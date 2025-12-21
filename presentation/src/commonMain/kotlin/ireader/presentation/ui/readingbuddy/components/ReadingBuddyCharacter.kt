@@ -11,8 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -92,7 +92,10 @@ fun ReadingBuddyCharacter(
         Box(
             modifier = Modifier
                 .offset { IntOffset(0, bounceOffset.dp.roundToPx()) }
-                .scale(scale),
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                },
             contentAlignment = Alignment.Center
         ) {
             // Background glow for special moods

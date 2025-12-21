@@ -27,8 +27,11 @@ fun ChapterListFilterBar(
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showFilterMenu by remember { mutableStateOf(false) }
     
+    // Cache filter lookup map for O(1) access instead of O(n) find on each iteration
+    val filtersByType = remember(filters) { filters.associateBy { it.type } }
+    
     // Count active filters
-    val activeFilterCount = filters.count { it.value != ChaptersFilters.Value.Missing }
+    val activeFilterCount = remember(filters) { filters.count { it.value != ChaptersFilters.Value.Missing } }
     
     // Only show if there are active filters or user wants to add filters
     if (activeFilterCount > 0 || showFilterMenu) {
@@ -53,7 +56,7 @@ fun ChapterListFilterBar(
                     modifier = Modifier.weight(1f)
                 ) {
                     // Hide Read Chapters chip
-                    val hideReadFilter = filters.find { it.type == ChaptersFilters.Type.Read }
+                    val hideReadFilter = filtersByType[ChaptersFilters.Type.Read]
                     if (hideReadFilter?.value == ChaptersFilters.Value.Excluded) {
                         CompactFilterChip(
                             label = localizeHelper.localize(Res.string.hide_read),
@@ -62,7 +65,7 @@ fun ChapterListFilterBar(
                     }
                     
                     // Hide Duplicate Chapters chip
-                    val hideDuplicateFilter = filters.find { it.type == ChaptersFilters.Type.Duplicate }
+                    val hideDuplicateFilter = filtersByType[ChaptersFilters.Type.Duplicate]
                     if (hideDuplicateFilter?.value == ChaptersFilters.Value.Excluded) {
                         CompactFilterChip(
                             label = localizeHelper.localize(Res.string.hide_duplicates),

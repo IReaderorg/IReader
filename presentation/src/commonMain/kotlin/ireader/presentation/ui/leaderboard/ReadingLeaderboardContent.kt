@@ -16,9 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -380,7 +380,7 @@ private fun ReadingPodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) 
     val medal = when (place) { 1 -> "??"; 2 -> "??"; 3 -> "??"; else -> "" }
     val scale by animateFloatAsState(targetValue = if (place == 1) 1.05f else 1f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
     
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(100.dp).scale(scale)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(100.dp).graphicsLayer { scaleX = scale; scaleY = scale }) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.size(if (place == 1) 56.dp else 48.dp).clip(CircleShape).background(color.copy(alpha = 0.2f))) {
             Text(medal, style = if (place == 1) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium)
         }

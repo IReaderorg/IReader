@@ -638,9 +638,11 @@ private fun AchievementsSection(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    val lockedAchievements = allAchievements.filter { all ->
-                        unlockedAchievements.none { it.name == all.name }
-                    }.take(3)
+                    val lockedAchievements = remember(allAchievements, unlockedAchievements) {
+                        allAchievements.filter { all ->
+                            unlockedAchievements.none { it.name == all.name }
+                        }.take(3)
+                    }
                     
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         items(lockedAchievements, key = { it.name }) { achievement ->

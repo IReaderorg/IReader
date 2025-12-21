@@ -1093,7 +1093,9 @@ private fun LanguageDropdown(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedName = languages.find { it.first == selectedCode }?.second ?: selectedCode
+    val selectedName = remember(languages, selectedCode) { 
+        languages.find { it.first == selectedCode }?.second ?: selectedCode 
+    }
     
     ExposedDropdownMenuBox(
         expanded = expanded,

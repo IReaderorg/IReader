@@ -329,6 +329,9 @@ class SettingScreenSpec {
             }
         ) { padding ->
             if (isSearchActive) {
+                // Group results by section - cached for performance (must be outside LazyColumn)
+                val groupedResults = remember(filteredSettings) { filteredSettings.groupBy { it.section } }
+                
                 // Search Results
                 LazyColumn(
                     modifier = Modifier.padding(padding),
@@ -368,7 +371,6 @@ class SettingScreenSpec {
                         }
                     } else {
                         // Group results by section
-                        val groupedResults = filteredSettings.groupBy { it.section }
                         groupedResults.forEach { (section, items) ->
                             item(key = "section_$section") {
                                 Text(

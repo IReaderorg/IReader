@@ -98,7 +98,9 @@ fun TranslationSettingsScreenV2(
         }
     }
 
-    val currentEngine = engines.find { it.id == viewModel.translatorEngine.value }
+    val currentEngine = remember(engines, viewModel.translatorEngine.value) { 
+        engines.find { it.id == viewModel.translatorEngine.value } 
+    }
     val isAiEngine = currentEngine?.supportsContextAwareTranslation == true
     val isGeminiSelected = viewModel.translatorEngine.value == 8L
     val isOpenAISelected = viewModel.translatorEngine.value == 2L

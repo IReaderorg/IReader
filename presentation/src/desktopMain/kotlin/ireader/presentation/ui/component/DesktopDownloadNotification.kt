@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import ireader.domain.services.common.DownloadProgress
 import ireader.domain.services.common.DownloadService
@@ -102,18 +103,28 @@ private fun DownloadNotificationPanel(
     onPauseAll: () -> Unit,
     onResumeAll: () -> Unit
 ) {
-    val activeDownloads = downloadProgress.values.filter { 
-        it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED 
+    val activeDownloads = remember(downloadProgress) {
+        downloadProgress.values.filter { 
+            it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED 
+        }
     }
-    val completedCount = downloadProgress.values.count { it.status == DownloadStatus.COMPLETED }
-    val failedCount = downloadProgress.values.count { it.status == DownloadStatus.FAILED }
+    val completedCount = remember(downloadProgress) { 
+        downloadProgress.values.count { it.status == DownloadStatus.COMPLETED } 
+    }
+    val failedCount = remember(downloadProgress) { 
+        downloadProgress.values.count { it.status == DownloadStatus.FAILED } 
+    }
     
-    val overallProgress = if (activeDownloads.isNotEmpty()) {
-        activeDownloads.map { it.progress }.average().toFloat()
-    } else 0f
+    val overallProgress = remember(activeDownloads) {
+        if (activeDownloads.isNotEmpty()) {
+            activeDownloads.map { it.progress }.average().toFloat()
+        } else 0f
+    }
     
-    val currentDownload = activeDownloads.firstOrNull { it.status == DownloadStatus.DOWNLOADING }
-        ?: activeDownloads.firstOrNull()
+    val currentDownload = remember(activeDownloads) {
+        activeDownloads.firstOrNull { it.status == DownloadStatus.DOWNLOADING }
+            ?: activeDownloads.firstOrNull()
+    }
     
     Card(
         modifier = Modifier
@@ -243,7 +254,7 @@ private fun DownloadNotificationHeader(
                     tint = Color.White,
                     modifier = Modifier
                         .size(24.dp)
-                        .offset(y = animatedOffset.dp)
+                        .offset { IntOffset(0, animatedOffset.toInt()) }
                 )
             }
         }
@@ -610,7 +621,9 @@ fun DesktopDownloadNotificationOverlay(
     
     // Track completed downloads to show completion toast
     var previousCompletedCount by remember { mutableIntStateOf(0) }
-    val currentCompletedCount = downloadProgress.values.count { it.status == DownloadStatus.COMPLETED }
+    val currentCompletedCount = remember(downloadProgress) { 
+        downloadProgress.values.count { it.status == DownloadStatus.COMPLETED } 
+    }
     
     LaunchedEffect(currentCompletedCount) {
         if (currentCompletedCount > previousCompletedCount && previousCompletedCount > 0) {

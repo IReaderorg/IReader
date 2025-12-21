@@ -270,27 +270,31 @@ fun MultiSwipeRefresh(
 
     // Create nested scroll connections for ALL indicators (not just enabled ones)
     // The enabled state is checked dynamically in the connection itself
-    val nestedScrollConnections = indicators.map { indicator ->
-        val updatedOnRefresh = rememberUpdatedState(indicator.onRefresh)
-        val updatedEnabled = rememberUpdatedState(indicator.enable)
-        remember(state, coroutineScope, indicator.alignment) {
+    val nestedScrollConnections = remember(indicators, state, coroutineScope, swipeEnabled, refreshTriggerPx) {
+        indicators.map { indicator ->
             SwipeRefreshNestedScrollConnection(
                 state = state,
                 coroutineScope = coroutineScope,
                 onRefresh = {
-                    updatedOnRefresh.value.invoke()
+                    indicator.onRefresh.invoke()
                 },
                 scrollFromTop = (indicator.alignment as BiasAlignment).verticalBias != 1f
-            )
-        }.apply {
-            // Use the updated enabled state so it reacts to isAtBottom/isAtTop changes
-            this.enabled = swipeEnabled && updatedEnabled.value
-            this.refreshTrigger = refreshTriggerPx
+            ).apply {
+                this.enabled = swipeEnabled && indicator.enable
+                this.refreshTrigger = refreshTriggerPx
+            }
+        }
+    }
+    
+    // Update enabled state reactively when it changes
+    LaunchedEffect(swipeEnabled, indicators) {
+        nestedScrollConnections.forEachIndexed { index, connection ->
+            connection.enabled = swipeEnabled && indicators[index].enable
         }
     }
     
     // Filter enabled indicators for rendering (this is reactive since it's in the composable body)
-    val enabledIndicators = indicators.filter { it.enable }
+    val enabledIndicators = remember(indicators) { indicators.filter { it.enable } }
 
     // Apply all nested scroll connections to a single Box
     var boxModifier = modifier

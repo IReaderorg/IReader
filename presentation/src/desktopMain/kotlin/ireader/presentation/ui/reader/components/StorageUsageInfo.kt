@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,8 +23,8 @@ fun StorageUsageInfo(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val downloadedModels = models.filter { it.isDownloaded }
-    val totalSize = downloadedModels.sumOf { it.sizeBytes }
+    val downloadedModels = remember(models) { models.filter { it.isDownloaded } }
+    val totalSize = remember(downloadedModels) { downloadedModels.sumOf { it.sizeBytes } }
     
     if (downloadedModels.isNotEmpty()) {
         Card(

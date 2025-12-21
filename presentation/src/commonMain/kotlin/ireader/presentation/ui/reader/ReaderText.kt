@@ -53,7 +53,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -1231,7 +1230,7 @@ private fun OverscrollPrevIndicator(
             modifier = modifier
                 .fillMaxWidth()
                 .height((progress * 100).dp)
-                .alpha(progress)
+                .graphicsLayer { alpha = progress }
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
@@ -1349,8 +1348,10 @@ private fun ChapterVoidSpace(
             modifier = Modifier
                 .size(150.dp)
                 .align(Alignment.Center)
-                .graphicsLayer { translationY = floatOffset }
-                .alpha(glowAlpha * 0.3f)
+                .graphicsLayer { 
+                    translationY = floatOffset
+                    alpha = glowAlpha * 0.3f
+                }
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
@@ -1492,7 +1493,7 @@ private fun ChapterVoidSpace(
                         Box(
                             modifier = Modifier
                                 .size(5.dp)
-                                .alpha(dotAlpha)
+                                .graphicsLayer { alpha = dotAlpha }
                                 .background(contentTextColorMuted, RoundedCornerShape(2.5.dp))
                         )
                     }

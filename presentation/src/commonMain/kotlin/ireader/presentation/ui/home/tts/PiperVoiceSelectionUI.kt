@@ -80,15 +80,15 @@ fun PiperVoiceSelectionContent(
         }
     }
     
-    val downloadedCount = voices.count { it.isDownloaded }
+    val downloadedCount = remember(voices) { voices.count { it.isDownloaded } }
     val totalCount = voices.size
     
     val mainListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     
     // Split voices into downloaded and available
-    val downloadedVoices = filteredVoices.filter { it.isDownloaded }
-    val availableVoices = filteredVoices.filter { !it.isDownloaded }
+    val downloadedVoices = remember(filteredVoices) { filteredVoices.filter { it.isDownloaded } }
+    val availableVoices = remember(filteredVoices) { filteredVoices.filter { !it.isDownloaded } }
     
     LazyColumn(
         state = mainListState,

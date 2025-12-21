@@ -508,8 +508,8 @@ private fun AssignBadgeDialog(
     onDismiss: () -> Unit,
     onAssign: (String) -> Unit
 ) {
-    val userBadgeIds = userBadges.map { it.id }.toSet()
-    val unassignedBadges = availableBadges.filter { it.id !in userBadgeIds }
+    val userBadgeIds = remember(userBadges) { userBadges.map { it.id }.toSet() }
+    val unassignedBadges = remember(availableBadges, userBadgeIds) { availableBadges.filter { it.id !in userBadgeIds } }
     
     AlertDialog(
         onDismissRequest = onDismiss,

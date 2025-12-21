@@ -68,9 +68,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -382,7 +382,10 @@ private fun TopBookCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .scale(scale.value)
+            .graphicsLayer {
+                scaleX = scale.value
+                scaleY = scale.value
+            }
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),

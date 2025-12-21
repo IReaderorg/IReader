@@ -17,9 +17,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -909,7 +909,7 @@ private fun EnhancedPodiumPlace(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(100.dp)
-            .scale(scale)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
     ) {
         // Medal with glow effect
         Box(
@@ -1178,7 +1178,7 @@ private fun AnimatedRankBadge(rank: Int, size: Dp) {
     Box(
         modifier = Modifier
             .size(size)
-            .scale(scale)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(CircleShape)
             .background(backgroundColor)
             .border(

@@ -114,7 +114,9 @@ private fun PickerFilter(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
-    val selectedOption = options.find { it.value == selectedValue } ?: options.firstOrNull()
+    val selectedOption = remember(options, selectedValue) { 
+        options.find { it.value == selectedValue } ?: options.firstOrNull() 
+    }
     
     Column(modifier = modifier.fillMaxWidth()) {
         Text(

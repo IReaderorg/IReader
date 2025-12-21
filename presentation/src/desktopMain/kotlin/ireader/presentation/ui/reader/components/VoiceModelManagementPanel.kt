@@ -287,7 +287,9 @@ fun VoiceModelManagementPanel(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Language filter
-                    val languages = availableModels.map { it.language.substringBefore("-") }.distinct().sorted()
+                    val languages = remember(availableModels) { 
+                        availableModels.map { it.language.substringBefore("-") }.distinct().sorted() 
+                    }
                     FilterChipDropdown(
                         label = localizeHelper.localize(Res.string.lang),
                         options = languages,
@@ -356,7 +358,9 @@ fun VoiceModelManagementPanel(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    val selectedModel = availableModels.find { it.id == selectedModelId }
+                    val selectedModel = remember(availableModels, selectedModelId) { 
+                        availableModels.find { it.id == selectedModelId } 
+                    }
                     if (selectedModel != null) {
                         Text(
                             text = "Active voice: ${selectedModel.name}",

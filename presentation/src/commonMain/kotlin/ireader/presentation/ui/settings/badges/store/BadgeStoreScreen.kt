@@ -72,9 +72,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -554,7 +554,7 @@ private fun FeaturedBadgeCard(
     Card(
         modifier = Modifier
             .width(cardWidth)
-            .scale(scale)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .hoverable(interactionSource)
             .pointerHoverIcon(PointerIcon.Hand)
             .clickable(onClick = onClick),
@@ -707,7 +707,7 @@ private fun ModernBadgeCard(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(if (isLargeScreen) 0.8f else 0.85f)
-            .scale(scale)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .hoverable(interactionSource)
             .pointerHoverIcon(PointerIcon.Hand)
             .clickable(onClick = onClick),

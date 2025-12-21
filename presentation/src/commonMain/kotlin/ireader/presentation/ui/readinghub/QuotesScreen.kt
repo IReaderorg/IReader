@@ -181,8 +181,11 @@ private fun QuotesLoadingScreen() {
                 text = "📚",
                 fontSize = 64.sp,
                 modifier = Modifier
-                    .scale(scale)
-                    .graphicsLayer { rotationZ = rotation }
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        rotationZ = rotation
+                    }
             )
             
             Spacer(modifier = Modifier.height(24.dp))

@@ -86,9 +86,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -429,7 +429,10 @@ private fun ViewModeButton(
     )
     
     Surface(
-        modifier = Modifier.scale(scale),
+        modifier = Modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
         shape = RoundedCornerShape(8.dp),
         color = if (selected) 
             MaterialTheme.colorScheme.primaryContainer 
@@ -513,7 +516,10 @@ private fun CharacterArtCard(
                 else 
                     Modifier.aspectRatio(0.75f)
             )
-            .scale(scale)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -809,7 +815,10 @@ private fun LikeButton(
                 contentDescription = if (isLiked) "Unlike" else "Like",
                 modifier = Modifier
                     .size(if (compact) 16.dp else 18.dp)
-                    .scale(scale),
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    },
                 tint = if (isLiked)
                     MaterialTheme.colorScheme.error
                 else

@@ -11,10 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -115,7 +115,7 @@ fun RowScope.FloatingNavigationItem(
         modifier = modifier
             .height(52.dp)
             .width(animatedWidth)
-            .scale(animatedScale),
+            .graphicsLayer { scaleX = animatedScale; scaleY = animatedScale },
         enabled = enabled,
         shape = RoundedCornerShape(26.dp),
         color = if (selected) {
@@ -208,7 +208,7 @@ fun RowScope.CompactFloatingNavigationItem(
     Column(
         modifier = modifier
             .weight(1f)
-            .scale(animatedScale),
+            .graphicsLayer { scaleX = animatedScale; scaleY = animatedScale },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

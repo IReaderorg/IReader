@@ -13,10 +13,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -127,7 +127,7 @@ fun RowScope.ModernNavigationItem(
         modifier = modifier
             .weight(1f)
             .fillMaxHeight()
-            .scale(animatedScale)
+            .graphicsLayer { scaleX = animatedScale; scaleY = animatedScale }
             .clickable(
                 enabled = enabled,
                 indication = null,
@@ -264,7 +264,7 @@ fun ModernNavigationRailItem(
     Surface(
         modifier = modifier
             .padding(vertical = 4.dp, horizontal = 8.dp)
-            .scale(animatedScale)
+            .graphicsLayer { scaleX = animatedScale; scaleY = animatedScale }
             .clickable(
                 enabled = enabled,
                 indication = null,

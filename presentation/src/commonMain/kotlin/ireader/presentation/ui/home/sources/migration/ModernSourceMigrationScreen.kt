@@ -221,7 +221,7 @@ private fun MigrationCompletionDialog(
     onDismiss: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val successCount = results.count { it.success }
+    val successCount = remember(results) { results.count { it.success } }
     val failedCount = results.size - successCount
     
     AlertDialog(

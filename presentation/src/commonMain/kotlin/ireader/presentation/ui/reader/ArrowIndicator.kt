@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -111,7 +110,7 @@ fun ArrowIndicator(
             .fillMaxWidth()
             .height((progress * 140).dp)
             .clipToBounds() // Prevent any content from overflowing outside the box
-            .alpha(progress)
+            .graphicsLayer { alpha = progress }
             .background(
                 Brush.verticalGradient(
                     colors = if (isTop) {
@@ -136,7 +135,7 @@ fun ArrowIndicator(
             Box(
                 modifier = Modifier
                     .size(100.dp)
-                    .alpha(glowAlpha)
+                    .graphicsLayer { alpha = glowAlpha }
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
@@ -186,7 +185,7 @@ fun ArrowIndicator(
                     Box(
                         modifier = Modifier
                             .size((maxSize.value * 1.8f).dp * progress)
-                            .alpha(glowAlpha * 0.5f)
+                            .graphicsLayer { alpha = glowAlpha * 0.5f }
                             .background(
                                 Brush.radialGradient(
                                     colors = listOf(

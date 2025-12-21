@@ -19,8 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -290,7 +290,7 @@ private fun FastScrollerThumb(
                 .padding(horizontal = 8.dp)
                 .padding(end = endContentPadding)
                 .width(ThumbThickness)
-                .alpha(alpha)
+                .graphicsLayer { this.alpha = alpha }
                 .background(color = thumbColor, shape = ThumbShape),
         )
     }

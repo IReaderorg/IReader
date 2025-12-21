@@ -19,9 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
@@ -90,7 +90,7 @@ private fun NFTBadgeGlowEffect(size: Dp) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.nft_glow))
     
-    val alpha by infiniteTransition.animateFloat(
+    val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.6f,
         animationSpec = infiniteRepeatable(
@@ -106,7 +106,7 @@ private fun NFTBadgeGlowEffect(size: Dp) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .alpha(alpha)
+            .graphicsLayer { alpha = glowAlpha }
     ) {
         // Radial gradient overlay for glow effect
         androidx.compose.foundation.Canvas(

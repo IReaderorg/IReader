@@ -215,6 +215,9 @@ private fun FilterSection(
     filters: List<LibraryFilter>,
     onFilterToggle: (LibraryFilter.Type) -> Unit
 ) {
+    // Cache filter lookup map for O(1) access instead of O(n) find on each iteration
+    val filtersByType = remember(filters) { filters.associateBy { it.type } }
+    
     Text(
         text = localize(Res.string.filter),
         style = MaterialTheme.typography.titleMedium,
@@ -226,7 +229,7 @@ private fun FilterSection(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         LibraryFilter.Type.values().forEach { type ->
-            val filter = filters.find { it.type == type }
+            val filter = filtersByType[type]
             val isActive = filter?.value == LibraryFilter.Value.Included
             
             FilterChip(

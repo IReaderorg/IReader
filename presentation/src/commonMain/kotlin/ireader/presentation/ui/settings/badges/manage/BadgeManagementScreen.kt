@@ -653,7 +653,9 @@ private fun BadgePreviewSection(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    val featuredBadges = ownedBadges.filter { it.id in featuredBadgeIds }
+                    val featuredBadges = remember(ownedBadges, featuredBadgeIds) {
+                        ownedBadges.filter { it.id in featuredBadgeIds }
+                    }
                     if (featuredBadges.isNotEmpty()) {
                         ProfileBadgeDisplay(badges = featuredBadges)
                     } else {
@@ -687,7 +689,9 @@ private fun BadgePreviewSection(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    val primaryBadge = ownedBadges.find { it.id == primaryBadgeId }
+                    val primaryBadge = remember(ownedBadges, primaryBadgeId) { 
+                        ownedBadges.find { it.id == primaryBadgeId } 
+                    }
                     
                     Row(
                         verticalAlignment = Alignment.CenterVertically

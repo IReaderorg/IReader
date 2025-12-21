@@ -27,6 +27,10 @@ fun PerformanceMetricsSection(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    // Cache plugin lookup map for O(1) access instead of O(n) find on each iteration
+    val pluginsById = androidx.compose.runtime.remember(plugins) { plugins.associateBy { it.id } }
+    
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -58,7 +62,7 @@ fun PerformanceMetricsSection(
             
             // Metrics for each plugin with resource usage
             resourceUsage.forEach { (pluginId, usage) ->
-                val plugin = plugins.find { it.id == pluginId }
+                val plugin = pluginsById[pluginId]
                 if (plugin != null) {
                     PluginMetricItem(
                         pluginName = plugin.manifest.name,

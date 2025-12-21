@@ -93,7 +93,9 @@ fun JSPluginFilterPicker(
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedOption = options.find { it.value == selectedValue } ?: options.firstOrNull()
+    val selectedOption = remember(options, selectedValue) { 
+        options.find { it.value == selectedValue } ?: options.firstOrNull() 
+    }
     
     Column(modifier = modifier.fillMaxWidth()) {
         Text(

@@ -19,9 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -237,7 +237,7 @@ private fun EnhancedLanguageChip(
             isPressed = true
             onClick()
         },
-        modifier = modifier.scale(scale),
+        modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale },
         shape = RoundedCornerShape(12.dp),
         color = backgroundColor,
         shadowElevation = if (isSelected) 4.dp else 0.dp
