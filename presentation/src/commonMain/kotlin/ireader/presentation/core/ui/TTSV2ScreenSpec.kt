@@ -257,14 +257,19 @@ class TTSV2ScreenSpec(
         val useGradioTTS by appPreferences.useGradioTTS().changes().collectAsState(
             initial = appPreferences.useGradioTTS().get()
         )
-        val activeGradioConfigId by appPreferences.activeGradioConfigId().changes().collectAsState(
+        val savedGradioConfigId by appPreferences.activeGradioConfigId().changes().collectAsState(
             initial = appPreferences.activeGradioConfigId().get()
         )
+        // Use default preset if no config is saved
+        val activeGradioConfigId = remember(savedGradioConfigId) {
+            savedGradioConfigId.ifEmpty { "coqui_ireader" }
+        }
         
         // Selected Piper voice model - observe changes to display in UI
         val selectedPiperModel by appPreferences.selectedPiperModel().changes().collectAsState(
             initial = appPreferences.selectedPiperModel().get()
         )
+        // Always consider configured since we have a default preset
         val isGradioConfigured = remember(activeGradioConfigId) { activeGradioConfigId.isNotEmpty() }
         
         // Chunk mode settings - observe changes to re-chunk when user changes word count
@@ -659,32 +664,8 @@ class TTSV2ScreenSpec(
             }
         }
         
-        // Watch for content filter changes and refresh content
-        // Use drop(1) to skip the initial emission from .changes() flow
-        // This prevents double-loading when the screen first opens
-        LaunchedEffect(Unit) {
-            // Watch for filter enabled/disabled changes (skip initial value)
-            readerPreferences.contentFilterEnabled().changes().drop(1).collect { enabled ->
-                Log.warn { "TTSV2ScreenSpec: Content filter enabled changed to $enabled" }
-                contentFilterEnabled = enabled
-                // Refresh content to apply new filter settings
-                if (state.hasContent) {
-                    viewModel.adapter.refreshContent()
-                }
-            }
-        }
-        
-        LaunchedEffect(Unit) {
-            // Watch for filter patterns changes (skip initial value)
-            readerPreferences.contentFilterPatterns().changes().drop(1).collect { patterns ->
-                Log.warn { "TTSV2ScreenSpec: Content filter patterns changed" }
-                contentFilterPatterns = patterns
-                // Refresh content to apply new filter settings
-                if (state.hasContent) {
-                    viewModel.adapter.refreshContent()
-                }
-            }
-        }
+        // Content filter changes are applied on next chapter load
+        // No need to watch for changes during TTS playback as it would interrupt reading
         
         // Save TTS state periodically for process death recovery
         LaunchedEffect(state.chapter?.id, currentParagraph, isPlaying) {
@@ -1240,7 +1221,11 @@ class TTSV2ScreenSpec(
                             onSpeedChange = { viewModel.adapter.setSpeed(it) },
                             onAutoNextChange = { enabled -> viewModel.adapter.setAutoNextChapter(enabled) },
                             onCoquiTTSChange = { enabled ->
-                                if (isGradioConfigured) {
+                                if (enabled && !isGradioConfigured) {
+                                    // No Gradio config set up - open engine settings
+                                    showEngineSettings = true
+                                    showSettings = false
+                                } else if (isGradioConfigured) {
                                     // Save to preferences - the flow will update useGradioTTS automatically
                                     scope.launch { appPreferences.useGradioTTS().set(enabled) }
                                     if (enabled) {
