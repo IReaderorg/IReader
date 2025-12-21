@@ -35,7 +35,9 @@ data class ExploreScreenState(
     // Dialog state
     val dialog: ExploreDialog? = null,
     // Broken source state - indicates parsing failure due to website changes
-    val isSourceBroken: Boolean = false
+    val isSourceBroken: Boolean = false,
+    // Plugin incompatibility state - indicates plugin compiled with different Kotlin version
+    val isPluginIncompatible: Boolean = false
 ) {
     /**
      * Derived property for the source from catalog

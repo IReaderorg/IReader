@@ -128,35 +128,96 @@ class ExploreViewModel(
         
         val source = _state.value.source
         if (sourceId != null && source != null) {
-            // Initialize filters from source
-            _state.update { it.copy(modifiedFilters = source.getFilters()) }
-            
-            if (!query.isNullOrBlank()) {
-                // Start in search mode with query
+            try {
+                // Initialize filters from source - wrapped in try-catch for plugin compatibility
+                val filters = try {
+                    source.getFilters()
+                } catch (e: IllegalAccessError) {
+                    // Plugin compiled with incompatible Kotlin version
+                    Log.error { "[ExploreViewModel] Plugin compatibility error loading filters: ${e.message}" }
+                    handlePluginCompatibilityError(catalog.name, e)
+                    return
+                } catch (e: NoSuchMethodError) {
+                    Log.error { "[ExploreViewModel] Plugin method not found: ${e.message}" }
+                    handlePluginCompatibilityError(catalog.name, e)
+                    return
+                } catch (e: LinkageError) {
+                    // Covers ClassNotFoundException, NoClassDefFoundError, etc.
+                    Log.error { "[ExploreViewModel] Plugin linkage error: ${e.message}" }
+                    handlePluginCompatibilityError(catalog.name, e)
+                    return
+                }
+                
+                _state.update { it.copy(modifiedFilters = filters) }
+                
+                if (!query.isNullOrBlank()) {
+                    // Start in search mode with query
+                    _state.update { 
+                        it.copy(
+                            isSearchModeEnabled = true,
+                            searchQuery = query
+                        )
+                    }
+                    loadItems()
+                } else {
+                    // Start with default listing - also wrapped for safety
+                    val listings = try {
+                        source.getListings()
+                    } catch (e: LinkageError) {
+                        Log.error { "[ExploreViewModel] Plugin error getting listings: ${e.message}" }
+                        handlePluginCompatibilityError(catalog.name, e)
+                        return
+                    }
+                    
+                    if (listings.isNotEmpty()) {
+                        _state.update { it.copy(currentListing = listings.first()) }
+                        loadItems()
+                        scope.launch { readLayoutType() }
+                    } else {
+                        scope.launch {
+                            showSnackBar(UiText.MStringResource(Res.string.the_source_is_not_found))
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Catch-all for any other plugin errors
+                Log.error { "[ExploreViewModel] Unexpected error initializing source: ${e.message}" }
                 _state.update { 
                     it.copy(
-                        isSearchModeEnabled = true,
-                        searchQuery = query
+                        error = UiText.DynamicString("Plugin error: ${e.message ?: "Unknown error"}"),
+                        isSourceBroken = true
                     )
-                }
-                loadItems()
-            } else {
-                // Start with default listing
-                val listings = source.getListings()
-                if (listings.isNotEmpty()) {
-                    _state.update { it.copy(currentListing = listings.first()) }
-                    loadItems()
-                    scope.launch { readLayoutType() }
-                } else {
-                    scope.launch {
-                        showSnackBar(UiText.MStringResource(Res.string.the_source_is_not_found))
-                    }
                 }
             }
         } else {
             scope.launch {
                 showSnackBar(UiText.MStringResource(Res.string.the_source_is_not_found))
             }
+        }
+    }
+    
+    /**
+     * Handle plugin compatibility errors gracefully.
+     * These occur when a plugin is compiled with a different Kotlin version.
+     */
+    private fun handlePluginCompatibilityError(sourceName: String, error: Throwable) {
+        val errorMessage = buildString {
+            append("Plugin '$sourceName' is incompatible with this app version. ")
+            append("Please update the plugin or reinstall it.")
+        }
+        
+        Log.error { "[ExploreViewModel] $errorMessage\nCause: ${error.message}" }
+        
+        _state.update { 
+            it.copy(
+                error = UiText.DynamicString(errorMessage),
+                isSourceBroken = true,
+                isPluginIncompatible = true
+            )
+        }
+        
+        scope.launch {
+            showSnackBar(UiText.DynamicString(errorMessage))
         }
     }
 
