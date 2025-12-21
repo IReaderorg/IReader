@@ -75,7 +75,7 @@ fun EpubExportDialog(
     var includeCover by remember { mutableStateOf(true) }
     var useTranslatedContent by remember { mutableStateOf(false) }
     var selectAllChapters by remember { mutableStateOf(true) }
-    var selectedChapterIds by remember { mutableStateOf(chapters.map { it.id }.toSet()) }
+    var selectedChapterIds by remember(chapters) { mutableStateOf(chapters.map { it.id }.toSet()) }
     var paragraphSpacing by remember { mutableStateOf(1.0f) }
     var chapterHeadingSize by remember { mutableStateOf(2.0f) }
     var typography by remember { mutableStateOf(Typography.DEFAULT) }
