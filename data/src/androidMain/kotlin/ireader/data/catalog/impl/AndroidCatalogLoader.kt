@@ -324,8 +324,12 @@ class AndroidCatalogLoader(
      */
     @Suppress("NewApi")
     private fun createInMemoryClassLoader(file: File, pkgName: String): ClassLoader {
-        // Read the APK/DEX file into memory
-        val dexBytes = file.readBytes()
+        // APK files are ZIP archives containing classes.dex - we need to extract it
+        val dexBytes = java.util.zip.ZipFile(file).use { zip ->
+            val dexEntry = zip.getEntry("classes.dex")
+                ?: throw IllegalStateException("No classes.dex found in APK: ${file.name}")
+            zip.getInputStream(dexEntry).readBytes()
+        }
         val buffer = ByteBuffer.wrap(dexBytes)
         
         return InMemoryDexClassLoader(buffer, context.classLoader)
