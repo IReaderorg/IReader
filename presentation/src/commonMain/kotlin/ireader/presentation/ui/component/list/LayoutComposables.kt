@@ -38,8 +38,9 @@ fun LayoutComposable(
     headers: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any) = {
         it.id
-    }
-
+    },
+    // Pagination footer - shown at the bottom of the list
+    footer: (@Composable () -> Unit)? = null
 ) {
     when (layout) {
         DisplayMode.ComfortableGrid -> {
@@ -64,7 +65,8 @@ fun LayoutComposable(
                 showLanguageBadge = showLanguageBadge,
                 headers = headers,
                 columns = columns ?: 3,
-                keys = keys
+                keys = keys,
+                footer = footer
             )
         }
         DisplayMode.List -> {
@@ -82,7 +84,8 @@ fun LayoutComposable(
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
                 headers = headers,
-                keys = keys
+                keys = keys,
+                footer = footer
             )
         }
         DisplayMode.CompactGrid -> {
@@ -102,7 +105,8 @@ fun LayoutComposable(
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
                 columns = columns ?: 3, // Default 3 columns for better display
-                keys = keys
+                keys = keys,
+                footer = footer
             )
         }
         else -> {
@@ -122,7 +126,8 @@ fun LayoutComposable(
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
                 columns = columns ?: 3, // Default 3 columns for better display
-                keys = keys
+                keys = keys,
+                footer = footer
             )
         }
     }

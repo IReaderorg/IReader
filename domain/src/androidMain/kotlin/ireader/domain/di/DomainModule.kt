@@ -18,6 +18,7 @@ import ireader.domain.services.update_service.UpdateService
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
+import ireader.domain.usecases.pdf.ImportPdf
 import ireader.domain.usecases.file.AndroidFileSaver
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
@@ -168,6 +169,7 @@ actual val DomainModule = module {
         )
     }
     single<ImportEpub> { ImportEpub(get(), get(), get(), get(), get(), get(), get()) }
+    single<ImportPdf> { ImportPdf(get(), get(), get(), get(), get(), get()) }
     single<PlatformUiPreferences> {
         AndroidUiPreferences(get(), get())
     }

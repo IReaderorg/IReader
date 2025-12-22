@@ -77,6 +77,7 @@ fun LibraryScreenTopBar(
     onUpdateLibrary: () -> Unit = {},
     onUpdateCategory: () -> Unit = {},
     onImportEpub: () -> Unit = {},
+    onImportPdf: () -> Unit = {},
     onOpenRandom: () -> Unit = {},
     onSyncRemote: () -> Unit = {},
     onSearchLibrary: () -> Unit = {}
@@ -121,6 +122,7 @@ fun LibraryScreenTopBar(
                 onUpdateLibrary = onUpdateLibrary,
                 onUpdateCategory = onUpdateCategory,
                 onImportEpub = onImportEpub,
+                onImportPdf = onImportPdf,
                 onOpenRandom = onOpenRandom,
                 onSyncRemote = onSyncRemote,
                 onSearchLibrary = onSearchLibrary
@@ -146,6 +148,7 @@ private fun RegularTopBar(
     onUpdateLibrary: () -> Unit = {},
     onUpdateCategory: () -> Unit = {},
     onImportEpub: () -> Unit = {},
+    onImportPdf: () -> Unit = {},
     onOpenRandom: () -> Unit = {},
     onSyncRemote: () -> Unit = {},
     onSearchLibrary: () -> Unit = {}
@@ -280,6 +283,16 @@ private fun RegularTopBar(
                             },
                             leadingIcon = {
                                 Icon(Icons.Outlined.FileUpload, contentDescription = null)
+                            }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text(localize(Res.string.import_pdf)) },
+                            onClick = {
+                                onImportPdf()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.PictureAsPdf, contentDescription = null)
                             }
                         )
                         ireader.presentation.ui.component.components.IDropdownMenuItem(

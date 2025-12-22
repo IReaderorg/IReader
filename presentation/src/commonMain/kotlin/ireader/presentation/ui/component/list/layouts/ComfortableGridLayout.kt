@@ -28,12 +28,13 @@ import ireader.i18n.resources.*
 /**
  * NATIVE-LIKE GRID LAYOUT
  * 
- * Optimizations for 60fps scroll:
+ * Optimizations for 60fps scroll with 800+ books:
  * 1. Stable keys for efficient item recycling
  * 2. contentType for better view recycling
- * 3. Pre-computed selection set for O(1) lookup
+ * 3. Pre-computed selection set for O(1) lookup (cached with remember)
  * 4. Minimal recomposition scope
  * 5. No loading indicators during scroll
+ * 6. PAGINATION: Footer for loading more items
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,7 +57,8 @@ fun ComfortableGridLayout(
     showLanguageBadge: Boolean = false,
     headers: ((url: String) -> Map<String, String>?)? = null,
     columns: Int = 3,
-    keys: ((item: BookItem) -> Any)
+    keys: ((item: BookItem) -> Any),
+    footer: (@Composable () -> Unit)? = null
 ) {
     // Cache cells calculation - stable reference
     val cells = remember(columns) {
@@ -69,8 +71,11 @@ fun ComfortableGridLayout(
     // Track fast scrolling for deferred operations
     val isScrollingFast = rememberIsGridScrollingFast(scrollState)
     
-    // Pre-compute selection set for O(1) lookup - CRITICAL for performance
-    val selectionSet = remember(selection) { selection.toHashSet() }
+    // CRITICAL: Cache selection set with remember to avoid O(n) recreation on every recomposition
+    // This is essential for 800+ books where selection changes are frequent
+    val selectionSet = remember(selection) { 
+        if (selection.isEmpty()) emptySet() else selection.toHashSet() 
+    }
     
     // Pre-compute badge visibility flags - avoid recalculation per item
     val showAnyBadge = remember(
@@ -81,20 +86,28 @@ fun ComfortableGridLayout(
         showUnreadChaptersBadge || showLocalMangaBadge || showLanguageBadge
     }
     
+    // Stable content padding
+    val contentPadding = remember { androidx.compose.foundation.layout.PaddingValues(8.dp) }
+    
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
             state = scrollState,
             modifier = modifier.fillMaxSize(),
             columns = cells,
+            contentPadding = contentPadding,
             content = {
                 items(
                     items = books,
                     key = keys,
                     contentType = { "book_item" }, // Same type for all items - better recycling
                 ) { book ->
-                    // Minimal state per item
+                    // Use derivedStateOf for selection check to minimize recomposition
+                    val isSelected = remember(book.id, selectionSet) { 
+                        book.id in selectionSet 
+                    }
+                    
+                    // Stable height state
                     val height = remember { mutableStateOf(IntSize(0, 0)) }
-                    val isSelected = book.id in selectionSet
                     
                     BookImage(
                         modifier = Modifier.onGloballyPositioned { height.value = it.size },
@@ -132,6 +145,16 @@ fun ComfortableGridLayout(
                         if (showInLibraryBadge && book.favorite) {
                             TextBadge(text = UiText.MStringResource(Res.string.in_library))
                         }
+                    }
+                }
+                
+                // Pagination footer - spans full width
+                if (footer != null) {
+                    item(
+                        span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) },
+                        contentType = "footer"
+                    ) {
+                        footer()
                     }
                 }
             }

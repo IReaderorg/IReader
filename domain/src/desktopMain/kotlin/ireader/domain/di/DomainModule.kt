@@ -8,6 +8,7 @@ import ireader.domain.preferences.prefs.DesktopUiPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
+import ireader.domain.usecases.pdf.ImportPdf
 import ireader.domain.usecases.file.DesktopFileSaver
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.local.LocalSourceImpl
@@ -74,6 +75,7 @@ actual val DomainModule: Module = module {
        DesktopFileSaver()
     }
     single<ImportEpub> { ImportEpub(get(), get(), get(), get(), get()) }
+    single<ImportPdf> { ImportPdf(get(), get(), get(), get()) }
     
     // Storage and Cache Managers
     single<StorageManager> { DesktopStorageManager() }

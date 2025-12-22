@@ -12,6 +12,7 @@ import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.usecases.translate.GoogleTranslateML
 import ireader.domain.usecases.epub.EpubCreator
 import ireader.domain.usecases.epub.ImportEpub
+import ireader.domain.usecases.pdf.ImportPdf
 import ireader.domain.services.ExtensionWatcherService
 import ireader.domain.services.tts.AITTSManager
 import ireader.domain.js.engine.JSEngine
@@ -91,6 +92,9 @@ actual val DomainModule: Module = module {
     // EpubCreator uses KoinComponent to inject HttpClient and ChapterRepository automatically
     single { EpubCreator() }
     single { ImportEpub() }
+    
+    // PDF
+    single { ImportPdf(get(), get(), get(), get()) }
     
     // JavaScript engine
     single { JSEngine() }

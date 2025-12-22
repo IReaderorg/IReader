@@ -97,6 +97,7 @@ import kotlinx.coroutines.withContext
  */
 private class AdvanceSettingsDialogState {
     var showImport by mutableStateOf(false)
+    var showImportPdf by mutableStateOf(false)
     var showDeleteAllDb by mutableStateOf(false)
     var showClearAllDatabase by mutableStateOf(false)
     var showClearNotInLibrary by mutableStateOf(false)
@@ -140,6 +141,20 @@ fun AdvanceSettings(
             vm.showSnackBar(UiText.ExceptionString(e))
         }
     })
+    
+    // PDF Import Handler
+    OnShowImportPdf(dialogState.showImportPdf, onFileSelected = {
+        dialogState.showImportPdf = false
+        if (it.isNotEmpty()) {
+            try {
+                vm.importPdf.parse(it)
+                vm.showSnackBar(UiText.MStringResource(Res.string.success))
+            } catch (e: Throwable) {
+                Log.error(e, "pdf parser throws an exception")
+                vm.showSnackBar(UiText.ExceptionString(e))
+            }
+        }
+    })
 
     // Pre-compute items list with stable keys - uses async loaded cache sizes
     val items = remember(cacheSize, coverCacheSize) {
@@ -179,6 +194,15 @@ fun AdvanceSettings(
                 icon = Icons.Default.Upload,
                 onClick = {
                     dialogState.showImport = true
+                }
+            ),
+            // PDF Import
+            Components.Row(
+                title = localizeHelper.localize(Res.string.import_pdf),
+                subtitle = localizeHelper.localize(Res.string.import_pdf_files_into_your_library),
+                icon = Icons.Default.Upload,
+                onClick = {
+                    dialogState.showImportPdf = true
                 }
             ),
             

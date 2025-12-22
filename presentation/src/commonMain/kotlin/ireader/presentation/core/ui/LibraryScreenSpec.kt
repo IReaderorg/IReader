@@ -34,6 +34,7 @@ import ireader.presentation.ui.home.library.LibraryScreenTopBar
 import ireader.presentation.ui.home.library.components.BottomTabComposable
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import ireader.presentation.ui.settings.advance.OnShowImportEpub
+import ireader.presentation.ui.settings.advance.OnShowImportPdf
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -144,6 +145,7 @@ object LibraryScreenSpec {
                         onUpdateLibrary = { vm.updateLibrary() },
                         onUpdateCategory = { vm.showUpdateCategoryDialog() },
                         onImportEpub = { vm.setShowImportEpubDialog(true) },
+                        onImportPdf = { vm.setShowImportPdfDialog(true) },
                         onOpenRandom = {
                             vm.openRandomEntry()?.let { bookId ->
                                 navController.navigateTo(BookDetailScreenSpec(bookId = bookId))
@@ -194,6 +196,17 @@ object LibraryScreenSpec {
                 vm.setShowImportEpubDialog(false)
                 if (uris.isNotEmpty()) {
                     vm.importEpubFiles(uris.map { it.toString() })
+                }
+            }
+        )
+        
+        // PDF Import Dialog
+        OnShowImportPdf(
+            show = state.showImportPdfDialog,
+            onFileSelected = { uris ->
+                vm.setShowImportPdfDialog(false)
+                if (uris.isNotEmpty()) {
+                    vm.importPdfFiles(uris.map { it.toString() })
                 }
             }
         )

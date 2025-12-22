@@ -15,6 +15,7 @@ import ireader.domain.storage.StorageManager
 import ireader.domain.usecases.category.CategoryUseCases
 import ireader.domain.usecases.database.RepairDatabaseUseCase
 import ireader.domain.usecases.epub.ImportEpub
+import ireader.domain.usecases.pdf.ImportPdf
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
@@ -33,6 +34,7 @@ class AdvanceSettingViewModel(
     val storageManager: StorageManager,
     val cacheManager: CacheManager,
     val importEpub: ImportEpub,
+    val importPdf: ImportPdf,
     private val readerPreferences: ReaderPreferences,
     private val androidReaderPreferences: PlatformUiPreferences,
     private val themeRepository: ThemeRepository,

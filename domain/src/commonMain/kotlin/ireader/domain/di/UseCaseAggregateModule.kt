@@ -32,7 +32,8 @@ val useCaseAggregateModule = module {
             archiveBook = get(),
             getLastRead = get(),
             getLibraryCategory = get(),
-            importEpub = get()
+            importEpub = get(),
+            importPdf = get()
         )
     }
     

@@ -2,6 +2,7 @@ package ireader.domain.usecases.library
 
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.epub.ImportEpub
+import ireader.domain.usecases.pdf.ImportPdf
 import ireader.domain.usecases.history.GetLastReadNovelUseCase
 import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.local.LocalGetBookUseCases
@@ -41,5 +42,6 @@ data class LibraryUseCases(
     val archiveBook: ArchiveBookUseCase,
     val getLastRead: GetLastReadNovelUseCase,
     val getLibraryCategory: GetLibraryCategory,
-    val importEpub: ImportEpub
+    val importEpub: ImportEpub,
+    val importPdf: ImportPdf
 )

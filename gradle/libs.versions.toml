@@ -131,6 +131,10 @@ jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 ksoup = { module = "io.github.ireaderorg:ksoup", version.ref = "ksoup" }
 ksoup-network = { module = "io.github.ireaderorg:ksoup-network", version.ref = "ksoup" }
 
+# PDF parsing - PDFBox for Desktop, PDFKit for iOS
+# Android uses built-in PdfRenderer (no external dependency needed)
+pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.3" }
+
 # Immutable Collections - Critical for Compose performance
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxImmutable" }
 

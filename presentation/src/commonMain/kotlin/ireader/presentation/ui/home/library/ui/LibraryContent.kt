@@ -17,6 +17,7 @@ import ireader.domain.models.entities.BookItem
 import ireader.presentation.ui.home.library.components.ScrollableTabs
 import ireader.presentation.ui.home.library.components.visibleName
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
+import ireader.presentation.ui.home.library.viewmodel.PaginationState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -112,6 +113,13 @@ internal fun LibraryContent(
                 },
                 getScrollPosition = { categoryId ->
                     vm.getScrollPosition(categoryId)
+                },
+                // Pagination callbacks
+                onLoadMore = { categoryId ->
+                    vm.loadMoreBooks(categoryId)
+                },
+                getPaginationState = { categoryId ->
+                    vm.getPaginationState(categoryId)
                 }
             )
         }

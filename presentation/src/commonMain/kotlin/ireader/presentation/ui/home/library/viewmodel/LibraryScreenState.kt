@@ -36,9 +36,13 @@ data class LibraryUiState(
     // Scroll positions per category (categoryId -> (index, offset))
     val categoryScrollPositions: Map<Long, Pair<Int, Int>> = emptyMap(),
     
+    // Pagination state per category (categoryId -> PaginationState)
+    val categoryPaginationState: Map<Long, PaginationState> = emptyMap(),
+    
     // Dialog state
     val showUpdateCategoryDialog: Boolean = false,
     val showImportEpubDialog: Boolean = false,
+    val showImportPdfDialog: Boolean = false,
     
     // Batch operation state
     val batchOperationInProgress: Boolean = false,
@@ -56,6 +60,26 @@ data class LibraryUiState(
     // Sync
     val isSyncAvailable: Boolean = false
 )
+
+/**
+ * Pagination state for a category.
+ * Tracks how many items are currently loaded and whether more are available.
+ */
+@Immutable
+data class PaginationState(
+    val loadedCount: Int = INITIAL_PAGE_SIZE,
+    val isLoadingMore: Boolean = false,
+    val hasMoreItems: Boolean = true,
+    val totalItems: Int = 0
+) {
+    companion object {
+        const val INITIAL_PAGE_SIZE = 50
+        const val PAGE_SIZE = 30
+    }
+    
+    @Stable
+    val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore
+}
 
 /**
  * State for undo operations
@@ -140,10 +164,14 @@ data class LibraryScreenState(
     // Scroll positions per category (categoryId -> (index, offset))
     val categoryScrollPositions: Map<Long, Pair<Int, Int>> = emptyMap(),
     
+    // Pagination state per category (categoryId -> PaginationState)
+    val categoryPaginationState: Map<Long, PaginationState> = emptyMap(),
+    
     // Dialog state
     val dialog: LibraryDialog? = null,
     val showUpdateCategoryDialog: Boolean = false,
     val showImportEpubDialog: Boolean = false,
+    val showImportPdfDialog: Boolean = false,
     
     // Batch operation state
     val batchOperationInProgress: Boolean = false,
@@ -182,4 +210,12 @@ data class LibraryScreenState(
     
     @Stable
     val hasContent: Boolean get() = books.isNotEmpty()
+    
+    /**
+     * Get pagination state for the current category.
+     */
+    @Stable
+    fun getPaginationState(categoryId: Long): PaginationState {
+        return categoryPaginationState[categoryId] ?: PaginationState(totalItems = books.size)
+    }
 }

@@ -647,6 +647,8 @@
     <string name="update_library">Update Library</string>
     <string name="update_category">Update Category</string>
     <string name="import_epub">Import EPUB</string>
+    <string name="import_pdf">Import PDF</string>
+    <string name="import_pdf_files_into_your_library">Import PDF files into your library for reading and TTS</string>
     <string name="open_random">Open Random</string>
     <string name="sync_remote">Sync Remote</string>
     <string name="no_categories_found">No categories found</string>

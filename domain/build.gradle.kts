@@ -227,6 +227,9 @@ kotlin {
 
                 implementation(compose.desktop.currentOs)
                 
+                // PDF parsing for desktop
+                implementation(libs.pdfbox)
+                
                 // Piper JNI for text-to-speech
                 // REMOVED: Now available as optional plugin (io.github.ireaderorg.plugins.piper-tts)
                 // Users who need neural TTS can install the plugin from Feature Store

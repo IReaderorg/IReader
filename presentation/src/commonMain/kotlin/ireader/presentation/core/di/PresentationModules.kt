@@ -50,7 +50,7 @@ val PresentationModules = module {
     factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
 
-    factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory <DownloadStateImpl> { DownloadStateImpl() }
     factory <FontScreenStateImpl> { FontScreenStateImpl() }
 

@@ -1,20 +1,29 @@
 package ireader.presentation.ui.home.library.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookItem
@@ -24,8 +33,10 @@ import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import ireader.presentation.ui.component.LocalPerformanceConfig
+import ireader.presentation.ui.home.library.viewmodel.PaginationState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.compose.koinInject
 
 /**
@@ -34,6 +45,16 @@ import org.koin.compose.koinInject
 @Stable
 private fun stableBookKey(book: BookItem): Any = book.id
 
+/**
+ * Library Pager optimized for 800+ books with PAGINATION.
+ * 
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Reduced beyondViewportPageCount to 0 (only render current page)
+ * - Cached scroll positions per category
+ * - Stable keys prevent unnecessary recomposition
+ * - Deferred prefetching to avoid blocking UI
+ * - PAGINATION: Loads books in chunks as user scrolls
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun LibraryPager(
@@ -60,6 +81,9 @@ internal fun LibraryPager(
     columnsInLandscape: Int = 5,
     onSaveScrollPosition: (categoryId: Long, index: Int, offset: Int) -> Unit = { _, _, _ -> },
     getScrollPosition: (categoryId: Long) -> Pair<Int, Int> = { 0 to 0 },
+    // Pagination callbacks
+    onLoadMore: (categoryId: Long) -> Unit = {},
+    getPaginationState: (categoryId: Long) -> PaginationState = { PaginationState() },
 ) {
     // Pre-compute stable key function to avoid lambda recreation
     val stableKeyFunction = remember { { book: BookItem -> stableBookKey(book) } }
@@ -77,6 +101,14 @@ internal fun LibraryPager(
         }
     }
     
+    // CRITICAL: Set beyondViewportPageCount to 0 for 800+ books
+    // This prevents pre-rendering adjacent pages which causes massive lag
+    // Each page with 800 books = 800 composables, so 3 pages = 2400 composables
+    val effectivePrefetchCount = remember(performanceConfig.prefetchDistance) {
+        // For large libraries, don't prefetch pages at all
+        0
+    }
+    
     HorizontalPager(
         state = pagerState,
         pageSpacing = 0.dp,
@@ -84,15 +116,16 @@ internal fun LibraryPager(
         reverseLayout = false,
         contentPadding = PaddingValues(0.dp),
         pageSize = PageSize.Fill,
-        beyondViewportPageCount = performanceConfig.prefetchDistance.coerceAtMost(2), // Limit prefetch based on device
+        beyondViewportPageCount = effectivePrefetchCount, // CRITICAL: 0 for large libraries
         key = { page -> categories.getOrNull(page)?.id ?: page },
         pageContent = { page ->
             val books by onPageChange(page)
             val categoryId = categories.getOrNull(page)?.id ?: 0L
+            val paginationState = getPaginationState(categoryId)
             
-            // Prefetch first few visible books for faster detail screen loading
-            LaunchedEffect(books, bookPrefetchService) {
-                if (bookPrefetchService != null && books.isNotEmpty()) {
+            // Only prefetch when this is the current page and not scrolling
+            LaunchedEffect(page, currentPage, books, bookPrefetchService) {
+                if (bookPrefetchService != null && books.isNotEmpty() && page == currentPage) {
                     // Prefetch first 3 books (most likely to be clicked)
                     val bookIds = books.take(3).map { it.id }
                     bookPrefetchService.prefetchMultiple(bookIds)
@@ -111,38 +144,79 @@ internal fun LibraryPager(
                 initialFirstVisibleItemScrollOffset = savedPosition.second
             )
             
-            // Save scroll position when it changes and prefetch visible books
-            LaunchedEffect(gridState, categoryId, books, bookPrefetchService) {
+            // Save scroll position when it changes - debounced to avoid excessive saves
+            LaunchedEffect(gridState, categoryId) {
                 snapshotFlow { 
                     gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset 
                 }.collect { (index, offset) ->
                     onSaveScrollPosition(categoryId, index, offset)
-                    
-                    // Prefetch visible and upcoming books when scroll settles
-                    if (bookPrefetchService != null && books.isNotEmpty() && !gridState.isScrollInProgress) {
-                        val visibleRange = index until minOf(index + 6, books.size)
-                        val bookIds = visibleRange.mapNotNull { books.getOrNull(it)?.id }
-                        if (bookIds.isNotEmpty()) {
-                            bookPrefetchService.prefetchMultiple(bookIds)
-                        }
+                }
+            }
+            
+            // PAGINATION: Detect when user scrolls near the end and load more
+            LaunchedEffect(gridState, categoryId, books.size, paginationState) {
+                snapshotFlow {
+                    val layoutInfo = gridState.layoutInfo
+                    val totalItems = layoutInfo.totalItemsCount
+                    val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    Triple(lastVisibleItem, totalItems, gridState.isScrollInProgress)
+                }
+                .distinctUntilChanged()
+                .collect { (lastVisibleItem, totalItems, isScrolling) ->
+                    // Load more when within 10 items of the end
+                    val threshold = 10
+                    if (!isScrolling && 
+                        totalItems > 0 && 
+                        lastVisibleItem >= totalItems - threshold &&
+                        paginationState.canLoadMore) {
+                        onLoadMore(categoryId)
                     }
                 }
             }
             
-            LaunchedEffect(lazyListState, categoryId, books, bookPrefetchService) {
+            // PAGINATION: Same for list layout
+            LaunchedEffect(lazyListState, categoryId, books.size, paginationState) {
+                snapshotFlow {
+                    val layoutInfo = lazyListState.layoutInfo
+                    val totalItems = layoutInfo.totalItemsCount
+                    val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                    Triple(lastVisibleItem, totalItems, lazyListState.isScrollInProgress)
+                }
+                .distinctUntilChanged()
+                .collect { (lastVisibleItem, totalItems, isScrolling) ->
+                    val threshold = 10
+                    if (!isScrolling && 
+                        totalItems > 0 && 
+                        lastVisibleItem >= totalItems - threshold &&
+                        paginationState.canLoadMore) {
+                        onLoadMore(categoryId)
+                    }
+                }
+            }
+            
+            // Separate effect for prefetching - only when scroll settles
+            LaunchedEffect(gridState, books, bookPrefetchService, page, currentPage) {
+                if (bookPrefetchService != null && books.isNotEmpty() && page == currentPage) {
+                    snapshotFlow { gridState.isScrollInProgress }
+                        .collect { isScrolling ->
+                            if (!isScrolling) {
+                                // Prefetch visible and upcoming books when scroll settles
+                                val index = gridState.firstVisibleItemIndex
+                                val visibleRange = index until minOf(index + 6, books.size)
+                                val bookIds = visibleRange.mapNotNull { books.getOrNull(it)?.id }
+                                if (bookIds.isNotEmpty()) {
+                                    bookPrefetchService.prefetchMultiple(bookIds)
+                                }
+                            }
+                        }
+                }
+            }
+            
+            LaunchedEffect(lazyListState, categoryId) {
                 snapshotFlow { 
                     lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset 
                 }.collect { (index, offset) ->
                     onSaveScrollPosition(categoryId, index, offset)
-                    
-                    // Prefetch visible and upcoming books when scroll settles
-                    if (bookPrefetchService != null && books.isNotEmpty() && !lazyListState.isScrollInProgress) {
-                        val visibleRange = index until minOf(index + 6, books.size)
-                        val bookIds = visibleRange.mapNotNull { books.getOrNull(it)?.id }
-                        if (bookIds.isNotEmpty()) {
-                            bookPrefetchService.prefetchMultiple(bookIds)
-                        }
-                    }
                 }
             }
             
@@ -181,8 +255,53 @@ internal fun LibraryPager(
                     showLanguageBadge = showLanguageBadge,
                     columns = columns,
                     keys = stableKeyFunction,
+                    // Pagination footer
+                    footer = if (paginationState.isLoadingMore || paginationState.hasMoreItems) {
+                        {
+                            PaginationFooter(
+                                isLoading = paginationState.isLoadingMore,
+                                hasMore = paginationState.hasMoreItems,
+                                loadedCount = books.size,
+                                totalCount = paginationState.totalItems
+                            )
+                        }
+                    } else null
                 )
             }
         }
     )
+}
+
+/**
+ * Footer shown at the bottom of the list during pagination.
+ */
+@Composable
+private fun PaginationFooter(
+    isLoading: Boolean,
+    hasMore: Boolean,
+    loadedCount: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier
+) {
+    if (!hasMore && !isLoading) return
+    
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.padding(8.dp),
+                strokeWidth = 2.dp
+            )
+        } else if (hasMore && totalCount > 0) {
+            Text(
+                text = "Showing $loadedCount of $totalCount",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }
