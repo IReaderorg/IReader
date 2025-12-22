@@ -117,7 +117,7 @@ actual class ImportPdf(
             
             // Extract text from pages in this chapter
             for (pageNum in currentPageStart until pageEnd) {
-                val page: PDFPage? = document.pageAtIndex(pageNum.toLong())
+                val page: PDFPage? = document.pageAtIndex(pageNum.toULong())
                 val pageText = page?.string
                 
                 if (!pageText.isNullOrBlank()) {

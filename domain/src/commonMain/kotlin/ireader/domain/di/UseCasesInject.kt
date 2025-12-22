@@ -72,6 +72,7 @@ import ireader.domain.usecases.statistics.ExportStatisticsUseCase
 import ireader.domain.usecases.statistics.ApplyAdvancedFiltersUseCase
 import ireader.domain.usecases.remote.GlobalSearchUseCase
 import ireader.domain.usecases.updates.DeleteAllUpdates
+import ireader.domain.usecases.updates.FindUpdatesPaginated
 import ireader.domain.usecases.updates.SubscribeUpdates
 import ireader.domain.usecases.updates.UpdateUseCases
 import org.koin.dsl.module
@@ -185,6 +186,7 @@ val UseCasesInject = module {
     factory<UpdateUseCases> { UpdateUseCases(
         subscribeUpdates = SubscribeUpdates(get()),
         deleteAllUpdates = DeleteAllUpdates(get()),
+        findUpdatesPaginated = FindUpdatesPaginated(get()),
     ) }
     
     // Download use cases - factory

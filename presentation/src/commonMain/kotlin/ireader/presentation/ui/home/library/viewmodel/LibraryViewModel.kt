@@ -10,6 +10,7 @@ import androidx.compose.ui.state.ToggleableState
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
+import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.prefs.LibraryPreferences
@@ -83,6 +84,12 @@ class LibraryViewModel(
     // Cached category book lists to avoid recomputation
     private val categoryBooksCache = mutableMapOf<Long, List<BookItem>>()
     private var lastBooksCacheKey: Int = 0
+    
+    // ==================== True DB Pagination State ====================
+    // Paginated books loaded directly from database (bypasses LibraryController for initial load)
+    private val _paginatedBooks = MutableStateFlow<Map<Long, List<LibraryBook>>>(emptyMap())
+    private val _paginatedTotalCounts = MutableStateFlow<Map<Long, Int>>(emptyMap())
+    private var paginationLoadJobs = mutableMapOf<Long, Job?>()
     
     // Preferences as StateFlow
     val lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -433,6 +440,8 @@ class LibraryViewModel(
     
     fun refreshUpdate() {
         libraryController.dispatch(LibraryCommand.RefreshLibrary)
+        // Reset pagination to reload fresh data
+        resetAllPagination()
     }
     
     fun updateLibrary() {
@@ -601,35 +610,38 @@ class LibraryViewModel(
      * Get library books for a specific category index as a Composable State.
      * Used by LibraryPager which expects @Composable (page: Int) -> State<List<BookItem>>.
      * 
-     * PERFORMANCE OPTIMIZED for 800+ books with PAGINATION:
+     * PERFORMANCE OPTIMIZED for 800+ books with TRUE DB PAGINATION:
+     * - Loads only the requested page from the database
      * - Uses stable cache key to avoid unnecessary recomputation
-     * - Pre-computes category membership sets once
-     * - Returns only paginated subset of books for smooth scrolling
-     * - Automatically initializes pagination state for new categories
+     * - Automatically loads initial page when category is first accessed
      */
     @Composable
     fun getLibraryForCategoryIndexAsState(categoryIndex: Int): State<List<BookItem>> {
         val currentState by state.collectAsState()
-        val currentBookCategories = bookCategories.value
+        val paginatedBooksMap by _paginatedBooks.collectAsState()
         val category = currentState.categories.getOrNull(categoryIndex)
         val categoryId = category?.id ?: 0L
         
         // Get pagination state for this category
         val paginationState = currentState.categoryPaginationState[categoryId]
-            ?: PaginationState(totalItems = currentState.books.size)
         
-        // Create a stable cache key based on data identity and pagination
+        // Load initial page if not loaded yet
+        androidx.compose.runtime.LaunchedEffect(categoryId) {
+            if (paginationState == null && category != null) {
+                loadInitialBooksForCategory(categoryId)
+            }
+        }
+        
+        // Create a stable cache key based on paginated data
         val cacheKey = remember(
-            currentState.books.size, 
-            currentBookCategories.size, 
+            paginatedBooksMap[categoryId]?.size ?: 0,
             category?.id,
-            paginationState.loadedCount
+            paginationState?.loadedCount ?: 0
         ) {
-            listOf(
-                currentState.books.hashCode(), 
-                currentBookCategories.hashCode(), 
+            Triple(
+                paginatedBooksMap[categoryId]?.hashCode() ?: 0,
                 category?.id,
-                paginationState.loadedCount
+                paginationState?.loadedCount ?: 0
             )
         }
         
@@ -639,13 +651,9 @@ class LibraryViewModel(
                 if (category == null) {
                     emptyList()
                 } else {
-                    val allCategoryBooks = getCachedBooksForCategory(
-                        categoryId = category.id,
-                        allBooks = currentState.books,
-                        bookCategories = currentBookCategories
-                    )
-                    // Apply pagination - only return loaded subset
-                    allCategoryBooks.take(paginationState.loadedCount)
+                    // Use paginated books from database
+                    val paginatedBooks = paginatedBooksMap[categoryId] ?: emptyList()
+                    paginatedBooks.map { it.toBookItem() }
                 }
             }
         }
@@ -656,15 +664,27 @@ class LibraryViewModel(
     /**
      * Get ALL library books for a specific category (without pagination).
      * Used internally for total count calculations.
+     * Note: With true DB pagination, this returns the currently loaded books.
+     * Use getTotalBooksForCategory() for the actual total count.
      */
     @Composable
     fun getAllBooksForCategoryAsState(categoryIndex: Int): State<List<BookItem>> {
         val currentState by state.collectAsState()
-        val currentBookCategories = bookCategories.value
+        val paginatedBooksMap by _paginatedBooks.collectAsState()
+        val totalCountsMap by _paginatedTotalCounts.collectAsState()
         val category = currentState.categories.getOrNull(categoryIndex)
+        val categoryId = category?.id ?: 0L
         
-        val cacheKey = remember(currentState.books.size, currentBookCategories.size, category?.id) {
-            Triple(currentState.books.hashCode(), currentBookCategories.hashCode(), category?.id)
+        val cacheKey = remember(
+            paginatedBooksMap[categoryId]?.size ?: 0,
+            totalCountsMap[categoryId] ?: 0,
+            category?.id
+        ) {
+            Triple(
+                paginatedBooksMap[categoryId]?.hashCode() ?: 0,
+                totalCountsMap[categoryId] ?: 0,
+                category?.id
+            )
         }
         
         val booksState = remember(cacheKey) {
@@ -672,11 +692,9 @@ class LibraryViewModel(
                 if (category == null) {
                     emptyList()
                 } else {
-                    getCachedBooksForCategory(
-                        categoryId = category.id,
-                        allBooks = currentState.books,
-                        bookCategories = currentBookCategories
-                    )
+                    // Return currently loaded paginated books
+                    val paginatedBooks = paginatedBooksMap[categoryId] ?: emptyList()
+                    paginatedBooks.map { it.toBookItem() }
                 }
             }
         }
@@ -781,6 +799,9 @@ class LibraryViewModel(
         } else {
             libraryController.dispatch(LibraryCommand.SetFilter(ireader.domain.services.library.LibraryFilter.None))
         }
+        
+        // Reset pagination to reload with new filter
+        resetAllPagination()
     }
     
     /**
@@ -828,6 +849,9 @@ class LibraryViewModel(
         
         // Update UI state
         _uiState.update { it.copy(sort = newSort) }
+        
+        // Reset pagination to reload with new sort
+        resetAllPagination()
     }
     
     /**
@@ -861,6 +885,9 @@ class LibraryViewModel(
         
         // Update UI state
         _uiState.update { it.copy(sort = newSort) }
+        
+        // Reset pagination to reload with new sort direction
+        resetAllPagination()
     }
     
     // ==================== Pagination ====================
@@ -870,12 +897,73 @@ class LibraryViewModel(
      */
     fun getPaginationState(categoryId: Long): PaginationState {
         return _uiState.value.categoryPaginationState[categoryId] 
-            ?: PaginationState(totalItems = state.value.books.size)
+            ?: PaginationState(totalItems = _paginatedTotalCounts.value[categoryId] ?: 0)
     }
     
     /**
-     * Load more books for a category when user scrolls near the end.
-     * This is called automatically by the grid when approaching the end of loaded items.
+     * Load initial page of books for a category from database.
+     * This uses true DB pagination - only loads INITIAL_PAGE_SIZE books from the database.
+     */
+    fun loadInitialBooksForCategory(categoryId: Long) {
+        // Cancel any existing load job for this category
+        paginationLoadJobs[categoryId]?.cancel()
+        
+        paginationLoadJobs[categoryId] = scope.launch {
+            try {
+                val sort = sorting.value
+                val filtersList = filters.value
+                val includeArchived = showArchivedBooks.value
+                
+                // Load first page from database
+                val (books, totalCount) = libraryUseCases.getLibraryCategory.awaitPaginated(
+                    categoryId = categoryId,
+                    sort = sort,
+                    filters = filtersList,
+                    limit = PaginationState.INITIAL_PAGE_SIZE,
+                    offset = 0,
+                    includeArchived = includeArchived
+                )
+                
+                // Update paginated books state
+                _paginatedBooks.update { current ->
+                    current + (categoryId to books)
+                }
+                
+                // Update total counts
+                _paginatedTotalCounts.update { current ->
+                    current + (categoryId to totalCount)
+                }
+                
+                // Update pagination state
+                _uiState.update { current ->
+                    val newPaginationState = current.categoryPaginationState.toMutableMap()
+                    newPaginationState[categoryId] = PaginationState(
+                        loadedCount = books.size,
+                        isLoadingMore = false,
+                        hasMoreItems = books.size < totalCount,
+                        totalItems = totalCount
+                    )
+                    current.copy(categoryPaginationState = newPaginationState)
+                }
+            } catch (e: Exception) {
+                // On error, fall back to empty state
+                _uiState.update { current ->
+                    val newPaginationState = current.categoryPaginationState.toMutableMap()
+                    newPaginationState[categoryId] = PaginationState(
+                        loadedCount = 0,
+                        isLoadingMore = false,
+                        hasMoreItems = false,
+                        totalItems = 0
+                    )
+                    current.copy(categoryPaginationState = newPaginationState)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Load more books for a category from database when user scrolls near the end.
+     * This uses true DB pagination - loads PAGE_SIZE more books from the database.
      */
     fun loadMoreBooks(categoryId: Long) {
         val currentPagination = getPaginationState(categoryId)
@@ -890,74 +978,134 @@ class LibraryViewModel(
             current.copy(categoryPaginationState = newPaginationState)
         }
         
-        // Simulate loading delay for smooth UX (actual data is already in memory)
         scope.launch {
-            // Small delay to prevent rapid-fire loading
-            kotlinx.coroutines.delay(100)
-            
-            val totalBooks = getTotalBooksForCategory(categoryId)
-            val newLoadedCount = minOf(
-                currentPagination.loadedCount + PaginationState.PAGE_SIZE,
-                totalBooks
-            )
-            val hasMore = newLoadedCount < totalBooks
-            
-            _uiState.update { current ->
-                val newPaginationState = current.categoryPaginationState.toMutableMap()
-                newPaginationState[categoryId] = PaginationState(
-                    loadedCount = newLoadedCount,
-                    isLoadingMore = false,
-                    hasMoreItems = hasMore,
-                    totalItems = totalBooks
+            try {
+                val sort = sorting.value
+                val filtersList = filters.value
+                val includeArchived = showArchivedBooks.value
+                val currentOffset = currentPagination.loadedCount
+                
+                // Load next page from database
+                val (newBooks, totalCount) = libraryUseCases.getLibraryCategory.awaitPaginated(
+                    categoryId = categoryId,
+                    sort = sort,
+                    filters = filtersList,
+                    limit = PaginationState.PAGE_SIZE,
+                    offset = currentOffset,
+                    includeArchived = includeArchived
                 )
-                current.copy(categoryPaginationState = newPaginationState)
+                
+                // Merge with existing books
+                val existingBooks = _paginatedBooks.value[categoryId] ?: emptyList()
+                val mergedBooks = existingBooks + newBooks
+                
+                // Update paginated books state
+                _paginatedBooks.update { current ->
+                    current + (categoryId to mergedBooks)
+                }
+                
+                // Update total counts
+                _paginatedTotalCounts.update { current ->
+                    current + (categoryId to totalCount)
+                }
+                
+                // Update pagination state
+                val newLoadedCount = mergedBooks.size
+                _uiState.update { current ->
+                    val newPaginationState = current.categoryPaginationState.toMutableMap()
+                    newPaginationState[categoryId] = PaginationState(
+                        loadedCount = newLoadedCount,
+                        isLoadingMore = false,
+                        hasMoreItems = newLoadedCount < totalCount,
+                        totalItems = totalCount
+                    )
+                    current.copy(categoryPaginationState = newPaginationState)
+                }
+            } catch (e: Exception) {
+                // On error, just stop loading
+                _uiState.update { current ->
+                    val newPaginationState = current.categoryPaginationState.toMutableMap()
+                    newPaginationState[categoryId] = currentPagination.copy(isLoadingMore = false)
+                    current.copy(categoryPaginationState = newPaginationState)
+                }
             }
         }
     }
     
     /**
-     * Reset pagination for a category (e.g., when category changes or data refreshes).
+     * Reset pagination for a category and reload from database.
+     * Call this when sort/filter changes or data needs to be refreshed.
      */
     fun resetPagination(categoryId: Long) {
-        val totalBooks = getTotalBooksForCategory(categoryId)
+        // Clear cached data for this category
+        _paginatedBooks.update { current ->
+            current - categoryId
+        }
+        _paginatedTotalCounts.update { current ->
+            current - categoryId
+        }
+        
+        // Reset pagination state
         _uiState.update { current ->
             val newPaginationState = current.categoryPaginationState.toMutableMap()
             newPaginationState[categoryId] = PaginationState(
-                loadedCount = minOf(PaginationState.INITIAL_PAGE_SIZE, totalBooks),
+                loadedCount = 0,
                 isLoadingMore = false,
-                hasMoreItems = totalBooks > PaginationState.INITIAL_PAGE_SIZE,
-                totalItems = totalBooks
+                hasMoreItems = true,
+                totalItems = 0
             )
             current.copy(categoryPaginationState = newPaginationState)
         }
+        
+        // Reload from database
+        loadInitialBooksForCategory(categoryId)
     }
     
     /**
-     * Get total books count for a category.
+     * Reset pagination for all categories.
+     * Call this when global settings change (sort, filter, archived).
+     */
+    fun resetAllPagination() {
+        // Clear all cached data
+        _paginatedBooks.value = emptyMap()
+        _paginatedTotalCounts.value = emptyMap()
+        
+        // Reset all pagination states
+        _uiState.update { current ->
+            current.copy(categoryPaginationState = emptyMap())
+        }
+        
+        // Reload current category
+        val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
+        loadInitialBooksForCategory(currentCategoryId)
+    }
+    
+    /**
+     * Get paginated books for a category.
+     * Returns books loaded from database via true DB pagination.
+     */
+    fun getPaginatedBooksForCategory(categoryId: Long): List<LibraryBook> {
+        return _paginatedBooks.value[categoryId] ?: emptyList()
+    }
+    
+    /**
+     * Get paginated books for a category as BookItem list.
+     */
+    fun getPaginatedBookItemsForCategory(categoryId: Long): List<BookItem> {
+        return getPaginatedBooksForCategory(categoryId).map { it.toBookItem() }
+    }
+    
+    /**
+     * Get total books count for a category from database.
      */
     private fun getTotalBooksForCategory(categoryId: Long): Int {
-        val allBooks = state.value.books
-        val bookCategoriesList = bookCategories.value
-        
-        return when (categoryId) {
-            0L -> allBooks.size // "All" category
-            -1L -> { // Uncategorized
-                val categorizedBookIds = bookCategoriesList.mapTo(HashSet(bookCategoriesList.size)) { it.bookId }
-                allBooks.count { it.id !in categorizedBookIds }
-            }
-            else -> { // Regular category
-                val bookIdsInCategory = bookCategoriesList
-                    .asSequence()
-                    .filter { it.categoryId == categoryId }
-                    .mapTo(HashSet()) { it.bookId }
-                allBooks.count { it.id in bookIdsInCategory }
-            }
-        }
+        return _paginatedTotalCounts.value[categoryId] ?: 0
     }
     
     /**
      * Get paginated books for a category.
      * Returns only the books that should be displayed based on current pagination state.
+     * @deprecated Use getPaginatedBooksForCategory instead for true DB pagination
      */
     fun getPaginatedBooksForCategory(
         categoryId: Long,

@@ -38,6 +38,25 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
             list.groupBy { it.readAt ?: 0L }
         }
     }
+    
+    /**
+     * Get paginated history from database.
+     * 
+     * @param query Search query for filtering
+     * @param limit Maximum number of items to return
+     * @param offset Number of items to skip
+     * @return Pair of (history items for this page, total count)
+     */
+    suspend fun findHistoriesPaginated(
+        query: String = "",
+        limit: Int,
+        offset: Int
+    ): Pair<Map<Long, List<HistoryWithRelations>>, Int> {
+        val items = historyRepository.findHistoriesPaginated(query, limit, offset)
+        val totalCount = historyRepository.getHistoryCount(query)
+        val grouped = items.groupBy { it.readAt ?: 0L }
+        return Pair(grouped, totalCount)
+    }
 
     suspend fun insertHistory(history: History) {
         return historyRepository.insertHistory(history)

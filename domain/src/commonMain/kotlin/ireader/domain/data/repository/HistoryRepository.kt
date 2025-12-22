@@ -15,6 +15,25 @@ interface HistoryRepository {
 
     suspend fun findHistories(): List<History>
     fun findHistoriesByFlow(query:String): Flow<List<HistoryWithRelations>>
+    
+    /**
+     * Get paginated history from database.
+     * 
+     * @param query Search query for filtering
+     * @param limit Maximum number of items to return
+     * @param offset Number of items to skip
+     * @return List of history items for the requested page
+     */
+    suspend fun findHistoriesPaginated(
+        query: String,
+        limit: Int,
+        offset: Int
+    ): List<HistoryWithRelations>
+    
+    /**
+     * Get total count of history items matching the query.
+     */
+    suspend fun getHistoryCount(query: String): Int
 
     suspend fun upsert(chapterId: Long,
                        readAt: Long,

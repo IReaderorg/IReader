@@ -17,6 +17,26 @@ enum class DateFilter {
 }
 
 /**
+ * Pagination state for history screen.
+ * Tracks how many items are currently loaded and whether more are available.
+ */
+@Immutable
+data class HistoryPaginationState(
+    val loadedCount: Int = INITIAL_PAGE_SIZE,
+    val isLoadingMore: Boolean = false,
+    val hasMoreItems: Boolean = true,
+    val totalItems: Int = 0
+) {
+    companion object {
+        const val INITIAL_PAGE_SIZE = 50
+        const val PAGE_SIZE = 30
+    }
+    
+    @Stable
+    val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore
+}
+
+/**
  * Dialog types for the history screen
  */
 sealed interface HistoryDialog {
@@ -52,7 +72,10 @@ data class HistoryScreenState(
     
     // Scroll position
     val savedScrollIndex: Int = 0,
-    val savedScrollOffset: Int = 0
+    val savedScrollOffset: Int = 0,
+    
+    // Pagination state
+    val paginationState: HistoryPaginationState = HistoryPaginationState()
 ) {
     @Stable
     val isEmpty: Boolean get() = histories.isEmpty() && !isLoading

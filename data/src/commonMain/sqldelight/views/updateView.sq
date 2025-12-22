@@ -35,6 +35,19 @@ SELECT *
 FROM updatesView
 WHERE dateUpload > :after;
 
+-- Paginated updates query
+updatesPaginated:
+SELECT *
+FROM updatesView
+WHERE dateUpload > :after
+ORDER BY dateUpload DESC
+LIMIT :limit OFFSET :offset;
+
+-- Count updates
+updatesCount:
+SELECT COUNT(*) FROM updatesView
+WHERE dateUpload > :after;
+
 -- Get updates with reading progress
 updatesWithProgress:
 SELECT *

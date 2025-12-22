@@ -34,6 +34,28 @@ class LibraryRepositoryImpl(
         ScreenProfiler.mark("Library", "db_query_complete")
         return result
     }
+    
+    override suspend fun findAllPaginated(
+        sort: LibrarySort,
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean
+    ): List<LibraryBook> {
+        ScreenProfiler.mark("Library", "db_paginated_query_start")
+        val result = handler.awaitList {
+            bookQueries.getLibraryPaginated(limit.toLong(), offset.toLong(), getLibraryMapper)
+        }.sortWith(sort, includeArchived).let { list ->
+            if (sort.isAscending) list else list.reversed()
+        }
+        ScreenProfiler.mark("Library", "db_paginated_query_complete_${result.size}_books")
+        return result
+    }
+    
+    override suspend fun getLibraryCount(includeArchived: Boolean): Int {
+        return handler.awaitOne {
+            bookQueries.getLibraryCount()
+        }.toInt()
+    }
 
     private fun Database.getLibrary(sort: LibrarySort): Query<LibraryBook> {
         return when (sort.type) {

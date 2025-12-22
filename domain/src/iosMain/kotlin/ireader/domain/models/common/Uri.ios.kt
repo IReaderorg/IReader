@@ -5,6 +5,19 @@ package ireader.domain.models.common
  */
 actual class Uri private constructor(private val urlString: String) {
     
+    /**
+     * Get the path from the URI string.
+     * For file:// URLs, extracts the path portion.
+     * For other strings, returns the string as-is.
+     */
+    val path: String get() {
+        return when {
+            urlString.startsWith("file://") -> urlString.removePrefix("file://")
+            urlString.startsWith("/") -> urlString
+            else -> urlString
+        }
+    }
+    
     actual override fun toString(): String = urlString
     
     actual companion object {

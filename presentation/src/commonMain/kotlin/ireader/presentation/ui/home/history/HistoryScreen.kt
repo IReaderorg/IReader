@@ -56,6 +56,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -127,6 +128,7 @@ import ireader.presentation.ui.core.coil.rememberBookCover
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.history.viewmodel.DateFilter
+import ireader.presentation.ui.home.history.viewmodel.HistoryPaginationState
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import ireader.domain.utils.extensions.todayStartMillis
 import ireader.domain.utils.extensions.yesterdayStartMillis
@@ -507,6 +509,10 @@ fun HistoryContent(
     dateFilter: DateFilter? = null,
     searchQuery: String = ""
 ) {
+    // Collect pagination state
+    val state by vm.state.collectAsState()
+    val paginationState = state.paginationState
+    
     // Memoize time boundaries to avoid recalculation - using KMP datetime
     val timeBoundaries = remember {
         Triple(
@@ -519,7 +525,7 @@ fun HistoryContent(
     val (today, yesterday, lastWeek) = timeBoundaries
     
     // Use derivedStateOf for grouped items to minimize recompositions
-    val groupedItems by remember(items, dateFilter, today, yesterday, lastWeek) {
+    val groupedItems by remember(items, dateFilter, today, yesterday, lastWeek, paginationState.loadedCount) {
         derivedStateOf {
             val allItems = items.values.flatten()
             val filteredItems = when (dateFilter) {
@@ -529,12 +535,17 @@ fun HistoryContent(
                 null -> allItems
             }
             
+            // Apply pagination - take only loadedCount items
+            val paginatedItems = filteredItems
+                .sortedByDescending { it.readAt }
+                .take(paginationState.loadedCount)
+            
             val todayItems = mutableListOf<HistoryWithRelations>()
             val yesterdayItems = mutableListOf<HistoryWithRelations>()
             val thisWeekItems = mutableListOf<HistoryWithRelations>()
             val earlierItems = mutableListOf<HistoryWithRelations>()
             
-            filteredItems.forEach { history ->
+            paginatedItems.forEach { history ->
                 when {
                     history.readAt >= today -> todayItems.add(history)
                     history.readAt >= yesterday -> yesterdayItems.add(history)
@@ -544,11 +555,28 @@ fun HistoryContent(
             }
             
             GroupedHistoryItems(
-                todayItems = todayItems.sortedByDescending { it.readAt },
-                yesterdayItems = yesterdayItems.sortedByDescending { it.readAt },
-                thisWeekItems = thisWeekItems.sortedByDescending { it.readAt },
-                earlierItems = earlierItems.sortedByDescending { it.readAt }
+                todayItems = todayItems,
+                yesterdayItems = yesterdayItems,
+                thisWeekItems = thisWeekItems,
+                earlierItems = earlierItems
             )
+        }
+    }
+    
+    // Calculate total visible items for pagination check
+    val totalVisibleItems by remember(groupedItems) {
+        derivedStateOf {
+            groupedItems.todayItems.size + groupedItems.yesterdayItems.size + 
+            groupedItems.thisWeekItems.size + groupedItems.earlierItems.size
+        }
+    }
+    
+    // Detect scroll to end for pagination
+    LaunchedEffect(listState) {
+        snapshotFlow { 
+            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+        }.collect { lastVisibleIndex ->
+            vm.checkAndLoadMore(lastVisibleIndex, totalVisibleItems)
         }
     }
     
@@ -667,6 +695,35 @@ fun HistoryContent(
                     )
                 }
             }
+            
+            // Pagination footer
+            item(key = "pagination_footer") {
+                HistoryPaginationFooter(
+                    paginationState = paginationState,
+                    totalVisibleItems = totalVisibleItems
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HistoryPaginationFooter(
+    paginationState: HistoryPaginationState,
+    totalVisibleItems: Int
+) {
+    // Only show loading indicator when actively loading more items
+    if (paginationState.isLoadingMore) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.dp
+            )
         }
     }
 }

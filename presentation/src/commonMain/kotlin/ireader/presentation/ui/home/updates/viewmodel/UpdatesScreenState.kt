@@ -27,6 +27,26 @@ data class UpdateProgress(
 )
 
 /**
+ * Pagination state for updates screen.
+ * Tracks how many items are currently loaded and whether more are available.
+ */
+@Immutable
+data class UpdatesPaginationState(
+    val loadedCount: Int = INITIAL_PAGE_SIZE,
+    val isLoadingMore: Boolean = false,
+    val hasMoreItems: Boolean = true,
+    val totalItems: Int = 0
+) {
+    companion object {
+        const val INITIAL_PAGE_SIZE = 50
+        const val PAGE_SIZE = 30
+    }
+    
+    @Stable
+    val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore
+}
+
+/**
  * Dialog types for the updates screen
  */
 sealed interface UpdatesDialog {
@@ -66,7 +86,10 @@ data class UpdatesScreenState(
     
     // Scroll position
     val savedScrollIndex: Int = 0,
-    val savedScrollOffset: Int = 0
+    val savedScrollOffset: Int = 0,
+    
+    // Pagination state
+    val paginationState: UpdatesPaginationState = UpdatesPaginationState()
 ) {
     @Stable
     val hasSelection: Boolean get() = selectedChapterIds.isNotEmpty()

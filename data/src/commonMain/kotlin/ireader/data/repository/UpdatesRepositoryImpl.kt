@@ -13,5 +13,21 @@ class UpdatesRepositoryImpl(private val handler: DatabaseHandler,) :
             updateViewQueries.updates(after = after, updatesMapper)
         }
     }
+    
+    override suspend fun findUpdatesPaginated(
+        after: Long,
+        limit: Int,
+        offset: Int
+    ): List<UpdatesWithRelations> {
+        return handler.awaitList {
+            updateViewQueries.updatesPaginated(after, limit.toLong(), offset.toLong(), updatesMapper)
+        }
+    }
+    
+    override suspend fun getUpdatesCount(after: Long): Int {
+        return handler.awaitOne {
+            updateViewQueries.updatesCount(after)
+        }.toInt()
+    }
 
 }

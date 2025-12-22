@@ -255,8 +255,8 @@ internal fun LibraryPager(
                     showLanguageBadge = showLanguageBadge,
                     columns = columns,
                     keys = stableKeyFunction,
-                    // Pagination footer
-                    footer = if (paginationState.isLoadingMore || paginationState.hasMoreItems) {
+                    // Pagination footer - only show when actively loading more items
+                    footer = if (paginationState.isLoadingMore) {
                         {
                             PaginationFooter(
                                 isLoading = paginationState.isLoadingMore,
@@ -274,6 +274,7 @@ internal fun LibraryPager(
 
 /**
  * Footer shown at the bottom of the list during pagination.
+ * Only shows loading indicator when actively loading more items.
  */
 @Composable
 private fun PaginationFooter(
@@ -283,7 +284,8 @@ private fun PaginationFooter(
     totalCount: Int,
     modifier: Modifier = Modifier
 ) {
-    if (!hasMore && !isLoading) return
+    // Only show when actively loading more items
+    if (!isLoading) return
     
     Box(
         modifier = modifier
@@ -291,17 +293,9 @@ private fun PaginationFooter(
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.padding(8.dp),
-                strokeWidth = 2.dp
-            )
-        } else if (hasMore && totalCount > 0) {
-            Text(
-                text = "Showing $loadedCount of $totalCount",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        CircularProgressIndicator(
+            modifier = Modifier.padding(8.dp),
+            strokeWidth = 2.dp
+        )
     }
 }

@@ -57,6 +57,22 @@ class HistoryRepositoryImpl constructor(
             .debounce(100.milliseconds) // Prevent rapid emissions
             .distinctUntilChanged() // Skip duplicates
     }
+    
+    override suspend fun findHistoriesPaginated(
+        query: String,
+        limit: Int,
+        offset: Int
+    ): List<HistoryWithRelations> {
+        return handler.awaitList {
+            historyViewQueries.history(query, limit.toLong(), offset.toLong(), historyWithRelationsMapper)
+        }
+    }
+    
+    override suspend fun getHistoryCount(query: String): Int {
+        return handler.awaitOne {
+            historyViewQueries.countHistory(query)
+        }.toInt()
+    }
 
     override suspend fun insertHistory(history: History) {
         return handler.await { insertBlocking(history) }

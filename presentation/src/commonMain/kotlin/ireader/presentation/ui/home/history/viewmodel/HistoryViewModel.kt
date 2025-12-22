@@ -15,6 +15,7 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel for the History screen following Mihon's StateScreenModel pattern.
+ * Uses true database pagination for optimal performance with large history.
  */
 @Stable
 class HistoryViewModel(
@@ -52,8 +54,8 @@ class HistoryViewModel(
     val relativeFormat by uiPreferences.relativeTime().asState()
     var warningAlert by mutableStateOf(WarningAlertData())
 
-    // All histories for filtering
-    private var allHistories: Map<Long, List<HistoryWithRelations>> = emptyMap()
+    // Job for loading operations
+    private var loadJob: Job? = null
     
     init {
         // Load preferences
@@ -62,19 +64,48 @@ class HistoryViewModel(
             _state.update { it.copy(groupByNovel = groupByNovel) }
         }
         
-        // Subscribe to history data
-        scope.launch {
+        // Load initial page from database
+        loadInitialPage()
+    }
+    
+    /**
+     * Load initial page of history from database.
+     */
+    private fun loadInitialPage() {
+        loadJob?.cancel()
+        loadJob = scope.launch {
             _state.update { it.copy(isLoading = true) }
-            historyUseCase.findHistoriesByFlowLongType().collect { histories ->
-                allHistories = histories
-                applySearchFilter()
+            
+            try {
+                val query = _state.value.searchQuery
+                val (grouped, totalCount) = historyUseCase.findHistoriesPaginated(
+                    query = query,
+                    limit = HistoryPaginationState.INITIAL_PAGE_SIZE,
+                    offset = 0
+                )
+                
+                _state.update { current ->
+                    current.copy(
+                        histories = grouped.mapValues { (_, list) -> list.toImmutableList() }.toImmutableMap(),
+                        isLoading = false,
+                        paginationState = HistoryPaginationState(
+                            loadedCount = grouped.values.sumOf { it.size },
+                            isLoadingMore = false,
+                            hasMoreItems = grouped.values.sumOf { it.size } < totalCount,
+                            totalItems = totalCount
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { it.copy(isLoading = false) }
             }
         }
     }
     
     fun onSearchQueryChange(query: String) {
         _state.update { it.copy(searchQuery = query) }
-        applySearchFilter()
+        // Reload from database with new search query
+        loadInitialPage()
     }
 
     fun toggleSearchMode() {
@@ -83,7 +114,7 @@ class HistoryViewModel(
         
         if (!newMode) {
             _state.update { it.copy(searchQuery = "") }
-            applySearchFilter()
+            loadInitialPage()
         }
     }
     
@@ -98,24 +129,8 @@ class HistoryViewModel(
     }
     
     fun applySearchFilter() {
-        val query = _state.value.searchQuery
-        val filtered = if (query.isBlank()) {
-            allHistories
-        } else {
-            allHistories.mapValues { (_, historyList) ->
-                historyList.filter {
-                    it.title.contains(query, ignoreCase = true) ||
-                    (it.chapterName?.contains(query, ignoreCase = true) ?: false)
-                }
-            }.filterValues { it.isNotEmpty() }
-        }
-        
-        _state.update { current ->
-            current.copy(
-                histories = filtered.mapValues { (_, list) -> list.toImmutableList() }.toImmutableMap(),
-                isLoading = false
-            )
-        }
+        // Now just triggers a database reload
+        loadInitialPage()
     }
 
     fun deleteHistory(history: HistoryWithRelations, localizeHelper: LocalizeHelper) {
@@ -134,6 +149,8 @@ class HistoryViewModel(
             scope.launch {
                 try {
                     historyUseCase.deleteHistory(chapterIdToDelete)
+                    // Reload to reflect deletion
+                    loadInitialPage()
                 } finally {
                     warningAlert.enable = false
                     _state.update { it.copy(dialog = null) }
@@ -161,6 +178,8 @@ class HistoryViewModel(
             scope.launch {
                 try {
                     historyUseCase.deleteAllHistories()
+                    // Reload to reflect deletion
+                    loadInitialPage()
                 } finally {
                     warningAlert.enable = false
                     _state.update { it.copy(dialog = null) }
@@ -177,11 +196,88 @@ class HistoryViewModel(
     fun forceRefresh() {
         scope.launch {
             _state.update { it.copy(isRefreshing = true) }
-            historyUseCase.findHistoriesByFlowLongType().collect { histories ->
-                allHistories = histories
-                applySearchFilter()
-                _state.update { it.copy(isRefreshing = false) }
+            loadInitialPage()
+            _state.update { it.copy(isRefreshing = false) }
+        }
+    }
+    
+    // ==================== Pagination ====================
+    
+    /**
+     * Get pagination state.
+     */
+    fun getPaginationState(): HistoryPaginationState {
+        return _state.value.paginationState
+    }
+    
+    /**
+     * Load more history items from database when user scrolls near the end.
+     */
+    fun loadMoreHistory() {
+        val currentPagination = getPaginationState()
+        
+        // Don't load if already loading or no more items
+        if (currentPagination.isLoadingMore || !currentPagination.hasMoreItems) return
+        
+        // Mark as loading
+        _state.update { current ->
+            current.copy(paginationState = currentPagination.copy(isLoadingMore = true))
+        }
+        
+        scope.launch {
+            try {
+                val query = _state.value.searchQuery
+                val currentLoadedCount = currentPagination.loadedCount
+                
+                // Load next page from database
+                val (newGrouped, totalCount) = historyUseCase.findHistoriesPaginated(
+                    query = query,
+                    limit = HistoryPaginationState.PAGE_SIZE,
+                    offset = currentLoadedCount
+                )
+                
+                // Merge with existing data
+                val existingHistories = _state.value.histories.toMutableMap()
+                newGrouped.forEach { (key, newList) ->
+                    val existing = existingHistories[key]?.toMutableList() ?: mutableListOf()
+                    existing.addAll(newList)
+                    existingHistories[key] = existing.toImmutableList()
+                }
+                
+                val newLoadedCount = existingHistories.values.sumOf { it.size }
+                
+                _state.update { current ->
+                    current.copy(
+                        histories = existingHistories.mapValues { (_, list) -> list }.toImmutableMap(),
+                        paginationState = HistoryPaginationState(
+                            loadedCount = newLoadedCount,
+                            isLoadingMore = false,
+                            hasMoreItems = newLoadedCount < totalCount,
+                            totalItems = totalCount
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                _state.update { current ->
+                    current.copy(
+                        paginationState = current.paginationState.copy(isLoadingMore = false)
+                    )
+                }
             }
+        }
+    }
+    
+    /**
+     * Check if we should load more items based on scroll position.
+     * Call this when user scrolls near the end of the list.
+     */
+    fun checkAndLoadMore(lastVisibleIndex: Int, totalVisibleItems: Int) {
+        val paginationState = getPaginationState()
+        val threshold = 10 // Load more when within 10 items of the end
+        
+        if (lastVisibleIndex >= paginationState.loadedCount - threshold && 
+            paginationState.canLoadMore) {
+            loadMoreHistory()
         }
     }
 }
