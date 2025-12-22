@@ -1,6 +1,7 @@
 package ireader.presentation.core
 
 import android.content.Context
+import android.os.Build
 import ireader.presentation.ui.update.AppUpdateState
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.core.component.KoinComponent
@@ -19,7 +20,11 @@ actual class DownloadEventHandler actual constructor(
     init {
         // Register the broadcast receiver
         val filter = AppUpdateDownloadReceiver.createIntentFilter()
-        context.registerReceiver(receiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(receiver, filter)
+        }
     }
     
     actual fun cleanup() {

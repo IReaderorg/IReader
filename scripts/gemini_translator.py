@@ -16,7 +16,7 @@ from typing import Dict, List
 
 # Configuration
 API_KEY = os.environ.get('GEMINI_API_KEY')
-API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 PROJECT_ROOT = Path('.')
 I18N_BASE_DIR = PROJECT_ROOT / 'i18n/src/commonMain/composeResources'
 SOURCE_FILE = I18N_BASE_DIR / 'values/strings.xml'

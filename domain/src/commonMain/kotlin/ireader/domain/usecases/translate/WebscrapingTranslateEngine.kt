@@ -284,7 +284,14 @@ open class WebscrapingTranslateEngine(
             
             // For Gemini API, chunk texts to avoid token limits
             if (currentService == AI_SERVICE.GEMINI) {
-                val maxChunkSize = 20 // Process max 20 paragraphs at a time
+                // OPTIMIZED: Dynamic chunk size based on text length
+                // Shorter texts can be batched more aggressively to reduce API calls
+                val avgTextLength = texts.map { it.length }.average()
+                val maxChunkSize = when {
+                    avgTextLength < 100 -> 40  // Short paragraphs: batch more
+                    avgTextLength < 300 -> 25  // Medium paragraphs
+                    else -> 15                  // Long paragraphs: smaller batches
+                }
                 val chunks = texts.chunked(maxChunkSize)
                 val allResults = mutableListOf<String>()
                 
@@ -462,14 +469,11 @@ open class WebscrapingTranslateEngine(
         else 
             ""
         
-        // Simplified prompt for Gemini to reduce token usage
+        // OPTIMIZED: Ultra-minimal prompt for Gemini to reduce token usage
+        // System instruction handles the translation context, so we only send the text
         return if (currentService == AI_SERVICE.GEMINI) {
-            """
-            Translate from $sourceLang to $targetLang. Return only the translation, no explanations.
-            Preserve ---PARAGRAPH_BREAK--- markers.
-            
-            $text
-            """.trimIndent()
+            // Format: "SRC→TGT:\n<text>" - minimal tokens, system instruction does the rest
+            "$sourceLang→$targetLang:\n$text"
         } else {
             """
             Translate the following $contentTypeStr from $sourceLang to $targetLang.
@@ -532,6 +536,7 @@ open class WebscrapingTranslateEngine(
     @Serializable
     private data class GeminiRequest(
         val contents: List<GeminiContent>,
+        val systemInstruction: GeminiContent? = null, // System instruction for token optimization
         val generationConfig: GeminiGenerationConfig = GeminiGenerationConfig()
     )
     
@@ -548,10 +553,10 @@ open class WebscrapingTranslateEngine(
     
     @Serializable
     private data class GeminiGenerationConfig(
-        val temperature: Float = 0.3f,
+        val temperature: Float = 0.1f, // Lower = more deterministic, fewer retries
         val topK: Int = 40,
         val topP: Float = 0.95f,
-        val maxOutputTokens: Int = 16384 // Increased to handle longer translations
+        val maxOutputTokens: Int = 8192 // Reduced from 16384 to save tokens
     )
     
     // Data class for Gemini API response
@@ -597,6 +602,27 @@ open class WebscrapingTranslateEngine(
         // Update the available models list
         fun updateAvailableModels(models: List<Pair<String, String>>) {
             _availableGeminiModels.value = models
+        }
+        
+        // CJK language codes for token estimation
+        private val CJK_LANGUAGES = setOf("zh", "ja", "ko", "th", "vi")
+        
+        /**
+         * Estimate token count for text.
+         * Uses character-based approximation since tiktoken isn't available in KMP.
+         * ~4 chars per token for Latin scripts, ~2-3 for CJK languages.
+         */
+        fun estimateTokens(text: String, targetLang: String = "en"): Int {
+            val charsPerToken = if (targetLang in CJK_LANGUAGES) 2.5 else 4.0
+            return (text.length / charsPerToken).toInt()
+        }
+        
+        /**
+         * Check if text is within safe token limits for Gemini.
+         * Gemini has ~30k token limit, we use 8k as safe input limit.
+         */
+        fun isWithinTokenLimit(text: String, targetLang: String = "en", maxTokens: Int = 8000): Boolean {
+            return estimateTokens(text, targetLang) <= maxTokens
         }
     }
     
@@ -731,8 +757,14 @@ open class WebscrapingTranslateEngine(
         // Construct API endpoint in the exact format used in Google's examples
         val endpoint = "https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey"
         
-        // Ensure request matches the curl example format
+        // OPTIMIZED: Use systemInstruction for reusable context (reduces per-request tokens)
+        // The system instruction is cached by Gemini, so it's more efficient than repeating in each prompt
         val requestBody = GeminiRequest(
+            systemInstruction = GeminiContent(
+                parts = listOf(
+                    GeminiPart(text = "Translator. Output only translation. Keep ---PARAGRAPH_BREAK--- markers intact.")
+                )
+            ),
             contents = listOf(
                 GeminiContent(
                     parts = listOf(
