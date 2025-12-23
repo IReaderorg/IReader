@@ -1,0 +1,83 @@
+import kotlin.collections.List;
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+
+-- Explore book table for temporary storage of browsed books
+-- This table has a fixed size limit and auto-cleans old entries
+-- Books are promoted to the main 'book' table when favorited or viewed in detail
+CREATE TABLE IF NOT EXISTS explore_book(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    source_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    title TEXT NOT NULL,
+    author TEXT,
+    description TEXT,
+    genre TEXT AS List<String>,
+    status INTEGER NOT NULL DEFAULT 0,
+    cover TEXT,
+    date_added INTEGER AS Long NOT NULL,
+    -- Unique constraint to prevent duplicates per source
+    UNIQUE(url, source_id)
+);
+
+-- Index for fast lookups by source
+CREATE INDEX IF NOT EXISTS idx_explore_book_source ON explore_book(source_id);
+-- Index for cleanup queries (oldest first)
+CREATE INDEX IF NOT EXISTS idx_explore_book_date ON explore_book(date_added ASC);
+-- Index for URL lookups
+CREATE INDEX IF NOT EXISTS idx_explore_book_url ON explore_book(url, source_id);
+
+-- Insert or replace an explore book
+upsertExploreBook:
+INSERT OR REPLACE INTO explore_book(
+    source_id, url, title, author, description, genre, status, cover, date_added
+) VALUES (
+    :sourceId, :url, :title, :author, :description, :genre, :status, :cover, :dateAdded
+);
+
+-- Find explore book by URL and source
+findByUrlAndSource:
+SELECT * FROM explore_book WHERE url = :url AND source_id = :sourceId LIMIT 1;
+
+-- Find all explore books for a source
+findBySource:
+SELECT * FROM explore_book WHERE source_id = :sourceId ORDER BY date_added DESC;
+
+-- Count total explore books
+countAll:
+SELECT COUNT(*) AS count FROM explore_book;
+
+-- Count explore books for a source
+countBySource:
+SELECT COUNT(*) AS count FROM explore_book WHERE source_id = :sourceId;
+
+-- Delete oldest explore books to maintain limit
+-- Keeps the most recent books up to the limit
+deleteOldest:
+DELETE FROM explore_book 
+WHERE _id IN (
+    SELECT _id FROM explore_book 
+    ORDER BY date_added ASC 
+    LIMIT :count
+);
+
+-- Delete explore book by URL and source (when promoted to main book table)
+deleteByUrlAndSource:
+DELETE FROM explore_book WHERE url = :url AND source_id = :sourceId;
+
+-- Delete all explore books for a source
+deleteBySource:
+DELETE FROM explore_book WHERE source_id = :sourceId;
+
+-- Delete all explore books
+deleteAll:
+DELETE FROM explore_book;
+
+-- Get explore book by ID
+findById:
+SELECT * FROM explore_book WHERE _id = :id LIMIT 1;
+
+-- Delete by ID
+deleteById:
+DELETE FROM explore_book WHERE _id = :id;

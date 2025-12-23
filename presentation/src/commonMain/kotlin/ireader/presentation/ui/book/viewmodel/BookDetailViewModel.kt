@@ -53,6 +53,7 @@ import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.presentation.ui.book.components.ExportOptions
 import ireader.presentation.ui.book.helpers.PlatformHelper
+import ireader.presentation.ui.core.utils.formatDecimal
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
@@ -2066,7 +2067,7 @@ class BookDetailViewModel(
                             ireader.domain.models.entities.TrackerService.KITSU -> kitsuScore = score
                             ireader.domain.models.entities.TrackerService.MANGAUPDATES -> mangaUpdatesScore = score
                         }
-                        emitEvent(BookDetailEvent.ShowSnackbar("Score updated to ${"%.1f".format(score)}"))
+                        emitEvent(BookDetailEvent.ShowSnackbar("Score updated to ${score.formatDecimal(1)}"))
                     } else {
                         emitEvent(BookDetailEvent.ShowSnackbar("Failed to update score"))
                     }

@@ -19,6 +19,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatDecimal
 
 /**
  * Tracking service data for display
@@ -242,7 +243,7 @@ private fun TrackingServiceCard(
                     // Score (clickable)
                     TrackingStatItem(
                         label = "Score",
-                        value = service.score?.let { if (it > 0) "%.1f".format(it) else "-" } ?: "-",
+                        value = service.score?.let { if (it > 0) it.formatDecimal(1) else "-" } ?: "-",
                         onClick = { showScoreDialog = true }
                     )
                     

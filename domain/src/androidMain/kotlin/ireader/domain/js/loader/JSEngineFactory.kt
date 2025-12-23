@@ -896,12 +896,42 @@ private object AdapterCodeCache {
                 if (typeof plugin.parseNovel === 'function') {
                     var pathUrl = extractPathUrl(url);
                     return getCachedParseNovel(pathUrl).then(function(novel) {
-                        if (novel && Array.isArray(novel.chapters)) {
+                        // Check if novel has chapters directly
+                        if (novel && Array.isArray(novel.chapters) && novel.chapters.length > 0) {
                             return novel.chapters.map(function(c) {
                                 var chapterUrl = c.url || c.path || "";
                                 return { name: c.name || c.title || "", url: chapterUrl, releaseTime: c.releaseTime || c.date || null };
                             });
                         }
+                        
+                        // If no chapters but has totalPages and parsePage, use pagination
+                        if (novel && novel.totalPages > 0 && typeof plugin.parsePage === 'function') {
+                            var totalPages = novel.totalPages;
+                            var allChapters = [];
+                            
+                            // Fetch all pages sequentially
+                            function fetchPage(pageNum) {
+                                if (pageNum > totalPages) {
+                                    return Promise.resolve(allChapters);
+                                }
+                                return Promise.resolve(plugin.parsePage(pathUrl, pageNum)).then(function(pageResult) {
+                                    if (pageResult && Array.isArray(pageResult.chapters)) {
+                                        pageResult.chapters.forEach(function(c) {
+                                            var chapterUrl = c.url || c.path || "";
+                                            allChapters.push({ 
+                                                name: c.name || c.title || "", 
+                                                url: chapterUrl, 
+                                                releaseTime: c.releaseTime || c.date || null 
+                                            });
+                                        });
+                                    }
+                                    return fetchPage(pageNum + 1);
+                                });
+                            }
+                            
+                            return fetchPage(1);
+                        }
+                        
                         return [];
                     });
                 }

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.TrackStatus
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatDecimal
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 
@@ -204,7 +205,7 @@ fun TrackingScoreDialog(
             ) {
                 // Score display
                 Text(
-                    text = if (scoreValue > 0) "%.1f".format(scoreValue) else "-",
+                    text = if (scoreValue > 0) scoreValue.formatDecimal(1) else "-",
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
