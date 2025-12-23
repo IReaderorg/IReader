@@ -172,52 +172,11 @@ object MainStarterScreen {
             }
         }
         
-        // Track navigation to refresh library when returning from detail screen
-        // This is more reliable than tracking in LibraryScreenSpec because MainStarterScreen
-        // is always in the composition tree
-        var wasOnDetailScreen by remember { mutableStateOf(false) }
-        var lastRefreshTime by remember { mutableStateOf(0L) }
-        val REFRESH_DEBOUNCE_MS = 500L // Debounce rapid navigation
-        
-        // Track navigation changes and trigger refresh with debouncing
-        // Note: We DON'T include libraryVm as a key because we don't want the effect to restart
-        // when libraryVm changes from null to non-null. The wasOnDetailScreen state would be lost.
-        LaunchedEffect(navController) {
-            navController.currentBackStackEntryFlow.collect { backStackEntry ->
-                val currentRoute = backStackEntry.destination.route
-                
-                // Check if we're on a detail screen (route pattern is "bookDetail/{bookId}")
-                val isOnDetailScreen = currentRoute == "bookDetail/{bookId}" || currentRoute?.startsWith("bookDetail/") == true
-                
-                // Check if we're on a reader screen (route pattern is "reader/{bookId}/{chapterId}")
-                // This is important because last_read_at is updated when reading
-                val isOnReaderScreen = currentRoute == "reader/{bookId}/{chapterId}" || currentRoute?.startsWith("reader/") == true
-                
-                Log.info { "Navigation: route=$currentRoute, wasOnDetailScreen=$wasOnDetailScreen, isOnDetailScreen=$isOnDetailScreen, isOnReaderScreen=$isOnReaderScreen, currentTabIndex=$currentTabIndex" }
-                
-                // Check if we're returning to main from a detail or reader screen
-                if (currentRoute == "main") {
-                    if (wasOnDetailScreen && currentTabIndex == 0) {
-                        val now = ireader.domain.utils.extensions.currentTimeToLong()
-                        val timeSinceLastRefresh = now - lastRefreshTime
-                        
-                        Log.info { "Navigation: Returning to library, timeSinceLastRefresh=${timeSinceLastRefresh}ms, libraryVm=${if (libraryVm != null) "available" else "null"}" }
-                        
-                        // Only refresh if enough time has passed (debounce rapid navigation)
-                        // AND libraryVm is available
-                        if (timeSinceLastRefresh > REFRESH_DEBOUNCE_MS && libraryVm != null) {
-                            lastRefreshTime = now
-                            Log.info { "Navigation: Triggering refreshCurrentCategory()" }
-                            libraryVm.refreshCurrentCategory()
-                        }
-                    }
-                    wasOnDetailScreen = false
-                } else if (isOnDetailScreen || isOnReaderScreen) {
-                    // Track both detail and reader screens - we want to refresh when returning from either
-                    wasOnDetailScreen = true
-                }
-            }
-        }
+        // NOTE: Navigation-based library refresh removed.
+        // Library now uses LibraryChangeNotifier for reactive updates:
+        // - When books are modified (CachedBookRepository notifies)
+        // - When read progress changes (UpdateLastReadTime notifies)
+        // This is more efficient and reliable than polling on navigation events.
         
         // Stable click handlers
         val tabClickHandlers = remember {

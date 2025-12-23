@@ -3,6 +3,7 @@ package ireader.domain.usecases.local.chapter_usecases
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.History
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.services.library.LibraryChangeNotifier
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.utils.extensions.currentTimeToLong
 
@@ -10,7 +11,8 @@ import ireader.domain.utils.extensions.currentTimeToLong
 class UpdateLastReadTime(
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val historyUseCase: HistoryUseCase,
-    private val uiPreferences: UiPreferences
+    private val uiPreferences: UiPreferences,
+    private val changeNotifier: LibraryChangeNotifier? = null
 ) {
     suspend operator fun invoke(chapter: Chapter, updateDateFetched: Boolean = false) {
 
@@ -30,6 +32,11 @@ class UpdateLastReadTime(
                     readAt = currentTimeToLong(),
                     readDuration = history?.readDuration ?: 0,
                 )
+            )
+            
+            // Notify library that read progress changed (affects unread count, last read sort)
+            changeNotifier?.notifyChange(
+                LibraryChangeNotifier.ChangeType.ReadProgressChanged(chapter.bookId)
             )
         }
     }

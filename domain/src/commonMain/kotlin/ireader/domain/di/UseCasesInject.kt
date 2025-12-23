@@ -134,7 +134,8 @@ val UseCasesInject = module {
             updateLastReadTime = UpdateLastReadTime(
                 insertUseCases = get(),
                 historyUseCase = get(),
-                uiPreferences = get()
+                uiPreferences = get(),
+                changeNotifier = getOrNull() // LibraryChangeNotifier - optional
             ),
             subscribeChapterById = SubscribeChapterById(get(), contentFilterUseCase)
         )

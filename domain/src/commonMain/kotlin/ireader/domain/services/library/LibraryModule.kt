@@ -9,6 +9,19 @@ import org.koin.dsl.module
  */
 val libraryModule = module {
     /**
+     * LibraryChangeNotifier as singleton - lightweight change notification system.
+     * 
+     * This solves the pagination vs reactivity problem:
+     * - Pagination loads data on-demand (efficient for large libraries)
+     * - But we still need to know WHEN data changed to reload
+     * - LibraryChangeNotifier provides that signal without loading all data
+     * 
+     * Repositories call notifyChange() when books are modified.
+     * ViewModel observes changes and reloads pagination when needed.
+     */
+    single { LibraryChangeNotifier() }
+    
+    /**
      * LibraryController as singleton - ensures single source of truth
      * across all screens that need library state.
      * 

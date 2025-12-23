@@ -15,6 +15,7 @@ import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.prefs.LibraryPreferences
+import ireader.domain.services.library.LibraryChangeNotifier
 import ireader.domain.services.library.LibraryCommand
 import ireader.domain.services.library.LibraryController
 import ireader.domain.services.platform.PlatformServices
@@ -51,6 +52,11 @@ private const val TAG = "LibraryViewModel"
  * - Reduced from 26 constructor parameters to 8 using aggregates
  * - State derived from LibraryController (SSOT) - no duplicate state
  * - Selection/filter/sort methods only dispatch to LibraryController
+ * 
+ * CHANGE DETECTION:
+ * - Observes LibraryChangeNotifier to know when books are modified
+ * - Reloads only affected categories (not all 10,000+ books)
+ * - Debounces rapid changes to avoid excessive reloads
  */
 @Stable
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -67,7 +73,9 @@ class LibraryViewModel(
     private val downloadService: ireader.domain.services.common.DownloadService,
     private val localizeHelper: LocalizeHelper,
     // LibraryController - SSOT for library state (Requirements: 3.1, 3.2, 3.3, 3.4)
-    private val libraryController: LibraryController
+    private val libraryController: LibraryController,
+    // Change notifier - signals when books are modified (for pagination reload)
+    private val changeNotifier: LibraryChangeNotifier? = null
 ) : BaseViewModel() {
 
     // ==================== State Derived from LibraryController (SSOT) ====================
@@ -103,6 +111,10 @@ class LibraryViewModel(
     // Track categories that are currently loading to prevent duplicate loads
     private val loadingCategories = mutableSetOf<Long>()
     private val loadingCategoriesMutex = Mutex()
+    
+    // Change notification handling
+    private var changeNotificationJob: Job? = null
+    private val pendingChanges = MutableStateFlow<Set<Long>>(emptySet()) // Book IDs that changed
     
     // Preferences as StateFlow
     val lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -156,10 +168,11 @@ class LibraryViewModel(
         val categoryBooks = paginatedBooksMap[categoryId] ?: emptyList()
         
         // Use search results from database when in search mode, otherwise use category books
+        // Apply distinctBy to prevent duplicate key errors in LazyColumn
         val filteredBooks = if (searchQuery.isNotBlank()) {
-            searchResults
+            searchResults.distinctBy { it.id }
         } else {
-            categoryBooks
+            categoryBooks.distinctBy { it.id }
         }
         
         LibraryScreenState(
@@ -347,6 +360,134 @@ class LibraryViewModel(
                 _uiState.update { it.copy(searchQuery = query.ifBlank { null }) }
             }
             .launchIn(scope)
+        
+        // ==================== Change Notification Observer ====================
+        // Observe LibraryChangeNotifier to know when books are modified.
+        // This replaces the old subscribe() approach which loaded ALL books.
+        // Now we only get lightweight signals and reload the affected page.
+        observeLibraryChanges()
+    }
+    
+    /**
+     * Observe library changes and reload pagination when needed.
+     * 
+     * This is memory-safe because:
+     * 1. We only receive lightweight signals (book IDs), not full book data
+     * 2. We debounce rapid changes to avoid excessive reloads
+     * 3. We only reload the current category's page, not all 10,000+ books
+     */
+    private fun observeLibraryChanges() {
+        if (changeNotifier == null) {
+            Log.debug { "$TAG: No changeNotifier available, skipping change observation" }
+            return
+        }
+        
+        changeNotificationJob?.cancel()
+        changeNotificationJob = changeNotifier.changes
+            .onEach { change ->
+                Log.debug { "$TAG: Received library change: $change" }
+                handleLibraryChange(change)
+            }
+            .launchIn(scope)
+        
+        // Also observe pending changes with debounce to batch rapid updates
+        pendingChanges
+            .debounce(500) // Wait 500ms for more changes before reloading
+            .onEach { changedBookIds ->
+                if (changedBookIds.isNotEmpty()) {
+                    Log.debug { "$TAG: Processing ${changedBookIds.size} pending book changes" }
+                    processPendingChanges(changedBookIds)
+                    pendingChanges.value = emptySet() // Clear after processing
+                }
+            }
+            .launchIn(scope)
+    }
+    
+    /**
+     * Handle a single library change event.
+     * For individual book changes, we batch them and debounce.
+     * For full refresh, we reload immediately.
+     */
+    private fun handleLibraryChange(change: LibraryChangeNotifier.ChangeType) {
+        when (change) {
+            is LibraryChangeNotifier.ChangeType.BookAdded,
+            is LibraryChangeNotifier.ChangeType.BookRemoved -> {
+                // Book added/removed affects counts and potentially visible list
+                // Reload current category
+                refreshCurrentCategoryDebounced()
+            }
+            
+            is LibraryChangeNotifier.ChangeType.BookUpdated -> {
+                // Single book updated - check if it's in current view
+                val bookId = change.bookId
+                pendingChanges.update { it + bookId }
+            }
+            
+            is LibraryChangeNotifier.ChangeType.BooksUpdated -> {
+                // Multiple books updated - batch them
+                pendingChanges.update { it + change.bookIds.toSet() }
+            }
+            
+            is LibraryChangeNotifier.ChangeType.CategoryChanged -> {
+                // Book's category changed - may affect current view
+                refreshCurrentCategoryDebounced()
+            }
+            
+            is LibraryChangeNotifier.ChangeType.CategoriesChanged -> {
+                // Multiple category changes - reload current category
+                refreshCurrentCategoryDebounced()
+            }
+            
+            is LibraryChangeNotifier.ChangeType.ReadProgressChanged -> {
+                // Read progress changed - update if sorting by last read
+                val currentSort = sorting.value
+                if (currentSort.type == LibrarySort.Type.LastRead) {
+                    refreshCurrentCategoryDebounced()
+                } else {
+                    // Just update the specific book in the list if visible
+                    pendingChanges.update { it + change.bookId }
+                }
+            }
+            
+            is LibraryChangeNotifier.ChangeType.FullRefresh,
+            is LibraryChangeNotifier.ChangeType.Unknown -> {
+                // Full refresh needed - reload all loaded categories
+                Log.info { "$TAG: Full library refresh triggered" }
+                resetAllPagination()
+            }
+        }
+    }
+    
+    /**
+     * Process batched book changes.
+     * Only reloads if any changed book is in the current view.
+     */
+    private fun processPendingChanges(changedBookIds: Set<Long>) {
+        val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
+        val currentBooks = _paginatedBooks.value[currentCategoryId] ?: emptyList()
+        
+        // Check if any changed book is in current view
+        val affectsCurrentView = currentBooks.any { it.id in changedBookIds }
+        
+        if (affectsCurrentView) {
+            Log.debug { "$TAG: Changed books affect current view, refreshing" }
+            refreshCurrentCategory()
+        } else {
+            Log.debug { "$TAG: Changed books not in current view, skipping refresh" }
+        }
+    }
+    
+    /**
+     * Debounced refresh of current category.
+     * Prevents rapid reloads when multiple changes occur quickly.
+     */
+    private var refreshDebounceJob: Job? = null
+    private fun refreshCurrentCategoryDebounced() {
+        refreshDebounceJob?.cancel()
+        refreshDebounceJob = scope.launch {
+            kotlinx.coroutines.delay(300) // Debounce 300ms
+            refreshCurrentCategory()
+        }
     }
 
     // ==================== Selection Management ====================
@@ -800,8 +941,9 @@ class LibraryViewModel(
                     emptyList()
                 } else {
                     // Use paginated books from database
+                    // Use distinctBy to ensure no duplicate book IDs (prevents LazyColumn key errors)
                     val paginatedBooks = paginatedBooksMap[categoryId] ?: emptyList()
-                    paginatedBooks.map { it.toBookItem() }
+                    paginatedBooks.distinctBy { it.id }.map { it.toBookItem() }
                 }
             }
         }
@@ -841,8 +983,9 @@ class LibraryViewModel(
                     emptyList()
                 } else {
                     // Return currently loaded paginated books
+                    // Use distinctBy to ensure no duplicate book IDs (prevents LazyColumn key errors)
                     val paginatedBooks = paginatedBooksMap[categoryId] ?: emptyList()
-                    paginatedBooks.map { it.toBookItem() }
+                    paginatedBooks.distinctBy { it.id }.map { it.toBookItem() }
                 }
             }
         }
@@ -948,8 +1091,8 @@ class LibraryViewModel(
             libraryController.dispatch(LibraryCommand.SetFilter(ireader.domain.services.library.LibraryFilter.None))
         }
         
-        // Reset pagination to reload with new filter
-        resetAllPagination()
+        // Reset pagination to reload with new filter - pass the new filters directly
+        resetAllPagination(newFilters = currentFilters)
     }
     
     /**
@@ -1195,9 +1338,11 @@ class LibraryViewModel(
                     includeArchived = includeArchived
                 )
                 
-                // Merge with existing books
+                // Merge with existing books, ensuring no duplicates
                 val existingBooks = _paginatedBooks.value[categoryId] ?: emptyList()
-                val mergedBooks = existingBooks + newBooks
+                val existingIds = existingBooks.mapTo(HashSet(existingBooks.size)) { it.id }
+                val uniqueNewBooks = newBooks.filter { it.id !in existingIds }
+                val mergedBooks = existingBooks + uniqueNewBooks
                 
                 // Update paginated books state
                 _paginatedBooks.update { current ->

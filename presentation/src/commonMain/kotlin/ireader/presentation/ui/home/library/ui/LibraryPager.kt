@@ -133,7 +133,9 @@ internal fun LibraryPager(
             }
             
             // Get saved scroll position for this category
-            val savedPosition = remember(categoryId) { getScrollPosition(categoryId) }
+            // Note: We call getScrollPosition directly (not remembered) so it always gets the latest value
+            // This ensures scroll position is restored correctly when navigating back from detail screen
+            val savedPosition = getScrollPosition(categoryId)
             
             val gridState = rememberLazyGridState(
                 initialFirstVisibleItemIndex = savedPosition.first,

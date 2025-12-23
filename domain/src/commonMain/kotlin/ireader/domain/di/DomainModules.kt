@@ -151,7 +151,8 @@ val DomainServices = module {
         ireader.domain.usecases.local.chapter_usecases.UpdateLastReadTime(
             get(),
             get(),
-            get()
+            get(),
+            getOrNull() // LibraryChangeNotifier - optional for backward compatibility
         )
     }
     factory  { ireader.domain.usecases.local.delete_usecases.book.DeleteBookById(get()) }

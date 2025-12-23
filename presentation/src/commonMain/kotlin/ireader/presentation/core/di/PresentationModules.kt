@@ -73,7 +73,8 @@ val PresentationModules = module {
     // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
     factory  { HistoryViewModel(get(), get(), get()) }
     // LibraryViewModel - Simplified with aggregates (Requirements: 3.1, 3.2, 3.3, 3.4, 4.1, 4.4)
-    // Reduced from 26 parameters to 9 using LibraryUseCases and PlatformServices aggregates
+    // Reduced from 26 parameters to 10 using LibraryUseCases and PlatformServices aggregates
+    // Added changeNotifier for pagination reload on book changes
     factory  { 
         LibraryViewModel(
             libraryUseCases = get(),           // Aggregate: groups 11 use cases
@@ -84,7 +85,8 @@ val PresentationModules = module {
             syncUseCases = getOrNull(),
             downloadService = get(),
             localizeHelper = get(),
-            libraryController = get()          // SSOT for library state
+            libraryController = get(),         // SSOT for library state
+            changeNotifier = getOrNull()       // Signals when books change (for pagination reload)
         )
     }
     // ExtensionViewModel - Simplified with ExtensionUseCases aggregate (Requirements: 1.3, 1.4, 1.5)

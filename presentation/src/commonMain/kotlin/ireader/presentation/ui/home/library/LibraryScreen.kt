@@ -84,15 +84,13 @@ fun LibraryScreen(
     // Refresh last read info when screen becomes visible
     LaunchedEffect(Unit) {
         vm.loadLastReadInfo()
-        // Also refresh current category to pick up any changes (e.g., after reading)
-        vm.refreshCurrentCategoryIfStale()
+        // NOTE: refreshCurrentCategoryIfStale() removed - LibraryChangeNotifier handles this now.
+        // When books are modified (read progress, updates, etc.), the notifier signals
+        // the ViewModel to reload the affected data automatically.
     }
     
-    // Refresh current category when screen is first composed
-    // The ViewModel will handle refreshing when returning from reader via navigation
-    LaunchedEffect(state.selectedCategoryIndex) {
-        // This triggers when category changes, ensuring fresh data
-    }
+    // NOTE: Category change effect removed - pagination handles loading automatically
+    // when category changes via getLibraryForCategoryIndexAsState()
 
     Surface(
         modifier = modifier.fillMaxSize(),
