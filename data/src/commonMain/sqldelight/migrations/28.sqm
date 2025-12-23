@@ -1,7 +1,7 @@
--- Migration 28: Fix last_read_at for existing data and add history triggers
+-- Migration 28: Fix last_read_at for existing data
 -- This migration fixes the last_read_at column that wasn't properly populated in migration 27
 
--- Update last_read_at from history table for all books
+-- Update last_read_at from history table for all favorite books
 UPDATE book SET
     last_read_at = COALESCE(
         (SELECT MAX(h.last_read) 
@@ -12,26 +12,5 @@ UPDATE book SET
     )
 WHERE favorite = 1;
 
--- Drop existing triggers if they exist (to recreate with correct logic)
-DROP TRIGGER IF EXISTS trigger_history_insert_update_book_last_read;
-DROP TRIGGER IF EXISTS trigger_history_update_update_book_last_read;
-
--- Trigger: After INSERT on history (when user reads a chapter)
-CREATE TRIGGER IF NOT EXISTS trigger_history_insert_update_book_last_read
-AFTER INSERT ON history
-BEGIN
-    UPDATE book SET
-        last_read_at = NEW.last_read
-    WHERE _id = (SELECT book_id FROM chapter WHERE _id = NEW.chapter_id)
-    AND NEW.last_read > last_read_at;
-END;
-
--- Trigger: After UPDATE on history (when user continues reading)
-CREATE TRIGGER IF NOT EXISTS trigger_history_update_update_book_last_read
-AFTER UPDATE OF last_read ON history
-BEGIN
-    UPDATE book SET
-        last_read_at = NEW.last_read
-    WHERE _id = (SELECT book_id FROM chapter WHERE _id = NEW.chapter_id)
-    AND NEW.last_read > last_read_at;
-END;
+-- NOTE: Triggers for maintaining last_read_at are created in DatabaseMigrations.kt (migrateV28toV29)
+-- SQLDelight's validator doesn't support NEW/OLD pseudo-tables in triggers
