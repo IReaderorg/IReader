@@ -22,7 +22,7 @@ class CategoriesUseCases  internal constructor(
 ) {
 
     suspend fun await(): List<CategoryWithCount> {
-        return repo.findAll()
+        return repo.findAll().filter { it.category.id != Category.UNCATEGORIZED_ID }
     }
     
 //    /**
