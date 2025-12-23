@@ -10,6 +10,12 @@ import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
 import ireader.domain.usecases.download.insert.InsertDownload
 import ireader.domain.usecases.download.insert.InsertDownloads
 import ireader.domain.usecases.download.update.UpdateDownloadPriority
+import ireader.domain.usecases.explore.ExploreBookUseCases
+import ireader.domain.usecases.explore.SaveExploreBook
+import ireader.domain.usecases.explore.SaveExploreBooks
+import ireader.domain.usecases.explore.GetExploreBook
+import ireader.domain.usecases.explore.PromoteExploreBookToLibrary
+import ireader.domain.usecases.explore.ClearExploreBooks
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.book_usecases.FindAllInLibraryBooks
 import ireader.domain.usecases.local.book_usecases.FindBookById
@@ -370,4 +376,18 @@ val UseCasesInject = module {
     // Reading Buddy use cases - now uses unified database statistics (no preferences)
     factory { ireader.domain.usecases.quote.ReadingBuddyUseCases(get()) }
     factory { ireader.domain.usecases.quote.QuoteUseCases(get()) }
+    
+    // Explore Book use cases - for managing temporary explore/browse books
+    factory { SaveExploreBook(get()) }
+    factory { SaveExploreBooks(get()) }
+    factory { GetExploreBook(get()) }
+    factory { PromoteExploreBookToLibrary(get(), get()) }
+    factory { ClearExploreBooks(get()) }
+    factory { ExploreBookUseCases(
+        saveExploreBook = get(),
+        saveExploreBooks = get(),
+        getExploreBook = get(),
+        promoteToLibrary = get(),
+        clearExploreBooks = get()
+    ) }
 }

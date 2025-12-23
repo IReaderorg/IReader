@@ -60,6 +60,9 @@ class ExploreViewModel(
     // Expose insertUseCases for backward compatibility with UI code
     val insertUseCases get() = exploreUseCases.insert
     
+    // Expose exploreUseCases for the new explore book architecture
+    val exploreBookUseCases get() = exploreUseCases.exploreBook
+    
     data class Param(val sourceId: Long?, val query: String?)
     
     // Immutable state flow following Mihon's pattern
@@ -449,23 +452,45 @@ class ExploreViewModel(
     }
     
     /**
-     * Add book to favorites
+     * Add book to favorites using the new explore book architecture.
+     * This promotes the book to the library and toggles the favorite status.
+     * If the book already exists in the library, it toggles its current favorite status.
      */
     suspend fun addToFavorite(bookItem: BookItem, onFavorite: (Book) -> Unit) {
-        val favorite = !bookItem.favorite
-        val book = bookItem.toBook().copy(favorite = favorite)
-        val bookId = insertUseCases.insertBook(book)
-        val updatedBook = book.copy(id = bookId)
+        val book = bookItem.toBook()
         
-        // Update state with new book
-        updateBookInState(updatedBook)
+        // First check if book already exists in library to get current favorite status
+        val existingBook = exploreUseCases.exploreBook.promoteToLibrary.findExisting(book.key, book.sourceId)
         
-        // Sync to remote if book is being favorited
-        if (favorite) {
-            syncUseCases?.syncBookToRemote?.invoke(updatedBook)
+        // Determine the new favorite status
+        val newFavorite = if (existingBook != null) {
+            // Toggle the existing book's favorite status
+            !existingBook.favorite
+        } else {
+            // New book - set to favorite (since user is explicitly favoriting)
+            true
         }
         
-        onFavorite(updatedBook)
+        // Use the promote use case to add/update in library with favorite status
+        val result = exploreUseCases.exploreBook.promoteToLibrary.fromBookWithStatus(
+            book = book,
+            favorite = newFavorite
+        )
+        
+        if (result != null) {
+            val (bookId, isFavorite) = result
+            val updatedBook = book.copy(id = bookId, favorite = isFavorite)
+            
+            // Update state with new book
+            updateBookInState(updatedBook)
+            
+            // Sync to remote if book is being favorited
+            if (isFavorite) {
+                syncUseCases?.syncBookToRemote?.invoke(updatedBook)
+            }
+            
+            onFavorite(updatedBook)
+        }
     }
     
     /**

@@ -46,7 +46,8 @@ val useCaseAggregateModule = module {
             insert = get(),
             findDuplicate = get(),
             openLocalFolder = get(),
-            browseScreenPref = get()
+            browseScreenPref = get(),
+            exploreBook = get()
         )
     }
     

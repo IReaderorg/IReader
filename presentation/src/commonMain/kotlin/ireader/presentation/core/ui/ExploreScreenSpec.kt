@@ -240,7 +240,8 @@ data class ExploreScreenSpec(
     
     /**
      * Handle book click with proper error handling and navigation.
-     * Inserts book to database first, then navigates to detail screen.
+     * Uses the new explore book architecture - promotes book to library only when clicked.
+     * If the book already exists in the library (especially if favorited), it opens that book.
      */
     private suspend fun handleBookClick(
         vm: ExploreViewModel,
@@ -257,12 +258,15 @@ data class ExploreScreenSpec(
                 return
             }
             
-            // Insert book and get ID
-            val bookId = vm.insertUseCases.insertBook(selectedBook)
+            // Use the new promote use case with status - this handles checking if book exists
+            // and returns both the ID and favorite status
+            val result = vm.exploreBookUseCases.promoteToLibrary.fromBookWithStatus(selectedBook)
             
-            if (bookId > 0L) {
-                // Update local state with the new ID
-                val updatedBook = selectedBook.copy(id = bookId)
+            if (result != null) {
+                val (bookId, isFavorite) = result
+                
+                // Update local state with the correct ID and favorite status
+                val updatedBook = selectedBook.copy(id = bookId, favorite = isFavorite)
                 vm.booksState.replaceBook(updatedBook)
                 
                 // Navigate to book detail

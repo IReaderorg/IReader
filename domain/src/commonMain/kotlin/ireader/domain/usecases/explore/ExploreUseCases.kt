@@ -29,5 +29,6 @@ data class ExploreUseCases(
     val insert: LocalInsertUseCases,
     val findDuplicate: FindDuplicateBook,
     val openLocalFolder: OpenLocalFolder,
-    val browseScreenPref: BrowseScreenPrefUseCase
+    val browseScreenPref: BrowseScreenPrefUseCase,
+    val exploreBook: ExploreBookUseCases
 )

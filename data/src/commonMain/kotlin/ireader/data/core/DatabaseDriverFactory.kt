@@ -14,6 +14,7 @@ import data.Character_timeline_event
 import data.Content_filter
 import data.Daily_reading_stats
 import data.Download
+import data.Explore_book
 import data.Global_glossary
 import data.Glossary
 import data.NftWallets
@@ -239,6 +240,11 @@ fun createDatabase(driver: SqlDriver): Database {
             statusAdapter = intLongColumnAdapter,
             last_readAdapter = floatDoubleColumnAdapter,
             scoreAdapter = floatDoubleColumnAdapter
+        ),
+        // Explore book table for temporary browse storage
+        explore_bookAdapter = Explore_book.Adapter(
+            genreAdapter = bookGenresConverter,
+            date_addedAdapter = longConverter
         ),
     )
 
