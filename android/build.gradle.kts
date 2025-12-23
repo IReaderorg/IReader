@@ -230,7 +230,7 @@ android {
             val debugType = getByName("debug")
             signingConfig = debugType.signingConfig
             versionNameSuffix = debugType.versionNameSuffix
-            applicationIdSuffix = debugType.applicationIdSuffix
+            applicationIdSuffix = ".preview"
             matchingFallbacks.add("release")
         }
     }
