@@ -38,6 +38,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * ViewModel for the Library screen following Mihon's StateScreenModel pattern.
@@ -97,6 +99,7 @@ class LibraryViewModel(
     
     // Track categories that are currently loading to prevent duplicate loads
     private val loadingCategories = mutableSetOf<Long>()
+    private val loadingCategoriesMutex = Mutex()
     
     // Preferences as StateFlow
     val lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -1042,24 +1045,24 @@ class LibraryViewModel(
      * @param forceRefresh If true, will reload even if data is already cached (used after showing preloaded cache)
      */
     fun loadInitialBooksForCategory(categoryId: Long, forceRefresh: Boolean = false) {
-        // Prevent duplicate loads - check if already loading or loaded
-        val shouldLoad = synchronized(loadingCategories) {
-            when {
-                categoryId in loadingCategories -> false
-                !forceRefresh && _paginatedBooks.value.containsKey(categoryId) -> false
-                else -> {
-                    loadingCategories.add(categoryId)
-                    true
-                }
-            }
-        }
-        
-        if (!shouldLoad) return
-        
         // Cancel any existing load job for this category (shouldn't happen but just in case)
         paginationLoadJobs[categoryId]?.cancel()
         
         paginationLoadJobs[categoryId] = scope.launch {
+            // Prevent duplicate loads - check if already loading or loaded (inside coroutine for thread safety)
+            val shouldLoad = loadingCategoriesMutex.withLock {
+                when {
+                    categoryId in loadingCategories -> false
+                    !forceRefresh && _paginatedBooks.value.containsKey(categoryId) -> false
+                    else -> {
+                        loadingCategories.add(categoryId)
+                        true
+                    }
+                }
+            }
+            
+            if (!shouldLoad) return@launch
+            
             try {
                 val sort = sorting.value
                 val filtersList = filters.value
@@ -1112,7 +1115,7 @@ class LibraryViewModel(
                     current.copy(categoryPaginationState = newPaginationState)
                 }
             } finally {
-                synchronized(loadingCategories) {
+                loadingCategoriesMutex.withLock {
                     loadingCategories.remove(categoryId)
                 }
             }
@@ -1224,23 +1227,25 @@ class LibraryViewModel(
      * Call this when global settings change (sort, filter, archived).
      */
     fun resetAllPagination() {
-        // Clear loading state
-        synchronized(loadingCategories) {
-            loadingCategories.clear()
+        scope.launch {
+            // Clear loading state
+            loadingCategoriesMutex.withLock {
+                loadingCategories.clear()
+            }
+            
+            // Clear all cached data
+            _paginatedBooks.value = emptyMap()
+            _paginatedTotalCounts.value = emptyMap()
+            
+            // Reset all pagination states
+            _uiState.update { current ->
+                current.copy(categoryPaginationState = emptyMap())
+            }
+            
+            // Reload current category
+            val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
+            loadInitialBooksForCategory(currentCategoryId)
         }
-        
-        // Clear all cached data
-        _paginatedBooks.value = emptyMap()
-        _paginatedTotalCounts.value = emptyMap()
-        
-        // Reset all pagination states
-        _uiState.update { current ->
-            current.copy(categoryPaginationState = emptyMap())
-        }
-        
-        // Reload current category
-        val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
-        loadInitialBooksForCategory(currentCategoryId)
     }
     
     /**
@@ -1251,28 +1256,30 @@ class LibraryViewModel(
     fun refreshCurrentCategory() {
         val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
         
-        // Clear loading state for this category
-        synchronized(loadingCategories) {
-            loadingCategories.remove(currentCategoryId)
+        scope.launch {
+            // Clear loading state for this category
+            loadingCategoriesMutex.withLock {
+                loadingCategories.remove(currentCategoryId)
+            }
+            
+            // Clear cached data for this category
+            _paginatedBooks.update { current ->
+                current - currentCategoryId
+            }
+            _paginatedTotalCounts.update { current ->
+                current - currentCategoryId
+            }
+            
+            // Reset pagination state for this category
+            _uiState.update { current ->
+                val newPaginationState = current.categoryPaginationState.toMutableMap()
+                newPaginationState.remove(currentCategoryId)
+                current.copy(categoryPaginationState = newPaginationState)
+            }
+            
+            // Reload from database
+            loadInitialBooksForCategory(currentCategoryId)
         }
-        
-        // Clear cached data for this category
-        _paginatedBooks.update { current ->
-            current - currentCategoryId
-        }
-        _paginatedTotalCounts.update { current ->
-            current - currentCategoryId
-        }
-        
-        // Reset pagination state for this category
-        _uiState.update { current ->
-            val newPaginationState = current.categoryPaginationState.toMutableMap()
-            newPaginationState.remove(currentCategoryId)
-            current.copy(categoryPaginationState = newPaginationState)
-        }
-        
-        // Reload from database
-        loadInitialBooksForCategory(currentCategoryId)
     }
     
     // Track when the current category was last loaded
