@@ -42,7 +42,6 @@ class LibraryRepositoryImpl(
         includeArchived: Boolean
     ): List<LibraryBook> {
         ScreenProfiler.mark("Library", "db_paginated_query_start_${sort.type.name}")
-        ireader.core.log.Log.error { "LibraryRepositoryImpl.findAllPaginated: sort=${sort.type.name}, ascending=${sort.isAscending}, limit=$limit, offset=$offset" }
         // Use sorted queries with cached counts - sorting done in SQL for efficiency
         val result = handler.awaitList {
             when (sort.type) {
@@ -51,7 +50,6 @@ class LibraryRepositoryImpl(
                     else bookQueries.getLibraryPaginatedByTitleDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.LastRead -> {
-                    ireader.core.log.Log.error { "LibraryRepositoryImpl: Using LastRead query, ascending=${sort.isAscending}" }
                     if (sort.isAscending) bookQueries.getLibraryPaginatedByLastReadAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                     else bookQueries.getLibraryPaginatedByLastRead(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
@@ -77,10 +75,6 @@ class LibraryRepositoryImpl(
                 }
             }
         }.filterArchived(includeArchived)
-        // Log first few books to verify sort order
-        if (result.isNotEmpty()) {
-            ireader.core.log.Log.error { "LibraryRepositoryImpl: First 3 books: ${result.take(3).map { "${it.title} (lastReadAt=${it.lastRead})" }}" }
-        }
         ScreenProfiler.mark("Library", "db_paginated_query_complete_${result.size}_books")
         return result
     }

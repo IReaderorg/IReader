@@ -66,16 +66,8 @@ class CategoriesUseCases  internal constructor(
                     // All category only shown when requested
                     Category.ALL_ID -> if (withAllCategory) categoryAndCount else null
 
-                    // Uncategorized category only shown if there are entries and user categories exist
-                    Category.UNCATEGORIZED_ID -> {
-                        if (count > 0 &&
-                            (!withAllCategory || categories.any { !it.category.isSystemCategory })
-                        ) {
-                            categoryAndCount
-                        } else {
-                            null
-                        }
-                    }
+                    // Uncategorized category - always hidden (removed per user request)
+                    Category.UNCATEGORIZED_ID -> null
 
                     // User created category - filter by empty status if preference is set
                     else -> {

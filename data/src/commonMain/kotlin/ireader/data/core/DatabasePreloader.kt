@@ -51,7 +51,6 @@ class DatabasePreloader(
      * sequentially instead of in parallel to reduce peak memory usage.
      */
     suspend fun preloadCriticalData() = withContext(ioDispatcher) {
-        Log.info("Starting critical data preload...", TAG)
         val startTime = currentTimeToLong()
         
         try {
@@ -65,9 +64,6 @@ class DatabasePreloader(
             // Preload library books with user's preferred sort order
             // Limited to first page to prevent OOM on large libraries
             preloadLibraryBooks()
-            
-            val duration = currentTimeToLong() - startTime
-            Log.info("Critical data preload completed in ${duration}ms", TAG)
             
             // Log performance stats
             dbOptimizations.logPerformanceReport()
@@ -84,29 +80,17 @@ class DatabasePreloader(
      */
     private suspend fun fixLastReadAtIfNeeded() {
         try {
-            Log.info("Checking if last_read_at needs fixing...", TAG)
-            
             // Check history table
             val historyCount = handler.awaitOne {
                 bookQueries.countHistoryEntries()
             }
-            Log.info("Total history entries: $historyCount", TAG)
-            
-            val booksWithHistory = handler.awaitOne {
-                bookQueries.countBooksWithHistory()
-            }
-            Log.info("Books with history: $booksWithHistory", TAG)
             
             // If there's history data, force update all books' last_read_at
             // This ensures the column is always up-to-date regardless of trigger state
             if (historyCount > 0) {
-                Log.info("Force updating last_read_at for all favorite books from history...", TAG)
                 handler.await {
                     bookQueries.forceUpdateLastReadAtFromHistory()
                 }
-                Log.info("Force updated last_read_at for all books with history", TAG)
-            } else {
-                Log.info("No history entries found, skipping last_read_at fix", TAG)
             }
         } catch (e: Exception) {
             Log.error("Failed to fix last_read_at: ${e.message}", TAG)
@@ -152,8 +136,6 @@ class DatabasePreloader(
             val sort = libraryPreferences.sorting().get()
             val limit = 50L // Only preload first 50 books for instant display
             
-            Log.info("Preloading library books with sort: ${sort.type.name}, ascending=${sort.isAscending}", TAG)
-            
             // Use the appropriate sorted query based on user preference
             val books = handler.awaitList {
                 when (sort.type) {
@@ -189,7 +171,6 @@ class DatabasePreloader(
             }
             // Update the in-memory cache for instant display
             ireader.domain.data.cache.LibraryDataCache.updateCache(books)
-            Log.info("Library books preloaded: ${books.size} books (limited to $limit) with sort ${sort.type.name}", TAG)
         } catch (e: Exception) {
             Log.error("Failed to preload library books: ${e.message}", TAG)
         }
