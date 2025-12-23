@@ -728,8 +728,8 @@ data class BookDetailScreenSpec constructor(
                 results = vm.trackingSearchResults,
                 isSearching = vm.isSearchingTracking,
                 onQueryChange = { /* Query is managed by search button */ },
-                onSearch = { query -> vm.searchOnAniList(query) },
-                onSelect = { result -> vm.linkToAniList(result) },
+                onSearch = { query -> vm.searchOnService(vm.currentSearchServiceId, query) },
+                onSelect = { result -> vm.linkToService(vm.currentSearchServiceId, result) },
                 onDismiss = { vm.showTrackingSearchDialog = false }
             )
         }
@@ -782,35 +782,94 @@ data class BookDetailScreenSpec constructor(
                         id = "anilist",
                         name = "AniList",
                         isLoggedIn = vm.isAniListLoggedIn,
-                        isTracked = vm.isTracked,
-                        status = vm.trackingStatus,
-                        progress = vm.trackingProgress,
-                        score = vm.trackingScore
+                        isTracked = vm.isAniListTracked,
+                        status = vm.aniListStatus,
+                        progress = vm.aniListProgress,
+                        score = vm.aniListScore
+                    ),
+                    ireader.presentation.ui.book.components.TrackingServiceInfo(
+                        id = "mal",
+                        name = "MyAnimeList",
+                        isLoggedIn = vm.isMalLoggedIn,
+                        isTracked = vm.isMalTracked,
+                        status = vm.malStatus,
+                        progress = vm.malProgress,
+                        score = vm.malScore
+                    ),
+                    ireader.presentation.ui.book.components.TrackingServiceInfo(
+                        id = "kitsu",
+                        name = "Kitsu",
+                        isLoggedIn = vm.isKitsuLoggedIn,
+                        isTracked = vm.isKitsuTracked,
+                        status = vm.kitsuStatus,
+                        progress = vm.kitsuProgress,
+                        score = vm.kitsuScore
+                    ),
+                    ireader.presentation.ui.book.components.TrackingServiceInfo(
+                        id = "mangaupdates",
+                        name = "MangaUpdates",
+                        isLoggedIn = vm.isMangaUpdatesLoggedIn,
+                        isTracked = vm.isMangaUpdatesTracked,
+                        status = vm.mangaUpdatesStatus,
+                        progress = vm.mangaUpdatesProgress,
+                        score = vm.mangaUpdatesScore
                     )
                 ),
                 onServiceClick = { serviceId ->
                     // Navigate to tracking settings if not logged in
-                    if (!vm.isAniListLoggedIn) {
-                        onDismiss()
-                        navController?.navigate(ireader.presentation.core.NavigationRoutes.trackingSettings)
-                    }
+                    onDismiss()
+                    navController?.navigate(ireader.presentation.core.NavigationRoutes.trackingSettings)
                 },
                 onSearchOnService = { serviceId ->
-                    // Search for this book on AniList
-                    vm.searchOnAniList(book.title)
+                    // Search for this book on the selected service
+                    val trackerServiceId = when (serviceId) {
+                        "anilist" -> ireader.domain.models.entities.TrackerService.ANILIST
+                        "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
+                        "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
+                        "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        else -> ireader.domain.models.entities.TrackerService.ANILIST
+                    }
+                    vm.searchOnService(trackerServiceId, book.title)
                 },
                 onRemoveTracking = { serviceId ->
-                    vm.removeTracking()
-                    onDismiss()
+                    val trackerServiceId = when (serviceId) {
+                        "anilist" -> ireader.domain.models.entities.TrackerService.ANILIST
+                        "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
+                        "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
+                        "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        else -> ireader.domain.models.entities.TrackerService.ANILIST
+                    }
+                    vm.removeTrackingFromService(trackerServiceId)
                 },
                 onUpdateStatus = { serviceId, status ->
-                    vm.updateTrackingStatusValue(status)
+                    val trackerServiceId = when (serviceId) {
+                        "anilist" -> ireader.domain.models.entities.TrackerService.ANILIST
+                        "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
+                        "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
+                        "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        else -> ireader.domain.models.entities.TrackerService.ANILIST
+                    }
+                    vm.updateServiceStatus(trackerServiceId, status)
                 },
                 onUpdateProgress = { serviceId, progress ->
-                    vm.updateTrackingProgress(progress)
+                    val trackerServiceId = when (serviceId) {
+                        "anilist" -> ireader.domain.models.entities.TrackerService.ANILIST
+                        "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
+                        "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
+                        "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        else -> ireader.domain.models.entities.TrackerService.ANILIST
+                    }
+                    vm.updateServiceProgress(trackerServiceId, progress)
                 },
                 onUpdateScore = { serviceId, score ->
-                    vm.updateTrackingScore(score)
+                    val trackerServiceId = when (serviceId) {
+                        "anilist" -> ireader.domain.models.entities.TrackerService.ANILIST
+                        "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
+                        "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
+                        "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        else -> ireader.domain.models.entities.TrackerService.ANILIST
+                    }
+                    vm.updateServiceScore(trackerServiceId, score)
                 },
                 onDismiss = onDismiss
             )

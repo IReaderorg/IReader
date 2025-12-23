@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
@@ -39,6 +40,10 @@ fun SettingsTrackingScreen(
     ) {
         LazyListState()
     }
+    
+    // Snackbar host state
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarMessage by viewModel.snackbarMessage.collectAsState()
 
     // Tracking service states
     val malEnabled by viewModel.malEnabled.collectAsState()
@@ -57,6 +62,18 @@ fun SettingsTrackingScreen(
     val autoUpdateStatus by viewModel.autoUpdateStatus.collectAsState()
     val autoUpdateProgress by viewModel.autoUpdateProgress.collectAsState()
     val autoUpdateScore by viewModel.autoUpdateScore.collectAsState()
+    
+    // Sync state
+    val isSyncing by viewModel.isSyncing.collectAsState()
+    val trackedBooksCount by viewModel.trackedBooksCount.collectAsState()
+    
+    // Show snackbar when message changes
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearSnackbar()
+        }
+    }
 
     IScaffold(
         modifier = modifier,
@@ -66,7 +83,8 @@ fun SettingsTrackingScreen(
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -247,22 +265,71 @@ fun SettingsTrackingScreen(
                 )
             }
             
+            // Statistics item
+            item {
+                SettingsItemWithTrailing(
+                    title = "Tracked Books",
+                    description = "Total books being tracked across all services",
+                    icon = Icons.Outlined.LibraryBooks,
+                    onClick = { },
+                    enabled = true
+                ) {
+                    Text(
+                        text = "$trackedBooksCount",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            
+            // Last sync time
+            item {
+                SettingsItemWithTrailing(
+                    title = "Last Sync",
+                    description = "When tracking data was last synchronized",
+                    icon = Icons.Outlined.Schedule,
+                    onClick = { },
+                    enabled = true
+                ) {
+                    Text(
+                        text = viewModel.getFormattedLastSyncTime(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
             item {
                 SettingsItem(
                     title = localizeHelper.localize(Res.string.sync_history),
-                    description = "View sync history and resolve conflicts",
+                    description = "View sync history and statistics",
                     icon = Icons.Outlined.History,
                     onClick = { viewModel.navigateToSyncHistory() }
                 )
             }
             
             item {
-                SettingsItem(
-                    title = localizeHelper.localize(Res.string.manual_sync),
-                    description = "Force sync all tracked books now",
-                    icon = Icons.Outlined.Sync,
-                    onClick = { viewModel.performManualSync() }
-                )
+                if (isSyncing) {
+                    SettingsItemWithTrailing(
+                        title = localizeHelper.localize(Res.string.manual_sync),
+                        description = "Syncing in progress...",
+                        icon = Icons.Outlined.Sync,
+                        onClick = { },
+                        enabled = false
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
+                } else {
+                    SettingsItem(
+                        title = localizeHelper.localize(Res.string.manual_sync),
+                        description = "Force sync all tracked books now",
+                        icon = Icons.Outlined.Sync,
+                        onClick = { viewModel.performManualSync() }
+                    )
+                }
             }
             
             item {
@@ -357,6 +424,47 @@ fun SettingsTrackingScreen(
             onTokenSubmit = { token -> viewModel.completeAniListLogin(token) }
         )
     }
+    
+    // MAL Login Dialog
+    if (viewModel.showMalLoginDialog) {
+        MalLoginDialog(
+            authUrl = viewModel.malAuthUrl.collectAsState().value,
+            error = viewModel.malLoginError,
+            onDismiss = { viewModel.dismissMalLoginDialog() },
+            onCodeSubmit = { code -> viewModel.completeMalLogin(code) }
+        )
+    }
+    
+    // Kitsu Login Dialog
+    if (viewModel.showKitsuLoginDialog) {
+        KitsuLoginDialog(
+            error = viewModel.kitsuLoginError,
+            onDismiss = { viewModel.dismissKitsuLoginDialog() },
+            onLogin = { username, password -> viewModel.completeKitsuLogin(username, password) }
+        )
+    }
+    
+    // MangaUpdates Login Dialog
+    if (viewModel.showMangaUpdatesLoginDialog) {
+        MangaUpdatesLoginDialog(
+            error = viewModel.mangaUpdatesLoginError,
+            onDismiss = { viewModel.dismissMangaUpdatesLoginDialog() },
+            onLogin = { username, password -> viewModel.completeMangaUpdatesLogin(username, password) }
+        )
+    }
+    
+    // Sync History Dialog
+    if (viewModel.showSyncHistoryDialog) {
+        SyncHistoryDialog(
+            trackedBooksCount = trackedBooksCount,
+            lastSyncTime = viewModel.getFormattedLastSyncTime(),
+            aniListLoggedIn = aniListLoggedIn,
+            malLoggedIn = malLoggedIn,
+            kitsuLoggedIn = kitsuLoggedIn,
+            mangaUpdatesLoggedIn = mangaUpdatesLoggedIn,
+            onDismiss = { viewModel.dismissSyncHistoryDialog() }
+        )
+    }
 }
 
 /**
@@ -434,6 +542,263 @@ private fun AniListLoginDialog(
             Button(
                 onClick = { onTokenSubmit(tokenInput) },
                 enabled = tokenInput.isNotBlank()
+            ) {
+                Text(localizeHelper.localize(Res.string.login))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.cancel))
+            }
+        }
+    )
+}
+
+/**
+ * Dialog for MyAnimeList OAuth login.
+ * Shows instructions and a text field to paste the authorization code.
+ */
+@Composable
+private fun MalLoginDialog(
+    authUrl: String?,
+    error: String?,
+    onDismiss: () -> Unit,
+    onCodeSubmit: (String) -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var codeInput by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Login to MyAnimeList") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "To login to MyAnimeList:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Text(
+                    text = "1. Open the URL below in your browser\n" +
+                           "2. Login and authorize IReader\n" +
+                           "3. Copy the authorization code from the redirect URL\n" +
+                           "4. Paste it below",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                if (authUrl != null) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        SelectionContainer {
+                            Text(
+                                text = authUrl,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                }
+                
+                OutlinedTextField(
+                    value = codeInput,
+                    onValueChange = { codeInput = it },
+                    label = { Text("Authorization Code") },
+                    placeholder = { Text("Paste your authorization code here") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = error != null
+                )
+                
+                if (error != null) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onCodeSubmit(codeInput) },
+                enabled = codeInput.isNotBlank()
+            ) {
+                Text(localizeHelper.localize(Res.string.login))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.cancel))
+            }
+        }
+    )
+}
+
+/**
+ * Dialog for Kitsu login with username and password.
+ */
+@Composable
+private fun KitsuLoginDialog(
+    error: String?,
+    onDismiss: () -> Unit,
+    onLogin: (String, String) -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Login to Kitsu") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Enter your Kitsu credentials:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Email or Username") },
+                    placeholder = { Text("Enter your email or username") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = error != null
+                )
+                
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    placeholder = { Text("Enter your password") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) {
+                        androidx.compose.ui.text.input.VisualTransformation.None
+                    } else {
+                        androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    },
+                    isError = error != null
+                )
+                
+                if (error != null) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onLogin(username, password) },
+                enabled = username.isNotBlank() && password.isNotBlank()
+            ) {
+                Text(localizeHelper.localize(Res.string.login))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.cancel))
+            }
+        }
+    )
+}
+
+/**
+ * Dialog for MangaUpdates login with username and password.
+ */
+@Composable
+private fun MangaUpdatesLoginDialog(
+    error: String?,
+    onDismiss: () -> Unit,
+    onLogin: (String, String) -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Login to MangaUpdates") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Enter your MangaUpdates credentials:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username") },
+                    placeholder = { Text("Enter your username") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = error != null
+                )
+                
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    placeholder = { Text("Enter your password") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) {
+                        androidx.compose.ui.text.input.VisualTransformation.None
+                    } else {
+                        androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    },
+                    isError = error != null
+                )
+                
+                if (error != null) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onLogin(username, password) },
+                enabled = username.isNotBlank() && password.isNotBlank()
             ) {
                 Text(localizeHelper.localize(Res.string.login))
             }
@@ -548,5 +913,147 @@ private fun TrackingServiceItem(
                 }
             }
         }
+    }
+}
+
+/**
+ * Dialog showing sync history and statistics
+ */
+@Composable
+private fun SyncHistoryDialog(
+    trackedBooksCount: Int,
+    lastSyncTime: String,
+    aniListLoggedIn: Boolean,
+    malLoggedIn: Boolean,
+    kitsuLoggedIn: Boolean,
+    mangaUpdatesLoggedIn: Boolean,
+    onDismiss: () -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(localizeHelper.localize(Res.string.sync_history)) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Statistics section
+                Text(
+                    text = "Statistics",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Tracked Books",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "$trackedBooksCount",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Last Sync",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = lastSyncTime,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                HorizontalDivider()
+                
+                // Services section
+                Text(
+                    text = "Connected Services",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                
+                // AniList
+                ServiceStatusRow(
+                    icon = Icons.Outlined.Favorite,
+                    serviceName = "AniList",
+                    isConnected = aniListLoggedIn
+                )
+                
+                // MyAnimeList
+                ServiceStatusRow(
+                    icon = Icons.Outlined.Star,
+                    serviceName = "MyAnimeList",
+                    isConnected = malLoggedIn
+                )
+                
+                // Kitsu
+                ServiceStatusRow(
+                    icon = Icons.Outlined.Pets,
+                    serviceName = "Kitsu",
+                    isConnected = kitsuLoggedIn
+                )
+                
+                // MangaUpdates
+                ServiceStatusRow(
+                    icon = Icons.Outlined.Update,
+                    serviceName = "MangaUpdates",
+                    isConnected = mangaUpdatesLoggedIn
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.ok))
+            }
+        }
+    )
+}
+
+@Composable
+private fun ServiceStatusRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    serviceName: String,
+    isConnected: Boolean
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = if (isConnected) MaterialTheme.colorScheme.primary 
+                       else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = serviceName,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Text(
+            text = if (isConnected) "Connected" else "Not connected",
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isConnected) MaterialTheme.colorScheme.primary 
+                   else MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

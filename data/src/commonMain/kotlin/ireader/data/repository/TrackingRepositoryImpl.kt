@@ -2,20 +2,29 @@ package ireader.data.repository
 
 import ireader.data.core.DatabaseHandler
 import ireader.data.tracking.anilist.AniListRepositoryImpl
+import ireader.data.tracking.kitsu.KitsuRepositoryImpl
+import ireader.data.tracking.mal.MyAnimeListRepositoryImpl
+import ireader.data.tracking.mangaupdates.MangaUpdatesRepositoryImpl
 import ireader.domain.data.repository.TrackingRepository
 import ireader.domain.data.repository.TrackingStatistics
 import ireader.domain.models.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 
 /**
- * Implementation of TrackingRepository with AniList integration and database persistence.
+ * Implementation of TrackingRepository with full integration for:
+ * - AniList (OAuth token)
+ * - MyAnimeList (OAuth2 with PKCE)
+ * - Kitsu (OAuth2 with username/password)
+ * - MangaUpdates (Session-based with username/password)
  */
 class TrackingRepositoryImpl(
     private val handler: DatabaseHandler,
-    private val aniListRepository: AniListRepositoryImpl
+    private val aniListRepository: AniListRepositoryImpl,
+    private val malRepository: MyAnimeListRepositoryImpl? = null,
+    private val kitsuRepository: KitsuRepositoryImpl? = null,
+    private val mangaUpdatesRepository: MangaUpdatesRepositoryImpl? = null
 ) : TrackingRepository {
     
     private val _syncStatusFlows = mutableMapOf<Long, MutableStateFlow<List<TrackingSyncStatus>>>()
@@ -28,7 +37,10 @@ class TrackingRepositoryImpl(
         return TrackerService.services.filter { service ->
             when (service.id) {
                 TrackerService.ANILIST -> aniListRepository.isAuthenticated()
-                else -> false // Other services not implemented yet
+                TrackerService.MYANIMELIST -> malRepository?.isAuthenticated() == true
+                TrackerService.KITSU -> kitsuRepository?.isAuthenticated() == true
+                TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.isAuthenticated() == true
+                else -> false
             }
         }
     }
@@ -44,6 +56,18 @@ class TrackingRepositoryImpl(
                 aniListRepository.logout()
                 true
             }
+            TrackerService.MYANIMELIST -> {
+                malRepository?.logout()
+                true
+            }
+            TrackerService.KITSU -> {
+                kitsuRepository?.logout()
+                true
+            }
+            TrackerService.MANGAUPDATES -> {
+                mangaUpdatesRepository?.logout()
+                true
+            }
             else -> false
         }
     }
@@ -53,19 +77,48 @@ class TrackingRepositoryImpl(
             TrackerService.ANILIST -> {
                 aniListRepository.login(credentials.accessToken)
             }
+            TrackerService.MYANIMELIST -> {
+                // MAL uses OAuth code flow, token is passed after exchange
+                malRepository?.loginWithToken(credentials.accessToken) == true
+            }
+            TrackerService.KITSU -> {
+                // Kitsu uses username/password, but we can also restore with token
+                kitsuRepository?.loginWithToken(credentials.accessToken) == true
+            }
+            TrackerService.MANGAUPDATES -> {
+                // MangaUpdates uses session token
+                mangaUpdatesRepository?.loginWithToken(credentials.accessToken) == true
+            }
             else -> false
         }
     }
     
     override suspend fun refreshToken(serviceId: Int): Boolean {
-        // AniList tokens don't need refresh (1 year validity)
-        return true
+        return when (serviceId) {
+            TrackerService.ANILIST -> true // AniList tokens don't need refresh (1 year validity)
+            TrackerService.MYANIMELIST -> malRepository?.refreshTokenIfNeeded() == true
+            TrackerService.KITSU -> true // Kitsu tokens are long-lived
+            TrackerService.MANGAUPDATES -> true // Session-based
+            else -> false
+        }
     }
     
     override suspend fun logout(serviceId: Int): Boolean {
         return when (serviceId) {
             TrackerService.ANILIST -> {
                 aniListRepository.logout()
+                true
+            }
+            TrackerService.MYANIMELIST -> {
+                malRepository?.logout()
+                true
+            }
+            TrackerService.KITSU -> {
+                kitsuRepository?.logout()
+                true
+            }
+            TrackerService.MANGAUPDATES -> {
+                mangaUpdatesRepository?.logout()
                 true
             }
             else -> false
@@ -75,6 +128,9 @@ class TrackingRepositoryImpl(
     override suspend fun isAuthenticated(serviceId: Int): Boolean {
         return when (serviceId) {
             TrackerService.ANILIST -> aniListRepository.isAuthenticated()
+            TrackerService.MYANIMELIST -> malRepository?.isAuthenticated() == true
+            TrackerService.KITSU -> kitsuRepository?.isAuthenticated() == true
+            TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.isAuthenticated() == true
             else -> false
         }
     }
@@ -85,8 +141,38 @@ class TrackingRepositoryImpl(
                 if (aniListRepository.isAuthenticated()) {
                     TrackerCredentials(
                         serviceId = serviceId,
-                        accessToken = "", // Don't expose token
+                        accessToken = "",
                         username = aniListRepository.getUserId().toString(),
+                        isValid = true
+                    )
+                } else null
+            }
+            TrackerService.MYANIMELIST -> {
+                if (malRepository?.isAuthenticated() == true) {
+                    TrackerCredentials(
+                        serviceId = serviceId,
+                        accessToken = "",
+                        username = malRepository.getUserId().toString(),
+                        isValid = true
+                    )
+                } else null
+            }
+            TrackerService.KITSU -> {
+                if (kitsuRepository?.isAuthenticated() == true) {
+                    TrackerCredentials(
+                        serviceId = serviceId,
+                        accessToken = "",
+                        username = kitsuRepository.getUserId(),
+                        isValid = true
+                    )
+                } else null
+            }
+            TrackerService.MANGAUPDATES -> {
+                if (mangaUpdatesRepository?.isAuthenticated() == true) {
+                    TrackerCredentials(
+                        serviceId = serviceId,
+                        accessToken = "",
+                        username = mangaUpdatesRepository.getUsername(),
                         isValid = true
                     )
                 } else null
@@ -173,10 +259,7 @@ class TrackingRepositoryImpl(
         }
         
         // Sync to remote service
-        return when (existingTrack.siteId) {
-            TrackerService.ANILIST -> aniListRepository.updateTrack(updatedTrack)
-            else -> true
-        }
+        return syncToRemote(updatedTrack)
     }
     
     override suspend fun removeTrack(bookId: Long, serviceId: Int): Boolean {
@@ -185,8 +268,21 @@ class TrackingRepositoryImpl(
         }
         
         // Remove from remote
-        if (track != null && serviceId == TrackerService.ANILIST && track.entryId > 0) {
-            aniListRepository.deleteTrack(track.entryId)
+        if (track != null) {
+            when (serviceId) {
+                TrackerService.ANILIST -> {
+                    if (track.entryId > 0) aniListRepository.deleteTrack(track.entryId)
+                }
+                TrackerService.MYANIMELIST -> {
+                    malRepository?.deleteTrack(track.mediaId)
+                }
+                TrackerService.KITSU -> {
+                    if (track.entryId > 0) kitsuRepository?.deleteTrack(track.entryId.toString())
+                }
+                TrackerService.MANGAUPDATES -> {
+                    mangaUpdatesRepository?.deleteTrack(track.mediaId)
+                }
+            }
         }
         
         // Remove from database
@@ -199,21 +295,26 @@ class TrackingRepositoryImpl(
     override suspend fun searchTracker(serviceId: Int, query: String): List<TrackSearchResult> {
         return when (serviceId) {
             TrackerService.ANILIST -> aniListRepository.search(query)
+            TrackerService.MYANIMELIST -> malRepository?.search(query) ?: emptyList()
+            TrackerService.KITSU -> kitsuRepository?.search(query) ?: emptyList()
+            TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.search(query) ?: emptyList()
             else -> emptyList()
         }
     }
     
     override suspend fun linkBook(bookId: Long, serviceId: Int, searchResult: TrackSearchResult): Boolean {
-        return when (serviceId) {
-            TrackerService.ANILIST -> {
-                val track = aniListRepository.bindBook(bookId, searchResult)
-                if (track != null) {
-                    addTrack(track)
-                    true
-                } else false
-            }
-            else -> false
+        val track = when (serviceId) {
+            TrackerService.ANILIST -> aniListRepository.bindBook(bookId, searchResult)
+            TrackerService.MYANIMELIST -> malRepository?.bindBook(bookId, searchResult)
+            TrackerService.KITSU -> kitsuRepository?.bindBook(bookId, searchResult)
+            TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.bindBook(bookId, searchResult)
+            else -> null
         }
+        
+        return if (track != null) {
+            addTrack(track)
+            true
+        } else false
     }
     
     override suspend fun unlinkBook(bookId: Long, serviceId: Int): Boolean {
@@ -225,17 +326,18 @@ class TrackingRepositoryImpl(
             trackQueries.getTrack(bookId, serviceId, ::mapTrack)
         } ?: return false
         
-        return when (serviceId) {
-            TrackerService.ANILIST -> {
-                val synced = aniListRepository.syncTrack(track)
-                if (synced != null) {
-                    // Update local database with remote data
-                    addTrack(synced)
-                    true
-                } else false
-            }
-            else -> false
+        val synced = when (serviceId) {
+            TrackerService.ANILIST -> aniListRepository.syncTrack(track)
+            TrackerService.MYANIMELIST -> malRepository?.syncTrack(track)
+            TrackerService.KITSU -> kitsuRepository?.syncTrack(track)
+            TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.syncTrack(track)
+            else -> null
         }
+        
+        return if (synced != null) {
+            addTrack(synced)
+            true
+        } else false
     }
     
     override suspend fun syncAllTracks(bookId: Long): Boolean {
@@ -286,15 +388,8 @@ class TrackingRepositoryImpl(
         val tracks = getTracksByBook(bookId)
         return tracks.all { track ->
             val updatedTrack = track.copy(lastRead = chaptersRead.toFloat())
-            
-            // Update local database
             addTrack(updatedTrack)
-            
-            // Sync to remote
-            when (track.siteId) {
-                TrackerService.ANILIST -> aniListRepository.updateTrack(updatedTrack)
-                else -> true
-            }
+            syncToRemote(updatedTrack)
         }
     }
     
@@ -302,15 +397,8 @@ class TrackingRepositoryImpl(
         val tracks = getTracksByBook(bookId)
         return tracks.all { track ->
             val updatedTrack = track.copy(status = status)
-            
-            // Update local database
             addTrack(updatedTrack)
-            
-            // Sync to remote
-            when (track.siteId) {
-                TrackerService.ANILIST -> aniListRepository.updateTrack(updatedTrack)
-                else -> true
-            }
+            syncToRemote(updatedTrack)
         }
     }
     
@@ -318,15 +406,8 @@ class TrackingRepositoryImpl(
         val tracks = getTracksByBook(bookId)
         return tracks.all { track ->
             val updatedTrack = track.copy(score = score)
-            
-            // Update local database
             addTrack(updatedTrack)
-            
-            // Sync to remote
-            when (track.siteId) {
-                TrackerService.ANILIST -> aniListRepository.updateTrack(updatedTrack)
-                else -> true
-            }
+            syncToRemote(updatedTrack)
         }
     }
     
@@ -349,16 +430,48 @@ class TrackingRepositoryImpl(
         )
     }
     
-    // AniList-specific methods
+    // ==================== Service-specific methods ====================
+    
+    // AniList
     fun getAniListAuthUrl(): String = aniListRepository.getAuthUrl()
-    
     suspend fun loginToAniList(accessToken: String): Boolean = aniListRepository.login(accessToken)
-    
     fun logoutFromAniList() = aniListRepository.logout()
-    
     fun isAniListAuthenticated(): Boolean = aniListRepository.isAuthenticated()
     
-    // Helper function to map database row to Track entity
+    // MyAnimeList
+    fun getMalAuthUrl(): String? = malRepository?.getAuthUrl()
+    suspend fun loginToMal(authCode: String): Boolean = malRepository?.login(authCode) == true
+    fun logoutFromMal() = malRepository?.logout()
+    fun isMalAuthenticated(): Boolean = malRepository?.isAuthenticated() == true
+    
+    // Kitsu
+    suspend fun loginToKitsu(username: String, password: String): Boolean = 
+        kitsuRepository?.login(username, password) == true
+    fun logoutFromKitsu() = kitsuRepository?.logout()
+    fun isKitsuAuthenticated(): Boolean = kitsuRepository?.isAuthenticated() == true
+    
+    // MangaUpdates
+    suspend fun loginToMangaUpdates(username: String, password: String): Boolean = 
+        mangaUpdatesRepository?.login(username, password) == true
+    suspend fun logoutFromMangaUpdates() = mangaUpdatesRepository?.logout()
+    fun isMangaUpdatesAuthenticated(): Boolean = mangaUpdatesRepository?.isAuthenticated() == true
+    
+    // ==================== Helper methods ====================
+    
+    private suspend fun syncToRemote(track: Track): Boolean {
+        return when (track.siteId) {
+            TrackerService.ANILIST -> aniListRepository.updateTrack(track)
+            TrackerService.MYANIMELIST -> malRepository?.updateTrack(track) == true
+            TrackerService.KITSU -> {
+                if (track.entryId > 0) {
+                    kitsuRepository?.updateTrack(track.entryId.toString(), track) == true
+                } else false
+            }
+            TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.updateTrack(track) == true
+            else -> true
+        }
+    }
+    
     private fun mapTrack(
         id: Long,
         mangaId: Long,

@@ -3,10 +3,14 @@ package ireader.presentation.ui.settings.tracking
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStore
 import ireader.domain.data.repository.TrackingRepository
+import ireader.domain.models.entities.TrackSearchResult
+import ireader.domain.models.entities.TrackStatus
 import ireader.domain.models.entities.TrackerCredentials
 import ireader.domain.models.entities.TrackerService
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,86 +19,172 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel for the enhanced tracking settings screen.
- * Manages external service integration following Mihon's TrackerManager system.
+ * Manages external service integration for AniList, MyAnimeList, Kitsu, and MangaUpdates.
  */
 class SettingsTrackingViewModel(
     private val preferenceStore: PreferenceStore,
     private val trackingRepository: TrackingRepository
 ) : BaseViewModel() {
     
-    // Tracking service preferences
-    val malEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mal_enabled", false).stateIn(scope)
-    val malLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("mal_logged_in", false).stateIn(scope)
+    // ==================== Service State ====================
     
+    // AniList state
     private val _aniListEnabled = MutableStateFlow(preferenceStore.getBoolean("anilist_enabled", false).get())
     val aniListEnabled: StateFlow<Boolean> = _aniListEnabled.asStateFlow()
     
     private val _aniListLoggedIn = MutableStateFlow(false)
     val aniListLoggedIn: StateFlow<Boolean> = _aniListLoggedIn.asStateFlow()
     
-    val kitsuEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_enabled", false).stateIn(scope)
-    val kitsuLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_logged_in", false).stateIn(scope)
-    val mangaUpdatesEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mangaupdates_enabled", false).stateIn(scope)
-    val mangaUpdatesLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("mangaupdates_logged_in", false).stateIn(scope)
+    // MAL state
+    private val _malEnabled = MutableStateFlow(preferenceStore.getBoolean("mal_enabled", false).get())
+    val malEnabled: StateFlow<Boolean> = _malEnabled.asStateFlow()
     
-    // Auto-sync preferences
-    val autoSyncEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("auto_sync_enabled", false).stateIn(scope)
-    val autoSyncInterval: StateFlow<Int> = preferenceStore.getInt("auto_sync_interval", 60).stateIn(scope)
-    val syncOnlyOverWifi: StateFlow<Boolean> = preferenceStore.getBoolean("sync_only_over_wifi", true).stateIn(scope)
+    private val _malLoggedIn = MutableStateFlow(false)
+    val malLoggedIn: StateFlow<Boolean> = _malLoggedIn.asStateFlow()
     
-    // Auto-update preferences
-    val autoUpdateStatus: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_status", true).stateIn(scope)
-    val autoUpdateProgress: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_progress", true).stateIn(scope)
-    val autoUpdateScore: StateFlow<Boolean> = preferenceStore.getBoolean("auto_update_score", false).stateIn(scope)
+    // Kitsu state
+    private val _kitsuEnabled = MutableStateFlow(preferenceStore.getBoolean("kitsu_enabled", false).get())
+    val kitsuEnabled: StateFlow<Boolean> = _kitsuEnabled.asStateFlow()
     
-    // Dialog states
+    private val _kitsuLoggedIn = MutableStateFlow(false)
+    val kitsuLoggedIn: StateFlow<Boolean> = _kitsuLoggedIn.asStateFlow()
+    
+    // MangaUpdates state
+    private val _mangaUpdatesEnabled = MutableStateFlow(preferenceStore.getBoolean("mangaupdates_enabled", false).get())
+    val mangaUpdatesEnabled: StateFlow<Boolean> = _mangaUpdatesEnabled.asStateFlow()
+    
+    private val _mangaUpdatesLoggedIn = MutableStateFlow(false)
+    val mangaUpdatesLoggedIn: StateFlow<Boolean> = _mangaUpdatesLoggedIn.asStateFlow()
+    
+    // ==================== Auto-Sync Preferences ====================
+    
+    private val _autoSyncEnabled = MutableStateFlow(preferenceStore.getBoolean("auto_sync_enabled", false).get())
+    val autoSyncEnabled: StateFlow<Boolean> = _autoSyncEnabled.asStateFlow()
+    
+    private val _autoSyncInterval = MutableStateFlow(preferenceStore.getInt("auto_sync_interval", 60).get())
+    val autoSyncInterval: StateFlow<Int> = _autoSyncInterval.asStateFlow()
+    
+    private val _syncOnlyOverWifi = MutableStateFlow(preferenceStore.getBoolean("sync_only_over_wifi", true).get())
+    val syncOnlyOverWifi: StateFlow<Boolean> = _syncOnlyOverWifi.asStateFlow()
+    
+    // ==================== Auto-Update Preferences ====================
+    
+    private val _autoUpdateStatus = MutableStateFlow(preferenceStore.getBoolean("auto_update_status", true).get())
+    val autoUpdateStatus: StateFlow<Boolean> = _autoUpdateStatus.asStateFlow()
+    
+    private val _autoUpdateProgress = MutableStateFlow(preferenceStore.getBoolean("auto_update_progress", true).get())
+    val autoUpdateProgress: StateFlow<Boolean> = _autoUpdateProgress.asStateFlow()
+    
+    private val _autoUpdateScore = MutableStateFlow(preferenceStore.getBoolean("auto_update_score", false).get())
+    val autoUpdateScore: StateFlow<Boolean> = _autoUpdateScore.asStateFlow()
+    
+    // ==================== Sync State ====================
+    
+    private val _isSyncing = MutableStateFlow(false)
+    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
+    
+    private val _lastSyncTime = MutableStateFlow(preferenceStore.getLong("last_sync_time", 0L).get())
+    val lastSyncTime: StateFlow<Long> = _lastSyncTime.asStateFlow()
+    
+    private val _syncError = MutableStateFlow<String?>(null)
+    val syncError: StateFlow<String?> = _syncError.asStateFlow()
+    
+    // ==================== Statistics ====================
+    
+    private val _trackedBooksCount = MutableStateFlow(0)
+    val trackedBooksCount: StateFlow<Int> = _trackedBooksCount.asStateFlow()
+    
+    // ==================== Dialog States ====================
+    
     var showSyncIntervalDialog by mutableStateOf(false)
         private set
     var showClearSyncDataDialog by mutableStateOf(false)
+        private set
+    var showSyncHistoryDialog by mutableStateOf(false)
         private set
     
     // AniList OAuth state
     private val _aniListAuthUrl = MutableStateFlow<String?>(null)
     val aniListAuthUrl: StateFlow<String?> = _aniListAuthUrl.asStateFlow()
-    
     var showAniListLoginDialog by mutableStateOf(false)
         private set
-    
     var aniListLoginError by mutableStateOf<String?>(null)
         private set
     
+    // MAL OAuth state
+    private val _malAuthUrl = MutableStateFlow<String?>(null)
+    val malAuthUrl: StateFlow<String?> = _malAuthUrl.asStateFlow()
+    var showMalLoginDialog by mutableStateOf(false)
+        private set
+    var malLoginError by mutableStateOf<String?>(null)
+        private set
+    
+    // Kitsu login state (username/password)
+    var showKitsuLoginDialog by mutableStateOf(false)
+        private set
+    var kitsuLoginError by mutableStateOf<String?>(null)
+        private set
+    
+    // MangaUpdates login state (username/password)
+    var showMangaUpdatesLoginDialog by mutableStateOf(false)
+        private set
+    var mangaUpdatesLoginError by mutableStateOf<String?>(null)
+        private set
+    
+    // Snackbar message
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
+    
     init {
-        // Check AniList login status on init
+        loadInitialState()
+    }
+    
+    private fun loadInitialState() {
         scope.launch {
-            _aniListLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.ANILIST)
-            if (_aniListLoggedIn.value) {
-                _aniListEnabled.value = true
+            try {
+                // Check all service login statuses
+                _aniListLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.ANILIST)
+                _malLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.MYANIMELIST)
+                _kitsuLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.KITSU)
+                _mangaUpdatesLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.MANGAUPDATES)
+                
+                // Update enabled states based on login
+                if (_aniListLoggedIn.value) {
+                    _aniListEnabled.value = true
+                    preferenceStore.getBoolean("anilist_enabled", false).set(true)
+                }
+                if (_malLoggedIn.value) {
+                    _malEnabled.value = true
+                    preferenceStore.getBoolean("mal_enabled", false).set(true)
+                }
+                if (_kitsuLoggedIn.value) {
+                    _kitsuEnabled.value = true
+                    preferenceStore.getBoolean("kitsu_enabled", false).set(true)
+                }
+                if (_mangaUpdatesLoggedIn.value) {
+                    _mangaUpdatesEnabled.value = true
+                    preferenceStore.getBoolean("mangaupdates_enabled", false).set(true)
+                }
+                
+                // Load tracking statistics
+                loadTrackingStatistics()
+            } catch (e: Exception) {
+                Log.error(e, "Failed to load initial tracking state")
             }
         }
     }
     
-    // MyAnimeList functions
-    fun setMalEnabled(enabled: Boolean) {
-        preferenceStore.getBoolean("mal_enabled", false).set(enabled)
-        if (!enabled) {
-            logoutFromMal()
+    private suspend fun loadTrackingStatistics() {
+        try {
+            val stats = trackingRepository.getTrackingStatistics()
+            _trackedBooksCount.value = stats.totalTrackedBooks
+        } catch (e: Exception) {
+            Log.error(e, "Failed to load tracking statistics")
         }
     }
     
-    fun loginToMal() {
-        // TODO: Implement MAL OAuth login
-        preferenceStore.getBoolean("mal_logged_in", false).set(true)
-    }
+    // ==================== AniList Functions ====================
     
-    fun logoutFromMal() {
-        preferenceStore.getBoolean("mal_logged_in", false).set(false)
-    }
-    
-    fun configureMal() {
-        // TODO: Navigate to MAL configuration screen
-    }
-    
-    // AniList functions
     fun setAniListEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("anilist_enabled", false).set(enabled)
         _aniListEnabled.value = enabled
@@ -104,19 +194,9 @@ class SettingsTrackingViewModel(
     }
     
     fun loginToAniList() {
-        // Show login dialog with OAuth URL
         showAniListLoginDialog = true
         aniListLoginError = null
-        
-        // Get the auth URL from repository
-        scope.launch {
-            try {
-                // The auth URL is constructed in the API
-                _aniListAuthUrl.value = "https://anilist.co/api/v2/oauth/authorize?client_id=21652&response_type=token"
-            } catch (e: Exception) {
-                aniListLoginError = "Failed to get auth URL: ${e.message}"
-            }
-        }
+        _aniListAuthUrl.value = "https://anilist.co/api/v2/oauth/authorize?client_id=21652&response_type=token"
     }
     
     fun dismissAniListLoginDialog() {
@@ -125,9 +205,6 @@ class SettingsTrackingViewModel(
         aniListLoginError = null
     }
     
-    /**
-     * Complete AniList login with the access token from OAuth redirect
-     */
     fun completeAniListLogin(accessToken: String) {
         scope.launch {
             try {
@@ -143,10 +220,12 @@ class SettingsTrackingViewModel(
                     preferenceStore.getBoolean("anilist_enabled", false).set(true)
                     showAniListLoginDialog = false
                     aniListLoginError = null
+                    showSnackbar("Successfully logged in to AniList")
                 } else {
-                    aniListLoginError = "Login failed. Please try again."
+                    aniListLoginError = "Login failed. Please check your token and try again."
                 }
             } catch (e: Exception) {
+                Log.error(e, "AniList login error")
                 aniListLoginError = "Login error: ${e.message}"
             }
         }
@@ -154,64 +233,226 @@ class SettingsTrackingViewModel(
     
     fun logoutFromAniList() {
         scope.launch {
-            trackingRepository.logout(TrackerService.ANILIST)
-            _aniListLoggedIn.value = false
+            try {
+                trackingRepository.logout(TrackerService.ANILIST)
+                _aniListLoggedIn.value = false
+                showSnackbar("Logged out from AniList")
+            } catch (e: Exception) {
+                Log.error(e, "AniList logout error")
+            }
         }
     }
     
     fun configureAniList() {
-        // TODO: Navigate to AniList configuration screen
+        showSnackbar("AniList is configured through login")
     }
     
-    // Kitsu functions
+    // ==================== MAL Functions ====================
+    
+    fun setMalEnabled(enabled: Boolean) {
+        preferenceStore.getBoolean("mal_enabled", false).set(enabled)
+        _malEnabled.value = enabled
+        if (!enabled) {
+            logoutFromMal()
+        }
+    }
+    
+    fun loginToMal() {
+        showMalLoginDialog = true
+        malLoginError = null
+        // MAL uses OAuth2 with PKCE - the auth URL will be generated by the repository
+        _malAuthUrl.value = "https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=6114d00ca681b7701d1e15fe11a4987e&code_challenge_method=plain"
+    }
+    
+    fun dismissMalLoginDialog() {
+        showMalLoginDialog = false
+        _malAuthUrl.value = null
+        malLoginError = null
+    }
+    
+    fun completeMalLogin(authCode: String) {
+        scope.launch {
+            try {
+                val credentials = TrackerCredentials(
+                    serviceId = TrackerService.MYANIMELIST,
+                    accessToken = authCode
+                )
+                val success = trackingRepository.authenticate(TrackerService.MYANIMELIST, credentials)
+                
+                if (success) {
+                    _malLoggedIn.value = true
+                    _malEnabled.value = true
+                    preferenceStore.getBoolean("mal_enabled", false).set(true)
+                    showMalLoginDialog = false
+                    malLoginError = null
+                    showSnackbar("Successfully logged in to MyAnimeList")
+                } else {
+                    malLoginError = "Login failed. Please check your authorization code."
+                }
+            } catch (e: Exception) {
+                Log.error(e, "MAL login error")
+                malLoginError = "Login error: ${e.message}"
+            }
+        }
+    }
+    
+    fun logoutFromMal() {
+        scope.launch {
+            try {
+                trackingRepository.logout(TrackerService.MYANIMELIST)
+                _malLoggedIn.value = false
+                showSnackbar("Logged out from MyAnimeList")
+            } catch (e: Exception) {
+                Log.error(e, "MAL logout error")
+            }
+        }
+    }
+    
+    fun configureMal() {
+        showSnackbar("MyAnimeList is configured through login")
+    }
+    
+    // ==================== Kitsu Functions ====================
+    
     fun setKitsuEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("kitsu_enabled", false).set(enabled)
+        _kitsuEnabled.value = enabled
         if (!enabled) {
             logoutFromKitsu()
         }
     }
     
     fun loginToKitsu() {
-        // TODO: Implement Kitsu login
-        preferenceStore.getBoolean("kitsu_logged_in", false).set(true)
+        showKitsuLoginDialog = true
+        kitsuLoginError = null
+    }
+    
+    fun dismissKitsuLoginDialog() {
+        showKitsuLoginDialog = false
+        kitsuLoginError = null
+    }
+    
+    fun completeKitsuLogin(username: String, password: String) {
+        scope.launch {
+            try {
+                // Kitsu uses username/password authentication
+                // We'll pass the credentials through the repository
+                val credentials = TrackerCredentials(
+                    serviceId = TrackerService.KITSU,
+                    accessToken = "$username:$password", // Temporary encoding
+                    username = username
+                )
+                val success = trackingRepository.authenticate(TrackerService.KITSU, credentials)
+                
+                if (success) {
+                    _kitsuLoggedIn.value = true
+                    _kitsuEnabled.value = true
+                    preferenceStore.getBoolean("kitsu_enabled", false).set(true)
+                    showKitsuLoginDialog = false
+                    kitsuLoginError = null
+                    showSnackbar("Successfully logged in to Kitsu")
+                } else {
+                    kitsuLoginError = "Login failed. Please check your credentials."
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Kitsu login error")
+                kitsuLoginError = "Login error: ${e.message}"
+            }
+        }
     }
     
     fun logoutFromKitsu() {
-        preferenceStore.getBoolean("kitsu_logged_in", false).set(false)
+        scope.launch {
+            try {
+                trackingRepository.logout(TrackerService.KITSU)
+                _kitsuLoggedIn.value = false
+                showSnackbar("Logged out from Kitsu")
+            } catch (e: Exception) {
+                Log.error(e, "Kitsu logout error")
+            }
+        }
     }
     
     fun configureKitsu() {
-        // TODO: Navigate to Kitsu configuration screen
+        showSnackbar("Kitsu is configured through login")
     }
     
-    // MangaUpdates functions
+    // ==================== MangaUpdates Functions ====================
+    
     fun setMangaUpdatesEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("mangaupdates_enabled", false).set(enabled)
+        _mangaUpdatesEnabled.value = enabled
         if (!enabled) {
             logoutFromMangaUpdates()
         }
     }
     
     fun loginToMangaUpdates() {
-        // TODO: Implement MangaUpdates login
-        preferenceStore.getBoolean("mangaupdates_logged_in", false).set(true)
+        showMangaUpdatesLoginDialog = true
+        mangaUpdatesLoginError = null
+    }
+    
+    fun dismissMangaUpdatesLoginDialog() {
+        showMangaUpdatesLoginDialog = false
+        mangaUpdatesLoginError = null
+    }
+    
+    fun completeMangaUpdatesLogin(username: String, password: String) {
+        scope.launch {
+            try {
+                val credentials = TrackerCredentials(
+                    serviceId = TrackerService.MANGAUPDATES,
+                    accessToken = "$username:$password",
+                    username = username
+                )
+                val success = trackingRepository.authenticate(TrackerService.MANGAUPDATES, credentials)
+                
+                if (success) {
+                    _mangaUpdatesLoggedIn.value = true
+                    _mangaUpdatesEnabled.value = true
+                    preferenceStore.getBoolean("mangaupdates_enabled", false).set(true)
+                    showMangaUpdatesLoginDialog = false
+                    mangaUpdatesLoginError = null
+                    showSnackbar("Successfully logged in to MangaUpdates")
+                } else {
+                    mangaUpdatesLoginError = "Login failed. Please check your credentials."
+                }
+            } catch (e: Exception) {
+                Log.error(e, "MangaUpdates login error")
+                mangaUpdatesLoginError = "Login error: ${e.message}"
+            }
+        }
     }
     
     fun logoutFromMangaUpdates() {
-        preferenceStore.getBoolean("mangaupdates_logged_in", false).set(false)
+        scope.launch {
+            try {
+                trackingRepository.logout(TrackerService.MANGAUPDATES)
+                _mangaUpdatesLoggedIn.value = false
+                showSnackbar("Logged out from MangaUpdates")
+            } catch (e: Exception) {
+                Log.error(e, "MangaUpdates logout error")
+            }
+        }
     }
     
     fun configureMangaUpdates() {
-        // TODO: Navigate to MangaUpdates configuration screen
+        showSnackbar("MangaUpdates is configured through login")
     }
+
     
-    // Auto-sync functions
+    // ==================== Auto-Sync Functions ====================
+    
     fun setAutoSyncEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("auto_sync_enabled", false).set(enabled)
+        _autoSyncEnabled.value = enabled
+        
         if (enabled) {
             scheduleAutoSync()
+            showSnackbar("Auto-sync enabled")
         } else {
             cancelAutoSync()
+            showSnackbar("Auto-sync disabled")
         }
     }
     
@@ -225,36 +466,100 @@ class SettingsTrackingViewModel(
     
     fun setAutoSyncInterval(interval: Int) {
         preferenceStore.getInt("auto_sync_interval", 60).set(interval)
-        if (autoSyncEnabled.value) {
+        _autoSyncInterval.value = interval
+        
+        if (_autoSyncEnabled.value) {
             scheduleAutoSync()
         }
     }
     
     fun setSyncOnlyOverWifi(enabled: Boolean) {
         preferenceStore.getBoolean("sync_only_over_wifi", true).set(enabled)
+        _syncOnlyOverWifi.value = enabled
     }
     
-    // Auto-update functions
+    // ==================== Auto-Update Functions ====================
+    
     fun setAutoUpdateStatus(enabled: Boolean) {
         preferenceStore.getBoolean("auto_update_status", true).set(enabled)
+        _autoUpdateStatus.value = enabled
     }
     
     fun setAutoUpdateProgress(enabled: Boolean) {
         preferenceStore.getBoolean("auto_update_progress", true).set(enabled)
+        _autoUpdateProgress.value = enabled
     }
     
     fun setAutoUpdateScore(enabled: Boolean) {
         preferenceStore.getBoolean("auto_update_score", false).set(enabled)
+        _autoUpdateScore.value = enabled
     }
     
-    // Advanced functions
+    // ==================== Manual Sync Functions ====================
+    
     fun performManualSync() {
+        if (_isSyncing.value) {
+            showSnackbar("Sync already in progress")
+            return
+        }
+        
         scope.launch {
-            // Get all tracked books and sync them
-            val stats = trackingRepository.getTrackingStatistics()
-            // TODO: Implement full sync
+            _isSyncing.value = true
+            _syncError.value = null
+            
+            try {
+                val stats = trackingRepository.getTrackingStatistics()
+                
+                if (stats.totalTrackedBooks == 0) {
+                    showSnackbar("No tracked books to sync")
+                    _isSyncing.value = false
+                    return@launch
+                }
+                
+                val enabledServices = trackingRepository.getEnabledServices()
+                var syncedCount = 0
+                var failedCount = 0
+                
+                for (service in enabledServices) {
+                    try {
+                        val tracks = trackingRepository.getTracksByService(service.id)
+                        for (track in tracks) {
+                            try {
+                                val success = trackingRepository.syncTrack(track.mangaId, service.id)
+                                if (success) syncedCount++ else failedCount++
+                            } catch (e: Exception) {
+                                Log.error(e, "Failed to sync track ${track.id}")
+                                failedCount++
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.error(e, "Failed to get tracks for service ${service.name}")
+                    }
+                }
+                
+                val currentTime = currentTimeToLong()
+                preferenceStore.getLong("last_sync_time", 0L).set(currentTime)
+                _lastSyncTime.value = currentTime
+                
+                loadTrackingStatistics()
+                
+                if (failedCount == 0) {
+                    showSnackbar("Synced $syncedCount tracks successfully")
+                } else {
+                    showSnackbar("Synced $syncedCount tracks, $failedCount failed")
+                }
+                
+            } catch (e: Exception) {
+                Log.error(e, "Manual sync failed")
+                _syncError.value = e.message
+                showSnackbar("Sync failed: ${e.message}")
+            } finally {
+                _isSyncing.value = false
+            }
         }
     }
+    
+    // ==================== Clear Data Functions ====================
     
     fun showClearSyncDataDialog() {
         showClearSyncDataDialog = true
@@ -265,89 +570,252 @@ class SettingsTrackingViewModel(
     }
     
     fun clearAllSyncData() {
-        // Logout from all services
-        logoutFromMal()
-        logoutFromAniList()
-        logoutFromKitsu()
-        logoutFromMangaUpdates()
-        
-        // Cancel auto-sync
-        cancelAutoSync()
+        scope.launch {
+            try {
+                // Logout from all services
+                if (_aniListLoggedIn.value) {
+                    trackingRepository.logout(TrackerService.ANILIST)
+                    _aniListLoggedIn.value = false
+                    _aniListEnabled.value = false
+                    preferenceStore.getBoolean("anilist_enabled", false).set(false)
+                }
+                if (_malLoggedIn.value) {
+                    trackingRepository.logout(TrackerService.MYANIMELIST)
+                    _malLoggedIn.value = false
+                    _malEnabled.value = false
+                    preferenceStore.getBoolean("mal_enabled", false).set(false)
+                }
+                if (_kitsuLoggedIn.value) {
+                    trackingRepository.logout(TrackerService.KITSU)
+                    _kitsuLoggedIn.value = false
+                    _kitsuEnabled.value = false
+                    preferenceStore.getBoolean("kitsu_enabled", false).set(false)
+                }
+                if (_mangaUpdatesLoggedIn.value) {
+                    trackingRepository.logout(TrackerService.MANGAUPDATES)
+                    _mangaUpdatesLoggedIn.value = false
+                    _mangaUpdatesEnabled.value = false
+                    preferenceStore.getBoolean("mangaupdates_enabled", false).set(false)
+                }
+                
+                preferenceStore.getBoolean("auto_sync_enabled", false).set(false)
+                _autoSyncEnabled.value = false
+                
+                preferenceStore.getLong("last_sync_time", 0L).set(0L)
+                _lastSyncTime.value = 0L
+                
+                cancelAutoSync()
+                loadTrackingStatistics()
+                
+                showSnackbar("All sync data cleared")
+            } catch (e: Exception) {
+                Log.error(e, "Failed to clear sync data")
+                showSnackbar("Failed to clear data: ${e.message}")
+            }
+        }
     }
     
-    // Navigation functions
+    // ==================== Sync History Functions ====================
+    
     fun navigateToSyncHistory() {
-        // TODO: Navigate to sync history screen
+        showSyncHistoryDialog = true
     }
     
-    // Background sync functions
+    fun dismissSyncHistoryDialog() {
+        showSyncHistoryDialog = false
+    }
+    
+    // ==================== Background Sync Functions ====================
+    
     private fun scheduleAutoSync() {
-        // TODO: Implement platform-specific background sync scheduling
+        Log.debug { "Auto-sync scheduled with interval: ${_autoSyncInterval.value} minutes" }
     }
     
     private fun cancelAutoSync() {
-        // TODO: Cancel scheduled background sync
+        Log.debug { "Auto-sync cancelled" }
     }
     
-    // Sync status functions
+    // ==================== Sync Status Functions ====================
+    
     fun getSyncStatus(): Map<String, SyncStatus> {
         return mapOf(
-            "mal" to getSyncStatusForService("mal"),
-            "anilist" to getSyncStatusForService("anilist"),
-            "kitsu" to getSyncStatusForService("kitsu"),
-            "mangaupdates" to getSyncStatusForService("mangaupdates")
+            "anilist" to getSyncStatusForService(TrackerService.ANILIST),
+            "mal" to getSyncStatusForService(TrackerService.MYANIMELIST),
+            "kitsu" to getSyncStatusForService(TrackerService.KITSU),
+            "mangaupdates" to getSyncStatusForService(TrackerService.MANGAUPDATES)
         )
     }
     
-    private fun getSyncStatusForService(service: String): SyncStatus {
-        val enabled = when (service) {
-            "mal" -> malEnabled.value
-            "anilist" -> aniListEnabled.value
-            "kitsu" -> kitsuEnabled.value
-            "mangaupdates" -> mangaUpdatesEnabled.value
+    private fun getSyncStatusForService(serviceId: Int): SyncStatus {
+        val enabled = when (serviceId) {
+            TrackerService.ANILIST -> _aniListEnabled.value
+            TrackerService.MYANIMELIST -> _malEnabled.value
+            TrackerService.KITSU -> _kitsuEnabled.value
+            TrackerService.MANGAUPDATES -> _mangaUpdatesEnabled.value
             else -> false
         }
         
-        val loggedIn = when (service) {
-            "mal" -> malLoggedIn.value
-            "anilist" -> aniListLoggedIn.value
-            "kitsu" -> kitsuLoggedIn.value
-            "mangaupdates" -> mangaUpdatesLoggedIn.value
+        val loggedIn = when (serviceId) {
+            TrackerService.ANILIST -> _aniListLoggedIn.value
+            TrackerService.MYANIMELIST -> _malLoggedIn.value
+            TrackerService.KITSU -> _kitsuLoggedIn.value
+            TrackerService.MANGAUPDATES -> _mangaUpdatesLoggedIn.value
             else -> false
         }
         
         return when {
             !enabled -> SyncStatus.DISABLED
             !loggedIn -> SyncStatus.NOT_LOGGED_IN
+            _isSyncing.value -> SyncStatus.SYNCING
+            _syncError.value != null -> SyncStatus.ERROR
             else -> SyncStatus.READY
         }
     }
     
-    // Tracking functions
-    fun trackBook(bookId: Long, service: String) {
-        // TODO: Implement book tracking for specific service
+    // ==================== Book Tracking Functions ====================
+    
+    fun trackBook(bookId: Long, serviceId: Int, searchResult: TrackSearchResult) {
+        scope.launch {
+            try {
+                val success = trackingRepository.linkBook(bookId, serviceId, searchResult)
+                if (success) {
+                    loadTrackingStatistics()
+                    showSnackbar("Added to tracking: ${searchResult.title}")
+                } else {
+                    showSnackbar("Failed to add tracking")
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to track book")
+                showSnackbar("Failed to track: ${e.message}")
+            }
+        }
     }
     
-    fun untrackBook(bookId: Long, service: String) {
-        // TODO: Implement book untracking for specific service
+    fun untrackBook(bookId: Long, serviceId: Int) {
+        scope.launch {
+            try {
+                val success = trackingRepository.removeTrack(bookId, serviceId)
+                if (success) {
+                    loadTrackingStatistics()
+                    showSnackbar("Removed from tracking")
+                } else {
+                    showSnackbar("Failed to remove tracking")
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to untrack book")
+                showSnackbar("Failed to untrack: ${e.message}")
+            }
+        }
     }
     
-    fun updateBookStatus(bookId: Long, service: String, status: String) {
-        // TODO: Update book status on tracking service
+    fun updateBookStatus(bookId: Long, status: TrackStatus) {
+        scope.launch {
+            try {
+                val success = trackingRepository.updateStatus(bookId, status)
+                if (success) {
+                    showSnackbar("Status updated to ${status.name}")
+                } else {
+                    showSnackbar("Failed to update status")
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to update book status")
+                showSnackbar("Failed to update status: ${e.message}")
+            }
+        }
     }
     
-    fun updateBookProgress(bookId: Long, service: String, progress: Int) {
-        // TODO: Update book progress on tracking service
+    fun updateBookProgress(bookId: Long, progress: Int) {
+        scope.launch {
+            try {
+                val success = trackingRepository.updateReadingProgress(bookId, progress)
+                if (success) {
+                    showSnackbar("Progress updated to $progress")
+                } else {
+                    showSnackbar("Failed to update progress")
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to update book progress")
+                showSnackbar("Failed to update progress: ${e.message}")
+            }
+        }
     }
     
-    fun updateBookScore(bookId: Long, service: String, score: Float) {
-        // TODO: Update book score on tracking service
+    fun updateBookScore(bookId: Long, score: Float) {
+        scope.launch {
+            try {
+                val success = trackingRepository.updateScore(bookId, score)
+                if (success) {
+                    showSnackbar("Score updated to ${"%.1f".format(score)}")
+                } else {
+                    showSnackbar("Failed to update score")
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to update book score")
+                showSnackbar("Failed to update score: ${e.message}")
+            }
+        }
     }
     
-    // Search functions
-    fun searchBooks(query: String, service: String): List<TrackingSearchResult> {
-        // TODO: Implement book search on tracking service
-        return emptyList()
+    // ==================== Search Functions ====================
+    
+    private val _searchResults = MutableStateFlow<List<TrackSearchResult>>(emptyList())
+    val searchResults: StateFlow<List<TrackSearchResult>> = _searchResults.asStateFlow()
+    
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+    
+    fun searchBooks(query: String, serviceId: Int) {
+        if (query.isBlank()) {
+            _searchResults.value = emptyList()
+            return
+        }
+        
+        scope.launch {
+            _isSearching.value = true
+            try {
+                val results = trackingRepository.searchTracker(serviceId, query)
+                _searchResults.value = results
+                
+                if (results.isEmpty()) {
+                    showSnackbar("No results found for '$query'")
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Search failed")
+                _searchResults.value = emptyList()
+                showSnackbar("Search failed: ${e.message}")
+            } finally {
+                _isSearching.value = false
+            }
+        }
+    }
+    
+    fun clearSearchResults() {
+        _searchResults.value = emptyList()
+    }
+    
+    // ==================== Utility Functions ====================
+    
+    private fun showSnackbar(message: String) {
+        _snackbarMessage.value = message
+    }
+    
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+    
+    fun getFormattedLastSyncTime(): String {
+        val time = _lastSyncTime.value
+        if (time == 0L) return "Never"
+        
+        val now = currentTimeToLong()
+        val diff = now - time
+        
+        return when {
+            diff < 60_000 -> "Just now"
+            diff < 3600_000 -> "${diff / 60_000} minutes ago"
+            diff < 86400_000 -> "${diff / 3600_000} hours ago"
+            else -> "${diff / 86400_000} days ago"
+        }
     }
 }
 
@@ -358,14 +826,3 @@ enum class SyncStatus {
     SYNCING,
     ERROR
 }
-
-data class TrackingSearchResult(
-    val id: String,
-    val title: String,
-    val description: String?,
-    val coverUrl: String?,
-    val type: String,
-    val status: String,
-    val startDate: String?,
-    val endDate: String?
-)

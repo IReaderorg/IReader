@@ -1583,17 +1583,60 @@ class BookDetailViewModel(
     
     // ==================== Tracking ====================
     
-    // Tracking state
+    // Tracking state - per service
     var showTrackingBottomSheet by mutableStateOf(false)
-    var isTracked by mutableStateOf(false)
-    var trackingStatus by mutableStateOf<String?>(null)
-    var trackingProgress by mutableStateOf<Int?>(null)
-    var trackingScore by mutableStateOf<Float?>(null)
+    
+    // AniList tracking state
     var isAniListLoggedIn by mutableStateOf(false)
+    var isAniListTracked by mutableStateOf(false)
+    var aniListStatus by mutableStateOf<String?>(null)
+    var aniListProgress by mutableStateOf<Int?>(null)
+    var aniListScore by mutableStateOf<Float?>(null)
+    private var aniListTrack: ireader.domain.models.entities.Track? = null
+    
+    // MAL tracking state
+    var isMalLoggedIn by mutableStateOf(false)
+    var isMalTracked by mutableStateOf(false)
+    var malStatus by mutableStateOf<String?>(null)
+    var malProgress by mutableStateOf<Int?>(null)
+    var malScore by mutableStateOf<Float?>(null)
+    private var malTrack: ireader.domain.models.entities.Track? = null
+    
+    // Kitsu tracking state
+    var isKitsuLoggedIn by mutableStateOf(false)
+    var isKitsuTracked by mutableStateOf(false)
+    var kitsuStatus by mutableStateOf<String?>(null)
+    var kitsuProgress by mutableStateOf<Int?>(null)
+    var kitsuScore by mutableStateOf<Float?>(null)
+    private var kitsuTrack: ireader.domain.models.entities.Track? = null
+    
+    // MangaUpdates tracking state
+    var isMangaUpdatesLoggedIn by mutableStateOf(false)
+    var isMangaUpdatesTracked by mutableStateOf(false)
+    var mangaUpdatesStatus by mutableStateOf<String?>(null)
+    var mangaUpdatesProgress by mutableStateOf<Int?>(null)
+    var mangaUpdatesScore by mutableStateOf<Float?>(null)
+    private var mangaUpdatesTrack: ireader.domain.models.entities.Track? = null
+    
+    // Legacy compatibility properties
+    var isTracked: Boolean
+        get() = isAniListTracked || isMalTracked || isKitsuTracked || isMangaUpdatesTracked
+        set(value) { isAniListTracked = value }
+    var trackingStatus: String?
+        get() = aniListStatus ?: malStatus ?: kitsuStatus ?: mangaUpdatesStatus
+        set(value) { aniListStatus = value }
+    var trackingProgress: Int?
+        get() = aniListProgress ?: malProgress ?: kitsuProgress ?: mangaUpdatesProgress
+        set(value) { aniListProgress = value }
+    var trackingScore: Float?
+        get() = aniListScore ?: malScore ?: kitsuScore ?: mangaUpdatesScore
+        set(value) { aniListScore = value }
+    
+    // Search state
     var trackingSearchResults by mutableStateOf<List<ireader.domain.models.entities.TrackSearchResult>>(emptyList())
     var showTrackingSearchDialog by mutableStateOf(false)
     var isSearchingTracking by mutableStateOf(false)
-    private var currentTrack: ireader.domain.models.entities.Track? = null
+    var currentSearchServiceId by mutableStateOf(ireader.domain.models.entities.TrackerService.ANILIST)
     
     init {
         // Load tracking status when ViewModel is created
@@ -1609,19 +1652,49 @@ class BookDetailViewModel(
         
         scope.launch {
             try {
-                // Check if AniList is authenticated
+                // Check authentication status for all services
                 isAniListLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.ANILIST)
+                isMalLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MYANIMELIST)
+                isKitsuLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.KITSU)
+                isMangaUpdatesLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MANGAUPDATES)
                 
                 // Load existing tracks for this book
                 val tracks = trackingRepository.getTracksByBook(bookId)
-                val anilistTrack = tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }
                 
-                if (anilistTrack != null) {
-                    currentTrack = anilistTrack
-                    isTracked = true
-                    trackingStatus = anilistTrack.status.name
-                    trackingProgress = anilistTrack.lastRead.toInt()
-                    trackingScore = anilistTrack.score
+                // AniList track
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }?.let { track ->
+                    aniListTrack = track
+                    isAniListTracked = true
+                    aniListStatus = track.status.name
+                    aniListProgress = track.lastRead.toInt()
+                    aniListScore = track.score
+                }
+                
+                // MAL track
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.MYANIMELIST }?.let { track ->
+                    malTrack = track
+                    isMalTracked = true
+                    malStatus = track.status.name
+                    malProgress = track.lastRead.toInt()
+                    malScore = track.score
+                }
+                
+                // Kitsu track
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.KITSU }?.let { track ->
+                    kitsuTrack = track
+                    isKitsuTracked = true
+                    kitsuStatus = track.status.name
+                    kitsuProgress = track.lastRead.toInt()
+                    kitsuScore = track.score
+                }
+                
+                // MangaUpdates track
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.MANGAUPDATES }?.let { track ->
+                    mangaUpdatesTrack = track
+                    isMangaUpdatesTracked = true
+                    mangaUpdatesStatus = track.status.name
+                    mangaUpdatesProgress = track.lastRead.toInt()
+                    mangaUpdatesScore = track.score
                 }
             } catch (e: Exception) {
                 Log.error(e, "Failed to load tracking status")
@@ -1646,7 +1719,7 @@ class BookDetailViewModel(
     }
     
     /**
-     * Load/refresh tracking status for the current book from AniList
+     * Load/refresh tracking status for the current book from all services
      */
     private fun loadTrackingStatus() {
         val bookId = param.bookId ?: return
@@ -1654,23 +1727,61 @@ class BookDetailViewModel(
         
         scope.launch {
             try {
-                // Check if AniList is authenticated
+                // Check authentication status for all services
                 isAniListLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.ANILIST)
+                isMalLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MYANIMELIST)
+                isKitsuLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.KITSU)
+                isMangaUpdatesLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MANGAUPDATES)
                 
-                // Sync track to get latest data from AniList
-                if (isTracked && currentTrack != null) {
+                // Sync and reload tracks
+                val tracks = trackingRepository.getTracksByBook(bookId)
+                
+                // AniList
+                if (isAniListTracked && aniListTrack != null) {
                     trackingRepository.syncTrack(bookId, ireader.domain.models.entities.TrackerService.ANILIST)
-                    
-                    // Reload tracks
-                    val tracks = trackingRepository.getTracksByBook(bookId)
-                    val anilistTrack = tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }
-                    
-                    if (anilistTrack != null) {
-                        currentTrack = anilistTrack
-                        trackingStatus = anilistTrack.status.name
-                        trackingProgress = anilistTrack.lastRead.toInt()
-                        trackingScore = anilistTrack.score
-                    }
+                }
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }?.let { track ->
+                    aniListTrack = track
+                    isAniListTracked = true
+                    aniListStatus = track.status.name
+                    aniListProgress = track.lastRead.toInt()
+                    aniListScore = track.score
+                }
+                
+                // MAL
+                if (isMalTracked && malTrack != null) {
+                    trackingRepository.syncTrack(bookId, ireader.domain.models.entities.TrackerService.MYANIMELIST)
+                }
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.MYANIMELIST }?.let { track ->
+                    malTrack = track
+                    isMalTracked = true
+                    malStatus = track.status.name
+                    malProgress = track.lastRead.toInt()
+                    malScore = track.score
+                }
+                
+                // Kitsu
+                if (isKitsuTracked && kitsuTrack != null) {
+                    trackingRepository.syncTrack(bookId, ireader.domain.models.entities.TrackerService.KITSU)
+                }
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.KITSU }?.let { track ->
+                    kitsuTrack = track
+                    isKitsuTracked = true
+                    kitsuStatus = track.status.name
+                    kitsuProgress = track.lastRead.toInt()
+                    kitsuScore = track.score
+                }
+                
+                // MangaUpdates
+                if (isMangaUpdatesTracked && mangaUpdatesTrack != null) {
+                    trackingRepository.syncTrack(bookId, ireader.domain.models.entities.TrackerService.MANGAUPDATES)
+                }
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.MANGAUPDATES }?.let { track ->
+                    mangaUpdatesTrack = track
+                    isMangaUpdatesTracked = true
+                    mangaUpdatesStatus = track.status.name
+                    mangaUpdatesProgress = track.lastRead.toInt()
+                    mangaUpdatesScore = track.score
                 }
             } catch (e: Exception) {
                 Log.error(e, "Failed to load tracking status")
@@ -1679,9 +1790,9 @@ class BookDetailViewModel(
     }
     
     /**
-     * Search for this book on AniList
+     * Search for this book on a tracking service
      */
-    fun searchOnAniList(query: String) {
+    fun searchOnService(serviceId: Int, query: String) {
         if (trackingRepository == null) {
             emitEvent(BookDetailEvent.ShowSnackbar("Tracking not available"))
             return
@@ -1691,11 +1802,9 @@ class BookDetailViewModel(
             try {
                 isSearchingTracking = true
                 showTrackingSearchDialog = true
+                currentSearchServiceId = serviceId
                 
-                val results = trackingRepository.searchTracker(
-                    ireader.domain.models.entities.TrackerService.ANILIST,
-                    query
-                )
+                val results = trackingRepository.searchTracker(serviceId, query)
                 
                 trackingSearchResults = results
                 isSearchingTracking = false
@@ -1704,7 +1813,7 @@ class BookDetailViewModel(
                     emitEvent(BookDetailEvent.ShowSnackbar("No results found for '$query'"))
                 }
             } catch (e: Exception) {
-                Log.error(e, "Failed to search on AniList")
+                Log.error(e, "Failed to search on service $serviceId")
                 isSearchingTracking = false
                 emitEvent(BookDetailEvent.ShowSnackbar("Search failed: ${e.message}"))
             }
@@ -1712,65 +1821,123 @@ class BookDetailViewModel(
     }
     
     /**
-     * Link book to a search result from AniList
+     * Search for this book on AniList (legacy compatibility)
      */
-    fun linkToAniList(searchResult: ireader.domain.models.entities.TrackSearchResult) {
+    fun searchOnAniList(query: String) {
+        searchOnService(ireader.domain.models.entities.TrackerService.ANILIST, query)
+    }
+    
+    /**
+     * Link book to a search result from a tracking service
+     */
+    fun linkToService(serviceId: Int, searchResult: ireader.domain.models.entities.TrackSearchResult) {
         val bookId = param.bookId ?: return
         if (trackingRepository == null) return
         
         scope.launch {
             try {
-                val success = trackingRepository.linkBook(
-                    bookId,
-                    ireader.domain.models.entities.TrackerService.ANILIST,
-                    searchResult
-                )
+                val success = trackingRepository.linkBook(bookId, serviceId, searchResult)
                 
                 if (success) {
                     // Reload tracking status
                     val tracks = trackingRepository.getTracksByBook(bookId)
-                    val anilistTrack = tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }
+                    val track = tracks.find { it.siteId == serviceId }
                     
-                    if (anilistTrack != null) {
-                        currentTrack = anilistTrack
-                        isTracked = true
-                        trackingStatus = anilistTrack.status.name
-                        trackingProgress = anilistTrack.lastRead.toInt()
-                        trackingScore = anilistTrack.score
+                    if (track != null) {
+                        when (serviceId) {
+                            ireader.domain.models.entities.TrackerService.ANILIST -> {
+                                aniListTrack = track
+                                isAniListTracked = true
+                                aniListStatus = track.status.name
+                                aniListProgress = track.lastRead.toInt()
+                                aniListScore = track.score
+                            }
+                            ireader.domain.models.entities.TrackerService.MYANIMELIST -> {
+                                malTrack = track
+                                isMalTracked = true
+                                malStatus = track.status.name
+                                malProgress = track.lastRead.toInt()
+                                malScore = track.score
+                            }
+                            ireader.domain.models.entities.TrackerService.KITSU -> {
+                                kitsuTrack = track
+                                isKitsuTracked = true
+                                kitsuStatus = track.status.name
+                                kitsuProgress = track.lastRead.toInt()
+                                kitsuScore = track.score
+                            }
+                            ireader.domain.models.entities.TrackerService.MANGAUPDATES -> {
+                                mangaUpdatesTrack = track
+                                isMangaUpdatesTracked = true
+                                mangaUpdatesStatus = track.status.name
+                                mangaUpdatesProgress = track.lastRead.toInt()
+                                mangaUpdatesScore = track.score
+                            }
+                        }
                     }
                     
                     showTrackingSearchDialog = false
-                    emitEvent(BookDetailEvent.ShowSnackbar("Added to AniList: ${searchResult.title}"))
+                    val serviceName = getServiceName(serviceId)
+                    emitEvent(BookDetailEvent.ShowSnackbar("Added to $serviceName: ${searchResult.title}"))
                 } else {
-                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to add to AniList"))
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to add tracking"))
                 }
             } catch (e: Exception) {
-                Log.error(e, "Failed to link to AniList")
+                Log.error(e, "Failed to link to service $serviceId")
                 emitEvent(BookDetailEvent.ShowSnackbar("Failed to add: ${e.message}"))
             }
         }
     }
     
     /**
-     * Remove tracking for the current book
+     * Link book to a search result from AniList (legacy compatibility)
      */
-    fun removeTracking() {
+    fun linkToAniList(searchResult: ireader.domain.models.entities.TrackSearchResult) {
+        linkToService(ireader.domain.models.entities.TrackerService.ANILIST, searchResult)
+    }
+    
+    /**
+     * Remove tracking for the current book from a specific service
+     */
+    fun removeTrackingFromService(serviceId: Int) {
         val bookId = param.bookId ?: return
         if (trackingRepository == null) return
         
         scope.launch {
             try {
-                val success = trackingRepository.removeTrack(
-                    bookId,
-                    ireader.domain.models.entities.TrackerService.ANILIST
-                )
+                val success = trackingRepository.removeTrack(bookId, serviceId)
                 
                 if (success) {
-                    currentTrack = null
-                    isTracked = false
-                    trackingStatus = null
-                    trackingProgress = null
-                    trackingScore = null
+                    when (serviceId) {
+                        ireader.domain.models.entities.TrackerService.ANILIST -> {
+                            aniListTrack = null
+                            isAniListTracked = false
+                            aniListStatus = null
+                            aniListProgress = null
+                            aniListScore = null
+                        }
+                        ireader.domain.models.entities.TrackerService.MYANIMELIST -> {
+                            malTrack = null
+                            isMalTracked = false
+                            malStatus = null
+                            malProgress = null
+                            malScore = null
+                        }
+                        ireader.domain.models.entities.TrackerService.KITSU -> {
+                            kitsuTrack = null
+                            isKitsuTracked = false
+                            kitsuStatus = null
+                            kitsuProgress = null
+                            kitsuScore = null
+                        }
+                        ireader.domain.models.entities.TrackerService.MANGAUPDATES -> {
+                            mangaUpdatesTrack = null
+                            isMangaUpdatesTracked = false
+                            mangaUpdatesStatus = null
+                            mangaUpdatesProgress = null
+                            mangaUpdatesScore = null
+                        }
+                    }
                     emitEvent(BookDetailEvent.ShowSnackbar("Tracking removed"))
                 } else {
                     emitEvent(BookDetailEvent.ShowSnackbar("Failed to remove tracking"))
@@ -1783,9 +1950,16 @@ class BookDetailViewModel(
     }
     
     /**
-     * Update tracking status value (Reading, Completed, etc.)
+     * Remove tracking for the current book (legacy - removes AniList)
      */
-    fun updateTrackingStatusValue(status: String) {
+    fun removeTracking() {
+        removeTrackingFromService(ireader.domain.models.entities.TrackerService.ANILIST)
+    }
+    
+    /**
+     * Update tracking status value for a specific service
+     */
+    fun updateServiceStatus(serviceId: Int, status: String) {
         val bookId = param.bookId ?: return
         if (trackingRepository == null) return
         
@@ -1798,13 +1972,28 @@ class BookDetailViewModel(
         
         scope.launch {
             try {
-                val success = trackingRepository.updateStatus(bookId, trackStatus)
+                // Get the track for this service
+                val tracks = trackingRepository.getTracksByBook(bookId)
+                val track = tracks.find { it.siteId == serviceId }
                 
-                if (success) {
-                    trackingStatus = status
-                    emitEvent(BookDetailEvent.ShowSnackbar("Status updated to $status"))
-                } else {
-                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to update status"))
+                if (track != null) {
+                    val update = ireader.domain.models.entities.TrackUpdate(
+                        id = track.id,
+                        status = trackStatus
+                    )
+                    val success = trackingRepository.updateTrack(update)
+                    
+                    if (success) {
+                        when (serviceId) {
+                            ireader.domain.models.entities.TrackerService.ANILIST -> aniListStatus = status
+                            ireader.domain.models.entities.TrackerService.MYANIMELIST -> malStatus = status
+                            ireader.domain.models.entities.TrackerService.KITSU -> kitsuStatus = status
+                            ireader.domain.models.entities.TrackerService.MANGAUPDATES -> mangaUpdatesStatus = status
+                        }
+                        emitEvent(BookDetailEvent.ShowSnackbar("Status updated to $status"))
+                    } else {
+                        emitEvent(BookDetailEvent.ShowSnackbar("Failed to update status"))
+                    }
                 }
             } catch (e: Exception) {
                 Log.error(e, "Failed to update tracking status")
@@ -1814,21 +2003,35 @@ class BookDetailViewModel(
     }
     
     /**
-     * Update tracking progress (chapters read)
+     * Update tracking progress for a specific service
      */
-    fun updateTrackingProgress(progress: Int) {
+    fun updateServiceProgress(serviceId: Int, progress: Int) {
         val bookId = param.bookId ?: return
         if (trackingRepository == null) return
         
         scope.launch {
             try {
-                val success = trackingRepository.updateReadingProgress(bookId, progress)
+                val tracks = trackingRepository.getTracksByBook(bookId)
+                val track = tracks.find { it.siteId == serviceId }
                 
-                if (success) {
-                    trackingProgress = progress
-                    emitEvent(BookDetailEvent.ShowSnackbar("Progress updated to $progress"))
-                } else {
-                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to update progress"))
+                if (track != null) {
+                    val update = ireader.domain.models.entities.TrackUpdate(
+                        id = track.id,
+                        lastRead = progress.toFloat()
+                    )
+                    val success = trackingRepository.updateTrack(update)
+                    
+                    if (success) {
+                        when (serviceId) {
+                            ireader.domain.models.entities.TrackerService.ANILIST -> aniListProgress = progress
+                            ireader.domain.models.entities.TrackerService.MYANIMELIST -> malProgress = progress
+                            ireader.domain.models.entities.TrackerService.KITSU -> kitsuProgress = progress
+                            ireader.domain.models.entities.TrackerService.MANGAUPDATES -> mangaUpdatesProgress = progress
+                        }
+                        emitEvent(BookDetailEvent.ShowSnackbar("Progress updated to $progress"))
+                    } else {
+                        emitEvent(BookDetailEvent.ShowSnackbar("Failed to update progress"))
+                    }
                 }
             } catch (e: Exception) {
                 Log.error(e, "Failed to update tracking progress")
@@ -1838,27 +2041,70 @@ class BookDetailViewModel(
     }
     
     /**
-     * Update tracking score
+     * Update tracking score for a specific service
      */
-    fun updateTrackingScore(score: Float) {
+    fun updateServiceScore(serviceId: Int, score: Float) {
         val bookId = param.bookId ?: return
         if (trackingRepository == null) return
         
         scope.launch {
             try {
-                val success = trackingRepository.updateScore(bookId, score)
+                val tracks = trackingRepository.getTracksByBook(bookId)
+                val track = tracks.find { it.siteId == serviceId }
                 
-                if (success) {
-                    trackingScore = score
-                    emitEvent(BookDetailEvent.ShowSnackbar("Score updated to ${"%.1f".format(score)}"))
-                } else {
-                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to update score"))
+                if (track != null) {
+                    val update = ireader.domain.models.entities.TrackUpdate(
+                        id = track.id,
+                        score = score
+                    )
+                    val success = trackingRepository.updateTrack(update)
+                    
+                    if (success) {
+                        when (serviceId) {
+                            ireader.domain.models.entities.TrackerService.ANILIST -> aniListScore = score
+                            ireader.domain.models.entities.TrackerService.MYANIMELIST -> malScore = score
+                            ireader.domain.models.entities.TrackerService.KITSU -> kitsuScore = score
+                            ireader.domain.models.entities.TrackerService.MANGAUPDATES -> mangaUpdatesScore = score
+                        }
+                        emitEvent(BookDetailEvent.ShowSnackbar("Score updated to ${"%.1f".format(score)}"))
+                    } else {
+                        emitEvent(BookDetailEvent.ShowSnackbar("Failed to update score"))
+                    }
                 }
             } catch (e: Exception) {
                 Log.error(e, "Failed to update tracking score")
                 emitEvent(BookDetailEvent.ShowSnackbar("Failed to update score: ${e.message}"))
             }
         }
+    }
+    
+    private fun getServiceName(serviceId: Int): String = when (serviceId) {
+        ireader.domain.models.entities.TrackerService.ANILIST -> "AniList"
+        ireader.domain.models.entities.TrackerService.MYANIMELIST -> "MyAnimeList"
+        ireader.domain.models.entities.TrackerService.KITSU -> "Kitsu"
+        ireader.domain.models.entities.TrackerService.MANGAUPDATES -> "MangaUpdates"
+        else -> "Unknown"
+    }
+    
+    /**
+     * Update tracking status value (Reading, Completed, etc.) - legacy compatibility
+     */
+    fun updateTrackingStatusValue(status: String) {
+        updateServiceStatus(ireader.domain.models.entities.TrackerService.ANILIST, status)
+    }
+    
+    /**
+     * Update tracking progress (chapters read) - legacy compatibility
+     */
+    fun updateTrackingProgress(progress: Int) {
+        updateServiceProgress(ireader.domain.models.entities.TrackerService.ANILIST, progress)
+    }
+    
+    /**
+     * Update tracking score - legacy compatibility
+     */
+    fun updateTrackingScore(score: Float) {
+        updateServiceScore(ireader.domain.models.entities.TrackerService.ANILIST, score)
     }
     
     /**

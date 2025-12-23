@@ -146,6 +146,7 @@ private fun TrackingServiceCard(
                             "anilist" -> Icons.Outlined.Favorite
                             "mal" -> Icons.Outlined.Star
                             "kitsu" -> Icons.Outlined.Pets
+                            "mangaupdates" -> Icons.Outlined.Update
                             else -> Icons.Outlined.Sync
                         },
                         contentDescription = null,
