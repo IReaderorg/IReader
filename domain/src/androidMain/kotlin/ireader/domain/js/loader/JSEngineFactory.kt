@@ -265,6 +265,59 @@ private object AdapterCodeCache {
             };
         }
 
+        // FormData polyfill - needed for POST requests with form data
+        if (typeof FormData === 'undefined') {
+            globalThis.FormData = function() {
+                this._data = {};
+            };
+            globalThis.FormData.prototype.append = function(key, value) {
+                if (!this._data[key]) {
+                    this._data[key] = [];
+                }
+                this._data[key].push(String(value));
+            };
+            globalThis.FormData.prototype.set = function(key, value) {
+                this._data[key] = [String(value)];
+            };
+            globalThis.FormData.prototype.get = function(key) {
+                return this._data[key] ? this._data[key][0] : null;
+            };
+            globalThis.FormData.prototype.getAll = function(key) {
+                return this._data[key] || [];
+            };
+            globalThis.FormData.prototype.has = function(key) {
+                return key in this._data;
+            };
+            globalThis.FormData.prototype.delete = function(key) {
+                delete this._data[key];
+            };
+            globalThis.FormData.prototype.keys = function() {
+                return Object.keys(this._data);
+            };
+            globalThis.FormData.prototype.entries = function() {
+                var result = [];
+                for (var key in this._data) {
+                    if (this._data.hasOwnProperty(key)) {
+                        for (var i = 0; i < this._data[key].length; i++) {
+                            result.push([key, this._data[key][i]]);
+                        }
+                    }
+                }
+                return result;
+            };
+            globalThis.FormData.prototype.toString = function() {
+                var parts = [];
+                for (var key in this._data) {
+                    if (this._data.hasOwnProperty(key)) {
+                        for (var i = 0; i < this._data[key].length; i++) {
+                            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(this._data[key][i]));
+                        }
+                    }
+                }
+                return parts.join('&');
+            };
+        }
+
         // TextEncoder/TextDecoder polyfills
         if (typeof TextEncoder === 'undefined') {
             globalThis.TextEncoder = function() {
@@ -592,8 +645,22 @@ private class J2V8ReflectionEngine(
                         if (typeof options.body === 'string') {
                             bodyStr = options.body;
                         } else if (options.body instanceof FormData) {
-                            // FormData not fully supported, convert to URL encoded
-                            bodyStr = '';
+                            // Convert FormData to URL-encoded string
+                            var parts = [];
+                            var data = options.body._data || {};
+                            for (var key in data) {
+                                if (data.hasOwnProperty(key)) {
+                                    var values = data[key];
+                                    for (var i = 0; i < values.length; i++) {
+                                        parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(values[i]));
+                                    }
+                                }
+                            }
+                            bodyStr = parts.join('&');
+                            // Set content-type header for form data
+                            if (!headersObj['content-type'] && !headersObj['Content-Type']) {
+                                headersObj['Content-Type'] = 'application/x-www-form-urlencoded';
+                            }
                         } else {
                             bodyStr = String(options.body);
                         }
