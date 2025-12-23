@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 30
+    const val CURRENT_VERSION = 31
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -95,6 +95,7 @@ object DatabaseMigrations {
             27 -> migrateV27toV28(driver)
             28 -> migrateV28toV29(driver)
             29 -> migrateV29toV30(driver)
+            30 -> migrateV30toV31(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2312,6 +2313,49 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(30, e)
+        }
+    }
+
+    /**
+     * Migration from version 30 to version 31
+     * Adds explore_book table for temporary storage of browsed books
+     * This table has a fixed size limit and auto-cleans old entries
+     * Books are promoted to the main 'book' table when favorited or viewed in detail
+     */
+    private fun migrateV30toV31(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(30, 31)
+            
+            // Create explore_book table
+            val createExploreBookTableSql = """
+                CREATE TABLE IF NOT EXISTS explore_book(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    source_id INTEGER NOT NULL,
+                    url TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    author TEXT,
+                    description TEXT,
+                    genre TEXT,
+                    status INTEGER NOT NULL DEFAULT 0,
+                    cover TEXT,
+                    date_added INTEGER NOT NULL,
+                    UNIQUE(url, source_id)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createExploreBookTableSql, 0)
+            Logger.logTableCreated("explore_book")
+            
+            // Create indexes
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_explore_book_source ON explore_book(source_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_explore_book_date ON explore_book(date_added ASC);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_explore_book_url ON explore_book(url, source_id);", 0)
+            Logger.logIndexCreated("explore_book indexes")
+            
+            Logger.logMigrationSuccess(31)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(31, e)
         }
     }
 

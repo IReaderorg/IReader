@@ -12,6 +12,7 @@ import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
+import ireader.domain.services.library.LibraryChangeNotifier
 import ireader.core.log.IReaderLog
 import ireader.core.performance.PerformanceMonitor
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +20,8 @@ import kotlinx.coroutines.flow.Flow
 class BookRepositoryImpl(
     private val handler: DatabaseHandler,
     private val bookCategoryRepository: BookCategoryRepository,
-    private val dbOptimizations: DatabaseOptimizations? = null
+    private val dbOptimizations: DatabaseOptimizations? = null,
+    private val changeNotifier: LibraryChangeNotifier? = null
 ) : BookRepository, BaseDao<Book>() {
     override suspend fun findAllBooks(): List<Book> {
         return PerformanceMonitor.measureDatabaseOperation("findAllBooks") {
@@ -94,11 +96,19 @@ class BookRepositoryImpl(
     }
 
     override suspend fun deleteBooks(book: List<Book>) {
-        return handler.await(inTransaction = true) {
+        val bookIds = book.map { it.id }
+        handler.await(inTransaction = true) {
             dbOperation(book) { book ->
                 bookQueries.deleteBook(book.id)
             }
-
+        }
+        // Notify deletions
+        if (bookIds.size <= 100) {
+            bookIds.forEach { bookId ->
+                changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BookRemoved(bookId))
+            }
+        } else {
+            changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.FullRefresh)
         }
     }
 
@@ -110,6 +120,7 @@ class BookRepositoryImpl(
         handler.await {
             bookQueries.deleteBook(id)
         }
+        changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BookRemoved(id))
     }
 
     override suspend fun findDuplicateBook(title: String, sourceId: Long): Book? {
@@ -132,10 +143,12 @@ class BookRepositoryImpl(
         handler.await {
             bookQueries.deleteNotInLibraryBooks()
         }
+        // Can't know which books were deleted, signal full refresh
+        changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.FullRefresh)
     }
 
     override suspend fun updateBook(book: Book) {
-        return handler.await(inTransaction = true) {
+        handler.await(inTransaction = true) {
             bookQueries.update(
                 source = book.sourceId,
                 dateAdded = book.dateAdded,
@@ -158,19 +171,25 @@ class BookRepositoryImpl(
                 pinnedOrder = book.pinnedOrder.toLong(),
                 isArchived = book.isArchived,
             )
-
+        }
+        // Notify change - if book is now favorite, it was added to library
+        if (book.favorite) {
+            changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BookAdded(book.id))
+        } else {
+            changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BookUpdated(book.id))
         }
     }
 
 
     override suspend fun updateBook(book: LibraryBook, favorite: Boolean) {
-        return handler.await {
+        handler.await {
             updateBooksOperation(book.toBook())
         }
+        changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BookUpdated(book.id))
     }
 
     override suspend fun updateBook(book: List<Book>) {
-        return handler.await(inTransaction = true) {
+        handler.await(inTransaction = true) {
             book.forEach { bookItem ->
                 try {
                     bookQueries.update(
@@ -200,6 +219,12 @@ class BookRepositoryImpl(
                 }
             }
             IReaderLog.info("Batch book update completed: ${book.size} books")
+        }
+        // Notify batch update
+        if (book.size <= 100) {
+            changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BooksUpdated(book.map { it.id }))
+        } else {
+            changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.FullRefresh)
         }
     }
 
@@ -307,10 +332,12 @@ class BookRepositoryImpl(
                     isArchived = existingBook.isArchived, // Preserve archive status
                 )
             }
+            // Notify update for existing book
+            changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BookUpdated(existingBook.id))
             existingBook.id
         } else {
             // Book doesn't exist - insert it
-            handler.awaitOneOrNullAsync(inTransaction = true) {
+            val insertedId = handler.awaitOneOrNullAsync(inTransaction = true) {
                 bookQueries.upsert(
                     id = book.id.toDB(),
                     source = book.sourceId,
@@ -337,6 +364,11 @@ class BookRepositoryImpl(
                 )
                 bookQueries.selectLastInsertedRowId()
             } ?: -1
+            // Notify new book added (if it's a favorite/library book)
+            if (book.favorite && insertedId > 0) {
+                changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BookAdded(insertedId))
+            }
+            insertedId
         }
     }
 
@@ -383,6 +415,16 @@ class BookRepositoryImpl(
             bookCategoryRepository.insertAll(bookCategories)
         } catch (_: Exception) {
             // Silently ignore category insertion errors
+        }
+
+        // Notify new books added (only favorites go to library)
+        val favoriteIds = book.zip(ids).filter { (b, _) -> b.favorite }.map { (_, id) -> id }
+        if (favoriteIds.isNotEmpty()) {
+            if (favoriteIds.size <= 100) {
+                changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BooksUpdated(favoriteIds))
+            } else {
+                changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.FullRefresh)
+            }
         }
 
         return ids

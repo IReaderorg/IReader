@@ -17,7 +17,16 @@ import org.koin.dsl.module
  */
 val bookRepositoryModule = module {
     single<BookCategoryRepository> { BookCategoryRepositoryImpl(get()) }
-    single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>(), getOrNull()) }
+    // BookRepositoryImpl now receives LibraryChangeNotifier to emit change events
+    // when books are added/updated/deleted from the library
+    single<BookRepository> { 
+        BookRepositoryImpl(
+            handler = get(), 
+            bookCategoryRepository = get<BookCategoryRepository>(), 
+            dbOptimizations = getOrNull(),
+            changeNotifier = getOrNull<LibraryChangeNotifier>() // Optional - may not be available in tests
+        ) 
+    }
     single<ExploreBookRepository> { ExploreBookRepositoryImpl(get()) }
     
     // Consolidated BookRepository with caching and change notifications
