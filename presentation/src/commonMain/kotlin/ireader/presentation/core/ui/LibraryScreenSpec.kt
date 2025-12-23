@@ -10,10 +10,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ireader.core.startup.ScreenProfiler
@@ -89,13 +89,13 @@ object LibraryScreenSpec {
             }
         }
         
-        LaunchedEffect(state.selectionMode) {
-            MainStarterScreen.showBottomNav(!state.selectionMode)
-        }
-        
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
+        
+        LaunchedEffect(state.selectionMode) {
+            MainStarterScreen.showBottomNav(!state.selectionMode)
+        }
 
         // Listen for filter sheet requests from double-tap on Library tab
         LaunchedEffect(Unit) {

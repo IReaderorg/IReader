@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.state.ToggleableState
+import ireader.core.log.Log
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
@@ -40,6 +41,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+
+private const val TAG = "LibraryViewModel"
 
 /**
  * ViewModel for the Library screen following Mihon's StateScreenModel pattern.
@@ -751,6 +754,7 @@ class LibraryViewModel(
      * - Loads only the requested page from the database
      * - Uses stable cache key to avoid unnecessary recomputation
      * - Automatically loads initial page when category is first accessed
+     * - Re-triggers load when pagination state is cleared (e.g., after returning from detail screen)
      */
     @Composable
     fun getLibraryForCategoryIndexAsState(categoryIndex: Int): State<List<BookItem>> {
@@ -762,9 +766,16 @@ class LibraryViewModel(
         // Get pagination state for this category
         val paginationState = currentState.categoryPaginationState[categoryId]
         
-        // Load initial page if not loaded yet
-        androidx.compose.runtime.LaunchedEffect(categoryId) {
-            if (paginationState == null && category != null) {
+        // Check if books are loaded for this category
+        val hasBooks = paginatedBooksMap.containsKey(categoryId)
+        
+        // Load initial page if not loaded yet OR if pagination state was cleared (e.g., after refresh)
+        // Key on both categoryId AND paginationState to re-trigger when state is cleared
+        // Also key on hasBooks to handle the case where books were cleared but pagination state wasn't yet
+        androidx.compose.runtime.LaunchedEffect(categoryId, paginationState == null, hasBooks) {
+            Log.debug { "$TAG: getLibraryForCategoryIndexAsState LaunchedEffect - categoryId=$categoryId, paginationState=${paginationState != null}, hasBooks=$hasBooks" }
+            if (category != null && (paginationState == null || !hasBooks)) {
+                Log.debug { "$TAG: Triggering loadInitialBooksForCategory for categoryId=$categoryId" }
                 loadInitialBooksForCategory(categoryId)
             }
         }
@@ -987,8 +998,8 @@ class LibraryViewModel(
         // Update UI state
         _uiState.update { it.copy(sort = newSort) }
         
-        // Reset pagination to reload with new sort
-        resetAllPagination()
+        // Reset pagination to reload with new sort - pass the new sort directly
+        resetAllPagination(newSort = newSort)
     }
     
     /**
@@ -1045,15 +1056,38 @@ class LibraryViewModel(
      * @param forceRefresh If true, will reload even if data is already cached (used after showing preloaded cache)
      */
     fun loadInitialBooksForCategory(categoryId: Long, forceRefresh: Boolean = false) {
-        // Cancel any existing load job for this category (shouldn't happen but just in case)
+        loadInitialBooksForCategoryWithParams(categoryId, forceRefresh, null, null)
+    }
+    
+    /**
+     * Load initial page of books for a category from database with optional parameter overrides.
+     * This is used when sort/filter changes to ensure the new values are used immediately
+     * before the StateFlow updates.
+     * 
+     * @param categoryId The category to load books for
+     * @param forceRefresh If true, will reload even if data is already cached
+     * @param sortOverride Optional sort to use instead of the current StateFlow value
+     * @param filtersOverride Optional filters to use instead of the current StateFlow value
+     */
+    private fun loadInitialBooksForCategoryWithParams(
+        categoryId: Long,
+        forceRefresh: Boolean = false,
+        sortOverride: LibrarySort? = null,
+        filtersOverride: List<LibraryFilter>? = null
+    ) {
+        // Cancel any existing load job for this category
         paginationLoadJobs[categoryId]?.cancel()
         
         paginationLoadJobs[categoryId] = scope.launch {
             // Prevent duplicate loads - check if already loading or loaded (inside coroutine for thread safety)
             val shouldLoad = loadingCategoriesMutex.withLock {
                 when {
-                    categoryId in loadingCategories -> false
-                    !forceRefresh && _paginatedBooks.value.containsKey(categoryId) -> false
+                    categoryId in loadingCategories -> {
+                        false
+                    }
+                    !forceRefresh && _paginatedBooks.value.containsKey(categoryId) -> {
+                        false
+                    }
                     else -> {
                         loadingCategories.add(categoryId)
                         true
@@ -1064,8 +1098,9 @@ class LibraryViewModel(
             if (!shouldLoad) return@launch
             
             try {
-                val sort = sorting.value
-                val filtersList = filters.value
+                // Use override values if provided, otherwise use current StateFlow values
+                val sort = sortOverride ?: sorting.value
+                val filtersList = filtersOverride ?: filters.value
                 val includeArchived = showArchivedBooks.value
                 
                 // Load first page from database
@@ -1102,7 +1137,11 @@ class LibraryViewModel(
                     )
                     current.copy(categoryPaginationState = newPaginationState)
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Job was cancelled - this is expected when a new load is triggered
+                throw e // Re-throw to properly cancel the coroutine
             } catch (e: Exception) {
+                Log.error(e, "$TAG: Error loading books for category $categoryId")
                 // On error, fall back to empty state
                 _uiState.update { current ->
                     val newPaginationState = current.categoryPaginationState.toMutableMap()
@@ -1218,20 +1257,30 @@ class LibraryViewModel(
             current.copy(categoryPaginationState = newPaginationState)
         }
         
-        // Reload from database
-        loadInitialBooksForCategory(categoryId)
+        // Reload from database with forceRefresh to ensure it loads
+        loadInitialBooksForCategory(categoryId, forceRefresh = true)
     }
     
     /**
      * Reset pagination for all categories.
      * Call this when global settings change (sort, filter, archived).
+     * 
+     * @param newSort Optional new sort to use (if called from toggleSort before StateFlow updates)
+     * @param newFilters Optional new filters to use (if called from toggleFilter before StateFlow updates)
      */
-    fun resetAllPagination() {
+    fun resetAllPagination(
+        newSort: LibrarySort? = null,
+        newFilters: List<LibraryFilter>? = null
+    ) {
         scope.launch {
             // Clear loading state
             loadingCategoriesMutex.withLock {
                 loadingCategories.clear()
             }
+            
+            // Cancel all existing load jobs
+            paginationLoadJobs.values.forEach { it?.cancel() }
+            paginationLoadJobs.clear()
             
             // Clear all cached data
             _paginatedBooks.value = emptyMap()
@@ -1242,9 +1291,14 @@ class LibraryViewModel(
                 current.copy(categoryPaginationState = emptyMap())
             }
             
-            // Reload current category
+            // Reload current category with forceRefresh to ensure it loads
             val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
-            loadInitialBooksForCategory(currentCategoryId)
+            loadInitialBooksForCategoryWithParams(
+                categoryId = currentCategoryId,
+                forceRefresh = true,
+                sortOverride = newSort,
+                filtersOverride = newFilters
+            )
         }
     }
     
@@ -1252,33 +1306,82 @@ class LibraryViewModel(
      * Refresh the current category's books from database.
      * Call this when returning to the library screen to pick up any changes
      * (e.g., last_read_at updated after reading a chapter).
+     * 
+     * IMPORTANT: This method does NOT clear existing books before loading new ones.
+     * This prevents the "disappearing books" issue when navigating quickly.
+     * The new books will atomically replace the old ones once loaded.
      */
     fun refreshCurrentCategory() {
         val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
+        Log.info { "$TAG: refreshCurrentCategory() called for categoryId=$currentCategoryId" }
         
+        // Cancel any existing load job for this category to prevent race conditions
+        paginationLoadJobs[currentCategoryId]?.cancel()
+        paginationLoadJobs[currentCategoryId] = null
+        
+        // Launch a coroutine to handle the refresh properly
         scope.launch {
-            // Clear loading state for this category
+            // Clear loading state so the new load can proceed
+            // This must happen BEFORE we check shouldLoad in the load method
             loadingCategoriesMutex.withLock {
                 loadingCategories.remove(currentCategoryId)
             }
             
-            // Clear cached data for this category
-            _paginatedBooks.update { current ->
-                current - currentCategoryId
-            }
-            _paginatedTotalCounts.update { current ->
-                current - currentCategoryId
-            }
+            // DON'T clear the books here - the new books will replace them atomically
+            // This prevents the "disappearing books" issue when navigating quickly
             
-            // Reset pagination state for this category
-            _uiState.update { current ->
-                val newPaginationState = current.categoryPaginationState.toMutableMap()
-                newPaginationState.remove(currentCategoryId)
-                current.copy(categoryPaginationState = newPaginationState)
+            // Now load the books directly in this coroutine (not via loadInitialBooksForCategoryWithParams
+            // which would launch another coroutine and potentially race with the loading state)
+            try {
+                val sort = sorting.value
+                val filtersList = filters.value
+                val includeArchived = showArchivedBooks.value
+                
+                Log.info { "$TAG: refreshCurrentCategory() loading books with sort=${sort.type}/${if (sort.isAscending) "asc" else "desc"}" }
+                
+                // Load first page from database
+                val (books, totalCount) = libraryUseCases.getLibraryCategory.awaitPaginated(
+                    categoryId = currentCategoryId,
+                    sort = sort,
+                    filters = filtersList,
+                    limit = PaginationState.INITIAL_PAGE_SIZE,
+                    offset = 0,
+                    includeArchived = includeArchived
+                )
+                
+                Log.info { "$TAG: refreshCurrentCategory() loaded ${books.size} books (total=$totalCount)" }
+                
+                // Track when this category was loaded
+                lastCategoryLoadTime[currentCategoryId] = ireader.domain.utils.extensions.currentTimeToLong()
+                
+                // Update paginated books state - this atomically replaces the old books
+                _paginatedBooks.update { current ->
+                    current + (currentCategoryId to books)
+                }
+                
+                // Update total counts
+                _paginatedTotalCounts.update { current ->
+                    current + (currentCategoryId to totalCount)
+                }
+                
+                // Update pagination state
+                _uiState.update { current ->
+                    val newPaginationState = current.categoryPaginationState.toMutableMap()
+                    newPaginationState[currentCategoryId] = PaginationState(
+                        loadedCount = books.size,
+                        isLoadingMore = false,
+                        hasMoreItems = books.size < totalCount,
+                        totalItems = totalCount
+                    )
+                    current.copy(categoryPaginationState = newPaginationState)
+                }
+                
+                Log.info { "$TAG: refreshCurrentCategory() completed successfully" }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.error(e, "$TAG: Error refreshing category $currentCategoryId")
             }
-            
-            // Reload from database
-            loadInitialBooksForCategory(currentCategoryId)
         }
     }
     
@@ -1295,8 +1398,12 @@ class LibraryViewModel(
         val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
         val lastLoad = lastCategoryLoadTime[currentCategoryId] ?: 0L
         val now = ireader.domain.utils.extensions.currentTimeToLong()
+        val timeSinceLastLoad = now - lastLoad
         
-        if (now - lastLoad > STALE_THRESHOLD_MS) {
+        Log.debug { "$TAG: refreshCurrentCategoryIfStale - categoryId=$currentCategoryId, timeSinceLastLoad=${timeSinceLastLoad}ms, threshold=${STALE_THRESHOLD_MS}ms" }
+        
+        if (timeSinceLastLoad > STALE_THRESHOLD_MS) {
+            Log.debug { "$TAG: Data is stale, refreshing category $currentCategoryId" }
             refreshCurrentCategory()
         }
     }

@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,14 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import ireader.core.log.Log
+
+/**
+ * CompositionLocal to provide the current visible tab index to child composables.
+ * This allows tabs to detect when they become visible and refresh their data.
+ * Value of -1 means no tab is currently visible (initial state).
+ */
+val LocalVisibleTabIndex = compositionLocalOf { -1 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 object MainStarterScreen {
@@ -159,6 +168,53 @@ object MainStarterScreen {
             switchTabEvent.receiveAsFlow().collectLatest { tabIndex ->
                 if (tabIndex in 0..4) {
                     currentTabIndex = tabIndex
+                }
+            }
+        }
+        
+        // Track navigation to refresh library when returning from detail screen
+        // This is more reliable than tracking in LibraryScreenSpec because MainStarterScreen
+        // is always in the composition tree
+        var wasOnDetailScreen by remember { mutableStateOf(false) }
+        var lastRefreshTime by remember { mutableStateOf(0L) }
+        val REFRESH_DEBOUNCE_MS = 500L // Debounce rapid navigation
+        
+        // Track navigation changes and trigger refresh with debouncing
+        // Note: We DON'T include libraryVm as a key because we don't want the effect to restart
+        // when libraryVm changes from null to non-null. The wasOnDetailScreen state would be lost.
+        LaunchedEffect(navController) {
+            navController.currentBackStackEntryFlow.collect { backStackEntry ->
+                val currentRoute = backStackEntry.destination.route
+                
+                // Check if we're on a detail screen (route pattern is "bookDetail/{bookId}")
+                val isOnDetailScreen = currentRoute == "bookDetail/{bookId}" || currentRoute?.startsWith("bookDetail/") == true
+                
+                // Check if we're on a reader screen (route pattern is "reader/{bookId}/{chapterId}")
+                // This is important because last_read_at is updated when reading
+                val isOnReaderScreen = currentRoute == "reader/{bookId}/{chapterId}" || currentRoute?.startsWith("reader/") == true
+                
+                Log.info { "Navigation: route=$currentRoute, wasOnDetailScreen=$wasOnDetailScreen, isOnDetailScreen=$isOnDetailScreen, isOnReaderScreen=$isOnReaderScreen, currentTabIndex=$currentTabIndex" }
+                
+                // Check if we're returning to main from a detail or reader screen
+                if (currentRoute == "main") {
+                    if (wasOnDetailScreen && currentTabIndex == 0) {
+                        val now = ireader.domain.utils.extensions.currentTimeToLong()
+                        val timeSinceLastRefresh = now - lastRefreshTime
+                        
+                        Log.info { "Navigation: Returning to library, timeSinceLastRefresh=${timeSinceLastRefresh}ms, libraryVm=${if (libraryVm != null) "available" else "null"}" }
+                        
+                        // Only refresh if enough time has passed (debounce rapid navigation)
+                        // AND libraryVm is available
+                        if (timeSinceLastRefresh > REFRESH_DEBOUNCE_MS && libraryVm != null) {
+                            lastRefreshTime = now
+                            Log.info { "Navigation: Triggering refreshCurrentCategory()" }
+                            libraryVm.refreshCurrentCategory()
+                        }
+                    }
+                    wasOnDetailScreen = false
+                } else if (isOnDetailScreen || isOnReaderScreen) {
+                    // Track both detail and reader screens - we want to refresh when returning from either
+                    wasOnDetailScreen = true
                 }
             }
         }
@@ -325,12 +381,15 @@ object MainStarterScreen {
                         .consumeWindowInsets(contentPadding)
                         .fillMaxSize(),
                 ) {
-                    // Optimized tab container with lazy init + memory retention
-                    PersistentTabContainer(
-                        currentTabIndex = currentTabIndex,
-                        visitedTabs = visitedTabs,
-                        showUpdates = vm.showUpdate.value
-                    )
+                    // Provide current tab index to child composables so they can detect visibility changes
+                    CompositionLocalProvider(LocalVisibleTabIndex provides currentTabIndex) {
+                        // Optimized tab container with lazy init + memory retention
+                        PersistentTabContainer(
+                            currentTabIndex = currentTabIndex,
+                            visitedTabs = visitedTabs,
+                            showUpdates = vm.showUpdate.value
+                        )
+                    }
                 }
             }
             
