@@ -89,7 +89,11 @@ object GraalVMEngineHelper : KoinComponent {
             return false
         }
         
-        if (initAttempted) return false
+        // Allow retry if we have a new classloader (plugin was reinstalled)
+        if (initAttempted && graalvmClassLoader == pluginClassLoader) {
+            Log.debug { "GraalVMEngineHelper: Already attempted with this classloader" }
+            return false
+        }
         
         Log.info { "GraalVMEngineHelper: Initializing GraalVM..." }
         
@@ -117,10 +121,20 @@ object GraalVMEngineHelper : KoinComponent {
             // Get Value methods
             cachedAsStringMethod = valueClass.getMethod("asString")
             
-            // Test creating a context
+            // Test creating a context with ICU disabled to avoid NoClassDefFoundError
             val builder = cachedNewBuilderMethod?.invoke(null, arrayOf("js"))
-            val builderWithAccess = cachedAllowAllAccessMethod?.invoke(builder, true)
-            val context = cachedBuildMethod?.invoke(builderWithAccess)
+            var configuredBuilder = cachedAllowAllAccessMethod?.invoke(builder, true)
+            
+            // Try to disable ICU-based Intl and set UTC timezone
+            try {
+                val optionMethod = configuredBuilder?.javaClass?.getMethod("option", String::class.java, String::class.java)
+                configuredBuilder = optionMethod?.invoke(configuredBuilder, "js.intl-402", "false")
+                configuredBuilder = optionMethod?.invoke(configuredBuilder, "js.timezone", "UTC")
+            } catch (e: Exception) {
+                Log.debug { "GraalVMEngineHelper: Could not set js.intl-402 option: ${e.message}" }
+            }
+            
+            val context = cachedBuildMethod?.invoke(configuredBuilder)
             cachedCloseMethod?.invoke(context)
             
             graalvmClassLoader = pluginClassLoader
@@ -131,8 +145,13 @@ object GraalVMEngineHelper : KoinComponent {
             
         } catch (e: Exception) {
             Log.error { "GraalVMEngineHelper: Failed to initialize: ${e.message}" }
+            Log.error { "GraalVMEngineHelper: Exception type: ${e.javaClass.name}" }
+            if (e.cause != null) {
+                Log.error { "GraalVMEngineHelper: Cause: ${e.cause?.message}" }
+            }
             e.printStackTrace()
             initAttempted = true
+            graalvmClassLoader = pluginClassLoader // Remember which classloader failed
             return false
         }
     }
@@ -197,6 +216,143 @@ private object AdapterCodeCache {
             console.info = function() { };
             console.debug = function() { };
             globalThis.console = console;
+        })();
+
+        // CRITICAL: Force-override Intl FIRST before any other code runs
+        // This prevents ICU NoClassDefFoundError when dayjs or other libs use Intl
+        (function() {
+            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            var monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            function pad(n) { return n < 10 ? '0' + n : String(n); }
+            
+            // Force-override Intl completely to avoid ICU dependency
+            // This MUST happen before any library (like dayjs) tries to use Intl
+            var IntlPolyfill = {
+                DateTimeFormat: function(locale, options) {
+                    this.locale = locale || 'en';
+                    this.options = options || {};
+                },
+                NumberFormat: function(locale, options) {
+                    this.locale = locale || 'en';
+                    this.options = options || {};
+                },
+                Collator: function(locale, options) {
+                    this.locale = locale || 'en';
+                    this.options = options || {};
+                },
+                PluralRules: function(locale, options) {
+                    this.locale = locale || 'en';
+                },
+                RelativeTimeFormat: function(locale, options) {
+                    this.locale = locale || 'en';
+                    this.options = options || {};
+                },
+                ListFormat: function(locale, options) {
+                    this.locale = locale || 'en';
+                    this.options = options || {};
+                },
+                getCanonicalLocales: function(locales) {
+                    if (!locales) return [];
+                    if (typeof locales === 'string') return [locales];
+                    return Array.prototype.slice.call(locales);
+                }
+            };
+            
+            IntlPolyfill.DateTimeFormat.prototype.format = function(date) {
+                if (!(date instanceof Date)) date = new Date(date);
+                if (isNaN(date.getTime())) return 'Invalid Date';
+                var opts = this.options;
+                if (opts.dateStyle === 'full') {
+                    return dayNames[date.getDay()] + ', ' + monthNames[date.getMonth()] + ' ' + 
+                           date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'long') {
+                    return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'medium') {
+                    return monthNamesShort[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'short') {
+                    return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+                }
+                return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+            };
+            IntlPolyfill.DateTimeFormat.prototype.formatToParts = function(date) {
+                if (!(date instanceof Date)) date = new Date(date);
+                return [
+                    { type: 'month', value: monthNames[date.getMonth()] },
+                    { type: 'literal', value: ' ' },
+                    { type: 'day', value: String(date.getDate()) },
+                    { type: 'literal', value: ', ' },
+                    { type: 'year', value: String(date.getFullYear()) }
+                ];
+            };
+            IntlPolyfill.DateTimeFormat.prototype.resolvedOptions = function() {
+                return { locale: this.locale, calendar: 'gregory', numberingSystem: 'latn', timeZone: 'UTC' };
+            };
+            IntlPolyfill.DateTimeFormat.supportedLocalesOf = function() { return ['en']; };
+            
+            IntlPolyfill.NumberFormat.prototype.format = function(num) { return String(num); };
+            IntlPolyfill.NumberFormat.prototype.formatToParts = function(num) {
+                return [{ type: 'integer', value: String(Math.floor(num)) }];
+            };
+            IntlPolyfill.NumberFormat.prototype.resolvedOptions = function() {
+                return { locale: this.locale, numberingSystem: 'latn' };
+            };
+            IntlPolyfill.NumberFormat.supportedLocalesOf = function() { return ['en']; };
+            
+            IntlPolyfill.Collator.prototype.compare = function(a, b) {
+                return String(a).localeCompare(String(b));
+            };
+            IntlPolyfill.Collator.prototype.resolvedOptions = function() {
+                return { locale: this.locale };
+            };
+            IntlPolyfill.Collator.supportedLocalesOf = function() { return ['en']; };
+            
+            IntlPolyfill.PluralRules.prototype.select = function(n) {
+                return n === 1 ? 'one' : 'other';
+            };
+            IntlPolyfill.PluralRules.prototype.resolvedOptions = function() {
+                return { locale: this.locale };
+            };
+            IntlPolyfill.PluralRules.supportedLocalesOf = function() { return ['en']; };
+            
+            IntlPolyfill.RelativeTimeFormat.prototype.format = function(value, unit) {
+                var absVal = Math.abs(value);
+                var suffix = value < 0 ? ' ago' : ' from now';
+                return absVal + ' ' + unit + (absVal !== 1 ? 's' : '') + suffix;
+            };
+            IntlPolyfill.RelativeTimeFormat.prototype.resolvedOptions = function() {
+                return { locale: this.locale };
+            };
+            IntlPolyfill.RelativeTimeFormat.supportedLocalesOf = function() { return ['en']; };
+            
+            IntlPolyfill.ListFormat.prototype.format = function(list) {
+                return Array.prototype.slice.call(list).join(', ');
+            };
+            IntlPolyfill.ListFormat.prototype.resolvedOptions = function() {
+                return { locale: this.locale };
+            };
+            IntlPolyfill.ListFormat.supportedLocalesOf = function() { return ['en']; };
+            
+            // FORCE override - don't check if exists, always replace
+            globalThis.Intl = IntlPolyfill;
+            
+            // Override Date prototype methods to avoid ICU
+            Date.prototype.toLocaleString = function(locale, options) {
+                return monthNames[this.getMonth()] + ' ' + this.getDate() + ', ' + this.getFullYear() + 
+                       ' ' + pad(this.getHours()) + ':' + pad(this.getMinutes()) + ':' + pad(this.getSeconds());
+            };
+            
+            Date.prototype.toLocaleDateString = function(locale, options) {
+                return monthNames[this.getMonth()] + ' ' + this.getDate() + ', ' + this.getFullYear();
+            };
+            
+            Date.prototype.toLocaleTimeString = function(locale, options) {
+                return pad(this.getHours()) + ':' + pad(this.getMinutes()) + ':' + pad(this.getSeconds());
+            };
         })();
 
         // Helper function to check if URL is absolute (has protocol)
@@ -343,6 +499,59 @@ private object AdapterCodeCache {
             };
         }
 
+        // FormData polyfill - needed for POST requests with form data
+        if (typeof FormData === 'undefined') {
+            globalThis.FormData = function() {
+                this._data = {};
+            };
+            globalThis.FormData.prototype.append = function(key, value) {
+                if (!this._data[key]) {
+                    this._data[key] = [];
+                }
+                this._data[key].push(String(value));
+            };
+            globalThis.FormData.prototype.set = function(key, value) {
+                this._data[key] = [String(value)];
+            };
+            globalThis.FormData.prototype.get = function(key) {
+                return this._data[key] ? this._data[key][0] : null;
+            };
+            globalThis.FormData.prototype.getAll = function(key) {
+                return this._data[key] || [];
+            };
+            globalThis.FormData.prototype.has = function(key) {
+                return key in this._data;
+            };
+            globalThis.FormData.prototype.delete = function(key) {
+                delete this._data[key];
+            };
+            globalThis.FormData.prototype.keys = function() {
+                return Object.keys(this._data);
+            };
+            globalThis.FormData.prototype.entries = function() {
+                var result = [];
+                for (var key in this._data) {
+                    if (this._data.hasOwnProperty(key)) {
+                        for (var i = 0; i < this._data[key].length; i++) {
+                            result.push([key, this._data[key][i]]);
+                        }
+                    }
+                }
+                return result;
+            };
+            globalThis.FormData.prototype.toString = function() {
+                var parts = [];
+                for (var key in this._data) {
+                    if (this._data.hasOwnProperty(key)) {
+                        for (var i = 0; i < this._data[key].length; i++) {
+                            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(this._data[key][i]));
+                        }
+                    }
+                }
+                return parts.join('&');
+            };
+        }
+
         // TextEncoder/TextDecoder polyfills
         if (typeof TextEncoder === 'undefined') {
             globalThis.TextEncoder = function() {
@@ -376,6 +585,90 @@ private object AdapterCodeCache {
         globalThis.setInterval = function(callback, delay) { return 0; };
         globalThis.clearTimeout = function(id) { };
         globalThis.clearInterval = function(id) { };
+
+        // Intl polyfill - provides basic date/number formatting without ICU
+        // This is needed because GraalVM JS may not have ICU support
+        if (typeof Intl === 'undefined' || typeof Intl.DateTimeFormat === 'undefined') {
+            globalThis.Intl = globalThis.Intl || {};
+            
+            // Month names for formatting
+            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            var monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            globalThis.Intl.DateTimeFormat = function(locale, options) {
+                this.locale = locale || 'en';
+                this.options = options || {};
+            };
+            
+            globalThis.Intl.DateTimeFormat.prototype.format = function(date) {
+                if (!(date instanceof Date)) {
+                    date = new Date(date);
+                }
+                if (isNaN(date.getTime())) {
+                    return 'Invalid Date';
+                }
+                
+                var opts = this.options;
+                var parts = [];
+                
+                // Handle dateStyle shortcuts
+                if (opts.dateStyle === 'full') {
+                    return dayNames[date.getDay()] + ', ' + monthNames[date.getMonth()] + ' ' + 
+                           date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'long') {
+                    return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'medium') {
+                    return monthNamesShort[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'short') {
+                    return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+                }
+                
+                // Handle individual options
+                if (opts.weekday === 'long') parts.push(dayNames[date.getDay()]);
+                else if (opts.weekday === 'short') parts.push(dayNamesShort[date.getDay()]);
+                
+                if (opts.month === 'long') parts.push(monthNames[date.getMonth()]);
+                else if (opts.month === 'short') parts.push(monthNamesShort[date.getMonth()]);
+                else if (opts.month === 'numeric') parts.push(String(date.getMonth() + 1));
+                else if (opts.month === '2-digit') parts.push(String(date.getMonth() + 1).padStart(2, '0'));
+                
+                if (opts.day === 'numeric') parts.push(String(date.getDate()));
+                else if (opts.day === '2-digit') parts.push(String(date.getDate()).padStart(2, '0'));
+                
+                if (opts.year === 'numeric') parts.push(String(date.getFullYear()));
+                else if (opts.year === '2-digit') parts.push(String(date.getFullYear()).slice(-2));
+                
+                if (parts.length === 0) {
+                    // Default format: Month Day, Year
+                    return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                }
+                
+                return parts.join(' ');
+            };
+            
+            globalThis.Intl.DateTimeFormat.prototype.resolvedOptions = function() {
+                return {
+                    locale: this.locale,
+                    calendar: 'gregory',
+                    numberingSystem: 'latn',
+                    timeZone: 'UTC'
+                };
+            };
+            
+            // NumberFormat polyfill
+            globalThis.Intl.NumberFormat = function(locale, options) {
+                this.locale = locale || 'en';
+                this.options = options || {};
+            };
+            
+            globalThis.Intl.NumberFormat.prototype.format = function(num) {
+                return String(num);
+            };
+        }
 
         // Wrapper function for plugins
         function wrapPlugin(plugin) {
@@ -527,8 +820,13 @@ private class GraalVMReflectionEngine(
                     val optionMethod = configuredBuilder?.javaClass?.getMethod("option", String::class.java, String::class.java)
                     // Suppress interpreter-only warning
                     configuredBuilder = optionMethod?.invoke(configuredBuilder, "engine.WarnInterpreterOnly", "false")
+                    // Disable ICU-based Intl to avoid NoClassDefFoundError for ICU classes
+                    // Note: js.intl-402 is the correct option name (not js.ecma-402)
+                    configuredBuilder = optionMethod?.invoke(configuredBuilder, "js.intl-402", "false")
+                    // Use UTC timezone to avoid ICU TimeZone dependency
+                    configuredBuilder = optionMethod?.invoke(configuredBuilder, "js.timezone", "UTC")
                 } catch (e: Exception) {
-                    Log.debug { "GraalVM: Could not set WarnInterpreterOnly option: ${e.message}" }
+                    Log.debug { "GraalVM: Could not set options: ${e.message}" }
                 }
                 
                 val builderWithAccess = configuredBuilder
@@ -620,14 +918,54 @@ private class GraalVMReflectionEngine(
     private fun setupBridge(ctx: Any) {
         evalMethod?.invoke(ctx, "js", """
             globalThis.fetch = function(url, options) {
+                var requestUrl = String(url || '');
                 return new Promise(function(resolve, reject) {
+                    // Convert Headers object to plain object if needed
+                    var headersObj = {};
+                    if (options && options.headers) {
+                        if (options.headers instanceof Headers) {
+                            // Headers polyfill stores in .headers property
+                            headersObj = options.headers.headers || {};
+                        } else if (typeof options.headers === 'object') {
+                            headersObj = options.headers;
+                        }
+                    }
+                    
+                    // Convert body to string if needed
+                    var bodyStr = null;
+                    if (options && options.body) {
+                        if (typeof options.body === 'string') {
+                            bodyStr = options.body;
+                        } else if (options.body instanceof FormData) {
+                            // Convert FormData to URL-encoded string
+                            var parts = [];
+                            var data = options.body._data || {};
+                            for (var key in data) {
+                                if (data.hasOwnProperty(key)) {
+                                    var values = data[key];
+                                    for (var i = 0; i < values.length; i++) {
+                                        parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(values[i]));
+                                    }
+                                }
+                            }
+                            bodyStr = parts.join('&');
+                            // Set content-type header for form data
+                            if (!headersObj['content-type'] && !headersObj['Content-Type']) {
+                                headersObj['Content-Type'] = 'application/x-www-form-urlencoded';
+                            }
+                        } else {
+                            bodyStr = String(options.body);
+                        }
+                    }
+                    
                     globalThis.__pendingFetch = {
-                        url: String(url || ''),
+                        url: requestUrl,
                         method: (options && options.method) || 'GET',
-                        headers: (options && options.headers) || {},
-                        body: (options && options.body) || null,
+                        headers: headersObj,
+                        body: bodyStr,
                         resolve: resolve,
-                        reject: reject
+                        reject: reject,
+                        requestUrl: requestUrl
                     };
                     globalThis.__fetchReady = true;
                 });
@@ -652,7 +990,17 @@ private class GraalVMReflectionEngine(
             evalMethod?.invoke(context, "js", script)
         } catch (e: Exception) {
             val cause = if (e is java.lang.reflect.InvocationTargetException) e.targetException else e
-            Log.warn { "GraalVM: evaluateVoidScript error: ${cause.message}" }
+            val errorMsg = cause.message ?: cause.toString()
+            
+            // Check if this is an ICU-related error
+            if (errorMsg.contains("icu", ignoreCase = true) || 
+                errorMsg.contains("TimeZone", ignoreCase = true) ||
+                errorMsg.contains("NoClassDefFoundError", ignoreCase = true)) {
+                Log.warn { "GraalVM: ICU-related error in evaluateVoidScript, script may have used Date/Intl features: $errorMsg" }
+                // Don't rethrow - the polyfills should handle this gracefully
+            } else {
+                Log.warn { "GraalVM: evaluateVoidScript error: $errorMsg" }
+            }
         }
     }
     
@@ -845,16 +1193,26 @@ private class GraalVMPluginWrapper(
             val fetchData = json.parseToJsonElement(fetchJson).jsonObject
 
             val url = fetchData["url"]?.jsonPrimitive?.content ?: return
+            val requestUrl = fetchData["requestUrl"]?.jsonPrimitive?.content ?: url
             val method = fetchData["method"]?.jsonPrimitive?.content ?: "GET"
+            
+            // Extract headers
+            val headersObj = fetchData["headers"]?.jsonObject
+            val headers = headersObj?.mapValues { it.value.jsonPrimitive.content } ?: emptyMap()
+            
+            // Extract body for POST requests
+            val body = fetchData["body"]?.jsonPrimitive?.content
 
             val response = withContext(Dispatchers.IO) {
-                bridgeService.fetch(url, FetchOptions(method = method))
+                bridgeService.fetch(url, FetchOptions(method = method, headers = headers, body = body))
             }
 
             // Store response and resolve promise
             val responseBodyVar = "__rb_${System.nanoTime()}"
             engine.evaluateVoidScript("globalThis.$responseBodyVar = ${Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(response.text))};")
 
+            // Include url property in response for redirect detection
+            val responseUrl = response.url ?: url
             engine.evaluateVoidScript("""
                 if (globalThis.__pendingFetch && globalThis.__pendingFetch.resolve) {
                     var bodyText = globalThis.$responseBodyVar;
@@ -862,6 +1220,7 @@ private class GraalVMPluginWrapper(
                     globalThis.__pendingFetch.resolve({
                         ok: ${response.status in 200..299},
                         status: ${response.status},
+                        url: '${responseUrl.replace("'", "\\'")}',
                         text: function() { return Promise.resolve(bodyText); },
                         json: function() { return Promise.resolve(JSON.parse(bodyText)); }
                     });

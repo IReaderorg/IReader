@@ -76,12 +76,16 @@ class JSBridgeServiceImpl(
             
             Log.info("JSBridge: Fetch complete - status ${response.status.value}, ${text.length} chars")
             
+            // Get the final URL (after redirects)
+            val finalUrl = response.request.url.toString()
+            
             FetchResponse(
                 ok = response.status.isSuccess(),
                 status = response.status.value,
                 statusText = response.status.description,
                 headers = headers,
-                text = text
+                text = text,
+                url = finalUrl
             )
         } catch (e: Exception) {
             Log.error("JSBridge: Fetch error for $url", e)
@@ -90,7 +94,8 @@ class JSBridgeServiceImpl(
                 status = 0,
                 statusText = e.message ?: "Unknown error",
                 headers = emptyMap(),
-                text = ""
+                text = "",
+                url = url
             )
         }
     }

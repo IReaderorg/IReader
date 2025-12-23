@@ -46,5 +46,6 @@ data class FetchResponse(
     val status: Int,
     val statusText: String,
     val headers: Map<String, String>,
-    val text: String
+    val text: String,
+    val url: String? = null
 )

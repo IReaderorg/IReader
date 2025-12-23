@@ -299,6 +299,90 @@ private object AdapterCodeCache {
         globalThis.clearTimeout = function(id) { };
         globalThis.clearInterval = function(id) { };
 
+        // Intl polyfill - provides basic date/number formatting without ICU
+        // This is needed because some JS engines may not have ICU support
+        if (typeof Intl === 'undefined' || typeof Intl.DateTimeFormat === 'undefined') {
+            globalThis.Intl = globalThis.Intl || {};
+            
+            // Month names for formatting
+            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            var monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            var dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            globalThis.Intl.DateTimeFormat = function(locale, options) {
+                this.locale = locale || 'en';
+                this.options = options || {};
+            };
+            
+            globalThis.Intl.DateTimeFormat.prototype.format = function(date) {
+                if (!(date instanceof Date)) {
+                    date = new Date(date);
+                }
+                if (isNaN(date.getTime())) {
+                    return 'Invalid Date';
+                }
+                
+                var opts = this.options;
+                var parts = [];
+                
+                // Handle dateStyle shortcuts
+                if (opts.dateStyle === 'full') {
+                    return dayNames[date.getDay()] + ', ' + monthNames[date.getMonth()] + ' ' + 
+                           date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'long') {
+                    return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'medium') {
+                    return monthNamesShort[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                } else if (opts.dateStyle === 'short') {
+                    return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+                }
+                
+                // Handle individual options
+                if (opts.weekday === 'long') parts.push(dayNames[date.getDay()]);
+                else if (opts.weekday === 'short') parts.push(dayNamesShort[date.getDay()]);
+                
+                if (opts.month === 'long') parts.push(monthNames[date.getMonth()]);
+                else if (opts.month === 'short') parts.push(monthNamesShort[date.getMonth()]);
+                else if (opts.month === 'numeric') parts.push(String(date.getMonth() + 1));
+                else if (opts.month === '2-digit') parts.push(String(date.getMonth() + 1).padStart(2, '0'));
+                
+                if (opts.day === 'numeric') parts.push(String(date.getDate()));
+                else if (opts.day === '2-digit') parts.push(String(date.getDate()).padStart(2, '0'));
+                
+                if (opts.year === 'numeric') parts.push(String(date.getFullYear()));
+                else if (opts.year === '2-digit') parts.push(String(date.getFullYear()).slice(-2));
+                
+                if (parts.length === 0) {
+                    // Default format: Month Day, Year
+                    return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+                }
+                
+                return parts.join(' ');
+            };
+            
+            globalThis.Intl.DateTimeFormat.prototype.resolvedOptions = function() {
+                return {
+                    locale: this.locale,
+                    calendar: 'gregory',
+                    numberingSystem: 'latn',
+                    timeZone: 'UTC'
+                };
+            };
+            
+            // NumberFormat polyfill
+            globalThis.Intl.NumberFormat = function(locale, options) {
+                this.locale = locale || 'en';
+                this.options = options || {};
+            };
+            
+            globalThis.Intl.NumberFormat.prototype.format = function(num) {
+                return String(num);
+            };
+        }
+
         // Wrapper function for plugins
         function wrapPlugin(plugin) {
             var wrapper = {};
@@ -489,14 +573,40 @@ private class J2V8ReflectionEngine(
     private fun setupBridge(runtime: Any) {
         executeVoidScriptMethod?.invoke(runtime, """
             globalThis.fetch = function(url, options) {
+                var requestUrl = String(url || '');
                 return new Promise(function(resolve, reject) {
+                    // Convert Headers object to plain object if needed
+                    var headersObj = {};
+                    if (options && options.headers) {
+                        if (options.headers instanceof Headers) {
+                            // Headers polyfill stores in .headers property
+                            headersObj = options.headers.headers || {};
+                        } else if (typeof options.headers === 'object') {
+                            headersObj = options.headers;
+                        }
+                    }
+                    
+                    // Convert body to string if needed
+                    var bodyStr = null;
+                    if (options && options.body) {
+                        if (typeof options.body === 'string') {
+                            bodyStr = options.body;
+                        } else if (options.body instanceof FormData) {
+                            // FormData not fully supported, convert to URL encoded
+                            bodyStr = '';
+                        } else {
+                            bodyStr = String(options.body);
+                        }
+                    }
+                    
                     globalThis.__pendingFetch = {
-                        url: String(url || ''),
+                        url: requestUrl,
                         method: (options && options.method) || 'GET',
-                        headers: (options && options.headers) || {},
-                        body: (options && options.body) || null,
+                        headers: headersObj,
+                        body: bodyStr,
                         resolve: resolve,
-                        reject: reject
+                        reject: reject,
+                        requestUrl: requestUrl
                     };
                     globalThis.__fetchReady = true;
                 });
@@ -710,16 +820,26 @@ private class J2V8PluginWrapper(
             val fetchData = json.parseToJsonElement(fetchJson).jsonObject
 
             val url = fetchData["url"]?.jsonPrimitive?.content ?: return
+            val requestUrl = fetchData["requestUrl"]?.jsonPrimitive?.content ?: url
             val method = fetchData["method"]?.jsonPrimitive?.content ?: "GET"
+            
+            // Extract headers
+            val headersObj = fetchData["headers"]?.jsonObject
+            val headers = headersObj?.mapValues { it.value.jsonPrimitive.content } ?: emptyMap()
+            
+            // Extract body for POST requests
+            val body = fetchData["body"]?.jsonPrimitive?.content
 
             val response = withContext(Dispatchers.IO) {
-                bridgeService.fetch(url, FetchOptions(method = method))
+                bridgeService.fetch(url, FetchOptions(method = method, headers = headers, body = body))
             }
 
             // Store response and resolve promise
             val responseBodyVar = "__rb_${System.nanoTime()}"
             engine.evaluateVoidScript("globalThis.$responseBodyVar = ${Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(response.text))};")
 
+            // Include url property in response for redirect detection
+            val responseUrl = response.url ?: url
             engine.evaluateVoidScript("""
                 if (globalThis.__pendingFetch && globalThis.__pendingFetch.resolve) {
                     var bodyText = globalThis.$responseBodyVar;
@@ -727,6 +847,7 @@ private class J2V8PluginWrapper(
                     globalThis.__pendingFetch.resolve({
                         ok: ${response.status in 200..299},
                         status: ${response.status},
+                        url: '${responseUrl.replace("'", "\\'")}',
                         text: function() { return Promise.resolve(bodyText); },
                         json: function() { return Promise.resolve(JSON.parse(bodyText)); }
                     });
