@@ -153,6 +153,16 @@ actual val DomainModule = module {
     single<StorageManager> { AndroidStorageManager(get(), get()) }
     single<CacheManager> { AndroidCacheManager(get(), get()) }
     
+    // SAF Storage Manager
+    single<ireader.domain.storage.SafStorageManager> { 
+        ireader.domain.storage.SafStorageManager(get(), get()) 
+    }
+    
+    // SAF Folder Checker - checks if SAF folder is available
+    single<ireader.domain.storage.SafFolderChecker> { 
+        ireader.domain.storage.SafFolderChecker(get(), get(), get()) 
+    }
+    
     single<GetSimpleStorage>{ AndroidGetSimpleStorage(get(), get()) }
     single<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(get(), get()) }
     single<DefaultNotificationHelper> { DefaultNotificationHelper(get(),get()) }

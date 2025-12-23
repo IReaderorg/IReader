@@ -548,8 +548,8 @@ private fun AniListLoginDialog(
                     Text(
                         text = "1. Open the URL below in your browser\n" +
                                "2. Login and authorize IReader\n" +
-                               "3. Copy the access token from the URL\n" +
-                               "4. Paste it below",
+                               "3. Copy the full URL from the browser after redirect\n" +
+                               "4. Paste it below (or just the access token)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -590,10 +590,11 @@ private fun AniListLoginDialog(
                     OutlinedTextField(
                         value = tokenInput,
                         onValueChange = { tokenInput = it },
-                        label = { Text("Access Token") },
-                        placeholder = { Text("Paste your access token here") },
+                        label = { Text("Access Token or URL") },
+                        placeholder = { Text("Paste the full URL or access token") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
+                        singleLine = false,
+                        maxLines = 3,
                         isError = error != null
                     )
                     

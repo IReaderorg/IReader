@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +36,7 @@ fun ChapterBar(
     val onPageSelected = remember(vm) { { page: Int -> vm.loadChapterPage(page) } }
     val onPreviousPage = remember(vm) { { vm.previousChapterPage() } }
     val onNextPage = remember(vm) { { vm.nextChapterPage() } }
+    val onLoadAll = remember(vm) { { vm.loadAllChapters() } }
     
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -63,7 +65,7 @@ fun ChapterBar(
                 )
                 Text(
                     text = if (vm.isPaginated) {
-                        "Page ${vm.chapterCurrentPage} of ${vm.chapterTotalPages}"
+                        "${chapters.size} chapters • Page ${vm.chapterCurrentPage}/${vm.chapterTotalPages}"
                     } else {
                         "${chapters.size} ${if (chapters.size == 1) "chapter" else "chapters"}"
                     },
@@ -98,6 +100,25 @@ fun ChapterBar(
                         expanded = showDownloadMenu,
                         onDismissRequest = { showDownloadMenu = false }
                     ) {
+                        // Load all chapters option (only for paginated sources)
+                        if (vm.isPaginated) {
+                            DropdownMenuItem(
+                                text = { Text("Load All Chapters") },
+                                onClick = {
+                                    showDownloadMenu = false
+                                    onLoadAll()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.SelectAll,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            )
+                            HorizontalDivider()
+                        }
+                        
                         DropdownMenuItem(
                             text = { Text(localizeHelper.localize(Res.string.download_all_unread)) },
                             onClick = {

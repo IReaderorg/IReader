@@ -2695,6 +2695,13 @@
     <string name="stop_playback_after">Stop playback after:</string>
     <string name="storage_settings">Storage Settings</string>
     <string name="storage_setup">Storage Setup</string>
+    <string name="storage_required">Storage Required</string>
+    <string name="storage_access_lost">Storage Access Lost</string>
+    <string name="storage_access_lost_description">IReader no longer has access to the storage folder. Please select a folder to continue using the app.</string>
+    <string name="storage_access_lost_reasons">The folder may have been deleted, moved, or the permission was revoked. This can happen after app updates or system changes.</string>
+    <string name="why_did_this_happen">Why did this happen?</string>
+    <string name="storage_is_needed_for">Storage is needed for:</string>
+    <string name="select_storage_folder">Select Storage Folder</string>
     <string name="streak">Streak</string>
     <string name="submission_guidelines">Submission Guidelines</string>
     <string name="submit_a_quote">Submit a Quote</string>

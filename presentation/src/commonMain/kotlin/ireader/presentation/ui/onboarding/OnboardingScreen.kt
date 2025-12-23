@@ -521,7 +521,7 @@ private fun StorageSetupPage(
         
         Spacer(modifier = Modifier.height(32.dp))
         
-        // Feature cards
+        // Feature cards (reduced to 2)
         AnimatedVisibility(
             visible = showContent,
             enter = fadeIn(tween(500, 300)) + slideInVertically(tween(500, 300)) { 30 }
@@ -530,29 +530,15 @@ private fun StorageSetupPage(
                 StorageFeatureCard(
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
                     title = localizeHelper.localize(Res.string.downloaded_chapters_1),
-                    description = "Save chapters for offline reading",
+                    description = "Save chapters, extensions, and backups",
                     accentColor = MaterialTheme.colorScheme.primary
-                )
-                
-                StorageFeatureCard(
-                    icon = Icons.Outlined.Extension,
-                    title = localizeHelper.localize(Res.string.extensions_sources),
-                    description = "Store installed extensions and plugins",
-                    accentColor = MaterialTheme.colorScheme.secondary
-                )
-                
-                StorageFeatureCard(
-                    icon = Icons.Outlined.Backup,
-                    title = localizeHelper.localize(Res.string.backups),
-                    description = "Keep your library and settings safe",
-                    accentColor = MaterialTheme.colorScheme.tertiary
                 )
                 
                 StorageFeatureCard(
                     icon = Icons.Outlined.Storage,
                     title = localizeHelper.localize(Res.string.persistent_storage),
                     description = "Data persists even if app is uninstalled",
-                    accentColor = Color(0xFF4CAF50)
+                    accentColor = MaterialTheme.colorScheme.tertiary
                 )
             }
         }

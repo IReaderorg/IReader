@@ -903,6 +903,7 @@ class BookDetailViewModel(
     /**
      * Check if the current source supports paginated chapter loading
      * and initialize pagination state if it does.
+     * If pagination is supported and no chapters are loaded, automatically loads page 1.
      */
     fun checkPaginationSupport() {
         val currentState = _state.value as? BookDetailState.Success ?: return
@@ -912,31 +913,47 @@ class BookDetailViewModel(
         
         if (supportsPagination) {
             scope.launch {
-                val pageCount = remoteUseCases.getRemoteChapters.getChapterPageCount(
-                    currentState.book,
-                    catalog
-                )
-                updateSuccessState { 
-                    it.copy(
-                        supportsPaginatedChapters = true,
-                        chapterTotalPages = pageCount
+                try {
+                    val pageCount = remoteUseCases.getRemoteChapters.getChapterPageCount(
+                        currentState.book,
+                        catalog
                     )
+                    
+                    // Only enable pagination if there are multiple pages
+                    if (pageCount > 1) {
+                        updateSuccessState { 
+                            it.copy(
+                                supportsPaginatedChapters = true,
+                                chapterTotalPages = pageCount,
+                                chapterCurrentPage = 1
+                            )
+                        }
+                        
+                        // If no chapters loaded yet, automatically load page 1
+                        val updatedState = _state.value as? BookDetailState.Success
+                        if (updatedState != null && updatedState.chapters.isEmpty()) {
+                            fetchChapterPage(1)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.error { "Error checking pagination support: ${e.message}" }
                 }
             }
         }
     }
     
     /**
-     * Load a specific page of chapters from the source.
-     * This replaces the current chapter list with the chapters from the requested page.
+     * Fetch and save a specific page of chapters from the source to the database.
+     * Chapters are added to the existing list in the database, not replaced.
+     * The UI will update automatically via the database subscription.
      */
-    fun loadChapterPage(page: Int) {
+    fun fetchChapterPage(page: Int) {
         val currentState = _state.value as? BookDetailState.Success ?: return
         if (!currentState.supportsPaginatedChapters) return
         if (page < 1 || page > currentState.chapterTotalPages) return
         if (currentState.isLoadingChapterPage) return
         
-        updateSuccessState { it.copy(isLoadingChapterPage = true) }
+        updateSuccessState { it.copy(isLoadingChapterPage = true, chapterCurrentPage = page) }
         
         scope.launch {
             val result = remoteUseCases.getRemoteChapters.getChapterPage(
@@ -947,9 +964,17 @@ class BookDetailViewModel(
             
             when (result) {
                 is ireader.domain.usecases.remote.ChapterPageResult.Success -> {
+                    // Filter out chapters that already exist in the database (by key/URL)
+                    val existingKeys = chapters.map { it.key }.toSet()
+                    val newChapters = result.chapters.filter { it.key !in existingKeys }
+                    
+                    if (newChapters.isNotEmpty()) {
+                        // Save new chapters to database - UI will update via subscription
+                        localInsertUseCases.insertChapters(newChapters)
+                    }
+                    
                     updateSuccessState { state ->
                         state.copy(
-                            chapters = result.chapters.toImmutableList(),
                             chapterCurrentPage = result.currentPage,
                             chapterTotalPages = result.totalPages,
                             isLoadingChapterPage = false
@@ -965,36 +990,84 @@ class BookDetailViewModel(
     }
     
     /**
-     * Load the next page of chapters.
+     * Fetch the next page of chapters and add to database.
      */
-    fun nextChapterPage() {
+    fun fetchNextChapterPage() {
         val currentState = _state.value as? BookDetailState.Success ?: return
         if (currentState.hasNextPage) {
-            loadChapterPage(currentState.chapterCurrentPage + 1)
+            fetchChapterPage(currentState.chapterCurrentPage + 1)
         }
     }
     
     /**
-     * Load the previous page of chapters.
+     * Fetch the previous page of chapters and add to database.
      */
-    fun previousChapterPage() {
+    fun fetchPreviousChapterPage() {
         val currentState = _state.value as? BookDetailState.Success ?: return
         if (currentState.hasPreviousPage) {
-            loadChapterPage(currentState.chapterCurrentPage - 1)
+            fetchChapterPage(currentState.chapterCurrentPage - 1)
         }
     }
     
+    // Keep old methods for backward compatibility but redirect to new ones
+    fun loadChapterPage(page: Int) = fetchChapterPage(page)
+    fun nextChapterPage() = fetchNextChapterPage()
+    fun previousChapterPage() = fetchPreviousChapterPage()
+    
     /**
-     * Load all chapters at once (for sources that support pagination).
-     * This fetches all pages and combines them into a single list.
+     * Fetch all chapters from all pages and save to database.
+     * Chapters are added to the existing list, not replaced.
      */
     fun loadAllChapters() {
         val currentState = _state.value as? BookDetailState.Success ?: return
         if (!currentState.supportsPaginatedChapters) return
+        if (currentState.isLoadingChapterPage) return
         
-        // Fall back to the standard chapter loading which loads all chapters
+        updateSuccessState { it.copy(isLoadingChapterPage = true) }
+        
         scope.launch {
-            getRemoteChapterDetail(currentState.book, currentState.catalogSource)
+            try {
+                val allNewChapters = mutableListOf<Chapter>()
+                val totalPages = currentState.chapterTotalPages
+                val existingKeys = chapters.map { it.key }.toSet()
+                
+                // Fetch all pages sequentially
+                for (page in 1..totalPages) {
+                    updateSuccessState { it.copy(chapterCurrentPage = page) }
+                    
+                    val result = remoteUseCases.getRemoteChapters.getChapterPage(
+                        book = currentState.book,
+                        catalog = currentState.catalogSource,
+                        page = page
+                    )
+                    
+                    when (result) {
+                        is ireader.domain.usecases.remote.ChapterPageResult.Success -> {
+                            // Filter out chapters that already exist
+                            val newChapters = result.chapters.filter { it.key !in existingKeys }
+                            allNewChapters.addAll(newChapters)
+                        }
+                        is ireader.domain.usecases.remote.ChapterPageResult.Error -> {
+                            Log.warn { "Failed to load page $page: ${result.error}" }
+                        }
+                    }
+                }
+                
+                // Save all new chapters to database - UI will update via subscription
+                if (allNewChapters.isNotEmpty()) {
+                    localInsertUseCases.insertChapters(allNewChapters)
+                }
+                
+                updateSuccessState { state ->
+                    state.copy(
+                        chapterCurrentPage = totalPages,
+                        isLoadingChapterPage = false
+                    )
+                }
+            } catch (e: Exception) {
+                Log.error { "Error loading all chapters: ${e.message}" }
+                updateSuccessState { it.copy(isLoadingChapterPage = false) }
+            }
         }
     }
 

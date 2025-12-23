@@ -33,8 +33,7 @@ import java.io.File
         )
     }
     single<AppInitializers> { AppInitializers(EmojiCompatInitializer(androidApplication()),
-        NotificationsInitializer(androidApplication(),get()), CrashHandler(androidApplication()), FirebaseInitializer(androidApplication()),
-        UpdateServiceInitializer(androidApplication(),get()), get())
+        NotificationsInitializer(androidApplication(),get()), CrashHandler(androidApplication()), get(),get(),get())
     }
     single<AndroidUiPreferences> {
         AndroidUiPreferences(
