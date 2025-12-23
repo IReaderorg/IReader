@@ -202,6 +202,15 @@ class BookDetailViewModel(
     val expandedSummary: Boolean get() = (_state.value as? BookDetailState.Success)?.isSummaryExpanded == true
     val modifiedCommands: List<Command<*>> get() = (_state.value as? BookDetailState.Success)?.modifiedCommands ?: emptyList()
     
+    // Chapter pagination derived state
+    val chapterCurrentPage: Int get() = (_state.value as? BookDetailState.Success)?.chapterCurrentPage ?: 1
+    val chapterTotalPages: Int get() = (_state.value as? BookDetailState.Success)?.chapterTotalPages ?: 1
+    val isLoadingChapterPage: Boolean get() = (_state.value as? BookDetailState.Success)?.isLoadingChapterPage ?: false
+    val supportsPaginatedChapters: Boolean get() = (_state.value as? BookDetailState.Success)?.supportsPaginatedChapters ?: false
+    val isPaginated: Boolean get() = (_state.value as? BookDetailState.Success)?.isPaginated ?: false
+    val hasNextPage: Boolean get() = (_state.value as? BookDetailState.Success)?.hasNextPage ?: false
+    val hasPreviousPage: Boolean get() = (_state.value as? BookDetailState.Success)?.hasPreviousPage ?: false
+    
     // Track if ViewModel has been initialized
     private var isInitialized = false
 
@@ -888,6 +897,106 @@ class BookDetailViewModel(
             getRemoteChapterDetail(currentState.book, currentState.catalogSource, commands)
         }
     }
+    
+    // ==================== Chapter Pagination ====================
+    
+    /**
+     * Check if the current source supports paginated chapter loading
+     * and initialize pagination state if it does.
+     */
+    fun checkPaginationSupport() {
+        val currentState = _state.value as? BookDetailState.Success ?: return
+        val catalog = currentState.catalogSource
+        
+        val supportsPagination = remoteUseCases.getRemoteChapters.supportsPaginatedChapters(catalog)
+        
+        if (supportsPagination) {
+            scope.launch {
+                val pageCount = remoteUseCases.getRemoteChapters.getChapterPageCount(
+                    currentState.book,
+                    catalog
+                )
+                updateSuccessState { 
+                    it.copy(
+                        supportsPaginatedChapters = true,
+                        chapterTotalPages = pageCount
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Load a specific page of chapters from the source.
+     * This replaces the current chapter list with the chapters from the requested page.
+     */
+    fun loadChapterPage(page: Int) {
+        val currentState = _state.value as? BookDetailState.Success ?: return
+        if (!currentState.supportsPaginatedChapters) return
+        if (page < 1 || page > currentState.chapterTotalPages) return
+        if (currentState.isLoadingChapterPage) return
+        
+        updateSuccessState { it.copy(isLoadingChapterPage = true) }
+        
+        scope.launch {
+            val result = remoteUseCases.getRemoteChapters.getChapterPage(
+                book = currentState.book,
+                catalog = currentState.catalogSource,
+                page = page
+            )
+            
+            when (result) {
+                is ireader.domain.usecases.remote.ChapterPageResult.Success -> {
+                    updateSuccessState { state ->
+                        state.copy(
+                            chapters = result.chapters.toImmutableList(),
+                            chapterCurrentPage = result.currentPage,
+                            chapterTotalPages = result.totalPages,
+                            isLoadingChapterPage = false
+                        )
+                    }
+                }
+                is ireader.domain.usecases.remote.ChapterPageResult.Error -> {
+                    updateSuccessState { it.copy(isLoadingChapterPage = false) }
+                    result.error?.let { showSnackBar(it) }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Load the next page of chapters.
+     */
+    fun nextChapterPage() {
+        val currentState = _state.value as? BookDetailState.Success ?: return
+        if (currentState.hasNextPage) {
+            loadChapterPage(currentState.chapterCurrentPage + 1)
+        }
+    }
+    
+    /**
+     * Load the previous page of chapters.
+     */
+    fun previousChapterPage() {
+        val currentState = _state.value as? BookDetailState.Success ?: return
+        if (currentState.hasPreviousPage) {
+            loadChapterPage(currentState.chapterCurrentPage - 1)
+        }
+    }
+    
+    /**
+     * Load all chapters at once (for sources that support pagination).
+     * This fetches all pages and combines them into a single list.
+     */
+    fun loadAllChapters() {
+        val currentState = _state.value as? BookDetailState.Success ?: return
+        if (!currentState.supportsPaginatedChapters) return
+        
+        // Fall back to the standard chapter loading which loads all chapters
+        scope.launch {
+            getRemoteChapterDetail(currentState.book, currentState.catalogSource)
+        }
+    }
 
     // ==================== Chapter Selection ====================
     // Delegated to ChapterController (Requirements: 9.1, 9.4, 9.5)
@@ -1228,6 +1337,9 @@ class BookDetailViewModel(
                         sourceSwitchingState.showBanner = true
                     }
                 }
+                
+                // Also check if source supports paginated chapters
+                checkPaginationSupport()
             } catch (e: Exception) {
                 Log.error { "Error checking source availability: ${e.message}" }
             }

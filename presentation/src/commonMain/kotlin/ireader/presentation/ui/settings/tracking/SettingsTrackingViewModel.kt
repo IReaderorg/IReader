@@ -138,6 +138,24 @@ class SettingsTrackingViewModel(
     
     init {
         loadInitialState()
+        observeAniListCallback()
+    }
+    
+    /**
+     * Observe for pending AniList OAuth callbacks from deeplinks.
+     */
+    private fun observeAniListCallback() {
+        scope.launch {
+            AniListCallbackHandler.pendingCallbackFlow.collect { callbackUrl ->
+                if (callbackUrl != null) {
+                    Log.debug { "Processing AniList callback: $callbackUrl" }
+                    val success = handleAniListCallback(callbackUrl)
+                    if (success) {
+                        AniListCallbackHandler.clearPendingCallback()
+                    }
+                }
+            }
+        }
     }
     
     private fun loadInitialState() {
@@ -186,6 +204,9 @@ class SettingsTrackingViewModel(
     
     // ==================== AniList Functions ====================
     
+    // AniList OAuth redirect URI - uses custom scheme for deeplink callback
+    private val aniListRedirectUri = "ireader://anilist-callback"
+    
     fun setAniListEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("anilist_enabled", false).set(enabled)
         _aniListEnabled.value = enabled
@@ -197,7 +218,51 @@ class SettingsTrackingViewModel(
     fun loginToAniList() {
         showAniListLoginDialog = true
         aniListLoginError = null
+        // Note: AniList implicit grant flow returns token in URL fragment
+        // The redirect URI will capture the token automatically
         _aniListAuthUrl.value = "https://anilist.co/api/v2/oauth/authorize?client_id=21652&response_type=token"
+    }
+    
+    /**
+     * Get the AniList OAuth URL for opening in browser.
+     * Returns the authorization URL that will redirect back to the app with the access token.
+     */
+    fun getAniListOAuthUrl(): String {
+        return "https://anilist.co/api/v2/oauth/authorize?client_id=21652&response_type=token"
+    }
+    
+    /**
+     * Handle the OAuth callback from AniList.
+     * This is called when the app receives a deeplink with the access token.
+     * 
+     * @param callbackUrl The full callback URL containing the access token in the fragment
+     * @return true if the token was successfully extracted and login initiated
+     */
+    fun handleAniListCallback(callbackUrl: String): Boolean {
+        // AniList returns token in URL fragment: ireader://anilist-callback#access_token=xxx&token_type=Bearer&expires_in=xxx
+        val fragment = callbackUrl.substringAfter("#", "")
+        if (fragment.isEmpty()) {
+            aniListLoginError = "No access token found in callback URL"
+            return false
+        }
+        
+        // Parse the fragment parameters
+        val params = fragment.split("&").associate { param ->
+            val (key, value) = param.split("=", limit = 2).let { 
+                if (it.size == 2) it[0] to it[1] else it[0] to ""
+            }
+            key to value
+        }
+        
+        val accessToken = params["access_token"]
+        if (accessToken.isNullOrEmpty()) {
+            aniListLoginError = "Access token not found in callback"
+            return false
+        }
+        
+        // Complete the login with the extracted token
+        completeAniListLogin(accessToken)
+        return true
     }
     
     fun dismissAniListLoginDialog() {

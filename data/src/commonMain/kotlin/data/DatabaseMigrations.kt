@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 31
+    const val CURRENT_VERSION = 33
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -96,6 +96,7 @@ object DatabaseMigrations {
             28 -> migrateV28toV29(driver)
             29 -> migrateV29toV30(driver)
             30 -> migrateV30toV31(driver)
+            31 -> migrateV31toV32(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2356,6 +2357,20 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(31, e)
+        }
+    }
+
+    /**
+     * Migration from version 31 to version 32
+     * No-op migration to handle database version mismatch from previous builds
+     */
+    private fun migrateV31toV32(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(31, 32)
+            // No schema changes - this migration exists to handle version mismatch
+            Logger.logMigrationSuccess(32)
+        } catch (e: Exception) {
+            Logger.logMigrationError(32, e)
         }
     }
 

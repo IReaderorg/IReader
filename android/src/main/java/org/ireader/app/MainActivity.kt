@@ -60,6 +60,7 @@ import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.getPerformanceConfigForDevice
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.settings.storage.StorageFolderPickerScreen
+import ireader.presentation.ui.settings.tracking.AniListCallbackHandler
 import ireader.presentation.ui.core.ui.asStateIn
 // FirstLaunchDialog removed - now handled in OnboardingScreen
 import kotlinx.coroutines.channels.awaitClose
@@ -293,6 +294,24 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         val uri = intent.data
         if (uri != null) {
             val scheme = uri.scheme
+            
+            // Handle AniList OAuth callback
+            if (scheme == "ireader" && uri.host == "anilist-callback") {
+                println("✅ AniList OAuth callback detected: $uri")
+                // Navigate to tracking settings and pass the callback URL
+                val callbackUrl = uri.toString()
+                navController.navigate(NavigationRoutes.trackingSettings) {
+                    launchSingleTop = true
+                }
+                // Store the callback URL for the ViewModel to process
+                // We'll use a shared preference or event bus approach
+                lifecycleScope.launch {
+                    delay(500) // Wait for navigation to complete
+                    AniListCallbackHandler.pendingCallback = callbackUrl
+                }
+                return true
+            }
+            
             // MetaMask SDK callback (uses package name as scheme)
             if (scheme == "ir.kazemcodes.infinityreader.debug" ||
                 scheme == "ir.kazemcodes.infinityreader" ||

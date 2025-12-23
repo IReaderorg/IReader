@@ -469,17 +469,21 @@ fun SettingsTrackingScreen(
 
 /**
  * Dialog for AniList OAuth login.
- * Shows instructions and a text field to paste the access token.
+ * Shows instructions and a button to open browser for authentication.
+ * The app will automatically capture the access token via deeplink callback.
  */
 @Composable
 private fun AniListLoginDialog(
     authUrl: String?,
     error: String?,
     onDismiss: () -> Unit,
-    onTokenSubmit: (String) -> Unit
+    onTokenSubmit: (String) -> Unit,
+    onOpenBrowser: () -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     var tokenInput by remember { mutableStateOf("") }
+    var showManualEntry by remember { mutableStateOf(false) }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -489,45 +493,121 @@ private fun AniListLoginDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "To login to AniList:",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                
-                Text(
-                    text = "1. Open the URL below in your browser\n" +
-                           "2. Login and authorize IReader\n" +
-                           "3. Copy the access token from the URL\n" +
-                           "4. Paste it below",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                if (authUrl != null) {
-                    Surface(
+                if (!showManualEntry) {
+                    // Primary flow: Open browser
+                    Text(
+                        text = "Click the button below to login to AniList. After authorizing, you'll be redirected back to the app automatically.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Open Browser Button
+                    Button(
+                        onClick = {
+                            authUrl?.let { url ->
+                                try {
+                                    uriHandler.openUri(url)
+                                } catch (e: Exception) {
+                                    // Fallback to manual entry if browser fails
+                                    showManualEntry = true
+                                }
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.surfaceVariant
+                        enabled = authUrl != null
                     ) {
-                        SelectionContainer {
-                            Text(
-                                text = authUrl,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(8.dp)
+                        Icon(
+                            imageVector = Icons.Outlined.OpenInBrowser,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Open AniList in Browser")
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Manual entry option
+                    TextButton(
+                        onClick = { showManualEntry = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Having trouble? Enter token manually",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                } else {
+                    // Manual entry flow (fallback)
+                    Text(
+                        text = "To login to AniList manually:",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    
+                    Text(
+                        text = "1. Open the URL below in your browser\n" +
+                               "2. Login and authorize IReader\n" +
+                               "3. Copy the access token from the URL\n" +
+                               "4. Paste it below",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    if (authUrl != null) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            SelectionContainer {
+                                Text(
+                                    text = authUrl,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                        
+                        // Copy URL button
+                        val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+                        TextButton(
+                            onClick = {
+                                clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(authUrl))
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.ContentCopy,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
                             )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Copy URL")
                         }
                     }
+                    
+                    OutlinedTextField(
+                        value = tokenInput,
+                        onValueChange = { tokenInput = it },
+                        label = { Text("Access Token") },
+                        placeholder = { Text("Paste your access token here") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = error != null
+                    )
+                    
+                    // Back to browser option
+                    TextButton(
+                        onClick = { showManualEntry = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "← Back to browser login",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
-                
-                OutlinedTextField(
-                    value = tokenInput,
-                    onValueChange = { tokenInput = it },
-                    label = { Text("Access Token") },
-                    placeholder = { Text("Paste your access token here") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = error != null
-                )
                 
                 if (error != null) {
                     Text(
@@ -539,11 +619,13 @@ private fun AniListLoginDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = { onTokenSubmit(tokenInput) },
-                enabled = tokenInput.isNotBlank()
-            ) {
-                Text(localizeHelper.localize(Res.string.login))
+            if (showManualEntry) {
+                Button(
+                    onClick = { onTokenSubmit(tokenInput) },
+                    enabled = tokenInput.isNotBlank()
+                ) {
+                    Text(localizeHelper.localize(Res.string.login))
+                }
             }
         },
         dismissButton = {

@@ -1,6 +1,7 @@
 package ireader.domain.js.loader
 
 import ireader.core.log.Log
+import ireader.domain.js.bridge.ChapterPage
 import ireader.domain.js.bridge.FetchOptions
 import ireader.domain.js.bridge.JSBridgeService
 import ireader.domain.js.bridge.LNReaderPlugin
@@ -1137,57 +1138,68 @@ private object AdapterCodeCache {
                             author: d.author || null,
                             description: d.description || d.summary || null,
                             genres: Array.isArray(d.genres) ? d.genres : [],
-                            status: d.status || null
+                            status: d.status || null,
+                            totalChapterPages: d.totalPages > 0 ? d.totalPages : 1
                         };
                     });
                 }
-                return Promise.resolve({ name: "", url: url, cover: "", author: null, description: null, genres: [], status: null });
+                return Promise.resolve({ name: "", url: url, cover: "", author: null, description: null, genres: [], status: null, totalChapterPages: 1 });
             };
 
             wrapper.getChapters = function(url) {
+                // For backward compatibility, load first page only
+                return wrapper.getChaptersPage(url, 1).then(function(result) {
+                    return result.chapters;
+                });
+            };
+            
+            wrapper.getChaptersPage = function(url, page) {
                 if (typeof plugin.parseNovel === 'function') {
                     var pathUrl = extractPathUrl(url);
                     return getCachedParseNovel(pathUrl).then(function(novel) {
-                        // Check if novel has chapters directly
+                        var totalPages = novel && novel.totalPages > 0 ? novel.totalPages : 1;
+                        
+                        // Check if novel has chapters directly (non-paginated)
                         if (novel && Array.isArray(novel.chapters) && novel.chapters.length > 0) {
-                            return novel.chapters.map(function(c) {
+                            var chapters = novel.chapters.map(function(c) {
                                 var chapterUrl = c.url || c.path || "";
                                 return { name: c.name || c.title || "", url: chapterUrl, releaseTime: c.releaseTime || c.date || null };
                             });
+                            return { chapters: chapters, totalPages: 1, currentPage: 1 };
                         }
                         
-                        // If no chapters but has totalPages and parsePage, use pagination
-                        if (novel && novel.totalPages > 0 && typeof plugin.parsePage === 'function') {
-                            var totalPages = novel.totalPages;
-                            var allChapters = [];
-                            
-                            // Fetch all pages sequentially
-                            function fetchPage(pageNum) {
-                                if (pageNum > totalPages) {
-                                    return Promise.resolve(allChapters);
+                        // If has totalPages and parsePage, use pagination
+                        if (novel && totalPages > 0 && typeof plugin.parsePage === 'function') {
+                            return Promise.resolve(plugin.parsePage(pathUrl, page)).then(function(pageResult) {
+                                var chapters = [];
+                                if (pageResult && Array.isArray(pageResult.chapters)) {
+                                    chapters = pageResult.chapters.map(function(c) {
+                                        var chapterUrl = c.url || c.path || "";
+                                        return { 
+                                            name: c.name || c.title || "", 
+                                            url: chapterUrl, 
+                                            releaseTime: c.releaseTime || c.date || null 
+                                        };
+                                    });
                                 }
-                                return Promise.resolve(plugin.parsePage(pathUrl, pageNum)).then(function(pageResult) {
-                                    if (pageResult && Array.isArray(pageResult.chapters)) {
-                                        pageResult.chapters.forEach(function(c) {
-                                            var chapterUrl = c.url || c.path || "";
-                                            allChapters.push({ 
-                                                name: c.name || c.title || "", 
-                                                url: chapterUrl, 
-                                                releaseTime: c.releaseTime || c.date || null 
-                                            });
-                                        });
-                                    }
-                                    return fetchPage(pageNum + 1);
-                                });
-                            }
-                            
-                            return fetchPage(1);
+                                return { chapters: chapters, totalPages: totalPages, currentPage: page };
+                            });
                         }
                         
-                        return [];
+                        return { chapters: [], totalPages: 1, currentPage: page };
                     });
                 }
-                return Promise.resolve([]);
+                return Promise.resolve({ chapters: [], totalPages: 1, currentPage: page });
+            };
+            
+            wrapper.getChapterPageCount = function(url) {
+                if (typeof plugin.parseNovel === 'function') {
+                    var pathUrl = extractPathUrl(url);
+                    return getCachedParseNovel(pathUrl).then(function(novel) {
+                        return novel && novel.totalPages > 0 ? novel.totalPages : 1;
+                    });
+                }
+                return Promise.resolve(1);
             };
 
             wrapper.getChapterContent = function(url) {
@@ -1580,6 +1592,30 @@ private class GraalVMPluginWrapper(
             }
         }
     }
+    
+    override suspend fun getChaptersPage(url: String, page: Int): ChapterPage = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            try {
+                val resultJson = awaitPromise("__wrappedPlugin.getChaptersPage('${url.replace("'", "\\'")}', $page)")
+                parseChapterPage(resultJson)
+            } catch (e: Exception) {
+                Log.error { "GraalVMPluginWrapper: Error in getChaptersPage: ${e.message}" }
+                ChapterPage(emptyList(), 1, page)
+            }
+        }
+    }
+    
+    override suspend fun getChapterPageCount(url: String): Int = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            try {
+                val result = awaitPromise("__wrappedPlugin.getChapterPageCount('${url.replace("'", "\\'")}')")
+                result.toIntOrNull() ?: 1
+            } catch (e: Exception) {
+                Log.error { "GraalVMPluginWrapper: Error in getChapterPageCount: ${e.message}" }
+                1
+            }
+        }
+    }
 
     override suspend fun getChapterContent(url: String): String = withContext(Dispatchers.IO) {
         mutex.withLock {
@@ -1744,7 +1780,8 @@ private class GraalVMPluginWrapper(
                 author = obj["author"]?.jsonPrimitive?.content,
                 description = obj["description"]?.jsonPrimitive?.content,
                 genres = obj["genres"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList(),
-                status = obj["status"]?.jsonPrimitive?.content
+                status = obj["status"]?.jsonPrimitive?.content,
+                totalChapterPages = obj["totalChapterPages"]?.jsonPrimitive?.content?.toIntOrNull() ?: 1
             )
         } catch (e: Exception) {
             PluginNovelDetails("", "", "", null, null, emptyList(), null)
@@ -1764,6 +1801,28 @@ private class GraalVMPluginWrapper(
             }
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+    
+    private fun parseChapterPage(jsonStr: String): ChapterPage {
+        return try {
+            val obj = json.parseToJsonElement(jsonStr).jsonObject
+            val chaptersArray = obj["chapters"]?.jsonArray ?: return ChapterPage(emptyList(), 1, 1)
+            val chapters = chaptersArray.map { element ->
+                val chapterObj = element.jsonObject
+                PluginChapter(
+                    name = chapterObj["name"]?.jsonPrimitive?.content ?: "",
+                    url = chapterObj["url"]?.jsonPrimitive?.content ?: "",
+                    releaseTime = chapterObj["releaseTime"]?.jsonPrimitive?.content
+                )
+            }
+            ChapterPage(
+                chapters = chapters,
+                totalPages = obj["totalPages"]?.jsonPrimitive?.content?.toIntOrNull() ?: 1,
+                currentPage = obj["currentPage"]?.jsonPrimitive?.content?.toIntOrNull() ?: 1
+            )
+        } catch (e: Exception) {
+            ChapterPage(emptyList(), 1, 1)
         }
     }
 }

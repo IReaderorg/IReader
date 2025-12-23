@@ -31,6 +31,11 @@ fun ChapterBar(
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showDownloadMenu by remember { mutableStateOf(false) }
     
+    // Memoize pagination callbacks
+    val onPageSelected = remember(vm) { { page: Int -> vm.loadChapterPage(page) } }
+    val onPreviousPage = remember(vm) { { vm.previousChapterPage() } }
+    val onNextPage = remember(vm) { { vm.nextChapterPage() } }
+    
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
@@ -57,7 +62,11 @@ fun ChapterBar(
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "${chapters.size} ${if (chapters.size == 1) "chapter" else "chapters"}",
+                    text = if (vm.isPaginated) {
+                        "Page ${vm.chapterCurrentPage} of ${vm.chapterTotalPages}"
+                    } else {
+                        "${chapters.size} ${if (chapters.size == 1) "chapter" else "chapters"}"
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
                     fontSize = 12.sp
@@ -161,6 +170,18 @@ fun ChapterBar(
                 }
             }
         }
+        
+            // Pagination bar (only shown when source supports pagination)
+            AnimatedChapterPaginationBar(
+                visible = vm.isPaginated,
+                currentPage = vm.chapterCurrentPage,
+                totalPages = vm.chapterTotalPages,
+                isLoading = vm.isLoadingChapterPage,
+                onPageSelected = onPageSelected,
+                onPreviousPage = onPreviousPage,
+                onNextPage = onNextPage,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         
             // Divider
             Spacer(modifier = Modifier.height(12.dp))

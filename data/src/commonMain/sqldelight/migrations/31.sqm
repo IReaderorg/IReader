@@ -1,0 +1,21 @@
+-- Migration 31: Add explore_book table for temporary storage of browsed books
+-- This table has a fixed size limit and auto-cleans old entries
+-- Books are promoted to the main 'book' table when favorited or viewed in detail
+
+CREATE TABLE IF NOT EXISTS explore_book(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    source_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    title TEXT NOT NULL,
+    author TEXT,
+    description TEXT,
+    genre TEXT,
+    status INTEGER NOT NULL DEFAULT 0,
+    cover TEXT,
+    date_added INTEGER NOT NULL,
+    UNIQUE(url, source_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_explore_book_source ON explore_book(source_id);
+CREATE INDEX IF NOT EXISTS idx_explore_book_date ON explore_book(date_added ASC);
+CREATE INDEX IF NOT EXISTS idx_explore_book_url ON explore_book(url, source_id);

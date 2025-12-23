@@ -40,9 +40,33 @@ interface LNReaderPlugin {
     suspend fun getNovelDetails(url: String): PluginNovelDetails
     
     /**
-     * Get chapter list
+     * Get chapter list (loads first page or all chapters if not paginated)
      */
     suspend fun getChapters(url: String): List<PluginChapter>
+    
+    /**
+     * Get paginated chapter list
+     * @param url Novel URL
+     * @param page Page number (1-based)
+     * @return ChapterPage containing chapters and pagination info
+     */
+    suspend fun getChaptersPage(url: String, page: Int): ChapterPage {
+        // Default implementation for plugins that don't support pagination
+        return if (page == 1) {
+            ChapterPage(chapters = getChapters(url), totalPages = 1, currentPage = 1)
+        } else {
+            ChapterPage(chapters = emptyList(), totalPages = 1, currentPage = page)
+        }
+    }
+    
+    /**
+     * Get total number of chapter pages for a novel
+     * @param url Novel URL
+     * @return Total number of pages, or 1 if not paginated
+     */
+    suspend fun getChapterPageCount(url: String): Int {
+        return 1
+    }
     
     /**
      * Get chapter content
@@ -82,7 +106,8 @@ data class PluginNovelDetails(
     val author: String? = null,
     val description: String? = null,
     val genres: List<String> = emptyList(),
-    val status: String? = null
+    val status: String? = null,
+    val totalChapterPages: Int = 1
 )
 
 /**
@@ -93,4 +118,14 @@ data class PluginChapter(
     val name: String,
     val url: String,
     val releaseTime: String? = null
+)
+
+/**
+ * Paginated chapter list result
+ */
+@Serializable
+data class ChapterPage(
+    val chapters: List<PluginChapter>,
+    val totalPages: Int,
+    val currentPage: Int
 )

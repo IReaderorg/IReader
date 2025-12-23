@@ -68,6 +68,12 @@ sealed interface BookDetailState {
         val lastReadChapterId: Long? = null,
         val chapterDisplayMode: ChapterDisplayMode = ChapterDisplayMode.Default,
         
+        // Chapter pagination (for sources that support paged chapter loading)
+        val chapterCurrentPage: Int = 1,
+        val chapterTotalPages: Int = 1,
+        val isLoadingChapterPage: Boolean = false,
+        val supportsPaginatedChapters: Boolean = false,
+        
         // Source switching
         val sourceSwitching: SourceSwitchingData? = null,
         
@@ -87,6 +93,11 @@ sealed interface BookDetailState {
         val isRefreshing: Boolean get() = isRefreshingBook || isRefreshingChapters
         val isInLibrary: Boolean get() = book.favorite
         val isArchived: Boolean get() = book.isArchived
+        
+        // Pagination derived properties
+        val isPaginated: Boolean get() = supportsPaginatedChapters && chapterTotalPages > 1
+        val hasNextPage: Boolean get() = chapterCurrentPage < chapterTotalPages
+        val hasPreviousPage: Boolean get() = chapterCurrentPage > 1
         
         /**
          * Get filtered and sorted chapters based on current filters

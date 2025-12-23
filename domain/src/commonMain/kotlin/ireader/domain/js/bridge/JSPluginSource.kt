@@ -33,6 +33,9 @@ class JSPluginSource(
     override val baseUrl: String
         get() = _baseUrl
     
+    // Cache for total chapter pages per novel
+    private val chapterPageCountCache = mutableMapOf<String, Int>()
+    
     class LatestListing() : Listing(name = "Latest")
     class PopularListing() : Listing(name = "Popular")
     
@@ -240,29 +243,107 @@ class JSPluginSource(
             
             // Store chapter URLs as ABSOLUTE URLs
             chapters.mapIndexed { index, chapter ->
-                // Convert chapter URL to absolute for storage
-                val absoluteChapterUrl = if (chapter.url.startsWith("http://") || chapter.url.startsWith("https://")) {
-                    chapter.url  // Already absolute
-                } else if (_baseUrl.isNotBlank()) {
-                    // Append relative path to baseUrl, handling trailing/leading slashes
-                    val base = _baseUrl.trimEnd('/')
-                    val path = if (chapter.url.startsWith("/")) chapter.url else "/${chapter.url}"
-                    base + path
-                } else {
-                    chapter.url  // Keep as-is if no baseUrl available
-                }
-                
-                ChapterInfo(
-                    key = absoluteChapterUrl,  // Store ABSOLUTE URL
-                    name = chapter.name,
-                    number = (index + 1).toFloat(),
-                    dateUpload = parseDate(chapter.releaseTime)
-                )
+                convertToChapterInfo(chapter, index)
             }
         } catch (e: Exception) {
             Log.error("JSPluginSource: Error in getChapterList", e)
             emptyList()
         }
+    }
+    
+    /**
+     * Get paginated chapter list from the plugin.
+     * This is the preferred method for sources that support pagination.
+     */
+    override suspend fun getChapterListPaged(
+        manga: MangaInfo,
+        page: Int,
+        commands: List<Command<*>>
+    ): ChaptersPageInfo {
+        return try {
+            val pluginUrl = toPluginUrl(manga.key)
+            Log.info("JSPluginSource: [$name] getChapterListPaged called for ${manga.key} page=$page")
+            
+            val chapterPage = plugin.getChaptersPage(pluginUrl, page)
+            
+            Log.info("JSPluginSource: [$name] Got ${chapterPage.chapters.size} chapters, page ${chapterPage.currentPage}/${chapterPage.totalPages}")
+            
+            // Cache the total pages for this novel
+            chapterPageCountCache[pluginUrl] = chapterPage.totalPages
+            
+            // Calculate base index for chapter numbering based on page
+            // Assuming ~24 chapters per page (common for LNReader plugins)
+            val baseIndex = (page - 1) * 24
+            
+            val chapters = chapterPage.chapters.mapIndexed { index, chapter ->
+                convertToChapterInfo(chapter, baseIndex + index)
+            }
+            
+            ChaptersPageInfo.forPage(
+                chapters = chapters,
+                page = chapterPage.currentPage,
+                totalPages = chapterPage.totalPages
+            )
+        } catch (e: Exception) {
+            Log.error("JSPluginSource: Error in getChapterListPaged", e)
+            // Fallback to non-paginated method
+            val chapters = getChapterList(manga, commands)
+            ChaptersPageInfo.singlePage(chapters)
+        }
+    }
+    
+    /**
+     * Get the total number of chapter pages for a manga.
+     */
+    override suspend fun getChapterPageCount(manga: MangaInfo): Int {
+        return try {
+            val pluginUrl = toPluginUrl(manga.key)
+            
+            // Check cache first
+            chapterPageCountCache[pluginUrl]?.let { return it }
+            
+            // Fetch from plugin
+            val pageCount = plugin.getChapterPageCount(pluginUrl)
+            chapterPageCountCache[pluginUrl] = pageCount
+            
+            Log.info("JSPluginSource: [$name] Chapter page count for ${manga.key}: $pageCount")
+            pageCount
+        } catch (e: Exception) {
+            Log.error("JSPluginSource: Error getting chapter page count", e)
+            1
+        }
+    }
+    
+    /**
+     * Returns true if this source supports paginated chapter loading.
+     */
+    override fun supportsPaginatedChapters(): Boolean {
+        // JS plugins from LNReader support pagination
+        return true
+    }
+    
+    /**
+     * Convert a PluginChapter to ChapterInfo with absolute URL.
+     */
+    private fun convertToChapterInfo(chapter: PluginChapter, index: Int): ChapterInfo {
+        // Convert chapter URL to absolute for storage
+        val absoluteChapterUrl = if (chapter.url.startsWith("http://") || chapter.url.startsWith("https://")) {
+            chapter.url  // Already absolute
+        } else if (_baseUrl.isNotBlank()) {
+            // Append relative path to baseUrl, handling trailing/leading slashes
+            val base = _baseUrl.trimEnd('/')
+            val path = if (chapter.url.startsWith("/")) chapter.url else "/${chapter.url}"
+            base + path
+        } else {
+            chapter.url  // Keep as-is if no baseUrl available
+        }
+        
+        return ChapterInfo(
+            key = absoluteChapterUrl,  // Store ABSOLUTE URL
+            name = chapter.name,
+            number = (index + 1).toFloat(),
+            dateUpload = parseDate(chapter.releaseTime)
+        )
     }
     
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
