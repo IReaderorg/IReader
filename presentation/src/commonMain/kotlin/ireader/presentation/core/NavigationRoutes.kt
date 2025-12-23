@@ -37,6 +37,7 @@ object NavigationRoutes {
     const val repository = "repository"
     const val webView = "webView"
     const val browseSettings = "browseSettings"
+    const val trackingSettings = "trackingSettings"
     const val readingHub = "readingHub"
     const val quotesScreen = "quotesScreen"
     const val submitQuote = "submitQuote"

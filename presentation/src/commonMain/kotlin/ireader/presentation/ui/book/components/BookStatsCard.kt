@@ -1,6 +1,5 @@
 package ireader.presentation.ui.book.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -9,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +22,8 @@ import ireader.i18n.resources.Res
 fun BookStatsCard(
     book: Book,
     chapterCount: Int,
+    onTracking: (() -> Unit)? = null,
+    isTracked: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -72,13 +72,23 @@ fun BookStatsCard(
                 thickness = 1.dp
             )
             
-            // Genres stat
-            StatItem(
-                icon = Icons.Default.Category,
-                value = book.genres.size.toString(),
-                label = localizeHelper.localize(Res.string.genres),
-                iconTint = MaterialTheme.colorScheme.tertiary
-            )
+            // Tracking stat (clickable)
+            if (onTracking != null) {
+                ClickableStatItem(
+                    icon = Icons.Default.Sync,
+                    value = if (isTracked) "Tracked" else "Not Tracked",
+                    label = localizeHelper.localize(Res.string.tracking),
+                    iconTint = if (isTracked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    onClick = onTracking
+                )
+            } else {
+                StatItem(
+                    icon = Icons.Default.Sync,
+                    value = if (isTracked) "Tracked" else "Not Tracked",
+                    label = localizeHelper.localize(Res.string.tracking),
+                    iconTint = if (isTracked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -115,5 +125,47 @@ private fun StatItem(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
             fontSize = 11.sp
         )
+    }
+}
+
+@Composable
+private fun ClickableStatItem(
+    icon: ImageVector,
+    value: String,
+    label: String,
+    iconTint: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        color = Color.Transparent
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = iconTint
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 16.sp
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+                fontSize = 11.sp
+            )
+        }
     }
 }

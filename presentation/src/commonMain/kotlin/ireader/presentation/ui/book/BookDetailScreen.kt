@@ -111,6 +111,8 @@ fun BookDetailScreen(
     onShowCoverPreview: () -> Unit = {},
     onCharacterArtGallery: () -> Unit = {},
     onCharacterArtDetail: (String) -> Unit = {},
+    onTracking: (() -> Unit)? = null,
+    isTracked: Boolean = false,
     uiPreferences: UiPreferences = koinInject(),
 ) {
     val focusManager = LocalFocusManager.current
@@ -250,7 +252,9 @@ fun BookDetailScreen(
                     chapterCount = chapters.value.size,
                     uiPreferences = uiPreferences,
                     onCharacterArtGallery = onCharacterArtGallery,
-                    onCharacterArtDetail = onCharacterArtDetail
+                    onCharacterArtDetail = onCharacterArtDetail,
+                    onTracking = onTracking,
+                    isTracked = isTracked
                 )
             },
             endContent = {
@@ -319,7 +323,9 @@ fun BookDetailScreen(
                     item(key = "book_stats") {
                         BookStatsCard(
                             book = book,
-                            chapterCount = chapterCount
+                            chapterCount = chapterCount,
+                            onTracking = onTracking,
+                            isTracked = isTracked
                         )
                     }
                     item(key = "action_buttons") {
@@ -503,6 +509,8 @@ private fun BookInfoPanel(
     uiPreferences: UiPreferences,
     onCharacterArtGallery: () -> Unit,
     onCharacterArtDetail: (String) -> Unit,
+    onTracking: (() -> Unit)? = null,
+    isTracked: Boolean = false,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Backdrop behind everything
@@ -534,7 +542,9 @@ private fun BookInfoPanel(
             item {
                 BookStatsCard(
                     book = book,
-                    chapterCount = chapterCount
+                    chapterCount = chapterCount,
+                    onTracking = onTracking,
+                    isTracked = isTracked
                 )
             }
             

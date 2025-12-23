@@ -146,7 +146,8 @@ val PresentationModules = module {
             chapterController = get(),
             bookController = get(),
             bookDetailController = get(),      // BookDetailController for SSOT pattern
-            localizeHelper = get()             // For UiText localization
+            localizeHelper = get(),            // For UiText localization
+            trackingRepository = getOrNull()   // For AniList tracking
         )
     }
     // Changed from single to factory - settings screen is not always needed
@@ -182,7 +183,7 @@ val PresentationModules = module {
     factory  { SettingsDownloadViewModel(get()) }
     factory  { SettingsSecurityViewModel(get()) }
     factory  { SettingsNotificationViewModel(get()) }
-    factory  { SettingsTrackingViewModel(get()) }
+    factory  { SettingsTrackingViewModel(get(), get()) }
     factory  { SettingsDataViewModel(get()) }
     
     // Authentication ViewModels

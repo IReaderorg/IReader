@@ -1,0 +1,21 @@
+-- Migration 30: Add track table for external tracking services (AniList, MAL, etc.)
+
+CREATE TABLE IF NOT EXISTS track (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    manga_id INTEGER NOT NULL,
+    site_id INTEGER NOT NULL,
+    entry_id INTEGER NOT NULL DEFAULT 0,
+    media_id INTEGER NOT NULL DEFAULT 0,
+    media_url TEXT NOT NULL DEFAULT '',
+    title TEXT NOT NULL DEFAULT '',
+    last_read REAL NOT NULL DEFAULT 0,
+    total_chapters INTEGER NOT NULL DEFAULT 0,
+    score REAL NOT NULL DEFAULT 0,
+    status INTEGER NOT NULL DEFAULT 1,
+    start_read_time INTEGER NOT NULL DEFAULT 0,
+    end_read_time INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(manga_id, site_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_track_manga_id ON track(manga_id);
+CREATE INDEX IF NOT EXISTS idx_track_site_id ON track(site_id);

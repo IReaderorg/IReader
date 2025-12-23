@@ -37,6 +37,7 @@ import data.Reading_milestone
 import data.Reading_session
 import data.SourceComparison
 import data.Theme
+import data.Track
 import data.Translated_chapter
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.book.bookGenresConverter
@@ -230,6 +231,14 @@ fun createDatabase(driver: SqlDriver): Database {
         content_filterAdapter = Content_filter.Adapter(
             created_atAdapter = longConverter,
             updated_atAdapter = longConverter
+        ),
+        // Track table for external tracking services
+        trackAdapter = Track.Adapter(
+            site_idAdapter = intLongColumnAdapter,
+            total_chaptersAdapter = intLongColumnAdapter,
+            statusAdapter = intLongColumnAdapter,
+            last_readAdapter = floatDoubleColumnAdapter,
+            scoreAdapter = floatDoubleColumnAdapter
         ),
     )
 

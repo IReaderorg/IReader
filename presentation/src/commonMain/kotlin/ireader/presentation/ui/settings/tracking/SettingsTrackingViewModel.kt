@@ -4,22 +4,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
+import ireader.domain.data.repository.TrackingRepository
+import ireader.domain.models.entities.TrackerCredentials
+import ireader.domain.models.entities.TrackerService
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for the enhanced tracking settings screen.
  * Manages external service integration following Mihon's TrackerManager system.
  */
 class SettingsTrackingViewModel(
-    private val preferenceStore: PreferenceStore
+    private val preferenceStore: PreferenceStore,
+    private val trackingRepository: TrackingRepository
 ) : BaseViewModel() {
     
     // Tracking service preferences
     val malEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mal_enabled", false).stateIn(scope)
     val malLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("mal_logged_in", false).stateIn(scope)
-    val aniListEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("anilist_enabled", false).stateIn(scope)
-    val aniListLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("anilist_logged_in", false).stateIn(scope)
+    
+    private val _aniListEnabled = MutableStateFlow(preferenceStore.getBoolean("anilist_enabled", false).get())
+    val aniListEnabled: StateFlow<Boolean> = _aniListEnabled.asStateFlow()
+    
+    private val _aniListLoggedIn = MutableStateFlow(false)
+    val aniListLoggedIn: StateFlow<Boolean> = _aniListLoggedIn.asStateFlow()
+    
     val kitsuEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_enabled", false).stateIn(scope)
     val kitsuLoggedIn: StateFlow<Boolean> = preferenceStore.getBoolean("kitsu_logged_in", false).stateIn(scope)
     val mangaUpdatesEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("mangaupdates_enabled", false).stateIn(scope)
@@ -41,51 +53,110 @@ class SettingsTrackingViewModel(
     var showClearSyncDataDialog by mutableStateOf(false)
         private set
     
+    // AniList OAuth state
+    private val _aniListAuthUrl = MutableStateFlow<String?>(null)
+    val aniListAuthUrl: StateFlow<String?> = _aniListAuthUrl.asStateFlow()
+    
+    var showAniListLoginDialog by mutableStateOf(false)
+        private set
+    
+    var aniListLoginError by mutableStateOf<String?>(null)
+        private set
+    
+    init {
+        // Check AniList login status on init
+        scope.launch {
+            _aniListLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.ANILIST)
+            if (_aniListLoggedIn.value) {
+                _aniListEnabled.value = true
+            }
+        }
+    }
+    
     // MyAnimeList functions
     fun setMalEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("mal_enabled", false).set(enabled)
         if (!enabled) {
-            // Logout when disabled
             logoutFromMal()
         }
     }
     
     fun loginToMal() {
         // TODO: Implement MAL OAuth login
-        // This should open a web view or external browser for OAuth
-        // On success, set mal_logged_in to true and store tokens
         preferenceStore.getBoolean("mal_logged_in", false).set(true)
     }
     
     fun logoutFromMal() {
         preferenceStore.getBoolean("mal_logged_in", false).set(false)
-        // TODO: Clear stored MAL tokens and user data
     }
     
     fun configureMal() {
         // TODO: Navigate to MAL configuration screen
-        // This should allow setting preferences like:
-        // - Default status for new books
-        // - Score format (1-10, 1-5, etc.)
-        // - Privacy settings
     }
     
     // AniList functions
     fun setAniListEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("anilist_enabled", false).set(enabled)
+        _aniListEnabled.value = enabled
         if (!enabled) {
             logoutFromAniList()
         }
     }
     
     fun loginToAniList() {
-        // TODO: Implement AniList OAuth login
-        preferenceStore.getBoolean("anilist_logged_in", false).set(true)
+        // Show login dialog with OAuth URL
+        showAniListLoginDialog = true
+        aniListLoginError = null
+        
+        // Get the auth URL from repository
+        scope.launch {
+            try {
+                // The auth URL is constructed in the API
+                _aniListAuthUrl.value = "https://anilist.co/api/v2/oauth/authorize?client_id=21652&response_type=token"
+            } catch (e: Exception) {
+                aniListLoginError = "Failed to get auth URL: ${e.message}"
+            }
+        }
+    }
+    
+    fun dismissAniListLoginDialog() {
+        showAniListLoginDialog = false
+        _aniListAuthUrl.value = null
+        aniListLoginError = null
+    }
+    
+    /**
+     * Complete AniList login with the access token from OAuth redirect
+     */
+    fun completeAniListLogin(accessToken: String) {
+        scope.launch {
+            try {
+                val credentials = TrackerCredentials(
+                    serviceId = TrackerService.ANILIST,
+                    accessToken = accessToken
+                )
+                val success = trackingRepository.authenticate(TrackerService.ANILIST, credentials)
+                
+                if (success) {
+                    _aniListLoggedIn.value = true
+                    _aniListEnabled.value = true
+                    preferenceStore.getBoolean("anilist_enabled", false).set(true)
+                    showAniListLoginDialog = false
+                    aniListLoginError = null
+                } else {
+                    aniListLoginError = "Login failed. Please try again."
+                }
+            } catch (e: Exception) {
+                aniListLoginError = "Login error: ${e.message}"
+            }
+        }
     }
     
     fun logoutFromAniList() {
-        preferenceStore.getBoolean("anilist_logged_in", false).set(false)
-        // TODO: Clear stored AniList tokens and user data
+        scope.launch {
+            trackingRepository.logout(TrackerService.ANILIST)
+            _aniListLoggedIn.value = false
+        }
     }
     
     fun configureAniList() {
@@ -101,13 +172,12 @@ class SettingsTrackingViewModel(
     }
     
     fun loginToKitsu() {
-        // TODO: Implement Kitsu login (username/password or OAuth)
+        // TODO: Implement Kitsu login
         preferenceStore.getBoolean("kitsu_logged_in", false).set(true)
     }
     
     fun logoutFromKitsu() {
         preferenceStore.getBoolean("kitsu_logged_in", false).set(false)
-        // TODO: Clear stored Kitsu tokens and user data
     }
     
     fun configureKitsu() {
@@ -129,7 +199,6 @@ class SettingsTrackingViewModel(
     
     fun logoutFromMangaUpdates() {
         preferenceStore.getBoolean("mangaupdates_logged_in", false).set(false)
-        // TODO: Clear stored MangaUpdates tokens and user data
     }
     
     fun configureMangaUpdates() {
@@ -140,10 +209,8 @@ class SettingsTrackingViewModel(
     fun setAutoSyncEnabled(enabled: Boolean) {
         preferenceStore.getBoolean("auto_sync_enabled", false).set(enabled)
         if (enabled) {
-            // Schedule sync job
             scheduleAutoSync()
         } else {
-            // Cancel sync job
             cancelAutoSync()
         }
     }
@@ -159,7 +226,6 @@ class SettingsTrackingViewModel(
     fun setAutoSyncInterval(interval: Int) {
         preferenceStore.getInt("auto_sync_interval", 60).set(interval)
         if (autoSyncEnabled.value) {
-            // Reschedule with new interval
             scheduleAutoSync()
         }
     }
@@ -183,8 +249,11 @@ class SettingsTrackingViewModel(
     
     // Advanced functions
     fun performManualSync() {
-        // TODO: Implement manual sync for all enabled services
-        // This should sync all tracked books immediately
+        scope.launch {
+            // Get all tracked books and sync them
+            val stats = trackingRepository.getTrackingStatistics()
+            // TODO: Implement full sync
+        }
     }
     
     fun showClearSyncDataDialog() {
@@ -202,9 +271,6 @@ class SettingsTrackingViewModel(
         logoutFromKitsu()
         logoutFromMangaUpdates()
         
-        // Clear all tracking data
-        // TODO: Implement clearing of all tracking data from database
-        
         // Cancel auto-sync
         cancelAutoSync()
     }
@@ -217,7 +283,6 @@ class SettingsTrackingViewModel(
     // Background sync functions
     private fun scheduleAutoSync() {
         // TODO: Implement platform-specific background sync scheduling
-        // This should use WorkManager on Android or similar on other platforms
     }
     
     private fun cancelAutoSync() {

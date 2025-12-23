@@ -1,8 +1,9 @@
 package ireader.presentation.ui.book.components
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
@@ -104,7 +105,8 @@ fun ModernBookSummary(
         }
         
         // Genres
-        if (book.genres.isNotEmpty()) {
+        val filteredGenres = remember(book.genres) { book.genres.filter { it.isNotBlank() } }
+        if (filteredGenres.isNotEmpty()) {
             Spacer(modifier = Modifier.height(12.dp))
             
             Text(
@@ -117,11 +119,11 @@ fun ModernBookSummary(
             )
             
             if (isSummaryExpanded) {
-                androidx.compose.foundation.layout.FlowRow(
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    book.genres.filter { it.isNotBlank() }.forEach { genre ->
+                    filteredGenres.forEach { genre ->
                         ModernGenreChip(genre)
                     }
                 }
@@ -130,16 +132,16 @@ fun ModernBookSummary(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    book.genres.filter { it.isNotBlank() }.take(3).forEach { genre ->
+                    filteredGenres.take(3).forEach { genre ->
                         ModernGenreChip(genre)
                     }
-                    if (book.genres.size > 3) {
+                    if (filteredGenres.size > 3) {
                         Surface(
                             shape = RoundedCornerShape(8.dp),
                             color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
                         ) {
                             Text(
-                                text = "+${book.genres.size - 3}",
+                                text = "+${filteredGenres.size - 3}",
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.SemiBold,
@@ -162,18 +164,14 @@ private fun ModernGenreChip(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-        border = androidx.compose.foundation.BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-        )
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
             fontSize = 12.sp
         )
     }

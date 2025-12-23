@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -346,6 +347,103 @@ fun SettingsTrackingScreen(
             }
         )
     }
+    
+    // AniList Login Dialog
+    if (viewModel.showAniListLoginDialog) {
+        AniListLoginDialog(
+            authUrl = viewModel.aniListAuthUrl.collectAsState().value,
+            error = viewModel.aniListLoginError,
+            onDismiss = { viewModel.dismissAniListLoginDialog() },
+            onTokenSubmit = { token -> viewModel.completeAniListLogin(token) }
+        )
+    }
+}
+
+/**
+ * Dialog for AniList OAuth login.
+ * Shows instructions and a text field to paste the access token.
+ */
+@Composable
+private fun AniListLoginDialog(
+    authUrl: String?,
+    error: String?,
+    onDismiss: () -> Unit,
+    onTokenSubmit: (String) -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var tokenInput by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Login to AniList") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "To login to AniList:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Text(
+                    text = "1. Open the URL below in your browser\n" +
+                           "2. Login and authorize IReader\n" +
+                           "3. Copy the access token from the URL\n" +
+                           "4. Paste it below",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                if (authUrl != null) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        SelectionContainer {
+                            Text(
+                                text = authUrl,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                    }
+                }
+                
+                OutlinedTextField(
+                    value = tokenInput,
+                    onValueChange = { tokenInput = it },
+                    label = { Text("Access Token") },
+                    placeholder = { Text("Paste your access token here") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = error != null
+                )
+                
+                if (error != null) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onTokenSubmit(tokenInput) },
+                enabled = tokenInput.isNotBlank()
+            ) {
+                Text(localizeHelper.localize(Res.string.login))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable

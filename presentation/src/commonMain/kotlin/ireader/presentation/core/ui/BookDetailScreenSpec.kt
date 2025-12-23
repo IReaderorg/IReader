@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -613,6 +614,8 @@ data class BookDetailScreenSpec constructor(
                             onShowCoverPreview = { vm.showCoverPreviewDialog = true },
                             onCharacterArtGallery = navigationCallbacks.onNavigateToCharacterArtGallery,
                             onCharacterArtDetail = navigationCallbacks.onNavigateToCharacterArtDetail,
+                            onTracking = { vm.showTrackingDialog() },
+                            isTracked = vm.isTracked,
                         )
                     }
                 }
@@ -708,6 +711,28 @@ data class BookDetailScreenSpec constructor(
                 }
             )
         }
+        
+        // Tracking bottom sheet
+        if (vm.showTrackingBottomSheet) {
+            TrackingBottomSheetContent(
+                vm = vm,
+                book = state.book,
+                onDismiss = { vm.hideTrackingDialog() }
+            )
+        }
+        
+        // Tracking search dialog
+        if (vm.showTrackingSearchDialog) {
+            ireader.presentation.ui.book.components.TrackingSearchDialog(
+                query = state.book.title,
+                results = vm.trackingSearchResults,
+                isSearching = vm.isSearchingTracking,
+                onQueryChange = { /* Query is managed by search button */ },
+                onSearch = { query -> vm.searchOnAniList(query) },
+                onSelect = { result -> vm.linkToAniList(result) },
+                onDismiss = { vm.showTrackingSearchDialog = false }
+            )
+        }
     }
     
     @Composable
@@ -734,6 +759,61 @@ data class BookDetailScreenSpec constructor(
                     androidx.compose.material3.Text(localizeHelper.localize(Res.string.go_back))
                 }
             }
+        }
+    }
+    
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun TrackingBottomSheetContent(
+        vm: BookDetailViewModel,
+        book: ireader.domain.models.entities.Book,
+        onDismiss: () -> Unit
+    ) {
+        val navController = LocalNavigator.current
+        
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            ireader.presentation.ui.book.components.TrackingBottomSheet(
+                book = book,
+                services = listOf(
+                    ireader.presentation.ui.book.components.TrackingServiceInfo(
+                        id = "anilist",
+                        name = "AniList",
+                        isLoggedIn = vm.isAniListLoggedIn,
+                        isTracked = vm.isTracked,
+                        status = vm.trackingStatus,
+                        progress = vm.trackingProgress,
+                        score = vm.trackingScore
+                    )
+                ),
+                onServiceClick = { serviceId ->
+                    // Navigate to tracking settings if not logged in
+                    if (!vm.isAniListLoggedIn) {
+                        onDismiss()
+                        navController?.navigate(ireader.presentation.core.NavigationRoutes.trackingSettings)
+                    }
+                },
+                onSearchOnService = { serviceId ->
+                    // Search for this book on AniList
+                    vm.searchOnAniList(book.title)
+                },
+                onRemoveTracking = { serviceId ->
+                    vm.removeTracking()
+                    onDismiss()
+                },
+                onUpdateStatus = { serviceId, status ->
+                    vm.updateTrackingStatusValue(status)
+                },
+                onUpdateProgress = { serviceId, progress ->
+                    vm.updateTrackingProgress(progress)
+                },
+                onUpdateScore = { serviceId, score ->
+                    vm.updateTrackingScore(score)
+                },
+                onDismiss = onDismiss
+            )
         }
     }
 }

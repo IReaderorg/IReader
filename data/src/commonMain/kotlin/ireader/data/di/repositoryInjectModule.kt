@@ -23,6 +23,7 @@ val repositoryInjectModule = module {
     includes(catalogRepositoryModule)
     includes(userDataRepositoryModule)
     includes(translationRepositoryModule)
+    includes(trackingModule)
     
     // Include remote module for 7-project Supabase setup
     // Supports both default config (from local.properties) and user override

@@ -1,0 +1,88 @@
+import kotlin.Int;
+import kotlin.Long;
+import kotlin.Float;
+
+-- Track table for storing external tracking service data
+CREATE TABLE IF NOT EXISTS track (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    manga_id INTEGER NOT NULL,
+    site_id INTEGER AS Int NOT NULL,
+    entry_id INTEGER NOT NULL DEFAULT 0,
+    media_id INTEGER NOT NULL DEFAULT 0,
+    media_url TEXT NOT NULL DEFAULT '',
+    title TEXT NOT NULL DEFAULT '',
+    last_read REAL AS Float NOT NULL DEFAULT 0,
+    total_chapters INTEGER AS Int NOT NULL DEFAULT 0,
+    score REAL AS Float NOT NULL DEFAULT 0,
+    status INTEGER AS Int NOT NULL DEFAULT 1,
+    start_read_time INTEGER NOT NULL DEFAULT 0,
+    end_read_time INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(manga_id, site_id)
+);
+
+-- Index for faster lookups by book
+CREATE INDEX IF NOT EXISTS idx_track_manga_id ON track(manga_id);
+
+-- Index for faster lookups by service
+CREATE INDEX IF NOT EXISTS idx_track_site_id ON track(site_id);
+
+-- Get all tracks for a book
+getTracksByBookId:
+SELECT * FROM track WHERE manga_id = :bookId;
+
+-- Get all tracks for a service
+getTracksBySiteId:
+SELECT * FROM track WHERE site_id = :siteId;
+
+-- Get a specific track
+getTrack:
+SELECT * FROM track WHERE manga_id = :bookId AND site_id = :siteId;
+
+-- Get track by id
+getTrackById:
+SELECT * FROM track WHERE id = :id;
+
+-- Insert or replace a track
+upsertTrack:
+INSERT OR REPLACE INTO track(
+    manga_id, site_id, entry_id, media_id, media_url, title,
+    last_read, total_chapters, score, status, start_read_time, end_read_time
+) VALUES (
+    :mangaId, :siteId, :entryId, :mediaId, :mediaUrl, :title,
+    :lastRead, :totalChapters, :score, :status, :startReadTime, :endReadTime
+);
+
+-- Update track
+updateTrack:
+UPDATE track SET
+    entry_id = :entryId,
+    media_id = :mediaId,
+    media_url = :mediaUrl,
+    title = :title,
+    last_read = :lastRead,
+    total_chapters = :totalChapters,
+    score = :score,
+    status = :status,
+    start_read_time = :startReadTime,
+    end_read_time = :endReadTime
+WHERE id = :id;
+
+-- Delete track
+deleteTrack:
+DELETE FROM track WHERE manga_id = :bookId AND site_id = :siteId;
+
+-- Delete all tracks for a book
+deleteTracksByBookId:
+DELETE FROM track WHERE manga_id = :bookId;
+
+-- Get all tracks
+getAllTracks:
+SELECT * FROM track;
+
+-- Get track count
+getTrackCount:
+SELECT COUNT(*) FROM track;
+
+-- Get tracks count by service
+getTrackCountBySiteId:
+SELECT COUNT(*) FROM track WHERE site_id = :siteId;

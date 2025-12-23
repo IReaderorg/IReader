@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 29
+    const val CURRENT_VERSION = 30
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -94,6 +94,7 @@ object DatabaseMigrations {
             26 -> migrateV26toV27(driver)
             27 -> migrateV27toV28(driver)
             28 -> migrateV28toV29(driver)
+            29 -> migrateV29toV30(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2268,6 +2269,49 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(29, e)
+        }
+    }
+
+    /**
+     * Migration from version 29 to version 30
+     * Adds track table for external tracking services (AniList, MAL, Kitsu, etc.)
+     */
+    private fun migrateV29toV30(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(29, 30)
+            
+            // Create track table
+            val createTrackTableSql = """
+                CREATE TABLE IF NOT EXISTS track (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    manga_id INTEGER NOT NULL,
+                    site_id INTEGER NOT NULL,
+                    entry_id INTEGER NOT NULL DEFAULT 0,
+                    media_id INTEGER NOT NULL DEFAULT 0,
+                    media_url TEXT NOT NULL DEFAULT '',
+                    title TEXT NOT NULL DEFAULT '',
+                    last_read REAL NOT NULL DEFAULT 0,
+                    total_chapters INTEGER NOT NULL DEFAULT 0,
+                    score REAL NOT NULL DEFAULT 0,
+                    status INTEGER NOT NULL DEFAULT 1,
+                    start_read_time INTEGER NOT NULL DEFAULT 0,
+                    end_read_time INTEGER NOT NULL DEFAULT 0,
+                    UNIQUE(manga_id, site_id)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createTrackTableSql, 0)
+            Logger.logTableCreated("track")
+            
+            // Create indexes
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_track_manga_id ON track(manga_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_track_site_id ON track(site_id);", 0)
+            Logger.logIndexCreated("track indexes")
+            
+            Logger.logMigrationSuccess(30)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(30, e)
         }
     }
 

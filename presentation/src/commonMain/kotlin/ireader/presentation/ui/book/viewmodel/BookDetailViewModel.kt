@@ -113,6 +113,7 @@ class BookDetailViewModel(
     private val bookController: BookController,
     private val bookDetailController: BookDetailController,
     private val localizeHelper: LocalizeHelper,
+    private val trackingRepository: ireader.domain.data.repository.TrackingRepository? = null,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -1579,6 +1580,295 @@ class BookDetailViewModel(
     
     // Cover preview dialog state
     var showCoverPreviewDialog by mutableStateOf(false)
+    
+    // ==================== Tracking ====================
+    
+    // Tracking state
+    var showTrackingBottomSheet by mutableStateOf(false)
+    var isTracked by mutableStateOf(false)
+    var trackingStatus by mutableStateOf<String?>(null)
+    var trackingProgress by mutableStateOf<Int?>(null)
+    var trackingScore by mutableStateOf<Float?>(null)
+    var isAniListLoggedIn by mutableStateOf(false)
+    var trackingSearchResults by mutableStateOf<List<ireader.domain.models.entities.TrackSearchResult>>(emptyList())
+    var showTrackingSearchDialog by mutableStateOf(false)
+    var isSearchingTracking by mutableStateOf(false)
+    private var currentTrack: ireader.domain.models.entities.Track? = null
+    
+    init {
+        // Load tracking status when ViewModel is created
+        loadInitialTrackingStatus()
+    }
+    
+    /**
+     * Load initial tracking status for the current book
+     */
+    private fun loadInitialTrackingStatus() {
+        val bookId = param.bookId ?: return
+        if (trackingRepository == null) return
+        
+        scope.launch {
+            try {
+                // Check if AniList is authenticated
+                isAniListLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.ANILIST)
+                
+                // Load existing tracks for this book
+                val tracks = trackingRepository.getTracksByBook(bookId)
+                val anilistTrack = tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }
+                
+                if (anilistTrack != null) {
+                    currentTrack = anilistTrack
+                    isTracked = true
+                    trackingStatus = anilistTrack.status.name
+                    trackingProgress = anilistTrack.lastRead.toInt()
+                    trackingScore = anilistTrack.score
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to load tracking status")
+            }
+        }
+    }
+    
+    /**
+     * Show the tracking bottom sheet/dialog
+     */
+    fun showTrackingDialog() {
+        showTrackingBottomSheet = true
+        // Refresh tracking status when dialog opens
+        loadTrackingStatus()
+    }
+    
+    /**
+     * Hide the tracking bottom sheet/dialog
+     */
+    fun hideTrackingDialog() {
+        showTrackingBottomSheet = false
+    }
+    
+    /**
+     * Load/refresh tracking status for the current book from AniList
+     */
+    private fun loadTrackingStatus() {
+        val bookId = param.bookId ?: return
+        if (trackingRepository == null) return
+        
+        scope.launch {
+            try {
+                // Check if AniList is authenticated
+                isAniListLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.ANILIST)
+                
+                // Sync track to get latest data from AniList
+                if (isTracked && currentTrack != null) {
+                    trackingRepository.syncTrack(bookId, ireader.domain.models.entities.TrackerService.ANILIST)
+                    
+                    // Reload tracks
+                    val tracks = trackingRepository.getTracksByBook(bookId)
+                    val anilistTrack = tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }
+                    
+                    if (anilistTrack != null) {
+                        currentTrack = anilistTrack
+                        trackingStatus = anilistTrack.status.name
+                        trackingProgress = anilistTrack.lastRead.toInt()
+                        trackingScore = anilistTrack.score
+                    }
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to load tracking status")
+            }
+        }
+    }
+    
+    /**
+     * Search for this book on AniList
+     */
+    fun searchOnAniList(query: String) {
+        if (trackingRepository == null) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Tracking not available"))
+            return
+        }
+        
+        scope.launch {
+            try {
+                isSearchingTracking = true
+                showTrackingSearchDialog = true
+                
+                val results = trackingRepository.searchTracker(
+                    ireader.domain.models.entities.TrackerService.ANILIST,
+                    query
+                )
+                
+                trackingSearchResults = results
+                isSearchingTracking = false
+                
+                if (results.isEmpty()) {
+                    emitEvent(BookDetailEvent.ShowSnackbar("No results found for '$query'"))
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to search on AniList")
+                isSearchingTracking = false
+                emitEvent(BookDetailEvent.ShowSnackbar("Search failed: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Link book to a search result from AniList
+     */
+    fun linkToAniList(searchResult: ireader.domain.models.entities.TrackSearchResult) {
+        val bookId = param.bookId ?: return
+        if (trackingRepository == null) return
+        
+        scope.launch {
+            try {
+                val success = trackingRepository.linkBook(
+                    bookId,
+                    ireader.domain.models.entities.TrackerService.ANILIST,
+                    searchResult
+                )
+                
+                if (success) {
+                    // Reload tracking status
+                    val tracks = trackingRepository.getTracksByBook(bookId)
+                    val anilistTrack = tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.ANILIST }
+                    
+                    if (anilistTrack != null) {
+                        currentTrack = anilistTrack
+                        isTracked = true
+                        trackingStatus = anilistTrack.status.name
+                        trackingProgress = anilistTrack.lastRead.toInt()
+                        trackingScore = anilistTrack.score
+                    }
+                    
+                    showTrackingSearchDialog = false
+                    emitEvent(BookDetailEvent.ShowSnackbar("Added to AniList: ${searchResult.title}"))
+                } else {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to add to AniList"))
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to link to AniList")
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to add: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Remove tracking for the current book
+     */
+    fun removeTracking() {
+        val bookId = param.bookId ?: return
+        if (trackingRepository == null) return
+        
+        scope.launch {
+            try {
+                val success = trackingRepository.removeTrack(
+                    bookId,
+                    ireader.domain.models.entities.TrackerService.ANILIST
+                )
+                
+                if (success) {
+                    currentTrack = null
+                    isTracked = false
+                    trackingStatus = null
+                    trackingProgress = null
+                    trackingScore = null
+                    emitEvent(BookDetailEvent.ShowSnackbar("Tracking removed"))
+                } else {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to remove tracking"))
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to remove tracking")
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to remove tracking: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Update tracking status value (Reading, Completed, etc.)
+     */
+    fun updateTrackingStatusValue(status: String) {
+        val bookId = param.bookId ?: return
+        if (trackingRepository == null) return
+        
+        val trackStatus = try {
+            ireader.domain.models.entities.TrackStatus.valueOf(status)
+        } catch (e: Exception) {
+            Log.error(e, "Invalid track status: $status")
+            return
+        }
+        
+        scope.launch {
+            try {
+                val success = trackingRepository.updateStatus(bookId, trackStatus)
+                
+                if (success) {
+                    trackingStatus = status
+                    emitEvent(BookDetailEvent.ShowSnackbar("Status updated to $status"))
+                } else {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to update status"))
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to update tracking status")
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to update status: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Update tracking progress (chapters read)
+     */
+    fun updateTrackingProgress(progress: Int) {
+        val bookId = param.bookId ?: return
+        if (trackingRepository == null) return
+        
+        scope.launch {
+            try {
+                val success = trackingRepository.updateReadingProgress(bookId, progress)
+                
+                if (success) {
+                    trackingProgress = progress
+                    emitEvent(BookDetailEvent.ShowSnackbar("Progress updated to $progress"))
+                } else {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to update progress"))
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to update tracking progress")
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to update progress: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Update tracking score
+     */
+    fun updateTrackingScore(score: Float) {
+        val bookId = param.bookId ?: return
+        if (trackingRepository == null) return
+        
+        scope.launch {
+            try {
+                val success = trackingRepository.updateScore(bookId, score)
+                
+                if (success) {
+                    trackingScore = score
+                    emitEvent(BookDetailEvent.ShowSnackbar("Score updated to ${"%.1f".format(score)}"))
+                } else {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to update score"))
+                }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to update tracking score")
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to update score: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Update tracking status for the current book.
+     * This will be called when tracking data is loaded from AniList or other services.
+     */
+    fun updateTrackingStatus(tracked: Boolean, status: String?) {
+        isTracked = tracked
+        trackingStatus = status
+    }
     
     /**
      * Share text using platform-specific sharing mechanism.

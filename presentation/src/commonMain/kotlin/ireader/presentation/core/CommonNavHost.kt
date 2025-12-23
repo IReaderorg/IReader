@@ -41,6 +41,7 @@ import ireader.presentation.core.ui.RepositoryScreenSpec
 import ireader.presentation.core.ui.SecuritySettingSpec
 import ireader.presentation.core.ui.SettingScreenSpec
 import ireader.presentation.core.ui.SourceMigrationScreenSpec
+import ireader.presentation.core.ui.TrackingSettingsScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import ireader.presentation.core.ui.TTSV2ScreenSpec
 import ireader.presentation.core.ui.TranslationScreenSpec
@@ -329,6 +330,10 @@ fun CommonNavHost(
         }
         composable(NavigationRoutes.browseSettings) {
             BrowseSettingsScreenSpec().Content()
+        }
+        
+        composable(NavigationRoutes.trackingSettings) {
+            TrackingSettingsScreenSpec().Content()
         }
         
         // Routes with parameters

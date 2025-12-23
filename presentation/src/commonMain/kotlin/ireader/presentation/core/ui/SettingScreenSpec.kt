@@ -237,6 +237,16 @@ class SettingScreenSpec {
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
                 ),
+                
+                // Tracking
+                SearchableSettingItem(
+                    id = "tracking",
+                    title = localizeHelper.localize(Res.string.tracking),
+                    description = "Sync reading progress with AniList, MAL, and more",
+                    icon = Icons.Default.Sync,
+                    section = localizeHelper.localize(Res.string.tracking),
+                    onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
+                ),
             )
         }
         
@@ -510,6 +520,23 @@ class SettingScreenSpec {
                             description = "Manage security and privacy settings",
                             icon = Icons.Default.Security,
                             onClick = { navController.navigate(NavigationRoutes.securitySettings) }
+                        )
+                    }
+                    
+                    // Tracking Section
+                    item {
+                        SettingsSectionHeader(
+                            title = localizeHelper.localize(Res.string.tracking),
+                            icon = Icons.Default.Sync
+                        )
+                    }
+                    
+                    item {
+                        SettingsItem(
+                            title = localizeHelper.localize(Res.string.tracking),
+                            description = "Sync reading progress with AniList, MAL, and more",
+                            icon = Icons.Default.Sync,
+                            onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
                         )
                     }
                     
