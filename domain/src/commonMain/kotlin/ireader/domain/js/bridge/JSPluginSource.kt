@@ -189,11 +189,15 @@ class JSPluginSource(
     }
     
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
+        Log.info("JSPluginSource: [$name] getMangaDetails START for ${manga.key}")
         return try {
-            // Use URL exactly as stored (same format plugin returned)
-            Log.info("JSPluginSource: [$name] getMangaDetails called for ${manga.key}")
+            // Convert URL to plugin format (relative path if needed)
+            val pluginUrl = toPluginUrl(manga.key)
+            Log.info("JSPluginSource: [$name] getMangaDetails calling plugin.getNovelDetails with $pluginUrl")
             
-            val details = plugin.getNovelDetails(manga.key)
+            val details = plugin.getNovelDetails(pluginUrl)
+            
+            Log.info("JSPluginSource: [$name] getMangaDetails got response: name=${details.name}, cover=${details.cover}")
             
             // Only convert cover to absolute if we have a valid baseUrl
             val coverUrl = if (details.cover.isNotBlank()) {
@@ -208,7 +212,7 @@ class JSPluginSource(
                 ""
             }
             
-            manga.copy(
+            val result = manga.copy(
                 title = details.name,
                 cover = coverUrl,
                 author = details.author ?: "",
@@ -216,25 +220,40 @@ class JSPluginSource(
                 genres = details.genres,
                 status = parseStatus(details.status)
             )
+            Log.info("JSPluginSource: [$name] getMangaDetails SUCCESS: title=${result.title}")
+            result
         } catch (e: Exception) {
-            Log.error("JSPluginSource: Error in getMangaDetails", e)
+            Log.error("JSPluginSource: [$name] getMangaDetails ERROR: ${e.message}", e)
             manga
         }
     }
     
     override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
         return try {
-            // Use URL exactly as stored (same format plugin returned)
-            Log.info("JSPluginSource: [$name] getChapterList called for ${manga.key}")
+            // Convert URL to plugin format (relative path)
+            val pluginUrl = toPluginUrl(manga.key)
+            Log.info("JSPluginSource: [$name] getChapterList called for ${manga.key} -> $pluginUrl")
             
-            val chapters = plugin.getChapters(manga.key)
+            val chapters = plugin.getChapters(pluginUrl)
             
             Log.info("JSPluginSource: [$name] Got ${chapters.size} chapters from plugin")
             
-            // Store chapter URLs exactly as plugin returns them
+            // Store chapter URLs as ABSOLUTE URLs
             chapters.mapIndexed { index, chapter ->
+                // Convert chapter URL to absolute for storage
+                val absoluteChapterUrl = if (chapter.url.startsWith("http://") || chapter.url.startsWith("https://")) {
+                    chapter.url  // Already absolute
+                } else if (_baseUrl.isNotBlank()) {
+                    // Append relative path to baseUrl, handling trailing/leading slashes
+                    val base = _baseUrl.trimEnd('/')
+                    val path = if (chapter.url.startsWith("/")) chapter.url else "/${chapter.url}"
+                    base + path
+                } else {
+                    chapter.url  // Keep as-is if no baseUrl available
+                }
+                
                 ChapterInfo(
-                    key = chapter.url,  // Store URL exactly as plugin returns it
+                    key = absoluteChapterUrl,  // Store ABSOLUTE URL
                     name = chapter.name,
                     number = (index + 1).toFloat(),
                     dateUpload = parseDate(chapter.releaseTime)
@@ -248,10 +267,11 @@ class JSPluginSource(
     
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         return try {
-            // Use URL exactly as stored (same format plugin returned)
-            Log.info("JSPluginSource: [$name] getPageList called for ${chapter.key}")
+            // Convert URL to plugin format (relative path if needed)
+            val pluginUrl = toPluginUrl(chapter.key)
+            Log.info("JSPluginSource: [$name] getPageList called for ${chapter.key} -> $pluginUrl")
             
-            val content = plugin.getChapterContent(chapter.key)
+            val content = plugin.getChapterContent(pluginUrl)
             
             if (content.isBlank()) {
                 Log.warn("JSPluginSource: Empty content returned for ${chapter.key}")
@@ -358,8 +378,8 @@ class JSPluginSource(
     
     /**
      * Convert plugin novel to MangaInfo
-     * Store URLs exactly as the plugin returns them - don't modify
-     * Auto-detects baseUrl from first absolute URL for cover images
+     * IMPORTANT: Store ABSOLUTE URLs in the app (for display, sharing, etc.)
+     * The toPluginUrl() function will convert back to relative when calling plugin methods
      */
     private fun PluginNovel.toMangaInfo(): MangaInfo {
         // Auto-detect baseUrl from the first URL we see (for cover images)
@@ -368,8 +388,22 @@ class JSPluginSource(
             autoDetectBaseUrl(this.cover)
         }
         
+        // Convert URL to absolute for storage
+        val absoluteUrl = if (this.url.startsWith("http://") || this.url.startsWith("https://")) {
+            this.url  // Already absolute
+        } else if (_baseUrl.isNotBlank()) {
+            // Append relative path to baseUrl, handling trailing/leading slashes
+            val base = _baseUrl.trimEnd('/')
+            val path = if (this.url.startsWith("/")) this.url else "/${this.url}"
+            base + path
+        } else {
+            this.url  // Keep as-is if no baseUrl available
+        }
+        
+        Log.debug("JSPluginSource: [$name] toMangaInfo: ${this.url} -> $absoluteUrl (baseUrl=$_baseUrl)")
+        
         return MangaInfo(
-            key = this.url,  // Store URL exactly as plugin returns it
+            key = absoluteUrl,  // Store ABSOLUTE URL
             title = this.name,
             cover = if (this.cover.isNotBlank()) {
                 // Only convert cover to absolute if we have a valid baseUrl

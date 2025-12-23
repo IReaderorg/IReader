@@ -234,18 +234,59 @@ private object AdapterCodeCache {
                         });
                     }
                 }
-                this.get = function(key) { return this.params[key] ? this.params[key][0] : null; };
-                this.toString = function() {
-                    var parts = [];
-                    for (var key in this.params) {
-                        if (this.params.hasOwnProperty(key)) {
-                            this.params[key].forEach(function(value) {
-                                parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
-                            });
+            };
+            globalThis.URLSearchParams.prototype.append = function(key, value) {
+                if (!this.params[key]) this.params[key] = [];
+                this.params[key].push(String(value));
+            };
+            globalThis.URLSearchParams.prototype.set = function(key, value) {
+                this.params[key] = [String(value)];
+            };
+            globalThis.URLSearchParams.prototype.get = function(key) {
+                return this.params[key] ? this.params[key][0] : null;
+            };
+            globalThis.URLSearchParams.prototype.getAll = function(key) {
+                return this.params[key] || [];
+            };
+            globalThis.URLSearchParams.prototype.has = function(key) {
+                return key in this.params;
+            };
+            globalThis.URLSearchParams.prototype.delete = function(key) {
+                delete this.params[key];
+            };
+            globalThis.URLSearchParams.prototype.keys = function() {
+                return Object.keys(this.params);
+            };
+            globalThis.URLSearchParams.prototype.entries = function() {
+                var result = [];
+                for (var key in this.params) {
+                    if (this.params.hasOwnProperty(key)) {
+                        for (var i = 0; i < this.params[key].length; i++) {
+                            result.push([key, this.params[key][i]]);
                         }
                     }
-                    return parts.join('&');
-                };
+                }
+                return result;
+            };
+            globalThis.URLSearchParams.prototype.forEach = function(callback) {
+                for (var key in this.params) {
+                    if (this.params.hasOwnProperty(key)) {
+                        for (var i = 0; i < this.params[key].length; i++) {
+                            callback(this.params[key][i], key, this);
+                        }
+                    }
+                }
+            };
+            globalThis.URLSearchParams.prototype.toString = function() {
+                var parts = [];
+                for (var key in this.params) {
+                    if (this.params.hasOwnProperty(key)) {
+                        for (var i = 0; i < this.params[key].length; i++) {
+                            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(this.params[key][i]));
+                        }
+                    }
+                }
+                return parts.join('&');
             };
         }
 
@@ -436,9 +477,342 @@ private object AdapterCodeCache {
             };
         }
 
+        // atob/btoa polyfills for base64 encoding/decoding
+        if (typeof atob === 'undefined') {
+            globalThis.atob = function(str) {
+                var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+                var output = '';
+                str = String(str).replace(/=+$/, '');
+                for (var bc = 0, bs, buffer, idx = 0; buffer = str.charAt(idx++);
+                    ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer, bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0) {
+                    buffer = chars.indexOf(buffer);
+                }
+                return output;
+            };
+        }
+        
+        if (typeof btoa === 'undefined') {
+            globalThis.btoa = function(str) {
+                var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+                var output = '';
+                for (var block, charCode, idx = 0, map = chars;
+                    str.charAt(idx | 0) || (map = '=', idx % 1);
+                    output += map.charAt(63 & block >> 8 - idx % 1 * 8)) {
+                    charCode = str.charCodeAt(idx += 3/4);
+                    block = block << 8 | charCode;
+                }
+                return output;
+            };
+        }
+
+        // Object.assign polyfill
+        if (typeof Object.assign !== 'function') {
+            Object.assign = function(target) {
+                if (target == null) throw new TypeError('Cannot convert undefined or null to object');
+                var to = Object(target);
+                for (var i = 1; i < arguments.length; i++) {
+                    var source = arguments[i];
+                    if (source != null) {
+                        for (var key in source) {
+                            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                                to[key] = source[key];
+                            }
+                        }
+                    }
+                }
+                return to;
+            };
+        }
+
+        // Array.from polyfill
+        if (!Array.from) {
+            Array.from = function(arrayLike, mapFn, thisArg) {
+                var arr = [];
+                var len = arrayLike.length;
+                for (var i = 0; i < len; i++) {
+                    arr.push(mapFn ? mapFn.call(thisArg, arrayLike[i], i) : arrayLike[i]);
+                }
+                return arr;
+            };
+        }
+
+        // Array.prototype.find polyfill
+        if (!Array.prototype.find) {
+            Array.prototype.find = function(predicate, thisArg) {
+                for (var i = 0; i < this.length; i++) {
+                    if (predicate.call(thisArg, this[i], i, this)) return this[i];
+                }
+                return undefined;
+            };
+        }
+
+        // Array.prototype.findIndex polyfill
+        if (!Array.prototype.findIndex) {
+            Array.prototype.findIndex = function(predicate, thisArg) {
+                for (var i = 0; i < this.length; i++) {
+                    if (predicate.call(thisArg, this[i], i, this)) return i;
+                }
+                return -1;
+            };
+        }
+
+        // Array.prototype.includes polyfill
+        if (!Array.prototype.includes) {
+            Array.prototype.includes = function(searchElement, fromIndex) {
+                var start = fromIndex || 0;
+                for (var i = start; i < this.length; i++) {
+                    if (this[i] === searchElement) return true;
+                }
+                return false;
+            };
+        }
+
+        // Array.prototype.flat polyfill
+        if (!Array.prototype.flat) {
+            Array.prototype.flat = function(depth) {
+                depth = depth === undefined ? 1 : Math.floor(depth);
+                if (depth < 1) return Array.prototype.slice.call(this);
+                return (function flatten(arr, d) {
+                    var result = [];
+                    for (var i = 0; i < arr.length; i++) {
+                        if (Array.isArray(arr[i]) && d > 0) {
+                            result = result.concat(flatten(arr[i], d - 1));
+                        } else {
+                            result.push(arr[i]);
+                        }
+                    }
+                    return result;
+                })(this, depth);
+            };
+        }
+
+        // Array.prototype.flatMap polyfill
+        if (!Array.prototype.flatMap) {
+            Array.prototype.flatMap = function(callback, thisArg) {
+                return this.map(callback, thisArg).flat(1);
+            };
+        }
+
+        // String.prototype.includes polyfill
+        if (!String.prototype.includes) {
+            String.prototype.includes = function(search, start) {
+                return this.indexOf(search, start) !== -1;
+            };
+        }
+
+        // String.prototype.startsWith polyfill
+        if (!String.prototype.startsWith) {
+            String.prototype.startsWith = function(search, pos) {
+                pos = pos || 0;
+                return this.substr(pos, search.length) === search;
+            };
+        }
+
+        // String.prototype.endsWith polyfill
+        if (!String.prototype.endsWith) {
+            String.prototype.endsWith = function(search, length) {
+                if (length === undefined || length > this.length) length = this.length;
+                return this.substring(length - search.length, length) === search;
+            };
+        }
+
+        // String.prototype.padStart polyfill
+        if (!String.prototype.padStart) {
+            String.prototype.padStart = function(targetLength, padString) {
+                targetLength = targetLength >> 0;
+                padString = String(padString || ' ');
+                if (this.length >= targetLength) return String(this);
+                targetLength = targetLength - this.length;
+                if (targetLength > padString.length) {
+                    padString += padString.repeat(targetLength / padString.length);
+                }
+                return padString.slice(0, targetLength) + String(this);
+            };
+        }
+
+        // String.prototype.padEnd polyfill
+        if (!String.prototype.padEnd) {
+            String.prototype.padEnd = function(targetLength, padString) {
+                targetLength = targetLength >> 0;
+                padString = String(padString || ' ');
+                if (this.length >= targetLength) return String(this);
+                targetLength = targetLength - this.length;
+                if (targetLength > padString.length) {
+                    padString += padString.repeat(targetLength / padString.length);
+                }
+                return String(this) + padString.slice(0, targetLength);
+            };
+        }
+
+        // String.prototype.repeat polyfill
+        if (!String.prototype.repeat) {
+            String.prototype.repeat = function(count) {
+                if (count < 0) throw new RangeError('repeat count must be non-negative');
+                if (count === Infinity) throw new RangeError('repeat count must be less than infinity');
+                count = Math.floor(count);
+                if (this.length === 0 || count === 0) return '';
+                var result = '';
+                for (var i = 0; i < count; i++) result += this;
+                return result;
+            };
+        }
+
+        // String.prototype.trim polyfill
+        if (!String.prototype.trim) {
+            String.prototype.trim = function() {
+                return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+            };
+        }
+
+        // String.prototype.trimStart polyfill
+        if (!String.prototype.trimStart) {
+            String.prototype.trimStart = function() {
+                return this.replace(/^[\s\uFEFF\xA0]+/, '');
+            };
+        }
+
+        // String.prototype.trimEnd polyfill
+        if (!String.prototype.trimEnd) {
+            String.prototype.trimEnd = function() {
+                return this.replace(/[\s\uFEFF\xA0]+$/, '');
+            };
+        }
+
+        // Object.entries polyfill
+        if (!Object.entries) {
+            Object.entries = function(obj) {
+                var result = [];
+                for (var key in obj) {
+                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                        result.push([key, obj[key]]);
+                    }
+                }
+                return result;
+            };
+        }
+
+        // Object.values polyfill
+        if (!Object.values) {
+            Object.values = function(obj) {
+                var result = [];
+                for (var key in obj) {
+                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                        result.push(obj[key]);
+                    }
+                }
+                return result;
+            };
+        }
+
+        // Object.keys polyfill
+        if (!Object.keys) {
+            Object.keys = function(obj) {
+                var result = [];
+                for (var key in obj) {
+                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                        result.push(key);
+                    }
+                }
+                return result;
+            };
+        }
+
+        // Object.fromEntries polyfill
+        if (!Object.fromEntries) {
+            Object.fromEntries = function(entries) {
+                var obj = {};
+                for (var i = 0; i < entries.length; i++) {
+                    obj[entries[i][0]] = entries[i][1];
+                }
+                return obj;
+            };
+        }
+
+        // Number.isNaN polyfill
+        if (!Number.isNaN) {
+            Number.isNaN = function(value) {
+                return typeof value === 'number' && value !== value;
+            };
+        }
+
+        // Number.isFinite polyfill
+        if (!Number.isFinite) {
+            Number.isFinite = function(value) {
+                return typeof value === 'number' && isFinite(value);
+            };
+        }
+
+        // Number.isInteger polyfill
+        if (!Number.isInteger) {
+            Number.isInteger = function(value) {
+                return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
+            };
+        }
+
         // Wrapper function for plugins
         function wrapPlugin(plugin) {
             var wrapper = {};
+            
+            // Cache for parseNovel results to avoid duplicate network requests
+            // Key: URL path, Value: { data: novelData, timestamp: Date.now() }
+            var parseNovelCache = {};
+            var CACHE_TTL = 60000; // Cache for 60 seconds
+            
+            // Helper to get cached parseNovel result or fetch new one
+            function getCachedParseNovel(pathUrl) {
+                var cached = parseNovelCache[pathUrl];
+                var now = Date.now();
+                
+                // Return cached data if still valid
+                if (cached && (now - cached.timestamp) < CACHE_TTL) {
+                    return Promise.resolve(cached.data);
+                }
+                
+                // Fetch new data and cache it
+                return Promise.resolve(plugin.parseNovel(pathUrl)).then(function(data) {
+                    parseNovelCache[pathUrl] = { data: data, timestamp: now };
+                    return data;
+                });
+            }
+            
+            // Helper to extract path from URL
+            function extractPathUrl(url) {
+                var pathUrl = url;
+                if (plugin.site && url.indexOf(plugin.site) === 0) {
+                    pathUrl = url.substring(plugin.site.length);
+                    if (pathUrl.indexOf('/') !== 0) pathUrl = '/' + pathUrl;
+                } else if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+                    try {
+                        var urlObj = new URL(url);
+                        pathUrl = urlObj.pathname + urlObj.search + urlObj.hash;
+                    } catch(e) {}
+                }
+                return pathUrl;
+            }
+            
+            // Helper to resolve relative URLs to absolute using plugin.site
+            function resolveUrl(url, baseUrl) {
+                if (!url) return "";
+                // Already absolute URL
+                if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+                    return url;
+                }
+                // Data URL or blob URL - return as is
+                if (url.indexOf('data:') === 0 || url.indexOf('blob:') === 0) {
+                    return url;
+                }
+                // Relative URL - prepend base URL
+                if (baseUrl) {
+                    var base = baseUrl.replace(/\/+$/, ''); // Remove trailing slashes
+                    if (url.indexOf('/') === 0) {
+                        return base + url;
+                    } else {
+                        return base + '/' + url;
+                    }
+                }
+                return url;
+            }
+            
             wrapper.getId = function() { return plugin.id || "unknown"; };
             wrapper.getName = function() { return plugin.name || "Unknown Plugin"; };
             wrapper.getSite = function() { return plugin.site || ""; };
@@ -451,7 +825,9 @@ private object AdapterCodeCache {
                     return Promise.resolve(plugin.searchNovels(query, page)).then(function(results) {
                         if (!Array.isArray(results)) return [];
                         return results.map(function(r) {
-                            return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
+                            var novelUrl = r.url || r.path || "";
+                            var novelCover = resolveUrl(r.cover || r.image || "", plugin.site);
+                            return { name: r.name || r.title || "", url: novelUrl, cover: novelCover };
                         });
                     });
                 }
@@ -469,7 +845,9 @@ private object AdapterCodeCache {
                     return Promise.resolve(result).then(function(results) {
                         if (!Array.isArray(results)) return [];
                         return results.map(function(r) {
-                            return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
+                            var novelUrl = r.url || r.path || "";
+                            var novelCover = resolveUrl(r.cover || r.image || "", plugin.site);
+                            return { name: r.name || r.title || "", url: novelUrl, cover: novelCover };
                         });
                     });
                 }
@@ -487,7 +865,9 @@ private object AdapterCodeCache {
                     return Promise.resolve(result).then(function(results) {
                         if (!Array.isArray(results)) return [];
                         return results.map(function(r) {
-                            return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
+                            var novelUrl = r.url || r.path || "";
+                            var novelCover = resolveUrl(r.cover || r.image || "", plugin.site);
+                            return { name: r.name || r.title || "", url: novelUrl, cover: novelCover };
                         });
                     });
                 }
@@ -496,11 +876,12 @@ private object AdapterCodeCache {
 
             wrapper.getNovelDetails = function(url) {
                 if (typeof plugin.parseNovel === 'function') {
-                    return Promise.resolve(plugin.parseNovel(url)).then(function(d) {
+                    var pathUrl = extractPathUrl(url);
+                    return getCachedParseNovel(pathUrl).then(function(d) {
                         return {
                             name: d.name || d.title || "",
                             url: d.url || d.path || url,
-                            cover: d.cover || d.image || "",
+                            cover: resolveUrl(d.cover || d.image || "", plugin.site),
                             author: d.author || null,
                             description: d.description || d.summary || null,
                             genres: Array.isArray(d.genres) ? d.genres : [],
@@ -513,10 +894,12 @@ private object AdapterCodeCache {
 
             wrapper.getChapters = function(url) {
                 if (typeof plugin.parseNovel === 'function') {
-                    return Promise.resolve(plugin.parseNovel(url)).then(function(novel) {
+                    var pathUrl = extractPathUrl(url);
+                    return getCachedParseNovel(pathUrl).then(function(novel) {
                         if (novel && Array.isArray(novel.chapters)) {
                             return novel.chapters.map(function(c) {
-                                return { name: c.name || c.title || "", url: c.url || c.path || "", releaseTime: c.releaseTime || c.date || null };
+                                var chapterUrl = c.url || c.path || "";
+                                return { name: c.name || c.title || "", url: chapterUrl, releaseTime: c.releaseTime || c.date || null };
                             });
                         }
                         return [];
@@ -527,7 +910,17 @@ private object AdapterCodeCache {
 
             wrapper.getChapterContent = function(url) {
                 if (typeof plugin.parseChapter === 'function') {
-                    return Promise.resolve(plugin.parseChapter(url)).then(function(content) {
+                    var pathUrl = url;
+                    if (plugin.site && url.indexOf(plugin.site) === 0) {
+                        pathUrl = url.substring(plugin.site.length);
+                        if (pathUrl.indexOf('/') !== 0) pathUrl = '/' + pathUrl;
+                    } else if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+                        try {
+                            var urlObj = new URL(url);
+                            pathUrl = urlObj.pathname + urlObj.search + urlObj.hash;
+                        } catch(e) {}
+                    }
+                    return Promise.resolve(plugin.parseChapter(pathUrl)).then(function(content) {
                         var text = typeof content === 'string' ? content : (content.text || "");
                         return text.replace(/[\n\r\t]/g, '');
                     });
@@ -625,8 +1018,27 @@ private class J2V8ReflectionEngine(
     
     private fun setupBridge(runtime: Any) {
         executeVoidScriptMethod?.invoke(runtime, """
+            // Helper function to normalize URLs (fix double slashes)
+            function normalizeUrl(url) {
+                if (!url) return url;
+                // Fix double slashes in path (but not in protocol)
+                // First, separate protocol
+                var protoIdx = url.indexOf('://');
+                if (protoIdx !== -1) {
+                    var proto = url.substring(0, protoIdx + 3);
+                    var rest = url.substring(protoIdx + 3);
+                    // Replace multiple consecutive slashes with single slash in the rest
+                    while (rest.indexOf('//') !== -1) {
+                        rest = rest.split('//').join('/');
+                    }
+                    return proto + rest;
+                }
+                return url;
+            }
+            
             globalThis.fetch = function(url, options) {
-                var requestUrl = String(url || '');
+                var requestUrl = normalizeUrl(String(url || ''));
+                console.log('[JSBridge] fetch called with url=' + requestUrl);
                 return new Promise(function(resolve, reject) {
                     // Convert Headers object to plain object if needed
                     var headersObj = {};
