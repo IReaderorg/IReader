@@ -95,6 +95,9 @@ class LibraryViewModel(
     private val _paginatedTotalCounts = MutableStateFlow<Map<Long, Int>>(emptyMap())
     private var paginationLoadJobs = mutableMapOf<Long, Job?>()
     
+    // Track categories that are currently loading to prevent duplicate loads
+    private val loadingCategories = mutableSetOf<Long>()
+    
     // Preferences as StateFlow
     val lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
     val filters = libraryPreferences.filters(true).asState()
@@ -224,11 +227,12 @@ class LibraryViewModel(
     
     private fun initializeState() {
         ireader.core.log.Log.error { "LibraryViewModel: initializeState START" }
-        // Load initial preferences
+        // Load initial preferences - use libraryPreferences.sorting() which is the SSOT
+        // Note: Previously used sortersUseCase which was a different preference key, causing sort to reset on restart
         scope.launch {
-            val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
-            val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
-            _uiState.update { it.copy(sort = LibrarySort(sortType.type, sortBy)) }
+            val savedSort = libraryPreferences.sorting().get()
+            ireader.core.log.Log.error { "LibraryViewModel: Loaded sort preference: ${savedSort.type.name}, ascending=${savedSort.isAscending}" }
+            _uiState.update { it.copy(sort = savedSort) }
         }
         
         // Load layout preference
@@ -285,7 +289,9 @@ class LibraryViewModel(
         // Also load initial books for the default category immediately
         scope.launch {
             try {
+                ireader.core.log.Log.error { "LibraryViewModel: Loading categories..." }
                 val categoriesList = libraryUseCases.categories.await()
+                ireader.core.log.Log.error { "LibraryViewModel: Loaded ${categoriesList.size} categories" }
                 val lastCategoryId = lastUsedCategory.value
                 val index = categoriesList.indexOfFirst { it.category.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
                 
@@ -296,10 +302,38 @@ class LibraryViewModel(
                     )
                 }
                 
-                // Immediately load initial books for the selected category
-                // This speeds up the initial display significantly
+                // Check if we have preloaded cache from app startup
+                // This provides instant display while DB query runs
                 val categoryId = categoriesList.getOrNull(index)?.category?.id ?: 0L
-                loadInitialBooksForCategory(categoryId)
+                val cachedBooks = ireader.domain.data.cache.LibraryDataCache.getCachedBooks()
+                
+                if (cachedBooks.isNotEmpty() && categoryId == 0L) {
+                    // Use cached books for instant display (only for "All" category)
+                    ireader.core.log.Log.error { "LibraryViewModel: Using ${cachedBooks.size} preloaded books from cache" }
+                    _paginatedBooks.update { current ->
+                        current + (categoryId to cachedBooks)
+                    }
+                    _paginatedTotalCounts.update { current ->
+                        current + (categoryId to cachedBooks.size)
+                    }
+                    _uiState.update { current ->
+                        val newPaginationState = current.categoryPaginationState.toMutableMap()
+                        newPaginationState[categoryId] = PaginationState(
+                            loadedCount = cachedBooks.size,
+                            isLoadingMore = false,
+                            hasMoreItems = true, // Assume there are more books
+                            totalItems = cachedBooks.size
+                        )
+                        current.copy(categoryPaginationState = newPaginationState)
+                    }
+                    // Still load from DB to get accurate count and potentially more books
+                    // Use forceRefresh=true since we already have cached data
+                    loadInitialBooksForCategory(categoryId, forceRefresh = true)
+                } else {
+                    // No cache or different category - load from DB
+                    ireader.core.log.Log.error { "LibraryViewModel: Loading initial books for category $categoryId" }
+                    loadInitialBooksForCategory(categoryId)
+                }
             } catch (e: Exception) {
                 ireader.core.log.Log.error(e, "LibraryViewModel: Failed to load categories")
                 // Even if categories fail, try to load books for "All" category
@@ -1011,13 +1045,37 @@ class LibraryViewModel(
     /**
      * Load initial page of books for a category from database.
      * This uses true DB pagination - only loads INITIAL_PAGE_SIZE books from the database.
+     * 
+     * @param categoryId The category to load books for
+     * @param forceRefresh If true, will reload even if data is already cached (used after showing preloaded cache)
      */
-    fun loadInitialBooksForCategory(categoryId: Long) {
-        // Cancel any existing load job for this category
+    fun loadInitialBooksForCategory(categoryId: Long, forceRefresh: Boolean = false) {
+        // Prevent duplicate loads - check if already loading or loaded
+        val shouldLoad = synchronized(loadingCategories) {
+            when {
+                categoryId in loadingCategories -> {
+                    ireader.core.log.Log.error { "LibraryViewModel: loadInitialBooksForCategory($categoryId) - already loading, skipping" }
+                    false
+                }
+                !forceRefresh && _paginatedBooks.value.containsKey(categoryId) -> {
+                    ireader.core.log.Log.error { "LibraryViewModel: loadInitialBooksForCategory($categoryId) - already loaded, skipping" }
+                    false
+                }
+                else -> {
+                    loadingCategories.add(categoryId)
+                    true
+                }
+            }
+        }
+        
+        if (!shouldLoad) return
+        
+        // Cancel any existing load job for this category (shouldn't happen but just in case)
         paginationLoadJobs[categoryId]?.cancel()
         
         paginationLoadJobs[categoryId] = scope.launch {
             try {
+                ireader.core.log.Log.error { "LibraryViewModel: loadInitialBooksForCategory($categoryId) - starting load" }
                 val sort = sorting.value
                 val filtersList = filters.value
                 val includeArchived = showArchivedBooks.value
@@ -1031,6 +1089,8 @@ class LibraryViewModel(
                     offset = 0,
                     includeArchived = includeArchived
                 )
+                
+                ireader.core.log.Log.error { "LibraryViewModel: loadInitialBooksForCategory($categoryId) - loaded ${books.size} books, total=$totalCount" }
                 
                 // Update paginated books state
                 _paginatedBooks.update { current ->
@@ -1054,7 +1114,11 @@ class LibraryViewModel(
                     current.copy(categoryPaginationState = newPaginationState)
                 }
             } catch (e: Exception) {
-                ireader.core.log.Log.error(e, "LibraryViewModel: loadInitialBooksForCategory($categoryId) failed")
+                if (e is kotlinx.coroutines.CancellationException) {
+                    ireader.core.log.Log.debug { "LibraryViewModel: loadInitialBooksForCategory($categoryId) - cancelled" }
+                } else {
+                    ireader.core.log.Log.error(e, "LibraryViewModel: loadInitialBooksForCategory($categoryId) failed")
+                }
                 // On error, fall back to empty state
                 _uiState.update { current ->
                     val newPaginationState = current.categoryPaginationState.toMutableMap()
@@ -1065,6 +1129,10 @@ class LibraryViewModel(
                         totalItems = 0
                     )
                     current.copy(categoryPaginationState = newPaginationState)
+                }
+            } finally {
+                synchronized(loadingCategories) {
+                    loadingCategories.remove(categoryId)
                 }
             }
         }
@@ -1175,6 +1243,11 @@ class LibraryViewModel(
      * Call this when global settings change (sort, filter, archived).
      */
     fun resetAllPagination() {
+        // Clear loading state
+        synchronized(loadingCategories) {
+            loadingCategories.clear()
+        }
+        
         // Clear all cached data
         _paginatedBooks.value = emptyMap()
         _paginatedTotalCounts.value = emptyMap()

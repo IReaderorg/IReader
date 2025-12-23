@@ -835,3 +835,55 @@ SELECT COUNT(DISTINCT book._id) AS count
 FROM book
 WHERE book.favorite = 1 
     AND book._id NOT IN (SELECT book_id FROM bookcategories);
+
+-- Count books that need last_read_at fix (have history but last_read_at = 0)
+countBooksNeedingLastReadFix:
+SELECT COUNT(*) AS count
+FROM book
+WHERE book.favorite = 1 
+    AND book.last_read_at = 0
+    AND EXISTS (
+        SELECT 1 FROM history h
+        JOIN chapter c ON h.chapter_id = c._id
+        WHERE c.book_id = book._id
+    );
+
+-- Fix last_read_at from history table for books that have history but last_read_at = 0
+fixLastReadAtFromHistory:
+UPDATE book SET
+    last_read_at = COALESCE(
+        (SELECT MAX(h.last_read) 
+         FROM history h 
+         JOIN chapter c ON h.chapter_id = c._id 
+         WHERE c.book_id = book._id), 
+        0
+    )
+WHERE book.favorite = 1 
+    AND book.last_read_at = 0
+    AND EXISTS (
+        SELECT 1 FROM history h
+        JOIN chapter c ON h.chapter_id = c._id
+        WHERE c.book_id = book._id
+    );
+
+-- Debug: Count total history entries
+countHistoryEntries:
+SELECT COUNT(*) AS count FROM history;
+
+-- Debug: Count books with any history
+countBooksWithHistory:
+SELECT COUNT(DISTINCT c.book_id) AS count
+FROM history h
+JOIN chapter c ON h.chapter_id = c._id;
+
+-- Force update last_read_at for ALL favorite books from history (ignores current value)
+forceUpdateLastReadAtFromHistory:
+UPDATE book SET
+    last_read_at = COALESCE(
+        (SELECT MAX(h.last_read) 
+         FROM history h 
+         JOIN chapter c ON h.chapter_id = c._id 
+         WHERE c.book_id = book._id), 
+        last_read_at
+    )
+WHERE book.favorite = 1;

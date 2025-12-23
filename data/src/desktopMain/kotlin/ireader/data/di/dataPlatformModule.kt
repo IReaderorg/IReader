@@ -35,7 +35,7 @@ actual val dataPlatformModule: Module = module {
     single<ireader.data.core.DatabaseOptimizations> { ireader.data.core.DatabaseOptimizations(get()) }
     
     // Database preloader - warms up cache during app startup
-    single<ireader.data.core.DatabasePreloader> { ireader.data.core.DatabasePreloader(get(), get()) }
+    single<ireader.data.core.DatabasePreloader> { ireader.data.core.DatabasePreloader(get(), get(), get()) }
     single<CatalogLoader> { DesktopCatalogLoader(get(),get(),get(),get()) }
     single<DesktopCatalogInstallationChanges> { DesktopCatalogInstallationChanges() }
     single<CatalogInstallationChanges> { DesktopCatalogInstallationChanges() }

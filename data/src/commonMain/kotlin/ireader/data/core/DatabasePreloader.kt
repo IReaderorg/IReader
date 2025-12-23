@@ -1,6 +1,8 @@
 package ireader.data.core
 
 import ireader.core.log.Log
+import ireader.domain.models.library.LibrarySort
+import ireader.domain.preferences.prefs.LibraryPreferences
 import kotlinx.coroutines.CoroutineScope
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.SupervisorJob
@@ -19,7 +21,8 @@ import ireader.domain.utils.extensions.currentTimeToLong
  */
 class DatabasePreloader(
     private val dbOptimizations: DatabaseOptimizations,
-    private val handler: DatabaseHandler
+    private val handler: DatabaseHandler,
+    private val libraryPreferences: LibraryPreferences
 ) {
     private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     
@@ -52,13 +55,16 @@ class DatabasePreloader(
         val startTime = currentTimeToLong()
         
         try {
+            // First, fix last_read_at if not populated (migration may have failed)
+            fixLastReadAtIfNeeded()
+            
             // Run preloads SEQUENTIALLY to reduce peak memory usage
             // This is important for low-memory devices with large libraries
             preloadCategories()
             preloadRecentHistory()
-            // Skip library books preload on large libraries to prevent OOM
-            // The library screen will load books via pagination instead
-            // preloadLibraryBooks()
+            // Preload library books with user's preferred sort order
+            // Limited to first page to prevent OOM on large libraries
+            preloadLibraryBooks()
             
             val duration = currentTimeToLong() - startTime
             Log.info("Critical data preload completed in ${duration}ms", TAG)
@@ -68,6 +74,42 @@ class DatabasePreloader(
             
         } catch (e: Exception) {
             Log.error("Critical data preload failed: ${e.message}", TAG)
+        }
+    }
+    
+    /**
+     * Fix last_read_at column if it's not populated.
+     * This handles cases where migration 27/28 didn't properly populate the column.
+     * Also runs on every startup to ensure last_read_at is always up-to-date.
+     */
+    private suspend fun fixLastReadAtIfNeeded() {
+        try {
+            Log.info("Checking if last_read_at needs fixing...", TAG)
+            
+            // Check history table
+            val historyCount = handler.awaitOne {
+                bookQueries.countHistoryEntries()
+            }
+            Log.info("Total history entries: $historyCount", TAG)
+            
+            val booksWithHistory = handler.awaitOne {
+                bookQueries.countBooksWithHistory()
+            }
+            Log.info("Books with history: $booksWithHistory", TAG)
+            
+            // If there's history data, force update all books' last_read_at
+            // This ensures the column is always up-to-date regardless of trigger state
+            if (historyCount > 0) {
+                Log.info("Force updating last_read_at for all favorite books from history...", TAG)
+                handler.await {
+                    bookQueries.forceUpdateLastReadAtFromHistory()
+                }
+                Log.info("Force updated last_read_at for all books with history", TAG)
+            } else {
+                Log.info("No history entries found, skipping last_read_at fix", TAG)
+            }
+        } catch (e: Exception) {
+            Log.error("Failed to fix last_read_at: ${e.message}", TAG)
         }
     }
     
@@ -106,16 +148,48 @@ class DatabasePreloader(
     
     private suspend fun preloadLibraryBooks() {
         try {
-            // IMPORTANT: Only preload a limited number of books to prevent OOM
-            // with large libraries (10,000+ books). The full library is loaded
-            // via pagination when the user opens the Library screen.
+            // Get user's preferred sort order from preferences
+            val sort = libraryPreferences.sorting().get()
             val limit = 50L // Only preload first 50 books for instant display
+            
+            Log.info("Preloading library books with sort: ${sort.type.name}, ascending=${sort.isAscending}", TAG)
+            
+            // Use the appropriate sorted query based on user preference
             val books = handler.awaitList {
-                bookQueries.getLibraryPaginated(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                when (sort.type) {
+                    LibrarySort.Type.Title -> {
+                        if (sort.isAscending) bookQueries.getLibraryPaginatedByTitle(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                        else bookQueries.getLibraryPaginatedByTitleDesc(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                    }
+                    LibrarySort.Type.LastRead -> {
+                        if (sort.isAscending) bookQueries.getLibraryPaginatedByLastReadAsc(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                        else bookQueries.getLibraryPaginatedByLastRead(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                    }
+                    LibrarySort.Type.LastUpdated -> {
+                        if (sort.isAscending) bookQueries.getLibraryPaginatedByLastUpdateAsc(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                        else bookQueries.getLibraryPaginatedByLastUpdate(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                    }
+                    LibrarySort.Type.Unread -> {
+                        if (sort.isAscending) bookQueries.getLibraryPaginatedByUnreadAsc(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                        else bookQueries.getLibraryPaginatedByUnread(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                    }
+                    LibrarySort.Type.TotalChapters -> {
+                        if (sort.isAscending) bookQueries.getLibraryPaginatedByTotalChaptersAsc(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                        else bookQueries.getLibraryPaginatedByTotalChapters(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                    }
+                    LibrarySort.Type.Source -> {
+                        if (sort.isAscending) bookQueries.getLibraryPaginatedBySource(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                        else bookQueries.getLibraryPaginatedBySourceDesc(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                    }
+                    LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
+                        if (sort.isAscending) bookQueries.getLibraryPaginatedByDateAddedAsc(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                        else bookQueries.getLibraryPaginatedByDateAdded(limit, 0L, ireader.data.book.getLibraryFastMapper)
+                    }
+                }
             }
             // Update the in-memory cache for instant display
             ireader.domain.data.cache.LibraryDataCache.updateCache(books)
-            Log.debug("Library books preloaded: ${books.size} books (limited to $limit)", TAG)
+            Log.info("Library books preloaded: ${books.size} books (limited to $limit) with sort ${sort.type.name}", TAG)
         } catch (e: Exception) {
             Log.error("Failed to preload library books: ${e.message}", TAG)
         }

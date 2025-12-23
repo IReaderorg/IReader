@@ -47,7 +47,7 @@ actual val dataPlatformModule = module {
     single<DatabaseOptimizations>(createdAtStart = false) { DatabaseOptimizations(get()) }
     
     // Database preloader - LAZY: runs in background
-    single<DatabasePreloader>(createdAtStart = false) { DatabasePreloader(get(), get()) }
+    single<DatabasePreloader>(createdAtStart = false) { DatabasePreloader(get(), get(), get()) }
 
     // CatalogLoader - LAZY: catalog loading is deferred
     single<CatalogLoader>(createdAtStart = false) {

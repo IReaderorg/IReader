@@ -9,6 +9,8 @@ import ireader.domain.models.entities.SmartCategory
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -58,24 +60,39 @@ class GetLibraryCategory  internal constructor(
             }
             categoryId == 0L -> {
                 // ALL category - TRUE DB pagination
-                val totalCount = libraryRepository.getLibraryCount(includeArchived)
-                val books = libraryRepository.findAllPaginated(sort, limit, offset, includeArchived)
-                val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
-                Pair(filtered, totalCount)
+                // Run count and books queries in parallel for speed
+                coroutineScope {
+                    val countDeferred = async { libraryRepository.getLibraryCount(includeArchived) }
+                    val booksDeferred = async { libraryRepository.findAllPaginated(sort, limit, offset, includeArchived) }
+                    val totalCount = countDeferred.await()
+                    val books = booksDeferred.await()
+                    val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
+                    Pair(filtered, totalCount)
+                }
             }
             categoryId == -1L -> {
                 // UNCATEGORIZED - TRUE DB pagination
-                val totalCount = libraryRepository.getUncategorizedCount(includeArchived)
-                val books = libraryRepository.findUncategorizedPaginated(sort, limit, offset, includeArchived)
-                val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
-                Pair(filtered, totalCount)
+                // Run count and books queries in parallel for speed
+                coroutineScope {
+                    val countDeferred = async { libraryRepository.getUncategorizedCount(includeArchived) }
+                    val booksDeferred = async { libraryRepository.findUncategorizedPaginated(sort, limit, offset, includeArchived) }
+                    val totalCount = countDeferred.await()
+                    val books = booksDeferred.await()
+                    val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
+                    Pair(filtered, totalCount)
+                }
             }
             else -> {
                 // Regular category - TRUE DB pagination
-                val totalCount = libraryRepository.getLibraryCountByCategory(categoryId, includeArchived)
-                val books = libraryRepository.findByCategoryPaginated(categoryId, sort, limit, offset, includeArchived)
-                val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
-                Pair(filtered, totalCount)
+                // Run count and books queries in parallel for speed
+                coroutineScope {
+                    val countDeferred = async { libraryRepository.getLibraryCountByCategory(categoryId, includeArchived) }
+                    val booksDeferred = async { libraryRepository.findByCategoryPaginated(categoryId, sort, limit, offset, includeArchived) }
+                    val totalCount = countDeferred.await()
+                    val books = booksDeferred.await()
+                    val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
+                    Pair(filtered, totalCount)
+                }
             }
         }
     }

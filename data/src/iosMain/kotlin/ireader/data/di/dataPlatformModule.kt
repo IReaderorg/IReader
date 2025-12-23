@@ -33,7 +33,7 @@ actual val dataPlatformModule: Module = module {
     
     // Database optimizations
     single<ireader.data.core.DatabaseOptimizations> { ireader.data.core.DatabaseOptimizations(get()) }
-    single<ireader.data.core.DatabasePreloader> { ireader.data.core.DatabasePreloader(get(), get()) }
+    single<ireader.data.core.DatabasePreloader> { ireader.data.core.DatabasePreloader(get(), get(), get()) }
     
     // Catalog management
     single<CatalogLoader> { IosCatalogLoader(get(), get(), get()) }
