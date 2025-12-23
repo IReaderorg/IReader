@@ -53,34 +53,11 @@ class CategoriesUseCases  internal constructor(
             repo.subscribe(),
             libraryPreferences.showSmartCategories().stateIn(scope)
         ) { categories, showSmartCategories ->
-            // Get smart categories with counts only if enabled
-            val smartCategories = if (showSmartCategories) {
-                try {
-                    val smartCats = listOf(
-                        SmartCategory.RecentlyAdded,
-                        SmartCategory.CurrentlyReading,
-                        SmartCategory.Completed,
-                        SmartCategory.Unread
-                    )
-
-                    smartCats.mapNotNull { smartCategory ->
-                        try {
-                            val count = getSmartCategoryBooksUseCase.getCount(smartCategory)
-                            if (count > 0 || showEmptyCategories) {
-                                smartCategory.toCategoryWithCount(count)
-                            } else {
-                                null
-                            }
-                        } catch (e: Exception) {
-                            null
-                        }
-                    }
-                } catch (e: Exception) {
-                    emptyList()
-                }
-            } else {
-                emptyList()
-            }
+            // PERFORMANCE FIX: Smart categories are DISABLED during initial load
+            // because getCount() loads ALL books into memory, causing OOM with large libraries (10,000+ books).
+            // Smart categories should be loaded lazily or use database COUNT queries instead.
+            // TODO: Implement efficient database COUNT queries for smart categories
+            val smartCategories = emptyList<CategoryWithCount>()
 
             // Filter regular categories
             val regularCategories = categories.mapNotNull { categoryAndCount ->

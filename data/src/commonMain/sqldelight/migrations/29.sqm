@@ -1,0 +1,6 @@
+-- Migration 29: This migration is handled by DatabaseMigrations.kt
+-- The Kotlin code adds cached chapter counts and last_read_at columns to book table
+-- and creates triggers to keep them in sync.
+-- This file exists for SQLDelight schema versioning consistency.
+
+-- No SQL needed here - all handled in Kotlin migration code

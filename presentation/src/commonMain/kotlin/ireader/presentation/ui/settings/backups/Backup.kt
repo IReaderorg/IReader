@@ -39,9 +39,18 @@ fun BackUpAndRestoreScreen(
     var showBackupSaver by remember { mutableStateOf(false) }
     var showRestorePicker by remember { mutableStateOf(false) }
     
+    // Backup/Restore progress
+    val backupRestoreProgress by vm.backupRestoreProgress.collectAsState()
+    
     // LNReader import progress
     val lnReaderProgress by vm.lnReaderImportProgress.collectAsState()
     val lnReaderResult by vm.lnReaderImportResult.collectAsState()
+    
+    // Progress dialog
+    BackupProgressDialog(
+        progress = backupRestoreProgress,
+        onDismiss = { vm.dismissProgress() }
+    )
     
     // Platform-specific file picker for LNReader backup
     OnPickLNReaderBackup(

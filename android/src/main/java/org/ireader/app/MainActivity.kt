@@ -177,7 +177,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             val navController = rememberNavController()
                             
                             // Track if we're at root to enable/disable ConfirmExit
-                            // Use derivedStateOf to efficiently track back stack changes
                             val isAtRoot by remember {
                                 androidx.compose.runtime.derivedStateOf {
                                     navController.previousBackStackEntry == null
@@ -185,26 +184,19 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             }
                             
                             ProvideNavigator(navController) {
-                                // Always show ConfirmExit when at root to prevent white screen on rapid back
-                                // The BackHandler inside ConfirmExit handles the actual exit logic
                                 ConfirmExit(isAtRoot = isAtRoot)
                                 
                                 IScaffold {
                                     CommonNavHost(navController)
-                                    // Legacy permission handler for users who skipped initial permission
                                     GetPermissions(uiPreferences, context = this@MainActivity)
-                                    // Required plugin handler - shows dialog when JS engine or Piper TTS is needed
                                     ireader.presentation.ui.plugins.required.RequiredPluginHandler()
                                 }
                                 
-                                // Handle initial intent after navigation is set up (like Mihon)
                                 LaunchedEffect(navController) {
-                                    // Wait for navigation graph to be ready
                                     delay(500)
                                     handleIntentAction(this@MainActivity.intent, navController)
                                 }
                                 
-                                // FirstLaunchDialog removed - now handled in OnboardingScreen
                                 HandleOnNewIntent(this, navController)
                             }
                         }

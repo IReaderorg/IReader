@@ -180,8 +180,12 @@ data class LibraryBook(
     var dateUpload: Long = 0
     var unreadCount: Int = 0
     var readCount: Int = 0
-    val totalChapters
-        get() = readCount + unreadCount
+    // Cached total chapters from database (maintained by triggers)
+    // Falls back to computed value if not set
+    private var _totalChapters: Int = -1
+    var totalChapters: Int
+        get() = if (_totalChapters >= 0) _totalChapters else readCount + unreadCount
+        set(value) { _totalChapters = value }
 
     val hasStarted
         get() = readCount > 0

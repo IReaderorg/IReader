@@ -169,5 +169,17 @@ ON CONFLICT(_id) DO UPDATE SET
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;
 
+-- Query to manually refresh all book chapter counts (run after migration or data import)
+refreshAllBookChapterCounts:
+UPDATE book SET
+    cached_total_chapters = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id), 0),
+    cached_unread_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id AND read = 0), 0),
+    cached_read_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id AND read = 1), 0);
 
-
+-- Query to refresh chapter counts for a single book
+refreshBookChapterCounts:
+UPDATE book SET
+    cached_total_chapters = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = :bookId), 0),
+    cached_unread_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = :bookId AND read = 0), 0),
+    cached_read_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = :bookId AND read = 1), 0)
+WHERE _id = :bookId;

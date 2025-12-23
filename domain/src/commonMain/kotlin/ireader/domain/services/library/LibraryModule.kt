@@ -14,10 +14,12 @@ val libraryModule = module {
      * 
      * LAZY LOADING: createdAtStart=false ensures this is not created during app startup.
      * The controller is created on-demand when first accessed (e.g., when user opens Library).
+     * 
+     * NOTE: LibraryController no longer loads books directly to prevent OOM with large libraries.
+     * Book loading is handled by LibraryViewModel via pagination.
      */
     single(createdAtStart = false) { 
         LibraryController(
-            libraryRepository = get(),
             categoryRepository = get()
         )
     }

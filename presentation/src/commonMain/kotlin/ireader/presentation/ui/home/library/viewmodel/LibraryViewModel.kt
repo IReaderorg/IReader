@@ -75,6 +75,10 @@ class LibraryViewModel(
     private val searchQueryFlow = MutableStateFlow("")
     private var searchJob: Job? = null
     
+    // Search results from database
+    private val _searchResults = MutableStateFlow<List<LibraryBook>>(emptyList())
+    private val _searchTotalCount = MutableStateFlow(0)
+    
     // Loaded manga cache
     private val loadedManga = mutableMapOf<Long, List<BookItem>>()
     
@@ -124,15 +128,29 @@ class LibraryViewModel(
         _uiState,
         searchQueryFlow,
         libraryPreferences.columnsInPortrait().stateIn(scope),
-        libraryPreferences.columnsInLandscape().stateIn(scope)
-    ) { controllerState, uiState, searchQuery, columnsPortrait, columnsLandscape ->
-        // Apply search filter to books if search query is not empty
+        libraryPreferences.columnsInLandscape().stateIn(scope),
+        _paginatedBooks,
+        _searchResults
+    ) { values ->
+        val controllerState = values[0] as ireader.domain.services.library.LibraryState
+        val uiState = values[1] as LibraryUiState
+        val searchQuery = values[2] as String
+        val columnsPortrait = values[3] as Int
+        val columnsLandscape = values[4] as Int
+        @Suppress("UNCHECKED_CAST")
+        val paginatedBooksMap = values[5] as Map<Long, List<LibraryBook>>
+        @Suppress("UNCHECKED_CAST")
+        val searchResults = values[6] as List<LibraryBook>
+        
+        // Get current category's paginated books
+        val categoryId = uiState.categories.getOrNull(uiState.selectedCategoryIndex)?.id ?: 0L
+        val categoryBooks = paginatedBooksMap[categoryId] ?: emptyList()
+        
+        // Use search results from database when in search mode, otherwise use category books
         val filteredBooks = if (searchQuery.isNotBlank()) {
-            controllerState.filteredBooks.filter { book ->
-                book.title.contains(searchQuery, ignoreCase = true)
-            }
+            searchResults
         } else {
-            controllerState.filteredBooks
+            categoryBooks
         }
         
         LibraryScreenState(
@@ -201,12 +219,11 @@ class LibraryViewModel(
 
     init {
         initializeState()
-        
-        // Load library via LibraryController
         libraryController.dispatch(LibraryCommand.LoadLibrary)
     }
     
     private fun initializeState() {
+        ireader.core.log.Log.error { "LibraryViewModel: initializeState START" }
         // Load initial preferences
         scope.launch {
             val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
@@ -239,6 +256,11 @@ class LibraryViewModel(
         }
         
         // Subscribe to categories
+        // NOTE: Category subscription is disabled to prevent OOM on low-memory devices
+        // with large libraries (10,000+ books). The library uses true DB pagination
+        // which loads books directly without needing categories from LibraryController.
+        // TODO: Re-enable when memory usage is optimized
+        /*
         combine(
             libraryPreferences.showAllCategory().stateIn(scope),
             libraryPreferences.showEmptyCategories().stateIn(scope)
@@ -257,6 +279,33 @@ class LibraryViewModel(
                 }
             }
         }.launchIn(scope)
+        */
+        
+        // Load categories once (non-reactive) to avoid continuous memory pressure
+        // Also load initial books for the default category immediately
+        scope.launch {
+            try {
+                val categoriesList = libraryUseCases.categories.await()
+                val lastCategoryId = lastUsedCategory.value
+                val index = categoriesList.indexOfFirst { it.category.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
+                
+                _uiState.update { current ->
+                    current.copy(
+                        categories = categoriesList.toImmutableList(),
+                        selectedCategoryIndex = index
+                    )
+                }
+                
+                // Immediately load initial books for the selected category
+                // This speeds up the initial display significantly
+                val categoryId = categoriesList.getOrNull(index)?.category?.id ?: 0L
+                loadInitialBooksForCategory(categoryId)
+            } catch (e: Exception) {
+                ireader.core.log.Log.error(e, "LibraryViewModel: Failed to load categories")
+                // Even if categories fail, try to load books for "All" category
+                loadInitialBooksForCategory(0L)
+            }
+        }
         
         // Debounced search
         searchQueryFlow
@@ -285,13 +334,34 @@ class LibraryViewModel(
     }
     
     fun selectAllInCurrentCategory() {
-        // Only dispatch to LibraryController (SSOT pattern)
-        libraryController.dispatch(LibraryCommand.SelectAll)
+        // Since LibraryController no longer loads books (to prevent OOM),
+        // we handle select all here using the paginated books
+        val categoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
+        val paginatedBooks = _paginatedBooks.value[categoryId] ?: emptyList()
+        
+        // Select all visible books by dispatching individual select commands
+        paginatedBooks.forEach { book ->
+            if (book.id !in state.value.selectedBookIds) {
+                libraryController.dispatch(LibraryCommand.SelectBook(book.id))
+            }
+        }
     }
     
     fun flipAllInCurrentCategory() {
-        // Only dispatch to LibraryController (SSOT pattern)
-        libraryController.dispatch(LibraryCommand.InvertSelection)
+        // Since LibraryController no longer loads books (to prevent OOM),
+        // we handle invert selection here using the paginated books
+        val categoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
+        val paginatedBooks = _paginatedBooks.value[categoryId] ?: emptyList()
+        val currentSelection = state.value.selectedBookIds
+        
+        // Invert selection for all visible books
+        paginatedBooks.forEach { book ->
+            if (book.id in currentSelection) {
+                libraryController.dispatch(LibraryCommand.DeselectBook(book.id))
+            } else {
+                libraryController.dispatch(LibraryCommand.SelectBook(book.id))
+            }
+        }
     }
 
     // ==================== Scroll Position ====================
@@ -422,10 +492,48 @@ class LibraryViewModel(
     fun searchInLibrary(query: String) {
         searchQueryFlow.value = query
         _uiState.update { it.copy(inSearchMode = query.isNotBlank()) }
+        
+        // Cancel previous search job
+        searchJob?.cancel()
+        
+        if (query.isBlank()) {
+            _searchResults.value = emptyList()
+            _searchTotalCount.value = 0
+            return
+        }
+        
+        // Perform database search with debounce handled by the flow
+        searchJob = scope.launch {
+            try {
+                val sort = sorting.value
+                val filtersList = filters.value
+                val includeArchived = showArchivedBooks.value
+                
+                // Search with pagination (load first 100 results)
+                val (results, totalCount) = libraryUseCases.getLibraryCategory.searchPaginated(
+                    query = query,
+                    sort = sort,
+                    filters = filtersList,
+                    limit = 100,
+                    offset = 0,
+                    includeArchived = includeArchived
+                )
+                
+                _searchResults.value = results
+                _searchTotalCount.value = totalCount
+            } catch (e: Exception) {
+                ireader.core.log.Log.error(e, "LibraryViewModel: searchInLibrary failed")
+                _searchResults.value = emptyList()
+                _searchTotalCount.value = 0
+            }
+        }
     }
     
     fun clearSearch() {
+        searchJob?.cancel()
         searchQueryFlow.value = ""
+        _searchResults.value = emptyList()
+        _searchTotalCount.value = 0
         _uiState.update { it.copy(inSearchMode = false, searchQuery = null) }
     }
     
@@ -946,6 +1054,7 @@ class LibraryViewModel(
                     current.copy(categoryPaginationState = newPaginationState)
                 }
             } catch (e: Exception) {
+                ireader.core.log.Log.error(e, "LibraryViewModel: loadInitialBooksForCategory($categoryId) failed")
                 // On error, fall back to empty state
                 _uiState.update { current ->
                     val newPaginationState = current.categoryPaginationState.toMutableMap()

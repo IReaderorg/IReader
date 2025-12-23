@@ -41,14 +41,47 @@ class LibraryRepositoryImpl(
         offset: Int,
         includeArchived: Boolean
     ): List<LibraryBook> {
-        ScreenProfiler.mark("Library", "db_paginated_query_start")
+        ScreenProfiler.mark("Library", "db_paginated_query_start_${sort.type.name}")
+        // Use sorted queries with cached counts - sorting done in SQL for efficiency
         val result = handler.awaitList {
-            bookQueries.getLibraryPaginated(limit.toLong(), offset.toLong(), getLibraryMapper)
-        }.sortWith(sort, includeArchived).let { list ->
-            if (sort.isAscending) list else list.reversed()
-        }
+            when (sort.type) {
+                LibrarySort.Type.Title -> {
+                    if (sort.isAscending) bookQueries.getLibraryPaginatedByTitle(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryPaginatedByTitleDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastRead -> {
+                    if (sort.isAscending) bookQueries.getLibraryPaginatedByLastReadAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryPaginatedByLastRead(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastUpdated -> {
+                    if (sort.isAscending) bookQueries.getLibraryPaginatedByLastUpdateAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryPaginatedByLastUpdate(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Unread -> {
+                    if (sort.isAscending) bookQueries.getLibraryPaginatedByUnreadAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryPaginatedByUnread(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.TotalChapters -> {
+                    if (sort.isAscending) bookQueries.getLibraryPaginatedByTotalChaptersAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryPaginatedByTotalChapters(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Source -> {
+                    if (sort.isAscending) bookQueries.getLibraryPaginatedBySource(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryPaginatedBySourceDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
+                    if (sort.isAscending) bookQueries.getLibraryPaginatedByDateAddedAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryPaginatedByDateAdded(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+            }
+        }.filterArchived(includeArchived)
         ScreenProfiler.mark("Library", "db_paginated_query_complete_${result.size}_books")
         return result
+    }
+    
+    // Helper to filter archived books
+    private fun List<LibraryBook>.filterArchived(includeArchived: Boolean): List<LibraryBook> {
+        return if (includeArchived) this else this.filter { !it.isArchived }
     }
     
     override suspend fun getLibraryCount(includeArchived: Boolean): Int {
@@ -265,6 +298,139 @@ class LibraryRepositoryImpl(
         return handler.awaitList {
             bookQueries.getFavorites(booksMapper)
         }
+    }
+    
+    override suspend fun findByCategoryPaginated(
+        categoryId: Long,
+        sort: LibrarySort,
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean
+    ): List<LibraryBook> {
+        ScreenProfiler.mark("Library", "db_category_paginated_start_${sort.type.name}")
+        // Use sorted queries with cached counts - sorting done in SQL
+        val result = handler.awaitList {
+            when (sort.type) {
+                LibrarySort.Type.Title -> {
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryPaginatedFast(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryByTitleDesc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastRead -> {
+                    bookQueries.getLibraryByCategoryByLastRead(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastUpdated -> {
+                    bookQueries.getLibraryByCategoryByLastUpdate(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Unread -> {
+                    bookQueries.getLibraryByCategoryByUnread(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.TotalChapters -> {
+                    bookQueries.getLibraryByCategoryByTotalChapters(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Source, LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
+                    // Fall back to title sort for these (can add more queries if needed)
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryPaginatedFast(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryByTitleDesc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+            }
+        }.filterArchived(includeArchived)
+        ScreenProfiler.mark("Library", "db_category_paginated_done_${result.size}")
+        return result
+    }
+    
+    override suspend fun getLibraryCountByCategory(categoryId: Long, includeArchived: Boolean): Int {
+        return handler.awaitOne {
+            bookQueries.getLibraryCountByCategory(categoryId)
+        }.toInt()
+    }
+    
+    override suspend fun findUncategorizedPaginated(
+        sort: LibrarySort,
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean
+    ): List<LibraryBook> {
+        ScreenProfiler.mark("Library", "db_uncategorized_paginated_start_${sort.type.name}")
+        // Use sorted queries with cached counts - sorting done in SQL
+        val result = handler.awaitList {
+            when (sort.type) {
+                LibrarySort.Type.Title -> {
+                    if (sort.isAscending) bookQueries.getUncategorizedPaginatedFast(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedByTitleDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastRead -> {
+                    bookQueries.getUncategorizedByLastRead(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastUpdated -> {
+                    bookQueries.getUncategorizedByLastUpdate(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Unread -> {
+                    bookQueries.getUncategorizedByUnread(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.TotalChapters -> {
+                    bookQueries.getUncategorizedByTotalChapters(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Source, LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
+                    // Fall back to title sort for these
+                    if (sort.isAscending) bookQueries.getUncategorizedPaginatedFast(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedByTitleDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+            }
+        }.filterArchived(includeArchived)
+        ScreenProfiler.mark("Library", "db_uncategorized_paginated_done_${result.size}")
+        return result
+    }
+    
+    override suspend fun getUncategorizedCount(includeArchived: Boolean): Int {
+        return handler.awaitOne {
+            bookQueries.getUncategorizedCount()
+        }.toInt()
+    }
+    
+    override suspend fun searchPaginated(
+        query: String,
+        sort: LibrarySort,
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean
+    ): List<LibraryBook> {
+        if (query.isBlank()) return emptyList()
+        
+        ScreenProfiler.mark("Library", "db_search_paginated_start_${sort.type.name}")
+        val result = handler.awaitList {
+            when (sort.type) {
+                LibrarySort.Type.Title -> {
+                    if (sort.isAscending) bookQueries.searchPaginatedFast(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedByTitleDesc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastRead -> {
+                    bookQueries.searchPaginatedByLastRead(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.LastUpdated -> {
+                    bookQueries.searchPaginatedByLastUpdate(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Unread -> {
+                    bookQueries.searchPaginatedByUnread(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
+                    bookQueries.searchPaginatedByDateAdded(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.TotalChapters, LibrarySort.Type.Source -> {
+                    // Fall back to title sort
+                    if (sort.isAscending) bookQueries.searchPaginatedFast(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedByTitleDesc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+            }
+        }.filterArchived(includeArchived)
+        ScreenProfiler.mark("Library", "db_search_paginated_done_${result.size}")
+        return result
+    }
+    
+    override suspend fun getSearchCount(query: String, includeArchived: Boolean): Int {
+        if (query.isBlank()) return 0
+        return handler.awaitOne {
+            bookQueries.getSearchCount(query)
+        }.toInt()
     }
 
 }

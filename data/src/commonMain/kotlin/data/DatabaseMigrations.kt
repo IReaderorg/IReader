@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 28
+    const val CURRENT_VERSION = 29
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -93,6 +93,7 @@ object DatabaseMigrations {
             25 -> migrateV25toV26(driver)
             26 -> migrateV26toV27(driver)
             27 -> migrateV27toV28(driver)
+            28 -> migrateV28toV29(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2091,6 +2092,182 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(28, e)
+        }
+    }
+    
+    /**
+     * Migration from version 28 to version 29
+     * Adds cached chapter counts and last_read_at columns to book table for fast library queries.
+     * These columns are maintained by triggers on the chapter and history tables.
+     */
+    private fun migrateV28toV29(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(28, 29)
+            
+            // Check which columns already exist
+            val columnsCheck = "PRAGMA table_info(book)"
+            var hasCachedUnreadCount = false
+            var hasCachedReadCount = false
+            var hasCachedTotalChapters = false
+            var hasLastReadAt = false
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = columnsCheck,
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        when (columnName) {
+                            "cached_unread_count" -> hasCachedUnreadCount = true
+                            "cached_read_count" -> hasCachedReadCount = true
+                            "cached_total_chapters" -> hasCachedTotalChapters = true
+                            "last_read_at" -> hasLastReadAt = true
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            // Add missing columns
+            if (!hasCachedUnreadCount) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN cached_unread_count INTEGER NOT NULL DEFAULT 0;", 0)
+                Logger.logColumnAdded("book", "cached_unread_count")
+            }
+            
+            if (!hasCachedReadCount) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN cached_read_count INTEGER NOT NULL DEFAULT 0;", 0)
+                Logger.logColumnAdded("book", "cached_read_count")
+            }
+            
+            if (!hasCachedTotalChapters) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN cached_total_chapters INTEGER NOT NULL DEFAULT 0;", 0)
+                Logger.logColumnAdded("book", "cached_total_chapters")
+            }
+            
+            if (!hasLastReadAt) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN last_read_at INTEGER NOT NULL DEFAULT 0;", 0)
+                Logger.logColumnAdded("book", "last_read_at")
+            }
+            
+            // Create indexes for sorting by cached counts
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_favorite_unread ON book(favorite, cached_unread_count DESC) WHERE favorite = 1;", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_favorite_total_chapters ON book(favorite, cached_total_chapters DESC) WHERE favorite = 1;", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_favorite_last_read ON book(favorite, last_read_at DESC) WHERE favorite = 1;", 0)
+            Logger.logIndexCreated("book cached count indexes")
+            
+            // Populate cached counts from existing chapter data
+            Logger.logDebug("Populating cached chapter counts...")
+            val populateCountsSql = """
+                UPDATE book SET
+                    cached_total_chapters = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id), 0),
+                    cached_unread_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id AND read = 0), 0),
+                    cached_read_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id AND read = 1), 0)
+                WHERE favorite = 1;
+            """.trimIndent()
+            driver.execute(null, populateCountsSql, 0)
+            Logger.logDebug("Populated cached chapter counts")
+            
+            // Populate last_read_at from history table
+            Logger.logDebug("Populating last_read_at from history...")
+            val populateLastReadSql = """
+                UPDATE book SET
+                    last_read_at = COALESCE(
+                        (SELECT MAX(h.last_read) 
+                         FROM history h 
+                         JOIN chapter c ON h.chapter_id = c._id 
+                         WHERE c.book_id = book._id), 
+                        0
+                    )
+                WHERE favorite = 1;
+            """.trimIndent()
+            driver.execute(null, populateLastReadSql, 0)
+            Logger.logDebug("Populated last_read_at")
+            
+            // Create triggers to keep cached counts in sync
+            Logger.logDebug("Creating triggers for cached counts...")
+            
+            // Trigger: After INSERT on chapter
+            driver.execute(null, "DROP TRIGGER IF EXISTS trigger_chapter_insert_update_book_counts;", 0)
+            val triggerInsertSql = """
+                CREATE TRIGGER IF NOT EXISTS trigger_chapter_insert_update_book_counts
+                AFTER INSERT ON chapter
+                BEGIN
+                    UPDATE book SET
+                        cached_total_chapters = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id),
+                        cached_unread_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 0),
+                        cached_read_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 1)
+                    WHERE _id = NEW.book_id;
+                END;
+            """.trimIndent()
+            driver.execute(null, triggerInsertSql, 0)
+            
+            // Trigger: After UPDATE on chapter read status
+            driver.execute(null, "DROP TRIGGER IF EXISTS trigger_chapter_update_read_status;", 0)
+            val triggerUpdateSql = """
+                CREATE TRIGGER IF NOT EXISTS trigger_chapter_update_read_status
+                AFTER UPDATE OF read ON chapter
+                BEGIN
+                    UPDATE book SET
+                        cached_unread_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 0),
+                        cached_read_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 1),
+                        last_read_at = CASE WHEN NEW.read = 1 THEN strftime('%s', 'now') * 1000 ELSE last_read_at END
+                    WHERE _id = NEW.book_id;
+                END;
+            """.trimIndent()
+            driver.execute(null, triggerUpdateSql, 0)
+            
+            // Trigger: After DELETE on chapter
+            driver.execute(null, "DROP TRIGGER IF EXISTS trigger_chapter_delete_update_book_counts;", 0)
+            val triggerDeleteSql = """
+                CREATE TRIGGER IF NOT EXISTS trigger_chapter_delete_update_book_counts
+                AFTER DELETE ON chapter
+                BEGIN
+                    UPDATE book SET
+                        cached_total_chapters = (SELECT COUNT(*) FROM chapter WHERE book_id = OLD.book_id),
+                        cached_unread_count = (SELECT COUNT(*) FROM chapter WHERE book_id = OLD.book_id AND read = 0),
+                        cached_read_count = (SELECT COUNT(*) FROM chapter WHERE book_id = OLD.book_id AND read = 1)
+                    WHERE _id = OLD.book_id;
+                END;
+            """.trimIndent()
+            driver.execute(null, triggerDeleteSql, 0)
+            
+            // Trigger: After INSERT on history (when user reads a chapter)
+            driver.execute(null, "DROP TRIGGER IF EXISTS trigger_history_insert_update_book_last_read;", 0)
+            val triggerHistoryInsertSql = """
+                CREATE TRIGGER IF NOT EXISTS trigger_history_insert_update_book_last_read
+                AFTER INSERT ON history
+                BEGIN
+                    UPDATE book SET
+                        last_read_at = NEW.last_read
+                    WHERE _id = (SELECT book_id FROM chapter WHERE _id = NEW.chapter_id)
+                    AND NEW.last_read > last_read_at;
+                END;
+            """.trimIndent()
+            driver.execute(null, triggerHistoryInsertSql, 0)
+            
+            // Trigger: After UPDATE on history (when user continues reading)
+            driver.execute(null, "DROP TRIGGER IF EXISTS trigger_history_update_update_book_last_read;", 0)
+            val triggerHistoryUpdateSql = """
+                CREATE TRIGGER IF NOT EXISTS trigger_history_update_update_book_last_read
+                AFTER UPDATE OF last_read ON history
+                BEGIN
+                    UPDATE book SET
+                        last_read_at = NEW.last_read
+                    WHERE _id = (SELECT book_id FROM chapter WHERE _id = NEW.chapter_id)
+                    AND NEW.last_read > last_read_at;
+                END;
+            """.trimIndent()
+            driver.execute(null, triggerHistoryUpdateSql, 0)
+            
+            Logger.logDebug("Created triggers for cached counts")
+            
+            Logger.logMigrationSuccess(29)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(29, e)
         }
     }
 

@@ -53,7 +53,8 @@ fun createDatabase(driver: SqlDriver): Database {
         bookAdapter = Book.Adapter(
             genreAdapter = bookGenresConverter,
             cover_last_modifiedAdapter = longConverter,
-            date_addedAdapter = longConverter
+            date_addedAdapter = longConverter,
+            last_read_atAdapter = longConverter
         ),
         chapterAdapter = Chapter.Adapter(
             contentAdapter = chapterContentConvertor,

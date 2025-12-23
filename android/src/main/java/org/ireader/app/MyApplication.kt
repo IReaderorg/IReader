@@ -135,41 +135,37 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         ))
         println("Phase 2 (data): ${System.currentTimeMillis() - phase2Start}ms")
         
-        // Phase 3: UI modules (needed for rendering)
+        // Phase 3: Plugin and domain modules (PluginModule MUST come before CatalogModule)
         val phase3Start = System.currentTimeMillis()
         koinApp.koin.loadModules(listOf(
+            PluginModule,                 // MUST be first - CatalogLoader depends on PluginManager
+            remotePlatformModule,
+            remoteModule,
             DomainModule,                 // Domain logic
-            CatalogModule,                // Catalog (lazy internally)
+            CatalogModule,                // Catalog (depends on PluginManager)
+        ))
+        println("Phase 3 (domain): ${System.currentTimeMillis() - phase3Start}ms")
+        
+        // Phase 4: UI and service modules
+        val phase4Start = System.currentTimeMillis()
+        koinApp.koin.loadModules(listOf(
             PresentationModules,          // ViewModels (all factory)
             presentationPlatformModule,   // Platform UI
-            AppModule                     // App-specific
+            AppModule,                    // App-specific
+            reviewModule,
+            platformServiceModule,
+            ireader.domain.di.ServiceModule,
+            UseCasesInject,
+            DomainServices
         ))
-        println("Phase 3 (UI): ${System.currentTimeMillis() - phase3Start}ms")
+        println("Phase 4 (UI): ${System.currentTimeMillis() - phase4Start}ms")
         
         // Initialize SecureStorageHelper (fast, needed for plugins)
         initializeSecureStorage()
         
-        // Phase 4: Non-essential modules (background - after first frame)
-        backgroundScope.launch {
-            kotlinx.coroutines.delay(100) // Let first frame render
-            
-            val phase4Start = System.currentTimeMillis()
-            koinApp.koin.loadModules(listOf(
-                remotePlatformModule,
-                remoteModule,
-                reviewModule,
-                platformServiceModule,
-                ireader.domain.di.ServiceModule,
-                UseCasesInject,
-                DomainServices,
-                PluginModule
-            ))
-            println("Phase 4 (background): ${System.currentTimeMillis() - phase4Start}ms")
-            
-            // Mark modules as fully initialized
-            ireader.domain.di.ModuleInitializationState.markFullyInitialized()
-            println("=== Background modules loaded, app fully initialized ===")
-        }
+        // Mark modules as fully initialized
+        ireader.domain.di.ModuleInitializationState.markFullyInitialized()
+        println("=== All modules loaded ===")
         
         println("=== Koin initialization (to first frame): ${System.currentTimeMillis() - totalStart}ms ===")
     }
@@ -215,12 +211,15 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             
             println("Database initialization: ${System.currentTimeMillis() - start}ms")
             
-            delay(500)
+            // Delay preloader more to let UI settle first
+            delay(2000)
             try {
+                println("MyApplication: Starting database preloader...")
                 val preloader: DatabasePreloader by inject()
                 preloader.preloadCriticalData()
+                println("MyApplication: Database preloader completed")
             } catch (e: Exception) {
-                println("Database preloader not available: ${e.message}")
+                println("Database preloader failed: ${e.message}")
             }
         } catch (e: Exception) {
             println("Failed to initialize database: ${e.message}")

@@ -28,7 +28,9 @@ sealed class AppTab(
             @Composable get() = LibraryScreenSpec.getIcon()
         
         @Composable
-        override fun Content() = LibraryScreenSpec.TabContent()
+        override fun Content() {
+            LibraryScreenSpec.TabContent()
+        }
     }
     
     data object Updates : AppTab(1, "tab_updates") {
@@ -39,7 +41,9 @@ sealed class AppTab(
             @Composable get() = UpdateScreenSpec.getIcon()
         
         @Composable
-        override fun Content() = UpdateScreenSpec.TabContent()
+        override fun Content() {
+            UpdateScreenSpec.TabContent()
+        }
     }
     
     data object History : AppTab(2, "tab_history") {
@@ -50,7 +54,9 @@ sealed class AppTab(
             @Composable get() = HistoryScreenSpec.getIcon()
         
         @Composable
-        override fun Content() = HistoryScreenSpec.TabContent()
+        override fun Content() {
+            HistoryScreenSpec.TabContent()
+        }
     }
     
     data object Extensions : AppTab(3, "tab_extensions") {
@@ -61,7 +67,9 @@ sealed class AppTab(
             @Composable get() = ExtensionScreenSpec.getIcon()
         
         @Composable
-        override fun Content() = ExtensionScreenSpec.TabContent()
+        override fun Content() {
+            ExtensionScreenSpec.TabContent()
+        }
     }
     
     data object More : AppTab(4, "tab_more") {
@@ -72,7 +80,9 @@ sealed class AppTab(
             @Composable get() = MoreScreenSpec.getIcon()
         
         @Composable
-        override fun Content() = MoreScreenSpec.TabContent()
+        override fun Content() {
+            MoreScreenSpec.TabContent()
+        }
     }
     
     companion object {

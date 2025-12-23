@@ -72,11 +72,12 @@ val mangaChapterMapper: (Long, Long, String, String?, String?, String?, List<Str
     }
 
 val libraryManga:
-            (Long, Long, String, String?, String?, String?, List<String>?, String, Long, String?, String, Boolean, Long?, Long?, Boolean, Long, Long, Long, Long, Boolean, Long, Boolean, Long?) -> LibraryBook =
+            (Long, Long, String, String?, String?, String?, List<String>?, String, Long, String?, String, Boolean, Long?, Long?, Boolean, Long, Long, Long, Long, Boolean, Long, Boolean, Long, Long, Long, Long, Long?) -> LibraryBook =
     { _id, source, url, artist, author, description, genre, title,
         status, thumbnail_url, custom_cover, favorite, last_update,
       next_update, initialized, viewer, chapter_flags,
-        cover_last_modified, date_added, is_pinned, pinned_order, is_archived, max ->
+        cover_last_modified, date_added, is_pinned, pinned_order, is_archived,
+        cached_unread_count, cached_read_count, cached_total_chapters, last_read_at, max ->
         LibraryBook(
             id = _id,
             sourceId = source,
@@ -87,10 +88,10 @@ val libraryManga:
             customCover = custom_cover,
             lastUpdate = last_update?:0L,
         ).apply {
-            this.unreadCount = unreadCount.toInt()
-            this.readCount = readCount.toInt()
-            this.category = category.toInt()
-            this.lastRead = max?.toLong()?:0L
+            this.unreadCount = cached_unread_count.toInt()
+            this.readCount = cached_read_count.toInt()
+            this.totalChapters = cached_total_chapters.toInt()
+            this.lastRead = max?.toLong() ?: last_read_at
             this.isPinned = is_pinned
             this.pinnedOrder = pinned_order.toInt()
             this.isArchived = is_archived
@@ -118,7 +119,11 @@ val booksMapper= { _id: Long,
                    date_added: Long,
                    is_pinned: Boolean,
                    pinned_order: Long,
-                   is_archived: Boolean, ->
+                   is_archived: Boolean,
+                   cached_unread_count: Long,
+                   cached_read_count: Long,
+                   cached_total_chapters: Long,
+                   last_read_at: Long, ->
     Book(
         id = _id,
         sourceId = source,
@@ -167,9 +172,13 @@ val getLibraryMapper = { _id: Long,
                          is_pinned: Boolean,
                          pinned_order: Long,
                          is_archived: Boolean,
+                         cached_unread_count: Long,
+                         cached_read_count: Long,
+                         cached_total_chapters: Long,
+                         last_read_at: Long,
+                         category: Long,
                          unread_count: Long,
-                         read_count: Long,
-                         category: Long, ->
+                         read_count: Long, ->
 
     LibraryBook(
         id = _id,
@@ -183,6 +192,8 @@ val getLibraryMapper = { _id: Long,
     ).apply {
         this.unreadCount = unread_count.toInt()
         this.readCount = read_count.toInt()
+        this.totalChapters = cached_total_chapters.toInt()
+        this.lastRead = last_read_at
         this.category = category.toInt()
         this.isPinned = is_pinned
         this.pinnedOrder = pinned_order.toInt()
@@ -193,8 +204,8 @@ val getLibraryMapper = { _id: Long,
 
 
 /**
- * Fast mapper for getLibraryFast query - doesn't include chapter counts
- * Chapter counts are loaded lazily to improve initial load time on low-end devices
+ * Fast mapper for getLibraryFast query - uses cached chapter counts from book table
+ * No chapter table joins needed - counts are maintained by triggers
  */
 val getLibraryFastMapper = { _id: Long,
                               source: Long,
@@ -218,6 +229,10 @@ val getLibraryFastMapper = { _id: Long,
                               is_pinned: Boolean,
                               pinned_order: Long,
                               is_archived: Boolean,
+                              cached_unread_count: Long,
+                              cached_read_count: Long,
+                              cached_total_chapters: Long,
+                              last_read_at: Long,
                               category: Long,
                               unread_count: Long,
                               read_count: Long, ->
@@ -232,9 +247,11 @@ val getLibraryFastMapper = { _id: Long,
         customCover = custom_cover,
         lastUpdate = last_update ?: 0L,
     ).apply {
-        // Chapter counts are 0 from the fast query (hardcoded in SQL)
+        // Use cached counts from book table (maintained by triggers)
         this.unreadCount = unread_count.toInt()
         this.readCount = read_count.toInt()
+        this.totalChapters = cached_total_chapters.toInt()
+        this.lastRead = last_read_at
         this.category = category.toInt()
         this.isPinned = is_pinned
         this.pinnedOrder = pinned_order.toInt()

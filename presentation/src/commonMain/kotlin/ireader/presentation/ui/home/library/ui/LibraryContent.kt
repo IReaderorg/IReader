@@ -40,10 +40,36 @@ internal fun LibraryContent(
     val selectedBooks = state.selectedBookIds
     val layout = state.layout
     val isLoading = state.isLoading
+    val inSearchMode = state.inSearchMode
+    val searchBooks = state.books // This contains search results when in search mode
     
-    // Early return for empty categories - but remember the check to avoid recomposition
+    // Early return for empty categories when not in search mode
     val hasCategories = remember(categories) { categories.isNotEmpty() }
-    if (!hasCategories) return
+    if (!hasCategories && !inSearchMode) return
+    
+    // Show search results when in search mode
+    if (inSearchMode) {
+        // Convert LibraryBook to BookItem for display
+        val searchBookItems = remember(searchBooks) {
+            searchBooks.map { it.toBookItem() }
+        }
+        
+        LibrarySearchResults(
+            books = searchBookItems,
+            layout = layout,
+            selection = selectedBooks.toList(),
+            onClick = onBook,
+            onLongClick = onLongBook,
+            goToLatestChapter = goToLatestChapter,
+            showUnreadBadge = vm.unreadBadge.value,
+            showReadBadge = vm.readBadge.value,
+            showGoToLastChapterBadge = vm.goToLastChapterBadge.value,
+            getColumnsForOrientation = getColumnsForOrientation,
+            columnsInPortrait = state.columnsInPortrait,
+            columnsInLandscape = state.columnsInLandscape
+        )
+        return
+    }
     
     val horizontalPager =
         rememberPagerState(

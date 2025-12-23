@@ -1,0 +1,82 @@
+-- Migration 27: Add cached chapter counts to book table for fast library queries
+-- These columns are maintained by triggers on the chapter table
+
+-- Add new columns to book table
+ALTER TABLE book ADD COLUMN cached_unread_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE book ADD COLUMN cached_read_count INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE book ADD COLUMN cached_total_chapters INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE book ADD COLUMN last_read_at INTEGER NOT NULL DEFAULT 0;
+
+-- Create indexes for sorting by cached counts
+CREATE INDEX IF NOT EXISTS idx_book_favorite_unread ON book(favorite, cached_unread_count DESC) WHERE favorite = 1;
+CREATE INDEX IF NOT EXISTS idx_book_favorite_total_chapters ON book(favorite, cached_total_chapters DESC) WHERE favorite = 1;
+CREATE INDEX IF NOT EXISTS idx_book_favorite_last_read ON book(favorite, last_read_at DESC) WHERE favorite = 1;
+
+-- Populate cached counts from existing chapter data
+-- Also populate last_read_at from history table (most recent read time for any chapter in the book)
+UPDATE book SET
+    cached_total_chapters = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id), 0),
+    cached_unread_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id AND read = 0), 0),
+    cached_read_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = book._id AND read = 1), 0),
+    last_read_at = COALESCE(
+        (SELECT MAX(h.last_read) 
+         FROM history h 
+         JOIN chapter c ON h.chapter_id = c._id 
+         WHERE c.book_id = book._id), 
+        0
+    );
+
+-- Create triggers to keep cached counts in sync
+
+-- Trigger: After INSERT on chapter
+CREATE TRIGGER IF NOT EXISTS trigger_chapter_insert_update_book_counts
+AFTER INSERT ON chapter
+BEGIN
+    UPDATE book SET
+        cached_total_chapters = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id),
+        cached_unread_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 0),
+        cached_read_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 1)
+    WHERE _id = NEW.book_id;
+END;
+
+-- Trigger: After UPDATE on chapter read status
+CREATE TRIGGER IF NOT EXISTS trigger_chapter_update_read_status
+AFTER UPDATE OF read ON chapter
+BEGIN
+    UPDATE book SET
+        cached_unread_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 0),
+        cached_read_count = (SELECT COUNT(*) FROM chapter WHERE book_id = NEW.book_id AND read = 1),
+        last_read_at = CASE WHEN NEW.read = 1 THEN strftime('%s', 'now') * 1000 ELSE last_read_at END
+    WHERE _id = NEW.book_id;
+END;
+
+-- Trigger: After DELETE on chapter
+CREATE TRIGGER IF NOT EXISTS trigger_chapter_delete_update_book_counts
+AFTER DELETE ON chapter
+BEGIN
+    UPDATE book SET
+        cached_total_chapters = (SELECT COUNT(*) FROM chapter WHERE book_id = OLD.book_id),
+        cached_unread_count = (SELECT COUNT(*) FROM chapter WHERE book_id = OLD.book_id AND read = 0),
+        cached_read_count = (SELECT COUNT(*) FROM chapter WHERE book_id = OLD.book_id AND read = 1)
+    WHERE _id = OLD.book_id;
+END;
+
+-- Trigger: After INSERT on history (when user reads a chapter)
+CREATE TRIGGER IF NOT EXISTS trigger_history_insert_update_book_last_read
+AFTER INSERT ON history
+BEGIN
+    UPDATE book SET
+        last_read_at = NEW.last_read
+    WHERE _id = (SELECT book_id FROM chapter WHERE _id = NEW.chapter_id)
+    AND NEW.last_read > last_read_at;
+END;
+
+-- Trigger: After UPDATE on history (when user continues reading)
+CREATE TRIGGER IF NOT EXISTS trigger_history_update_update_book_last_read
+AFTER UPDATE OF last_read ON history
+BEGIN
+    UPDATE book SET
+        last_read_at = NEW.last_read
+    WHERE _id = (SELECT book_id FROM chapter WHERE _id = NEW.chapter_id)
+    AND NEW.last_read > last_read_at;
+END;

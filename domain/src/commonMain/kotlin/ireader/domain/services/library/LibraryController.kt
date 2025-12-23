@@ -2,8 +2,6 @@ package ireader.domain.services.library
 
 import ireader.core.log.Log
 import ireader.domain.data.repository.CategoryRepository
-import ireader.domain.data.repository.LibraryRepository
-import ireader.domain.models.entities.LibraryBook
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,11 +33,11 @@ import kotlinx.coroutines.sync.withLock
  * - UI concerns (UI observes state, sends commands)
  * - Platform-specific implementations
  * - Book-level operations (handled by BookController)
+ * - Loading books (handled by LibraryViewModel via pagination to prevent OOM)
  * 
  * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 5.1, 5.2, 5.4, 7.3
  */
 class LibraryController(
-    private val libraryRepository: LibraryRepository,
     private val categoryRepository: CategoryRepository
 ) {
     companion object {
@@ -60,7 +58,8 @@ class LibraryController(
     val events: SharedFlow<LibraryEvent> = _events.asSharedFlow()
     
     // Active subscriptions
-    private var booksSubscriptionJob: Job? = null
+    // NOTE: booksSubscriptionJob removed - books are now loaded via pagination in LibraryViewModel
+    // to prevent OOM with large libraries (10,000+ books)
     private var categoriesSubscriptionJob: Job? = null
 
     
@@ -110,11 +109,15 @@ class LibraryController(
     // ========== Lifecycle Commands ==========
     
     /**
-     * Load the library and subscribe to reactive updates.
+     * Load the library metadata (categories only, NOT books).
      * Requirements: 3.1
+     * 
+     * IMPORTANT: This method intentionally does NOT load books to prevent OOM
+     * with large libraries (10,000+ books). Book loading is handled by
+     * LibraryViewModel's pagination system which loads books on-demand from the database.
      */
     private suspend fun loadLibrary() {
-        Log.debug { "$TAG: loadLibrary()" }
+        Log.debug { "$TAG: loadLibrary() - loading categories only (books loaded via pagination)" }
         
         // Cancel existing subscriptions
         cancelSubscriptions()
@@ -122,17 +125,13 @@ class LibraryController(
         _state.update { it.copy(isLoading = true, error = null) }
         
         try {
-            val currentSort = _state.value.sort
+            // NOTE: We intentionally do NOT subscribe to library books here.
+            // Loading all books at once causes OOM with large libraries (10,000+ books).
+            // Instead, LibraryViewModel handles book loading via true DB pagination.
+            // The books/filteredBooks fields in LibraryState remain empty - 
+            // UI should use LibraryViewModel.getPaginatedBooksForCategory() instead.
             
-            // Subscribe to library books
-            booksSubscriptionJob = scope.launch {
-                libraryRepository.subscribe(currentSort.toDomainSort()).collect { books ->
-                    Log.debug { "$TAG: Library updated - ${books.size} books" }
-                    updateBooksAndApplyFilter(books)
-                }
-            }
-            
-            // Subscribe to categories
+            // Subscribe to categories only (lightweight)
             categoriesSubscriptionJob = scope.launch {
                 categoryRepository.getAllAsFlow().collect { categories ->
                     Log.debug { "$TAG: Categories updated - ${categories.size} categories" }
@@ -160,17 +159,20 @@ class LibraryController(
     }
     
     private fun cancelSubscriptions() {
-        booksSubscriptionJob?.cancel()
         categoriesSubscriptionJob?.cancel()
-        booksSubscriptionJob = null
         categoriesSubscriptionJob = null
     }
     
     // ========== Filter/Sort Commands ==========
     
     /**
-     * Set the current filter and reapply to books.
+     * Set the current filter and notify listeners.
      * Requirements: 3.2
+     * 
+     * NOTE: Since LibraryController no longer loads books (to prevent OOM),
+     * this method only stores the filter setting. The actual filtering is
+     * handled by LibraryViewModel's pagination system which applies the filter
+     * when loading books from the database.
      */
     private suspend fun setFilter(filter: LibraryFilter) {
         Log.debug { "$TAG: setFilter($filter)" }
@@ -179,12 +181,10 @@ class LibraryController(
         val currentSelection = _state.value.selectedBookIds
         
         _state.update { state ->
-            // Only apply filter, not sort - repository already sorted the data
-            val predicate = filter.toPredicate()
-            val filteredBooks = state.books.filter(predicate)
+            // Only update filter setting - LibraryViewModel handles actual filtering
+            // via paginated database queries
             state.copy(
                 filter = filter,
-                filteredBooks = filteredBooks,
                 selectedBookIds = currentSelection // Preserve selection
             )
         }
@@ -193,8 +193,12 @@ class LibraryController(
     }
     
     /**
-     * Set the current sort and re-subscribe to repository with new sort.
+     * Set the current sort and notify listeners.
      * Requirements: 3.3
+     * 
+     * NOTE: This no longer re-subscribes to books since book loading is handled
+     * by LibraryViewModel's pagination system. The sort is stored in state and
+     * LibraryViewModel will use it when loading paginated books.
      */
     private suspend fun setSort(sort: LibrarySort) {
         Log.debug { "$TAG: setSort($sort)" }
@@ -202,17 +206,8 @@ class LibraryController(
         // Preserve selection when changing sort
         val currentSelection = _state.value.selectedBookIds
         
-        // Update sort in state first
+        // Update sort in state - LibraryViewModel will handle reloading paginated books
         _state.update { it.copy(sort = sort, selectedBookIds = currentSelection) }
-        
-        // Cancel existing subscription and re-subscribe with new sort
-        booksSubscriptionJob?.cancel()
-        booksSubscriptionJob = scope.launch {
-            libraryRepository.subscribe(sort.toDomainSort()).collect { books ->
-                Log.debug { "$TAG: Library updated with new sort - ${books.size} books" }
-                updateBooksAndApplyFilter(books)
-            }
-        }
         
         _events.emit(LibraryEvent.SortChanged(sort))
     }
@@ -268,14 +263,21 @@ class LibraryController(
     
     /**
      * Select all books in the current filtered view.
+     * 
+     * NOTE: Since LibraryController no longer loads books (to prevent OOM),
+     * this method now accepts book IDs from the caller (LibraryViewModel).
+     * The actual "select all" logic is handled by LibraryViewModel which
+     * has access to the paginated books.
+     * 
+     * This method is kept for compatibility but will only work if book IDs
+     * are provided via a separate mechanism (e.g., SelectAllWithIds command).
      */
     private suspend fun selectAll() {
-        Log.debug { "$TAG: selectAll()" }
+        Log.debug { "$TAG: selectAll() - NOTE: filteredBooks is empty, use SelectAllWithIds instead" }
         
-        _state.update { state ->
-            val allIds = state.filteredBooks.map { it.id }.toSet()
-            state.copy(selectedBookIds = allIds)
-        }
+        // filteredBooks is now empty since we don't load books
+        // LibraryViewModel should handle this by calling selectBook for each visible book
+        // or by using a new SelectAllWithIds command
         
         _events.emit(LibraryEvent.SelectionChanged(_state.value.selectionCount))
     }
@@ -296,15 +298,17 @@ class LibraryController(
     
     /**
      * Invert the current selection.
+     * 
+     * NOTE: Since LibraryController no longer loads books (to prevent OOM),
+     * this method cannot properly invert selection without knowing all book IDs.
+     * LibraryViewModel should handle this by providing the visible book IDs.
      */
     private suspend fun invertSelection() {
-        Log.debug { "$TAG: invertSelection()" }
+        Log.debug { "$TAG: invertSelection() - NOTE: filteredBooks is empty, handled by ViewModel" }
         
-        _state.update { state ->
-            val allIds = state.filteredBooks.map { it.id }.toSet()
-            val invertedSelection = allIds - state.selectedBookIds
-            state.copy(selectedBookIds = invertedSelection)
-        }
+        // filteredBooks is now empty since we don't load books
+        // LibraryViewModel should handle this by computing the inversion
+        // based on its paginated books
         
         _events.emit(LibraryEvent.SelectionChanged(_state.value.selectionCount))
     }
@@ -312,18 +316,20 @@ class LibraryController(
     // ========== Refresh Commands ==========
     
     /**
-     * Refresh the library from the database.
+     * Refresh the library metadata (categories).
+     * 
+     * NOTE: This no longer loads all books since book loading is handled
+     * by LibraryViewModel's pagination system. The refresh event signals
+     * LibraryViewModel to reset its pagination and reload.
      */
     private suspend fun refreshLibrary() {
-        Log.debug { "$TAG: refreshLibrary()" }
+        Log.debug { "$TAG: refreshLibrary() - refreshing categories only" }
         
         _state.update { it.copy(isRefreshing = true, error = null) }
         
         try {
-            val currentSort = _state.value.sort
-            val books = libraryRepository.findAll(currentSort.toDomainSort())
-            
-            updateBooksAndApplyFilter(books)
+            // Categories are already subscribed via flow, so just emit refresh completed
+            // LibraryViewModel will handle resetting pagination and reloading books
             
             _state.update { it.copy(isRefreshing = false) }
             _events.emit(LibraryEvent.RefreshCompleted)
@@ -334,24 +340,6 @@ class LibraryController(
         }
     }
     
-    // ========== Helper Methods ==========
-    
-    /**
-     * Update books and apply current filter (but NOT sort - repository already sorted).
-     * The repository handles sorting with proper database queries for LastRead, DateAdded, etc.
-     */
-    private fun updateBooksAndApplyFilter(books: List<LibraryBook>) {
-        _state.update { state ->
-            // Only apply filter, not sort - repository already sorted the data correctly
-            val predicate = state.filter.toPredicate()
-            val filteredBooks = books.filter(predicate)
-            state.copy(
-                books = books,
-                filteredBooks = filteredBooks,
-                isLoading = false
-            )
-        }
-    }
     // ========== Error Handling ==========
     
     /**

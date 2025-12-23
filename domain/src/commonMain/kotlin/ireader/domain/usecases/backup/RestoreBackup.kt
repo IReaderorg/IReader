@@ -40,6 +40,8 @@ class RestoreBackup internal constructor(
         return try {
             val bytes = fileSaver.read(uri)
             val backup = loadDump(bytes)
+            var booksRestored = 0
+            var chaptersRestored = 0
 
             transactions.run {
                 restoreCategories(backup.categories)
@@ -50,6 +52,7 @@ class RestoreBackup internal constructor(
                         manga.categories.mapNotNull(backupCategoriesWithId::get)
                     try {
                         restoreChapters(manga)
+                        chaptersRestored += manga.chapters.size
                     } catch (e: Exception) {
                         ireader.core.log.Log.warn(e, "Failed to restore chapters for book: ${manga.title}")
                     }
@@ -63,10 +66,11 @@ class RestoreBackup internal constructor(
                     } catch (e: Exception) {
                         ireader.core.log.Log.warn(e, "Failed to restore tracks for book: ${manga.title}")
                     }
+                    booksRestored++
                 }
             }
             onSuccess()
-            Result.Success
+            Result.Success(booksRestored, chaptersRestored)
         } catch (e: Exception) {
             ireader.core.log.Log.error(e, "Restore Backup was failed")
             onError(UiText.ExceptionString(e))
@@ -361,7 +365,60 @@ class RestoreBackup internal constructor(
                     }
                 }
             }
-            Result.Success
+            Result.Success(backup.library.size, backup.library.sumOf { it.chapters.size })
+        } catch (e: Exception) {
+            ireader.core.log.Log.error(e, "Restore Backup from bytes failed")
+            Result.Error(e)
+        }
+    }
+    
+    /**
+     * Restore backup from byte array with progress callback
+     * @param bytes The backup data
+     * @param onProgress Callback for progress updates (currentBook, totalBooks, bookName)
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun restoreFromBytesWithProgress(
+        bytes: ByteArray,
+        onProgress: (current: Int, total: Int, bookName: String) -> Unit
+    ): Result {
+        return try {
+            val backup = loadDump(bytes)
+            val totalBooks = backup.library.size
+            var booksRestored = 0
+            var chaptersRestored = 0
+
+            transactions.run {
+                restoreCategories(backup.categories)
+                val backupCategoriesWithId = getCategoryIdsByBackupId(backup.categories)
+                
+                backup.library.forEachIndexed { index, manga ->
+                    // Report progress
+                    onProgress(index + 1, totalBooks, manga.title)
+                    
+                    val mangaId = restoreManga(manga)
+                    val categoryIdsOfManga =
+                        manga.categories.mapNotNull(backupCategoriesWithId::get)
+                    try {
+                        restoreChapters(manga)
+                        chaptersRestored += manga.chapters.size
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore chapters for book: ${manga.title}")
+                    }
+                    try {
+                        restoreCategoriesOfBook(mangaId, categoryIdsOfManga)
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore categories for book: ${manga.title}")
+                    }
+                    try {
+                        restoreTracks(manga, mangaId)
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore tracks for book: ${manga.title}")
+                    }
+                    booksRestored++
+                }
+            }
+            Result.Success(booksRestored, chaptersRestored)
         } catch (e: Exception) {
             ireader.core.log.Log.error(e, "Restore Backup from bytes failed")
             Result.Error(e)
@@ -369,7 +426,7 @@ class RestoreBackup internal constructor(
     }
 
     sealed class Result {
-        object Success : Result()
+        data class Success(val booksRestored: Int = 0, val chaptersRestored: Int = 0) : Result()
         data class Error(val error: Exception) : Result()
     }
 }

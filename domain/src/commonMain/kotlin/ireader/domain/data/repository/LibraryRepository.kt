@@ -31,6 +31,38 @@ interface LibraryRepository {
      * Used for pagination to know total pages.
      */
     suspend fun getLibraryCount(includeArchived: Boolean = false): Int
+    
+    /**
+     * Get paginated library books for a specific category from database.
+     * Uses the existing getLibraryByCategoryPaginated SQL query.
+     */
+    suspend fun findByCategoryPaginated(
+        categoryId: Long,
+        sort: LibrarySort,
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean = false
+    ): List<LibraryBook>
+    
+    /**
+     * Get the total count of library books in a specific category.
+     */
+    suspend fun getLibraryCountByCategory(categoryId: Long, includeArchived: Boolean = false): Int
+    
+    /**
+     * Get paginated uncategorized library books from database.
+     */
+    suspend fun findUncategorizedPaginated(
+        sort: LibrarySort,
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean = false
+    ): List<LibraryBook>
+    
+    /**
+     * Get the total count of uncategorized library books.
+     */
+    suspend fun getUncategorizedCount(includeArchived: Boolean = false): Int
     fun subscribe(sort: LibrarySort, includeArchived: Boolean = false): Flow<List<LibraryBook>>
     
     /**
@@ -50,4 +82,27 @@ interface LibraryRepository {
     suspend fun findDownloadedBooks(): List<Book>
 
     suspend fun findFavorites(): List<Book>
+    
+    /**
+     * Search library books by title with pagination.
+     * 
+     * @param query The search query (matches title)
+     * @param sort The sort order
+     * @param limit Maximum number of books to return
+     * @param offset Number of books to skip
+     * @param includeArchived Whether to include archived books
+     * @return List of matching library books
+     */
+    suspend fun searchPaginated(
+        query: String,
+        sort: LibrarySort,
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean = false
+    ): List<LibraryBook>
+    
+    /**
+     * Get the total count of library books matching a search query.
+     */
+    suspend fun getSearchCount(query: String, includeArchived: Boolean = false): Int
 }

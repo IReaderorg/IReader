@@ -4,12 +4,28 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.models.BackUpBook
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.storage.StorageManager
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup
 import ireader.domain.usecases.files.GetSimpleStorage
-import ireader.domain.storage.StorageManager
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LocalizeHelper
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.lnreader_error_corrupted_backup
+import ireader.i18n.resources.lnreader_error_database_failed
+import ireader.i18n.resources.lnreader_error_empty_backup
+import ireader.i18n.resources.lnreader_error_file_not_found
+import ireader.i18n.resources.lnreader_error_invalid_backup
+import ireader.i18n.resources.lnreader_error_out_of_memory
+import ireader.i18n.resources.lnreader_error_parse_failed
+import ireader.i18n.resources.lnreader_error_permission_denied
+import ireader.i18n.resources.lnreader_error_read_failed
+import ireader.i18n.resources.lnreader_import_not_available
+import ireader.i18n.resources.lnreader_import_starting
+import ireader.i18n.resources.save_backup
+import ireader.i18n.resources.select_backup_file
+import ireader.i18n.resources.select_lnreader_backup
 import ireader.presentation.ui.settings.reader.SettingState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,10 +33,66 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
-import ireader.domain.utils.extensions.currentTimeToLong
+import okio.buffer
+import okio.use
+
+/**
+ * Progress state for backup/restore operations
+ */
+sealed class BackupRestoreProgress {
+    object Idle : BackupRestoreProgress()
+    
+    // Backup states
+    data class BackupStarting(val message: String = "Preparing backup...") : BackupRestoreProgress()
+    data class BackupInProgress(
+        val currentBook: Int,
+        val totalBooks: Int,
+        val bookName: String,
+        val message: String = "Backing up library..."
+    ) : BackupRestoreProgress()
+    data class BackupCompressing(val message: String = "Compressing backup...") : BackupRestoreProgress()
+    data class BackupWriting(val message: String = "Saving backup file...") : BackupRestoreProgress()
+    data class BackupComplete(val message: String = "Backup completed!") : BackupRestoreProgress()
+    data class BackupError(val error: String) : BackupRestoreProgress()
+    
+    // Restore states
+    data class RestoreStarting(val message: String = "Reading backup file...") : BackupRestoreProgress()
+    data class RestoreDecompressing(val message: String = "Decompressing backup...") : BackupRestoreProgress()
+    data class RestoreParsing(val message: String = "Parsing backup data...") : BackupRestoreProgress()
+    data class RestoreInProgress(
+        val currentBook: Int,
+        val totalBooks: Int,
+        val bookName: String,
+        val message: String = "Restoring library..."
+    ) : BackupRestoreProgress()
+    data class RestoreComplete(
+        val booksRestored: Int,
+        val chaptersRestored: Int,
+        val message: String = "Restore completed!"
+    ) : BackupRestoreProgress()
+    data class RestoreError(val error: String) : BackupRestoreProgress()
+    
+    val isInProgress: Boolean
+        get() = this !is Idle && this !is BackupComplete && this !is BackupError && 
+                this !is RestoreComplete && this !is RestoreError
+    
+    val progress: Float
+        get() = when (this) {
+            is Idle -> 0f
+            is BackupStarting -> 0.05f
+            is BackupInProgress -> 0.1f + (currentBook.toFloat() / totalBooks.coerceAtLeast(1)) * 0.7f
+            is BackupCompressing -> 0.85f
+            is BackupWriting -> 0.95f
+            is BackupComplete -> 1f
+            is BackupError -> 0f
+            is RestoreStarting -> 0.05f
+            is RestoreDecompressing -> 0.1f
+            is RestoreParsing -> 0.15f
+            is RestoreInProgress -> 0.2f + (currentBook.toFloat() / totalBooks.coerceAtLeast(1)) * 0.75f
+            is RestoreComplete -> 1f
+            is RestoreError -> 0f
+        }
+}
 
 
 class BackupScreenViewModel(
@@ -45,6 +117,10 @@ class BackupScreenViewModel(
     val automaticBackup = uiPreferences.automaticBackupTime().asState()
     val maxAutomaticFiles = uiPreferences.maxAutomaticBackupFiles().asState()
     
+    // Backup/Restore progress state
+    private val _backupRestoreProgress = MutableStateFlow<BackupRestoreProgress>(BackupRestoreProgress.Idle)
+    val backupRestoreProgress: StateFlow<BackupRestoreProgress> = _backupRestoreProgress.asStateFlow()
+    
     // LNReader import state
     private val _lnReaderImportProgress = MutableStateFlow<ImportLNReaderBackup.ImportProgress?>(null)
     val lnReaderImportProgress: StateFlow<ImportLNReaderBackup.ImportProgress?> = _lnReaderImportProgress.asStateFlow()
@@ -57,6 +133,13 @@ class BackupScreenViewModel(
         if (automaticBackup.value != ireader.domain.models.prefs.PreferenceValues.AutomaticBackup.Off) {
             scheduleAutomaticBackup?.schedule(automaticBackup.value)
         }
+    }
+    
+    /**
+     * Dismiss the progress dialog
+     */
+    fun dismissProgress() {
+        _backupRestoreProgress.value = BackupRestoreProgress.Idle
     }
     
     /**
@@ -198,24 +281,55 @@ class BackupScreenViewModel(
      */
     private suspend fun createBackupToLocation(uri: ireader.domain.models.common.Uri) {
         try {
-            showSnackBar(ireader.i18n.UiText.DynamicString("Creating backup..."))
+            _backupRestoreProgress.value = BackupRestoreProgress.BackupStarting()
             
-            // Create backup using existing use case
-            val books = booksUseCasa.findAllInLibraryBooks()
-            val backupData = createBackup.createBackupData(books)
-            
-            // Write to file
-            when (val result = fileSystemService.writeFileBytes(uri, backupData)) {
-                is ireader.domain.services.common.ServiceResult.Success -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Backup created successfully"))
+            // Run on IO dispatcher to avoid blocking main thread
+            kotlinx.coroutines.withContext(ireader.domain.utils.extensions.ioDispatcher) {
+                // Get all books
+                val books = booksUseCasa.findAllInLibraryBooks()
+                val totalBooks = books.size
+                
+                _backupRestoreProgress.value = BackupRestoreProgress.BackupInProgress(
+                    currentBook = 0,
+                    totalBooks = totalBooks,
+                    bookName = "",
+                    message = "Found $totalBooks books to backup..."
+                )
+                
+                // Create backup data with progress updates
+                val backupData = createBackup.createBackupData(books)
+                
+                _backupRestoreProgress.value = BackupRestoreProgress.BackupCompressing()
+                
+                // Compress with gzip
+                val compressedData = okio.Buffer().let { buffer ->
+                    okio.GzipSink(buffer).buffer().use { gzipSink ->
+                        gzipSink.write(backupData)
+                    }
+                    buffer.readByteArray()
                 }
-                is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to create backup: ${result.message ?: "Unknown error"}"))
+                
+                _backupRestoreProgress.value = BackupRestoreProgress.BackupWriting()
+                
+                // Write to file
+                when (val result = fileSystemService.writeFileBytes(uri, compressedData)) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        _backupRestoreProgress.value = BackupRestoreProgress.BackupComplete(
+                            message = "Backup completed! $totalBooks books saved."
+                        )
+                    }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        _backupRestoreProgress.value = BackupRestoreProgress.BackupError(
+                            error = result.message ?: "Unknown error"
+                        )
+                    }
+                    else -> {}
                 }
-                else -> {}
             }
         } catch (e: Exception) {
-            showSnackBar(ireader.i18n.UiText.DynamicString("Backup error: ${e.message ?: "Unknown error"}"))
+            _backupRestoreProgress.value = BackupRestoreProgress.BackupError(
+                error = e.message ?: "Unknown error"
+            )
         }
     }
     
@@ -224,22 +338,68 @@ class BackupScreenViewModel(
      */
     private suspend fun restoreFromLocation(uri: ireader.domain.models.common.Uri) {
         try {
-            showSnackBar(ireader.i18n.UiText.DynamicString("Restoring backup..."))
+            _backupRestoreProgress.value = BackupRestoreProgress.RestoreStarting()
             
-            // Read backup file
-            when (val result = fileSystemService.readFileBytes(uri)) {
-                is ireader.domain.services.common.ServiceResult.Success -> {
-                    // Restore using existing use case
-                    restoreBackup.restoreFromBytes(result.data)
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Backup restored successfully"))
+            // Run on IO dispatcher to avoid blocking main thread
+            kotlinx.coroutines.withContext(ireader.domain.utils.extensions.ioDispatcher) {
+                // Read backup file
+                when (val result = fileSystemService.readFileBytes(uri)) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        _backupRestoreProgress.value = BackupRestoreProgress.RestoreDecompressing()
+                        
+                        // Decompress gzip if needed (backup files are gzip compressed)
+                        // Use Okio for KMP compatibility
+                        val decompressedData = try {
+                            okio.Buffer().apply { write(result.data) }
+                                .let { okio.GzipSource(it) }
+                                .let { okio.Buffer().apply { writeAll(it) } }
+                                .readByteArray()
+                        } catch (e: Exception) {
+                            // Not gzip compressed, use raw data
+                            result.data
+                        }
+                        
+                        _backupRestoreProgress.value = BackupRestoreProgress.RestoreParsing()
+                        
+                        // Restore using existing use case with progress callback
+                        val restoreResult = restoreBackup.restoreFromBytesWithProgress(
+                            decompressedData
+                        ) { current, total, bookName ->
+                            _backupRestoreProgress.value = BackupRestoreProgress.RestoreInProgress(
+                                currentBook = current,
+                                totalBooks = total,
+                                bookName = bookName,
+                                message = "Restoring: $bookName"
+                            )
+                        }
+                        
+                        when (restoreResult) {
+                            is RestoreBackup.Result.Success -> {
+                                _backupRestoreProgress.value = BackupRestoreProgress.RestoreComplete(
+                                    booksRestored = restoreResult.booksRestored,
+                                    chaptersRestored = restoreResult.chaptersRestored,
+                                    message = "Restored ${restoreResult.booksRestored} books, ${restoreResult.chaptersRestored} chapters"
+                                )
+                            }
+                            is RestoreBackup.Result.Error -> {
+                                _backupRestoreProgress.value = BackupRestoreProgress.RestoreError(
+                                    error = restoreResult.error.message ?: "Unknown error"
+                                )
+                            }
+                        }
+                    }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        _backupRestoreProgress.value = BackupRestoreProgress.RestoreError(
+                            error = result.message ?: "Failed to read backup file"
+                        )
+                    }
+                    else -> {}
                 }
-                is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to restore: ${result.message ?: "Unknown error"}"))
-                }
-                else -> {}
             }
         } catch (e: Exception) {
-            showSnackBar(ireader.i18n.UiText.DynamicString("Restore error: ${e.message ?: "Unknown error"}"))
+            _backupRestoreProgress.value = BackupRestoreProgress.RestoreError(
+                error = e.message ?: "Unknown error"
+            )
         }
     }
     

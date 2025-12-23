@@ -42,20 +42,23 @@ class DatabasePreloader(
     /**
      * Preload critical data and wait for completion.
      * Use this when you need to ensure data is loaded before proceeding.
+     * 
+     * IMPORTANT: On low-memory devices with large libraries (10,000+ books),
+     * we need to be very conservative with memory usage. We run preloads
+     * sequentially instead of in parallel to reduce peak memory usage.
      */
     suspend fun preloadCriticalData() = withContext(ioDispatcher) {
         Log.info("Starting critical data preload...", TAG)
         val startTime = currentTimeToLong()
         
         try {
-            // Parallel preload of independent data
-            val jobs = listOf(
-                async { preloadLibraryBooks() },
-                async { preloadCategories() },
-                async { preloadRecentHistory() }
-            )
-            
-            jobs.awaitAll()
+            // Run preloads SEQUENTIALLY to reduce peak memory usage
+            // This is important for low-memory devices with large libraries
+            preloadCategories()
+            preloadRecentHistory()
+            // Skip library books preload on large libraries to prevent OOM
+            // The library screen will load books via pagination instead
+            // preloadLibraryBooks()
             
             val duration = currentTimeToLong() - startTime
             Log.info("Critical data preload completed in ${duration}ms", TAG)
@@ -103,13 +106,16 @@ class DatabasePreloader(
     
     private suspend fun preloadLibraryBooks() {
         try {
-            // Use ultra-fast query for preloading - same as Library screen uses
+            // IMPORTANT: Only preload a limited number of books to prevent OOM
+            // with large libraries (10,000+ books). The full library is loaded
+            // via pagination when the user opens the Library screen.
+            val limit = 50L // Only preload first 50 books for instant display
             val books = handler.awaitList {
-                bookQueries.getLibraryUltraFast(ireader.data.book.getLibraryFastMapper)
+                bookQueries.getLibraryPaginated(limit, 0L, ireader.data.book.getLibraryFastMapper)
             }
             // Update the in-memory cache for instant display
             ireader.domain.data.cache.LibraryDataCache.updateCache(books)
-            Log.debug("Library books preloaded: ${books.size} books", TAG)
+            Log.debug("Library books preloaded: ${books.size} books (limited to $limit)", TAG)
         } catch (e: Exception) {
             Log.error("Failed to preload library books: ${e.message}", TAG)
         }

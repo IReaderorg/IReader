@@ -25,7 +25,7 @@ class GetLibraryCategory  internal constructor(
 
     /**
      * Get paginated library books for a category.
-     * This is more efficient for large libraries as it only loads the requested page from the database.
+     * Uses TRUE database pagination for all category types to prevent OOM.
      * 
      * @param categoryId The category to filter by (0 for ALL, -1 for UNCATEGORIZED)
      * @param sort The sort order
@@ -43,32 +43,40 @@ class GetLibraryCategory  internal constructor(
         offset: Int,
         includeArchived: Boolean = false
     ): Pair<List<LibraryBook>, Int> {
-        // For paginated queries, we need to get total count first
-        val totalCount = libraryRepository.getLibraryCount(includeArchived)
-        
         // Check if this is a smart category
         val smartCategory = SmartCategory.getById(categoryId)
         
-        // For smart categories and filtered queries, we need to load all and filter in memory
-        // because the filtering logic is complex and can't be done in SQL
         val hasActiveFilters = filters.any { 
             it.value == LibraryFilter.Value.Included || it.value == LibraryFilter.Value.Excluded 
         }
         
-        return if (smartCategory != null || hasActiveFilters || categoryId == -1L) {
-            // Fall back to in-memory pagination for complex queries
-            val allBooks = await(categoryId, sort, filters, includeArchived)
-            val paginatedBooks = allBooks.drop(offset).take(limit)
-            Pair(paginatedBooks, allBooks.size)
-        } else if (categoryId == 0L) {
-            // ALL category - use database pagination
-            val books = libraryRepository.findAllPaginated(sort, limit, offset, includeArchived)
-            Pair(books, totalCount)
-        } else {
-            // Regular category - need to filter by category, use in-memory pagination
-            val allBooks = await(categoryId, sort, filters, includeArchived)
-            val paginatedBooks = allBooks.drop(offset).take(limit)
-            Pair(paginatedBooks, allBooks.size)
+        return when {
+            smartCategory != null -> {
+                // Smart categories require in-memory filtering (complex logic)
+                val allBooks = await(categoryId, sort, filters, includeArchived)
+                Pair(allBooks.drop(offset).take(limit), allBooks.size)
+            }
+            categoryId == 0L -> {
+                // ALL category - TRUE DB pagination
+                val totalCount = libraryRepository.getLibraryCount(includeArchived)
+                val books = libraryRepository.findAllPaginated(sort, limit, offset, includeArchived)
+                val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
+                Pair(filtered, totalCount)
+            }
+            categoryId == -1L -> {
+                // UNCATEGORIZED - TRUE DB pagination
+                val totalCount = libraryRepository.getUncategorizedCount(includeArchived)
+                val books = libraryRepository.findUncategorizedPaginated(sort, limit, offset, includeArchived)
+                val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
+                Pair(filtered, totalCount)
+            }
+            else -> {
+                // Regular category - TRUE DB pagination
+                val totalCount = libraryRepository.getLibraryCountByCategory(categoryId, includeArchived)
+                val books = libraryRepository.findByCategoryPaginated(categoryId, sort, limit, offset, includeArchived)
+                val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
+                Pair(filtered, totalCount)
+            }
         }
     }
 
@@ -230,6 +238,38 @@ class GetLibraryCategory  internal constructor(
                 allBooks.filter { it.id in bookIdsInCategory }.filteredWith(filters)
             }
         }
+    }
+
+    /**
+     * Search library books with pagination.
+     * Uses TRUE database pagination for search results.
+     * 
+     * @param query The search query (matches title)
+     * @param sort The sort order
+     * @param filters Active filters to apply
+     * @param limit Maximum number of books to return
+     * @param offset Number of books to skip
+     * @param includeArchived Whether to include archived books
+     * @return Pair of (books for this page, total count)
+     */
+    suspend fun searchPaginated(
+        query: String,
+        sort: LibrarySort = LibrarySort.default,
+        filters: List<LibraryFilter> = emptyList(),
+        limit: Int,
+        offset: Int,
+        includeArchived: Boolean = false
+    ): Pair<List<LibraryBook>, Int> {
+        if (query.isBlank()) return Pair(emptyList(), 0)
+        
+        val hasActiveFilters = filters.any { 
+            it.value == LibraryFilter.Value.Included || it.value == LibraryFilter.Value.Excluded 
+        }
+        
+        val totalCount = libraryRepository.getSearchCount(query, includeArchived)
+        val books = libraryRepository.searchPaginated(query, sort, limit, offset, includeArchived)
+        val filtered = if (hasActiveFilters) books.filteredWith(filters) else books
+        return Pair(filtered, totalCount)
     }
 
     private suspend fun List<LibraryBook>.filteredWith(filters: List<LibraryFilter>): List<LibraryBook> {
