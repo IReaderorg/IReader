@@ -90,12 +90,14 @@ object DateParser {
     }
     
     /**
-     * Parse absolute date
+     * Parse absolute date from various formats.
+     * Supports ISO format (2024-01-15), month name format (January 15, 2024),
+     * and US format (01/15/2024).
+     * 
+     * @param text The date string to parse
+     * @return The timestamp in milliseconds, or null if parsing fails
      */
     fun parseAbsolute(text: String): Long? {
-        // This is a simplified implementation
-        // In production, you'd use kotlinx-datetime for proper parsing
-        
         // Try to extract year, month, day
         val normalized = text.trim()
         
@@ -127,8 +129,13 @@ object DateParser {
     }
     
     /**
-     * Create approximate timestamp from date components
-     * Note: This is a simplified calculation, not accounting for timezones
+     * Create timestamp from date components.
+     * Calculates the number of milliseconds since Unix epoch (1970-01-01 00:00:00 UTC).
+     * 
+     * @param year The year (e.g., 2024)
+     * @param month The month (1-12)
+     * @param day The day of month (1-31)
+     * @return The timestamp in milliseconds
      */
     private fun approximateTimestamp(year: Int, month: Int, day: Int): Long {
         // Days since epoch (1970-01-01)

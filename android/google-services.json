@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "927826490201",
     "project_id": "infinity-reader",
-    "storage_bucket": "infinity-reader.appspot.com"
+    "storage_bucket": "infinity-reader.firebasestorage.app"
   },
   "client": [
     {
@@ -12,12 +12,7 @@
           "package_name": "ir.kazemcodes.infinityreader"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "927826490201-7lpv8hr4bdnqe381jiqbl8uesoth8ffr.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyBWQvmx_sx0hY3wnLawcEwddVegbgmQawo"
@@ -25,12 +20,7 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "927826490201-7lpv8hr4bdnqe381jiqbl8uesoth8ffr.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     },
@@ -41,12 +31,7 @@
           "package_name": "ir.kazemcodes.infinityreader.debug"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "927826490201-7lpv8hr4bdnqe381jiqbl8uesoth8ffr.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyBWQvmx_sx0hY3wnLawcEwddVegbgmQawo"
@@ -54,12 +39,26 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "927826490201-7lpv8hr4bdnqe381jiqbl8uesoth8ffr.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927826490201:android:c6210194df9b45ccdd5248",
+        "android_client_info": {
+          "package_name": "ir.kazemcodes.infinityreader.preview"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWQvmx_sx0hY3wnLawcEwddVegbgmQawo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
         }
       }
     }

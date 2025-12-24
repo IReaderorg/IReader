@@ -8,6 +8,7 @@ import ireader.domain.services.backup.GoogleDriveBackupService
 import ireader.domain.usecases.book.BookUseCases
 import ireader.domain.usecases.category.CategoryUseCases
 import ireader.domain.usecases.chapter.ChapterUseCases
+import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +26,8 @@ class GoogleDriveViewModel(
     // NEW: Clean architecture use cases
     private val bookUseCases: BookUseCases,
     private val chapterUseCases: ChapterUseCases,
-    private val categoryUseCases: CategoryUseCases
+    private val categoryUseCases: CategoryUseCases,
+    private val insertUseCases: LocalInsertUseCases
 ) : StateViewModel<GoogleDriveViewModel.State>(State()) {
     
     data class State(
@@ -314,21 +316,11 @@ class GoogleDriveViewModel(
                             }
                         }
                         
-                        // Insert backed-up chapters
+                        // Insert backed-up chapters using batch insert for efficiency
                         if (backupData.chapters.isNotEmpty()) {
-                            // Group chapters by book for efficient insertion
-                            val chaptersByBook = backupData.chapters.groupBy { it.bookId }
-                            chaptersByBook.forEach { (_, chapters) ->
-                                // Note: We'd need an insertChapters use case for batch operations
-                                // For now, we'll insert individually
-                                chapters.forEach { chapter ->
-                                    // This is a workaround - ideally we'd have a batch insert use case
-                                    chapterUseCases.updateReadStatus(chapter.id, chapter.read)
-                                    if (chapter.bookmark) {
-                                        chapterUseCases.updateBookmarkStatus(chapter.id, true)
-                                    }
-                                }
-                            }
+                            // Use batch insert for all chapters at once - much more efficient
+                            // than individual inserts, especially for large backups
+                            insertUseCases.insertChapters(backupData.chapters)
                         }
                         
                         // Restore reading progress using use cases

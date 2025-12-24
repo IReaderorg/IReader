@@ -1,5 +1,6 @@
 ﻿package ireader.core.source
 
+import ireader.core.source.helpers.DateParser
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.MangaInfo
 import ireader.core.util.currentTimeMillis
@@ -166,25 +167,18 @@ object SourceHelpers {
     }
     
     /**
-     * Parse date from common formats
+     * Parse date from common formats using the DateParser utility.
+     * Supports ISO formats, US/European formats, month names, and relative dates.
+     * 
+     * @param dateString The date string to parse
+     * @return The timestamp in milliseconds, or null if parsing fails
      */
     fun parseDate(dateString: String): Long? {
-        // This is a simplified version - in production you'd use proper date parsing
-        val patterns = mapOf(
-            Regex("""(\d{4})-(\d{2})-(\d{2})""") to "yyyy-MM-dd",
-            Regex("""(\d{2})/(\d{2})/(\d{4})""") to "MM/dd/yyyy",
-            Regex("""(\d{2})\.(\d{2})\.(\d{4})""") to "dd.MM.yyyy"
-        )
+        if (dateString.isBlank()) return null
         
-        for ((pattern, _) in patterns) {
-            if (pattern.containsMatchIn(dateString)) {
-                // Return current time as placeholder
-                // In production, use proper date parsing library
-                return currentTimeMillis()
-            }
-        }
-        
-        return null
+        val result = DateParser.parse(dateString)
+        // DateParser.parse returns 0L if it can't parse the date
+        return if (result > 0L) result else null
     }
     
     /**

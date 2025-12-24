@@ -1,5 +1,6 @@
 package ireader.domain.image
 
+import ireader.core.io.DesktopVirtualFile
 import ireader.core.io.VirtualFile
 import ireader.core.io.VirtualInputStream
 import ireader.core.storage.AppDir
@@ -25,7 +26,6 @@ actual class CoverCache actual constructor(
         private const val CUSTOM_COVERS_DIR = "covers/custom"
     }
 
-    // VirtualFile migration complete - using temporary wrapper for backward compatibility
     private val cacheBaseDir: File = AppDir
 
     /**
@@ -90,7 +90,7 @@ actual class CoverCache actual constructor(
         var deleted = 0
 
         getCoverFile(cover)?.let { virtualFile ->
-            val file = (virtualFile as DesktopVirtualFile).file
+            val file = File(virtualFile.path)
             if (file.exists() && file.delete()) ++deleted
         }
 
@@ -109,58 +109,8 @@ actual class CoverCache actual constructor(
      */
     actual suspend fun deleteCustomCover(cover: BookCover): Boolean {
         val virtualFile = getCustomCoverFile(cover)
-        val file = (virtualFile as DesktopVirtualFile).file
+        val file = File(virtualFile.path)
         return file.exists() && file.delete()
-    }
-    
-    // Temporary wrapper until VirtualFile migration is complete
-    private class DesktopVirtualFile(val file: File) : VirtualFile {
-        override val path: String get() = file.absolutePath
-        override val name: String get() = file.name
-        override val parent: VirtualFile? get() = file.parentFile?.let { DesktopVirtualFile(it) }
-        override val extension: String get() = file.extension
-        
-        override suspend fun exists() = file.exists()
-        override suspend fun isDirectory() = file.isDirectory
-        override suspend fun isFile() = file.isFile
-        override suspend fun size() = file.length()
-        override suspend fun lastModified() = file.lastModified()
-        override suspend fun mkdirs() = file.mkdirs()
-        override suspend fun createNewFile() = file.createNewFile()
-        override suspend fun delete() = file.delete()
-        override suspend fun deleteRecursively() = file.deleteRecursively()
-        override suspend fun listFiles() = file.listFiles()?.map { DesktopVirtualFile(it) } ?: emptyList()
-        override suspend fun listFiles(filter: (VirtualFile) -> Boolean) = 
-            file.listFiles()?.map { DesktopVirtualFile(it) }?.filter(filter) ?: emptyList()
-        override suspend fun readBytes() = file.readBytes()
-        override suspend fun readText() = file.readText()
-        override suspend fun writeBytes(bytes: ByteArray) = file.writeBytes(bytes)
-        override suspend fun writeText(text: String) = file.writeText(text)
-        override suspend fun appendBytes(bytes: ByteArray) = file.appendBytes(bytes)
-        override suspend fun appendText(text: String) = file.appendText(text)
-        override suspend fun copyTo(target: VirtualFile, overwrite: Boolean) = 
-            file.copyTo((target as DesktopVirtualFile).file, overwrite).let { true }
-        override suspend fun moveTo(target: VirtualFile) = 
-            file.renameTo((target as DesktopVirtualFile).file)
-        override fun resolve(relativePath: String) = DesktopVirtualFile(File(file, relativePath))
-        override suspend fun inputStream() = DesktopVirtualInputStream(file.inputStream())
-        override suspend fun outputStream(append: Boolean) = DesktopVirtualOutputStream(file.outputStream())
-        override fun walk() = throw NotImplementedError("walk() not implemented in temporary wrapper")
-    }
-    
-    private class DesktopVirtualInputStream(private val stream: java.io.InputStream) : VirtualInputStream {
-        override suspend fun read() = stream.read()
-        override suspend fun read(buffer: ByteArray) = stream.read(buffer)
-        override suspend fun read(buffer: ByteArray, offset: Int, length: Int) = stream.read(buffer, offset, length)
-        override suspend fun close() = stream.close()
-    }
-    
-    private class DesktopVirtualOutputStream(private val stream: java.io.OutputStream) : ireader.core.io.VirtualOutputStream {
-        override suspend fun write(byte: Int) = stream.write(byte)
-        override suspend fun write(buffer: ByteArray) = stream.write(buffer)
-        override suspend fun write(buffer: ByteArray, offset: Int, length: Int) = stream.write(buffer, offset, length)
-        override suspend fun flush() = stream.flush()
-        override suspend fun close() = stream.close()
     }
 
     /**

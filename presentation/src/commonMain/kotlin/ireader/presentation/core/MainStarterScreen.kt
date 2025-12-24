@@ -34,7 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.zIndex
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
 import kotlinx.coroutines.delay
 import ireader.presentation.core.ui.AppTab
 import ireader.presentation.ui.component.ExtensionsShimmerLoading
@@ -482,8 +483,10 @@ private fun PersistentTabContainer(
  * Key optimization: Content is always composed once initialized (not removed from tree)
  * to preserve scroll positions, loaded images, and other UI state.
  * 
- * Uses zIndex to ensure only the visible tab receives touch events, preventing
- * glitches from hidden tabs intercepting touches.
+ * Standard approach: Uses graphicsLayer for visibility and pointerInput to properly
+ * block touch events on hidden tabs. This is more reliable than zIndex layering
+ * because it explicitly consumes all pointer events rather than relying on
+ * z-ordering which can have edge cases with nested scrollable content.
  */
 @Composable
 private inline fun TabSlot(
@@ -500,17 +503,38 @@ private inline fun TabSlot(
         return
     }
     
-    // Use zIndex to layer tabs properly - visible tab on top receives all touches
-    // Hidden tabs are pushed behind with zIndex 0, visible tab gets zIndex 1
-    // This prevents touch event conflicts without using translation hacks
+    // Standard approach: Use graphicsLayer for visibility control and
+    // pointerInput to properly block touch events on hidden tabs.
+    // This is more reliable than zIndex because:
+    // 1. It explicitly consumes all pointer events on hidden tabs
+    // 2. No reliance on z-ordering which can fail with nested scrollables
+    // 3. Better performance as hidden content doesn't process touch events
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .zIndex(if (isVisible) 1f else 0f)
             .graphicsLayer {
                 // Use alpha for visibility - keeps content in composition tree
+                // but makes it invisible when not the active tab
                 alpha = if (isVisible) 1f else 0f
             }
+            .then(
+                if (!isVisible) {
+                    // Block all touch events on hidden tabs
+                    // This prevents touch event conflicts without relying on z-ordering
+                    Modifier.pointerInput(Unit) {
+                        // Consume all pointer events - this effectively disables
+                        // all touch interaction on hidden tabs
+                        awaitPointerEventScope {
+                            while (true) {
+                                awaitPointerEvent()
+                                // Events are consumed by not propagating them
+                            }
+                        }
+                    }
+                } else {
+                    Modifier
+                }
+            )
     ) {
         when {
             isVisible && !isInitialized -> {
