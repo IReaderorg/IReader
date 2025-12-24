@@ -47,6 +47,8 @@ import ireader.presentation.core.ui.TTSV2ScreenSpec
 import ireader.presentation.core.ui.TranslationScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
+import ireader.presentation.ui.plugins.integration.FeaturePluginIntegration
+import ireader.presentation.ui.plugins.integration.PluginNavigationExtensions
 import org.koin.compose.koinInject
 
 /**
@@ -238,6 +240,11 @@ fun CommonNavHost(
         // Plugin Repository - Manage plugin sources
         composable(NavigationRoutes.pluginRepository) {
             ireader.presentation.core.ui.PluginRepositoryScreenSpec().Content()
+        }
+        
+        // Plugin Management - Manage installed plugins
+        composable(NavigationRoutes.pluginManagement) {
+            ireader.presentation.core.ui.PluginManagementScreenSpec().Content()
         }
         
         // Developer Portal - For plugin developers with dev badge
@@ -578,6 +585,18 @@ fun CommonNavHost(
         
         // Allow additional platform-specific routes
         additionalRoutes?.invoke(this)
+        
+        // Register plugin screens dynamically
+        // This allows feature plugins to add their own screens to the navigation graph
+        // Note: We use GlobalContext.get() here because koinInject() is a Composable function
+        // and can't be used directly in NavGraphBuilder context
+        try {
+            val featurePluginIntegration = org.koin.core.context.GlobalContext.get().get<FeaturePluginIntegration>()
+            PluginNavigationExtensions.registerPluginScreens(this, featurePluginIntegration)
+        } catch (e: Exception) {
+            // Plugin integration not available, skip plugin screen registration
+            println("[CommonNavHost] Plugin screen registration skipped: ${e.message}")
+        }
         }
     }
 }

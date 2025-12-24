@@ -9,8 +9,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -96,19 +99,22 @@ object ReaderPluginMenuIntegration {
     
     /**
      * Handle menu item click
-     * This would trigger the plugin's action
+     * This triggers the plugin's action - navigates to plugin screen if route is available
      */
     private suspend fun handleMenuItemClick(
         menuItem: PluginMenuItem,
         navController: NavHostController
     ) {
         try {
-            // The actual action execution would be handled by the plugin
-            // through the FeaturePluginIntegration.executePluginAction method
-            // For now, we just navigate if the menu item has a route
-            // In a full implementation, this would call back to the plugin
+            // Navigate to the plugin screen if a route is defined
+            // Plugin menu items can define a route like "plugin/reading-stats/main"
+            val route = menuItem.route
+            if (!route.isNullOrBlank()) {
+                navController.navigate(route)
+            }
         } catch (e: Exception) {
             // Log error but don't crash
+            println("[ReaderPluginMenuIntegration] Failed to handle menu item click: ${e.message}")
         }
     }
 }
@@ -117,6 +123,7 @@ object ReaderPluginMenuIntegration {
  * Composable for rendering plugin menu items in a bottom sheet
  * Requirements: 6.1
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PluginMenuBottomSheet(
     menuItems: List<PluginMenuItem>,
@@ -125,24 +132,34 @@ fun PluginMenuBottomSheet(
     onDismiss: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp)
+    val sheetState = rememberModalBottomSheetState()
+    
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
     ) {
-        Text(
-            text = localizeHelper.localize(Res.string.plugin_features),
-            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-        
-        Divider()
-        
-        ReaderPluginMenuIntegration.PluginMenuItems(
-            menuItems = menuItems,
-            navController = navController,
-            scope = scope,
-            onDismiss = onDismiss
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
+            Text(
+                text = localizeHelper.localize(Res.string.plugin_features),
+                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            
+            Divider()
+            
+            ReaderPluginMenuIntegration.PluginMenuItems(
+                menuItems = menuItems,
+                navController = navController,
+                scope = scope,
+                onDismiss = onDismiss
+            )
+            
+            // Add some bottom padding for navigation bar
+            Spacer(modifier = Modifier.height(32.dp))
+        }
     }
 }

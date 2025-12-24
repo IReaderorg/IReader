@@ -83,7 +83,9 @@ data class PluginMenuItem(
     /** Icon name (optional) */
     val icon: String? = null,
     /** Sort order (lower = higher priority) */
-    val order: Int = 0
+    val order: Int = 0,
+    /** Navigation route (optional) - if set, clicking the menu item navigates to this route */
+    val route: String? = null
 )
 
 /**

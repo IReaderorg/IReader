@@ -48,7 +48,8 @@ class ChapterController(
     private val loadChapterContentUseCase: LoadChapterContentUseCase,
     private val updateProgressUseCase: UpdateProgressUseCase,
     private val navigateChapterUseCase: NavigateChapterUseCase,
-    private val bookRepository: BookRepository
+    private val bookRepository: BookRepository,
+    private val chapterNotifier: ChapterNotifier
 ) {
     companion object {
         private const val TAG = "ChapterController"
@@ -220,6 +221,12 @@ class ChapterController(
                 isLoadingChapters = false
             )
         }
+        
+        // Notify observers that chapters have been refreshed
+        val bookId = currentState.book?.id
+        if (bookId != null) {
+            chapterNotifier.tryNotifyChange(ChapterNotifier.ChangeType.BookChaptersRefreshed(bookId))
+        }
     }
     
     /**
@@ -248,6 +255,13 @@ class ChapterController(
                     onSuccess = { loadedChapter ->
                         chapter = loadedChapter
                         _events.emit(ChapterEvent.ContentFetched(chapterId))
+                        // Notify observers that content was fetched
+                        val bookId = _state.value.book?.id
+                        if (bookId != null) {
+                            chapterNotifier.tryNotifyChange(
+                                ChapterNotifier.ChangeType.ContentFetched(chapterId, bookId)
+                            )
+                        }
                     },
                     onFailure = { error ->
                         Log.error(error, "$TAG: Failed to load chapter content")
@@ -277,6 +291,14 @@ class ChapterController(
             }
             
             _events.emit(ChapterEvent.ChapterLoaded(chapter!!))
+            
+            // Notify observers that current chapter changed
+            val bookId = _state.value.book?.id
+            if (bookId != null) {
+                chapterNotifier.tryNotifyChange(
+                    ChapterNotifier.ChangeType.CurrentChapterChanged(chapterId, bookId)
+                )
+            }
             
         } catch (e: Exception) {
             Log.error(e, "$TAG: Failed to load chapter")

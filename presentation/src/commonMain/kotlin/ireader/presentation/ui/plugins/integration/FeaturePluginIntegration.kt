@@ -14,13 +14,27 @@ import ireader.domain.plugins.PluginManager
 import ireader.domain.plugins.PluginStatus
 import ireader.domain.plugins.PluginType
 import ireader.plugin.api.FeaturePlugin
+import ireader.plugin.api.Plugin
 import ireader.plugin.api.PluginAction
 import ireader.plugin.api.PluginMenuItem
 import ireader.plugin.api.PluginScreen
 import ireader.plugin.api.PluginScreenContext
 import ireader.plugin.api.ReaderContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+/**
+ * Data class representing an incompatible plugin that needs update
+ */
+data class IncompatiblePlugin(
+    val pluginId: String,
+    val pluginName: String,
+    val currentVersion: String,
+    val errorMessage: String
+)
 
 /**
  * Integration layer for Feature Plugins with app navigation and reader
@@ -31,6 +45,13 @@ class FeaturePluginIntegration(
     private val pluginDataStorage: PluginDataStorage
 ) {
     
+    // Track incompatible plugins
+    private val _incompatiblePlugins = MutableStateFlow<List<IncompatiblePlugin>>(emptyList())
+    val incompatiblePlugins: StateFlow<List<IncompatiblePlugin>> = _incompatiblePlugins.asStateFlow()
+    
+    // Track skipped plugins (user chose not to update)
+    private val skippedPluginIds = mutableSetOf<String>()
+    
     /**
      * Get menu items from all enabled feature plugins
      * Requirements: 6.1
@@ -40,17 +61,34 @@ class FeaturePluginIntegration(
     fun getPluginMenuItems(): List<PluginMenuItem> {
         return try {
             val featurePlugins = getEnabledFeaturePlugins()
+            val incompatible = mutableListOf<IncompatiblePlugin>()
             
-            featurePlugins.flatMap { plugin ->
+            val menuItems = featurePlugins.flatMap { plugin ->
                 try {
                     plugin.getMenuItems()
-                } catch (e: Exception) {
-                    // Log error but don't disrupt functionality
+                } catch (e: Throwable) {
+                    // Track incompatible plugin
+                    if (!skippedPluginIds.contains(plugin.manifest.id)) {
+                        incompatible.add(IncompatiblePlugin(
+                            pluginId = plugin.manifest.id,
+                            pluginName = plugin.manifest.name,
+                            currentVersion = plugin.manifest.version,
+                            errorMessage = e.message ?: "Unknown error"
+                        ))
+                    }
+                    println("[FeaturePluginIntegration] Plugin ${plugin.manifest.id} getMenuItems() failed: ${e.message}")
                     emptyList()
                 }
             }.sortedBy { it.order }
-        } catch (e: Exception) {
-            // Return empty list if there's an error
+            
+            // Update incompatible plugins state
+            if (incompatible.isNotEmpty()) {
+                _incompatiblePlugins.value = incompatible
+            }
+            
+            menuItems
+        } catch (e: Throwable) {
+            println("[FeaturePluginIntegration] getPluginMenuItems() failed: ${e.message}")
             emptyList()
         }
     }
@@ -64,17 +102,40 @@ class FeaturePluginIntegration(
     fun getPluginScreens(): List<PluginScreen> {
         return try {
             val featurePlugins = getEnabledFeaturePlugins()
+            val incompatible = mutableListOf<IncompatiblePlugin>()
             
-            featurePlugins.flatMap { plugin ->
+            val screens = featurePlugins.flatMap { plugin ->
                 try {
                     plugin.getScreens()
-                } catch (e: Exception) {
-                    // Log error but don't disrupt functionality
+                } catch (e: Throwable) {
+                    // Track incompatible plugin
+                    if (!skippedPluginIds.contains(plugin.manifest.id)) {
+                        incompatible.add(IncompatiblePlugin(
+                            pluginId = plugin.manifest.id,
+                            pluginName = plugin.manifest.name,
+                            currentVersion = plugin.manifest.version,
+                            errorMessage = e.message ?: "Unknown error"
+                        ))
+                    }
+                    println("[FeaturePluginIntegration] Plugin ${plugin.manifest.id} getScreens() failed: ${e.message}")
                     emptyList()
                 }
             }
-        } catch (e: Exception) {
-            // Return empty list if there's an error
+            
+            // Update incompatible plugins state
+            if (incompatible.isNotEmpty()) {
+                val current = _incompatiblePlugins.value.toMutableList()
+                incompatible.forEach { newPlugin ->
+                    if (current.none { it.pluginId == newPlugin.pluginId }) {
+                        current.add(newPlugin)
+                    }
+                }
+                _incompatiblePlugins.value = current
+            }
+            
+            screens
+        } catch (e: Throwable) {
+            println("[FeaturePluginIntegration] getPluginScreens() failed: ${e.message}")
             emptyList()
         }
     }
@@ -113,12 +174,14 @@ class FeaturePluginIntegration(
                 try {
                     val action = plugin.onReaderContext(context)
                     action?.let { actions.add(it) }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     // Log error but continue with other plugins
+                    println("[FeaturePluginIntegration] Plugin ${plugin.manifest.id} onReaderContext() failed: ${e.message}")
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             // Don't disrupt main app functionality
+            println("[FeaturePluginIntegration] handleReaderContext() failed: ${e.message}")
         }
         
         return actions
@@ -216,6 +279,42 @@ class FeaturePluginIntegration(
     fun hasFeaturePlugins(): Boolean {
         return getEnabledFeaturePlugins().isNotEmpty()
     }
+    
+    /**
+     * Check if there are incompatible plugins that need update
+     */
+    fun hasIncompatiblePlugins(): Boolean {
+        return _incompatiblePlugins.value.isNotEmpty()
+    }
+    
+    /**
+     * Skip updating a plugin (user chose not to update)
+     */
+    fun skipPlugin(pluginId: String) {
+        skippedPluginIds.add(pluginId)
+        _incompatiblePlugins.value = _incompatiblePlugins.value.filter { it.pluginId != pluginId }
+    }
+    
+    /**
+     * Skip all incompatible plugins
+     */
+    fun skipAllIncompatiblePlugins() {
+        _incompatiblePlugins.value.forEach { skippedPluginIds.add(it.pluginId) }
+        _incompatiblePlugins.value = emptyList()
+    }
+    
+    /**
+     * Clear incompatible plugin after successful update
+     */
+    fun clearIncompatiblePlugin(pluginId: String) {
+        _incompatiblePlugins.value = _incompatiblePlugins.value.filter { it.pluginId != pluginId }
+        skippedPluginIds.remove(pluginId)
+    }
+    
+    /**
+     * Get the PluginManager for reinstalling plugins
+     */
+    fun getPluginManager(): PluginManager = pluginManager
 }
 
 /**

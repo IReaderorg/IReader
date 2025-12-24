@@ -253,4 +253,14 @@ val screenModelModule = module {
             getCurrentUser = get()
         )
     }
+    
+    // ==================== Plugin Management ====================
+    
+    // Plugin Management ViewModel - Manage installed plugins
+    factory {
+        ireader.presentation.ui.plugins.management.PluginManagementViewModel(
+            pluginManager = get(),
+            uiPreferences = get()
+        )
+    }
 }

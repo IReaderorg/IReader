@@ -41,6 +41,7 @@ import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import ireader.presentation.ui.settings.security.SettingsSecurityViewModel
 import ireader.presentation.ui.settings.tracking.SettingsTrackingViewModel
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
+import ireader.presentation.ui.plugins.integration.pluginIntegrationModule
 import org.koin.dsl.module
 
 val PresentationModules = module {
@@ -315,6 +316,8 @@ val PresentationModules = module {
             preferencesController = get(),
             // TTSController - singleton for syncing chapter when returning from TTS screen
             ttsController = get(),
+            // ChapterNotifier - singleton for reactive chapter change notifications
+            chapterNotifier = get(),
             settingsViewModel = get(),
             translationViewModel = get(),
             ttsViewModel = get(),
@@ -351,5 +354,8 @@ val PresentationModules = module {
 
     // New StateScreenModel implementations following Mihon's pattern
     includes(screenModelModule)
+    
+    // Plugin integration module for feature plugins
+    includes(pluginIntegrationModule)
 
 }

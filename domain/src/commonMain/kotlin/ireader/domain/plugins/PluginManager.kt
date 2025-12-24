@@ -117,15 +117,9 @@ class PluginManager(
             var enabledIdsChanged = false
             
             plugins.forEach { plugin ->
-                // Auto-enable infrastructure and feature plugins if not already enabled
-                // These include: JS_ENGINE, TTS, GRADIO_TTS, THEME, TRANSLATION, FEATURE, and AI plugins
-                val isAutoEnablePlugin = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
-                                         plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
-                                         plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS ||
-                                         plugin.manifest.type == ireader.plugin.api.PluginType.THEME ||
-                                         plugin.manifest.type == ireader.plugin.api.PluginType.TRANSLATION ||
-                                         plugin.manifest.type == ireader.plugin.api.PluginType.FEATURE ||
-                                         plugin.manifest.type == ireader.plugin.api.PluginType.AI
+                // Auto-enable ALL installed plugins
+                // This ensures plugins are immediately available after installation
+                val isAutoEnablePlugin = true // Enable all plugin types
                 
                 println("[PluginManager] Plugin ${plugin.manifest.id}: type=${plugin.manifest.type}, isAutoEnablePlugin=$isAutoEnablePlugin, alreadyEnabled=${enabledIds.contains(plugin.manifest.id)}")
                 
@@ -194,14 +188,9 @@ class PluginManager(
             
             registry.register(plugin)
             
-            // Auto-enable infrastructure and feature plugins (JS_ENGINE, TTS, GRADIO_TTS, THEME, TRANSLATION, FEATURE, AI)
-            val shouldAutoEnable = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.THEME ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.TRANSLATION ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.FEATURE ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.AI
+            // Auto-enable ALL installed plugins
+            // This ensures plugins are immediately available after installation
+            val shouldAutoEnable = true // Enable all plugin types
             
             val initialStatus = if (shouldAutoEnable) PluginStatus.ENABLED else PluginStatus.DISABLED
             database.insertOrUpdate(plugin.manifest, initialStatus)

@@ -96,6 +96,8 @@ class ReaderScreenViewModel(
     private val preferencesController: ReaderPreferencesController,
     // TTSController - for syncing chapter when returning from TTS screen
     private val ttsController: ireader.domain.services.tts_service.v2.TTSController,
+    // ChapterNotifier - for reactive chapter change notifications
+    private val chapterNotifier: ireader.domain.services.chapter.ChapterNotifier,
     // Sub-ViewModels
     val settingsViewModel: ReaderSettingsViewModel,
     val translationViewModel: ReaderTranslationViewModel,
@@ -221,6 +223,8 @@ class ReaderScreenViewModel(
             subscribeToChapterControllerEvents()
             // Subscribe to ReaderPreferencesController events (Requirements: 4.1, 4.2)
             subscribeToPreferencesControllerEvents()
+            // Subscribe to ChapterNotifier for reactive chapter updates
+            subscribeToChapterNotifier()
             initializeReader(bookId, chapterId)
             // Subscribe to TTS chapter changes for sync
             subscribeTTSChapterChanges()
@@ -337,6 +341,127 @@ class ReaderScreenViewModel(
                         Log.debug { "ChapterController: Chapter completed" }
                     }
                 }
+            }
+        }
+    }
+    
+    // ==================== ChapterNotifier Integration ====================
+    
+    private var chapterNotifierJob: Job? = null
+    
+    /**
+     * Subscribe to ChapterNotifier for reactive chapter change notifications.
+     * This ensures the reader screen stays in sync when chapters are modified.
+     * 
+     * Performance optimizations:
+     * - Uses changesForBook() to filter at source (avoids processing unrelated changes)
+     * - Content updates (ContentFetched) are immediate for responsiveness
+     * - Chapter list updates are debounced to avoid rapid recomposition
+     * - Only refreshes when state is Success
+     */
+    private fun subscribeToChapterNotifier() {
+        chapterNotifierJob?.cancel()
+        chapterNotifierJob = scope.launch {
+            // Wait for initial state to be set
+            val initialBookId = (params.bookId ?: return@launch)
+            
+            // Use debounced flow for chapter list updates (drawer)
+            // 100ms debounce prevents rapid recomposition during batch operations
+            chapterNotifier.changesForBookDebounced(initialBookId, debounceMs = 100)
+                .collect { change ->
+                    val currentState = _state.value as? ReaderState.Success ?: return@collect
+                    
+                    when (change) {
+                        is ireader.domain.services.chapter.ChapterNotifier.ChangeType.BookChaptersRefreshed -> {
+                            Log.debug { "ChapterNotifier: Chapters refreshed for book ${change.bookId}" }
+                            refreshChaptersFromController()
+                        }
+                        is ireader.domain.services.chapter.ChapterNotifier.ChangeType.ContentFetched -> {
+                            if (change.chapterId == currentState.currentChapter.id) {
+                                Log.debug { "ChapterNotifier: Content fetched for current chapter ${change.chapterId}" }
+                                reloadCurrentChapterContent()
+                            }
+                        }
+                        is ireader.domain.services.chapter.ChapterNotifier.ChangeType.ChapterUpdated -> {
+                            Log.debug { "ChapterNotifier: Chapter ${change.chapterId} updated" }
+                            if (change.chapterId == currentState.currentChapter.id) {
+                                reloadCurrentChapterContent()
+                            }
+                            refreshChaptersFromController()
+                        }
+                        is ireader.domain.services.chapter.ChapterNotifier.ChangeType.ChaptersUpdated -> {
+                            Log.debug { "ChapterNotifier: ${change.chapterIds.size} chapters updated" }
+                            if (change.chapterIds.contains(currentState.currentChapter.id)) {
+                                reloadCurrentChapterContent()
+                            }
+                            refreshChaptersFromController()
+                        }
+                        is ireader.domain.services.chapter.ChapterNotifier.ChangeType.CurrentChapterChanged -> {
+                            // This is emitted by our own ChapterController, no need to handle
+                        }
+                        is ireader.domain.services.chapter.ChapterNotifier.ChangeType.FullRefresh -> {
+                            Log.debug { "ChapterNotifier: Full refresh requested" }
+                            refreshChaptersFromController()
+                        }
+                        else -> {
+                            // Handle other change types if needed
+                        }
+                    }
+                }
+        }
+    }
+    
+    /**
+     * Refresh chapters list from database.
+     * Called when ChapterNotifier signals a change.
+     * 
+     * Note: We fetch directly from the use case instead of ChapterController
+     * because the controller's subscription might be debounced and not yet updated.
+     */
+    private fun refreshChaptersFromController() {
+        val currentState = _state.value as? ReaderState.Success ?: return
+        
+        scope.launch {
+            try {
+                // Fetch fresh chapters from database
+                val chapters = getChapterUseCase.findChaptersByBookId(currentState.book.id)
+                if (chapters.isNotEmpty()) {
+                    updateSuccessState { state ->
+                        val newIndex = chapters.indexOfFirst { it.id == state.currentChapter.id }
+                            .coerceAtLeast(0)
+                        state.copy(
+                            chapters = chapters,
+                            currentChapterIndex = newIndex
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.error { "Failed to refresh chapters: ${e.message}" }
+            }
+        }
+    }
+    
+    /**
+     * Reload current chapter content from database.
+     * Also updates the chapter in the chapters list to reflect any changes (e.g., read status).
+     */
+    private fun reloadCurrentChapterContent() {
+        val currentState = _state.value as? ReaderState.Success ?: return
+        scope.launch {
+            val freshChapter = getChapterUseCase.findChapterById(currentState.currentChapter.id)
+            if (freshChapter != null) {
+                updateSuccessState { state ->
+                    // Update both currentChapter and the chapter in the chapters list
+                    val updatedChapters = state.chapters.map { ch ->
+                        if (ch.id == freshChapter.id) freshChapter else ch
+                    }
+                    state.copy(
+                        currentChapter = freshChapter,
+                        content = if (freshChapter.content.isNotEmpty()) freshChapter.content else state.content,
+                        chapters = updatedChapters
+                    )
+                }
+                Log.debug { "Reloaded chapter: read=${freshChapter.read}, content=${freshChapter.content.size} pages" }
             }
         }
     }
@@ -592,7 +717,7 @@ class ReaderScreenViewModel(
             chapterId != LAST_CHAPTER && chapterId != NO_VALUE -> chapterId
             last != null -> last.chapterId
             else -> {
-                // Get chapters from ChapterController state (Requirements: 9.2, 9.4, 9.5)
+                // Get chapters from ChapterController state, with fallback to database
                 val chapters = getChaptersFromController().ifEmpty {
                     // Fallback to direct query if controller hasn't loaded yet
                     getChapterUseCase.findChaptersByBookId(bookId)
@@ -615,7 +740,11 @@ class ReaderScreenViewModel(
     // ==================== Chapter Loading ====================
 
     /**
-     * Load a chapter by ID
+     * Load a chapter by ID.
+     * 
+     * Chapters list is managed by ChapterController and synced via ChapterNotifier.
+     * This method only loads the current chapter content and updates local UI state.
+     * 
      * @param scrollToEnd Override scroll behavior. If null, uses `next` parameter logic.
      *                    If true, scrolls to end. If false, scrolls to start.
      */
@@ -643,8 +772,11 @@ class ReaderScreenViewModel(
             return null
         }
 
-        // Get all chapters for navigation
-        val chapters = getChapterUseCase.findChaptersByBookId(book.id)
+        // Get chapters - prefer ChapterController but fallback to database
+        // This ensures we have chapters even if ChapterController hasn't loaded yet
+        val chapters = getChaptersFromController().ifEmpty {
+            getChapterUseCase.findChaptersByBookId(book.id)
+        }
         val chapterIndex = chapters.indexOfFirst { it.id == chapter.id }
 
         // Create or update Success state
@@ -666,13 +798,19 @@ class ReaderScreenViewModel(
         // Note: chapter.content is already filtered at the use case level (FindChapterById)
         val totalWords = calculateTotalWords(chapter.content)
         
+        // Use existing chapters from state if ChapterController hasn't loaded yet
+        val effectiveChapters = chapters.ifEmpty { previousSuccessState?.chapters ?: emptyList() }
+        val effectiveIndex = if (chapters.isNotEmpty()) chapterIndex else {
+            effectiveChapters.indexOfFirst { it.id == chapter.id }
+        }
+        
         _state.value = ReaderState.Success(
             book = book,
             currentChapter = chapter,
-            chapters = chapters,
+            chapters = effectiveChapters,
             catalog = catalog,
             content = chapter.content,
-            currentChapterIndex = if (chapterIndex != -1) chapterIndex else 0,
+            currentChapterIndex = if (effectiveIndex != -1) effectiveIndex else 0,
             chapterShell = newChapterShell,
             isLoadingContent = chapter.isEmpty() && catalog?.source != null,
             // Preserve UI state from previous state
@@ -702,11 +840,11 @@ class ReaderScreenViewModel(
         // Update last read time
         getChapterUseCase.updateLastReadTime(chapter)
         
-        // Notify ChapterController about the chapter load
+        // Notify ChapterController about the chapter load (this triggers ChapterNotifier)
         chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
 
         // Track chapter open (pass isLast to track book completion when last chapter is finished)
-        val isLastChapter = chapterIndex != -1 && chapterIndex == chapters.lastIndex
+        val isLastChapter = effectiveIndex != -1 && effectiveIndex == effectiveChapters.lastIndex
         statisticsViewModel.onChapterOpened(chapter, isLastChapter)
 
         // Trigger preload via ChapterController (Requirements: 9.2, 9.4, 9.5)
@@ -735,23 +873,26 @@ class ReaderScreenViewModel(
             catalog = catalog,
             onSuccess = { filteredChapter ->
                 // Chapter is already saved to DB and filtered
+                // ChapterNotifier will update the chapters list reactively
                 val totalWords = calculateTotalWords(filteredChapter.content)
                 
                 updateSuccessState { state ->
-                    // Update the chapters list to reflect the cached content
-                    // This ensures the drawer shows the cached icon for the fetched chapter
-                    val updatedChapters = state.chapters.map { ch ->
-                        if (ch.id == filteredChapter.id) filteredChapter else ch
-                    }
-                    
                     state.copy(
                         currentChapter = filteredChapter,
-                        chapters = updatedChapters,
                         content = filteredChapter.content,
                         isLoadingContent = false,
                         totalWords = totalWords
                     )
                 }
+                
+                // Notify ChapterNotifier that content was fetched
+                // This will trigger refreshChaptersFromController() to update the chapters list
+                chapterNotifier.tryNotifyChange(
+                    ireader.domain.services.chapter.ChapterNotifier.ChangeType.ContentFetched(
+                        chapterId = filteredChapter.id,
+                        bookId = book.id
+                    )
+                )
                 
                 // Check chapter health after content loads
                 if (filteredChapter.content.isNotEmpty()) {

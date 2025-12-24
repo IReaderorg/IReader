@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -51,6 +52,8 @@ import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.CustomSystemColor
 import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.core.ui.SnackBarListener
+import ireader.presentation.ui.plugins.integration.FeaturePluginIntegration
+import ireader.presentation.ui.plugins.integration.IncompatiblePluginHandler
 import ireader.presentation.ui.reader.ReaderScreenDrawer
 import ireader.presentation.ui.reader.ReaderScreenTopBar
 import ireader.presentation.ui.reader.ReadingScreen
@@ -93,6 +96,17 @@ data class ReaderScreenSpec(
         val processStateManager: ProcessStateManager = koinInject()
         val readerState by vm.state.collectAsState()
         
+        // Plugin integration for reader menu items
+        // Use getKoin().getOrNull() instead of try-catch around koinInject (composable)
+        val koin = org.koin.compose.getKoin()
+        val featurePluginIntegration: FeaturePluginIntegration? = remember {
+            koin.getOrNull<FeaturePluginIntegration>()
+        }
+        val pluginMenuItems = remember(featurePluginIntegration) {
+            featurePluginIntegration?.getPluginMenuItems() ?: emptyList()
+        }
+        var showPluginMenu by rememberSaveable { mutableStateOf(false) }
+        
         // Extract values from state
         val successState = readerState as? ReaderState.Success
         val currentIndex = successState?.currentChapterIndex ?: 0
@@ -103,6 +117,14 @@ data class ReaderScreenSpec(
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        
+        // Show dialog for incompatible plugins that need update
+        IncompatiblePluginHandler(
+            featurePluginIntegration = featurePluginIntegration,
+            onNavigateToFeatureStore = {
+                navController.navigate(NavigationRoutes.featureStore)
+            }
+        )
 
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
         
@@ -573,8 +595,22 @@ data class ReaderScreenSpec(
                             },
                             onChapterArt = {
                                 vm.showChapterArtDialog()
+                            },
+                            hasPluginMenuItems = pluginMenuItems.isNotEmpty(),
+                            onPluginMenu = {
+                                showPluginMenu = true
                             }
                         )
+                    
+                    // Plugin menu bottom sheet
+                    if (showPluginMenu && pluginMenuItems.isNotEmpty()) {
+                        ireader.presentation.ui.plugins.integration.PluginMenuBottomSheet(
+                            menuItems = pluginMenuItems,
+                            navController = navController,
+                            scope = scope,
+                            onDismiss = { showPluginMenu = false }
+                        )
+                    }
                     
                     // Modal sheet rendered inside the Box to ensure it appears above content
                     val isSettingChanging = vm.settingsViewModel.isSettingChanging

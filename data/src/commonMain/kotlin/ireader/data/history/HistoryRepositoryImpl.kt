@@ -3,7 +3,6 @@ package ireader.data.history
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.core.DatabaseHandler
 import ireader.data.core.DatabaseOptimizations
-import ireader.data.util.toDB
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
 import ireader.domain.models.entities.HistoryWithRelations
@@ -22,8 +21,8 @@ class HistoryRepositoryImpl constructor(
     private val dbOptimizations: DatabaseOptimizations? = null
 ) : HistoryRepository {
     
-    override suspend fun findHistory(id: Long): History? {
-        return handler.awaitOneOrNull { historyQueries.findHistoryByBookId(id, historyMapper) }
+    override suspend fun findHistory(chapterId: Long): History? {
+        return handler.awaitOneOrNull { historyQueries.findHistoryByChapterId(chapterId, historyMapper) }
     }
 
     override suspend fun findHistoryByChapterId(chapterId: Long): History? {
@@ -156,7 +155,7 @@ class HistoryRepositoryImpl constructor(
 
     private fun Database.insertBlocking(history: History) {
         historyQueries.upsert(
-            chapterId = history.chapterId.toDB() ?: 0,
+            chapterId = history.chapterId,
             readAt = history.readAt,
             time_read = history.readDuration,
             reading_progress = history.progress.toDouble()

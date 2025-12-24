@@ -222,6 +222,22 @@ class SettingScreenSpec {
                     onClick = { navController.navigate(NavigationRoutes.repository) }
                 ),
                 SearchableSettingItem(
+                    id = "plugins",
+                    title = "Installed Plugins",
+                    description = "Manage installed plugins and features",
+                    icon = Icons.Default.Apps,
+                    section = localizeHelper.localize(Res.string.advanced),
+                    onClick = { navController.navigate(NavigationRoutes.pluginManagement) }
+                ),
+                SearchableSettingItem(
+                    id = "feature_store",
+                    title = "Feature Store",
+                    description = "Browse and install plugins",
+                    icon = Icons.Default.ShoppingCart,
+                    section = localizeHelper.localize(Res.string.advanced),
+                    onClick = { navController.navigate(NavigationRoutes.featureStore) }
+                ),
+                SearchableSettingItem(
                     id = "advanced",
                     title = localizeHelper.localize(Res.string.advance_setting),
                     description = "Advanced configuration options",
@@ -554,6 +570,24 @@ class SettingScreenSpec {
                             description = "Manage content sources and extensions",
                             icon = Icons.Default.Extension,
                             onClick = { navController.navigate(NavigationRoutes.repository) }
+                        )
+                    }
+                    
+                    item {
+                        SettingsItem(
+                            title = "Installed Plugins",
+                            description = "Manage installed plugins and features",
+                            icon = Icons.Default.Apps,
+                            onClick = { navController.navigate(NavigationRoutes.pluginManagement) }
+                        )
+                    }
+                    
+                    item {
+                        SettingsItem(
+                            title = "Feature Store",
+                            description = "Browse and install plugins",
+                            icon = Icons.Default.ShoppingCart,
+                            onClick = { navController.navigate(NavigationRoutes.featureStore) }
                         )
                     }
                     

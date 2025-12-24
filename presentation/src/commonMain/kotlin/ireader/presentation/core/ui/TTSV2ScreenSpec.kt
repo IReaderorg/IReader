@@ -79,6 +79,7 @@ import ireader.domain.services.tts_service.TTSChapterCache
 import ireader.domain.services.tts_service.TTSChapterDownloadManager
 import ireader.domain.services.tts_service.TTSTextMerger
 import ireader.domain.services.tts_service.createTTSDownloadIntentProvider
+import ireader.domain.services.chapter.ChapterNotifier
 import ireader.domain.services.tts_service.v2.EngineType
 import ireader.domain.services.tts_service.v2.GradioConfig
 import ireader.domain.services.tts_service.v2.TTSController
@@ -172,6 +173,7 @@ class TTSV2ScreenSpec(
         val serviceStarter: TTSV2ServiceStarter = koinInject()
         val gradioTTSManager: GradioTTSManager = koinInject()
         val processStateManager: ProcessStateManager = koinInject()
+        val chapterNotifier: ChapterNotifier = koinInject()
         
         // Set up platform-specific intents for notification actions
         LaunchedEffect(Unit) {
@@ -604,6 +606,69 @@ class TTSV2ScreenSpec(
                 lastParagraphWordCount = if (currentParagraph < state.paragraphs.size) {
                     SentenceHighlighter.countTotalWords(state.paragraphs[currentParagraph])
                 } else 0
+            }
+        }
+        
+        // Subscribe to ChapterNotifier for reactive chapter updates
+        // This ensures TTS screen stays in sync when chapters are modified in the database
+        // Performance: Uses changesForBookDebounced() to filter at source and debounce rapid changes
+        LaunchedEffect(bookId) {
+            chapterNotifier.changesForBookDebounced(bookId, debounceMs = 150).collect { change ->
+                when (change) {
+                    is ChapterNotifier.ChangeType.BookChaptersRefreshed -> {
+                        Log.warn { "TTSV2ScreenSpec: ChapterNotifier - Chapters refreshed for book $bookId" }
+                        // Reload chapters list for drawer
+                        try {
+                            chapters = chapterRepository.findChaptersByBookId(bookId)
+                        } catch (e: Exception) {
+                            Log.error { "TTSV2ScreenSpec: Failed to reload chapters: ${e.message}" }
+                        }
+                    }
+                    is ChapterNotifier.ChangeType.ContentFetched -> {
+                        if (change.chapterId == state.chapter?.id) {
+                            Log.warn { "TTSV2ScreenSpec: ChapterNotifier - Content fetched for current chapter ${change.chapterId}" }
+                            // Refresh content from controller
+                            viewModel.adapter.refreshContent()
+                        }
+                    }
+                    is ChapterNotifier.ChangeType.ChapterUpdated -> {
+                        Log.warn { "TTSV2ScreenSpec: ChapterNotifier - Chapter ${change.chapterId} updated" }
+                        // Reload chapters list
+                        try {
+                            chapters = chapterRepository.findChaptersByBookId(bookId)
+                        } catch (e: Exception) {
+                            Log.error { "TTSV2ScreenSpec: Failed to reload chapters: ${e.message}" }
+                        }
+                        // If current chapter was updated, refresh content
+                        if (change.chapterId == state.chapter?.id) {
+                            viewModel.adapter.refreshContent()
+                        }
+                    }
+                    is ChapterNotifier.ChangeType.ChaptersUpdated -> {
+                        Log.warn { "TTSV2ScreenSpec: ChapterNotifier - ${change.chapterIds.size} chapters updated" }
+                        // Reload chapters list
+                        try {
+                            chapters = chapterRepository.findChaptersByBookId(bookId)
+                        } catch (e: Exception) {
+                            Log.error { "TTSV2ScreenSpec: Failed to reload chapters: ${e.message}" }
+                        }
+                        // If current chapter was updated, refresh content
+                        if (change.chapterIds.contains(state.chapter?.id)) {
+                            viewModel.adapter.refreshContent()
+                        }
+                    }
+                    is ChapterNotifier.ChangeType.FullRefresh -> {
+                        Log.warn { "TTSV2ScreenSpec: ChapterNotifier - Full refresh requested" }
+                        try {
+                            chapters = chapterRepository.findChaptersByBookId(bookId)
+                        } catch (e: Exception) {
+                            Log.error { "TTSV2ScreenSpec: Failed to reload chapters: ${e.message}" }
+                        }
+                    }
+                    else -> {
+                        // Handle other change types if needed
+                    }
+                }
             }
         }
         

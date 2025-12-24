@@ -80,6 +80,7 @@ object NavigationRoutes {
     const val legadoSourceImport = "legadoSourceImport"
     const val PLUGIN_DETAILS = "pluginDetails/{pluginId}"
     const val PLUGIN_DETAILS_BASE = "pluginDetails"
+    const val pluginManagement = "pluginManagement"
     
     fun pluginDetails(pluginId: String) = "pluginDetails/$pluginId"
     

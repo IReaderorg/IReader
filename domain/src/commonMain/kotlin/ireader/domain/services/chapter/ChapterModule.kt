@@ -14,8 +14,11 @@ import org.koin.dsl.module
  * Koin module for the Unified Chapter Controller and its dependencies.
  * 
  * This module provides:
- * - ChapterController as a singleton (single source of truth for chapter state)
+ * - ChapterController as a factory (each screen gets its own instance)
  * - All use case implementations required by ChapterController
+ * 
+ * Note: ChapterNotifier is registered in chapterRepositoryModule (data layer)
+ * since it's used by ChapterRepository. It's injected here via get().
  * 
  * Requirements: 5.5 - The Chapter_Controller SHALL be injectable via dependency injection framework
  */
@@ -75,7 +78,8 @@ val chapterModule = module {
      * 
      * Sync between screens happens only on explicit events (e.g., TTS onPop).
      * 
-     * Dependencies: All use cases above + BookRepository
+     * Dependencies: All use cases above + BookRepository + ChapterNotifier
+     * Note: ChapterNotifier is registered in chapterRepositoryModule (data layer)
      */
     factory {
         ChapterController(
@@ -83,7 +87,8 @@ val chapterModule = module {
             loadChapterContentUseCase = get(),
             updateProgressUseCase = get(),
             navigateChapterUseCase = get(),
-            bookRepository = get()
+            bookRepository = get(),
+            chapterNotifier = get()
         )
     }
 }

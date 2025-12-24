@@ -1,6 +1,5 @@
 package ireader.data.chapter
 
-import app.cash.sqldelight.Query
 import ireader.data.core.DatabaseHandler
 import ireader.data.core.DatabaseOptimizations
 import ireader.data.util.toDB
@@ -13,6 +12,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.time.Duration.Companion.milliseconds
 
 
+/**
+ * Repository implementation for chapter data operations.
+ * 
+ * Note: ChapterNotifier is NOT injected here. All change notifications are emitted
+ * by ChapterController (single source of truth) to avoid duplicate notifications.
+ */
 @OptIn(FlowPreview::class)
 class ChapterRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -148,12 +153,14 @@ class ChapterRepositoryImpl(
 
 
     override suspend fun deleteChaptersByBookId(bookId: Long) {
-        return handler.await {
+        handler.await {
             chapterQueries.deleteChaptersByBookId(bookId)
         }
     }
 
     override suspend fun deleteChapters(chapters: List<Chapter>) {
+        if (chapters.isEmpty()) return
+        
         handler.await(inTransaction = true) {
             chapters.forEach { chapter ->
                 chapterQueries.delete(chapter.id)
@@ -162,15 +169,14 @@ class ChapterRepositoryImpl(
     }
 
     override suspend fun deleteChapter(chapter: Chapter) {
-        return handler.await {
-
+        handler.await {
             chapterQueries.delete(chapter.id)
         }
     }
 
 
     override suspend fun deleteAllChapters() {
-        return handler.await {
+        handler.await {
             chapterQueries.delelteAllChapters()
         }
     }

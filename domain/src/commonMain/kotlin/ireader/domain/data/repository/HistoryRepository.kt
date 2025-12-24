@@ -5,7 +5,7 @@ import ireader.domain.models.entities.History
 import kotlinx.coroutines.flow.Flow
 
 interface HistoryRepository {
-    suspend fun findHistory(id: Long): History?
+    suspend fun findHistory(chapterId: Long): History?
 
     suspend fun findHistoryByChapterId(chapterId: Long): History?
     suspend fun findHistoryByBookId(bookId: Long): History?

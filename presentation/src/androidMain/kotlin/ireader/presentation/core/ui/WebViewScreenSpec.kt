@@ -623,31 +623,37 @@ private fun WebViewActionMenu(
     webView: android.webkit.WebView?,
     source: ireader.core.source.CatalogSource?
 ) {
-    AnimatedVisibility(
-        visible = screenState.showActionMenu,
-        enter = fadeIn() + slideInVertically { it / 2 },
-        exit = fadeOut() + slideOutVertically { it / 2 },
+    Box(
         modifier = Modifier
-            .padding(bottom = 80.dp)
+            .fillMaxSize()
+            .navigationBarsPadding(),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        ActionMenu(
-            onFetchBook = {
-                handleFetchBook(vm, webView, source, scope, host, screenState)
-                screenState.showActionMenu = false
-            },
-            onFetchChapter = {
-                handleFetchChapter(vm, webView, source, scope, host, screenState)
-                screenState.showActionMenu = false
-            },
-            onFetchChapters = {
-                handleFetchChapters(vm, webView, source, scope, host, screenState)
-                screenState.showActionMenu = false
-            },
-            enableBookFetch = screenState.enableBookFetch,
-            enableChapterFetch = screenState.enableChapterFetch,
-            enableChaptersFetch = screenState.enableChaptersFetch,
-            onDismiss = { screenState.showActionMenu = false }
-        )
+        AnimatedVisibility(
+            visible = screenState.showActionMenu,
+            enter = fadeIn() + slideInVertically { it },
+            exit = fadeOut() + slideOutVertically { it },
+            modifier = Modifier.padding(bottom = 88.dp)
+        ) {
+            ActionMenu(
+                onFetchBook = {
+                    handleFetchBook(vm, webView, source, scope, host, screenState)
+                    screenState.showActionMenu = false
+                },
+                onFetchChapter = {
+                    handleFetchChapter(vm, webView, source, scope, host, screenState)
+                    screenState.showActionMenu = false
+                },
+                onFetchChapters = {
+                    handleFetchChapters(vm, webView, source, scope, host, screenState)
+                    screenState.showActionMenu = false
+                },
+                enableBookFetch = screenState.enableBookFetch,
+                enableChapterFetch = screenState.enableChapterFetch,
+                enableChaptersFetch = screenState.enableChaptersFetch,
+                onDismiss = { screenState.showActionMenu = false }
+            )
+        }
     }
 }
 
