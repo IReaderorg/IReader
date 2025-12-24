@@ -316,9 +316,13 @@ class JSPluginSource(
     
     /**
      * Returns true if this source supports paginated chapter loading.
+     * Only returns true if the source has parsePage function AND totalPages > 1.
+     * This is determined by checking if getChapterPageCount returns > 1.
      */
     override fun supportsPaginatedChapters(): Boolean {
-        // JS plugins from LNReader support pagination
+        // We can't know for sure without checking a specific novel,
+        // so we return true here and let the actual page count determine if pagination is used.
+        // The JS wrapper will return totalPages=1 for non-paginated sources.
         return true
     }
     

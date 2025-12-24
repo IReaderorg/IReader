@@ -879,6 +879,8 @@ private object AdapterCodeCache {
                 if (typeof plugin.parseNovel === 'function') {
                     var pathUrl = extractPathUrl(url);
                     return getCachedParseNovel(pathUrl).then(function(d) {
+                        // Only report totalPages > 1 if source actually has parsePage function
+                        var hasPagination = typeof plugin.parsePage === 'function' && d.totalPages > 1;
                         return {
                             name: d.name || d.title || "",
                             url: d.url || d.path || url,
@@ -887,7 +889,7 @@ private object AdapterCodeCache {
                             description: d.description || d.summary || null,
                             genres: Array.isArray(d.genres) ? d.genres : [],
                             status: d.status || null,
-                            totalChapterPages: d.totalPages > 0 ? d.totalPages : 1
+                            totalChapterPages: hasPagination ? d.totalPages : 1
                         };
                     });
                 }
@@ -895,46 +897,71 @@ private object AdapterCodeCache {
             };
 
             wrapper.getChapters = function(url) {
-                // For backward compatibility, load first page only
-                return wrapper.getChaptersPage(url, 1).then(function(result) {
-                    return result.chapters;
-                });
+                if (typeof plugin.parseNovel === 'function') {
+                    var pathUrl = extractPathUrl(url);
+                    return getCachedParseNovel(pathUrl).then(function(novel) {
+                        // If novel has chapters directly, return them (non-paginated source)
+                        if (novel && Array.isArray(novel.chapters) && novel.chapters.length > 0) {
+                            return novel.chapters.map(function(c) {
+                                var chapterUrl = c.url || c.path || "";
+                                return { name: c.name || c.title || "", url: chapterUrl, releaseTime: c.releaseTime || c.date || null };
+                            });
+                        }
+                        
+                        // If source has parsePage and totalPages > 1, load first page only
+                        if (typeof plugin.parsePage === 'function' && novel && novel.totalPages > 1) {
+                            return Promise.resolve(plugin.parsePage(pathUrl, 1)).then(function(pageResult) {
+                                if (pageResult && Array.isArray(pageResult.chapters)) {
+                                    return pageResult.chapters.map(function(c) {
+                                        var chapterUrl = c.url || c.path || "";
+                                        return { name: c.name || c.title || "", url: chapterUrl, releaseTime: c.releaseTime || c.date || null };
+                                    });
+                                }
+                                return [];
+                            });
+                        }
+                        
+                        return [];
+                    });
+                }
+                return Promise.resolve([]);
             };
             
             wrapper.getChaptersPage = function(url, page) {
                 if (typeof plugin.parseNovel === 'function') {
                     var pathUrl = extractPathUrl(url);
                     return getCachedParseNovel(pathUrl).then(function(novel) {
-                        var totalPages = novel && novel.totalPages > 0 ? novel.totalPages : 1;
+                        // Check if source actually supports pagination (has parsePage AND totalPages > 1)
+                        var hasPagination = typeof plugin.parsePage === 'function' && novel && novel.totalPages > 1;
                         
-                        // Check if novel has chapters directly (non-paginated)
-                        if (novel && Array.isArray(novel.chapters) && novel.chapters.length > 0) {
-                            var chapters = novel.chapters.map(function(c) {
-                                var chapterUrl = c.url || c.path || "";
-                                return { name: c.name || c.title || "", url: chapterUrl, releaseTime: c.releaseTime || c.date || null };
-                            });
-                            return { chapters: chapters, totalPages: 1, currentPage: 1 };
+                        // If no pagination support, return all chapters from parseNovel as single page
+                        if (!hasPagination) {
+                            if (novel && Array.isArray(novel.chapters) && novel.chapters.length > 0) {
+                                var chapters = novel.chapters.map(function(c) {
+                                    var chapterUrl = c.url || c.path || "";
+                                    return { name: c.name || c.title || "", url: chapterUrl, releaseTime: c.releaseTime || c.date || null };
+                                });
+                                return { chapters: chapters, totalPages: 1, currentPage: 1 };
+                            }
+                            return { chapters: [], totalPages: 1, currentPage: 1 };
                         }
                         
-                        // If has totalPages and parsePage, use pagination
-                        if (novel && totalPages > 0 && typeof plugin.parsePage === 'function') {
-                            return Promise.resolve(plugin.parsePage(pathUrl, page)).then(function(pageResult) {
-                                var chapters = [];
-                                if (pageResult && Array.isArray(pageResult.chapters)) {
-                                    chapters = pageResult.chapters.map(function(c) {
-                                        var chapterUrl = c.url || c.path || "";
-                                        return { 
-                                            name: c.name || c.title || "", 
-                                            url: chapterUrl, 
-                                            releaseTime: c.releaseTime || c.date || null 
-                                        };
-                                    });
-                                }
-                                return { chapters: chapters, totalPages: totalPages, currentPage: page };
-                            });
-                        }
-                        
-                        return { chapters: [], totalPages: 1, currentPage: page };
+                        // Source supports pagination - use parsePage
+                        var totalPages = novel.totalPages;
+                        return Promise.resolve(plugin.parsePage(pathUrl, page)).then(function(pageResult) {
+                            var chapters = [];
+                            if (pageResult && Array.isArray(pageResult.chapters)) {
+                                chapters = pageResult.chapters.map(function(c) {
+                                    var chapterUrl = c.url || c.path || "";
+                                    return { 
+                                        name: c.name || c.title || "", 
+                                        url: chapterUrl, 
+                                        releaseTime: c.releaseTime || c.date || null 
+                                    };
+                                });
+                            }
+                            return { chapters: chapters, totalPages: totalPages, currentPage: page };
+                        });
                     });
                 }
                 return Promise.resolve({ chapters: [], totalPages: 1, currentPage: page });
@@ -944,10 +971,26 @@ private object AdapterCodeCache {
                 if (typeof plugin.parseNovel === 'function') {
                     var pathUrl = extractPathUrl(url);
                     return getCachedParseNovel(pathUrl).then(function(novel) {
-                        return novel && novel.totalPages > 0 ? novel.totalPages : 1;
+                        // Only return totalPages > 1 if source actually has parsePage function
+                        var hasPagination = typeof plugin.parsePage === 'function' && novel && novel.totalPages > 1;
+                        return hasPagination ? novel.totalPages : 1;
                     });
                 }
                 return Promise.resolve(1);
+            };
+            
+            // Check if source supports pagination
+            wrapper.supportsPagination = function(url) {
+                if (typeof plugin.parsePage !== 'function') {
+                    return Promise.resolve(false);
+                }
+                if (typeof plugin.parseNovel === 'function') {
+                    var pathUrl = extractPathUrl(url);
+                    return getCachedParseNovel(pathUrl).then(function(novel) {
+                        return novel && novel.totalPages > 1;
+                    });
+                }
+                return Promise.resolve(false);
             };
 
             wrapper.getChapterContent = function(url) {
