@@ -58,11 +58,18 @@ internal class IosDatabaseHandler(
 
             // Update the stored version
             preferencesHelper.database_version().set(DatabaseMigrations.CURRENT_VERSION)
+        } else {
+            // Even if no migration is needed, ensure required columns exist
+            // This handles cases where migrations failed silently
+            DatabaseMigrations.ensureRequiredColumns(driver)
         }
     }
 
     override fun repairDatabase() {
         try {
+            // Ensure required columns exist before view creation
+            DatabaseMigrations.ensureRequiredColumns(driver)
+            
             // Force create views
             DatabaseMigrations.forceViewReinit(driver)
 

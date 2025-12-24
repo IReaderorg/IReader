@@ -54,12 +54,16 @@ class AndroidDatabaseHandler(
                 } catch (_: Exception) {
                     // Try to recover by forcing view creation
                     try {
+                        DatabaseMigrations.ensureRequiredColumns(driver)
                         DatabaseMigrations.forceViewReinit(driver)
                     } catch (_: Exception) {
                         // Recovery attempt also failed
                     }
                 }
             } else {
+                // Even if no migration is needed, ensure required columns exist
+                // This handles cases where migrations failed silently
+                DatabaseMigrations.ensureRequiredColumns(driver)
                 // Even if no migration is needed, ensure views are initialized
                 DatabaseMigrations.initializeViewsDirectly(driver)
             }
@@ -70,6 +74,9 @@ class AndroidDatabaseHandler(
 
     override fun repairDatabase() {
         try {
+            // Ensure required columns exist before view creation
+            DatabaseMigrations.ensureRequiredColumns(driver)
+            
             // Force create views
             DatabaseMigrations.forceViewReinit(driver)
             

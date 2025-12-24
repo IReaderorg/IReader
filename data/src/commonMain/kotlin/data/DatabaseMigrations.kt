@@ -778,11 +778,51 @@ object DatabaseMigrations {
 
     fun forceViewReinit(driver: SqlDriver) {
         try {
+            // First ensure all required columns exist
+            ensureRequiredColumns(driver)
+            
             driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)
             driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
             initializeViews(driver)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Ensures all required columns exist in the database tables.
+     * This is a repair mechanism for cases where migrations may have failed silently.
+     * Public so it can be called from JvmDatabaseHandler.repairDatabase()
+     */
+    fun ensureRequiredColumns(driver: SqlDriver) {
+        try {
+            // Check and add chapter_page column to book table if missing
+            val columnsCheck = "PRAGMA table_info(book)"
+            var hasChapterPageColumn = false
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = columnsCheck,
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        if (columnName == "chapter_page") {
+                            hasChapterPageColumn = true
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            if (!hasChapterPageColumn) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN chapter_page INTEGER NOT NULL DEFAULT 1;", 0)
+                println("[DatabaseMigrations] Added missing chapter_page column to book table")
+            }
+        } catch (e: Exception) {
+            println("[DatabaseMigrations] Error ensuring required columns: ${e.message}")
         }
     }
     
