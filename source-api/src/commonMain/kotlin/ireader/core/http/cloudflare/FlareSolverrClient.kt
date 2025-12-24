@@ -106,6 +106,13 @@ data class FlareSolverrSolution(
     val userAgent: String
 )
 
+@Serializable
+data class FlareSolverrSessionsResponse(
+    val status: String,
+    val message: String = "",
+    val sessions: List<String> = emptyList()
+)
+
 /**
  * Default implementation of FlareSolverrClient
  */
@@ -179,10 +186,17 @@ class FlareSolverrClientImpl(
                 setBody(json.encodeToString(request))
             }
             val responseText = response.bodyAsText()
-            // Parse sessions from response
-            emptyList() // TODO: Parse actual sessions
+            // Parse sessions from FlareSolverr response
+            // Response format: {"status":"ok","message":"","sessions":["session1","session2"]}
+            val parsed = json.decodeFromString<FlareSolverrSessionsResponse>(responseText)
+            if (parsed.status == "ok") {
+                parsed.sessions
+            } else {
+                Log.warn { "FlareSolverr sessions list returned non-ok status: ${parsed.message}" }
+                emptyList()
+            }
         } catch (e: Exception) {
-            Log.error { "Failed to list FlareSolverr sessions" }
+            Log.error { "Failed to list FlareSolverr sessions: ${e.message}" }
             emptyList()
         }
     }

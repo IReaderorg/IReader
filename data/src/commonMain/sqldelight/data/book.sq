@@ -32,7 +32,9 @@ CREATE TABLE IF NOT EXISTS book(
     cached_unread_count INTEGER NOT NULL DEFAULT 0,
     cached_read_count INTEGER NOT NULL DEFAULT 0,
     cached_total_chapters INTEGER NOT NULL DEFAULT 0,
-    last_read_at INTEGER AS Long NOT NULL DEFAULT 0
+    last_read_at INTEGER AS Long NOT NULL DEFAULT 0,
+    -- Current chapter page for sources with paginated chapter loading
+    chapter_page INTEGER NOT NULL DEFAULT 1
 );
 
 
@@ -313,6 +315,14 @@ updateArchiveStatus:
 UPDATE book SET
     is_archived = :isArchived
 WHERE _id = :bookId;
+
+updateChapterPage:
+UPDATE book SET
+    chapter_page = :chapterPage
+WHERE _id = :bookId;
+
+getChapterPage:
+SELECT chapter_page FROM book WHERE _id = :bookId;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID();

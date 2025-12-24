@@ -5,6 +5,7 @@ import ireader.core.source.Dependencies
 import ireader.core.source.HttpSource
 import ireader.core.source.SourceHelpers
 import ireader.core.source.model.*
+import ireader.core.util.LNReaderHtmlParser
 import ireader.domain.js.models.PluginMetadata
 import ireader.domain.js.util.JSFilterConverter
 import ireader.domain.utils.extensions.currentTimeToLong
@@ -365,61 +366,26 @@ class JSPluginSource(
             
             Log.info("JSPluginSource: Got ${content.length} chars of content")
             
-            // Parse HTML and extract text paragraphs
-            val pages = parseHtmlToPages(content)
+            // Parse HTML content using LNReaderHtmlParser
+            // This handles HTML stripping, \n \r removal, and paragraph splitting
+            val pages = LNReaderHtmlParser.parseToPages(content)
             
             if (pages.isEmpty()) {
                 Log.warn("JSPluginSource: No paragraphs extracted from HTML")
-                // Fallback to single page with raw content
-                return listOf(Text(content))
+                // Fallback to single page with cleaned raw content
+                val cleanedContent = content
+                    .replace(Regex("<[^>]+>"), "") // Strip HTML tags
+                    .replace("\r", "")
+                    .replace("\n", " ")
+                    .replace(Regex("\\s+"), " ")
+                    .trim()
+                return if (cleanedContent.isNotBlank()) listOf(Text(cleanedContent)) else emptyList()
             }
             
             Log.info("JSPluginSource: Extracted ${pages.size} paragraphs")
             pages
         } catch (e: Exception) {
             Log.error("JSPluginSource: Error in getPageList", e)
-            emptyList()
-        }
-    }
-    
-    /**
-     * Parse HTML content and extract readable text paragraphs.
-     */
-    private fun parseHtmlToPages(html: String): List<Page> {
-        return try {
-            val doc = com.fleeksoft.ksoup.Ksoup.parse(html)
-            
-            // Remove script and style elements
-            doc.select("script, style").remove()
-            
-            // Extract text from paragraph-like elements
-            val paragraphs = mutableListOf<String>()
-            
-            // Try common content selectors first
-            val contentElements = doc.select("p, div.chapter-content p, div.text p, div.content p")
-            
-            if (contentElements.isNotEmpty()) {
-                contentElements.forEach { element ->
-                    val text = element.text().trim()
-                    if (text.isNotEmpty() && text.length > 10) { // Filter out very short text
-                        paragraphs.add(text)
-                    }
-                }
-            } else {
-                // Fallback: split by line breaks
-                val text = doc.body().text()
-                text.split("\n").forEach { line ->
-                    val trimmed = line.trim()
-                    if (trimmed.isNotEmpty() && trimmed.length > 10) {
-                        paragraphs.add(trimmed)
-                    }
-                }
-            }
-            
-            // Convert paragraphs to Page objects
-            paragraphs.map { Text(it) }
-        } catch (e: Exception) {
-            Log.error("JSPluginSource: Error parsing HTML: ${e.message}", e)
             emptyList()
         }
     }

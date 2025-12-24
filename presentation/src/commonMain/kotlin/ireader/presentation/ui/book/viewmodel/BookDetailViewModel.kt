@@ -412,7 +412,15 @@ class BookDetailViewModel(
                         persistentListOf()
                     }
                     
+                    // Check if source supports pagination (will verify page count in background)
+                    val supportsPagination = source?.supportsPaginatedChapters() ?: false
+                    
+                    // Determine if remote fetch will be needed
+                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
+                    
                     // Set initial state immediately from prefetch cache
+                    // Keep refreshing indicators if remote fetch will be triggered
+                    // Note: supportsPaginatedChapters stays false until we confirm page count > 1
                     val initialState = BookDetailState.Success(
                         book = book,
                         chapters = chapters.toImmutableList(),
@@ -421,6 +429,8 @@ class BookDetailViewModel(
                         lastReadChapterId = lastReadChapterId,
                         commands = commands,
                         modifiedCommands = commands,
+                        isRefreshingBook = needsRemoteFetch && book.lastUpdate < 1L,
+                        isRefreshingChapters = needsRemoteFetch,
                     )
                     _state.value = initialState
                     ScreenProfiler.mark(screenTag, "state_set_from_prefetch")
@@ -429,8 +439,15 @@ class BookDetailViewModel(
                     // Subscribe for updates in background
                     subscribeToBookAndChapters(bookId, catalogSource)
                     
+                    // If source supports pagination, check page count in background
+                    // This will set supportsPaginatedChapters=true only if pageCount > 1
+                    if (supportsPagination) {
+                        scope.launch(ioDispatcher) {
+                            checkPaginationSupport()
+                        }
+                    }
+                    
                     // Trigger remote fetch if book needs updating or has no chapters
-                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
                     if (needsRemoteFetch) {
                         scope.launch(ioDispatcher) {
                             if (book.lastUpdate < 1L) {
@@ -506,7 +523,19 @@ class BookDetailViewModel(
                         persistentListOf()
                     }
                     
+                    // Check if source supports pagination (will verify page count in background)
+                    val supportsPagination = source?.supportsPaginatedChapters() ?: false
+                    
+                    // Trigger initial fetch if book needs updating (AFTER subscribing)
+                    // Fetch remote data if:
+                    // 1. Book has never been updated (lastUpdate < 1L), OR
+                    // 2. Book has no chapters yet
+                    // This runs in background and won't block UI
+                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
+                    
                     // Set initial state immediately - this triggers UI update
+                    // Keep refreshing indicators if remote fetch will be triggered
+                    // Note: supportsPaginatedChapters stays false until we confirm page count > 1
                     val initialState = BookDetailState.Success(
                         book = book,
                         chapters = chapters.toImmutableList(),
@@ -515,6 +544,8 @@ class BookDetailViewModel(
                         lastReadChapterId = history?.chapterId,
                         commands = commands,
                         modifiedCommands = commands,
+                        isRefreshingBook = needsRemoteFetch && book.lastUpdate < 1L,
+                        isRefreshingChapters = needsRemoteFetch,
                     )
                     _state.value = initialState
                     ScreenProfiler.mark(screenTag, "state_set_success")
@@ -524,12 +555,14 @@ class BookDetailViewModel(
                     // This runs in background and won't block UI
                     subscribeToBookAndChapters(bookId, catalogSource)
                     
-                    // Trigger initial fetch if book needs updating (AFTER subscribing)
-                    // Fetch remote data if:
-                    // 1. Book has never been updated (lastUpdate < 1L), OR
-                    // 2. Book has no chapters yet
-                    // This runs in background and won't block UI
-                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
+                    // If source supports pagination, check page count in background
+                    // This will set supportsPaginatedChapters=true only if pageCount > 1
+                    if (supportsPagination) {
+                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            checkPaginationSupport()
+                        }
+                    }
+                    
                     if (needsRemoteFetch) {
                         scope.launch(kotlinx.coroutines.Dispatchers.IO) {
                             // Fetch book details if never updated
@@ -664,6 +697,11 @@ class BookDetailViewModel(
                     selectedChapterIds = currentState?.selectedChapterIds ?: persistentSetOf(),
                     searchQuery = currentState?.searchQuery,
                     isSearchMode = currentState?.isSearchMode ?: false,
+                    // Preserve pagination state
+                    supportsPaginatedChapters = currentState?.supportsPaginatedChapters ?: false,
+                    chapterCurrentPage = currentState?.chapterCurrentPage ?: 1,
+                    chapterTotalPages = currentState?.chapterTotalPages ?: 1,
+                    isLoadingChapterPage = currentState?.isLoadingChapterPage ?: false,
                 )
             } else if (hasReceivedBook) {
                 // Book was deleted after we had it - show error
@@ -904,6 +942,7 @@ class BookDetailViewModel(
      * Check if the current source supports paginated chapter loading
      * and initialize pagination state if it does.
      * If pagination is supported and no chapters are loaded, automatically loads page 1.
+     * Uses the saved chapter page from the database if available.
      */
     fun checkPaginationSupport() {
         val currentState = _state.value as? BookDetailState.Success ?: return
@@ -919,25 +958,46 @@ class BookDetailViewModel(
                         catalog
                     )
                     
-                    // Only enable pagination if there are multiple pages
+                    // Only enable pagination UI if there are multiple pages
                     if (pageCount > 1) {
+                        // Use saved page from book entity, clamped to valid range
+                        val savedPage = currentState.book.chapterPage.coerceIn(1, pageCount)
+                        
                         updateSuccessState { 
                             it.copy(
                                 supportsPaginatedChapters = true,
                                 chapterTotalPages = pageCount,
-                                chapterCurrentPage = 1
+                                chapterCurrentPage = savedPage
                             )
                         }
                         
-                        // If no chapters loaded yet, automatically load page 1
+                        // If no chapters loaded yet, automatically load the saved page
                         val updatedState = _state.value as? BookDetailState.Success
                         if (updatedState != null && updatedState.chapters.isEmpty()) {
-                            fetchChapterPage(1)
+                            fetchChapterPage(savedPage)
+                        }
+                    } else {
+                        // Only 1 page, disable pagination UI
+                        updateSuccessState { 
+                            it.copy(
+                                supportsPaginatedChapters = false,
+                                chapterTotalPages = 1,
+                                chapterCurrentPage = 1
+                            )
                         }
                     }
                 } catch (e: Exception) {
                     Log.error { "Error checking pagination support: ${e.message}" }
+                    // On error, disable pagination UI
+                    updateSuccessState { 
+                        it.copy(supportsPaginatedChapters = false)
+                    }
                 }
+            }
+        } else {
+            // Source doesn't support pagination, ensure UI is disabled
+            updateSuccessState { 
+                it.copy(supportsPaginatedChapters = false)
             }
         }
     }
@@ -972,6 +1032,9 @@ class BookDetailViewModel(
                         // Save new chapters to database - UI will update via subscription
                         localInsertUseCases.insertChapters(newChapters)
                     }
+                    
+                    // Save current page to database for persistence
+                    bookUseCases.updateChapterPage(currentState.book.id, result.currentPage)
                     
                     updateSuccessState { state ->
                         state.copy(

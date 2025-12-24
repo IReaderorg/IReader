@@ -222,4 +222,9 @@ interface BookRepository : BookReadRepository, BookWriteRepository {
      * Update archive status for a book
      */
     override suspend fun updateArchiveStatus(bookId: Long, isArchived: Boolean)
+    
+    /**
+     * Update chapter page for a book (for sources with paginated chapter loading)
+     */
+    override suspend fun updateChapterPage(bookId: Long, chapterPage: Int)
 }

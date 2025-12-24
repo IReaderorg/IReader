@@ -22,6 +22,7 @@ val repositoryUseCaseModule = module {
     single { UpdateBookPinStatusUseCase(get()) }
     single { UpdateBookArchiveStatusUseCase(get()) }
     single { SearchBooksUseCase(get()) }
+    single { UpdateChapterPageUseCase(get()) }
     
     // Book Use Cases Aggregate
     single {
@@ -35,7 +36,8 @@ val repositoryUseCaseModule = module {
             updateArchiveStatus = get(),
             searchBooks = get(),
             addToLibrary = get(),
-            removeFromLibrary = get()
+            removeFromLibrary = get(),
+            updateChapterPage = get()
         )
     }
     

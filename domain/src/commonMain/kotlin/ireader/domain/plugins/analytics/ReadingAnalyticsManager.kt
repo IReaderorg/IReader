@@ -13,6 +13,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import ireader.core.util.createICoroutineScope
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.formatIsoDate
 
 /**
  * Manager for Reading Analytics.
@@ -390,10 +391,8 @@ class ReadingAnalyticsManager(
     }
     
     private fun getTodayDateString(): String {
-        // Returns YYYY-MM-DD format
-        val now = currentTimeToLong()
-        // Platform-specific date formatting would be needed
-        return "2024-01-01" // Placeholder
+        // Returns YYYY-MM-DD format using existing formatIsoDate extension
+        return currentTimeToLong().formatIsoDate()
     }
 }
 

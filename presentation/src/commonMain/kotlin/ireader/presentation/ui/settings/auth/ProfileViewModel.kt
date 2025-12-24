@@ -6,6 +6,7 @@ import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.User
 import ireader.domain.usecases.remote.RemoteBackendUseCases
 import ireader.domain.data.repository.BadgeRepository
+import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     private val remoteUseCases: RemoteBackendUseCases?,
-    private val badgeRepository: BadgeRepository?
+    private val badgeRepository: BadgeRepository?,
+    private val readingStatisticsRepository: ReadingStatisticsRepository?
 ) : StateViewModel<ProfileState>(ProfileState()) {
     
     init {
@@ -261,17 +263,39 @@ class ProfileViewModel(
         scope.launch {
             updateState { it.copy(isStatsLoading = true) }
             
-            // TODO: Implement actual statistics fetching from database
-            // For now, using placeholder values
-            // You should create a use case to fetch these from your reading_statistics table
-            updateState { 
-                it.copy(
-                    chaptersRead = 0,
-                    booksCompleted = 0,
-                    reviewsWritten = 0,
-                    readingStreak = 0,
-                    isStatsLoading = false
-                ) 
+            try {
+                val stats = readingStatisticsRepository?.getStatistics()
+                if (stats != null) {
+                    updateState { 
+                        it.copy(
+                            chaptersRead = stats.totalChaptersRead,
+                            booksCompleted = stats.booksCompleted,
+                            reviewsWritten = 0, // Reviews are tracked separately
+                            readingStreak = stats.readingStreak,
+                            isStatsLoading = false
+                        ) 
+                    }
+                } else {
+                    updateState { 
+                        it.copy(
+                            chaptersRead = 0,
+                            booksCompleted = 0,
+                            reviewsWritten = 0,
+                            readingStreak = 0,
+                            isStatsLoading = false
+                        ) 
+                    }
+                }
+            } catch (e: Exception) {
+                updateState { 
+                    it.copy(
+                        chaptersRead = 0,
+                        booksCompleted = 0,
+                        reviewsWritten = 0,
+                        readingStreak = 0,
+                        isStatsLoading = false
+                    ) 
+                }
             }
         }
     }

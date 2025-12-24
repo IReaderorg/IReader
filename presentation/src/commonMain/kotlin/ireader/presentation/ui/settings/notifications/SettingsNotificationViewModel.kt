@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 /**
  * ViewModel for the enhanced notification settings screen.
@@ -195,9 +198,12 @@ class SettingsNotificationViewModel(
         }
     }
     
+    @OptIn(ExperimentalTime::class)
     private fun getCurrentTime(): Pair<Int, Int> {
-        // TODO: Implement platform-specific current time retrieval
-        return 12 to 0 // Placeholder
+        val now = kotlin.time.Clock.System.now()
+        val localDateTime = kotlinx.datetime.Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+        return localDateTime.hour to localDateTime.minute
     }
     
     private fun isTimeBetween(time: Pair<Int, Int>, start: Pair<Int, Int>, end: Pair<Int, Int>): Boolean {

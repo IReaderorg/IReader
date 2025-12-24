@@ -95,7 +95,8 @@ sealed interface BookDetailState {
         val isArchived: Boolean get() = book.isArchived
         
         // Pagination derived properties
-        val isPaginated: Boolean get() = supportsPaginatedChapters
+        // Only show pagination UI if source supports it AND we have confirmed multiple pages exist
+        val isPaginated: Boolean get() = supportsPaginatedChapters && chapterTotalPages > 1
         val hasNextPage: Boolean get() = chapterCurrentPage < chapterTotalPages
         val hasPreviousPage: Boolean get() = chapterCurrentPage > 1
         

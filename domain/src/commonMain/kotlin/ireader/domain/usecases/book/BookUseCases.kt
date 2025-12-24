@@ -14,5 +14,6 @@ data class BookUseCases(
     val updateArchiveStatus: UpdateBookArchiveStatusUseCase,
     val searchBooks: SearchBooksUseCase,
     val addToLibrary: AddToLibrary,
-    val removeFromLibrary: RemoveFromLibrary
+    val removeFromLibrary: RemoveFromLibrary,
+    val updateChapterPage: UpdateChapterPageUseCase,
 )

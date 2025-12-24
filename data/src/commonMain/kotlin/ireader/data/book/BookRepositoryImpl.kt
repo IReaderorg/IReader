@@ -620,4 +620,13 @@ class BookRepositoryImpl(
             )
         }
     }
+    
+    override suspend fun updateChapterPage(bookId: Long, chapterPage: Int) {
+        handler.await {
+            bookQueries.updateChapterPage(
+                bookId = bookId,
+                chapterPage = chapterPage.toLong()
+            )
+        }
+    }
 }

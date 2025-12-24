@@ -26,6 +26,7 @@ data class Book(
     val isPinned: Boolean = false,
     val pinnedOrder: Int = 0,
     val isArchived: Boolean = false,
+    val chapterPage: Int = 1,
 ) : BaseBook {
 
     companion object {

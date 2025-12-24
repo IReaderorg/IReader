@@ -43,6 +43,7 @@ val useCaseModule = module {
     singleOf(::UpdateBookPinStatusUseCase)
     singleOf(::UpdateBookArchiveStatusUseCase)
     singleOf(::SearchBooksUseCase)
+    singleOf(::UpdateChapterPageUseCase)
     
     // BookUseCases aggregate
     single {
@@ -56,7 +57,8 @@ val useCaseModule = module {
             updateArchiveStatus = get(),
             searchBooks = get(),
             addToLibrary = get(),
-            removeFromLibrary = get()
+            removeFromLibrary = get(),
+            updateChapterPage = get(),
         )
     }
     

@@ -4,6 +4,10 @@ import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.select.Elements
 import ireader.core.util.currentTimeMillis
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlin.time.ExperimentalTime
 
 /**
  * Enhanced HTML parsing utilities for better novel content extraction
@@ -194,18 +198,49 @@ object ParsingUtils {
     
     /**
      * Parse date from various formats
+     * Supports: YYYY-MM-DD, MM/DD/YYYY, DD.MM.YYYY
      */
+    @OptIn(ExperimentalTime::class)
     fun parseDate(dateString: String): Long? {
-        val patterns = listOf(
-            Regex("""(\d{4})-(\d{2})-(\d{2})"""),
-            Regex("""(\d{2})/(\d{2})/(\d{4})"""),
-            Regex("""(\d{2})\.(\d{2})\.(\d{4})""")
-        )
+        // Pattern: YYYY-MM-DD (ISO format)
+        val isoPattern = Regex("""(\d{4})-(\d{2})-(\d{2})""")
+        isoPattern.find(dateString)?.let { match ->
+            val year = match.groupValues[1].toIntOrNull() ?: return@let
+            val month = match.groupValues[2].toIntOrNull() ?: return@let
+            val day = match.groupValues[3].toIntOrNull() ?: return@let
+            return try {
+                val date = LocalDate(year, month, day)
+                date.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+            } catch (e: Exception) {
+                null
+            }
+        }
         
-        for (pattern in patterns) {
-            val match = pattern.find(dateString)
-            if (match != null) {
-                return currentTimeMillis()
+        // Pattern: MM/DD/YYYY (US format)
+        val usPattern = Regex("""(\d{2})/(\d{2})/(\d{4})""")
+        usPattern.find(dateString)?.let { match ->
+            val month = match.groupValues[1].toIntOrNull() ?: return@let
+            val day = match.groupValues[2].toIntOrNull() ?: return@let
+            val year = match.groupValues[3].toIntOrNull() ?: return@let
+            return try {
+                val date = LocalDate(year, month, day)
+                date.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+            } catch (e: Exception) {
+                null
+            }
+        }
+        
+        // Pattern: DD.MM.YYYY (European format)
+        val euPattern = Regex("""(\d{2})\.(\d{2})\.(\d{4})""")
+        euPattern.find(dateString)?.let { match ->
+            val day = match.groupValues[1].toIntOrNull() ?: return@let
+            val month = match.groupValues[2].toIntOrNull() ?: return@let
+            val year = match.groupValues[3].toIntOrNull() ?: return@let
+            return try {
+                val date = LocalDate(year, month, day)
+                date.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+            } catch (e: Exception) {
+                null
             }
         }
         

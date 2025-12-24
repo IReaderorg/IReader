@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 33
+    const val CURRENT_VERSION = 34
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -97,6 +97,7 @@ object DatabaseMigrations {
             29 -> migrateV29toV30(driver)
             30 -> migrateV30toV31(driver)
             31 -> migrateV31toV32(driver)
+            32 -> migrateV32toV33(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2371,6 +2372,49 @@ object DatabaseMigrations {
             Logger.logMigrationSuccess(32)
         } catch (e: Exception) {
             Logger.logMigrationError(32, e)
+        }
+    }
+
+    /**
+     * Migration from version 32 to version 33
+     * Adds chapter_page column to book table for paginated chapter loading
+     */
+    private fun migrateV32toV33(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(32, 33)
+            
+            // Check if chapter_page column already exists
+            val columnsCheck = "PRAGMA table_info(book)"
+            var hasChapterPageColumn = false
+            
+            driver.executeQuery(
+                identifier = null,
+                sql = columnsCheck,
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        val columnName = cursor.getString(1)
+                        if (columnName == "chapter_page") {
+                            hasChapterPageColumn = true
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+            
+            // Add chapter_page column if it doesn't exist
+            if (!hasChapterPageColumn) {
+                driver.execute(null, "ALTER TABLE book ADD COLUMN chapter_page INTEGER NOT NULL DEFAULT 1;", 0)
+                Logger.logColumnAdded("book", "chapter_page")
+            }
+            
+            Logger.logMigrationSuccess(33)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(33, e)
+            // Don't throw - allow the app to continue even if migration fails
         }
     }
 

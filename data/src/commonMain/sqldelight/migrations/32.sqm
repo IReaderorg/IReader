@@ -1,0 +1,4 @@
+-- Migration 32: Add chapter_page column to book table
+-- This stores the current chapter page for sources that support paginated chapter loading
+
+ALTER TABLE book ADD COLUMN chapter_page INTEGER NOT NULL DEFAULT 1;

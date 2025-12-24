@@ -204,6 +204,7 @@ class DIResolutionPropertyTest {
         override suspend fun updatePinnedOrder(bookId: Long, pinnedOrder: Int) {}
         override suspend fun getMaxPinnedOrder(): Int = 0
         override suspend fun updateArchiveStatus(bookId: Long, isArchived: Boolean) {}
+        override suspend fun updateChapterPage(bookId: Long, chapterPage: Int) {}
     }
     
     /**
