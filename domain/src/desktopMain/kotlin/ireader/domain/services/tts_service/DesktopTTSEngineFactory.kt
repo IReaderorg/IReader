@@ -3,19 +3,16 @@ package ireader.domain.services.tts_service
 import ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer
 import ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter
 import ireader.domain.services.tts_service.kokoro.KokoroTTSEngine
-import ireader.domain.services.tts_service.maya.MayaTTSAdapter
-import ireader.domain.services.tts_service.maya.MayaTTSEngine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 /**
  * Desktop implementation of TTS Engine Factory
- * Uses Piper, Kokoro, and Maya TTS engines
+ * Uses Piper and Kokoro TTS engines
  */
 actual object TTSEngineFactory : KoinComponent {
     private val piperSynthesizer: PiperSpeechSynthesizer by inject()
     private val kokoroEngine: KokoroTTSEngine by inject()
-    private val mayaEngine: MayaTTSEngine by inject()
     
     actual fun createNativeEngine(): TTSEngine {
         // Default to Piper as the primary engine
@@ -36,7 +33,7 @@ actual object TTSEngineFactory : KoinComponent {
     }
     
     actual fun getAvailableEngines(): List<String> {
-        return listOf("Piper TTS", "Kokoro TTS", "Maya TTS", "Gradio TTS (Online)")
+        return listOf("Piper TTS", "Kokoro TTS", "Gradio TTS (Online)")
     }
     
     /**
@@ -46,7 +43,6 @@ actual object TTSEngineFactory : KoinComponent {
         return when (engineName.lowercase()) {
             "piper", "piper tts" -> DesktopPiperTTSEngine(piperSynthesizer)
             "kokoro", "kokoro tts" -> DesktopKokoroTTSEngine(KokoroTTSAdapter(kokoroEngine))
-            "maya", "maya tts" -> DesktopMayaTTSEngine(MayaTTSAdapter(mayaEngine))
             else -> null
         }
     }
@@ -79,14 +75,8 @@ actual object DesktopTTSEngines : KoinComponent {
     }
     
     actual fun createMayaEngine(): TTSEngine? {
-        return try {
-            // Maya requires separate installation
-            val mayaEngine = MayaTTSEngine()
-            DesktopMayaTTSEngine(MayaTTSAdapter(mayaEngine))
-        } catch (e: Exception) {
-            ireader.core.log.Log.error { "Failed to create Maya engine: ${e.message}" }
-            null
-        }
+        // Maya TTS has been removed
+        return null
     }
 }
 
@@ -183,39 +173,6 @@ private class DesktopKokoroTTSEngine(
         // Cleanup Kokoro resources
     }
     override fun getEngineName() = "Kokoro TTS"
-    override fun setCallback(callback: TTSEngineCallback) {
-        this.callback = callback
-    }
-}
-
-/**
- * Desktop Maya TTS Engine
- */
-private class DesktopMayaTTSEngine(
-    private val adapter: MayaTTSAdapter
-) : TTSEngine {
-    private var callback: TTSEngineCallback? = null
-    
-    override suspend fun speak(text: String, utteranceId: String) {
-        callback?.onStart(utteranceId)
-        try {
-            // Maya synthesis - simplified for now
-            callback?.onDone(utteranceId)
-        } catch (e: Exception) {
-            callback?.onError(utteranceId, e.message ?: "Maya TTS error")
-        }
-    }
-    
-    override fun stop() {}
-    override fun pause() {}
-    override fun resume() {}
-    override fun setSpeed(speed: Float) {}
-    override fun setPitch(pitch: Float) {}
-    override fun isReady() = true
-    override fun cleanup() {
-        // Cleanup Maya resources
-    }
-    override fun getEngineName() = "Maya TTS"
     override fun setCallback(callback: TTSEngineCallback) {
         this.callback = callback
     }

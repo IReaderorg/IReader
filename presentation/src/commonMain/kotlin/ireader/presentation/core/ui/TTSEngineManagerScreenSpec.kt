@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
  * 
  * Platform-specific implementation:
  * - Android: Manages AI TTS voices (Piper TTS voice downloads and selection)
- * - Desktop: Manages TTS engines (Piper, Kokoro, Maya installation and configuration)
+ * - Desktop: Manages TTS engines (Piper, Kokoro installation and configuration)
  */
 expect class TTSEngineManagerScreenSpec() {
     @Composable

@@ -59,7 +59,6 @@ fun VoiceSelectionDialog(
                         text = when (currentEngine) {
                             DesktopTTSService.TTSEngine.PIPER -> "Select Piper Voice"
                             DesktopTTSService.TTSEngine.KOKORO -> "Select Kokoro Voice"
-                            DesktopTTSService.TTSEngine.MAYA -> "Select Maya Language"
                             DesktopTTSService.TTSEngine.SIMULATION -> "Simulation Mode"
                             DesktopTTSService.TTSEngine.GRADIO -> "Gradio Online Mode"
                         },
@@ -148,68 +147,6 @@ fun VoiceSelectionDialog(
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            DesktopTTSService.TTSEngine.MAYA -> {
-                                // Show Maya languages
-                                Text(
-                                    text = localizeHelper.localize(Res.string.available_languages),
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                
-                                val languages = listOf(
-                                    "English" to "en",
-                                    "Spanish" to "es",
-                                    "French" to "fr",
-                                    "German" to "de",
-                                    "Italian" to "it",
-                                    "Portuguese" to "pt",
-                                    "Polish" to "pl",
-                                    "Turkish" to "tr",
-                                    "Russian" to "ru",
-                                    "Dutch" to "nl",
-                                    "Czech" to "cs",
-                                    "Arabic" to "ar",
-                                    "Chinese" to "zh",
-                                    "Japanese" to "ja",
-                                    "Korean" to "ko",
-                                    "Hindi" to "hi"
-                                )
-                                
-                                languages.forEach { (name, code) ->
-                                    OutlinedCard(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onClick = {
-                                            scope.launch {
-                                                try {
-                                                    // Save selected Maya language to preferences
-                                                    voicePreferences.setSelectedMayaLanguage(code)
-                                                    
-                                                    // Apply to TTS service
-                                                    ttsService.mayaAdapter.setLanguage(code)
-                                                    
-                                                    Log.info { "Maya language selected: $name ($code)" }
-                                                } catch (e: Exception) {
-                                                    Log.error("Failed to set Maya language", e)
-                                                }
-                                            }
-                                            onDismiss()
-                                        }
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = name,
-                                                style = MaterialTheme.typography.bodyLarge
-                                            )
                                         }
                                     }
                                 }

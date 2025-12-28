@@ -125,13 +125,8 @@ fun TTSPerformanceSettingsDialog(
                 
                 // Current engine info
                 val currentEngine = ttsService.getCurrentEngine()
-                if (currentEngine == DesktopTTSService.TTSEngine.KOKORO || 
-                    currentEngine == DesktopTTSService.TTSEngine.MAYA) {
-                    val activeProcesses = if (currentEngine == DesktopTTSService.TTSEngine.KOKORO) {
-                        ttsService.kokoroAdapter.getActiveProcessCount()
-                    } else {
-                        0 // TODO: Add Maya process count
-                    }
+                if (currentEngine == DesktopTTSService.TTSEngine.KOKORO) {
+                    val activeProcesses = ttsService.kokoroAdapter.getActiveProcessCount()
                     
                     Text(
                         text = "Currently active processes: $activeProcesses",

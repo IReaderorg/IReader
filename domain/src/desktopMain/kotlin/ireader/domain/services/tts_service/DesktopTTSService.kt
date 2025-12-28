@@ -59,18 +59,9 @@ class DesktopTTSService : KoinComponent {
         ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter(kokoroEngine)
     }
     
-    // Maya TTS components (optional)
-    private val mayaEngine: ireader.domain.services.tts_service.maya.MayaTTSEngine by lazy {
-        ireader.domain.services.tts_service.maya.MayaTTSEngine()
-    }
-    val mayaAdapter: ireader.domain.services.tts_service.maya.MayaTTSAdapter by lazy {
-        ireader.domain.services.tts_service.maya.MayaTTSAdapter(mayaEngine)
-    }
-    
     // TTS Engine selection
     private var currentEngine: TTSEngine = TTSEngine.PIPER
     var kokoroAvailable = false
-    var mayaAvailable = false
 
     lateinit var state: DesktopTTSState
     private var serviceJob: Job? = null
@@ -139,11 +130,11 @@ class DesktopTTSService : KoinComponent {
                 Log.error { "Piper JNI library failed to load: ${e.message}" }
                 enableSimulationMode(
                     "Piper TTS library failed to load. " +
-                    "Please install Kokoro or Maya TTS from TTS Manager."
+                    "Please install Kokoro TTS from TTS Manager."
                 )
             } catch (e: Exception) {
                 Log.error { "Failed to load Piper: ${e.message}" }
-                enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro/Maya from TTS Manager.")
+                enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro from TTS Manager.")
             }
             
             // Check if Kokoro is already installed (don't auto-install)
@@ -178,38 +169,9 @@ class DesktopTTSService : KoinComponent {
                 Log.debug { "Kokoro check: ${e.message}" }
             }
             
-            // Check if Maya is already installed (don't auto-install)
-            try {
-                val mayaDir = java.io.File(ireader.core.storage.AppDir, "maya")
-                val mayaScript = java.io.File(mayaDir, "maya_tts.py")
-                
-                // Only initialize if the script already exists (meaning it was installed before)
-                if (mayaScript.exists()) {
-                    Log.info { "Found existing Maya installation, verifying..." }
-                    
-                    // Check if dependencies are installed without triggering installation
-                    val pythonCheck = ProcessBuilder(
-                        "python", "-c", 
-                        "import torch; import transformers; import scipy; print('OK')"
-                    ).redirectErrorStream(true).start()
-                    
-                    val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
-                    if (checkCompleted && pythonCheck.exitValue() == 0) {
-                        mayaAvailable = true
-                        Log.info { "Maya TTS available (dependencies verified)" }
-                    } else {
-                        Log.info { "Maya script found but dependencies missing (user can reinstall from TTS Manager)" }
-                    }
-                } else {
-                    Log.info { "Maya not installed (user must install from TTS Manager)" }
-                }
-            } catch (e: Exception) {
-                Log.debug { "Maya check: ${e.message}" }
-            }
-            
             // If Piper failed, enable simulation mode
             if (!synthesizer.isInitialized()) {
-                enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro/Maya from TTS Manager.")
+                enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro from TTS Manager.")
             }
             
             // Load Gradio TTS configuration from preferences (unified online TTS)
@@ -232,7 +194,6 @@ class DesktopTTSService : KoinComponent {
     enum class TTSEngine {
         PIPER,
         KOKORO,
-        MAYA,
         GRADIO,
         SIMULATION
     }
@@ -344,7 +305,7 @@ class DesktopTTSService : KoinComponent {
      * Start periodic cleanup task for zombie processes
      * 
      * This task runs every 5 minutes to detect and clean up zombie processes
-     * from Piper, Kokoro, and Maya TTS engines.
+     * from Piper and Kokoro TTS engines.
      */
     private fun startProcessCleanupTask() {
         cleanupJob = serviceScope.launch {
@@ -368,7 +329,7 @@ class DesktopTTSService : KoinComponent {
                         Log.warn { "Cleaned up $zombieCount zombie processes during periodic cleanup" }
                     }
                     
-                    // Enforce process limits for Maya
+                    // Enforce process limits for Kokoro
                     enforceProcessLimits()
                     
                 } catch (e: CancellationException) {
@@ -387,11 +348,9 @@ class DesktopTTSService : KoinComponent {
     private fun logEngineProcessStatus() {
         try {
             val kokoroCount = if (kokoroAvailable) kokoroAdapter.getActiveProcessCount() else 0
-            val mayaCount = if (mayaAvailable) mayaAdapter.getActiveProcessCount() else 0
-            val totalCount = kokoroCount + mayaCount
             
-            if (totalCount > 0) {
-                Log.info { "TTS Engine processes: Kokoro=$kokoroCount, Maya=$mayaCount (Total=$totalCount)" }
+            if (kokoroCount > 0) {
+                Log.info { "TTS Engine processes: Kokoro=$kokoroCount" }
             }
         } catch (e: Exception) {
             Log.error { "Error logging engine process status: ${e.message}" }
@@ -399,20 +358,20 @@ class DesktopTTSService : KoinComponent {
     }
     
     /**
-     * Enforce process limits for Maya engine
+     * Enforce process limits for Kokoro engine
      * 
-     * Maya has a configurable max concurrent process limit from preferences.
+     * Kokoro has a configurable max concurrent process limit from preferences.
      * This ensures the limit is respected.
      */
     private fun enforceProcessLimits() {
         try {
-            if (mayaAvailable) {
+            if (kokoroAvailable) {
                 val maxProcesses = appPrefs.maxConcurrentTTSProcesses().get()
-                val currentCount = mayaAdapter.getActiveProcessCount()
+                val currentCount = kokoroAdapter.getActiveProcessCount()
                 
                 if (currentCount > maxProcesses) {
-                    Log.warn { "Maya process count ($currentCount) exceeds limit ($maxProcesses)" }
-                    // The Maya engine itself handles queuing, so just log the warning
+                    Log.warn { "Kokoro process count ($currentCount) exceeds limit ($maxProcesses)" }
+                    // The Kokoro engine itself handles queuing, so just log the warning
                 }
             }
         } catch (e: Exception) {
@@ -431,9 +390,6 @@ class DesktopTTSService : KoinComponent {
         try {
             if (kokoroAvailable) {
                 total += kokoroAdapter.getActiveProcessCount()
-            }
-            if (mayaAvailable) {
-                total += mayaAdapter.getActiveProcessCount()
             }
             // Add ProcessTracker count for any directly tracked processes
             total += processTracker.getActiveProcessCount()
@@ -455,9 +411,6 @@ class DesktopTTSService : KoinComponent {
         try {
             if (kokoroAvailable) {
                 stats["Kokoro"] = kokoroAdapter.getActiveProcessCount()
-            }
-            if (mayaAvailable) {
-                stats["Maya"] = mayaAdapter.getActiveProcessCount()
             }
             
             // Add ProcessTracker statistics
@@ -1004,7 +957,6 @@ class DesktopTTSService : KoinComponent {
                 when (currentEngine) {
                     TTSEngine.PIPER -> readTextWithPiper(text)
                     TTSEngine.KOKORO -> readTextWithKokoro(text)
-                    TTSEngine.MAYA -> readTextWithMaya(text)
                     TTSEngine.GRADIO -> readTextWithGradio(text)
                     TTSEngine.SIMULATION -> readTextSimulation(text)
                 }
@@ -1191,44 +1143,6 @@ class DesktopTTSService : KoinComponent {
             }
         } catch (e: Exception) {
             Log.error { "Kokoro error: ${e.message}" }
-            advanceToNextParagraph()
-        }
-    }
-    
-    private suspend fun readTextWithMaya(text: String) {
-        try {
-            Log.debug { "Synthesizing with Maya: text length=${text.length}" }
-            
-            // Use default language or get from preferences
-            val language = "en" // TODO: Add language selection to preferences
-            
-            // Synthesize with Maya
-            val result = mayaAdapter.synthesize(text, language, state.speechSpeed.value)
-            
-            result.onSuccess { audioData ->
-                Log.debug { "Maya synthesis successful: ${audioData.samples.size} bytes" }
-                
-                // Play generated audio
-                try {
-                    audioEngine.play(audioData)
-                } catch (e: Exception) {
-                    Log.error { "Audio playback error: ${e.message}" }
-                }
-                
-                // Check sleep time
-                checkSleepTime()
-                
-                // Move to next paragraph if still playing
-                if (state.isPlaying.value) {
-                    advanceToNextParagraph()
-                }
-            }.onFailure { error ->
-                Log.error { "Maya synthesis failed: ${error.message}" }
-                // Fall back to next paragraph
-                advanceToNextParagraph()
-            }
-        } catch (e: Exception) {
-            Log.error { "Maya error: ${e.message}" }
             advanceToNextParagraph()
         }
     }
@@ -2046,15 +1960,6 @@ class DesktopTTSService : KoinComponent {
                     Log.warn { "Kokoro not available. Please install from TTS Manager." }
                 }
             }
-            TTSEngine.MAYA -> {
-                if (mayaAvailable) {
-                    currentEngine = TTSEngine.MAYA
-                    isSimulationMode = false
-                    Log.info { "Switched to Maya TTS" }
-                } else {
-                    Log.warn { "Maya not available. Please install from TTS Manager." }
-                }
-            }
             TTSEngine.GRADIO -> {
                 // Try to configure from preferences if not already available
                 if (!gradioAvailable || gradioPlayer == null) {
@@ -2164,7 +2069,6 @@ class DesktopTTSService : KoinComponent {
         return buildList {
             if (synthesizer.isInitialized()) add(TTSEngine.PIPER)
             if (kokoroAvailable) add(TTSEngine.KOKORO)
-            if (mayaAvailable) add(TTSEngine.MAYA)
             if (gradioAvailable) add(TTSEngine.GRADIO)
             add(TTSEngine.SIMULATION)
         }
@@ -2210,43 +2114,6 @@ class DesktopTTSService : KoinComponent {
     }
     
 
-    
-    /**
-     * Check Maya availability on-demand (only when needed)
-     * This is called when opening TTS settings screen
-     */
-    suspend fun checkMayaAvailability(): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val mayaDir = java.io.File(ireader.core.storage.AppDir, "maya")
-            val mayaScript = java.io.File(mayaDir, "maya_tts.py")
-            
-            if (mayaScript.exists()) {
-                Log.info { "Found existing Maya installation, verifying..." }
-                
-                // Check if dependencies are installed
-                val pythonCheck = ProcessBuilder(
-                    "python", "-c", 
-                    "import torch; import transformers; import scipy; print('OK')"
-                ).redirectErrorStream(true).start()
-                
-                val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
-                if (checkCompleted && pythonCheck.exitValue() == 0) {
-                    mayaAvailable = true
-                    Log.info { "Maya TTS available (dependencies verified)" }
-                    return@withContext true
-                } else {
-                    Log.info { "Maya script found but dependencies missing" }
-                    return@withContext false
-                }
-            } else {
-                Log.info { "Maya not installed" }
-                return@withContext false
-            }
-        } catch (e: Exception) {
-            Log.debug { "Maya check: ${e.message}" }
-            return@withContext false
-        }
-    }
     
     /**
      * Pre-generate audio for upcoming paragraphs
@@ -2328,11 +2195,6 @@ class DesktopTTSService : KoinComponent {
                     return Result.failure(Exception("Kokoro TTS not available. Please initialize it first."))
                 }
             }
-            TTSEngine.MAYA -> {
-                if (!mayaAvailable) {
-                    return Result.failure(Exception("Maya TTS not available. Please initialize it first."))
-                }
-            }
             TTSEngine.GRADIO -> {
                 if (!gradioAvailable || gradioPlayer == null) {
                     return Result.failure(Exception("Gradio TTS not available. Please configure it first."))
@@ -2351,10 +2213,6 @@ class DesktopTTSService : KoinComponent {
                     TTSEngine.KOKORO -> {
                         val voice = "af_bella"
                         kokoroAdapter.synthesize(text, voice, state.speechSpeed.value)
-                    }
-                    TTSEngine.MAYA -> {
-                        val language = "en"
-                        mayaAdapter.synthesize(text, language, state.speechSpeed.value)
                     }
                     TTSEngine.GRADIO -> {
                         // Gradio TTS doesn't support direct synthesis to AudioData for chapter download
@@ -2469,17 +2327,6 @@ class DesktopTTSService : KoinComponent {
                 Log.info { "Kokoro TTS shutdown successfully" }
             } catch (e: Exception) {
                 Log.error { "Error shutting down Kokoro: ${e.message}" }
-            }
-        }
-        
-        // Shutdown Maya
-        if (mayaAvailable) {
-            try {
-                Log.info { "Shutting down Maya TTS..." }
-                mayaAdapter.shutdown()
-                Log.info { "Maya TTS shutdown successfully" }
-            } catch (e: Exception) {
-                Log.error { "Error shutting down Maya: ${e.message}" }
             }
         }
         

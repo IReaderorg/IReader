@@ -9,7 +9,7 @@ import org.koin.compose.koinInject
 import ireader.presentation.core.safePopBackStack
 /**
  * Desktop implementation of TTS Engine Manager Screen
- * Manages TTS engines (Piper, Kokoro, Maya)
+ * Manages TTS engines (Piper, Kokoro)
  * 
  * On desktop, Piper TTS requires a plugin to be installed.
  * The RequiredPluginHandler will be shown when user tries to install/use Piper

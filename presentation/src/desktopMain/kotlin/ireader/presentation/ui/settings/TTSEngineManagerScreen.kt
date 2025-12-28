@@ -120,15 +120,12 @@ fun TTSEngineManagerScreen(
     // Engine status
     var piperStatus by remember { mutableStateOf(EngineStatus.CHECKING) }
     var kokoroStatus by remember { mutableStateOf(EngineStatus.CHECKING) }
-    var mayaStatus by remember { mutableStateOf(EngineStatus.CHECKING) }
     var piperMessage by remember { mutableStateOf("") }
     var kokoroMessage by remember { mutableStateOf("") }
-    var mayaMessage by remember { mutableStateOf("") }
     
     // Installation progress
     var isInstallingPiper by remember { mutableStateOf(false) }
     var isInstallingKokoro by remember { mutableStateOf(false) }
-    var isInstallingMaya by remember { mutableStateOf(false) }
     var installationLog by remember { mutableStateOf("") }
     var useGradioTTS by remember { mutableStateOf(false) }
     
@@ -176,28 +173,6 @@ fun TTSEngineManagerScreen(
             }
         } catch (e: Exception) {
             kokoroMessage = "Error checking Kokoro: ${e.message}"
-            EngineStatus.ERROR
-        }
-        
-        // Check Maya - on-demand check only when screen opens
-        mayaStatus = try {
-            val isAvailable = ttsService.checkMayaAvailability()
-            
-            if (isAvailable) {
-                mayaMessage = "Maya engine ready"
-                EngineStatus.INSTALLED
-            } else {
-                val mayaDir = java.io.File(ireader.core.storage.AppDir, "maya")
-                val mayaScript = java.io.File(mayaDir, "maya_tts.py")
-                if (mayaScript.exists()) {
-                    mayaMessage = "Maya installed but dependencies missing"
-                } else {
-                    mayaMessage = "Maya not installed"
-                }
-                EngineStatus.NOT_INSTALLED
-            }
-        } catch (e: Exception) {
-            mayaMessage = "Error checking Maya: ${e.message}"
             EngineStatus.ERROR
         }
     }
@@ -473,91 +448,6 @@ fun TTSEngineManagerScreen(
                 }
             )
             
-            // Maya TTS Card
-            EngineCard(
-                name = "Maya TTS",
-                description = "Multilingual neural TTS from Maya Research",
-                icon = Icons.Default.Psychology,
-                status = mayaStatus,
-                statusMessage = mayaMessage,
-                isInstalling = isInstallingMaya,
-                features = listOf(
-                    "16+ languages supported",
-                    "High-quality multilingual voices",
-                    "Hugging Face Transformers",
-                    "Python-based (no compilation)",
-                    "Requires Python 3.8-3.12"
-                ),
-                onInstall = {
-                    isInstallingMaya = true
-                    scope.launch {
-                        try {
-                            installationLog = "Installing Maya TTS...\n"
-                            installMaya(
-                                ttsService = ttsService,
-                                onProgress = { message ->
-                                    installationLog += "$message\n"
-                                },
-                                onComplete = { success, message ->
-                                    isInstallingMaya = false
-                                    if (success) {
-                                        mayaStatus = EngineStatus.INSTALLED
-                                        mayaMessage = "Maya installed successfully"
-                                    } else {
-                                        mayaStatus = EngineStatus.ERROR
-                                        mayaMessage = message
-                                    }
-                                }
-                            )
-                        } catch (e: Exception) {
-                            isInstallingMaya = false
-                            mayaStatus = EngineStatus.ERROR
-                            mayaMessage = "Installation failed: ${e.message}"
-                        }
-                    }
-                },
-                onUninstall = {
-                    scope.launch {
-                        try {
-                            installationLog += "Uninstalling Maya TTS...\n"
-                            ttsService.mayaAdapter.shutdown()
-                            val mayaDir = java.io.File(ireader.core.storage.AppDir, "maya")
-                            if (mayaDir.exists()) {
-                                mayaDir.deleteRecursively()
-                                installationLog += "✓ Maya uninstalled\n"
-                                mayaStatus = EngineStatus.NOT_INSTALLED
-                                mayaMessage = "Maya uninstalled"
-                            }
-                        } catch (e: Exception) {
-                            installationLog += "✗ Uninstall failed: ${e.message}\n"
-                            mayaMessage = "Uninstall failed: ${e.message}"
-                        }
-                    }
-                },
-                onTest = {
-                    scope.launch {
-                        try {
-                            installationLog += "Testing Maya TTS...\n"
-                            val result = ttsService.mayaAdapter.synthesize(
-                                text = localizeHelper.localize(Res.string.hello_this_is_a_test),
-                                language = "en",
-                                speed = 1.0f
-                            )
-                            if (result.isSuccess) {
-                                installationLog += "✓ Maya test successful\n"
-                                mayaMessage = "Test successful"
-                            } else {
-                                installationLog += "✗ Maya test failed\n"
-                                mayaMessage = "Test failed"
-                            }
-                        } catch (e: Exception) {
-                            installationLog += "✗ Test error: ${e.message}\n"
-                            mayaMessage = "Test error: ${e.message}"
-                        }
-                    }
-                }
-            )
-            
             // Installation log - Enhanced with better visibility
             if (installationLog.isNotEmpty()) {
                 val logScrollState = rememberScrollState()
@@ -588,7 +478,7 @@ fun TTSEngineManagerScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (isInstallingKokoro || isInstallingMaya || isInstallingPiper) {
+                                if (isInstallingKokoro || isInstallingPiper) {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(16.dp),
                                         strokeWidth = 2.dp
@@ -650,7 +540,7 @@ fun TTSEngineManagerScreen(
                         }
                         
                         // Progress indicator
-                        if (isInstallingKokoro || isInstallingMaya || isInstallingPiper) {
+                        if (isInstallingKokoro || isInstallingPiper) {
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -820,7 +710,6 @@ fun TTSEngineManagerScreen(
                         Text(
                             text = localizeHelper.localize(Res.string.piper_requires_native_libraries_provided) +
                                    "• Kokoro requires Python 3.8-3.12 and Git\n" +
-                                   "• Maya requires Python 3.8-3.12 (16+ languages)\n" +
                                    "• All engines work offline after installation\n" +
                                    "• You can use multiple engines simultaneously",
                             style = MaterialTheme.typography.bodySmall,
@@ -1133,99 +1022,6 @@ private suspend fun installKokoro(
     }
 }
 
-/**
- * Install Maya TTS
- */
-private suspend fun installMaya(
-    ttsService: DesktopTTSService,
-    onProgress: (String) -> Unit,
-    onComplete: (Boolean, String) -> Unit
-) {
-    try {
-        onProgress("═══════════════════════════════════════")
-        onProgress("Starting Maya TTS Installation")
-        onProgress("═══════════════════════════════════════")
-        onProgress("")
-        
-        onProgress("[1/5] Checking Python installation...")
-        kotlinx.coroutines.delay(500)
-        
-        onProgress("      Searching for compatible Python (3.8-3.12)...")
-        
-        val result = ttsService.mayaAdapter.initialize()
-        
-        if (result.isSuccess) {
-            onProgress("      ✓ Python found and compatible")
-            onProgress("")
-            
-            onProgress("[2/5] Creating Maya inference script...")
-            onProgress("      Generating Python wrapper for Maya model")
-            kotlinx.coroutines.delay(500)
-            onProgress("      ✓ Script created successfully")
-            onProgress("")
-            
-            onProgress("[3/5] Installing Python dependencies...")
-            onProgress("      This will download ~3-5 GB of packages")
-            onProgress("      - PyTorch (~2-3 GB)")
-            onProgress("      - Transformers (~500 MB)")
-            onProgress("      - SciPy (~100 MB)")
-            onProgress("      - NumPy (~50 MB)")
-            onProgress("      - Accelerate (~50 MB)")
-            onProgress("")
-            onProgress("      Please wait, this may take 5-15 minutes...")
-            onProgress("      (Check logs below for detailed progress)")
-            kotlinx.coroutines.delay(1000)
-            onProgress("      ✓ Dependencies installed")
-            onProgress("")
-            
-            onProgress("[4/5] Downloading Maya model...")
-            onProgress("      Model: maya-research/maya1")
-            onProgress("      Size: ~1-2 GB")
-            onProgress("      Source: Hugging Face Hub")
-            onProgress("")
-            onProgress("      Model will be downloaded on first use")
-            kotlinx.coroutines.delay(500)
-            onProgress("      ✓ Model configuration ready")
-            onProgress("")
-            
-            onProgress("[5/5] Verifying installation...")
-            kotlinx.coroutines.delay(500)
-            onProgress("      ✓ All components verified")
-            onProgress("")
-            
-            onProgress("═══════════════════════════════════════")
-            onProgress("✓ Installation Complete!")
-            onProgress("═══════════════════════════════════════")
-            onProgress("")
-            onProgress("Supported languages:")
-            onProgress("  English, Spanish, French, German, Italian,")
-            onProgress("  Portuguese, Polish, Turkish, Russian, Dutch,")
-            onProgress("  Czech, Arabic, Chinese, Japanese, Korean, Hindi")
-            
-            // Mark Maya as available
-            ttsService.mayaAvailable = true
-            
-            onComplete(true, "Maya installed successfully")
-        } else {
-            val error = result.exceptionOrNull()?.message ?: "Unknown error"
-            onProgress("")
-            onProgress("✗ Installation failed: $error")
-            onProgress("")
-            onProgress("Common issues:")
-            onProgress("  • Python 3.8-3.12 not found (you have 3.13)")
-            onProgress("  • Network connection issues")
-            onProgress("  • Insufficient disk space (~5 GB needed)")
-            onProgress("  • Hugging Face Hub access issues")
-            onComplete(false, error)
-        }
-        
-    } catch (e: Exception) {
-        Log.error { "Maya installation failed: ${e.message}" }
-        onProgress("")
-        onProgress("✗ Unexpected error: ${e.message}")
-        onComplete(false, "Installation failed: ${e.message}")
-    }
-}
 @Composable
 private fun VoiceCard(
     voice: ireader.domain.models.tts.VoiceModel,

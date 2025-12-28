@@ -2364,7 +2364,7 @@ expect fun TTSEngineSettingsScreen(
  * 
  * Platform-specific behavior:
  * - Android: Shows available system TTS voices
- * - Desktop: Shows available Piper/Kokoro/Maya voices
+ * - Desktop: Shows available Piper/Kokoro voices
  */
 @Composable
 expect fun TTSVoiceSelectionScreen(

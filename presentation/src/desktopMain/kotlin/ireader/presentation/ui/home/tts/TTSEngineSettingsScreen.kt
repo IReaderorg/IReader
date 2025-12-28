@@ -26,7 +26,7 @@ import ireader.presentation.ui.core.theme.currentOrThrow
  * Desktop implementation of TTS Engine Settings Screen
  * 
  * Shows the TTS Engine Manager with options to:
- * - View installed engines (Piper, Kokoro, Maya)
+ * - View installed engines (Piper, Kokoro)
  * - Install/uninstall engines
  * - Test engines
  * - Configure Gradio TTS server
@@ -51,7 +51,6 @@ actual fun TTSEngineSettingsScreen(
     var piperAvailable by remember { mutableStateOf(false) }
     var piperNativeLibraryFailed by remember { mutableStateOf(false) }
     var kokoroAvailable by remember { mutableStateOf(false) }
-    var mayaAvailable by remember { mutableStateOf(false) }
     var currentEngine by remember { mutableStateOf("") }
     
     // Check engine status when plugin availability changes
@@ -62,7 +61,6 @@ actual fun TTSEngineSettingsScreen(
         // Check if plugin is installed but native library failed
         piperNativeLibraryFailed = isPiperPluginAvailable && !ireader.domain.services.tts_service.piper.PiperJNISynthesizer.isPiperReady()
         kokoroAvailable = ttsService.kokoroAvailable
-        mayaAvailable = ttsService.mayaAvailable
         currentEngine = ttsService.getCurrentEngine().name
     }
     
@@ -205,20 +203,6 @@ actual fun TTSEngineSettingsScreen(
                             scope.launch {
                                 ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.KOKORO)
                                 currentEngine = "KOKORO"
-                            }
-                        }
-                    )
-                    
-                    // Maya TTS
-                    EngineCard(
-                        name = "Maya TTS",
-                        description = "Multilingual neural TTS from Maya Research",
-                        isAvailable = mayaAvailable,
-                        isCurrentEngine = currentEngine == "MAYA",
-                        onSelect = {
-                            scope.launch {
-                                ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.MAYA)
-                                currentEngine = "MAYA"
                             }
                         }
                     )
