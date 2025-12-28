@@ -8,6 +8,8 @@ import ireader.presentation.core.theme.LocaleHelper
 
 import ireader.presentation.imageloader.CoilLoaderFactory
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
+import ireader.presentation.ui.settings.tracking.AndroidTrackingSyncScheduler
+import ireader.presentation.ui.settings.tracking.TrackingSyncScheduler
 import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageStateImpl
 import org.koin.dsl.module
@@ -55,4 +57,7 @@ actual val presentationPlatformModule = module  {
     single<ireader.presentation.core.theme.DynamicColorScheme> { 
         ireader.presentation.core.theme.AndroidDynamicColorScheme(get()) 
     }
+    
+    // Tracking sync scheduler using WorkManager
+    single<TrackingSyncScheduler> { AndroidTrackingSyncScheduler(get()) }
 }

@@ -1,5 +1,6 @@
 package ireader.presentation.ui.book.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,6 +22,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.utils.formatDecimal
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Tracking service data for display
@@ -141,21 +144,17 @@ private fun TrackingServiceCard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Service icon
-                    Icon(
-                        imageVector = when (service.id) {
-                            "anilist" -> Icons.Outlined.Favorite
-                            "mal" -> Icons.Outlined.Star
-                            "kitsu" -> Icons.Outlined.Pets
-                            "mangaupdates" -> Icons.Outlined.Update
-                            else -> Icons.Outlined.Sync
-                        },
+                    // Service icon - using sync icon for all tracking services
+                    Image(
+                        painter = painterResource(Res.drawable.ic_sync),
                         contentDescription = null,
-                        tint = if (service.isTracked) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
+                        colorFilter = ColorFilter.tint(
+                            if (service.isTracked) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        ),
                         modifier = Modifier.size(24.dp)
                     )
                     

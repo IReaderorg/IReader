@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Android-specific scheduler for tracking sync using WorkManager.
  */
-class TrackingSyncScheduler(private val context: Context) {
+class AndroidTrackingSyncScheduler(private val context: Context) : TrackingSyncScheduler {
     
     private val workManager = WorkManager.getInstance(context)
     
@@ -21,7 +21,7 @@ class TrackingSyncScheduler(private val context: Context) {
      * @param intervalMinutes Interval between syncs in minutes
      * @param requireWifi Whether to only sync over WiFi
      */
-    fun schedule(intervalMinutes: Int, requireWifi: Boolean = false) {
+    override fun schedule(intervalMinutes: Int, requireWifi: Boolean) {
         try {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(
@@ -53,7 +53,7 @@ class TrackingSyncScheduler(private val context: Context) {
     /**
      * Cancel scheduled tracking sync.
      */
-    fun cancel() {
+    override fun cancel() {
         try {
             workManager.cancelUniqueWork(TrackingSyncWorker.WORK_NAME)
             Log.info { "Tracking sync cancelled" }
@@ -65,7 +65,7 @@ class TrackingSyncScheduler(private val context: Context) {
     /**
      * Check if tracking sync is currently scheduled.
      */
-    fun isScheduled(): Boolean {
+    override fun isScheduled(): Boolean {
         return try {
             val workInfos = workManager.getWorkInfosForUniqueWork(TrackingSyncWorker.WORK_NAME).get()
             workInfos.any { !it.state.isFinished }

@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
 class SettingsTrackingViewModel(
     private val preferenceStore: PreferenceStore,
     private val trackingRepository: TrackingRepository,
-    private val oAuthCallbackHandler: OAuthCallbackHandler = OAuthCallbackHandler()
+    private val oAuthCallbackHandler: OAuthCallbackHandler = OAuthCallbackHandler(),
+    private val syncScheduler: TrackingSyncScheduler? = null
 ) : BaseViewModel() {
     
     // ==================== Service State ====================
@@ -701,11 +702,21 @@ class SettingsTrackingViewModel(
     // ==================== Background Sync Functions ====================
     
     private fun scheduleAutoSync() {
-        Log.debug { "Auto-sync scheduled with interval: ${_autoSyncInterval.value} minutes" }
+        if (syncScheduler != null) {
+            syncScheduler.schedule(_autoSyncInterval.value, _syncOnlyOverWifi.value)
+            Log.debug { "Auto-sync scheduled with interval: ${_autoSyncInterval.value} minutes" }
+        } else {
+            Log.debug { "Auto-sync scheduler not available on this platform" }
+        }
     }
     
     private fun cancelAutoSync() {
-        Log.debug { "Auto-sync cancelled" }
+        if (syncScheduler != null) {
+            syncScheduler.cancel()
+            Log.debug { "Auto-sync cancelled" }
+        } else {
+            Log.debug { "Auto-sync scheduler not available on this platform" }
+        }
     }
     
     // ==================== Sync Status Functions ====================

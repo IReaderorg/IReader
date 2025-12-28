@@ -1,5 +1,6 @@
 package ireader.presentation.ui.settings.tracking
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
@@ -20,6 +22,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Enhanced tracking settings screen following Mihon's TrackerManager system.
@@ -106,7 +109,6 @@ fun SettingsTrackingScreen(
             item {
                 TrackingServiceItem(
                     serviceName = "MyAnimeList",
-                    serviceIcon = Icons.Outlined.Star, // TODO: Use actual MAL icon
                     enabled = malEnabled,
                     loggedIn = malLoggedIn,
                     onToggleEnabled = viewModel::setMalEnabled,
@@ -120,7 +122,6 @@ fun SettingsTrackingScreen(
             item {
                 TrackingServiceItem(
                     serviceName = "AniList",
-                    serviceIcon = Icons.Outlined.Favorite, // TODO: Use actual AniList icon
                     enabled = aniListEnabled,
                     loggedIn = aniListLoggedIn,
                     onToggleEnabled = viewModel::setAniListEnabled,
@@ -134,7 +135,6 @@ fun SettingsTrackingScreen(
             item {
                 TrackingServiceItem(
                     serviceName = "Kitsu",
-                    serviceIcon = Icons.Outlined.Pets, // TODO: Use actual Kitsu icon
                     enabled = kitsuEnabled,
                     loggedIn = kitsuLoggedIn,
                     onToggleEnabled = viewModel::setKitsuEnabled,
@@ -148,7 +148,6 @@ fun SettingsTrackingScreen(
             item {
                 TrackingServiceItem(
                     serviceName = "MangaUpdates",
-                    serviceIcon = Icons.Outlined.Update, // TODO: Use actual MU icon
                     enabled = mangaUpdatesEnabled,
                     loggedIn = mangaUpdatesLoggedIn,
                     onToggleEnabled = viewModel::setMangaUpdatesEnabled,
@@ -897,7 +896,6 @@ private fun MangaUpdatesLoginDialog(
 @Composable
 private fun TrackingServiceItem(
     serviceName: String,
-    serviceIcon: androidx.compose.ui.graphics.vector.ImageVector,
     enabled: Boolean,
     loggedIn: Boolean,
     onToggleEnabled: (Boolean) -> Unit,
@@ -918,12 +916,12 @@ private fun TrackingServiceItem(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = serviceIcon,
+                Image(
+                    painter = painterResource(Res.drawable.ic_sync),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant),
                     modifier = Modifier.size(24.dp)
                 )
                 
