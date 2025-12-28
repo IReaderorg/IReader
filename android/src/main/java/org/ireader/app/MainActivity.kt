@@ -308,6 +308,32 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         val uri = intent.data
         if (uri != null) {
             val scheme = uri.scheme
+            
+            // AniList OAuth callback: ireader://anilist-auth#access_token=...
+            if (scheme == "ireader" && uri.host == "anilist-auth") {
+                val fragment = uri.fragment
+                if (fragment != null && fragment.contains("access_token=")) {
+                    // Parse access token from fragment
+                    val params = fragment.split("&").associate { param ->
+                        val parts = param.split("=", limit = 2)
+                        if (parts.size == 2) parts[0] to parts[1] else parts[0] to ""
+                    }
+                    val accessToken = params["access_token"]
+                    if (!accessToken.isNullOrEmpty()) {
+                        println("✅ AniList OAuth callback detected with token")
+                        // Store the token for the tracking settings to pick up
+                        ireader.domain.usecases.tracking.OAuthCallbackHandler.pendingAniListToken = accessToken
+                        // Navigate to tracking settings if not already there
+                        navController.navigate("trackingSettings") {
+                            launchSingleTop = true
+                        }
+                        return true
+                    }
+                }
+                println("⚠️ AniList OAuth callback without valid token: $uri")
+                return true
+            }
+            
             // MetaMask SDK callback (uses package name as scheme)
             if (scheme == "ir.kazemcodes.infinityreader.debug" ||
                 scheme == "ir.kazemcodes.infinityreader" ||

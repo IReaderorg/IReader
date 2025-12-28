@@ -33,8 +33,8 @@ class AniListApi(
         const val BASE_MANGA_URL = "https://anilist.co/manga/"
         
         // Register your app at https://anilist.co/settings/developer
-        // For now using a placeholder - you'll need to register and get your own
-        const val CLIENT_ID = "21652"  // IReader client ID (needs registration)
+        // IReader client ID
+        const val CLIENT_ID = "33567"
     }
     
     private var accessToken: String? = null

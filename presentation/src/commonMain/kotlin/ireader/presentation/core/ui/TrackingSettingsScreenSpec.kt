@@ -1,6 +1,7 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.tracking.SettingsTrackingScreen
@@ -17,6 +18,11 @@ class TrackingSettingsScreenSpec {
     fun Content() {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: SettingsTrackingViewModel = koinInject()
+        
+        // Check for pending OAuth callbacks when screen becomes visible
+        LaunchedEffect(Unit) {
+            viewModel.onScreenVisible()
+        }
         
         SettingsTrackingScreen(
             onNavigateUp = { navController.safePopBackStack() },

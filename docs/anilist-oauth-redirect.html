@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IReader - AniList Authorization</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 400px;
+        }
+        h1 {
+            color: #02a9ff;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        .token-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .btn {
+            background: #02a9ff;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: #0288d1;
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #02a9ff;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #51cf66;
+        }
+        #status {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 IReader</h1>
+        <div id="content">
+            <p>Processing AniList authorization...</p>
+        </div>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // Parse the access token from URL fragment
+        function getAccessToken() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            return params.get('access_token');
+        }
+
+        function showContent(html) {
+            document.getElementById('content').innerHTML = html;
+        }
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<p class="${isError ? 'error' : 'success'}">${message}</p>`;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('Token copied to clipboard!');
+            }).catch(() => {
+                showStatus('Failed to copy. Please select and copy manually.', true);
+            });
+        }
+
+        function init() {
+            const token = getAccessToken();
+            
+            if (!token) {
+                showContent(`
+                    <p class="error">No access token found in the URL.</p>
+                    <p>Please try authorizing again from the IReader app.</p>
+                `);
+                return;
+            }
+
+            // Try to redirect to the app using custom URL scheme
+            const appUrl = 'ireader://anilist-auth#access_token=' + encodeURIComponent(token);
+            
+            showContent(`
+                <p class="success">✓ Authorization successful!</p>
+                <p>Redirecting to IReader app...</p>
+                <p style="margin-top: 2rem; font-size: 0.9rem;">If the app doesn't open automatically:</p>
+                <button class="btn" onclick="window.location.href='${appUrl}'">Open IReader App</button>
+                <br>
+                <button class="btn btn-secondary" onclick="copyToClipboard('${token}')">Copy Token</button>
+                <p style="margin-top: 1rem; font-size: 0.8rem; color: #888;">
+                    Or copy this token and paste it in the IReader app manually:
+                </p>
+                <div class="token-box" onclick="this.select()">${token.substring(0, 50)}...</div>
+            `);
+
+            // Attempt automatic redirect
+            setTimeout(() => {
+                window.location.href = appUrl;
+            }, 1000);
+        }
+
+        init();
+    </script>
+</body>
+</html>

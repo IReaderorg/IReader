@@ -10,6 +10,7 @@ import ireader.domain.models.entities.TrackSearchResult
 import ireader.domain.models.entities.TrackStatus
 import ireader.domain.models.entities.TrackerCredentials
 import ireader.domain.models.entities.TrackerService
+import ireader.domain.usecases.tracking.OAuthCallbackHandler
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.ui.core.utils.formatDecimal
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -24,7 +25,8 @@ import kotlinx.coroutines.launch
  */
 class SettingsTrackingViewModel(
     private val preferenceStore: PreferenceStore,
-    private val trackingRepository: TrackingRepository
+    private val trackingRepository: TrackingRepository,
+    private val oAuthCallbackHandler: OAuthCallbackHandler = OAuthCallbackHandler()
 ) : BaseViewModel() {
     
     // ==================== Service State ====================
@@ -138,6 +140,28 @@ class SettingsTrackingViewModel(
     
     init {
         loadInitialState()
+        checkPendingOAuthCallback()
+    }
+    
+    /**
+     * Check if there's a pending OAuth token from a deep link callback.
+     * This handles the case where the user authorized AniList and was redirected back to the app.
+     */
+    private fun checkPendingOAuthCallback() {
+        val pendingToken = oAuthCallbackHandler.consumeAniListToken()
+        if (pendingToken != null) {
+            Log.debug { "Found pending AniList OAuth token from deep link callback" }
+            // Auto-complete the login with the pending token
+            completeAniListLogin(pendingToken)
+        }
+    }
+    
+    /**
+     * Called when the screen becomes visible to check for pending OAuth callbacks.
+     * This is useful when navigating back to the settings screen after OAuth redirect.
+     */
+    fun onScreenVisible() {
+        checkPendingOAuthCallback()
     }
     
     private fun loadInitialState() {
@@ -197,7 +221,7 @@ class SettingsTrackingViewModel(
     fun loginToAniList() {
         showAniListLoginDialog = true
         aniListLoginError = null
-        _aniListAuthUrl.value = "https://anilist.co/api/v2/oauth/authorize?client_id=21652&response_type=token"
+        _aniListAuthUrl.value = "https://anilist.co/api/v2/oauth/authorize?client_id=33567&response_type=token"
     }
     
     fun dismissAniListLoginDialog() {
