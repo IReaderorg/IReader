@@ -113,9 +113,41 @@ class BookCoverFetcher(
         )
     }
 
-    @Suppress("UNUSED_PARAMETER")
+    /**
+     * Load image from Android content:// URI.
+     * This handles content provider URIs like those from gallery picks or document providers.
+     */
     private fun fileUriLoader(uri: String): FetchResult {
-        throw NotImplementedError("URI loading must be implemented platform-specifically")
+        val context = options.context
+        val contentUri = android.net.Uri.parse(uri)
+        
+        // Open input stream from content resolver
+        val inputStream = context.contentResolver.openInputStream(contentUri)
+            ?: error("Cannot open content URI: $uri")
+        
+        // Create a temporary file to store the content
+        val tempFile = java.io.File.createTempFile("cover_", ".tmp", context.cacheDir)
+        try {
+            tempFile.outputStream().use { output ->
+                inputStream.use { input ->
+                    input.copyTo(output)
+                }
+            }
+            
+            val okioPath = tempFile.absolutePath.toPath()
+            return SourceFetchResult(
+                source = ImageSource(
+                    file = okioPath,
+                    fileSystem = FileSystem.SYSTEM,
+                    diskCacheKey = diskCacheKey
+                ),
+                mimeType = context.contentResolver.getType(contentUri) ?: "image/*",
+                dataSource = DataSource.DISK,
+            )
+        } catch (e: Exception) {
+            tempFile.delete()
+            throw e
+        }
     }
 
     private suspend fun httpLoader(): FetchResult {

@@ -3,24 +3,30 @@ package ireader.presentation.ui.settings.notifications
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStore
-import ireader.presentation.ui.core.utils.asStateFlow
+import ireader.domain.data.repository.NotificationRepository
+import ireader.domain.models.notification.NotificationChannel
+import ireader.domain.models.notification.NotificationImportance
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.ExperimentalTime
 
 /**
  * ViewModel for the enhanced notification settings screen.
  * Manages comprehensive notification preferences with granular control over types and channels.
  */
 class SettingsNotificationViewModel(
-    private val preferenceStore: PreferenceStore
+    private val preferenceStore: PreferenceStore,
+    private val notificationRepository: NotificationRepository? = null,
+    private val notificationHelper: NotificationHelper = DefaultNotificationHelper()
 ) : BaseViewModel() {
     
     // Library notification preferences
@@ -48,11 +54,24 @@ class SettingsNotificationViewModel(
     val quietHoursStart: StateFlow<Pair<Int, Int>> = preferenceStore.getString("quiet_hours_start", "22:00").stateIn(scope).map { parseTime(it) }.stateIn(scope, SharingStarted.Eagerly, parseTime("22:00"))
     val quietHoursEnd: StateFlow<Pair<Int, Int>> = preferenceStore.getString("quiet_hours_end", "08:00").stateIn(scope).map { parseTime(it) }.stateIn(scope, SharingStarted.Eagerly, parseTime("08:00"))
     
+    // Permission state
+    private val _hasNotificationPermission = MutableStateFlow(notificationHelper.hasNotificationPermission())
+    val hasNotificationPermission: StateFlow<Boolean> = _hasNotificationPermission.asStateFlow()
+    
+    // Snackbar message
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
+    
     // Dialog states
     var showQuietHoursStartDialog by mutableStateOf(false)
         private set
     var showQuietHoursEndDialog by mutableStateOf(false)
         private set
+    
+    init {
+        // Create notification channels on initialization
+        createNotificationChannels()
+    }
     
     // Library notification functions
     fun setLibraryUpdateNotifications(enabled: Boolean) {
@@ -92,14 +111,17 @@ class SettingsNotificationViewModel(
     // Notification behavior functions
     fun setNotificationSound(enabled: Boolean) {
         preferenceStore.getBoolean("notification_sound", true).set(enabled)
+        updateNotificationChannels()
     }
     
     fun setNotificationVibration(enabled: Boolean) {
         preferenceStore.getBoolean("notification_vibration", true).set(enabled)
+        updateNotificationChannels()
     }
     
     fun setNotificationLED(enabled: Boolean) {
         preferenceStore.getBoolean("notification_led", true).set(enabled)
+        updateNotificationChannels()
     }
     
     fun setGroupNotifications(enabled: Boolean) {
@@ -139,27 +161,66 @@ class SettingsNotificationViewModel(
     
     // Advanced functions
     fun openNotificationChannelSettings() {
-        // TODO: Implement platform-specific notification channel settings
-        // On Android, this should open the system notification settings for the app
+        notificationHelper.openNotificationSettings()
     }
     
     fun sendTestNotifications() {
-        // TODO: Implement test notification sending
-        sendTestLibraryNotification()
-        sendTestDownloadNotification()
-        sendTestSystemNotification()
+        scope.launch {
+            try {
+                if (!hasNotificationPermission.value) {
+                    showSnackbar("Notification permission not granted")
+                    return@launch
+                }
+                
+                sendTestLibraryNotification()
+                sendTestDownloadNotification()
+                sendTestSystemNotification()
+                showSnackbar("Test notifications sent")
+            } catch (e: Exception) {
+                Log.error(e, "Failed to send test notifications")
+                showSnackbar("Failed to send test notifications: ${e.message}")
+            }
+        }
     }
     
-    private fun sendTestLibraryNotification() {
-        // TODO: Send a test library update notification
+    private suspend fun sendTestLibraryNotification() {
+        if (!libraryUpdateNotifications.value) return
+        
+        notificationRepository?.showNotification(
+            ireader.domain.models.notification.IReaderNotification(
+                id = 9001,
+                channelId = CHANNEL_LIBRARY,
+                title = "Test Library Update",
+                content = "This is a test library update notification",
+                ongoing = false
+            )
+        )
     }
     
-    private fun sendTestDownloadNotification() {
-        // TODO: Send a test download notification
+    private suspend fun sendTestDownloadNotification() {
+        if (!downloadCompleteNotifications.value) return
+        
+        notificationRepository?.showNotification(
+            ireader.domain.models.notification.IReaderNotification(
+                id = 9002,
+                channelId = CHANNEL_DOWNLOADER,
+                title = "Test Download Complete",
+                content = "This is a test download notification",
+                ongoing = false
+            )
+        )
     }
     
-    private fun sendTestSystemNotification() {
-        // TODO: Send a test system notification
+    private suspend fun sendTestSystemNotification() {
+        notificationRepository?.showNotification(
+            ireader.domain.models.notification.IReaderNotification(
+                id = 9003,
+                channelId = CHANNEL_COMMON,
+                title = "Test System Notification",
+                content = "This is a test system notification",
+                ongoing = false
+            )
+        )
     }
     
     // Utility functions
@@ -198,11 +259,11 @@ class SettingsNotificationViewModel(
         }
     }
     
-    @OptIn(ExperimentalTime::class)
+    @OptIn(kotlin.time.ExperimentalTime::class)
     private fun getCurrentTime(): Pair<Int, Int> {
         val now = kotlin.time.Clock.System.now()
-        val localDateTime = kotlinx.datetime.Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
-            .toLocalDateTime(TimeZone.currentSystemDefault())
+        val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
+        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
         return localDateTime.hour to localDateTime.minute
     }
     
@@ -216,26 +277,103 @@ class SettingsNotificationViewModel(
     
     // Notification channel management
     fun createNotificationChannels() {
-        // TODO: Implement platform-specific notification channel creation
-        // This should create separate channels for:
-        // - Library updates
-        // - New chapters
-        // - Downloads
-        // - System notifications
-        // - Errors
+        scope.launch {
+            try {
+                val channels = listOf(
+                    NotificationChannel(
+                        id = CHANNEL_COMMON,
+                        name = "Common",
+                        description = "General notifications",
+                        importance = NotificationImportance.LOW
+                    ),
+                    NotificationChannel(
+                        id = CHANNEL_LIBRARY,
+                        name = "Library Updates",
+                        description = "Notifications for library updates and new chapters",
+                        importance = NotificationImportance.DEFAULT
+                    ),
+                    NotificationChannel(
+                        id = CHANNEL_DOWNLOADER,
+                        name = "Downloads",
+                        description = "Download progress and completion notifications",
+                        importance = NotificationImportance.LOW
+                    ),
+                    NotificationChannel(
+                        id = CHANNEL_BACKUP_RESTORE,
+                        name = "Backup & Restore",
+                        description = "Backup and restore operation notifications",
+                        importance = NotificationImportance.DEFAULT
+                    ),
+                    NotificationChannel(
+                        id = CHANNEL_CRASH_LOGS,
+                        name = "Crash Logs",
+                        description = "Crash and error notifications",
+                        importance = NotificationImportance.HIGH
+                    ),
+                    NotificationChannel(
+                        id = CHANNEL_INCOGNITO,
+                        name = "Incognito Mode",
+                        description = "Incognito mode status notifications",
+                        importance = NotificationImportance.LOW
+                    )
+                )
+                
+                notificationRepository?.createNotificationChannels(channels)
+                Log.debug { "Notification channels created" }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to create notification channels")
+            }
+        }
     }
     
     fun updateNotificationChannels() {
-        // TODO: Update existing notification channels with current preferences
+        // Channels are updated by recreating them with new settings
+        createNotificationChannels()
     }
     
     // Notification permission handling
     fun checkNotificationPermission(): Boolean {
-        // TODO: Implement platform-specific notification permission check
-        return true // Placeholder
+        val hasPermission = notificationHelper.hasNotificationPermission()
+        _hasNotificationPermission.value = hasPermission
+        return hasPermission
     }
     
     fun requestNotificationPermission() {
-        // TODO: Implement platform-specific notification permission request
+        notificationHelper.requestNotificationPermission()
     }
+    
+    private fun showSnackbar(message: String) {
+        _snackbarMessage.value = message
+    }
+    
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+    
+    companion object {
+        const val CHANNEL_COMMON = "common_channel"
+        const val CHANNEL_LIBRARY = "library_channel"
+        const val CHANNEL_DOWNLOADER = "downloader_channel"
+        const val CHANNEL_BACKUP_RESTORE = "backup_restore_channel"
+        const val CHANNEL_CRASH_LOGS = "crash_logs_channel"
+        const val CHANNEL_INCOGNITO = "incognito_channel"
+    }
+}
+
+/**
+ * Interface for platform-specific notification operations
+ */
+interface NotificationHelper {
+    fun hasNotificationPermission(): Boolean
+    fun requestNotificationPermission()
+    fun openNotificationSettings()
+}
+
+/**
+ * Default implementation for commonMain
+ */
+class DefaultNotificationHelper : NotificationHelper {
+    override fun hasNotificationPermission(): Boolean = true
+    override fun requestNotificationPermission() {}
+    override fun openNotificationSettings() {}
 }

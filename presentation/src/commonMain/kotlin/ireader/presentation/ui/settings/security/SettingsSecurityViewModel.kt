@@ -3,20 +3,27 @@ package ireader.presentation.ui.settings.security
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ireader.core.log.Log
+import ireader.core.prefs.PreferenceStore
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for the enhanced security and privacy settings screen.
  * Manages comprehensive security preferences following Mihon's SecurityPreferences system.
  */
 class SettingsSecurityViewModel(
-    private val uiPreferences: UiPreferences
+    private val uiPreferences: UiPreferences,
+    private val preferenceStore: PreferenceStore,
+    private val securityHelper: SecurityHelper = DefaultSecurityHelper()
 ) : BaseViewModel() {
     
     // App lock preferences
@@ -35,6 +42,13 @@ class SettingsSecurityViewModel(
     // Content restrictions
     val adultContentLock: StateFlow<Boolean> = uiPreferences.adultSourceLockEnabled().stateIn(scope)
     
+    // PIN/Password state
+    private val _pinHash = MutableStateFlow(preferenceStore.getString("security_pin_hash", "").get())
+    val hasPinSet: StateFlow<Boolean> = _pinHash.asStateFlow().map { it.isNotEmpty() }.stateIn(scope, SharingStarted.WhileSubscribed(5000), false)
+    
+    private val _passwordHash = MutableStateFlow(preferenceStore.getString("security_password_hash", "").get())
+    val hasPasswordSet: StateFlow<Boolean> = _passwordHash.asStateFlow().map { it.isNotEmpty() }.stateIn(scope, SharingStarted.WhileSubscribed(5000), false)
+    
     // Dialog states
     var showLockMethodDialog by mutableStateOf(false)
         private set
@@ -44,9 +58,19 @@ class SettingsSecurityViewModel(
         private set
     var showClearAuthDataDialog by mutableStateOf(false)
         private set
+    var showPinSetupDialog by mutableStateOf(false)
+        private set
+    var showPasswordSetupDialog by mutableStateOf(false)
+        private set
+    var showAuthValidationDialog by mutableStateOf(false)
+        private set
+    
+    // Snackbar message
+    private val _snackbarMessage = MutableStateFlow<String?>(null)
+    val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
     
     // Platform-specific biometric availability
-    val isBiometricAvailable: Boolean = checkBiometricAvailability()
+    val isBiometricAvailable: Boolean = securityHelper.isBiometricAvailable()
     
     // App lock functions
     fun setAppLockEnabled(enabled: Boolean) {
@@ -71,12 +95,20 @@ class SettingsSecurityViewModel(
     
     fun setAppLockMethod(method: String) {
         uiPreferences.appLockMethod().set(method)
-        // TODO: Implement method-specific setup (PIN entry, password setup, etc.)
+        
+        // Trigger setup for the selected method
+        when (method) {
+            "pin" -> if (!hasPinSet.value) showPinSetupDialog = true
+            "password" -> if (!hasPasswordSet.value) showPasswordSetupDialog = true
+            "biometric" -> if (isBiometricAvailable) setupBiometric()
+        }
     }
     
     fun setBiometricEnabled(enabled: Boolean) {
         if (isBiometricAvailable) {
             uiPreferences.biometricEnabled().set(enabled)
+        } else {
+            showSnackbar("Biometric authentication is not available on this device")
         }
     }
     
@@ -129,48 +161,153 @@ class SettingsSecurityViewModel(
     }
     
     fun clearAuthenticationData() {
-        // TODO: Implement clearing of authentication tokens and sessions
-        // This should clear:
-        // - Source login tokens
-        // - Tracking service tokens
-        // - Cloud backup authentication
-        // - Any other stored authentication data
+        scope.launch {
+            try {
+                // Clear PIN and password hashes
+                preferenceStore.getString("security_pin_hash", "").set("")
+                preferenceStore.getString("security_password_hash", "").set("")
+                _pinHash.value = ""
+                _passwordHash.value = ""
+                
+                // Clear tracking service tokens (stored in preferences)
+                preferenceStore.getString("anilist_token", "").set("")
+                preferenceStore.getString("mal_token", "").set("")
+                preferenceStore.getString("kitsu_token", "").set("")
+                preferenceStore.getString("mangaupdates_token", "").set("")
+                
+                // Clear cloud backup authentication
+                preferenceStore.getString("cloud_backup_token", "").set("")
+                
+                // Reset app lock state
+                uiPreferences.isAppLocked = false
+                uiPreferences.lastAppUnlock().set(0L)
+                
+                showSnackbar("Authentication data cleared successfully")
+                Log.info { "All authentication data cleared" }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to clear authentication data")
+                showSnackbar("Failed to clear authentication data: ${e.message}")
+            }
+        }
     }
     
-    // Navigation functions
+    // Navigation functions - these trigger navigation events
+    private val _navigationEvent = MutableStateFlow<SecurityNavigationEvent?>(null)
+    val navigationEvent: StateFlow<SecurityNavigationEvent?> = _navigationEvent.asStateFlow()
+    
     fun navigateToSecurityAudit() {
-        // TODO: Implement navigation to security audit screen
+        _navigationEvent.value = SecurityNavigationEvent.SecurityAudit
     }
     
-    // Platform-specific functions
-    private fun checkBiometricAvailability(): Boolean {
-        // TODO: Implement platform-specific biometric availability check
-        // This should check if the device supports fingerprint, face unlock, etc.
-        return true // Placeholder
+    fun clearNavigationEvent() {
+        _navigationEvent.value = null
     }
     
     // PIN/Password setup functions
     fun setupPIN() {
-        // TODO: Implement PIN setup dialog/screen
+        showPinSetupDialog = true
+    }
+    
+    fun dismissPinSetupDialog() {
+        showPinSetupDialog = false
+    }
+    
+    fun savePIN(pin: String): Boolean {
+        if (pin.length < 4) {
+            showSnackbar("PIN must be at least 4 digits")
+            return false
+        }
+        
+        val hash = securityHelper.hashCredential(pin)
+        preferenceStore.getString("security_pin_hash", "").set(hash)
+        _pinHash.value = hash
+        showPinSetupDialog = false
+        showSnackbar("PIN set successfully")
+        return true
+    }
+    
+    fun verifyPIN(pin: String): Boolean {
+        val storedHash = preferenceStore.getString("security_pin_hash", "").get()
+        return securityHelper.verifyCredential(pin, storedHash)
     }
     
     fun setupPassword() {
-        // TODO: Implement password setup dialog/screen
+        showPasswordSetupDialog = true
+    }
+    
+    fun dismissPasswordSetupDialog() {
+        showPasswordSetupDialog = false
+    }
+    
+    fun savePassword(password: String): Boolean {
+        if (password.length < 6) {
+            showSnackbar("Password must be at least 6 characters")
+            return false
+        }
+        
+        val hash = securityHelper.hashCredential(password)
+        preferenceStore.getString("security_password_hash", "").set(hash)
+        _passwordHash.value = hash
+        showPasswordSetupDialog = false
+        showSnackbar("Password set successfully")
+        return true
+    }
+    
+    fun verifyPassword(password: String): Boolean {
+        val storedHash = preferenceStore.getString("security_password_hash", "").get()
+        return securityHelper.verifyCredential(password, storedHash)
     }
     
     fun setupPattern() {
-        // TODO: Implement pattern setup dialog/screen
+        // Pattern lock requires platform-specific UI
+        // For now, show a message
+        showSnackbar("Pattern lock setup requires platform-specific implementation")
     }
     
     fun setupBiometric() {
-        // TODO: Implement biometric enrollment if needed
+        if (isBiometricAvailable) {
+            uiPreferences.biometricEnabled().set(true)
+            showSnackbar("Biometric authentication enabled")
+        } else {
+            showSnackbar("Biometric authentication is not available on this device")
+        }
     }
     
     // Security validation functions
+    fun showAuthValidationDialog() {
+        showAuthValidationDialog = true
+    }
+    
+    fun dismissAuthValidationDialog() {
+        showAuthValidationDialog = false
+    }
+    
     fun validateCurrentAuthentication(callback: (Boolean) -> Unit) {
-        // TODO: Implement current authentication validation
-        // This should prompt for current PIN/password/biometric before allowing changes
-        callback(true) // Placeholder
+        val method = appLockMethod.value
+        
+        when (method) {
+            "pin" -> {
+                if (hasPinSet.value) {
+                    // Show PIN validation dialog - callback will be called from UI
+                    showAuthValidationDialog = true
+                } else {
+                    callback(true) // No PIN set, allow
+                }
+            }
+            "password" -> {
+                if (hasPasswordSet.value) {
+                    // Show password validation dialog - callback will be called from UI
+                    showAuthValidationDialog = true
+                } else {
+                    callback(true) // No password set, allow
+                }
+            }
+            "biometric" -> {
+                // Biometric validation is handled by platform-specific code
+                callback(true)
+            }
+            else -> callback(true) // No lock method, allow
+        }
     }
     
     // Security audit functions
@@ -211,5 +348,51 @@ class SettingsSecurityViewModel(
         }
         
         return recommendations
+    }
+    
+    private fun showSnackbar(message: String) {
+        _snackbarMessage.value = message
+    }
+    
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
+}
+
+/**
+ * Navigation events for security settings
+ */
+sealed class SecurityNavigationEvent {
+    object SecurityAudit : SecurityNavigationEvent()
+}
+
+/**
+ * Interface for platform-specific security operations
+ */
+interface SecurityHelper {
+    fun isBiometricAvailable(): Boolean
+    fun hashCredential(credential: String): String
+    fun verifyCredential(credential: String, hash: String): Boolean
+}
+
+/**
+ * Default implementation using simple hashing (for commonMain)
+ * Platform-specific implementations can provide stronger hashing
+ */
+class DefaultSecurityHelper : SecurityHelper {
+    override fun isBiometricAvailable(): Boolean = false
+    
+    override fun hashCredential(credential: String): String {
+        // Simple hash for cross-platform compatibility
+        // Platform-specific implementations should use stronger algorithms
+        var hash = 7L
+        for (char in credential) {
+            hash = hash * 31 + char.code
+        }
+        return hash.toString(16)
+    }
+    
+    override fun verifyCredential(credential: String, hash: String): Boolean {
+        return hashCredential(credential) == hash
     }
 }

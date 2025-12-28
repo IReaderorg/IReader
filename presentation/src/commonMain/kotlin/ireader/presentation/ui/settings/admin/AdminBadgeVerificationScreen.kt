@@ -407,6 +407,41 @@ private fun PaymentDetailRow(
 }
 
 private fun formatDate(dateString: String): String {
-    // TODO: Implement proper date formatting
-    return dateString.take(10)
+    return try {
+        // Parse ISO 8601 date string and format it nicely
+        // Expected format: "2024-01-15T10:30:00Z" or "2024-01-15"
+        val datePart = dateString.substringBefore("T").trim()
+        if (datePart.length >= 10) {
+            val parts = datePart.split("-")
+            if (parts.size == 3) {
+                val year = parts[0]
+                val month = parts[1]
+                val day = parts[2]
+                
+                val monthName = when (month) {
+                    "01" -> "Jan"
+                    "02" -> "Feb"
+                    "03" -> "Mar"
+                    "04" -> "Apr"
+                    "05" -> "May"
+                    "06" -> "Jun"
+                    "07" -> "Jul"
+                    "08" -> "Aug"
+                    "09" -> "Sep"
+                    "10" -> "Oct"
+                    "11" -> "Nov"
+                    "12" -> "Dec"
+                    else -> month
+                }
+                
+                "$monthName $day, $year"
+            } else {
+                datePart
+            }
+        } else {
+            dateString.take(10)
+        }
+    } catch (e: Exception) {
+        dateString.take(10)
+    }
 }

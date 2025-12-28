@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * ViewModel for the enhanced library settings screen.
@@ -141,11 +143,26 @@ class SettingsLibraryViewModel(
     }
     
     // Navigation functions
+    private val _navigationEvent = MutableStateFlow<LibraryNavigationEvent?>(null)
+    val navigationEvent: StateFlow<LibraryNavigationEvent?> = _navigationEvent.asStateFlow()
+    
     fun navigateToCategoryManagement() {
-        // TODO: Implement navigation to category management screen
+        _navigationEvent.value = LibraryNavigationEvent.CategoryManagement
     }
     
     fun navigateToLibraryStatistics() {
-        // TODO: Implement navigation to library statistics screen
+        _navigationEvent.value = LibraryNavigationEvent.LibraryStatistics
     }
+    
+    fun clearNavigationEvent() {
+        _navigationEvent.value = null
+    }
+}
+
+/**
+ * Navigation events for library settings
+ */
+sealed class LibraryNavigationEvent {
+    object CategoryManagement : LibraryNavigationEvent()
+    object LibraryStatistics : LibraryNavigationEvent()
 }

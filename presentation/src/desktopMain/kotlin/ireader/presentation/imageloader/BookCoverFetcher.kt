@@ -112,8 +112,32 @@ class BookCoverFetcher(
         )
     }
 
+    /**
+     * Load image from URI on desktop.
+     * Desktop doesn't have content:// URIs like Android, but we can handle file:// URIs
+     * and convert them to file paths.
+     */
     private suspend fun fileUriLoader(uri: String): FetchResult {
-        throw NotImplementedError("URI loading must be implemented platform-specifically")
+        // On desktop, content:// URIs don't exist
+        // If somehow a content:// URI is passed, try to extract a usable path
+        val path = when {
+            uri.startsWith("content://") -> {
+                // Desktop doesn't support Android content providers
+                // Log warning and try to extract any path component
+                Log.warn { "Content URI not supported on desktop: $uri" }
+                uri.substringAfterLast("/")
+            }
+            uri.startsWith("file://") -> uri.substringAfter("file://")
+            else -> uri
+        }
+        
+        // Try to load as a file path
+        val file = java.io.File(path)
+        if (file.exists()) {
+            return filePathLoader(path)
+        }
+        
+        error("Cannot load URI on desktop: $uri (resolved path: $path does not exist)")
     }
 
     private suspend fun httpLoader(): FetchResult {

@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * ViewModel for the enhanced reader settings screen.
@@ -220,15 +222,31 @@ class SettingsReaderViewModel(
     }
     
     // Navigation functions
+    private val _navigationEvent = MutableStateFlow<ReaderNavigationEvent?>(null)
+    val navigationEvent: StateFlow<ReaderNavigationEvent?> = _navigationEvent.asStateFlow()
+    
     fun navigateToColorFilters() {
-        // TODO: Implement navigation to color filters screen
+        _navigationEvent.value = ReaderNavigationEvent.ColorFilters
     }
     
     fun navigateToImageScaling() {
-        // TODO: Implement navigation to image scaling screen
+        _navigationEvent.value = ReaderNavigationEvent.ImageScaling
     }
     
     fun navigateToTapZones() {
-        // TODO: Implement navigation to tap zones customization screen
+        _navigationEvent.value = ReaderNavigationEvent.TapZones
     }
+    
+    fun clearNavigationEvent() {
+        _navigationEvent.value = null
+    }
+}
+
+/**
+ * Navigation events for reader settings
+ */
+sealed class ReaderNavigationEvent {
+    object ColorFilters : ReaderNavigationEvent()
+    object ImageScaling : ReaderNavigationEvent()
+    object TapZones : ReaderNavigationEvent()
 }

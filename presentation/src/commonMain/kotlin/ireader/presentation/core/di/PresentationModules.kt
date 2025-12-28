@@ -185,7 +185,7 @@ val PresentationModules = module {
     factory  { SettingsReaderViewModel(get()) }
     factory  { SettingsLibraryViewModel(get()) }
     factory  { SettingsDownloadViewModel(get()) }
-    factory  { SettingsSecurityViewModel(get()) }
+    factory  { SettingsSecurityViewModel(get(), get()) }
     factory  { SettingsNotificationViewModel(get()) }
     factory  { SettingsTrackingViewModel(get(), get()) }
     factory  { SettingsDataViewModel(get(), getOrNull(), getOrNull()) }

@@ -6,7 +6,9 @@ import androidx.compose.runtime.setValue
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * ViewModel for the enhanced appearance settings screen.
@@ -111,11 +113,26 @@ class SettingsAppearanceViewModel(
     }
     
     // Navigation functions
+    private val _navigationEvent = MutableStateFlow<AppearanceNavigationEvent?>(null)
+    val navigationEvent: StateFlow<AppearanceNavigationEvent?> = _navigationEvent.asStateFlow()
+    
     fun navigateToColorCustomization() {
-        // TODO: Implement navigation to color customization screen
+        _navigationEvent.value = AppearanceNavigationEvent.ColorCustomization
     }
     
     fun navigateToThemeManagement() {
-        // TODO: Implement navigation to theme management screen
+        _navigationEvent.value = AppearanceNavigationEvent.ThemeManagement
     }
+    
+    fun clearNavigationEvent() {
+        _navigationEvent.value = null
+    }
+}
+
+/**
+ * Navigation events for appearance settings
+ */
+sealed class AppearanceNavigationEvent {
+    object ColorCustomization : AppearanceNavigationEvent()
+    object ThemeManagement : AppearanceNavigationEvent()
 }
