@@ -1,5 +1,9 @@
 package ireader.core.http
 
+import ireader.core.http.cloudflare.CloudflareBypassPluginManager
+import ireader.core.http.cloudflare.CloudflareChallenge
+import ireader.core.http.cloudflare.PluginBypassResult
+import ireader.core.log.Log
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -28,11 +32,140 @@ import kotlin.coroutines.suspendCoroutine
  * - JavaScript execution
  * - Cookie handling
  * - Cloudflare bypass (via real browser fingerprint)
+ * 
+ * Also supports plugin-based bypass (FlareSolverr) for additional flexibility.
  */
 @OptIn(ExperimentalForeignApi::class)
 actual class BrowserEngine : BrowserEngineInterface {
     
+    // Plugin manager for Cloudflare bypass (injected via setter for DI compatibility)
+    private var bypassManager: CloudflareBypassPluginManager? = null
+    
+    /**
+     * Set the CloudflareBypassPluginManager for plugin-based bypass.
+     * Called by DI after construction.
+     */
+    fun setBypassManager(manager: CloudflareBypassPluginManager) {
+        bypassManager = manager
+        Log.info { "[iOSBrowserEngine] Bypass manager configured" }
+    }
+    
     actual override suspend fun fetch(
+        url: String,
+        selector: String?,
+        headers: Headers,
+        timeout: Long,
+        userAgent: String
+    ): BrowserResult {
+        // First try WKWebView (native browser)
+        val webViewResult = fetchWithWebView(url, selector, headers, timeout, userAgent)
+        
+        // Check if we hit Cloudflare protection that WKWebView couldn't handle
+        if (webViewResult.statusCode in listOf(403, 503) && 
+            webViewResult.responseBody.contains("cloudflare", ignoreCase = true)) {
+            
+            // Try plugin-based bypass as fallback
+            val manager = bypassManager
+            if (manager != null) {
+                val hasProvider = manager.hasAvailableProvider()
+                if (hasProvider) {
+                    Log.info { "[iOSBrowserEngine] WKWebView hit Cloudflare, trying plugin bypass" }
+                    return fetchWithBypassManager(url, headers, timeout, userAgent)
+                }
+            }
+        }
+        
+        return webViewResult
+    }
+    
+    /**
+     * Fetch using CloudflareBypassPluginManager for plugin-based bypass
+     */
+    private suspend fun fetchWithBypassManager(
+        url: String,
+        headers: Headers,
+        timeout: Long,
+        userAgent: String
+    ): BrowserResult {
+        val manager = bypassManager ?: return BrowserResult(
+            responseBody = "",
+            cookies = emptyList(),
+            statusCode = 500,
+            error = "Bypass manager not configured"
+        )
+        
+        try {
+            val challenge = CloudflareChallenge.JSChallenge()
+            
+            Log.info { "[iOSBrowserEngine] Attempting plugin-based bypass for: $url" }
+            
+            val result = manager.bypass(
+                url = url,
+                challenge = challenge,
+                headers = headers,
+                userAgent = userAgent,
+                timeoutMs = timeout
+            )
+            
+            return when (result) {
+                is PluginBypassResult.Success -> {
+                    Log.info { "[iOSBrowserEngine] Plugin bypass successful for: $url" }
+                    
+                    val cookies = result.cookies.map { cookie ->
+                        Cookie(
+                            name = cookie.name,
+                            value = cookie.value,
+                            domain = cookie.domain,
+                            path = cookie.path,
+                            expiresAt = cookie.expiresAt,
+                            secure = cookie.secure,
+                            httpOnly = cookie.httpOnly
+                        )
+                    }
+                    
+                    BrowserResult(
+                        responseBody = result.content,
+                        cookies = cookies,
+                        statusCode = result.statusCode
+                    )
+                }
+                is PluginBypassResult.Failed -> {
+                    BrowserResult(
+                        responseBody = "",
+                        cookies = emptyList(),
+                        statusCode = 500,
+                        error = "Bypass failed: ${result.reason}"
+                    )
+                }
+                is PluginBypassResult.UserInteractionRequired -> {
+                    BrowserResult(
+                        responseBody = "",
+                        cookies = emptyList(),
+                        statusCode = 403,
+                        error = "User interaction required: ${result.message}"
+                    )
+                }
+                is PluginBypassResult.ServiceUnavailable -> {
+                    BrowserResult(
+                        responseBody = "",
+                        cookies = emptyList(),
+                        statusCode = 503,
+                        error = "Bypass service unavailable: ${result.reason}"
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.error(e, "[iOSBrowserEngine] Plugin bypass error")
+            return BrowserResult(
+                responseBody = "",
+                cookies = emptyList(),
+                statusCode = 500,
+                error = "Plugin bypass error: ${e.message}"
+            )
+        }
+    }
+    
+    private suspend fun fetchWithWebView(
         url: String,
         selector: String?,
         headers: Headers,

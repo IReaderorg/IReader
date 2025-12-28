@@ -5,14 +5,19 @@ import io.ktor.client.engine.darwin.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import ireader.core.http.cloudflare.CloudflareBypassPluginManager
 import kotlinx.serialization.json.Json
 
 /**
  * iOS implementation of HttpClients using Darwin engine
  */
-actual class HttpClients : HttpClientsInterface {
+actual class HttpClients(
+    private val bypassManager: CloudflareBypassPluginManager? = null
+) : HttpClientsInterface {
     
-    actual override val browser: BrowserEngine = BrowserEngine()
+    actual override val browser: BrowserEngine = BrowserEngine().apply {
+        bypassManager?.let { setBypassManager(it) }
+    }
     actual override val config: NetworkConfig = NetworkConfig()
     actual override val sslConfig: SSLConfiguration = SSLConfiguration()
     actual override val cookieSynchronizer: CookieSynchronizer = CookieSynchronizer()

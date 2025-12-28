@@ -197,6 +197,9 @@ val PresentationModules = module {
     // Sync ViewModels
     factory  { ireader.presentation.ui.settings.sync.SupabaseConfigViewModel(get(), get(), getOrNull(), getOrNull()) }
     
+    // Cloudflare Bypass Settings ViewModel
+    factory { ireader.presentation.ui.settings.cloudflare.CloudflareBypassSettingsViewModel(get(), get()) }
+    
     // Badge ViewModels
     factory { ireader.presentation.ui.settings.badges.store.BadgeStoreViewModel(get(), get()) }
     factory { ireader.presentation.ui.settings.badges.nft.NFTBadgeViewModel(get(), get(), get(), get(), get()) }

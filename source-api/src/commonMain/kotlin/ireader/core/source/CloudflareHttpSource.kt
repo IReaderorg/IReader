@@ -151,16 +151,41 @@ abstract class CloudflareHttpSource(
             val result = bypass.bypass(url, lastResponse, body, bypassConfig)
             
             when (result) {
-                is BypassResult.Success, is BypassResult.CachedCookie -> {
+                is BypassResult.Success -> {
                     // Retry request with new cookies
-                    val cookie = result.extractCookie()!!
+                    val clearanceCookie = result.cookie
                     
                     rateLimiter?.acquire(url.extractDomain())
                     
                     val retryResponse = client.get(url) {
-                        cookie("cf_clearance", cookie.cfClearance)
-                        cookie.cfBm?.let { cookie("__cf_bm", it) }
-                        header(HttpHeaders.UserAgent, cookie.userAgent)
+                        cookie("cf_clearance", clearanceCookie.cfClearance)
+                        clearanceCookie.cfBm?.let { cookie("__cf_bm", it) }
+                        header(HttpHeaders.UserAgent, clearanceCookie.userAgent)
+                        requestBuilder()
+                    }
+                    
+                    rateLimiter?.onResponse(url.extractDomain(), retryResponse.status.value)
+                    
+                    // Check if still challenged
+                    if (!CloudflareDetector.isChallengeLikely(retryResponse)) {
+                        return retryResponse
+                    }
+                    
+                    // Still challenged, invalidate cookie and retry
+                    cookieStore.invalidate(url.extractDomain())
+                    lastResponse = retryResponse
+                }
+                
+                is BypassResult.CachedCookie -> {
+                    // Retry request with cached cookies
+                    val clearanceCookie = result.cookie
+                    
+                    rateLimiter?.acquire(url.extractDomain())
+                    
+                    val retryResponse = client.get(url) {
+                        cookie("cf_clearance", clearanceCookie.cfClearance)
+                        clearanceCookie.cfBm?.let { cookie("__cf_bm", it) }
+                        header(HttpHeaders.UserAgent, clearanceCookie.userAgent)
                         requestBuilder()
                     }
                     

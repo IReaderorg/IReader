@@ -1,6 +1,10 @@
 package ireader.domain.di
 
 import ireader.core.http.HttpClients
+import ireader.core.http.cloudflare.cloudflareBypassModule
+import ireader.core.http.cloudflare.CloudflareBypassPluginManager
+import ireader.core.http.cloudflare.FlareSolverrProvider
+import ireader.core.http.cloudflare.initializeCloudflareBypass
 import ireader.core.prefs.PreferenceStore
 import okio.Path.Companion.toPath
 import ireader.core.prefs.PreferenceStoreFactory
@@ -50,6 +54,8 @@ actual val DomainModule: Module = module {
     includes(ServiceModule)
     // Include TTS v2 module for new clean TTS architecture
     includes(ireader.domain.services.tts_service.v2.ttsV2Module)
+    // Include Cloudflare bypass module for plugin-based bypass
+    includes(cloudflareBypassModule)
     
     // Process State Manager for handling process death
     single { ireader.domain.services.processstate.ProcessStateManager(get()) }
@@ -213,6 +219,18 @@ actual val DomainModule: Module = module {
     // Network components
     single<ireader.core.http.NetworkConfig> { 
         ireader.core.http.NetworkConfig() 
+    }
+    
+    // BrowserEngine with CloudflareBypassPluginManager
+    single<ireader.core.http.BrowserEngine> {
+        val manager: CloudflareBypassPluginManager = get()
+        val provider: FlareSolverrProvider = get()
+        // Register built-in provider
+        initializeCloudflareBypass(manager, provider)
+        
+        ireader.core.http.BrowserEngine().apply {
+            setBypassManager(manager)
+        }
     }
     
     single<HttpClients> { 

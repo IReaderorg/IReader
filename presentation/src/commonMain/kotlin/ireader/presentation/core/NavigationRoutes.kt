@@ -72,6 +72,7 @@ object NavigationRoutes {
     const val glossary = "glossary"
     const val communitySourceConfig = "communitySourceConfig"
     const val adminUserPanel = "adminUserPanel"
+    const val cloudflareBypass = "cloudflareBypass"
     const val featureStore = "featureStore"
     const val pluginRepository = "pluginRepository"
     const val developerPortal = "developerPortal"

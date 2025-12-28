@@ -350,6 +350,11 @@ fun CommonNavHost(
             TrackingSettingsScreenSpec().Content()
         }
         
+        // Cloudflare Bypass Settings
+        composable(NavigationRoutes.cloudflareBypass) {
+            ireader.presentation.core.ui.CloudflareBypassSettingsScreenSpec().Content()
+        }
+        
         // Routes with parameters
         composable(
             route = "bookDetail/{bookId}",

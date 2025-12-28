@@ -5,21 +5,19 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.statement.bodyAsText
+import ireader.core.http.cloudflare.CloudflareBypassPluginManager
+import ireader.core.http.cloudflare.CloudflareChallenge
+import ireader.core.http.cloudflare.PluginBypassResult
 import ireader.core.log.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 
 /**
  * Desktop implementation of BrowserEngine
  * 
  * Uses a multi-strategy approach:
- * 1. FlareSolverr (if available) - Full browser capabilities with Cloudflare bypass
+ * 1. CloudflareBypassPluginManager - Plugin-based bypass (FlareSolverr, etc.)
  * 2. Basic HTTP fetch - For simple pages without JavaScript requirements
  * 
  * To enable full browser capabilities on desktop, install FlareSolverr:
@@ -45,45 +43,29 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
         }
     }
     
-    // FlareSolverr configuration
-    private var flareSolverrUrl: String = "http://localhost:8191/v1"
-    private var flareSolverrAvailable: Boolean? = null
+    // Plugin manager for Cloudflare bypass (injected via setter for DI compatibility)
+    private var bypassManager: CloudflareBypassPluginManager? = null
     
     /**
-     * Configure FlareSolverr endpoint
+     * Set the CloudflareBypassPluginManager for plugin-based bypass.
+     * Called by DI after construction.
      */
-    fun configureFlareSolverr(url: String) {
-        flareSolverrUrl = url
-        flareSolverrAvailable = null // Reset availability check
+    fun setBypassManager(manager: CloudflareBypassPluginManager) {
+        bypassManager = manager
+        Log.info { "[DesktopBrowserEngine] Bypass manager configured" }
     }
     
     actual override fun isAvailable(): Boolean {
         // Desktop browser engine is always "available" but with limited capabilities
-        // Full capabilities require FlareSolverr
+        // Full capabilities require bypass plugins
         return true
     }
     
     /**
-     * Check if FlareSolverr is available for full browser capabilities
+     * Check if any bypass provider is available for full browser capabilities
      */
-    suspend fun isFlareSolverrAvailable(): Boolean {
-        if (flareSolverrAvailable != null) return flareSolverrAvailable!!
-        
-        return try {
-            val response = httpClient.post(flareSolverrUrl) {
-                contentType(ContentType.Application.Json)
-                setBody("""{"cmd":"sessions.list"}""")
-            }
-            flareSolverrAvailable = response.status.value in 200..299
-            if (flareSolverrAvailable == true) {
-                Log.info { "[DesktopBrowserEngine] FlareSolverr available at $flareSolverrUrl" }
-            }
-            flareSolverrAvailable!!
-        } catch (e: Exception) {
-            Log.debug { "[DesktopBrowserEngine] FlareSolverr not available: ${e.message}" }
-            flareSolverrAvailable = false
-            false
-        }
+    suspend fun hasBypassCapability(): Boolean {
+        return bypassManager?.hasAvailableProvider() ?: false
     }
     
     actual override suspend fun fetch(
@@ -93,81 +75,111 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
         timeout: Long,
         userAgent: String,
     ): BrowserResult = withContext(Dispatchers.IO) {
-        // Try FlareSolverr first for full browser capabilities
-        if (isFlareSolverrAvailable()) {
-            return@withContext fetchWithFlareSolverr(url, headers, timeout, userAgent)
+        // First try basic HTTP fetch
+        val basicResult = fetchWithHttpClient(url, headers, userAgent, selector)
+        
+        // Check if we hit Cloudflare protection
+        if (basicResult.statusCode in listOf(403, 503) && 
+            basicResult.error?.contains("Cloudflare", ignoreCase = true) == true) {
+            
+            // Try plugin-based bypass
+            val manager = bypassManager
+            if (manager != null && manager.hasAvailableProvider()) {
+                return@withContext fetchWithBypassManager(url, headers, timeout, userAgent, basicResult.responseBody)
+            }
         }
         
-        // Fall back to basic HTTP fetch
-        return@withContext fetchWithHttpClient(url, headers, userAgent, selector)
+        return@withContext basicResult
     }
     
     /**
-     * Fetch using FlareSolverr for full browser capabilities
+     * Fetch using CloudflareBypassPluginManager for plugin-based bypass
      */
-    private suspend fun fetchWithFlareSolverr(
+    private suspend fun fetchWithBypassManager(
         url: String,
         headers: Headers,
         timeout: Long,
-        userAgent: String
+        userAgent: String,
+        responseBody: String
     ): BrowserResult {
+        val manager = bypassManager ?: return BrowserResult(
+            responseBody = "",
+            cookies = emptyList(),
+            statusCode = 500,
+            error = "Bypass manager not configured"
+        )
+        
         try {
-            val request = FlareSolverrRequestDto(
-                cmd = "request.get",
+            // Detect challenge type from the response
+            val challenge = CloudflareChallenge.JSChallenge() // Default to JS challenge for 403/503
+            
+            Log.info { "[DesktopBrowserEngine] Attempting plugin-based bypass for: $url" }
+            
+            val result = manager.bypass(
                 url = url,
-                maxTimeout = timeout.toInt().coerceAtMost(180000),
-                headers = headers.takeIf { it.isNotEmpty() }
+                challenge = challenge,
+                headers = headers,
+                userAgent = userAgent,
+                timeoutMs = timeout
             )
             
-            val requestJson = json.encodeToString(FlareSolverrRequestDto.serializer(), request)
-            Log.debug { "[DesktopBrowserEngine] FlareSolverr request to: $url" }
-            
-            val response = httpClient.post(flareSolverrUrl) {
-                contentType(ContentType.Application.Json)
-                setBody(requestJson)
-            }
-            
-            val responseText = response.bodyAsText()
-            val solverrResponse = json.decodeFromString(FlareSolverrResponseDto.serializer(), responseText)
-            
-            if (solverrResponse.status == "ok" && solverrResponse.solution != null) {
-                Log.info { "[DesktopBrowserEngine] FlareSolverr success for: $url" }
-                
-                val cookies = solverrResponse.solution.cookies?.map { cookie ->
-                    Cookie(
-                        name = cookie.name,
-                        value = cookie.value,
-                        domain = cookie.domain ?: extractDomain(url),
-                        path = cookie.path ?: "/",
-                        expiresAt = cookie.expires?.toLong() ?: 0L,
-                        secure = cookie.secure ?: false,
-                        httpOnly = cookie.httpOnly ?: false
+            return when (result) {
+                is PluginBypassResult.Success -> {
+                    Log.info { "[DesktopBrowserEngine] Plugin bypass successful for: $url" }
+                    
+                    val cookies = result.cookies.map { cookie ->
+                        Cookie(
+                            name = cookie.name,
+                            value = cookie.value,
+                            domain = cookie.domain,
+                            path = cookie.path,
+                            expiresAt = cookie.expiresAt,
+                            secure = cookie.secure,
+                            httpOnly = cookie.httpOnly
+                        )
+                    }
+                    
+                    BrowserResult(
+                        responseBody = result.content,
+                        cookies = cookies,
+                        statusCode = result.statusCode
                     )
-                } ?: emptyList()
-                
-                return BrowserResult(
-                    responseBody = solverrResponse.solution.response,
-                    cookies = cookies,
-                    statusCode = solverrResponse.solution.status
-                )
-            } else {
-                Log.warn { "[DesktopBrowserEngine] FlareSolverr failed: ${solverrResponse.message}" }
-                return BrowserResult(
-                    responseBody = "",
-                    cookies = emptyList(),
-                    statusCode = 500,
-                    error = "FlareSolverr failed: ${solverrResponse.message}"
-                )
+                }
+                is PluginBypassResult.Failed -> {
+                    Log.warn { "[DesktopBrowserEngine] Plugin bypass failed: ${result.reason}" }
+                    BrowserResult(
+                        responseBody = "",
+                        cookies = emptyList(),
+                        statusCode = 500,
+                        error = "Bypass failed: ${result.reason}"
+                    )
+                }
+                is PluginBypassResult.UserInteractionRequired -> {
+                    Log.warn { "[DesktopBrowserEngine] User interaction required: ${result.message}" }
+                    BrowserResult(
+                        responseBody = "",
+                        cookies = emptyList(),
+                        statusCode = 403,
+                        error = "User interaction required: ${result.message}"
+                    )
+                }
+                is PluginBypassResult.ServiceUnavailable -> {
+                    Log.warn { "[DesktopBrowserEngine] Bypass service unavailable: ${result.reason}" }
+                    BrowserResult(
+                        responseBody = "",
+                        cookies = emptyList(),
+                        statusCode = 503,
+                        error = "Bypass service unavailable: ${result.reason}\n${result.setupInstructions ?: ""}"
+                    )
+                }
             }
         } catch (e: Exception) {
-            Log.error(e, "[DesktopBrowserEngine] FlareSolverr error")
-            // Mark as unavailable and fall back to HTTP client
-            flareSolverrAvailable = false
+            Log.error(e, "[DesktopBrowserEngine] Plugin bypass error")
             return BrowserResult(
                 responseBody = "",
                 cookies = emptyList(),
                 statusCode = 500,
-                error = "FlareSolverr error: ${e.message}"
+                error = "Plugin bypass error: ${e.message}"
             )
         }
     }
@@ -208,8 +220,7 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
                         responseBody = body,
                         cookies = emptyList(),
                         statusCode = statusCode,
-                        error = "Cloudflare protection detected. Install FlareSolverr for bypass: " +
-                                "docker run -d -p 8191:8191 ghcr.io/flaresolverr/flaresolverr:latest"
+                        error = "Cloudflare protection detected. Configure a bypass plugin in Settings > Cloudflare Bypass."
                     )
                 }
             }
@@ -234,51 +245,4 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
             )
         }
     }
-    
-    private fun extractDomain(url: String): String {
-        return try {
-            url.substringAfter("://").substringBefore("/").substringBefore(":")
-        } catch (e: Exception) {
-            ""
-        }
-    }
 }
-
-// Internal DTOs for FlareSolverr communication
-@Serializable
-private data class FlareSolverrRequestDto(
-    val cmd: String,
-    val url: String,
-    val maxTimeout: Int = 60000,
-    val session: String? = null,
-    val postData: String? = null,
-    val headers: Map<String, String>? = null
-)
-
-@Serializable
-private data class FlareSolverrResponseDto(
-    val status: String,
-    val message: String,
-    val solution: FlareSolverrSolutionDto? = null
-)
-
-@Serializable
-private data class FlareSolverrSolutionDto(
-    val url: String,
-    val status: Int,
-    val headers: Map<String, String>? = null,
-    val response: String,
-    val cookies: List<FlareSolverrCookieDto>? = null,
-    val userAgent: String? = null
-)
-
-@Serializable
-private data class FlareSolverrCookieDto(
-    val name: String,
-    val value: String,
-    val domain: String? = null,
-    val path: String? = null,
-    val expires: Double? = null,
-    val httpOnly: Boolean? = null,
-    val secure: Boolean? = null
-)

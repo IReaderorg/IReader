@@ -94,6 +94,8 @@ kotlin {
                 api(libs.ksoup.network)
                 // Kermit logging - exposed as API for consumers
                 api(libs.kermit)
+                // Koin for DI
+                api(libs.koin.core)
             }
         }
          androidMain {

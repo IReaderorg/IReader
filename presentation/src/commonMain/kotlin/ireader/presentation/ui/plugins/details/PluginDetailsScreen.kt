@@ -831,6 +831,7 @@ private fun getCategoryDisplayName(type: PluginType): String = when (type) {
     PluginType.TACHI_SOURCE_LOADER -> "Tachi Sources"
     PluginType.READER_SCREEN -> "Reader Screen"
     PluginType.SOURCE_LOADER -> "Source Loader"
+    PluginType.CLOUDFLARE_BYPASS -> "Cloudflare Bypass"
 }
 
 private fun getPermissionIcon(permission: ireader.plugin.api.PluginPermission): ImageVector = when (permission) {

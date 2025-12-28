@@ -3,6 +3,7 @@ package ireader.domain.di
 import android.app.Service
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.core.http.HttpClients
+import ireader.core.http.cloudflare.cloudflareBypassModule
 import okio.Path.Companion.toPath
 import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.PreferenceStoreFactory
@@ -57,6 +58,8 @@ actual val DomainModule = module {
     includes(ServiceModule)
     // Include TTS v2 module for new clean TTS architecture
     includes(ireader.domain.services.tts_service.v2.ttsV2Module)
+    // Include Cloudflare bypass module for plugin-based bypass
+    includes(cloudflareBypassModule)
     
     // Process State Manager for handling process death
     single { ireader.domain.services.processstate.ProcessStateManager(get()) }

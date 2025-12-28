@@ -60,6 +60,8 @@ import org.koin.dsl.module
 actual val DomainModule: Module = module {
     // Include TTS v2 module for new clean TTS architecture
     includes(ireader.domain.services.tts_service.v2.ttsV2Module)
+    // Include Cloudflare bypass module for plugin-based bypass
+    includes(ireader.core.http.cloudflare.cloudflareBypassModule)
     
     // Process State Manager for handling process death
     single { ireader.domain.services.processstate.ProcessStateManager(get()) }
@@ -137,4 +139,21 @@ actual val DomainModule: Module = module {
     // Extension services (stubs for iOS)
     single { ExtensionWatcherService() }
     single { PluginClassLoader() }
+    
+    // Network components
+    single<ireader.core.http.NetworkConfig> { 
+        ireader.core.http.NetworkConfig() 
+    }
+    
+    // HttpClients with CloudflareBypassPluginManager
+    single<ireader.core.http.HttpClients> {
+        val manager: ireader.core.http.cloudflare.CloudflareBypassPluginManager = get()
+        val provider: ireader.core.http.cloudflare.FlareSolverrProvider = get()
+        // Register built-in provider
+        ireader.core.http.cloudflare.initializeCloudflareBypass(manager, provider)
+        
+        ireader.core.http.HttpClients(
+            bypassManager = manager
+        )
+    }
 }

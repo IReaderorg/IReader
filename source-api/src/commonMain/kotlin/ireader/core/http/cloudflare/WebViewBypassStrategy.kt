@@ -1,11 +1,13 @@
 package ireader.core.http.cloudflare
 
-import ireader.core.http.BrowserEngine
 import ireader.core.http.BrowserEngineInterface
 import ireader.core.http.fingerprint.BrowserFingerprint
 import ireader.core.http.fingerprint.FingerprintEvasionScripts
 import ireader.core.http.fingerprint.FingerprintManager
 import ireader.core.util.currentTimeMillis
+
+// Use the internal BypassResult from CloudflareBypassStrategy, not the plugin one
+import ireader.core.http.cloudflare.BypassResult as InternalBypassResult
 
 /**
  * WebView-based Cloudflare bypass strategy
@@ -38,11 +40,11 @@ class WebViewBypassStrategy(
         url: String,
         challenge: CloudflareChallenge,
         config: BypassConfig
-    ): BypassResult {
+    ): InternalBypassResult {
         if (!browserEngine.isAvailable()) {
-            return BypassResult.Failed(
-                "WebView/BrowserEngine not available",
-                challenge,
+            return InternalBypassResult.Failed(
+                reason = "WebView/BrowserEngine not available",
+                challenge = challenge,
                 canRetry = false
             )
         }
@@ -78,9 +80,9 @@ class WebViewBypassStrategy(
             )
             
             if (!result.isSuccess) {
-                return BypassResult.Failed(
-                    result.error ?: "Browser fetch failed with status ${result.statusCode}",
-                    challenge,
+                return InternalBypassResult.Failed(
+                    reason = result.error ?: "Browser fetch failed with status ${result.statusCode}",
+                    challenge = challenge,
                     canRetry = true
                 )
             }
@@ -90,7 +92,7 @@ class WebViewBypassStrategy(
             val cfBm = result.cookies.find { it.name == "__cf_bm" }
             
             if (cfClearance != null) {
-                BypassResult.Success(
+                InternalBypassResult.Success(
                     ClearanceCookie(
                         cfClearance = cfClearance.value,
                         cfBm = cfBm?.value,
@@ -107,23 +109,23 @@ class WebViewBypassStrategy(
                 if (!isCloudflareChallengePage(body)) {
                     // Challenge might be solved but cookie not captured
                     // This can happen with some Cloudflare configurations
-                    BypassResult.Failed(
-                        "Challenge appears solved but cf_clearance cookie not found",
-                        challenge,
+                    InternalBypassResult.Failed(
+                        reason = "Challenge appears solved but cf_clearance cookie not found",
+                        challenge = challenge,
                         canRetry = true
                     )
                 } else {
-                    BypassResult.Failed(
-                        "Challenge not solved - still on Cloudflare page",
-                        challenge,
+                    InternalBypassResult.Failed(
+                        reason = "Challenge not solved - still on Cloudflare page",
+                        challenge = challenge,
                         canRetry = true
                     )
                 }
             }
         } catch (e: Exception) {
-            BypassResult.Failed(
-                "WebView bypass error: ${e.message}",
-                challenge,
+            InternalBypassResult.Failed(
+                reason = "WebView bypass error: ${e.message}",
+                challenge = challenge,
                 canRetry = true
             )
         }

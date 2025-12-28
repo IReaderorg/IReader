@@ -4,184 +4,227 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 
 /**
- * Detects Cloudflare protection and identifies the challenge type
+ * Detects Cloudflare protection and challenge types from HTTP responses.
  */
 object CloudflareDetector {
     
-    // Cloudflare challenge page patterns
+    // Cloudflare-specific headers
+    private val CF_HEADERS = listOf(
+        "cf-ray",
+        "cf-cache-status",
+        "cf-request-id"
+    )
+    
+    // Patterns indicating JS challenge
     private val JS_CHALLENGE_PATTERNS = listOf(
-        Regex("""<title>Just a moment\.\.\.</title>""", RegexOption.IGNORE_CASE),
-        Regex("""Checking your browser before accessing""", RegexOption.IGNORE_CASE),
-        Regex("""cf-browser-verification""", RegexOption.IGNORE_CASE),
-        Regex("""_cf_chl_opt"""),
-        Regex("""cdn-cgi/challenge-platform"""),
-        Regex("""__cf_chl_jschl_tk__"""),
-        Regex("""jschl-answer"""),
-        Regex("""jschl_vc""")
+        "Just a moment",
+        "Checking your browser",
+        "cf-browser-verification",
+        "_cf_chl_opt",
+        "cf_chl_prog",
+        "challenge-platform"
     )
     
+    // Patterns indicating Turnstile
     private val TURNSTILE_PATTERNS = listOf(
-        Regex("""challenges\.cloudflare\.com/turnstile"""),
-        Regex("""cf-turnstile"""),
-        Regex("""turnstile\.render"""),
-        Regex("""data-sitekey=['"](0x[^'"]+)['"]""")
+        "challenges.cloudflare.com/turnstile",
+        "cf-turnstile",
+        "turnstile.js"
     )
     
+    // Patterns indicating CAPTCHA
     private val CAPTCHA_PATTERNS = listOf(
-        Regex("""cf-captcha-container"""),
-        Regex("""g-recaptcha"""),
-        Regex("""h-captcha"""),
-        Regex("""data-sitekey=['"]([^'"]+)['"]""")
+        "cf-captcha-container",
+        "g-recaptcha",
+        "h-captcha"
     )
     
+    // Patterns indicating managed challenge
     private val MANAGED_CHALLENGE_PATTERNS = listOf(
-        Regex("""managed_checking_msg"""),
-        Regex("""cf-please-wait"""),
-        Regex("""Verifying you are human""", RegexOption.IGNORE_CASE),
-        Regex("""cf-spinner""")
-    )
-
-    private val BLOCK_PATTERNS = listOf(
-        Regex("""cf-error-details"""),
-        Regex("""Access denied""", RegexOption.IGNORE_CASE),
-        Regex("""Sorry, you have been blocked""", RegexOption.IGNORE_CASE),
-        Regex("""You have been blocked""", RegexOption.IGNORE_CASE),
-        Regex("""This website is using a security service""", RegexOption.IGNORE_CASE),
-        Regex("""Ray ID:""")
+        "managed_checking_msg",
+        "cf-please-wait",
+        "Verifying you are human"
     )
     
-    private val CLOUDFLARE_SERVERS = listOf("cloudflare", "cloudflare-nginx")
+    // Patterns indicating block
+    private val BLOCK_PATTERNS = listOf(
+        "cf-error-details",
+        "Access denied",
+        "Sorry, you have been blocked",
+        "You have been blocked",
+        "Error 1020"
+    )
+    
+    // Patterns indicating rate limit
+    private val RATE_LIMIT_PATTERNS = listOf(
+        "Error 1015",
+        "You are being rate limited"
+    )
     
     /**
-     * Detect Cloudflare challenge from HTTP response and body
+     * Detect Cloudflare challenge from HTTP response.
+     * 
+     * @param response HTTP response
+     * @param body Response body text
+     * @return Detected challenge type
      */
     fun detect(response: HttpResponse, body: String): CloudflareChallenge {
-        // First check if this is even a Cloudflare response
-        if (!isCloudflareResponse(response)) {
-            return CloudflareChallenge.None
-        }
-        
         val statusCode = response.status.value
         val rayId = extractRayId(response)
         
-        // Check for rate limiting first
-        if (statusCode == 429) {
+        // Check if this is even a Cloudflare response
+        if (!isCloudflareResponse(response, body)) {
+            return CloudflareChallenge.None
+        }
+        
+        // Check for rate limiting (429)
+        if (statusCode == HttpStatusCode.TooManyRequests.value) {
             val retryAfter = extractRetryAfter(response)
             return CloudflareChallenge.RateLimited(retryAfter, rayId)
         }
         
-        // Check for IP block (usually 403)
-        if (statusCode == 403 && matchesAny(body, BLOCK_PATTERNS)) {
-            return CloudflareChallenge.BlockedIP(rayId)
+        // Check for IP block (403 with block message)
+        if (statusCode == HttpStatusCode.Forbidden.value) {
+            if (BLOCK_PATTERNS.any { body.contains(it, ignoreCase = true) }) {
+                return CloudflareChallenge.BlockedIP(rayId)
+            }
         }
         
         // Check for Turnstile challenge
-        val turnstileSiteKey = extractTurnstileSiteKey(body)
-        if (turnstileSiteKey != null) {
-            return CloudflareChallenge.TurnstileChallenge(turnstileSiteKey, rayId)
+        if (TURNSTILE_PATTERNS.any { body.contains(it, ignoreCase = true) }) {
+            val siteKey = extractTurnstileSiteKey(body) ?: ""
+            return CloudflareChallenge.TurnstileChallenge(siteKey, rayId)
         }
         
         // Check for CAPTCHA challenge
-        val captchaSiteKey = extractCaptchaSiteKey(body)
-        if (captchaSiteKey != null) {
-            return CloudflareChallenge.CaptchaChallenge(captchaSiteKey, rayId)
+        if (CAPTCHA_PATTERNS.any { body.contains(it, ignoreCase = true) }) {
+            val siteKey = extractCaptchaSiteKey(body) ?: ""
+            return CloudflareChallenge.CaptchaChallenge(siteKey, rayId)
         }
         
         // Check for managed challenge
-        if (matchesAny(body, MANAGED_CHALLENGE_PATTERNS)) {
+        if (MANAGED_CHALLENGE_PATTERNS.any { body.contains(it, ignoreCase = true) }) {
             return CloudflareChallenge.ManagedChallenge(rayId)
         }
         
         // Check for JS challenge (most common)
-        if (statusCode in listOf(403, 503) && matchesAny(body, JS_CHALLENGE_PATTERNS)) {
-            return CloudflareChallenge.JSChallenge(rayId)
+        if (statusCode == HttpStatusCode.ServiceUnavailable.value || 
+            statusCode == HttpStatusCode.Forbidden.value) {
+            if (JS_CHALLENGE_PATTERNS.any { body.contains(it, ignoreCase = true) }) {
+                return CloudflareChallenge.JSChallenge(rayId)
+            }
         }
         
-        // If we have Cloudflare headers but can't identify the challenge
-        if (statusCode in listOf(403, 503)) {
-            return CloudflareChallenge.Unknown(rayId, collectHints(body))
+        // Check for rate limit patterns in body
+        if (RATE_LIMIT_PATTERNS.any { body.contains(it, ignoreCase = true) }) {
+            return CloudflareChallenge.RateLimited(null, rayId)
+        }
+        
+        // If we have Cloudflare headers but couldn't identify the challenge
+        if (rayId != null && (statusCode == 403 || statusCode == 503)) {
+            return CloudflareChallenge.Unknown(
+                rayId = rayId,
+                hints = listOf("Cloudflare response with unknown challenge type")
+            )
         }
         
         return CloudflareChallenge.None
     }
-
-    /**
-     * Quick check if response is from Cloudflare
-     */
-    fun isCloudflareResponse(response: HttpResponse): Boolean {
-        val server = response.headers["server"]?.lowercase()
-        val hasCfRay = response.headers["cf-ray"] != null
-        val hasCfCache = response.headers["cf-cache-status"] != null
-        
-        return hasCfRay || hasCfCache || CLOUDFLARE_SERVERS.any { server?.contains(it) == true }
-    }
     
     /**
-     * Check if response indicates a Cloudflare challenge (quick check without body)
+     * Quick check if response is likely a Cloudflare challenge.
+     * Use this for fast filtering before full detection.
      */
     fun isChallengeLikely(response: HttpResponse): Boolean {
-        if (!isCloudflareResponse(response)) return false
-        return response.status.value in listOf(403, 429, 503)
+        return mightBeCloudflare(response)
     }
     
     /**
-     * Extract Ray ID from response headers
+     * Quick check if response might be Cloudflare protected.
+     * Use this for fast filtering before full detection.
      */
-    fun extractRayId(response: HttpResponse): String? {
-        return response.headers["cf-ray"]?.substringBefore("-")
+    fun mightBeCloudflare(response: HttpResponse): Boolean {
+        val statusCode = response.status.value
+        
+        // Quick status code check
+        if (statusCode !in listOf(403, 429, 503, 520, 521, 522, 523, 524)) {
+            return false
+        }
+        
+        // Check for Cloudflare headers
+        return CF_HEADERS.any { header ->
+            response.headers[header] != null
+        } || response.headers["server"]?.contains("cloudflare", ignoreCase = true) == true
     }
     
     /**
-     * Extract Retry-After header value in seconds
+     * Check if response is from Cloudflare.
+     */
+    private fun isCloudflareResponse(response: HttpResponse, body: String): Boolean {
+        // Check headers
+        val hasCloudflareHeaders = CF_HEADERS.any { header ->
+            response.headers[header] != null
+        }
+        
+        val serverIsCloudflare = response.headers["server"]
+            ?.contains("cloudflare", ignoreCase = true) == true
+        
+        // Check body for Cloudflare indicators
+        val hasCloudflareBody = body.contains("cloudflare", ignoreCase = true) ||
+                body.contains("cf-browser-verification", ignoreCase = true) ||
+                body.contains("__cf_", ignoreCase = true)
+        
+        return hasCloudflareHeaders || serverIsCloudflare || hasCloudflareBody
+    }
+    
+    /**
+     * Extract CF-Ray ID from response headers.
+     */
+    private fun extractRayId(response: HttpResponse): String? {
+        return response.headers["cf-ray"]
+    }
+    
+    /**
+     * Extract Retry-After header value in seconds.
      */
     private fun extractRetryAfter(response: HttpResponse): Long? {
         return response.headers["retry-after"]?.toLongOrNull()
     }
     
     /**
-     * Extract Turnstile site key from page body
+     * Extract Turnstile site key from page body.
      */
     private fun extractTurnstileSiteKey(body: String): String? {
-        // Look for Turnstile-specific patterns
-        val turnstileRegex = Regex("""data-sitekey=['"](0x[A-Za-z0-9_-]+)['"]""")
-        val match = turnstileRegex.find(body)
-        if (match != null && body.contains("turnstile", ignoreCase = true)) {
-            return match.groupValues[1]
+        val patterns = listOf(
+            Regex("""sitekey['":\s]+['"]([^'"]+)['"]"""),
+            Regex("""data-sitekey=['"]([^'"]+)['"]"""),
+            Regex("""turnstileSiteKey['":\s]+['"]([^'"]+)['"]""")
+        )
+        
+        for (pattern in patterns) {
+            val match = pattern.find(body)
+            if (match != null) {
+                return match.groupValues.getOrNull(1)
+            }
         }
         return null
     }
     
     /**
-     * Extract CAPTCHA site key from page body
+     * Extract CAPTCHA site key from page body.
      */
     private fun extractCaptchaSiteKey(body: String): String? {
-        // Skip if it's a Turnstile (handled separately)
-        if (body.contains("turnstile", ignoreCase = true)) return null
+        val patterns = listOf(
+            Regex("""data-sitekey=['"]([^'"]+)['"]"""),
+            Regex("""sitekey['":\s]+['"]([^'"]+)['"]""")
+        )
         
-        val siteKeyRegex = Regex("""data-sitekey=['"]([^'"]+)['"]""")
-        return siteKeyRegex.find(body)?.groupValues?.get(1)
-    }
-    
-    /**
-     * Check if body matches any of the given patterns
-     */
-    private fun matchesAny(body: String, patterns: List<Regex>): Boolean {
-        return patterns.any { it.containsMatchIn(body) }
-    }
-    
-    /**
-     * Collect hints about what type of challenge this might be
-     */
-    private fun collectHints(body: String): List<String> {
-        val hints = mutableListOf<String>()
-        
-        if (body.contains("challenge", ignoreCase = true)) hints.add("challenge_keyword")
-        if (body.contains("verify", ignoreCase = true)) hints.add("verify_keyword")
-        if (body.contains("captcha", ignoreCase = true)) hints.add("captcha_keyword")
-        if (body.contains("blocked", ignoreCase = true)) hints.add("blocked_keyword")
-        if (body.contains("security", ignoreCase = true)) hints.add("security_keyword")
-        if (body.contains("cf-", ignoreCase = true)) hints.add("cf_prefix")
-        
-        return hints
+        for (pattern in patterns) {
+            val match = pattern.find(body)
+            if (match != null) {
+                return match.groupValues.getOrNull(1)
+            }
+        }
+        return null
     }
 }

@@ -950,6 +950,7 @@ private fun getCategoryDisplayName(type: PluginType?): String = when (type) {
     PluginType.TACHI_SOURCE_LOADER -> "Tachi Sources"
     PluginType.READER_SCREEN -> "Reader Screens"
     PluginType.SOURCE_LOADER -> "Source Loaders"
+    PluginType.CLOUDFLARE_BYPASS -> "Cloudflare Bypass"
     null -> "All"
 }
 
@@ -970,6 +971,7 @@ private fun getCategoryColor(type: PluginType): Color = when (type) {
     PluginType.TACHI_SOURCE_LOADER -> Color(0xFFE65100)
     PluginType.READER_SCREEN -> Color(0xFF1565C0)
     PluginType.SOURCE_LOADER -> Color(0xFF558B2F)
+    PluginType.CLOUDFLARE_BYPASS -> Color(0xFFFF6F00)
 }
 
 private fun formatDownloadCount(count: Int): String = when {

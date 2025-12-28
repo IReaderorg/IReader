@@ -117,5 +117,16 @@ enum class PluginType {
      * Base type for plugins that load content sources.
      * Use more specific types (TACHI_SOURCE_LOADER) when applicable.
      */
-    SOURCE_LOADER
+    SOURCE_LOADER,
+    
+    /**
+     * Cloudflare bypass plugins provide strategies to bypass Cloudflare protection.
+     * Implement [CloudflareBypassPlugin] interface.
+     * 
+     * These plugins enable accessing Cloudflare-protected sources:
+     * - FlareSolverr integration
+     * - Browser automation services
+     * - Custom bypass implementations
+     */
+    CLOUDFLARE_BYPASS
 }
