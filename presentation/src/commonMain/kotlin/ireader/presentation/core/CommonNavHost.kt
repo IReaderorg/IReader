@@ -79,6 +79,13 @@ fun CommonNavHost(
 ) {
     val viewModelStore = remember { NavigationViewModelStore() }
     
+    // Get FeaturePluginIntegration at composable level for plugin screen registration
+    // Use getKoin().getOrNull() instead of try-catch around koinInject (composable)
+    val koin = org.koin.compose.getKoin()
+    val featurePluginIntegration: FeaturePluginIntegration? = remember {
+        koin.getOrNull<FeaturePluginIntegration>()
+    }
+    
     androidx.compose.runtime.CompositionLocalProvider(
         LocalNavigationViewModelStore provides viewModelStore
     ) {
@@ -588,14 +595,13 @@ fun CommonNavHost(
         
         // Register plugin screens dynamically
         // This allows feature plugins to add their own screens to the navigation graph
-        // Note: We use GlobalContext.get() here because koinInject() is a Composable function
-        // and can't be used directly in NavGraphBuilder context
-        try {
-            val featurePluginIntegration = org.koin.core.context.GlobalContext.get().get<FeaturePluginIntegration>()
-            PluginNavigationExtensions.registerPluginScreens(this, featurePluginIntegration)
-        } catch (e: Exception) {
-            // Plugin integration not available, skip plugin screen registration
-            println("[CommonNavHost] Plugin screen registration skipped: ${e.message}")
+        // FeaturePluginIntegration is injected at composable level above
+        if (featurePluginIntegration != null) {
+            try {
+                PluginNavigationExtensions.registerPluginScreens(this, featurePluginIntegration)
+            } catch (e: Exception) {
+                println("[CommonNavHost] Plugin screen registration failed: ${e.message}")
+            }
         }
         }
     }
