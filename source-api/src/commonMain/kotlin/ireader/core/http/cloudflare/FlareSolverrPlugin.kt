@@ -36,7 +36,7 @@ class FlareSolverrProvider(
     override val name: String = "FlareSolverr"
     override val priority: Int = 100
     
-    private val instanceId = System.identityHashCode(this)
+    private val instanceId = this.hashCode()
     
     init {
         Log.debug { "[FlareSolverrProvider] Instance created: $instanceId" }
