@@ -652,6 +652,8 @@
     <string name="open_random">Open Random</string>
     <string name="sync_remote">Sync Remote</string>
     <string name="no_categories_found">No categories found</string>
+    <string name="select_categories">Select Categories</string>
+    <string name="add_without_category">Add Without Category</string>
     <string name="export_as_epub">Export as ePub</string>
     <string name="info">Info</string>
     <string name="more_options">More Options</string>

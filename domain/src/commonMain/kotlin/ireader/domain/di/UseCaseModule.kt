@@ -31,7 +31,16 @@ val useCaseModule = module {
     singleOf(::UpdateBook)
     
     // Library management use cases
-    singleOf(::AddToLibrary)
+    // AddToLibrary with all dependencies for category selection and auto-categorization
+    single {
+        AddToLibrary(
+            updateBook = get(),
+            bookRepository = get(),
+            autoCategorizeBook = get(),
+            categoryRepository = get(),
+            bookCategoryRepository = get()
+        )
+    }
     singleOf(::RemoveFromLibrary)
     singleOf(::ToggleFavorite)
     

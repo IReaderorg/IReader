@@ -733,6 +733,17 @@ data class BookDetailScreenSpec constructor(
                 onDismiss = { vm.showTrackingSearchDialog = false }
             )
         }
+        
+        // Category selection dialog when adding to library
+        if (vm.showCategorySelectionDialog) {
+            val categories by vm.availableCategories.collectAsState()
+            ireader.presentation.ui.book.components.CategorySelectionDialog(
+                categories = categories,
+                onConfirm = { selectedIds -> vm.confirmCategorySelection(selectedIds) },
+                onDismiss = { vm.dismissCategorySelection() },
+                onSkip = { vm.confirmCategorySelection(emptySet()) }
+            )
+        }
     }
     
     @Composable

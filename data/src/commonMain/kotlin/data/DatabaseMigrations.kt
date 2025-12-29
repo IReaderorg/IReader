@@ -822,8 +822,57 @@ object DatabaseMigrations {
                 driver.execute(null, "ALTER TABLE book ADD COLUMN chapter_page INTEGER NOT NULL DEFAULT 1;", 0)
                 println("[DatabaseMigrations] Added missing chapter_page column to book table")
             }
+            
+            // Ensure category_auto_rules table exists
+            ensureCategoryAutoRulesTable(driver)
         } catch (e: Exception) {
             println("[DatabaseMigrations] Error ensuring required columns: ${e.message}")
+        }
+    }
+    
+    /**
+     * Ensures the category_auto_rules table exists.
+     * This is called from ensureRequiredColumns to handle cases where the migration didn't run.
+     */
+    private fun ensureCategoryAutoRulesTable(driver: SqlDriver) {
+        try {
+            // Check if table exists
+            var tableExists = false
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='category_auto_rules'",
+                mapper = { cursor ->
+                    val result = cursor.next()
+                    tableExists = result.value
+                    result
+                },
+                parameters = 0
+            )
+            
+            if (!tableExists) {
+                // Create category_auto_rules table
+                val createCategoryAutoRulesTableSql = """
+                    CREATE TABLE IF NOT EXISTS category_auto_rules(
+                        _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        category_id INTEGER NOT NULL,
+                        rule_type TEXT NOT NULL,
+                        value TEXT NOT NULL,
+                        is_enabled INTEGER NOT NULL DEFAULT 1,
+                        FOREIGN KEY(category_id) REFERENCES categories (_id)
+                        ON DELETE CASCADE
+                    );
+                """.trimIndent()
+                
+                driver.execute(null, createCategoryAutoRulesTableSql, 0)
+                println("[DatabaseMigrations] Created missing category_auto_rules table")
+                
+                // Create indexes
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_category_auto_rules_category_id ON category_auto_rules(category_id);", 0)
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_category_auto_rules_type ON category_auto_rules(rule_type);", 0)
+                println("[DatabaseMigrations] Created category_auto_rules indexes")
+            }
+        } catch (e: Exception) {
+            println("[DatabaseMigrations] Error ensuring category_auto_rules table: ${e.message}")
         }
     }
     

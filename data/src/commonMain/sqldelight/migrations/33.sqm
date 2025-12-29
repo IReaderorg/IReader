@@ -1,0 +1,19 @@
+-- Migration 33: Add category_auto_rules table for automatic categorization
+-- This table stores rules for automatically assigning books to categories
+-- based on genre or source
+
+CREATE TABLE IF NOT EXISTS category_auto_rules(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    category_id INTEGER NOT NULL,
+    rule_type TEXT NOT NULL,
+    value TEXT NOT NULL,
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY(category_id) REFERENCES categories (_id)
+    ON DELETE CASCADE
+);
+
+-- Index for faster lookups by category
+CREATE INDEX IF NOT EXISTS idx_category_auto_rules_category_id ON category_auto_rules(category_id);
+
+-- Index for faster lookups by rule type
+CREATE INDEX IF NOT EXISTS idx_category_auto_rules_type ON category_auto_rules(rule_type);

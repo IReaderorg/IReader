@@ -13,9 +13,22 @@ object IReaderLog {
     private val logger = Logger.withTag(DEFAULT_TAG)
     
     /**
+     * Whether to also print to stdout (useful for desktop where Kermit might not show logs)
+     */
+    var printToStdout: Boolean = true
+    
+    private fun printLog(level: String, tag: String, message: String, throwable: Throwable? = null) {
+        if (printToStdout) {
+            println("[$level/$tag] $message")
+            throwable?.printStackTrace()
+        }
+    }
+    
+    /**
      * Log debug messages for development and troubleshooting
      */
     fun debug(message: String, tag: String = DEFAULT_TAG, throwable: Throwable? = null) {
+        printLog("D", tag, message, throwable)
         Logger.withTag(tag).d(throwable) { message }
     }
     
@@ -23,6 +36,7 @@ object IReaderLog {
      * Log informational messages
      */
     fun info(message: String, tag: String = DEFAULT_TAG, throwable: Throwable? = null) {
+        printLog("I", tag, message, throwable)
         Logger.withTag(tag).i(throwable) { message }
     }
     
@@ -30,6 +44,7 @@ object IReaderLog {
      * Log warning messages for potential issues
      */
     fun warn(message: String, throwable: Throwable? = null, tag: String = DEFAULT_TAG) {
+        printLog("W", tag, message, throwable)
         Logger.withTag(tag).w(throwable) { message }
     }
     
@@ -37,6 +52,7 @@ object IReaderLog {
      * Log error messages for serious issues
      */
     fun error(message: String, throwable: Throwable? = null, tag: String = DEFAULT_TAG) {
+        printLog("E", tag, message, throwable)
         Logger.withTag(tag).e(throwable) { message }
     }
     

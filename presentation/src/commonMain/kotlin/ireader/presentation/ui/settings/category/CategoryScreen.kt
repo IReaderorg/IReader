@@ -129,9 +129,7 @@ fun CategoryScreen(
                 }
             },
             onConfirm = { text ->
-                vm.scope.launch {
-                    vm.createCategoryWithName.await(text)
-                }
+                vm.createCategory(text)
                 vm.showDialog = false
             },
             onDismiss = {

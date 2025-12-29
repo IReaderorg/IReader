@@ -1,11 +1,14 @@
 package ireader.domain.services.translationService
 
 import ireader.core.log.Log
+import ireader.core.source.LocalCatalogSource
+import ireader.core.source.LocalSource
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.models.entities.toChapterInfo
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.TranslationPreferences
 import ireader.domain.services.common.ServiceResult
@@ -47,6 +50,7 @@ class TranslationServiceImpl(
     private val readerPreferences: ReaderPreferences,
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
+    private val localCatalogSource: LocalCatalogSource? = null,
     private val stateHolder: TranslationStateHolder = TranslationStateHolder(),
     private val autoShareTranslationUseCase: ireader.domain.community.cloudflare.AutoShareTranslationUseCase? = null,
     private val communityPreferences: ireader.domain.community.CommunityPreferences? = null,
@@ -408,8 +412,45 @@ class TranslationServiceImpl(
     private suspend fun downloadChapterContent(task: TranslationTask): List<Page> {
         val book = bookRepository.findBookById(task.bookId)
             ?: throw Exception("Book not found")
+        
+        // findChapterById uses the full mapper which includes content
         val chapter = chapterRepository.findChapterById(task.chapterId)
             ?: throw Exception("Chapter not found")
+        
+        // Check if this is a local source - local sources don't need remote download
+        if (book.sourceId == LocalSource.SOURCE_ID) {
+            Log.info { "Local source detected for chapter: ${chapter.name}" }
+            
+            // For imported books (EPUB/PDF), content is already stored in the chapter
+            // findChapterById uses the full mapper, so content should be loaded
+            if (!chapter.isEmpty()) {
+                Log.info { "Using existing content from imported book (${chapter.content.size} pages)" }
+                return chapter.content
+            }
+            
+            // For scanned local novels, try to read from file system
+            // Local file keys have format: local_local_FolderName|||FileName.ext
+            if (chapter.key.contains("|||")) {
+                Log.info { "Attempting to read from local file system for key: ${chapter.key}" }
+                val localSource = localCatalogSource
+                    ?: throw Exception("Local source not available")
+                
+                val content = localSource.getPageList(chapter.toChapterInfo(), emptyList())
+                
+                if (content.isNotEmpty()) {
+                    Log.info { "Read ${content.size} pages from local file" }
+                    // Save content to the chapter table
+                    val updatedChapter = chapter.copy(content = content)
+                    chapterRepository.insertChapter(updatedChapter)
+                    return content
+                }
+            }
+            
+            // If we get here, the local source has no content
+            throw Exception("Local source chapter has no content. The chapter may not have been properly imported.")
+        }
+        
+        // For remote sources, use the existing download logic
         val catalog = getLocalCatalog.get(book.sourceId)
             ?: throw Exception("Source not found")
         

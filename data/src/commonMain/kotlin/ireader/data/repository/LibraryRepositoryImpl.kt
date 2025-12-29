@@ -42,6 +42,7 @@ class LibraryRepositoryImpl(
         includeArchived: Boolean
     ): List<LibraryBook> {
         ScreenProfiler.mark("Library", "db_paginated_query_start_${sort.type.name}")
+        println("[LibraryRepository] findAllPaginated called: sort=${sort.type}, limit=$limit, offset=$offset, includeArchived=$includeArchived")
         // Use sorted queries with cached counts - sorting done in SQL for efficiency
         val result = handler.awaitList {
             when (sort.type) {
@@ -75,6 +76,7 @@ class LibraryRepositoryImpl(
                 }
             }
         }.filterArchived(includeArchived)
+        println("[LibraryRepository] findAllPaginated returned ${result.size} books: ${result.map { "id=${it.id},title=${it.title}" }}")
         ScreenProfiler.mark("Library", "db_paginated_query_complete_${result.size}_books")
         return result
     }
@@ -85,9 +87,11 @@ class LibraryRepositoryImpl(
     }
     
     override suspend fun getLibraryCount(includeArchived: Boolean): Int {
-        return handler.awaitOne {
+        val count = handler.awaitOne {
             bookQueries.getLibraryCount()
         }.toInt()
+        println("[LibraryRepository] getLibraryCount returned: $count")
+        return count
     }
 
     private fun Database.getLibrary(sort: LibrarySort): Query<LibraryBook> {

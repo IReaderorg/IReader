@@ -10,6 +10,7 @@ package ireader.core.log
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import kotlin.time.ExperimentalTime
 
 /**
  * Logging utility using Kermit for Kotlin Multiplatform.
@@ -26,9 +27,19 @@ object Log {
     
     /**
      * Minimum severity level for logging.
-     * Set to Severity.Warn to suppress Info and Debug logs in production.
+     * Set to Severity.Verbose to see all logs including Debug.
      */
-    var minSeverity: Severity = Severity.Info
+    var minSeverity: Severity = Severity.Verbose
+    
+    /**
+     * Whether to also print to stdout (useful for desktop where Kermit might not show logs)
+     */
+    var printToStdout: Boolean = true
+    
+    init {
+        // Enable verbose logging by default and set Kermit's min severity
+        Logger.setMinSeverity(Severity.Verbose)
+    }
     
     /**
      * Enable verbose logging (Debug and Info levels).
@@ -47,13 +58,24 @@ object Log {
         minSeverity = Severity.Warn
         Logger.setMinSeverity(Severity.Warn)
     }
+    
+    @OptIn(ExperimentalTime::class)
+    private fun printLog(level: String, tag: String, message: String, throwable: Throwable? = null) {
+        if (printToStdout) {
+            val timestamp = kotlin.time.Clock.System.now().toString()
+            println("[$timestamp] $level/$tag: $message")
+            throwable?.printStackTrace()
+        }
+    }
 
     /**
      * Logs a lazy message at verbose level.
      */
     fun verbose(message: () -> String) {
         if (minSeverity.ordinal <= Severity.Verbose.ordinal) {
-            Logger.v(DEFAULT_TAG) { message() }
+            val msg = message()
+            printLog("V", DEFAULT_TAG, msg)
+            Logger.v(DEFAULT_TAG) { msg }
         }
     }
 
@@ -61,14 +83,18 @@ object Log {
      * Logs a formatted message at verbose level.
      */
     fun verbose(message: String, vararg arguments: Any?) {
-        Logger.v(DEFAULT_TAG) { message.formatMessage(*arguments) }
+        val msg = message.formatMessage(*arguments)
+        printLog("V", DEFAULT_TAG, msg)
+        Logger.v(DEFAULT_TAG) { msg }
     }
 
     /**
      * Logs an exception at verbose level.
      */
     fun verbose(exception: Throwable, message: String? = null, vararg arguments: Any?) {
-        Logger.v(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+        val msg = message?.formatMessage(*arguments) ?: exception.message ?: ""
+        printLog("V", DEFAULT_TAG, msg, exception)
+        Logger.v(DEFAULT_TAG, exception) { msg }
     }
 
     /**
@@ -76,7 +102,9 @@ object Log {
      */
     fun debug(message: () -> String) {
         if (minSeverity.ordinal <= Severity.Debug.ordinal) {
-            Logger.d(DEFAULT_TAG) { message() }
+            val msg = message()
+            printLog("D", DEFAULT_TAG, msg)
+            Logger.d(DEFAULT_TAG) { msg }
         }
     }
 
@@ -85,7 +113,9 @@ object Log {
      */
     fun debug(message: String, vararg arguments: Any?) {
         if (minSeverity.ordinal <= Severity.Debug.ordinal) {
-            Logger.d(DEFAULT_TAG) { message.formatMessage(*arguments) }
+            val msg = message.formatMessage(*arguments)
+            printLog("D", DEFAULT_TAG, msg)
+            Logger.d(DEFAULT_TAG) { msg }
         }
     }
 
@@ -94,7 +124,9 @@ object Log {
      */
     fun debug(exception: Throwable, message: String? = null, vararg arguments: Any?) {
         if (minSeverity.ordinal <= Severity.Debug.ordinal) {
-            Logger.d(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+            val msg = message?.formatMessage(*arguments) ?: exception.message ?: ""
+            printLog("D", DEFAULT_TAG, msg, exception)
+            Logger.d(DEFAULT_TAG, exception) { msg }
         }
     }
 
@@ -103,7 +135,9 @@ object Log {
      */
     fun info(message: () -> String) {
         if (minSeverity.ordinal <= Severity.Info.ordinal) {
-            Logger.i(DEFAULT_TAG) { message() }
+            val msg = message()
+            printLog("I", DEFAULT_TAG, msg)
+            Logger.i(DEFAULT_TAG) { msg }
         }
     }
 
@@ -112,7 +146,9 @@ object Log {
      */
     fun info(message: String, vararg arguments: Any?) {
         if (minSeverity.ordinal <= Severity.Info.ordinal) {
-            Logger.i(DEFAULT_TAG) { message.formatMessage(*arguments) }
+            val msg = message.formatMessage(*arguments)
+            printLog("I", DEFAULT_TAG, msg)
+            Logger.i(DEFAULT_TAG) { msg }
         }
     }
 
@@ -121,7 +157,9 @@ object Log {
      */
     fun info(exception: Throwable, message: String? = null, vararg arguments: Any?) {
         if (minSeverity.ordinal <= Severity.Info.ordinal) {
-            Logger.i(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+            val msg = message?.formatMessage(*arguments) ?: exception.message ?: ""
+            printLog("I", DEFAULT_TAG, msg, exception)
+            Logger.i(DEFAULT_TAG, exception) { msg }
         }
     }
 
@@ -129,48 +167,61 @@ object Log {
      * Logs a lazy message at warn level.
      */
     fun warn(message: () -> String) {
-        Logger.w(DEFAULT_TAG) { message() }
+        val msg = message()
+        printLog("W", DEFAULT_TAG, msg)
+        Logger.w(DEFAULT_TAG) { msg }
     }
 
     /**
      * Logs a formatted message at warn level.
      */
     fun warn(message: String, vararg arguments: Any?) {
-        Logger.w(DEFAULT_TAG) { message.formatMessage(*arguments) }
+        val msg = message.formatMessage(*arguments)
+        printLog("W", DEFAULT_TAG, msg)
+        Logger.w(DEFAULT_TAG) { msg }
     }
 
     /**
      * Logs an exception at warn level.
      */
     fun warn(exception: Throwable, message: String? = null, vararg arguments: Any?) {
-        Logger.w(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+        val msg = message?.formatMessage(*arguments) ?: exception.message ?: ""
+        printLog("W", DEFAULT_TAG, msg, exception)
+        Logger.w(DEFAULT_TAG, exception) { msg }
     }
 
     /**
      * Logs a lazy message at error level.
      */
     fun error(message: () -> String) {
-        Logger.e(DEFAULT_TAG) { message() }
+        val msg = message()
+        printLog("E", DEFAULT_TAG, msg)
+        Logger.e(DEFAULT_TAG) { msg }
     }
 
     /**
      * Logs a formatted message at error level.
      */
     fun error(message: String, vararg arguments: Any?) {
-        Logger.e(DEFAULT_TAG) { message.formatMessage(*arguments) }
+        val msg = message.formatMessage(*arguments)
+        printLog("E", DEFAULT_TAG, msg)
+        Logger.e(DEFAULT_TAG) { msg }
     }
 
     /**
      * Logs an exception at error level.
      */
     fun error(exception: Throwable, message: String? = null, vararg arguments: Any?) {
-        Logger.e(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+        val msg = message?.formatMessage(*arguments) ?: exception.message ?: ""
+        printLog("E", DEFAULT_TAG, msg, exception)
+        Logger.e(DEFAULT_TAG, exception) { msg }
     }
 
     /**
      * Logs an exception at error level (convenience overload).
      */
     fun error(message: String, exception: Throwable) {
+        printLog("E", DEFAULT_TAG, message, exception)
         Logger.e(DEFAULT_TAG, exception) { message }
     }
 

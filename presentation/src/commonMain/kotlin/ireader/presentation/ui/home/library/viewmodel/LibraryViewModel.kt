@@ -277,45 +277,39 @@ class LibraryViewModel(
         }
         
         // Subscribe to categories
-        // NOTE: Category subscription is disabled to prevent OOM on low-memory devices
-        // with large libraries (10,000+ books). The library uses true DB pagination
-        // which loads books directly without needing categories from LibraryController.
-        // TODO: Re-enable when memory usage is optimized
-        /*
+        // Subscribe to categories reactively for real-time updates
+        // This is memory-safe because it only loads category metadata, not books
         combine(
             libraryPreferences.showAllCategory().stateIn(scope),
             libraryPreferences.showEmptyCategories().stateIn(scope)
         ) { showAll, showEmpty ->
             Pair(showAll, showEmpty)
         }.flatMapLatest { (showAll, showEmpty) ->
-            libraryUseCases.categories.subscribe(showAll, showEmpty, scope).onEach { categoriesList ->
-                val lastCategoryId = lastUsedCategory.value
-                val index = categoriesList.indexOfFirst { it.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
-                
-                _uiState.update { current ->
-                    current.copy(
-                        categories = categoriesList.toImmutableList(),
-                        selectedCategoryIndex = index
-                    )
-                }
+            libraryUseCases.categories.subscribe(showAll, showEmpty, scope)
+        }.onEach { categoriesList ->
+            val lastCategoryId = lastUsedCategory.value
+            val currentIndex = _uiState.value.selectedCategoryIndex
+            // Preserve current selection if possible, otherwise use last used category
+            val index = if (currentIndex < categoriesList.size) {
+                currentIndex
+            } else {
+                categoriesList.indexOfFirst { it.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
+            }
+            
+            _uiState.update { current ->
+                current.copy(
+                    categories = categoriesList.toImmutableList(),
+                    selectedCategoryIndex = index
+                )
             }
         }.launchIn(scope)
-        */
         
-        // Load categories once (non-reactive) to avoid continuous memory pressure
-        // Also load initial books for the default category immediately
+        // Load initial books for the default category
         scope.launch {
             try {
                 val categoriesList = libraryUseCases.categories.await()
                 val lastCategoryId = lastUsedCategory.value
                 val index = categoriesList.indexOfFirst { it.category.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
-                
-                _uiState.update { current ->
-                    current.copy(
-                        categories = categoriesList.toImmutableList(),
-                        selectedCategoryIndex = index
-                    )
-                }
                 
                 // Check if we have preloaded cache from app startup
                 // This provides instant display while DB query runs

@@ -118,6 +118,8 @@ fun LibraryController(
                 deleteQueues.clear()
                 addQueues.clear()
                 vm.unselectAll()
+                // Refresh all categories to show updated book-category associations
+                vm.resetAllPagination()
             }
             showDialog = false
         },

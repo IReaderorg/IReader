@@ -18,15 +18,12 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class CategoryScreenViewModel(
     val categoriesUseCase: CategoriesUseCases,
     val reorderCategory: ReorderCategory,
     val createCategoryWithName: CreateCategoryWithName,
     private val libraryPreferences: ireader.domain.preferences.prefs.LibraryPreferences,
-    // NEW: Clean architecture use cases
     private val categoryUseCases: CategoryUseCases,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     var categories: SnapshotStateList<CategoryWithCount> = mutableStateListOf()
@@ -45,7 +42,7 @@ class CategoryScreenViewModel(
     init {
         libraryPreferences.showEmptyCategories().stateIn(scope)
             .flatMapLatest { showEmpty ->
-                categoriesUseCase.subscribe(false, showEmpty,scope)
+                categoriesUseCase.subscribe(false, showEmpty, scope)
             }
             .onEach { list ->
                 categories.clear()
@@ -63,10 +60,51 @@ class CategoryScreenViewModel(
     }
     
     /**
-     * Rename a category using the new use case layer
-     * Includes validation and error handling
+     * Create a new category and refresh the list.
      */
-    suspend fun renameCategory(categoryId: Long, newName: String) {
+    fun createCategory(name: String) {
+        scope.launch {
+            val result = createCategoryWithName.await(name)
+            when (result) {
+                is CreateCategoryWithName.Result.Success -> {
+                    refreshCategories()
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Category created: $name"))
+                }
+                is CreateCategoryWithName.Result.EmptyCategoryNameError -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Category name cannot be empty"))
+                }
+                is CreateCategoryWithName.Result.CategoryAlreadyExistsError -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Category already exists: ${result.name}"))
+                }
+                is CreateCategoryWithName.Result.InternalError -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to create category: ${result.error.message}"))
+                }
+            }
+        }
+    }
+    
+    /**
+     * Manually refresh categories from database.
+     */
+    fun refreshCategories() {
+        scope.launch {
+            try {
+                val showEmpty = showEmptyCategories.value
+                val list = categoriesUseCase.await()
+                    .filter { !it.isSystemCategory }
+                    .filter { showEmpty || it.bookCount > 0 }
+                categories.clear()
+                categories.addAll(list)
+            } catch (_: Exception) {
+                // Ignore errors during refresh
+            }
+        }
+    }
+    
+    /**
+     * Rename a category using the new use case layer
+     */
+    fun renameCategory(categoryId: Long, newName: String) {
         scope.launch {
             val result = categoryUseCases.updateCategory.rename(categoryId, newName)
             
@@ -143,6 +181,4 @@ class CategoryScreenViewModel(
     fun getRulesForCategory(categoryId: Long): List<CategoryAutoRule> {
         return autoRulesByCategory[categoryId] ?: emptyList()
     }
-    
-    //  val categories by categoriesUseCase.subscribe(false).asState(emptyList())
 }

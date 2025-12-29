@@ -33,3 +33,6 @@ DELETE FROM bookcategories WHERE category_id= :categoryId;
 
 deleteByBookId:
 DELETE FROM bookcategories WHERE bookcategories.book_id = :bookId;
+
+deleteByBookIdAndCategoryId:
+DELETE FROM bookcategories WHERE book_id = :bookId AND category_id = :categoryId;

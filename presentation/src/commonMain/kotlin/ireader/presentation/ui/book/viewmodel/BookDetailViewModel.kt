@@ -173,6 +173,7 @@ class BookDetailViewModel(
     var showMigrationDialog by mutableStateOf(false)
     var showEpubExportDialog by mutableStateOf(false)
     var showImagePickerDialog by mutableStateOf(false)
+    var showCategorySelectionDialog by mutableStateOf(false)
     var availableMigrationSources by mutableStateOf<List<CatalogLocal>>(emptyList())
     
     // Translation export state
@@ -820,36 +821,126 @@ class BookDetailViewModel(
 
     // ==================== Library Actions ====================
     
+    // Categories state for category selection dialog
+    private val _availableCategories = MutableStateFlow<List<ireader.domain.models.entities.CategoryWithCount>>(emptyList())
+    val availableCategories: StateFlow<List<ireader.domain.models.entities.CategoryWithCount>> = _availableCategories.asStateFlow()
+    
+    // Pending book to add to library (used when showing category selection dialog)
+    private var pendingBookForLibrary: Book? = null
+    
     /**
-     * Toggle the book's favorite status using BookController (SSOT pattern).
+     * Toggle the book's favorite status.
+     * If adding to library and categories exist, shows category selection dialog.
      * Requirements: 4.3
      */
     fun toggleInLibrary(book: Book) {
+        if (book.favorite) {
+            // Removing from library - no dialog needed
+            removeFromLibrary(book)
+        } else {
+            // Adding to library - check if we should show category selection
+            scope.launch {
+                val categories = withIOContext {
+                    bookUseCases.addToLibrary.getAvailableCategories()
+                }
+                
+                if (categories.isNotEmpty()) {
+                    // Store pending book and show dialog
+                    pendingBookForLibrary = book
+                    _availableCategories.value = categories
+                    showCategorySelectionDialog = true
+                } else {
+                    // No categories - add directly
+                    addToLibraryWithCategories(book, emptySet())
+                }
+            }
+        }
+    }
+    
+    /**
+     * Called when user confirms category selection from dialog.
+     */
+    fun confirmCategorySelection(selectedCategoryIds: Set<Long>) {
+        val book = pendingBookForLibrary ?: return
+        showCategorySelectionDialog = false
+        pendingBookForLibrary = null
+        addToLibraryWithCategories(book, selectedCategoryIds)
+    }
+    
+    /**
+     * Called when user dismisses category selection dialog.
+     */
+    fun dismissCategorySelection() {
+        showCategorySelectionDialog = false
+        pendingBookForLibrary = null
+    }
+    
+    /**
+     * Add book to library with specified categories.
+     */
+    private fun addToLibraryWithCategories(book: Book, categoryIds: Set<Long>) {
         updateSuccessState { it.copy(isInLibraryLoading = true) }
         
-        // Delegate to BookController for SSOT pattern (Requirements: 4.3)
-        // BookController handles the toggle operation and state updates
+        applicationScope.launch {
+            try {
+                val bookId = withIOContext {
+                    // Use AddToLibrary use case with full book object to ensure book exists in database
+                    // This handles the case where book is from explore screen and not yet in database
+                    bookUseCases.addToLibrary.awaitWithCategoriesFromBook(book, categoryIds)
+                }
+                
+                if (bookId > 0) {
+                    // Sync if available - use syncBookToRemote directly instead of toggleBookInLibrary
+                    // because toggleBookInLibrary checks the favorite status and would remove the book
+                    // if we pass favorite=true (it thinks the book is already in library and toggles it off)
+                    withIOContext {
+                        // Get the updated book from database to sync
+                        val updatedBook = bookUseCases.getBookById(bookId)
+                        if (updatedBook != null && syncUseCases != null) {
+                            try {
+                                syncUseCases.syncBookToRemote(updatedBook)
+                            } catch (e: Exception) {
+                                // Sync failure shouldn't prevent local add from succeeding
+                                ireader.core.log.Log.warn { "Failed to sync book to remote: ${e.message}" }
+                            }
+                        }
+                    }
+                    // Update the book state to reflect the change
+                    // Also update the book ID in case it was newly inserted
+                    updateSuccessState { state ->
+                        state.copy(
+                            isInLibraryLoading = false,
+                            book = state.book.copy(id = bookId, favorite = true)
+                        )
+                    }
+                    emitEvent(BookDetailEvent.ShowSnackbar("Added to library"))
+                } else {
+                    updateSuccessState { it.copy(isInLibraryLoading = false) }
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to add to library"))
+                }
+            } catch (e: Exception) {
+                updateSuccessState { it.copy(isInLibraryLoading = false) }
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to add to library: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Remove book from library.
+     */
+    private fun removeFromLibrary(book: Book) {
+        updateSuccessState { it.copy(isInLibraryLoading = true) }
+        
         bookController.dispatch(BookCommand.ToggleFavorite)
         
-        // Also handle sync if available (for backward compatibility)
         applicationScope.launch {
             try {
                 withIOContext {
                     syncUseCases?.toggleBookInLibrary?.invoke(book)
-                        ?: run {
-                            if (!book.favorite) {
-                                localInsertUseCases.updateBook.update(
-                                    book.copy(
-                                        favorite = true,
-                                        dateAdded = currentTimeToLong(),
-                                    )
-                                )
-                            } else {
-                                deleteUseCase.unFavoriteBook(listOf(book.id))
-                            }
-                        }
+                        ?: deleteUseCase.unFavoriteBook(listOf(book.id))
                 }
                 updateSuccessState { it.copy(isInLibraryLoading = false) }
+                emitEvent(BookDetailEvent.ShowSnackbar("Removed from library"))
             } catch (e: Exception) {
                 updateSuccessState { it.copy(isInLibraryLoading = false) }
                 emitEvent(BookDetailEvent.ShowSnackbar("Failed to update library: ${e.message}"))
