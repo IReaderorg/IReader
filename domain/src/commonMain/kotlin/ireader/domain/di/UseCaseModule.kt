@@ -41,7 +41,13 @@ val useCaseModule = module {
             bookCategoryRepository = get()
         )
     }
-    singleOf(::RemoveFromLibrary)
+    // RemoveFromLibrary with BookCategoryRepository to remove category associations
+    single {
+        RemoveFromLibrary(
+            updateBook = get(),
+            bookCategoryRepository = get()
+        )
+    }
     singleOf(::ToggleFavorite)
     
     // Individual book use cases for BookUseCases aggregate

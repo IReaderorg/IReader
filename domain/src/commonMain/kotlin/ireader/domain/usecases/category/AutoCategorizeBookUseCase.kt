@@ -1,5 +1,6 @@
 package ireader.domain.usecases.category
 
+import ireader.core.log.IReaderLog
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.CategoryAutoRuleRepository
 import ireader.domain.models.entities.Book
@@ -24,14 +25,22 @@ class AutoCategorizeBookUseCase(
      * @return List of category IDs the book was assigned to
      */
     suspend operator fun invoke(book: Book, sourceName: String? = null): List<Long> {
+        IReaderLog.info("AutoCategorizeBookUseCase: Checking rules for book '${book.title}' (id=${book.id}, genres=${book.genres}, sourceId=${book.sourceId})", "AutoCategorize")
+        
         val enabledRules = categoryAutoRuleRepository.findEnabledRules()
+        IReaderLog.info("AutoCategorizeBookUseCase: Found ${enabledRules.size} enabled rules", "AutoCategorize")
+        
         val matchingCategoryIds = mutableSetOf<Long>()
         
         for (rule in enabledRules) {
-            if (rule.matches(book, sourceName)) {
+            val matches = rule.matches(book, sourceName)
+            IReaderLog.info("AutoCategorizeBookUseCase: Rule ${rule.id} (type=${rule.ruleType}, value='${rule.value}') matches=$matches", "AutoCategorize")
+            if (matches) {
                 matchingCategoryIds.add(rule.categoryId)
             }
         }
+        
+        IReaderLog.info("AutoCategorizeBookUseCase: Book matches ${matchingCategoryIds.size} categories: $matchingCategoryIds", "AutoCategorize")
         
         // Insert book-category relationships for matching categories
         val bookCategories = matchingCategoryIds.map { categoryId ->
@@ -39,6 +48,7 @@ class AutoCategorizeBookUseCase(
         }
         
         if (bookCategories.isNotEmpty()) {
+            IReaderLog.info("AutoCategorizeBookUseCase: Inserting ${bookCategories.size} book-category relationships", "AutoCategorize")
             bookCategoryRepository.insertAll(bookCategories)
         }
         

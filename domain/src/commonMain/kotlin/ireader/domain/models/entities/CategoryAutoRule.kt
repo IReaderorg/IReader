@@ -32,13 +32,17 @@ data class CategoryAutoRule(
         if (!isEnabled) return false
         
         return when (ruleType) {
-            RuleType.GENRE -> book.genres.any { genre ->
-                genre.equals(value, ignoreCase = true)
+            RuleType.GENRE -> {
+                val genreMatches = book.genres.any { genre ->
+                    genre.equals(value, ignoreCase = true)
+                }
+                genreMatches
             }
             RuleType.SOURCE -> {
                 // Match by source ID or source name
-                book.sourceId.toString() == value || 
-                    sourceName?.equals(value, ignoreCase = true) == true
+                val sourceIdMatches = book.sourceId.toString() == value
+                val sourceNameMatches = sourceName?.equals(value, ignoreCase = true) == true
+                sourceIdMatches || sourceNameMatches
             }
         }
     }
