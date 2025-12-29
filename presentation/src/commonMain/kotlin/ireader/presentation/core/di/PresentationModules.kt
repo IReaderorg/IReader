@@ -174,7 +174,7 @@ val PresentationModules = module {
     factory  { TranslationSettingsViewModel(get(), get(), getOrNull(), get()) }
     factory  { CommunitySourceConfigViewModel(get(), getOrNull(), getOrNull()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
-    factory  { SourceRepositoryViewModel(get(), get()) }
+    factory  { SourceRepositoryViewModel(get(), get(), getOrNull()) }
     factory  { SecuritySettingsViewModel(get(), get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationViewModel(get(), get()) }
     factory  { AITTSSettingsViewModel(get(), get()) }

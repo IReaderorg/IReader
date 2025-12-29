@@ -27,10 +27,13 @@ import ireader.presentation.ui.core.ui.asStateIn
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.IO
+import kotlin.concurrent.Volatile
 
 /**
  * ViewModel for the Extension screen using sealed state pattern.
@@ -61,6 +64,11 @@ class ExtensionViewModel(
     private val deleteUserSource: ireader.domain.usersource.interactor.DeleteUserSource? = null,
 ) : BaseViewModel() {
     
+    companion object {
+        /** Debounce delay for auto-fetch after repository changes (ms) */
+        private const val AUTO_FETCH_DEBOUNCE_MS = 500L
+    }
+    
     // Convenience accessors for aggregate use cases (backward compatibility)
     private val getCatalogsByType get() = extensionUseCases.getCatalogsByType
     private val updateCatalog get() = extensionUseCases.updateCatalog
@@ -89,6 +97,10 @@ class ExtensionViewModel(
     private inline fun updateState(crossinline update: (ExtensionScreenState) -> ExtensionScreenState) {
         _state.update { update(it) }
     }
+    
+    // Job for debounced auto-fetch - cancel previous before starting new
+    @Volatile
+    private var autoFetchJob: Job? = null
     
     // ==================== Preferences (exposed as StateFlow) ====================
     
@@ -646,11 +658,68 @@ class ExtensionViewModel(
                 }
                 
                 showSnackBar(UiText.DynamicString("Repository added successfully"))
-                refreshCatalogs()
+                // Auto-fetch catalogs for the newly added repository (debounced)
+                triggerDebouncedAutoFetch()
             } catch (e: Exception) {
                 showSnackBar(UiText.DynamicString("Failed to add repository: ${e.message ?: "Unknown error"}"))
             }
         }
+    }
+    
+    /**
+     * Toggle source repository enabled state and auto-fetch catalogs
+     */
+    fun toggleSourceRepository(source: ExtensionSource, enabled: Boolean) {
+        scope.launch {
+            try {
+                catalogSourceRepository.update(source.copy(isEnable = enabled))
+                // Auto-fetch catalogs when repository is toggled (debounced)
+                triggerDebouncedAutoFetch()
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Failed to update repository: ${e.message ?: "Unknown error"}"))
+            }
+        }
+    }
+    
+    /**
+     * Triggers a debounced auto-fetch of remote catalogs.
+     * 
+     * Features:
+     * - Cancels any previous pending fetch request (prevents memory issues from rapid toggling)
+     * - Debounces by [AUTO_FETCH_DEBOUNCE_MS] to batch rapid changes
+     */
+    private fun triggerDebouncedAutoFetch() {
+        // Cancel previous auto-fetch job if still pending
+        autoFetchJob?.cancel()
+        
+        autoFetchJob = scope.launch(ioDispatcher) {
+            // Debounce: wait before fetching to batch rapid changes
+            delay(AUTO_FETCH_DEBOUNCE_MS)
+            
+            // Check if job was cancelled (new request came in)
+            if (!isActive) return@launch
+            
+            updateState { it.copy(isRefreshing = true) }
+            
+            try {
+                syncRemoteCatalogs.await(forceRefresh = true, onError = { error ->
+                    Log.warn(error, "Auto-fetch failed")
+                })
+            } finally {
+                // Only update state if this job wasn't cancelled
+                if (isActive) {
+                    updateState { it.copy(isRefreshing = false) }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Cancels any ongoing auto-fetch operation.
+     */
+    fun cancelAutoFetch() {
+        autoFetchJob?.cancel()
+        autoFetchJob = null
     }
     
     private fun parseRepositoryUrl(url: String): RepositoryInfo {

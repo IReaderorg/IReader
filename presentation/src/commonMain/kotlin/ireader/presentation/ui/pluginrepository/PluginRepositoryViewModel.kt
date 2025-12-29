@@ -8,22 +8,40 @@ import ireader.domain.plugins.PluginRepositoryIndexFetcher
 import ireader.domain.plugins.PluginRepositoryRepository
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.concurrent.Volatile
 
 /**
  * ViewModel for Plugin Repository management
+ * 
+ * Features:
+ * - Auto-fetches remote catalogs when repositories are added or toggled
+ * - Debounces rapid toggle operations to prevent memory issues
+ * - Cancels previous fetch requests when new ones are triggered
  */
 class PluginRepositoryViewModel(
     private val repository: PluginRepositoryRepository,
     private val indexFetcher: PluginRepositoryIndexFetcher
 ) : BaseViewModel() {
 
+    companion object {
+        /** Debounce delay for auto-fetch after repository changes (ms) */
+        private const val AUTO_FETCH_DEBOUNCE_MS = 500L
+    }
+
     private val _state = mutableStateOf(PluginRepositoryState())
     val state: State<PluginRepositoryState> = _state
 
     // Cache of fetched plugins per repository
     private val pluginCache = mutableMapOf<String, List<PluginIndexEntry>>()
+    
+    // Job for debounced auto-fetch - cancel previous before starting new
+    @Volatile
+    private var autoFetchJob: Job? = null
 
     init {
         initializeAndLoad()
@@ -84,6 +102,9 @@ class PluginRepositoryViewModel(
                 pluginCache[trimmedUrl] = index.plugins
 
                 _state.value = _state.value.copy(error = null, isRefreshing = false)
+                
+                // Auto-fetch catalogs for the newly added repository
+                triggerDebouncedAutoFetch()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isRefreshing = false,
@@ -119,6 +140,8 @@ class PluginRepositoryViewModel(
                 val entity = repository.getByUrl(url)
                 entity?.let {
                     repository.setEnabled(it.id, enabled)
+                    // Auto-fetch catalogs when repository is toggled (debounced)
+                    triggerDebouncedAutoFetch()
                 }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
@@ -247,5 +270,61 @@ class PluginRepositoryViewModel(
             isOfficial = isOfficial,
             lastError = lastError
         )
+    }
+    
+    /**
+     * Triggers a debounced auto-fetch of all enabled repositories.
+     * 
+     * Features:
+     * - Cancels any previous pending fetch request (prevents memory issues from rapid toggling)
+     * - Debounces by [AUTO_FETCH_DEBOUNCE_MS] to batch rapid changes
+     * - Only fetches enabled repositories
+     */
+    private fun triggerDebouncedAutoFetch() {
+        // Cancel previous auto-fetch job if still pending
+        autoFetchJob?.cancel()
+        
+        autoFetchJob = scope.launch {
+            // Debounce: wait before fetching to batch rapid changes
+            delay(AUTO_FETCH_DEBOUNCE_MS)
+            
+            // Fetch all enabled repositories
+            val enabledRepos = _state.value.repositories.filter { it.enabled }
+            if (enabledRepos.isEmpty()) return@launch
+            
+            _state.value = _state.value.copy(isRefreshing = true)
+            
+            try {
+                for (repo in enabledRepos) {
+                    // Check if job was cancelled (new request came in)
+                    if (!isActive) return@launch
+                    
+                    val indexResult = indexFetcher.fetchIndex(repo.url)
+                    indexResult.onSuccess { index ->
+                        pluginCache[repo.url] = index.plugins
+                        repository.updatePluginCount(
+                            id = repo.id,
+                            count = index.plugins.size,
+                            lastUpdated = currentTimeToLong()
+                        )
+                    }
+                    // Silently ignore failures during auto-fetch to not spam errors
+                }
+            } finally {
+                // Only update state if this job wasn't cancelled
+                if (isActive) {
+                    _state.value = _state.value.copy(isRefreshing = false)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Cancels any ongoing auto-fetch operation.
+     * Call this when the ViewModel is being cleared or when you need to stop fetching.
+     */
+    fun cancelAutoFetch() {
+        autoFetchJob?.cancel()
+        autoFetchJob = null
     }
 }
