@@ -389,6 +389,14 @@ class PluginManager(
     }
     
     /**
+     * Refresh the plugins flow (suspend version)
+     * Use this when you need to wait for the refresh to complete
+     */
+    suspend fun refreshPluginsSync() {
+        _pluginsFlow.value = registry.getAll()
+    }
+    
+    /**
      * Request a permission for a plugin
      * Requirements: 10.5
      */

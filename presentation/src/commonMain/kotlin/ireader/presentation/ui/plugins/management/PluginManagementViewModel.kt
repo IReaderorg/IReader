@@ -55,6 +55,11 @@ class PluginManagementViewModel(
         scope.launch {
             try {
                 pluginManager.loadPlugins()
+                // Force refresh the plugins flow to ensure UI gets updated
+                pluginManager.refreshPluginsSync()
+                // Ensure isLoading is set to false even if flow doesn't emit
+                // (e.g., when plugins were already loaded)
+                _state.value = _state.value.copy(isLoading = false)
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
