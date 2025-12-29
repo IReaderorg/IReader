@@ -98,6 +98,7 @@ object DatabaseMigrations {
             30 -> migrateV30toV31(driver)
             31 -> migrateV31toV32(driver)
             32 -> migrateV32toV33(driver)
+            33 -> migrateV33toV34(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2454,6 +2455,44 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(33, e)
+            // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+
+    /**
+     * Migration from version 33 to version 34
+     * Adds category_auto_rules table for automatic categorization of books
+     * based on genre or source
+     */
+    private fun migrateV33toV34(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(33, 34)
+            
+            // Create category_auto_rules table
+            val createCategoryAutoRulesTableSql = """
+                CREATE TABLE IF NOT EXISTS category_auto_rules(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    category_id INTEGER NOT NULL,
+                    rule_type TEXT NOT NULL,
+                    value TEXT NOT NULL,
+                    is_enabled INTEGER NOT NULL DEFAULT 1,
+                    FOREIGN KEY(category_id) REFERENCES categories (_id)
+                    ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createCategoryAutoRulesTableSql, 0)
+            Logger.logTableCreated("category_auto_rules")
+            
+            // Create indexes
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_category_auto_rules_category_id ON category_auto_rules(category_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_category_auto_rules_type ON category_auto_rules(rule_type);", 0)
+            Logger.logIndexCreated("category_auto_rules indexes")
+            
+            Logger.logMigrationSuccess(34)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(34, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }

@@ -711,6 +711,29 @@
     <string name="category_already_exists">Category \'%1$s\' already exists</string>
     <string name="category_not_found">Category not found</string>
     <string name="failed_to_rename">Failed to rename: %1$s</string>
+    
+    <!-- Auto-categorization strings -->
+    <string name="auto_categorization">Auto-categorization</string>
+    <string name="auto_categorization_rules">Auto-categorization Rules</string>
+    <string name="auto_categorization_description">Novels matching these rules will be automatically added to this category.</string>
+    <string name="current_rules">Current Rules</string>
+    <string name="no_rules_configured">No rules configured. Add a rule to automatically categorize novels.</string>
+    <string name="add_new_rule">Add New Rule</string>
+    <string name="add_rule">Add Rule</string>
+    <string name="genre_rule">Genre</string>
+    <string name="source_rule">Source</string>
+    <string name="genre_name">Genre name</string>
+    <string name="source_id_or_name">Source ID or name</string>
+    <string name="genre_placeholder">e.g., Fantasy, Romance, Action</string>
+    <string name="source_placeholder">e.g., 12345 or NovelUpdates</string>
+    <string name="added_genre_rule">Added genre rule: %1$s</string>
+    <string name="added_source_rule">Added source rule: %1$s</string>
+    <string name="failed_to_add_rule">Failed to add rule: %1$s</string>
+    <string name="rule_already_exists">A rule for this already exists in this category</string>
+    <string name="delete_rule">Delete rule</string>
+    <string name="rules_count">%1$d rules</string>
+    <string name="rule_count">%1$d rule</string>
+    
     <string name="backup_cancelled">Backup cancelled</string>
     <string name="restore_cancelled">Restore cancelled</string>
     <string name="creating_backup">Creating backup…</string>

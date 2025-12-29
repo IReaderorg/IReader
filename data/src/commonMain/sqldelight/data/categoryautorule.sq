@@ -1,0 +1,68 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+
+CREATE TABLE IF NOT EXISTS category_auto_rules(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    category_id INTEGER NOT NULL,
+    rule_type TEXT NOT NULL,
+    value TEXT NOT NULL,
+    is_enabled INTEGER AS Boolean NOT NULL DEFAULT 1,
+    FOREIGN KEY(category_id) REFERENCES categories (_id)
+    ON DELETE CASCADE
+);
+
+-- Index for faster lookups by category
+CREATE INDEX IF NOT EXISTS idx_category_auto_rules_category_id ON category_auto_rules(category_id);
+
+-- Index for faster lookups by rule type
+CREATE INDEX IF NOT EXISTS idx_category_auto_rules_type ON category_auto_rules(rule_type);
+
+findAll:
+SELECT * FROM category_auto_rules;
+
+findByCategoryId:
+SELECT * FROM category_auto_rules
+WHERE category_id = :categoryId;
+
+findByRuleType:
+SELECT * FROM category_auto_rules
+WHERE rule_type = :ruleType AND is_enabled = 1;
+
+findEnabledRules:
+SELECT * FROM category_auto_rules
+WHERE is_enabled = 1;
+
+findByGenreValue:
+SELECT * FROM category_auto_rules
+WHERE rule_type = 'GENRE' AND LOWER(value) = LOWER(:genreValue) AND is_enabled = 1;
+
+findBySourceValue:
+SELECT * FROM category_auto_rules
+WHERE rule_type = 'SOURCE' AND value = :sourceValue AND is_enabled = 1;
+
+insert:
+INSERT INTO category_auto_rules(category_id, rule_type, value, is_enabled)
+VALUES (:categoryId, :ruleType, :value, :isEnabled);
+
+update:
+UPDATE category_auto_rules
+SET category_id = coalesce(:categoryId, category_id),
+    rule_type = coalesce(:ruleType, rule_type),
+    value = coalesce(:value, value),
+    is_enabled = coalesce(:isEnabled, is_enabled)
+WHERE _id = :id;
+
+delete:
+DELETE FROM category_auto_rules
+WHERE _id = :id;
+
+deleteByCategoryId:
+DELETE FROM category_auto_rules
+WHERE category_id = :categoryId;
+
+deleteAll:
+DELETE FROM category_auto_rules;
+
+selectLastInsertedRowId:
+SELECT LAST_INSERT_ROWID();

@@ -14,6 +14,7 @@ import io.ktor.client.plugins.BrowserUserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.serialization.gson.gson
+import ireader.core.http.cloudflare.OkHttpCloudflareInterceptor
 import ireader.core.prefs.PreferenceStore
 import ireader.core.storage.AppDir
 import okhttp3.Cache
@@ -23,10 +24,12 @@ import java.util.concurrent.TimeUnit
 
 actual class HttpClients(
     store: PreferenceStore,
-    networkConfig: NetworkConfig = NetworkConfig()
+    networkConfig: NetworkConfig = NetworkConfig(),
+    bypassHandler: CloudflareBypassHandler = NoOpCloudflareBypassHandler
 ) : HttpClientsInterface {
 
     actual override val config: NetworkConfig = networkConfig
+    actual override val cloudflareBypassHandler: CloudflareBypassHandler = bypassHandler
 
     private val cache = run {
         val dir = File(AppDir, "network_cache/")
@@ -35,6 +38,11 @@ actual class HttpClients(
 
     actual override val sslConfig = SSLConfiguration()
     actual override val cookieSynchronizer = CookieSynchronizer()
+    
+    // Cloudflare interceptor for automatic bypass
+    private val cloudflareInterceptor = if (bypassHandler !== NoOpCloudflareBypassHandler) {
+        OkHttpCloudflareInterceptor(bypassHandler)
+    } else null
 
     private val basicClient = OkHttpClient.Builder()
         .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
@@ -43,6 +51,8 @@ actual class HttpClients(
         .cookieJar(PersistentCookieJar(store))
         .apply {
             sslConfig.applyTo(this)
+            // Add Cloudflare interceptor if available
+            cloudflareInterceptor?.let { addInterceptor(it) }
         }
 
 

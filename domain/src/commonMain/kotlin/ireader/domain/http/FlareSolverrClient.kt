@@ -227,8 +227,8 @@ data class FlareSolverrRequest(
 
 @Serializable
 data class FlareSolverrResponse(
-    val status: String,
-    val message: String,
+    val status: String = "error",
+    val message: String = "",
     val solution: FlareSolverrSolution? = null,
     val startTimestamp: Long? = null,
     val endTimestamp: Long? = null,
@@ -240,8 +240,8 @@ data class FlareSolverrSolution(
     val url: String,
     val status: Int,
     val headers: Map<String, String>? = null,
-    val response: String,
-    val cookies: List<FlareSolverrCookie>? = null,
+    val response: String? = null,
+    val cookies: List<FlareSolverrCookie> = emptyList(),
     val userAgent: String? = null
 )
 

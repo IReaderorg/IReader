@@ -21,12 +21,18 @@ class CloudflareBypassSettingsScreenSpec {
         val viewModel: CloudflareBypassSettingsViewModel = koinInject()
         
         val flareSolverrUrl by viewModel.flareSolverrUrl.collectAsState()
+        val isFlareSolverrRunning by viewModel.isFlareSolverrRunning.collectAsState()
         
         CloudflareBypassSettingsScreen(
             onNavigateUp = { navController.safePopBackStack() },
             bypassManager = viewModel.bypassManager,
             flareSolverrUrl = flareSolverrUrl,
-            onFlareSolverrUrlChange = viewModel::updateFlareSolverrUrl
+            onFlareSolverrUrlChange = viewModel::updateFlareSolverrUrl,
+            flareSolverrDownloadState = viewModel.flareSolverrDownloadState,
+            onDownloadFlareSolverr = viewModel::downloadFlareSolverr,
+            onStartFlareSolverr = viewModel::startFlareSolverr,
+            onStopFlareSolverr = viewModel::stopFlareSolverr,
+            isFlareSolverrRunning = isFlareSolverrRunning
         )
     }
 }

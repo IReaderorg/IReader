@@ -18,6 +18,8 @@ actual class HttpClients : HttpClientsInterface {
         BrowserEngine()
     }
     
+    actual override val cloudflareBypassHandler: CloudflareBypassHandler = NoOpCloudflareBypassHandler
+    
     actual override val default: HttpClient by lazy {
         HttpClient(Js) {
             install(ContentNegotiation) {

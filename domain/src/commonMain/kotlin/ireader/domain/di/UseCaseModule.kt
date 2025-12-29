@@ -105,6 +105,8 @@ val useCaseModule = module {
     singleOf(::ReorderCategory)
     singleOf(::AssignBookToCategoryUseCase)
     singleOf(::RemoveBookFromCategoryUseCase)
+    singleOf(::AutoCategorizeBookUseCase)
+    singleOf(::ManageCategoryAutoRulesUseCase)
     
     // CategoryUseCases aggregate
     single {
@@ -116,7 +118,9 @@ val useCaseModule = module {
             deleteCategory = get(),
             reorderCategories = get(),
             assignBookToCategory = get(),
-            removeBookFromCategory = get()
+            removeBookFromCategory = get(),
+            autoCategorizeBook = get(),
+            manageAutoRules = get(),
         )
     }
     

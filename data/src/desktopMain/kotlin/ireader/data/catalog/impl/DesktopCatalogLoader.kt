@@ -30,7 +30,8 @@ class DesktopCatalogLoader(
     private val httpClients: HttpClients,
     val uiPreferences: UiPreferences,
     preferences: PreferenceStoreFactory,
-    private val communitySource: ireader.domain.community.CommunitySource
+    private val communitySource: ireader.domain.community.CommunitySource,
+    private val pluginManager: ireader.core.http.cloudflare.CloudflareBypassPluginManager? = null
 ) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
     private val catalogPreferences = preferences.create("catalogs_data")
     
@@ -41,7 +42,8 @@ class DesktopCatalogLoader(
                 File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }.absolutePath.toPath()
             },
             httpClient = httpClients.default,
-            preferenceStoreFactory = preferences
+            preferenceStoreFactory = preferences,
+            pluginManager = pluginManager
         )
     }
     

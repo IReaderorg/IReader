@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import ireader.domain.services.platform.PlatformCapabilities
+import ireader.domain.services.platform.PlatformType
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
@@ -55,6 +57,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.SettingsItem
 import ireader.presentation.ui.settings.components.SettingsSectionHeader
 import ireader.presentation.core.safePopBackStack
+import org.koin.compose.koinInject
 /**
  * Data class representing a searchable setting item
  */
@@ -74,6 +77,8 @@ class SettingScreenSpec {
     fun Content() {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+        val platformCapabilities: PlatformCapabilities = koinInject()
+        val isDesktop = platformCapabilities.platformType == PlatformType.DESKTOP
         
         // Search state
         var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -81,189 +86,200 @@ class SettingScreenSpec {
         val focusManager = LocalFocusManager.current
         val focusRequester = remember { FocusRequester() }
         
-        // Build searchable settings list
-        val searchableSettings = remember {
-            listOf(
+        // Build searchable settings list (filtered by platform)
+        val searchableSettings = remember(isDesktop) {
+            buildList {
                 // Appearance & Display
-                SearchableSettingItem(
+                add(SearchableSettingItem(
                     id = "appearance",
                     title = localizeHelper.localize(Res.string.appearance),
                     description = "Customize app theme and colors",
                     icon = Icons.Default.Palette,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.appearance) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "font",
                     title = localizeHelper.localize(Res.string.font),
                     description = "Choose reading fonts and sizes",
                     icon = Icons.Default.FontDownload,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.fontSettings) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "theme",
                     title = localizeHelper.localize(Res.string.theme),
                     description = "Light, dark, or system default theme",
                     icon = Icons.Default.DarkMode,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.appearance) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "colors",
                     title = localizeHelper.localize(Res.string.colors),
                     description = "Dynamic colors and Material You",
                     icon = Icons.Default.ColorLens,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.appearance) }
-                ),
+                ))
                 
                 // General Settings
-                SearchableSettingItem(
+                add(SearchableSettingItem(
                     id = "general",
                     title = localizeHelper.localize(Res.string.general),
                     description = "General app preferences",
                     icon = Icons.Default.Tune,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.generalSettings) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "translation",
                     title = localizeHelper.localize(Res.string.translation_settings),
                     description = "Configure translation preferences",
                     icon = Icons.Default.Translate,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.translationSettings) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "supabase",
                     title = localizeHelper.localize(Res.string.supabase_configuration),
                     description = "Configure custom Supabase instance for sync",
                     icon = Icons.Outlined.Cloud,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.supabaseConfig) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "language",
                     title = localizeHelper.localize(Res.string.language),
                     description = "App language settings",
                     icon = Icons.Default.Language,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.generalSettings) }
-                ),
+                ))
                 
                 // Reading Experience
-                SearchableSettingItem(
+                add(SearchableSettingItem(
                     id = "reader",
                     title = localizeHelper.localize(Res.string.reader),
                     description = "Customize reading experience",
                     icon = Icons.Default.ChromeReaderMode,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "tts",
                     title = localizeHelper.localize(Res.string.tts_engine_manager),
                     description = "Configure text-to-speech engines and voices",
                     icon = Icons.Default.RecordVoiceOver,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.ttsEngineManager) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "statistics",
                     title = localizeHelper.localize(Res.string.statistics),
                     description = "View reading statistics and progress",
                     icon = Icons.Default.BarChart,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readingHub) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "font_size",
                     title = localizeHelper.localize(Res.string.font_size),
                     description = "Adjust text size for reading",
                     icon = Icons.Default.FormatSize,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "reading_mode",
                     title = localizeHelper.localize(Res.string.reading_mode),
                     description = "Scroll or page reading mode",
                     icon = Icons.Default.MenuBook,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
-                ),
+                ))
                 
                 // Security & Privacy
-                SearchableSettingItem(
+                add(SearchableSettingItem(
                     id = "security",
                     title = localizeHelper.localize(Res.string.security),
                     description = "Manage security and privacy settings",
                     icon = Icons.Default.Security,
                     section = localizeHelper.localize(Res.string.security),
                     onClick = { navController.navigate(NavigationRoutes.securitySettings) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "incognito",
                     title = localizeHelper.localize(Res.string.pref_incognito_mode),
                     description = localizeHelper.localize(Res.string.pref_incognito_mode_summary),
                     icon = Icons.Default.VisibilityOff,
                     section = localizeHelper.localize(Res.string.security),
                     onClick = { navController.navigate(NavigationRoutes.securitySettings) }
-                ),
+                ))
                 
                 // Advanced
-                SearchableSettingItem(
+                add(SearchableSettingItem(
                     id = "repository",
                     title = localizeHelper.localize(Res.string.repository),
                     description = "Manage content sources and extensions",
                     icon = Icons.Default.Extension,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.repository) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "plugins",
                     title = "Installed Plugins",
                     description = "Manage installed plugins and features",
                     icon = Icons.Default.Apps,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.pluginManagement) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "feature_store",
                     title = "Feature Store",
                     description = "Browse and install plugins",
                     icon = Icons.Default.ShoppingCart,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.featureStore) }
-                ),
-                SearchableSettingItem(
+                ))
+                // Cloudflare Bypass - Desktop only (FlareSolverr doesn't work on Android/iOS)
+                if (isDesktop) {
+                    add(SearchableSettingItem(
+                        id = "cloudflare_bypass",
+                        title = "Cloudflare Bypass",
+                        description = "Configure FlareSolverr for protected sources",
+                        icon = Icons.Default.Shield,
+                        section = localizeHelper.localize(Res.string.advanced),
+                        onClick = { navController.navigate(NavigationRoutes.cloudflareBypass) }
+                    ))
+                }
+                add(SearchableSettingItem(
                     id = "advanced",
                     title = localizeHelper.localize(Res.string.advance_setting),
                     description = "Advanced configuration options",
                     icon = Icons.Default.Code,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
-                ),
-                SearchableSettingItem(
+                ))
+                add(SearchableSettingItem(
                     id = "cache",
                     title = localizeHelper.localize(Res.string.clear_all_cache),
                     description = "Clear cached data to free up space",
                     icon = Icons.Default.DeleteSweep,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
-                ),
+                ))
                 
                 // Tracking
-                SearchableSettingItem(
+                add(SearchableSettingItem(
                     id = "tracking",
                     title = localizeHelper.localize(Res.string.tracking),
                     description = "Sync reading progress with AniList, MAL, and more",
                     icon = Icons.Default.Sync,
                     section = localizeHelper.localize(Res.string.tracking),
                     onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
-                ),
-            )
+                ))
+            }
         }
         
         // Filter settings based on search query
@@ -589,6 +605,18 @@ class SettingScreenSpec {
                             icon = Icons.Default.ShoppingCart,
                             onClick = { navController.navigate(NavigationRoutes.featureStore) }
                         )
+                    }
+                    
+                    // Cloudflare Bypass - Desktop only (FlareSolverr doesn't work on Android/iOS)
+                    if (isDesktop) {
+                        item {
+                            SettingsItem(
+                                title = "Cloudflare Bypass",
+                                description = "Configure FlareSolverr for protected sources",
+                                icon = Icons.Default.Shield,
+                                onClick = { navController.navigate(NavigationRoutes.cloudflareBypass) }
+                            )
+                        }
                     }
                     
                     item {

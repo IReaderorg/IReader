@@ -21,6 +21,7 @@ actual class HttpClients(
     actual override val config: NetworkConfig = NetworkConfig()
     actual override val sslConfig: SSLConfiguration = SSLConfiguration()
     actual override val cookieSynchronizer: CookieSynchronizer = CookieSynchronizer()
+    actual override val cloudflareBypassHandler: CloudflareBypassHandler = NoOpCloudflareBypassHandler
     
     actual override val default: HttpClient = HttpClient(Darwin) {
         engine {

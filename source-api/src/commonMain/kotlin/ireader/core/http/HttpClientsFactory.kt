@@ -1,11 +1,13 @@
 package ireader.core.http
 
 import ireader.core.http.cloudflare.CloudflareBypassManager
+import ireader.core.http.cloudflare.CloudflareBypassPluginManager
 import ireader.core.http.cloudflare.CloudflareCookieStore
 import ireader.core.http.cloudflare.CookieReplayStrategy
 import ireader.core.http.cloudflare.FlareSolverrClient
 import ireader.core.http.cloudflare.FlareSolverrStrategy
 import ireader.core.http.cloudflare.InMemoryCloudfareCookieStore
+import ireader.core.http.cloudflare.PluginManagerBypassStrategy
 import ireader.core.http.cloudflare.WebViewBypassStrategy
 import ireader.core.http.fingerprint.FingerprintManager
 import ireader.core.http.fingerprint.InMemoryFingerprintManager
@@ -29,7 +31,8 @@ object HttpClientsFactory {
     fun createEnhanced(
         baseClients: HttpClientsInterface,
         preferenceStore: PreferenceStore? = null,
-        flareSolverrUrl: String? = null
+        flareSolverrUrl: String? = null,
+        pluginManager: CloudflareBypassPluginManager? = null
     ): EnhancedHttpClientsInterface {
         // Create cookie store (persistent if preferences available)
         val cookieStore: CloudflareCookieStore = if (preferenceStore != null) {
@@ -64,14 +67,15 @@ object HttpClientsFactory {
             // Always add cookie replay (highest priority)
             add(CookieReplayStrategy(cookieStore))
             
+            // Add plugin manager strategy if available (includes FlareSolverr with auto-start)
+            if (pluginManager != null) {
+                add(PluginManagerBypassStrategy(pluginManager))
+            }
+            
             // Add WebView strategy if browser engine is available
             if (baseClients.browser.isAvailable()) {
                 add(WebViewBypassStrategy(baseClients.browser, fingerprintManager))
             }
-            
-            // Add FlareSolverr strategy if URL is configured (for desktop)
-            // Note: FlareSolverr client would need to be created with an HttpClient
-            // This is a simplified version - in production you'd inject the client
         }
         
         // Create bypass manager

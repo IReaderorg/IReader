@@ -1,10 +1,12 @@
 package ireader.data.di
 
+import ireader.data.category.CategoryAutoRuleRepositoryImpl
 import ireader.data.category.CategoryRepositoryImpl
 import ireader.data.downloads.DownloadRepositoryImpl
 import ireader.data.history.HistoryRepositoryImpl
 import ireader.data.repository.LibraryRepositoryImpl
 import ireader.data.repository.UpdatesRepositoryImpl
+import ireader.domain.data.repository.CategoryAutoRuleRepository
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.DownloadRepository
 import ireader.domain.data.repository.HistoryRepository
@@ -19,6 +21,7 @@ import org.koin.dsl.module
 val libraryRepositoryModule = module {
     single<LibraryRepository> { LibraryRepositoryImpl(get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get()) }
+    single<CategoryAutoRuleRepository> { CategoryAutoRuleRepositoryImpl(get()) }
     single<DownloadRepository> { DownloadRepositoryImpl(get()) }
     single<UpdatesRepository> { UpdatesRepositoryImpl(get()) }
     single<HistoryRepository> { HistoryRepositoryImpl(get(), getOrNull()) }

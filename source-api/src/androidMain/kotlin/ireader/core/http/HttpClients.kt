@@ -33,6 +33,7 @@ actual class HttpClients(
 ) : HttpClientsInterface {
 
     actual override val config: NetworkConfig = networkConfig
+    actual override val cloudflareBypassHandler: CloudflareBypassHandler = NoOpCloudflareBypassHandler
 
     private val cache = run {
         val dir = File(context.cacheDir, "network_cache")

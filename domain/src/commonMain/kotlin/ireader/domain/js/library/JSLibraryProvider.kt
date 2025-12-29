@@ -14,7 +14,8 @@ class JSLibraryProvider(
     private val engine: JSEngine,
     private val pluginId: String,
     private val httpClient: HttpClient,
-    private val preferenceStore: PreferenceStore
+    private val preferenceStore: PreferenceStore,
+    private val pluginManager: ireader.core.http.cloudflare.CloudflareBypassPluginManager? = null
 ) {
     
     // Create FlareSolverr client for Cloudflare bypass with extended timeout
@@ -23,7 +24,7 @@ class JSLibraryProvider(
         maxTimeout = 120000 // 2 minutes for complex challenges like wuxiaworld.site
     )
     
-    private val fetchApi = JSFetchApi(httpClient, pluginId, flareSolverrClient = flareSolverrClient)
+    private val fetchApi = JSFetchApi(httpClient, pluginId, flareSolverrClient = flareSolverrClient, pluginManager = pluginManager)
     private val storage = JSStorage(preferenceStore, pluginId)
     private val localStorage = JSLocalStorage()
     private val sessionStorage = JSSessionStorage()

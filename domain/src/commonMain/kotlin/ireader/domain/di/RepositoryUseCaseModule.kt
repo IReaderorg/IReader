@@ -69,6 +69,8 @@ val repositoryUseCaseModule = module {
     single { DeleteCategoryUseCase(get(), get()) }
     single { AssignBookToCategoryUseCase(get()) }
     single { RemoveBookFromCategoryUseCase(get()) }
+    single { AutoCategorizeBookUseCase(get(), get()) }
+    single { ManageCategoryAutoRulesUseCase(get(), get()) }
     
     // Category Use Cases Aggregate
     single {
@@ -80,7 +82,9 @@ val repositoryUseCaseModule = module {
             deleteCategory = get(),
             reorderCategories = get(),
             assignBookToCategory = get(),
-            removeBookFromCategory = get()
+            removeBookFromCategory = get(),
+            autoCategorizeBook = get(),
+            manageAutoRules = get(),
         )
     }
     

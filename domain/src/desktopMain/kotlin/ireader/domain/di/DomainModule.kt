@@ -1,7 +1,6 @@
 package ireader.domain.di
 
 import ireader.core.http.HttpClients
-import ireader.core.http.cloudflare.cloudflareBypassModule
 import ireader.core.http.cloudflare.CloudflareBypassPluginManager
 import ireader.core.http.cloudflare.FlareSolverrProvider
 import ireader.core.http.cloudflare.initializeCloudflareBypass
@@ -54,8 +53,53 @@ actual val DomainModule: Module = module {
     includes(ServiceModule)
     // Include TTS v2 module for new clean TTS architecture
     includes(ireader.domain.services.tts_service.v2.ttsV2Module)
-    // Include Cloudflare bypass module for plugin-based bypass
-    includes(cloudflareBypassModule)
+    // Note: NOT including cloudflareBypassModule - we define CloudflareBypassPluginManager here with provider registration
+    
+    // Basic HTTP client for FlareSolverr (without Cloudflare interceptor to avoid circular dependency)
+    single<io.ktor.client.HttpClient>(named("flareSolverrClient")) {
+        io.ktor.client.HttpClient(io.ktor.client.engine.okhttp.OkHttp) {
+            install(io.ktor.client.plugins.UserAgent) {
+                agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+            install(io.ktor.client.plugins.HttpTimeout) {
+                requestTimeoutMillis = 120_000 // 2 minutes for FlareSolverr requests
+                connectTimeoutMillis = 10_000
+                socketTimeoutMillis = 120_000
+            }
+            engine {
+                config {
+                    connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+                    readTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                    writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    retryOnConnectionFailure(true)
+                }
+            }
+        }
+    }
+    
+    // CloudflareBypassPluginManager with built-in FlareSolverr provider registered on creation
+    single<CloudflareBypassPluginManager> {
+        val manager = CloudflareBypassPluginManager()
+        val httpClient: io.ktor.client.HttpClient = get(named("flareSolverrClient"))
+        val preferenceStore: PreferenceStore = get()
+        val urlPref = preferenceStore.getString("flaresolverr_url", "http://127.0.0.1:8191/v1")
+        
+        // Create auto-starter for desktop
+        val autoStarter = ireader.core.http.cloudflare.DesktopFlareSolverrAutoStarter()
+        
+        val provider = FlareSolverrProvider(
+            httpClient = httpClient,
+            getServerUrl = { urlPref.get() },
+            autoStarter = autoStarter
+        )
+        initializeCloudflareBypass(manager, provider)
+        manager
+    }
+    
+    // CloudflareBypassHandler implementation for desktop
+    single<ireader.core.http.CloudflareBypassHandler> {
+        ireader.domain.http.DesktopCloudflareBypassHandler(get())
+    }
     
     // Process State Manager for handling process death
     single { ireader.domain.services.processstate.ProcessStateManager(get()) }
@@ -224,9 +268,7 @@ actual val DomainModule: Module = module {
     // BrowserEngine with CloudflareBypassPluginManager
     single<ireader.core.http.BrowserEngine> {
         val manager: CloudflareBypassPluginManager = get()
-        val provider: FlareSolverrProvider = get()
-        // Register built-in provider
-        initializeCloudflareBypass(manager, provider)
+        // Provider is already registered when CloudflareBypassPluginManager is created
         
         ireader.core.http.BrowserEngine().apply {
             setBypassManager(manager)
@@ -236,8 +278,22 @@ actual val DomainModule: Module = module {
     single<HttpClients> { 
         HttpClients(
             store = get<PreferenceStoreFactory>().create("cookies"),
-            networkConfig = get()
+            networkConfig = get(),
+            bypassHandler = get()
         ) 
+    }
+    
+    // Enhanced HTTP clients with Cloudflare bypass plugin manager integration
+    single<ireader.core.http.EnhancedHttpClientsInterface> {
+        val httpClients: HttpClients = get()
+        val pluginManager: CloudflareBypassPluginManager = get()
+        val preferenceStore: PreferenceStore = get()
+        
+        ireader.core.http.HttpClientsFactory.createEnhanced(
+            baseClients = httpClients,
+            preferenceStore = preferenceStore,
+            pluginManager = pluginManager
+        )
     }
     
     single<EpubCreator> { EpubCreator(get(), get<HttpClients>().default) }

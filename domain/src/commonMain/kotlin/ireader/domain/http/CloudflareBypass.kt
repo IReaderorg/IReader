@@ -9,6 +9,9 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import ireader.core.http.cloudflare.CloudflareBypassPluginManager
+import ireader.core.http.cloudflare.CloudflareChallenge
+import ireader.core.http.cloudflare.PluginBypassResult
 import ireader.core.log.Log
 import kotlinx.coroutines.delay
 
@@ -23,9 +26,11 @@ import kotlinx.coroutines.delay
  * 2. Cookie persistence across requests
  * 3. Retry with exponential backoff for 403/503 errors
  * 4. JavaScript challenge detection and handling
+ * 5. Plugin-based bypass (FlareSolverr with auto-start) when challenge is detected
  */
 class CloudflareBypass(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val pluginManager: CloudflareBypassPluginManager? = null
 ) {
     
     companion object {
@@ -74,16 +79,23 @@ class CloudflareBypass(
                                           bodyText.contains("Just a moment") ||
                                           bodyText.contains("cloudflare")
                         
-                        // If it's definitely Cloudflare, skip retries (they won't help)
+                        // If it's definitely Cloudflare, try plugin-based bypass
                         if (isCloudflare) {
-                            Log.warn { "[CloudflareBypass] Cloudflare challenge detected, skipping retries" }
+                            Log.warn { "[CloudflareBypass] Cloudflare challenge detected, trying plugin bypass" }
+                            
+                            // Try plugin-based bypass (FlareSolverr with auto-start)
+                            val pluginResult = tryPluginBypass(url, customHeaders)
+                            if (pluginResult != null && pluginResult.success) {
+                                return pluginResult
+                            }
+                            
                             return CloudflareResponse(
                                 success = false,
                                 statusCode = 403,
                                 statusText = "Forbidden - Cloudflare Protection",
                                 body = bodyText,
                                 headers = response.headers.entries().associate { it.key to it.value.joinToString(", ") },
-                                error = "Site is protected by Cloudflare. Trying advanced bypass methods...",
+                                error = pluginResult?.error ?: "Site is protected by Cloudflare. Configure FlareSolverr in Settings > Cloudflare Bypass.",
                                 isCloudflareChallenge = true
                             )
                         }
@@ -110,9 +122,17 @@ class CloudflareBypass(
                     
                     503 -> {
                         val bodyText = response.bodyAsText()
-                        if (bodyText.contains("cf-browser-verification") || bodyText.contains("Checking your browser")) {
+                        if (bodyText.contains("cf-browser-verification") || bodyText.contains("Checking your browser") || bodyText.contains("Just a moment")) {
+                            Log.warn { "[CloudflareBypass] Cloudflare 503 challenge detected, trying plugin bypass" }
+                            
+                            // Try plugin-based bypass (FlareSolverr with auto-start)
+                            val pluginResult = tryPluginBypass(url, customHeaders)
+                            if (pluginResult != null && pluginResult.success) {
+                                return pluginResult
+                            }
+                            
                             if (retries < MAX_RETRIES) {
-                                Log.warn { "[CloudflareBypass] Cloudflare challenge detected, waiting ${delayMs}ms" }
+                                Log.warn { "[CloudflareBypass] Plugin bypass failed, waiting ${delayMs}ms before retry" }
                                 delay(delayMs)
                                 delayMs *= 2
                                 retries++
@@ -125,7 +145,7 @@ class CloudflareBypass(
                                 statusText = "Service Unavailable - Cloudflare Challenge",
                                 body = bodyText,
                                 headers = response.headers.entries().associate { it.key to it.value.joinToString(", ") },
-                                error = "Cloudflare challenge detected. This requires a browser or FlareSolverr.",
+                                error = pluginResult?.error ?: "Cloudflare challenge detected. Configure FlareSolverr in Settings > Cloudflare Bypass.",
                                 isCloudflareChallenge = true
                             )
                         }
@@ -176,6 +196,82 @@ class CloudflareBypass(
             headers = emptyMap(),
             error = "Failed after $MAX_RETRIES retries: ${lastError?.message}"
         )
+    }
+    
+    /**
+     * Try to bypass Cloudflare using the plugin manager (FlareSolverr with auto-start).
+     */
+    private suspend fun tryPluginBypass(
+        url: String,
+        customHeaders: Map<String, String>
+    ): CloudflareResponse? {
+        val manager = pluginManager ?: return null
+        
+        try {
+            Log.info { "[CloudflareBypass] Attempting plugin-based bypass for: $url" }
+            
+            val result = manager.bypass(
+                url = url,
+                challenge = CloudflareChallenge.JSChallenge(),
+                headers = customHeaders,
+                userAgent = USER_AGENTS[0],
+                timeoutMs = 60000
+            )
+            
+            return when (result) {
+                is PluginBypassResult.Success -> {
+                    Log.info { "[CloudflareBypass] Plugin bypass successful!" }
+                    CloudflareResponse(
+                        success = true,
+                        statusCode = result.statusCode,
+                        statusText = "OK",
+                        body = result.content,
+                        headers = emptyMap(),
+                        cookies = result.cookies.map { "${it.name}=${it.value}" },
+                        isCloudflareChallenge = false
+                    )
+                }
+                is PluginBypassResult.Failed -> {
+                    Log.warn { "[CloudflareBypass] Plugin bypass failed: ${result.reason}" }
+                    CloudflareResponse(
+                        success = false,
+                        statusCode = 403,
+                        statusText = "Bypass Failed",
+                        body = "",
+                        headers = emptyMap(),
+                        error = "Plugin bypass failed: ${result.reason}",
+                        isCloudflareChallenge = true
+                    )
+                }
+                is PluginBypassResult.UserInteractionRequired -> {
+                    Log.warn { "[CloudflareBypass] User interaction required: ${result.message}" }
+                    CloudflareResponse(
+                        success = false,
+                        statusCode = 403,
+                        statusText = "User Interaction Required",
+                        body = "",
+                        headers = emptyMap(),
+                        error = "Manual verification required: ${result.message}",
+                        isCloudflareChallenge = true
+                    )
+                }
+                is PluginBypassResult.ServiceUnavailable -> {
+                    Log.warn { "[CloudflareBypass] Plugin service unavailable: ${result.reason}" }
+                    CloudflareResponse(
+                        success = false,
+                        statusCode = 503,
+                        statusText = "Service Unavailable",
+                        body = "",
+                        headers = emptyMap(),
+                        error = "Bypass service unavailable: ${result.reason}. ${result.setupInstructions ?: ""}",
+                        isCloudflareChallenge = true
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.error(e, "[CloudflareBypass] Plugin bypass error")
+            return null
+        }
     }
     
     /**

@@ -24,10 +24,11 @@ class JSFetchApi(
     private val pluginId: String,
     private val validator: ireader.domain.js.util.JSPluginValidator = ireader.domain.js.util.JSPluginValidator(),
     private val allowLocalhost: Boolean = false,
-    private val flareSolverrClient: ireader.domain.http.FlareSolverrClient? = null
+    private val flareSolverrClient: ireader.domain.http.FlareSolverrClient? = null,
+    private val pluginManager: ireader.core.http.cloudflare.CloudflareBypassPluginManager? = null
 ) {
     
-    private val cloudflareBypass = ireader.domain.http.CloudflareBypass(httpClient)
+    private val cloudflareBypass = ireader.domain.http.CloudflareBypass(httpClient, pluginManager)
     
     /**
      * Performs an HTTP request similar to the Fetch API.
@@ -130,7 +131,7 @@ class JSFetchApi(
                                     "status" to solverrResponse.solution.status,
                                     "statusText" to "OK",
                                     "url" to solverrResponse.solution.url,
-                                    "text" to solverrResponse.solution.response,
+                                    "text" to (solverrResponse.solution.response ?: ""),
                                     "headers" to (solverrResponse.solution.headers ?: emptyMap())
                                 )
                             } else {

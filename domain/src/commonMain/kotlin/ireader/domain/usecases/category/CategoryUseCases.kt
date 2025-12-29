@@ -12,5 +12,7 @@ data class CategoryUseCases(
     val deleteCategory: DeleteCategoryUseCase,
     val reorderCategories: ReorderCategory,
     val assignBookToCategory: AssignBookToCategoryUseCase,
-    val removeBookFromCategory: RemoveBookFromCategoryUseCase
+    val removeBookFromCategory: RemoveBookFromCategoryUseCase,
+    val autoCategorizeBook: AutoCategorizeBookUseCase,
+    val manageAutoRules: ManageCategoryAutoRulesUseCase,
 )

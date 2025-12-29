@@ -21,6 +21,13 @@ interface HttpClientsInterface {
   val config: NetworkConfig
   val sslConfig: SSLConfiguration
   val cookieSynchronizer: CookieSynchronizer
+  
+  /**
+   * Cloudflare bypass handler for automatic challenge resolution.
+   * Returns NoOpCloudflareBypassHandler on platforms without bypass support.
+   */
+  val cloudflareBypassHandler: CloudflareBypassHandler
+    get() = NoOpCloudflareBypassHandler
 }
 
 expect class HttpClients : HttpClientsInterface {
@@ -30,4 +37,5 @@ expect class HttpClients : HttpClientsInterface {
   override val config: NetworkConfig
   override val sslConfig: SSLConfiguration
   override val cookieSynchronizer: CookieSynchronizer
+  override val cloudflareBypassHandler: CloudflareBypassHandler
 }

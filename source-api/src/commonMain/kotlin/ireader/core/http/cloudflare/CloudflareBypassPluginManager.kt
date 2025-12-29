@@ -37,7 +37,7 @@ class CloudflareBypassPluginManager {
         // Sort by priority (highest first)
         _providers.value = current.sortedByDescending { it.priority }
         updateStatus()
-        Log.info { "[CloudflareBypassPluginManager] Registered provider: ${provider.name} (priority: ${provider.priority})" }
+        Log.debug { "[CloudflareBypassPluginManager] Registered provider: ${provider.name} (priority: ${provider.priority})" }
     }
     
     /**
@@ -46,7 +46,7 @@ class CloudflareBypassPluginManager {
     fun unregisterProvider(providerId: String) {
         _providers.value = _providers.value.filter { it.id != providerId }
         updateStatus()
-        Log.info { "[CloudflareBypassPluginManager] Unregistered provider: $providerId" }
+        Log.debug { "[CloudflareBypassPluginManager] Unregistered provider: $providerId" }
     }
     
     /**
@@ -56,9 +56,36 @@ class CloudflareBypassPluginManager {
     
     /**
      * Check if any bypass provider is available.
+     * Forces a fresh check by invalidating provider caches.
      */
     suspend fun hasAvailableProvider(): Boolean {
-        return _providers.value.any { it.isAvailable() }
+        val providers = _providers.value
+        Log.debug { "[CloudflareBypassPluginManager] Checking ${providers.size} providers for availability" }
+        
+        if (providers.isEmpty()) {
+            Log.debug { "[CloudflareBypassPluginManager] No providers registered!" }
+            return false
+        }
+        
+        // Invalidate caches to force fresh check
+        providers.forEach { provider ->
+            Log.debug { "[CloudflareBypassPluginManager] Provider: ${provider.name} (${provider.id})" }
+            if (provider is FlareSolverrProvider) {
+                provider.invalidateAvailabilityCache()
+            }
+        }
+        
+        for (provider in providers) {
+            try {
+                Log.debug { "[CloudflareBypassPluginManager] Checking provider: ${provider.name}" }
+                val available = provider.isAvailable()
+                Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} available: $available" }
+                if (available) return true
+            } catch (e: Exception) {
+                Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} availability check failed: ${e.message}" }
+            }
+        }
+        return false
     }
     
     /**
@@ -110,29 +137,36 @@ class CloudflareBypassPluginManager {
         // Try providers in priority order
         for (provider in providers) {
             try {
-                if (!provider.isAvailable()) {
+                Log.debug { "[CloudflareBypassPluginManager] Checking provider: ${provider.name} (${provider.id})" }
+                
+                val available = provider.isAvailable()
+                if (!available) {
                     Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} not available, skipping" }
                     continue
                 }
                 
-                if (!provider.canHandle(challenge)) {
+                val canHandle = provider.canHandle(challenge)
+                if (!canHandle) {
                     Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} cannot handle challenge type, skipping" }
                     continue
                 }
                 
-                Log.info { "[CloudflareBypassPluginManager] Trying provider: ${provider.name}" }
+                Log.debug { "[CloudflareBypassPluginManager] Trying provider: ${provider.name}" }
                 val result = provider.bypass(request)
+                
+                Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} result: ${result::class.simpleName}" }
                 
                 when (result) {
                     is PluginBypassResult.Success -> {
                         // Cache successful bypass
                         cacheCookies(domain, result.cookies, result.userAgent)
-                        Log.info { "[CloudflareBypassPluginManager] Bypass successful with ${provider.name}" }
+                        Log.debug { "[CloudflareBypassPluginManager] Bypass successful with ${provider.name}" }
                         return result
                     }
                     is PluginBypassResult.Failed -> {
+                        Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} failed: ${result.reason}, canRetry: ${result.canRetry}" }
                         if (!result.canRetry) {
-                            Log.warn { "[CloudflareBypassPluginManager] Provider ${provider.name} failed: ${result.reason}" }
+                            // Don't continue to next provider if retry is not allowed
                         }
                         // Continue to next provider
                     }
@@ -141,12 +175,12 @@ class CloudflareBypassPluginManager {
                         return result
                     }
                     is PluginBypassResult.ServiceUnavailable -> {
-                        Log.warn { "[CloudflareBypassPluginManager] Provider ${provider.name} unavailable: ${result.reason}" }
+                        Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} unavailable: ${result.reason}" }
                         // Continue to next provider
                     }
                 }
             } catch (e: Exception) {
-                Log.error(e, "[CloudflareBypassPluginManager] Provider ${provider.name} threw exception")
+                Log.debug { "[CloudflareBypassPluginManager] Provider ${provider.name} threw exception: ${e.message}" }
                 // Continue to next provider
             }
         }

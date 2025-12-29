@@ -83,8 +83,8 @@ data class FlareSolverrProxy(
 
 @Serializable
 data class FlareSolverrResponse(
-    val status: String,
-    val message: String,
+    val status: String = "error",
+    val message: String = "",
     val startTimestamp: Long? = null,
     val endTimestamp: Long? = null,
     val version: String? = null,

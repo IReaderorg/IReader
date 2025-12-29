@@ -2,6 +2,7 @@ package ireader.data.di
 
 import app.cash.sqldelight.db.SqlDriver
 import ireader.core.db.Transactions
+import ireader.core.http.cloudflare.CloudflareBypassPluginManager
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.data.catalog.impl.DesktopCatalogInstallationChanges
 import ireader.data.catalog.impl.DesktopCatalogInstaller
@@ -36,7 +37,7 @@ actual val dataPlatformModule: Module = module {
     
     // Database preloader - warms up cache during app startup
     single<ireader.data.core.DatabasePreloader> { ireader.data.core.DatabasePreloader(get(), get(), get()) }
-    single<CatalogLoader> { DesktopCatalogLoader(get(),get(),get(),get()) }
+    single<CatalogLoader> { DesktopCatalogLoader(get(), get(), get(), get(), getOrNull()) }
     single<DesktopCatalogInstallationChanges> { DesktopCatalogInstallationChanges() }
     single<CatalogInstallationChanges> { DesktopCatalogInstallationChanges() }
     single<InstallCatalog> { DesktopInstallCatalog(get()) }

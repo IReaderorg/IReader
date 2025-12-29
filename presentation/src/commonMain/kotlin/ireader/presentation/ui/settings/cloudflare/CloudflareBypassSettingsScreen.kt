@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import ireader.core.http.cloudflare.BypassManagerStatus
 import ireader.core.http.cloudflare.CloudflareBypassPluginManager
 import ireader.core.http.cloudflare.CloudflareBypassProvider
+import ireader.presentation.ui.component.DownloadPhase
+import ireader.presentation.ui.component.ExternalResourceDownloadProgress
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -35,7 +37,13 @@ fun CloudflareBypassSettingsScreen(
     onNavigateUp: () -> Unit,
     bypassManager: CloudflareBypassPluginManager,
     flareSolverrUrl: String,
-    onFlareSolverrUrlChange: (String) -> Unit
+    onFlareSolverrUrlChange: (String) -> Unit,
+    // FlareSolverr download state (optional - for on-demand download feature)
+    flareSolverrDownloadState: FlareSolverrDownloadState? = null,
+    onDownloadFlareSolverr: (() -> Unit)? = null,
+    onStartFlareSolverr: (() -> Unit)? = null,
+    onStopFlareSolverr: (() -> Unit)? = null,
+    isFlareSolverrRunning: Boolean = false
 ) {
     val localizeHelper = LocalLocalizeHelper.current
     val scope = rememberCoroutineScope()
@@ -46,6 +54,7 @@ fun CloudflareBypassSettingsScreen(
     var showUrlDialog by remember { mutableStateOf(false) }
     var isCheckingAvailability by remember { mutableStateOf(false) }
     var availabilityResults by remember { mutableStateOf<Map<String, Boolean>>(emptyMap()) }
+    var testConnectionResult by remember { mutableStateOf<Boolean?>(null) }
     
     IScaffold(
         modifier = modifier,
@@ -77,7 +86,21 @@ fun CloudflareBypassSettingsScreen(
                 InfoCard()
             }
             
-            // FlareSolverr Configuration
+            // FlareSolverr Download Card (if download state is provided)
+            if (flareSolverrDownloadState != null && onDownloadFlareSolverr != null) {
+                item {
+                    FlareSolverrStatusCard(
+                        state = flareSolverrDownloadState,
+                        isServerRunning = isFlareSolverrRunning,
+                        onDownloadClick = onDownloadFlareSolverr,
+                        onStartServer = onStartFlareSolverr ?: {},
+                        onStopServer = onStopFlareSolverr ?: {},
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
+            
+            // FlareSolverr Configuration (for external server)
             item {
                 FlareSolverrConfigCard(
                     serverUrl = flareSolverrUrl,
@@ -85,7 +108,9 @@ fun CloudflareBypassSettingsScreen(
                     onTestClick = {
                         scope.launch {
                             isCheckingAvailability = true
+                            testConnectionResult = null
                             val available = bypassManager.hasAvailableProvider()
+                            testConnectionResult = available
                             availabilityResults = providers.associate { 
                                 it.id to runCatching { 
                                     kotlinx.coroutines.runBlocking { it.isAvailable() }
@@ -94,7 +119,8 @@ fun CloudflareBypassSettingsScreen(
                             isCheckingAvailability = false
                         }
                     },
-                    isChecking = isCheckingAvailability
+                    isChecking = isCheckingAvailability,
+                    testResult = testConnectionResult
                 )
             }
             
@@ -134,6 +160,15 @@ fun CloudflareBypassSettingsScreen(
                 onFlareSolverrUrlChange(url)
                 showUrlDialog = false
             }
+        )
+    }
+    
+    // FlareSolverr Download Dialog
+    if (flareSolverrDownloadState != null && onDownloadFlareSolverr != null) {
+        FlareSolverrDownloadDialog(
+            state = flareSolverrDownloadState,
+            onDownload = onDownloadFlareSolverr,
+            onDismiss = { flareSolverrDownloadState.hideDialog() }
         )
     }
 }
@@ -233,7 +268,8 @@ private fun FlareSolverrConfigCard(
     serverUrl: String,
     onConfigureClick: () -> Unit,
     onTestClick: () -> Unit,
-    isChecking: Boolean
+    isChecking: Boolean,
+    testResult: Boolean? = null
 ) {
     Card(
         modifier = Modifier
@@ -308,6 +344,27 @@ private fun FlareSolverrConfigCard(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Test Connection")
+                }
+            }
+            
+            // Show test result
+            if (testResult != null && !isChecking) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (testResult) Icons.Default.Check else Icons.Default.Close,
+                        contentDescription = null,
+                        tint = if (testResult) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = if (testResult) "Connection successful!" else "Connection failed - server not responding",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (testResult) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }

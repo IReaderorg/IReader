@@ -160,7 +160,7 @@ actual class WebViewManger {
             
             if (solverrResponse.status == "ok" && solverrResponse.solution != null) {
                 Log.debug { "[DesktopWebViewManager] FlareSolverr success for: $url" }
-                return solverrResponse.solution.response
+                return solverrResponse.solution.response ?: ""
             }
         } catch (e: Exception) {
             Log.warn { "[DesktopWebViewManager] FlareSolverr failed: ${e.message}" }
@@ -202,8 +202,8 @@ private data class WebViewFlareSolverrRequest(
 
 @Serializable
 private data class WebViewFlareSolverrResponse(
-    val status: String,
-    val message: String,
+    val status: String = "error",
+    val message: String = "",
     val solution: WebViewFlareSolverrSolution? = null
 )
 
@@ -211,5 +211,5 @@ private data class WebViewFlareSolverrResponse(
 private data class WebViewFlareSolverrSolution(
     val url: String,
     val status: Int,
-    val response: String
+    val response: String? = null
 )

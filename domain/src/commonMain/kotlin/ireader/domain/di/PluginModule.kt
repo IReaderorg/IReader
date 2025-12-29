@@ -87,6 +87,16 @@ val PluginModule = module {
         )
     }
     
+    // Plugin Integration Service - bridges plugins with system managers
+    // This service listens to plugin changes and registers CloudflareBypassPlugin
+    // implementations with the CloudflareBypassPluginManager
+    single {
+        PluginIntegrationService(
+            pluginManager = get(),
+            cloudflareBypassManager = get()
+        ).also { it.start() }
+    }
+    
     // TTS Plugin Integration - lazy loaded when TTS is used
     factory { PluginTTSManager(get()) }
     factory { AudioStreamHandler() }
