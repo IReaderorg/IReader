@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Source
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,9 +58,11 @@ import kotlinx.coroutines.launch
 fun CategoryScreen(
     vm: CategoryScreenViewModel,
 ) {
+    // Collect categories as state - this will automatically update when the flow emits
+    val data by vm.categories.collectAsState()
+    
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
-    val data = vm.categories
     val snackbarHostState = remember { SnackbarHostState() }
     
     var categoryToDelete by remember { mutableStateOf<CategoryWithCount?>(null) }
@@ -270,7 +273,7 @@ fun CategoryFloatingActionButton(
 @Composable
 private fun CategoryContent(
     state: ReorderableLazyListState,
-    data: MutableList<CategoryWithCount>,
+    data: List<CategoryWithCount>,
     vm: CategoryScreenViewModel,
     onDelete: (CategoryWithCount) -> Unit,
     onRename: (CategoryWithCount) -> Unit

@@ -1,11 +1,9 @@
 package ireader.presentation.ui.settings.category
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.domain.models.entities.CategoryAutoRule
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.domain.usecases.category.CategoriesUseCases
@@ -13,9 +11,14 @@ import ireader.domain.usecases.category.CategoryUseCases
 import ireader.domain.usecases.category.CreateCategoryWithName
 import ireader.domain.usecases.category.ReorderCategory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -26,7 +29,11 @@ class CategoryScreenViewModel(
     private val libraryPreferences: ireader.domain.preferences.prefs.LibraryPreferences,
     private val categoryUseCases: CategoryUseCases,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
-    var categories: SnapshotStateList<CategoryWithCount> = mutableStateListOf()
+    
+    // Use StateFlow for categories - this is the key change
+    private val _categories = MutableStateFlow<List<CategoryWithCount>>(emptyList())
+    val categories: StateFlow<List<CategoryWithCount>> = _categories
+    
     var showDialog by mutableStateOf(false)
     
     val showEmptyCategories = libraryPreferences.showEmptyCategories().asState()
@@ -40,14 +47,15 @@ class CategoryScreenViewModel(
     var selectedRuleType by mutableStateOf(CategoryAutoRule.RuleType.GENRE)
     
     init {
+        // Subscribe to categories - use stateIn with Eagerly to start immediately
         libraryPreferences.showEmptyCategories().stateIn(scope)
             .flatMapLatest { showEmpty ->
                 categoriesUseCase.subscribe(false, showEmpty, scope)
             }
             .onEach { list ->
-                categories.clear()
-                categories.addAll(list)
-            }.launchIn(scope)
+                _categories.value = list
+            }
+            .stateIn(scope, SharingStarted.Eagerly, emptyList())
         
         // Subscribe to all auto-rules
         categoryUseCases.manageAutoRules.subscribeAllRules()
@@ -93,8 +101,7 @@ class CategoryScreenViewModel(
                 val list = categoriesUseCase.await()
                     .filter { !it.isSystemCategory }
                     .filter { showEmpty || it.bookCount > 0 }
-                categories.clear()
-                categories.addAll(list)
+                _categories.value = list
             } catch (_: Exception) {
                 // Ignore errors during refresh
             }

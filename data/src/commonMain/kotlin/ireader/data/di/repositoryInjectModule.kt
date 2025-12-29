@@ -11,11 +11,17 @@ import ireader.domain.data.repository.PiperVoiceRepository
 import ireader.domain.data.repository.PluginRepository
 import ireader.domain.data.repository.VoiceModelRepository
 import ireader.domain.plugins.PluginDatabase
+import ireader.domain.services.library.LibraryChangeNotifier
 import ireader.domain.usecases.database.RepairDatabaseUseCase
 import org.koin.dsl.module
 
 
 val repositoryInjectModule = module {
+    // LibraryChangeNotifier MUST be registered FIRST before any repositories
+    // because repositories use getOrNull<LibraryChangeNotifier>() to notify changes.
+    // If this is registered after repositories, they will get null and won't notify.
+    single { LibraryChangeNotifier() }
+    
     // Include feature-specific repository modules
     includes(bookRepositoryModule)
     includes(chapterRepositoryModule)

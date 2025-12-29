@@ -1,5 +1,6 @@
 package ireader.data.category
 
+import ireader.core.log.IReaderLog
 import ireader.domain.models.entities.BookCategory
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.BookCategoryRepository
@@ -34,6 +35,7 @@ class BookCategoryRepositoryImpl(
     }
 
     override suspend fun insertAll(categories: List<BookCategory>) {
+        IReaderLog.info("BookCategoryRepositoryImpl.insertAll() called with ${categories.size} categories", "BookCategoryRepo")
         handler.await(true) {
             categories.forEach { category ->
                 bookcategoryQueries.insert(category.bookId, category.categoryId)
@@ -42,7 +44,9 @@ class BookCategoryRepositoryImpl(
         // Notify library that categories changed so UI refreshes
         if (categories.isNotEmpty()) {
             val bookIds = categories.map { it.bookId }.distinct()
+            IReaderLog.info("BookCategoryRepositoryImpl: Notifying CategoriesChanged for bookIds=$bookIds, changeNotifier=${if (changeNotifier != null) "present" else "NULL"}", "BookCategoryRepo")
             changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.CategoriesChanged(bookIds))
+            IReaderLog.info("BookCategoryRepositoryImpl: Notification sent", "BookCategoryRepo")
         }
     }
 

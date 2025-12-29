@@ -1,5 +1,6 @@
 package ireader.domain.services.library
 
+import ireader.core.log.IReaderLog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -60,15 +61,15 @@ class LibraryChangeNotifier {
     }
     
     private val _changes = MutableSharedFlow<ChangeType>(
-        replay = 0,
+        replay = 1, // Keep last event for late subscribers
         extraBufferCapacity = 64 // Buffer to prevent blocking writers
     )
     
+    /** Track number of active subscribers for debugging */
+    private var subscriberCount = 0
+    
     /**
      * Flow of library changes. Observe this to know when to reload data.
-     * 
-     * Note: This is a SharedFlow with no replay, so observers only see
-     * changes that occur after they start collecting.
      */
     val changes: Flow<ChangeType> = _changes.asSharedFlow()
     
@@ -79,7 +80,9 @@ class LibraryChangeNotifier {
      * This is a suspend function but will not block - it uses a buffer.
      */
     suspend fun notifyChange(change: ChangeType) {
-        _changes.emit(change)
+        IReaderLog.info("LibraryChangeNotifier.notifyChange() called: $change, subscribers=${_changes.subscriptionCount.value}", "ChangeNotifier")
+        val emitted = _changes.emit(change)
+        IReaderLog.info("LibraryChangeNotifier.notifyChange() emitted: $change", "ChangeNotifier")
     }
     
     /**
@@ -87,6 +90,9 @@ class LibraryChangeNotifier {
      * Returns true if the change was emitted, false if buffer was full.
      */
     fun tryNotifyChange(change: ChangeType): Boolean {
-        return _changes.tryEmit(change)
+        IReaderLog.info("LibraryChangeNotifier.tryNotifyChange() called: $change, subscribers=${_changes.subscriptionCount.value}", "ChangeNotifier")
+        val result = _changes.tryEmit(change)
+        IReaderLog.info("LibraryChangeNotifier.tryNotifyChange() result=$result for: $change", "ChangeNotifier")
+        return result
     }
 }

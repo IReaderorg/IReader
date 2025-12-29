@@ -372,17 +372,21 @@ class LibraryViewModel(
      */
     private fun observeLibraryChanges() {
         if (changeNotifier == null) {
-            Log.debug { "$TAG: No changeNotifier available, skipping change observation" }
+            Log.warn { "$TAG: No changeNotifier available, skipping change observation" }
             return
         }
+        
+        Log.info { "$TAG: Setting up LibraryChangeNotifier observer" }
         
         changeNotificationJob?.cancel()
         changeNotificationJob = changeNotifier.changes
             .onEach { change ->
-                Log.debug { "$TAG: Received library change: $change" }
+                Log.info { "$TAG: Received library change from flow: $change" }
                 handleLibraryChange(change)
             }
             .launchIn(scope)
+        
+        Log.info { "$TAG: LibraryChangeNotifier observer started" }
         
         // Also observe pending changes with debounce to batch rapid updates
         pendingChanges
@@ -403,11 +407,13 @@ class LibraryViewModel(
      * For full refresh, we reload immediately.
      */
     private fun handleLibraryChange(change: LibraryChangeNotifier.ChangeType) {
+        Log.info { "$TAG: handleLibraryChange() received: $change" }
         when (change) {
             is LibraryChangeNotifier.ChangeType.BookAdded,
             is LibraryChangeNotifier.ChangeType.BookRemoved -> {
                 // Book added/removed affects counts and potentially visible list
                 // Reload current category
+                Log.info { "$TAG: BookAdded/Removed - calling refreshCurrentCategoryDebounced()" }
                 refreshCurrentCategoryDebounced()
             }
             
@@ -424,11 +430,13 @@ class LibraryViewModel(
             
             is LibraryChangeNotifier.ChangeType.CategoryChanged -> {
                 // Book's category changed - may affect current view
+                Log.info { "$TAG: CategoryChanged - calling refreshCurrentCategoryDebounced()" }
                 refreshCurrentCategoryDebounced()
             }
             
             is LibraryChangeNotifier.ChangeType.CategoriesChanged -> {
                 // Multiple category changes - reload current category
+                Log.info { "$TAG: CategoriesChanged for ${change.bookIds} - calling refreshCurrentCategoryDebounced()" }
                 refreshCurrentCategoryDebounced()
             }
             
