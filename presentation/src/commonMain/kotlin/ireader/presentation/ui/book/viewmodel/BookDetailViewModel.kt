@@ -1287,6 +1287,9 @@ class BookDetailViewModel(
      * Clear selection - dispatches to ChapterController for SSOT.
      */
     fun clearSelection() {
+        // Clear local selection immediately for responsive UI
+        selection.clear()
+        // Also dispatch to ChapterController to keep it in sync
         chapterController.dispatch(ChapterCommand.ClearSelection)
     }
     
