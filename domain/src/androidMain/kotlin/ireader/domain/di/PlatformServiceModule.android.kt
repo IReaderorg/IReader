@@ -251,9 +251,9 @@ class AndroidNetworkService(
             connection.disconnect()
             
             ServiceResult.Success(NetworkSpeed(
-                downloadMbps = mbps,
-                uploadMbps = 0.0, // Upload speed measurement not implemented
-                latencyMs = (endTime - startTime).toInt()
+                downloadMbps = mbps.toFloat(),
+                uploadMbps = 0.0f, // Upload speed measurement not implemented
+                latencyMs = endTime - startTime
             ))
         } catch (e: Exception) {
             ServiceResult.Error("Failed to measure network speed: ${e.message}")
