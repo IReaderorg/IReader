@@ -190,7 +190,7 @@ class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup, KoinComponent {
         val backupPath = "$backupDir/ireader_backup_$timestamp.ireader"
         
         // Create backup using injected CreateBackup use case
-        val uri = Uri(backupPath)
+        val uri = Uri.parse(backupPath)
         var backupError: String? = null
         
         createBackup.saveTo(
