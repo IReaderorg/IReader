@@ -245,10 +245,7 @@ val PresentationModules = module {
             readerPreferences = get()
         )
     }
-    
-    // Voice Selection ViewModel
-    factory { ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel(get(), get(), get(), get()) }
-    
+
     // Plugin ViewModels
     factory { (pluginId: String) -> 
         ireader.presentation.ui.plugins.details.PluginDetailsViewModel(

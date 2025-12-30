@@ -12,9 +12,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.LocalPlatformContext
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import ireader.domain.models.remote.PaymentProof
 import ireader.domain.models.remote.PaymentProofStatus
 import ireader.presentation.ui.component.IScaffold
@@ -195,6 +199,7 @@ private fun PaymentProofCard(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showConfirmDialog by remember { mutableStateOf<Boolean?>(null) }
+    var showImageViewer by remember { mutableStateOf(false) }
     
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -262,7 +267,7 @@ private fun PaymentProofCard(
             if (proof.proofImageUrl != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
-                    onClick = { /* TODO: Open image viewer */ },
+                    onClick = { showImageViewer = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
@@ -274,6 +279,14 @@ private fun PaymentProofCard(
                     Text(localizeHelper.localize(Res.string.view_payment_proof))
                 }
             }
+    
+    // Image Viewer Dialog
+    if (showImageViewer && proof.proofImageUrl != null) {
+        PaymentProofImageDialog(
+            imageUrl = proof.proofImageUrl!!,
+            onDismiss = { showImageViewer = false }
+        )
+    }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -444,4 +457,50 @@ private fun formatDate(dateString: String): String {
     } catch (e: Exception) {
         dateString.take(10)
     }
+}
+
+/**
+ * Full screen dialog to view payment proof image
+ */
+@Composable
+private fun PaymentProofImageDialog(
+    imageUrl: String,
+    onDismiss: () -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxSize(0.95f),
+        title = {
+            Text(
+                text = localizeHelper.localize(Res.string.view_payment_proof),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                val context = LocalPlatformContext.current
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .build(),
+                    contentDescription = localizeHelper.localize(Res.string.view_payment_proof),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.close))
+            }
+        }
+    )
 }

@@ -349,16 +349,7 @@ val DomainServices = module {
             notificationService = get()
         )
     }
-    
-    // Voice Management - Platform-specific implementation will be provided in platform modules
-    
-    // Voice downloader - lazy loaded when TTS is used
-    factory {
-        ireader.domain.voice.VoiceDownloader(
-            httpClient = get(),
-            storage = get()
-        )
-    }
+
     
 
     

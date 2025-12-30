@@ -144,12 +144,35 @@ class DesktopDeviceInfoService : DeviceInfoService {
 class DesktopNetworkService : NetworkService {
     
     private var running = false
+    private val networkStateFlow = MutableStateFlow(NetworkState(
+        isConnected = false,
+        type = NetworkType.NONE,
+        isMetered = false
+    ))
+    private var monitorJob: kotlinx.coroutines.Job? = null
+    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
     
-    override suspend fun initialize() {}
-    override suspend fun start() { running = true }
-    override suspend fun stop() { running = false }
+    override suspend fun initialize() {
+        // Initial network check
+        networkStateFlow.value = getNetworkState()
+    }
+    
+    override suspend fun start() { 
+        running = true
+        startNetworkMonitoring()
+    }
+    
+    override suspend fun stop() { 
+        running = false
+        monitorJob?.cancel()
+        monitorJob = null
+    }
+    
     override fun isRunning(): Boolean = running
-    override suspend fun cleanup() {}
+    
+    override suspend fun cleanup() {
+        stop()
+    }
     
     override fun isConnected(): Boolean {
         return try {
@@ -179,21 +202,46 @@ class DesktopNetworkService : NetworkService {
     }
     
     override fun getNetworkState(): NetworkState {
+        val connected = isConnected()
         return NetworkState(
-            isConnected = isConnected(),
-            type = if (isConnected()) NetworkType.ETHERNET else NetworkType.NONE,
+            isConnected = connected,
+            type = if (connected) detectNetworkType() else NetworkType.NONE,
             isMetered = false
         )
     }
     
     override fun observeNetworkChanges(): Flow<NetworkState> {
-        // TODO: Implement network change observer
-        return MutableStateFlow(getNetworkState())
+        return networkStateFlow
     }
     
     override suspend fun measureNetworkSpeed(): ServiceResult<NetworkSpeed> {
-        // TODO: Implement network speed measurement
-        return ServiceResult.Error("Not implemented yet")
+        return try {
+            // Measure download speed using a small test file
+            val testUrl = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+            val startTime = System.currentTimeMillis()
+            
+            val connection = java.net.URL(testUrl).openConnection() as java.net.HttpURLConnection
+            connection.connectTimeout = 10000
+            connection.readTimeout = 10000
+            connection.requestMethod = "GET"
+            
+            val bytes = connection.inputStream.use { it.readBytes() }
+            val endTime = System.currentTimeMillis()
+            
+            val durationSeconds = (endTime - startTime) / 1000.0
+            val bytesPerSecond = if (durationSeconds > 0) bytes.size / durationSeconds else 0.0
+            val mbps = (bytesPerSecond * 8) / 1_000_000 // Convert to Mbps
+            
+            connection.disconnect()
+            
+            ServiceResult.Success(NetworkSpeed(
+                downloadMbps = mbps,
+                uploadMbps = 0.0, // Upload speed measurement not implemented
+                latencyMs = (endTime - startTime).toInt()
+            ))
+        } catch (e: Exception) {
+            ServiceResult.Error("Failed to measure network speed: ${e.message}")
+        }
     }
     
     override suspend fun isHostReachable(host: String, timeoutMs: Long): Boolean {
@@ -202,6 +250,47 @@ class DesktopNetworkService : NetworkService {
             address.isReachable(timeoutMs.toInt())
         } catch (e: Exception) {
             false
+        }
+    }
+    
+    private fun detectNetworkType(): NetworkType {
+        return try {
+            val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+            while (interfaces.hasMoreElements()) {
+                val ni = interfaces.nextElement()
+                if (ni.isUp && !ni.isLoopback) {
+                    val name = ni.name.lowercase()
+                    return when {
+                        name.contains("eth") || name.contains("en") -> NetworkType.ETHERNET
+                        name.contains("wlan") || name.contains("wifi") || name.contains("wi-fi") -> NetworkType.WIFI
+                        else -> NetworkType.ETHERNET // Default to ethernet for desktop
+                    }
+                }
+            }
+            NetworkType.NONE
+        } catch (e: Exception) {
+            NetworkType.ETHERNET // Default assumption for desktop
+        }
+    }
+    
+    private fun startNetworkMonitoring() {
+        monitorJob?.cancel()
+        monitorJob = scope.launch {
+            while (running) {
+                val newState = getNetworkState()
+                if (newState != networkStateFlow.value) {
+                    networkStateFlow.value = newState
+                }
+                kotlinx.coroutines.delay(5000) // Check every 5 seconds
+            }
+        }
+    }
+    
+    private fun kotlinx.coroutines.CoroutineScope.launch(
+        block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit
+    ): kotlinx.coroutines.Job {
+        return kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            block()
         }
     }
 }

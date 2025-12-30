@@ -1,13 +1,32 @@
 package ireader.core.util
 
+import platform.Foundation.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
+
 /**
- * iOS implementation of StorageUtil
- * TODO: Implement using NSFileManager
+ * iOS implementation of StorageUtil using NSFileManager
  */
+@OptIn(ExperimentalForeignApi::class)
 actual object StorageUtil {
     actual fun getAvailableStorageSpace(): Long {
-        // TODO: Implement using NSFileManager.defaultManager().attributesOfFileSystemForPath
-        return Long.MAX_VALUE
+        return try {
+            val fileManager = NSFileManager.defaultManager
+            val documentDirectory = NSSearchPathForDirectoriesInDomains(
+                NSDocumentDirectory,
+                NSUserDomainMask,
+                true
+            ).firstOrNull() as? String ?: return Long.MAX_VALUE
+            
+            val attributes = fileManager.attributesOfFileSystemForPath(documentDirectory, null)
+            val freeSpace = attributes?.get(NSFileSystemFreeSize) as? NSNumber
+            freeSpace?.longLongValue ?: Long.MAX_VALUE
+        } catch (e: Exception) {
+            Long.MAX_VALUE
+        }
     }
     
     actual fun checkStorageBeforeOperation(requiredBytes: Long, bufferBytes: Long): Boolean {

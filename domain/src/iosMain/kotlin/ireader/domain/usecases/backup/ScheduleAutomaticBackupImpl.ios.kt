@@ -1,15 +1,19 @@
 package ireader.domain.usecases.backup
 
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.models.common.Uri
 import platform.BackgroundTasks.*
 import platform.Foundation.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * iOS implementation of automatic backup scheduling using BGTaskScheduler
  * 
  * Uses iOS Background Tasks framework for scheduling periodic backups.
+ * Injects CreateBackup use case via Koin for actual backup functionality.
  * 
  * ## Limitations
  * - iOS limits background execution time
@@ -28,7 +32,9 @@ import kotlinx.coroutines.*
  * ```
  */
 @OptIn(ExperimentalForeignApi::class)
-class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup {
+class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup, KoinComponent {
+    
+    private val createBackup: CreateBackup by inject()
     
     private var backupJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -153,18 +159,85 @@ class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup {
     }
     
     /**
-     * Perform the actual backup
-     * 
-     * Note: In a full implementation, this would:
-     * 1. Get CreateBackup use case via dependency injection
-     * 2. Create backup to local storage
-     * 3. Optionally upload to cloud storage
+     * Perform the actual backup using CreateBackup use case
      */
     private suspend fun performBackup() {
-        // TODO: Inject CreateBackup use case and perform actual backup
-        // For now, this is a placeholder that simulates backup
-        delay(1000) // Simulate backup work
+        // Get backup directory
+        val documentsDir = NSSearchPathForDirectoriesInDomains(
+            NSDocumentDirectory,
+            NSUserDomainMask,
+            true
+        ).firstOrNull() as? String ?: throw Exception("Cannot find documents directory")
+        
+        val backupDir = "$documentsDir/backups"
+        val fileManager = NSFileManager.defaultManager
+        
+        // Create backups directory if needed
+        if (!fileManager.fileExistsAtPath(backupDir)) {
+            fileManager.createDirectoryAtPath(
+                backupDir,
+                withIntermediateDirectories = true,
+                attributes = null,
+                error = null
+            )
+        }
+        
+        // Generate backup filename with timestamp
+        val dateFormatter = NSDateFormatter().apply {
+            dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        }
+        val timestamp = dateFormatter.stringFromDate(NSDate())
+        val backupPath = "$backupDir/ireader_backup_$timestamp.ireader"
+        
+        // Create backup using injected CreateBackup use case
+        val uri = Uri(backupPath)
+        var backupError: String? = null
+        
+        createBackup.saveTo(
+            uri = uri,
+            onError = { error -> 
+                backupError = error.toString()
+            },
+            onSuccess = {
+                println("[AutoBackup] Backup saved to: $backupPath")
+            },
+            currentEvent = { event ->
+                println("[AutoBackup] $event")
+            }
+        )
+        
+        if (backupError != null) {
+            throw Exception("Backup failed: $backupError")
+        }
+        
+        // Clean up old backups (keep last 5)
+        cleanupOldBackups(backupDir, keepCount = 5)
+        
         println("[AutoBackup] Backup performed at ${NSDate()}")
+    }
+    
+    /**
+     * Remove old backup files, keeping only the most recent ones
+     */
+    private fun cleanupOldBackups(backupDir: String, keepCount: Int) {
+        try {
+            val fileManager = NSFileManager.defaultManager
+            val contents = fileManager.contentsOfDirectoryAtPath(backupDir, null) as? List<String> ?: return
+            
+            val backupFiles = contents
+                .filter { it.endsWith(".ireader") }
+                .sortedDescending() // Most recent first (due to timestamp naming)
+            
+            if (backupFiles.size > keepCount) {
+                backupFiles.drop(keepCount).forEach { filename ->
+                    val filePath = "$backupDir/$filename"
+                    fileManager.removeItemAtPath(filePath, null)
+                    println("[AutoBackup] Removed old backup: $filename")
+                }
+            }
+        } catch (e: Exception) {
+            println("[AutoBackup] Failed to cleanup old backups: ${e.message}")
+        }
     }
     
     /**
