@@ -120,9 +120,9 @@ data class ExternalResourceInfo(
             val mb = kb / 1024.0
             val gb = mb / 1024.0
             return when {
-                gb >= 1.0 -> String.format("%.1f GB", gb)
-                mb >= 1.0 -> String.format("%.1f MB", mb)
-                kb >= 1.0 -> String.format("%.1f KB", kb)
+                gb >= 1.0 -> "${formatDouble(gb, 1)} GB"
+                mb >= 1.0 -> "${formatDouble(mb, 1)} MB"
+                kb >= 1.0 -> "${formatDouble(kb, 1)} KB"
                 else -> "$estimatedSize B"
             }
         }
@@ -179,9 +179,9 @@ data class ResourceDownloadProgress(
         val mb = kb / 1024.0
         val gb = mb / 1024.0
         return when {
-            gb >= 1.0 -> String.format("%.2f GB", gb)
-            mb >= 1.0 -> String.format("%.2f MB", mb)
-            kb >= 1.0 -> String.format("%.2f KB", kb)
+            gb >= 1.0 -> "${formatDouble(gb, 2)} GB"
+            mb >= 1.0 -> "${formatDouble(mb, 2)} MB"
+            kb >= 1.0 -> "${formatDouble(kb, 2)} KB"
             else -> "$bytes B"
         }
     }
@@ -253,4 +253,26 @@ sealed class ResourceDownloadResult {
         val currentPlatform: String,
         val supportedPlatforms: List<String>
     ) : ResourceDownloadResult()
+}
+
+
+/**
+ * KMP-compatible helper function to format a double with specified decimal places.
+ */
+private fun formatDouble(value: Double, decimals: Int): String {
+    var factor = 1.0
+    repeat(decimals) { factor *= 10.0 }
+    val rounded = kotlin.math.round(value * factor) / factor
+    val str = rounded.toString()
+    val dotIndex = str.indexOf('.')
+    return if (dotIndex == -1) {
+        "$str.${"0".repeat(decimals)}"
+    } else {
+        val currentDecimals = str.length - dotIndex - 1
+        if (currentDecimals >= decimals) {
+            str.substring(0, dotIndex + decimals + 1)
+        } else {
+            str + "0".repeat(decimals - currentDecimals)
+        }
+    }
 }
