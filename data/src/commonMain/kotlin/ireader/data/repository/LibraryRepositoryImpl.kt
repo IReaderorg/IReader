@@ -3,17 +3,19 @@ package ireader.data.repository
 import app.cash.sqldelight.Query
 import ir.kazemcodes.infinityreader.Database
 import ireader.core.startup.ScreenProfiler
+import ireader.data.book.booksMapper
+import ireader.data.book.getLibraryFastMapper
+import ireader.data.book.getLibraryMapper
+import ireader.data.book.libraryManga
+import ireader.data.core.DatabaseHandler
+import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.library.LibrarySort
-import ireader.data.book.booksMapper
-import ireader.data.book.getLibraryMapper
-import ireader.data.book.getLibraryFastMapper
-import ireader.data.book.libraryManga
-import ireader.domain.data.repository.LibraryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import ireader.data.core.DatabaseHandler
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class LibraryRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -434,6 +436,43 @@ class LibraryRepositoryImpl(
         if (query.isBlank()) return 0
         return handler.awaitOne {
             bookQueries.getSearchCount(query)
+        }.toInt()
+    }
+    
+    // ==================== Smart Category Count Methods ====================
+    
+    override suspend fun getCurrentlyReadingCount(): Int {
+        // The getCurrentlyReadingCount query returns multiple rows (one per book that matches)
+        // We need to count the number of rows returned
+        return handler.awaitList {
+            bookQueries.getCurrentlyReadingCount()
+        }.size
+    }
+    
+    @OptIn(ExperimentalTime::class)
+    override suspend fun getRecentlyAddedCount(daysAgo: Int): Int {
+        val currentTime = Clock.System.now().toEpochMilliseconds()
+        val threshold = currentTime - (daysAgo.toLong() * 24 * 60 * 60 * 1000)
+        return handler.awaitOne {
+            bookQueries.getRecentlyAddedCount(threshold)
+        }.toInt()
+    }
+    
+    override suspend fun getCompletedCount(): Int {
+        return handler.awaitOne {
+            bookQueries.getCompletedCount()
+        }.toInt()
+    }
+    
+    override suspend fun getUnreadCount(): Int {
+        return handler.awaitOne {
+            bookQueries.getUnreadCount()
+        }.toInt()
+    }
+    
+    override suspend fun getArchivedCount(): Int {
+        return handler.awaitOne {
+            bookQueries.getArchivedCount()
         }.toInt()
     }
 

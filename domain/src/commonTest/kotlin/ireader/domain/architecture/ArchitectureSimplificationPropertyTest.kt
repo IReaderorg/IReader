@@ -74,6 +74,36 @@ class ArchitectureSimplificationPropertyTest {
             return books.toList()
         }
         
+        override suspend fun findAllPaginated(
+            sort: DomainLibrarySort,
+            limit: Int,
+            offset: Int,
+            includeArchived: Boolean
+        ): List<LibraryBook> = books.drop(offset).take(limit)
+        
+        override suspend fun getLibraryCount(includeArchived: Boolean): Int = books.size
+        
+        override suspend fun findByCategoryPaginated(
+            categoryId: Long,
+            sort: DomainLibrarySort,
+            limit: Int,
+            offset: Int,
+            includeArchived: Boolean
+        ): List<LibraryBook> = books.filter { it.category.toLong() == categoryId }.drop(offset).take(limit)
+        
+        override suspend fun getLibraryCountByCategory(categoryId: Long, includeArchived: Boolean): Int =
+            books.count { it.category.toLong() == categoryId }
+        
+        override suspend fun findUncategorizedPaginated(
+            sort: DomainLibrarySort,
+            limit: Int,
+            offset: Int,
+            includeArchived: Boolean
+        ): List<LibraryBook> = books.filter { it.category == 0 }.drop(offset).take(limit)
+        
+        override suspend fun getUncategorizedCount(includeArchived: Boolean): Int =
+            books.count { it.category == 0 }
+        
         override fun subscribe(sort: DomainLibrarySort, includeArchived: Boolean): Flow<List<LibraryBook>> {
             return booksFlow
         }
@@ -89,6 +119,30 @@ class ArchitectureSimplificationPropertyTest {
         override suspend fun findDownloadedBooks(): List<ireader.domain.models.entities.Book> = emptyList()
         
         override suspend fun findFavorites(): List<ireader.domain.models.entities.Book> = emptyList()
+        
+        override suspend fun searchPaginated(
+            query: String,
+            sort: DomainLibrarySort,
+            limit: Int,
+            offset: Int,
+            includeArchived: Boolean
+        ): List<LibraryBook> = books.filter { it.title.contains(query, ignoreCase = true) }.drop(offset).take(limit)
+        
+        override suspend fun getSearchCount(query: String, includeArchived: Boolean): Int =
+            books.count { it.title.contains(query, ignoreCase = true) }
+        
+        override suspend fun getCurrentlyReadingCount(): Int =
+            books.count { it.readCount > 0 && it.unreadCount > 0 }
+        
+        override suspend fun getRecentlyAddedCount(daysAgo: Int): Int = 0
+        
+        override suspend fun getCompletedCount(): Int =
+            books.count { it.readCount > 0 && it.unreadCount == 0 }
+        
+        override suspend fun getUnreadCount(): Int =
+            books.count { it.readCount == 0 }
+        
+        override suspend fun getArchivedCount(): Int = 0
     }
     
     /**

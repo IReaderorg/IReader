@@ -52,6 +52,7 @@ import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.presentation.ui.book.components.ExportOptions
+import ireader.presentation.ui.book.components.EpubExportProgress
 import ireader.presentation.ui.book.helpers.PlatformHelper
 import ireader.presentation.ui.core.utils.formatDecimal
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -181,6 +182,10 @@ class BookDetailViewModel(
         private set
     var translationExportTargetLanguage by mutableStateOf("en")
         private set
+    
+    // EPUB export progress state
+    private val _epubExportProgress = MutableStateFlow<EpubExportProgress>(EpubExportProgress.Idle)
+    val epubExportProgress: StateFlow<EpubExportProgress> = _epubExportProgress.asStateFlow()
     
     // Source switching state
     val sourceSwitchingState = SourceSwitchingState()
@@ -1598,7 +1603,7 @@ class BookDetailViewModel(
         }
     }
     
-    fun startMigration(targetSourceId: Long) {
+    fun startMigration(targetSourceId: Long, flags: ireader.domain.models.migration.MigrationFlags = ireader.domain.models.migration.MigrationFlags()) {
         val currentBook = book ?: return
         val targetSourceName = catalogStore.get(targetSourceId)?.name
         
@@ -1607,7 +1612,7 @@ class BookDetailViewModel(
         
         scope.launch {
             try {
-                migrateToSourceUseCase(currentBook.id, targetSourceId).collect { progress ->
+                migrateToSourceUseCase(currentBook.id, targetSourceId, flags).collect { progress ->
                     sourceSwitchingState.migrationProgress = progress
                     
                     if (progress.isComplete) {
@@ -1716,20 +1721,23 @@ class BookDetailViewModel(
     
     fun exportAsEpub(options: ExportOptions) {
         val currentBook = book ?: return
+        val chaptersToExport = chapters
         
         scope.launch {
             try {
-                emitEvent(BookDetailEvent.ShowSnackbar("Preparing EPUB export..."))
+                // Show progress dialog
+                _epubExportProgress.value = EpubExportProgress.Starting("Preparing export...")
                 
                 val outputUri = try {
                     platformHelper.createEpubExportUri(currentBook.title, currentBook.author)
                 } catch (e: Exception) {
                     Log.error("Failed to create export URI", e)
-                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to select save location: ${e.message}"))
+                    _epubExportProgress.value = EpubExportProgress.Error("Failed to select save location: ${e.message}")
                     return@launch
                 }
                 
                 if (outputUri == null) {
+                    _epubExportProgress.value = EpubExportProgress.Idle
                     emitEvent(BookDetailEvent.ShowSnackbar("Export cancelled"))
                     return@launch
                 }
@@ -1749,26 +1757,67 @@ class BookDetailViewModel(
                     translationTargetLanguage = options.translationTargetLanguage
                 )
                 
+                val totalChapters = if (options.selectedChapters.isEmpty()) {
+                    chaptersToExport.size
+                } else {
+                    options.selectedChapters.size
+                }
+                
                 val result = exportBookAsEpubUseCase(
                     bookId = currentBook.id,
                     outputUri = ireader.domain.models.common.Uri.parse(outputUri),
                     options = domainOptions
-                ) { progress ->
-                    emitEvent(BookDetailEvent.ShowSnackbar(progress))
+                ) { progressMessage ->
+                    // Parse progress message to update UI
+                    when {
+                        progressMessage.contains("chapter", ignoreCase = true) -> {
+                            // Extract chapter number from message like "Exporting chapter 5/20: Chapter Title"
+                            val regex = """(\d+)/(\d+)""".toRegex()
+                            val match = regex.find(progressMessage)
+                            if (match != null) {
+                                val current = match.groupValues[1].toIntOrNull() ?: 0
+                                val total = match.groupValues[2].toIntOrNull() ?: totalChapters
+                                val chapterName = progressMessage.substringAfter(":").trim().ifEmpty { "Processing..." }
+                                _epubExportProgress.value = EpubExportProgress.InProgress(
+                                    currentChapter = current,
+                                    totalChapters = total,
+                                    chapterName = chapterName
+                                )
+                            }
+                        }
+                        progressMessage.contains("Creating", ignoreCase = true) ||
+                        progressMessage.contains("Compressing", ignoreCase = true) -> {
+                            _epubExportProgress.value = EpubExportProgress.Compressing(progressMessage)
+                        }
+                        progressMessage.contains("Saving", ignoreCase = true) ||
+                        progressMessage.contains("Writing", ignoreCase = true) -> {
+                            _epubExportProgress.value = EpubExportProgress.Writing(progressMessage)
+                        }
+                    }
                 }
                 
                 result.onSuccess { filePath ->
                     val exportType = if (options.useTranslatedContent) "translated " else ""
-                    emitEvent(BookDetailEvent.ShowSnackbar("${exportType}EPUB exported successfully"))
+                    _epubExportProgress.value = EpubExportProgress.Complete(
+                        filePath = filePath,
+                        message = "${exportType}EPUB exported successfully"
+                    )
                 }.onFailure { error ->
-                    emitEvent(BookDetailEvent.ShowSnackbar("Export failed: ${error.message}"))
+                    _epubExportProgress.value = EpubExportProgress.Error(error.message ?: "Export failed")
                     Log.error("EPUB export failed", error)
                 }
             } catch (e: Exception) {
                 Log.error("Error in EPUB export", e)
-                emitEvent(BookDetailEvent.ShowSnackbar("Export failed: ${e.message}"))
+                _epubExportProgress.value = EpubExportProgress.Error(e.message ?: "Export failed")
             }
         }
+    }
+    
+    /**
+     * Dismiss the EPUB export progress dialog
+     */
+    fun dismissEpubExportProgress() {
+        _epubExportProgress.value = EpubExportProgress.Idle
     }
 
     // ==================== Archive ====================

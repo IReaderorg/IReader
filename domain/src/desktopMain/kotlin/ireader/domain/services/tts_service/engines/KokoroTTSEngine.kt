@@ -23,7 +23,10 @@ class KokoroTTSEngine(
     private var callback: TTSEngineCallback? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var currentSpeed: Float = 1.0f
-    private var currentVoice: String = "af_bella" // Default voice
+    // Use the voice from the adapter (which loads from preferences)
+    private var currentVoice: String
+        get() = kokoroAdapter.getCurrentVoice()
+        set(value) { kokoroAdapter.setVoice(value) }
     
     override suspend fun speak(text: String, utteranceId: String) {
         scope.launch {

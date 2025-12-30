@@ -3,8 +3,14 @@ package ireader.domain.di
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.platform.*
 import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import org.koin.dsl.module
 import java.awt.Toolkit
 import java.net.InetAddress
@@ -149,8 +155,8 @@ class DesktopNetworkService : NetworkService {
         type = NetworkType.NONE,
         isMetered = false
     ))
-    private var monitorJob: kotlinx.coroutines.Job? = null
-    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
+    private var monitorJob: Job? = null
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     override suspend fun initialize() {
         // Initial network check
@@ -235,9 +241,9 @@ class DesktopNetworkService : NetworkService {
             connection.disconnect()
             
             ServiceResult.Success(NetworkSpeed(
-                downloadMbps = mbps,
-                uploadMbps = 0.0, // Upload speed measurement not implemented
-                latencyMs = (endTime - startTime).toInt()
+                downloadMbps = mbps.toFloat(),
+                uploadMbps = 0.0f, // Upload speed measurement not implemented
+                latencyMs = (endTime - startTime)
             ))
         } catch (e: Exception) {
             ServiceResult.Error("Failed to measure network speed: ${e.message}")
@@ -281,16 +287,8 @@ class DesktopNetworkService : NetworkService {
                 if (newState != networkStateFlow.value) {
                     networkStateFlow.value = newState
                 }
-                kotlinx.coroutines.delay(5000) // Check every 5 seconds
+                delay(5000) // Check every 5 seconds
             }
-        }
-    }
-    
-    private fun kotlinx.coroutines.CoroutineScope.launch(
-        block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit
-    ): kotlinx.coroutines.Job {
-        return kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            block()
         }
     }
 }

@@ -287,6 +287,19 @@ class ControllerDIPropertyTest {
         override suspend fun findAllFast(sort: ireader.domain.models.library.LibrarySort, includeArchived: Boolean): List<ireader.domain.models.entities.LibraryBook> = emptyList()
         override suspend fun findDownloadedBooks(): List<Book> = emptyList()
         override suspend fun findFavorites(): List<Book> = emptyList()
+        override suspend fun findAllPaginated(sort: ireader.domain.models.library.LibrarySort, limit: Int, offset: Int, includeArchived: Boolean): List<ireader.domain.models.entities.LibraryBook> = emptyList()
+        override suspend fun getLibraryCount(includeArchived: Boolean): Int = 0
+        override suspend fun findByCategoryPaginated(categoryId: Long, sort: ireader.domain.models.library.LibrarySort, limit: Int, offset: Int, includeArchived: Boolean): List<ireader.domain.models.entities.LibraryBook> = emptyList()
+        override suspend fun getLibraryCountByCategory(categoryId: Long, includeArchived: Boolean): Int = 0
+        override suspend fun findUncategorizedPaginated(sort: ireader.domain.models.library.LibrarySort, limit: Int, offset: Int, includeArchived: Boolean): List<ireader.domain.models.entities.LibraryBook> = emptyList()
+        override suspend fun getUncategorizedCount(includeArchived: Boolean): Int = 0
+        override suspend fun searchPaginated(query: String, sort: ireader.domain.models.library.LibrarySort, limit: Int, offset: Int, includeArchived: Boolean): List<ireader.domain.models.entities.LibraryBook> = emptyList()
+        override suspend fun getSearchCount(query: String, includeArchived: Boolean): Int = 0
+        override suspend fun getCurrentlyReadingCount(): Int = 0
+        override suspend fun getRecentlyAddedCount(daysAgo: Int): Int = 0
+        override suspend fun getCompletedCount(): Int = 0
+        override suspend fun getUnreadCount(): Int = 0
+        override suspend fun getArchivedCount(): Int = 0
     }
     
     /**

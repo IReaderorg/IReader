@@ -157,12 +157,33 @@ class AndroidNetworkService(
     
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private var running = false
+    private val networkStateFlow = MutableStateFlow(NetworkState(
+        isConnected = false,
+        type = NetworkType.NONE,
+        isMetered = false
+    ))
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
     
-    override suspend fun initialize() {}
-    override suspend fun start() { running = true }
-    override suspend fun stop() { running = false }
+    override suspend fun initialize() {
+        // Initial network check
+        networkStateFlow.value = getNetworkState()
+    }
+    
+    override suspend fun start() { 
+        running = true
+        registerNetworkCallback()
+    }
+    
+    override suspend fun stop() { 
+        running = false
+        unregisterNetworkCallback()
+    }
+    
     override fun isRunning(): Boolean = running
-    override suspend fun cleanup() {}
+    
+    override suspend fun cleanup() {
+        stop()
+    }
     
     override fun isConnected(): Boolean {
         val network = connectivityManager.activeNetwork ?: return false
@@ -206,23 +227,99 @@ class AndroidNetworkService(
     }
     
     override fun observeNetworkChanges(): Flow<NetworkState> {
-        // TODO: Implement network change observer
-        return MutableStateFlow(getNetworkState())
+        return networkStateFlow
     }
     
     override suspend fun measureNetworkSpeed(): ServiceResult<NetworkSpeed> {
-        // TODO: Implement network speed measurement
-        return ServiceResult.Error("Not implemented yet")
+        return try {
+            // Measure download speed using a small test file
+            val testUrl = "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+            val startTime = System.currentTimeMillis()
+            
+            val connection = java.net.URL(testUrl).openConnection() as java.net.HttpURLConnection
+            connection.connectTimeout = 10000
+            connection.readTimeout = 10000
+            connection.requestMethod = "GET"
+            
+            val bytes = connection.inputStream.use { it.readBytes() }
+            val endTime = System.currentTimeMillis()
+            
+            val durationSeconds = (endTime - startTime) / 1000.0
+            val bytesPerSecond = if (durationSeconds > 0) bytes.size / durationSeconds else 0.0
+            val mbps = (bytesPerSecond * 8) / 1_000_000 // Convert to Mbps
+            
+            connection.disconnect()
+            
+            ServiceResult.Success(NetworkSpeed(
+                downloadMbps = mbps,
+                uploadMbps = 0.0, // Upload speed measurement not implemented
+                latencyMs = (endTime - startTime).toInt()
+            ))
+        } catch (e: Exception) {
+            ServiceResult.Error("Failed to measure network speed: ${e.message}")
+        }
     }
     
     override suspend fun isHostReachable(host: String, timeoutMs: Long): Boolean {
-        // TODO: Implement host reachability check
-        return isConnected()
+        return try {
+            val address = java.net.InetAddress.getByName(host)
+            address.isReachable(timeoutMs.toInt())
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    private fun registerNetworkCallback() {
+        if (networkCallback != null) return
+        
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: android.net.Network) {
+                networkStateFlow.value = getNetworkState()
+            }
+            
+            override fun onLost(network: android.net.Network) {
+                networkStateFlow.value = NetworkState(
+                    isConnected = false,
+                    type = NetworkType.NONE,
+                    isMetered = false
+                )
+            }
+            
+            override fun onCapabilitiesChanged(
+                network: android.net.Network,
+                networkCapabilities: NetworkCapabilities
+            ) {
+                networkStateFlow.value = getNetworkState()
+            }
+        }
+        
+        networkCallback = callback
+        
+        val request = android.net.NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        
+        connectivityManager.registerNetworkCallback(request, callback)
+    }
+    
+    private fun unregisterNetworkCallback() {
+        networkCallback?.let { callback ->
+            try {
+                connectivityManager.unregisterNetworkCallback(callback)
+            } catch (e: Exception) {
+                // Ignore - callback may not be registered
+            }
+        }
+        networkCallback = null
     }
 }
 
 /**
  * Android implementation of BiometricService
+ * 
+ * Note: Full biometric authentication requires an Activity context and BiometricPrompt.
+ * This implementation provides the capability checks and a callback-based authentication
+ * that can be triggered from the UI layer.
  */
 class AndroidBiometricService(
     private val context: Context
@@ -231,11 +328,16 @@ class AndroidBiometricService(
     private val biometricManager = BiometricManager.from(context)
     private var running = false
     
+    // Callback holder for async authentication
+    private var authCallback: ((ServiceResult<BiometricResult>) -> Unit)? = null
+    
     override suspend fun initialize() {}
     override suspend fun start() { running = true }
     override suspend fun stop() { running = false }
     override fun isRunning(): Boolean = running
-    override suspend fun cleanup() {}
+    override suspend fun cleanup() {
+        authCallback = null
+    }
     
     override suspend fun isBiometricAvailable(): Boolean {
         return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == 
@@ -253,9 +355,150 @@ class AndroidBiometricService(
         negativeButtonText: String,
         confirmationRequired: Boolean
     ): ServiceResult<BiometricResult> {
-        // TODO: Implement biometric authentication
-        // This requires Activity context and BiometricPrompt setup
-        return ServiceResult.Error("Biometric authentication requires Activity context")
+        // Check if biometric is available first
+        if (!isBiometricAvailable()) {
+            return ServiceResult.Error("Biometric authentication not available on this device")
+        }
+        
+        // For actual authentication, we need to use BiometricPrompt which requires Activity
+        // This method returns instructions for the UI layer to handle
+        return ServiceResult.Error(
+            "BiometricAuthRequired:$title|$subtitle|$description|$negativeButtonText|$confirmationRequired"
+        )
+    }
+    
+    /**
+     * Create BiometricPrompt.PromptInfo for use by the UI layer
+     */
+    fun createPromptInfo(
+        title: String,
+        subtitle: String?,
+        description: String?,
+        negativeButtonText: String,
+        confirmationRequired: Boolean
+    ): BiometricPrompt.PromptInfo {
+        return BiometricPrompt.PromptInfo.Builder()
+            .setTitle(title)
+            .apply {
+                subtitle?.let { setSubtitle(it) }
+                description?.let { setDescription(it) }
+            }
+            .setNegativeButtonText(negativeButtonText)
+            .setConfirmationRequired(confirmationRequired)
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+            .build()
+    }
+    
+    /**
+     * Create BiometricPrompt.AuthenticationCallback for use by the UI layer
+     */
+    fun createAuthCallback(
+        onSuccess: () -> Unit,
+        onError: (Int, String) -> Unit,
+        onFailed: () -> Unit
+    ): BiometricPrompt.AuthenticationCallback {
+        return object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                onSuccess()
+            }
+            
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                onError(errorCode, errString.toString())
+            }
+            
+            override fun onAuthenticationFailed() {
+                super.onAuthenticationFailed()
+                onFailed()
+            }
+        }
+    }
+    
+    /**
+     * Authenticate using BiometricPrompt (must be called from Activity/Fragment)
+     * 
+     * Usage from Activity:
+     * ```kotlin
+     * val biometricService = koinInject<BiometricService>() as AndroidBiometricService
+     * val executor = ContextCompat.getMainExecutor(this)
+     * val biometricPrompt = BiometricPrompt(this, executor, biometricService.createAuthCallback(
+     *     onSuccess = { /* handle success */ },
+     *     onError = { code, msg -> /* handle error */ },
+     *     onFailed = { /* handle failed attempt */ }
+     * ))
+     * val promptInfo = biometricService.createPromptInfo(
+     *     title = "Authenticate",
+     *     subtitle = "Use biometric to unlock",
+     *     description = null,
+     *     negativeButtonText = "Cancel",
+     *     confirmationRequired = true
+     * )
+     * biometricPrompt.authenticate(promptInfo)
+     * ```
+     */
+    fun authenticateWithActivity(
+        activity: FragmentActivity,
+        title: String,
+        subtitle: String? = null,
+        description: String? = null,
+        negativeButtonText: String = "Cancel",
+        confirmationRequired: Boolean = true,
+        onResult: (ServiceResult<BiometricResult>) -> Unit
+    ) {
+        if (!isBiometricAvailableSync()) {
+            onResult(ServiceResult.Error("Biometric authentication not available"))
+            return
+        }
+        
+        val executor = ContextCompat.getMainExecutor(activity)
+        
+        val callback = object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                onResult(ServiceResult.Success(BiometricResult.Success))
+            }
+            
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                val result = when (errorCode) {
+                    BiometricPrompt.ERROR_USER_CANCELED,
+                    BiometricPrompt.ERROR_NEGATIVE_BUTTON -> BiometricResult.Cancelled
+                    BiometricPrompt.ERROR_LOCKOUT -> BiometricResult.LockedOut(lockoutDurationMs = 30_000L)
+                    BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> BiometricResult.LockedOut(lockoutDurationMs = null)
+                    else -> BiometricResult.Error(
+                        errorCode = BiometricErrorCode.UNKNOWN,
+                        message = errString.toString()
+                    )
+                }
+                onResult(ServiceResult.Success(result))
+            }
+            
+            override fun onAuthenticationFailed() {
+                super.onAuthenticationFailed()
+                // Don't report failure yet - user can retry
+            }
+        }
+        
+        val biometricPrompt = BiometricPrompt(activity, executor, callback)
+        
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(title)
+            .apply {
+                subtitle?.let { setSubtitle(it) }
+                description?.let { setDescription(it) }
+            }
+            .setNegativeButtonText(negativeButtonText)
+            .setConfirmationRequired(confirmationRequired)
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+            .build()
+        
+        biometricPrompt.authenticate(promptInfo)
+    }
+    
+    private fun isBiometricAvailableSync(): Boolean {
+        return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == 
+            BiometricManager.BIOMETRIC_SUCCESS
     }
     
     override fun getSupportedBiometricTypes(): List<BiometricType> {
@@ -264,6 +507,8 @@ class AndroidBiometricService(
         if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == 
             BiometricManager.BIOMETRIC_SUCCESS) {
             types.add(BiometricType.FINGERPRINT)
+            // Android doesn't easily distinguish between fingerprint and face
+            // We report fingerprint as the primary type
         }
         
         return types

@@ -30,7 +30,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 fun MigrationSourceDialog(
     sources: List<CatalogLocal>,
     onDismiss: () -> Unit,
-    onSourceSelected: (CatalogLocal) -> Unit
+    onSourceSelected: (CatalogLocal, MigrationFlags) -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedSource by remember { mutableStateOf<CatalogLocal?>(null) }
@@ -292,8 +292,7 @@ fun MigrationSourceDialog(
                         }
                         Button(
                             onClick = {
-                                selectedSource?.let { onSourceSelected(it) }
-                                onDismiss()
+                                selectedSource?.let { onSourceSelected(it, migrationFlags) }
                             },
                             modifier = Modifier.weight(1f)
                         ) {

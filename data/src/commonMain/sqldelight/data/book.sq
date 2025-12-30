@@ -351,6 +351,42 @@ HAVING
     SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END) > 0
     AND SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END) < COUNT(chapter._id);
 
+-- Smart Category: Recently Added (books added in last N days)
+-- Uses date_added column, parameter is timestamp threshold
+getRecentlyAddedCount:
+SELECT COUNT(*) AS count
+FROM book
+WHERE book.favorite = 1 
+    AND book.is_archived = 0
+    AND book.date_added > :timestampThreshold;
+
+-- Smart Category: Completed (all chapters read)
+-- Uses cached counts for efficiency
+getCompletedCount:
+SELECT COUNT(*) AS count
+FROM book
+WHERE book.favorite = 1 
+    AND book.is_archived = 0
+    AND book.cached_total_chapters > 0
+    AND book.cached_unread_count = 0;
+
+-- Smart Category: Unread (no chapters read)
+-- Uses cached counts for efficiency
+getUnreadCount:
+SELECT COUNT(*) AS count
+FROM book
+WHERE book.favorite = 1 
+    AND book.is_archived = 0
+    AND book.cached_total_chapters > 0
+    AND book.cached_read_count = 0;
+
+-- Smart Category: Archived
+getArchivedCount:
+SELECT COUNT(*) AS count
+FROM book
+WHERE book.favorite = 1 
+    AND book.is_archived = 1;
+
 getFavoriteGenres:
 SELECT genre
 FROM book

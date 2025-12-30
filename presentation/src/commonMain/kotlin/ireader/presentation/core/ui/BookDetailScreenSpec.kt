@@ -625,9 +625,9 @@ data class BookDetailScreenSpec constructor(
         if (vm.showMigrationDialog) {
             ireader.presentation.ui.book.components.MigrationSourceDialog(
                 sources = vm.availableMigrationSources,
-                onSourceSelected = { targetSource ->
+                onSourceSelected = { targetSource: ireader.domain.models.entities.CatalogLocal, flags: ireader.domain.models.migration.MigrationFlags ->
                     vm.showMigrationDialog = false
-                    vm.startMigration(targetSource.sourceId)
+                    vm.startMigration(targetSource.sourceId, flags)
                 },
                 onDismiss = { vm.showMigrationDialog = false }
             )
@@ -660,6 +660,13 @@ data class BookDetailScreenSpec constructor(
                 onDismiss = { vm.showEpubExportDialog = false }
             )
         }
+        
+        // EPUB Export Progress Dialog
+        val epubExportProgress by vm.epubExportProgress.collectAsState()
+        ireader.presentation.ui.book.components.EpubExportProgressDialog(
+            progress = epubExportProgress,
+            onDismiss = { vm.dismissEpubExportProgress() }
+        )
         
         if (vm.showDialog) {
             ireader.presentation.ui.book.components.EditInfoAlertDialog(

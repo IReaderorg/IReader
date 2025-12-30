@@ -56,7 +56,10 @@ class DesktopTTSService : KoinComponent {
         )
     }
     val kokoroAdapter: ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter by lazy {
-        ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter(kokoroEngine)
+        ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter(kokoroEngine, appPrefs).also {
+            // Load saved voice preference on initialization
+            it.loadVoiceFromPreferences()
+        }
     }
     
     // TTS Engine selection
@@ -1101,8 +1104,8 @@ class DesktopTTSService : KoinComponent {
         try {
             Log.debug { "Synthesizing with Kokoro: text length=${text.length}" }
             
-            // Use default voice or get from preferences
-            val voice = "af_bella" // TODO: Add voice selection to preferences
+            // Get voice from preferences
+            val voice = appPrefs.selectedKokoroVoice().get()
             
             // Check cache first
             val cachedAudio = audioCache.get(text, voice, state.speechSpeed.value)
@@ -2141,7 +2144,7 @@ class DesktopTTSService : KoinComponent {
         Log.info { "Pre-generating ${upcomingParagraphs.size} paragraphs..." }
         
         val voice = when (currentEngine) {
-            TTSEngine.KOKORO -> "af_bella"
+            TTSEngine.KOKORO -> appPrefs.selectedKokoroVoice().get()
             else -> return // Only Kokoro benefits from pre-generation currently
         }
         
@@ -2211,7 +2214,7 @@ class DesktopTTSService : KoinComponent {
                 when (currentEngine) {
                     TTSEngine.PIPER -> this.synthesizer.synthesize(text)
                     TTSEngine.KOKORO -> {
-                        val voice = "af_bella"
+                        val voice = appPrefs.selectedKokoroVoice().get()
                         kokoroAdapter.synthesize(text, voice, state.speechSpeed.value)
                     }
                     TTSEngine.GRADIO -> {

@@ -185,6 +185,15 @@ class AppPreferences(
     }
     
     /**
+     * Selected Kokoro TTS voice ID
+     * Default: "af_bella" (Bella - American Female, warm and friendly)
+     * Available voices: af_bella, af_sarah, am_adam, bf_emma, bm_george, etc.
+     */
+    fun selectedKokoroVoice(): Preference<String> {
+        return preferenceStore.getString("selected_kokoro_voice", "af_bella")
+    }
+    
+    /**
      * Selected AI TTS provider
      */
     fun selectedAITTSProvider(): Preference<String> {

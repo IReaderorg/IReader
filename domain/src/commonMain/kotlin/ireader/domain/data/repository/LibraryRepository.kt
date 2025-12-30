@@ -105,4 +105,38 @@ interface LibraryRepository {
      * Get the total count of library books matching a search query.
      */
     suspend fun getSearchCount(query: String, includeArchived: Boolean = false): Int
+    
+    // ==================== Smart Category Count Methods ====================
+    // These use efficient database COUNT queries instead of loading all books into memory
+    
+    /**
+     * Get count of books currently being read (have some chapters read but not all).
+     * Uses efficient SQL COUNT query.
+     */
+    suspend fun getCurrentlyReadingCount(): Int
+    
+    /**
+     * Get count of books added in the last N days.
+     * Uses efficient SQL COUNT query.
+     * @param daysAgo Number of days to look back (default 7)
+     */
+    suspend fun getRecentlyAddedCount(daysAgo: Int = 7): Int
+    
+    /**
+     * Get count of completed books (all chapters read).
+     * Uses efficient SQL COUNT query.
+     */
+    suspend fun getCompletedCount(): Int
+    
+    /**
+     * Get count of unread books (no chapters read).
+     * Uses efficient SQL COUNT query.
+     */
+    suspend fun getUnreadCount(): Int
+    
+    /**
+     * Get count of archived books.
+     * Uses efficient SQL COUNT query.
+     */
+    suspend fun getArchivedCount(): Int
 }

@@ -121,7 +121,7 @@ val DomainServices = module {
             fileSaver = get()
         )
     }
-    factory  { CategoriesUseCases(get(), get(), get(), get()) }
+    factory  { CategoriesUseCases(get(), get(), get(), get(), get()) }
     factory  { CreateCategoryWithName(get()) }
     factory  { ReorderCategory(get()) }
     factory  { SubscribeDownloadsUseCase(get()) }

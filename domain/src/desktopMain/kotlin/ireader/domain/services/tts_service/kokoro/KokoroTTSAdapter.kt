@@ -1,6 +1,7 @@
 package ireader.domain.services.tts_service.kokoro
 
 import ireader.core.log.Log
+import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.piper.AudioData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -16,7 +17,8 @@ import javax.sound.sampled.AudioSystem
  * used by the TTS service.
  */
 class KokoroTTSAdapter(
-    private val kokoroEngine: KokoroTTSEngine
+    private val kokoroEngine: KokoroTTSEngine,
+    private val appPreferences: AppPreferences? = null
 ) {
     
     /**
@@ -67,11 +69,23 @@ class KokoroTTSAdapter(
     /**
      * Set the current voice (stored for future synthesis calls)
      */
-    private var currentVoice: String = "af_bella"
+    private var currentVoice: String = appPreferences?.selectedKokoroVoice()?.get() ?: "af_bella"
     
     fun setVoice(voiceId: String) {
         currentVoice = voiceId
+        // Persist the voice selection to preferences
+        appPreferences?.selectedKokoroVoice()?.set(voiceId)
         Log.info { "Kokoro voice set to: $voiceId" }
+    }
+    
+    /**
+     * Load the voice from preferences (call on initialization)
+     */
+    fun loadVoiceFromPreferences() {
+        appPreferences?.selectedKokoroVoice()?.get()?.let { savedVoice ->
+            currentVoice = savedVoice
+            Log.info { "Loaded Kokoro voice from preferences: $savedVoice" }
+        }
     }
     
     fun getCurrentVoice(): String = currentVoice

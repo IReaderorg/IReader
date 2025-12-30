@@ -43,6 +43,7 @@ import ireader.presentation.ui.book.components.ChapterDetailBottomBar
 import ireader.presentation.ui.book.components.ChapterListFilterBar
 import ireader.presentation.ui.book.components.EditInfoAlertDialog
 import ireader.presentation.ui.book.components.EpubExportDialog
+import ireader.presentation.ui.book.components.EpubExportProgressDialog
 import ireader.presentation.ui.book.components.MigrationSourceDialog
 import ireader.presentation.ui.book.components.ModernActionButtons
 import ireader.presentation.ui.book.components.ModernBookBackdrop
@@ -183,11 +184,9 @@ fun BookDetailScreen(
     if (vm.showMigrationDialog) {
         MigrationSourceDialog(
             sources = vm.availableMigrationSources,
-            onSourceSelected = { targetSource ->
-                // Note: MigrationFlags are collected in the dialog but not yet used
-                // TODO: Update startMigration to accept MigrationFlags when use case supports it
+            onSourceSelected = { targetSource, flags ->
                 vm.showMigrationDialog = false
-                vm.startMigration(targetSource.sourceId)
+                vm.startMigration(targetSource.sourceId, flags)
             },
             onDismiss = { vm.showMigrationDialog = false }
         )
@@ -220,6 +219,13 @@ fun BookDetailScreen(
             onDismiss = { vm.showEpubExportDialog = false }
         )
     }
+    
+    // EPUB Export Progress Dialog
+    val epubExportProgress by vm.epubExportProgress.collectAsState()
+    EpubExportProgressDialog(
+        progress = epubExportProgress,
+        onDismiss = { vm.dismissEpubExportProgress() }
+    )
     
     // Translation rate limit warning dialog
     if (vm.showTranslationWarningDialog) {

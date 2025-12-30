@@ -9,6 +9,7 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.SourceComparisonRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.toChapter
+import ireader.domain.models.migration.MigrationFlags
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -30,7 +31,11 @@ class MigrateToSourceUseCase(
         val error: String? = null
     )
     
-    operator fun invoke(bookId: Long, targetSourceId: Long): Flow<MigrationProgress> = flow {
+    operator fun invoke(
+        bookId: Long, 
+        targetSourceId: Long,
+        flags: MigrationFlags = MigrationFlags()
+    ): Flow<MigrationProgress> = flow {
         try {
             emit(MigrationProgress("Starting migration...", 0.0f))
             
@@ -72,37 +77,47 @@ class MigrateToSourceUseCase(
             
             emit(MigrationProgress("Mapping chapters...", 0.5f))
             
-            // Get existing chapters to preserve read status
+            // Get existing chapters to preserve read status based on flags
             val existingChapters = chapterRepository.findChaptersByBookId(bookId)
             val existingChapterMap = existingChapters.associateBy { it.number }
             
-            // Convert new chapters and preserve read status
+            // Convert new chapters and preserve data based on MigrationFlags
             val chaptersToInsert = newChapters.mapIndexed { index, chapterInfo ->
                 val chapter = chapterInfo.toChapter(bookId)
                 val existingChapter = existingChapterMap[chapter.number]
                 
                 chapter.copy(
-                    read = existingChapter?.read ?: false,
-                    bookmark = existingChapter?.bookmark ?: false,
-                    lastPageRead = existingChapter?.lastPageRead ?: 0
+                    // Transfer reading progress if flag is enabled
+                    read = if (flags.readingProgress) existingChapter?.read ?: false else false,
+                    lastPageRead = if (flags.readingProgress) existingChapter?.lastPageRead ?: 0 else 0,
+                    // Transfer bookmarks if flag is enabled
+                    bookmark = if (flags.bookmarks) existingChapter?.bookmark ?: false else false
                 )
             }
             
             emit(MigrationProgress("Updating database...", 0.7f))
             
-            // Delete old chapters
-            chapterRepository.deleteChaptersByBookId(bookId)
-            
-            // Insert new chapters
-            chapterRepository.insertChapters(chaptersToInsert)
+            // Only delete and insert chapters if chapters flag is enabled
+            if (flags.chapters) {
+                // Delete old chapters
+                chapterRepository.deleteChaptersByBookId(bookId)
+                
+                // Insert new chapters
+                chapterRepository.insertChapters(chaptersToInsert)
+            }
             
             // Update book with new source and key
+            // Preserve custom cover if flag is enabled
             val updatedBook = book.copy(
                 sourceId = targetSourceId,
                 key = matchedBook.key,
-                initialized = true
+                initialized = true,
+                customCover = if (flags.customCover) book.customCover ?: "" else ""
             )
             bookRepository.updateBook(updatedBook)
+            
+            // Note: Category transfer is handled separately if flags.categories is true
+            // This would require CategoryRepository integration
             
             emit(MigrationProgress("Cleaning up...", 0.9f))
             
