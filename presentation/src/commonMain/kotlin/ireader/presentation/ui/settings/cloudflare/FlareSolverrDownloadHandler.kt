@@ -53,23 +53,13 @@ class FlareSolverrDownloadState {
 
 /**
  * Get FlareSolverr resource info based on platform
+ * Note: Platform detection is handled at runtime by platform-specific code
  */
 fun getFlareSolverrResourceInfo(): ExternalResourceInfo {
-    val os = System.getProperty("os.name")?.lowercase() ?: "unknown"
-    val arch = System.getProperty("os.arch")?.lowercase() ?: "unknown"
-    
-    val (platform, size) = when {
-        os.contains("win") -> "Windows x64" to "~600 MB"
-        os.contains("mac") && (arch.contains("aarch64") || arch.contains("arm")) -> "macOS ARM64" to "~400 MB"
-        os.contains("mac") -> "macOS x64" to "~400 MB"
-        os.contains("linux") -> "Linux x64" to "~450 MB"
-        else -> "Unknown" to "~500 MB"
-    }
-    
     return ExternalResourceInfo(
         name = "FlareSolverr",
         description = "FlareSolverr is required to bypass Cloudflare protection on some sources. It runs a browser locally to solve challenges automatically.",
-        downloadSize = size,
+        downloadSize = "~500 MB",
         sourceUrl = "https://github.com/FlareSolverr/FlareSolverr/releases",
         requiredFor = "Cloudflare-protected sources",
         icon = { Icon(Icons.Outlined.Security, contentDescription = null) }

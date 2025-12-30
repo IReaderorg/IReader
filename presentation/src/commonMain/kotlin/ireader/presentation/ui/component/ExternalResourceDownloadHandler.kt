@@ -426,9 +426,9 @@ private fun formatFileSize(bytes: Long): String {
     val gb = mb / 1024.0
     
     return when {
-        gb >= 1.0 -> String.format("%.2f GB", gb)
-        mb >= 1.0 -> String.format("%.2f MB", mb)
-        kb >= 1.0 -> String.format("%.2f KB", kb)
+        gb >= 1.0 -> "${(gb * 100).toLong() / 100.0} GB"
+        mb >= 1.0 -> "${(mb * 100).toLong() / 100.0} MB"
+        kb >= 1.0 -> "${(kb * 100).toLong() / 100.0} KB"
         else -> "$bytes B"
     }
 }
