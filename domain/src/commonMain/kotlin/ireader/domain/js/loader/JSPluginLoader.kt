@@ -57,8 +57,7 @@ class JSPluginLoader(
     private val pluginsDirectoryProvider: () -> Path,
     private val httpClient: HttpClient,
     private val preferenceStoreFactory: PreferenceStoreFactory,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM,
-    private val pluginManager: ireader.core.http.cloudflare.CloudflareBypassPluginManager? = null
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
     
     // Get the current plugins directory (may change if user selects new storage folder)
@@ -470,7 +469,7 @@ class JSPluginLoader(
             
             // Create bridge service for this plugin
             val pluginPreferenceStore = preferenceStoreFactory.create("js_plugin_$pluginId")
-            val bridgeService = JSBridgeServiceImpl(httpClient, pluginPreferenceStore, pluginId, pluginManager)
+            val bridgeService = JSBridgeServiceImpl(httpClient, pluginPreferenceStore, pluginId)
             
             // Create engine with bridge (platform-specific)
             val engine = createEngine(bridgeService)

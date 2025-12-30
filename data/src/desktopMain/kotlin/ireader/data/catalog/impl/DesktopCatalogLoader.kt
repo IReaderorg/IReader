@@ -42,8 +42,7 @@ class DesktopCatalogLoader(
                 File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }.absolutePath.toPath()
             },
             httpClient = httpClients.default,
-            preferenceStoreFactory = preferences,
-            pluginManager = pluginManager
+            preferenceStoreFactory = preferences
         )
     }
     
