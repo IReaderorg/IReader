@@ -40,6 +40,7 @@ import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import ireader.presentation.ui.settings.security.SettingsSecurityViewModel
 import ireader.presentation.ui.settings.tracking.SettingsTrackingViewModel
+import ireader.domain.usecases.tracking.OAuthCallbackHandler
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import ireader.presentation.ui.plugins.integration.pluginIntegrationModule
 import org.koin.dsl.module
@@ -187,7 +188,7 @@ val PresentationModules = module {
     factory  { SettingsDownloadViewModel(get()) }
     factory  { SettingsSecurityViewModel(get(), get()) }
     factory  { SettingsNotificationViewModel(get()) }
-    factory  { SettingsTrackingViewModel(get(), get(), get(), getOrNull()) }
+    factory  { SettingsTrackingViewModel(get(), get(), OAuthCallbackHandler(), getOrNull()) }
     factory  { SettingsDataViewModel(get(), getOrNull(), getOrNull()) }
     
     // Authentication ViewModels
