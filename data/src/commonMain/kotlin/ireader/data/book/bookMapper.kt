@@ -95,6 +95,7 @@ val libraryManga:
             this.isPinned = is_pinned
             this.pinnedOrder = pinned_order.toInt()
             this.isArchived = is_archived
+            this.dateUpload = date_added // Used by RecentlyAdded smart category
         }
     }
 
@@ -201,6 +202,7 @@ val getLibraryMapper = { _id: Long,
         this.isPinned = is_pinned
         this.pinnedOrder = pinned_order.toInt()
         this.isArchived = is_archived
+        this.dateUpload = date_added // Used by RecentlyAdded smart category
     }
 
 }
@@ -260,5 +262,6 @@ val getLibraryFastMapper = { _id: Long,
         this.isPinned = is_pinned
         this.pinnedOrder = pinned_order.toInt()
         this.isArchived = is_archived
+        this.dateUpload = date_added // Used by RecentlyAdded smart category
     }
 }

@@ -57,6 +57,10 @@ class DatabasePreloader(
             // First, fix last_read_at if not populated (migration may have failed)
             fixLastReadAtIfNeeded()
             
+            // Refresh cached chapter counts for smart categories
+            // This ensures counts are accurate after app updates or data imports
+            refreshCachedChapterCounts()
+            
             // Run preloads SEQUENTIALLY to reduce peak memory usage
             // This is important for low-memory devices with large libraries
             preloadCategories()
@@ -94,6 +98,24 @@ class DatabasePreloader(
             }
         } catch (e: Exception) {
             Log.error("Failed to fix last_read_at: ${e.message}", TAG)
+        }
+    }
+    
+    /**
+     * Refresh cached chapter counts for all books.
+     * This ensures smart categories (Currently Reading, Completed, Unread) work correctly.
+     * Runs on every startup to fix any stale cached counts.
+     */
+    private suspend fun refreshCachedChapterCounts() {
+        try {
+            val startTime = currentTimeToLong()
+            handler.await {
+                chapterQueries.refreshAllBookChapterCounts()
+            }
+            val duration = currentTimeToLong() - startTime
+            Log.debug("Cached chapter counts refreshed in ${duration}ms", TAG)
+        } catch (e: Exception) {
+            Log.error("Failed to refresh cached chapter counts: ${e.message}", TAG)
         }
     }
     

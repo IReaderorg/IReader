@@ -98,7 +98,7 @@ class ChapterRepositoryImpl(
         // Invalidate cache for the affected book
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
         
-        return handler.awaitOneAsync(inTransaction = true) {
+        val result = handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
                     chapter.bookId,
@@ -117,6 +117,13 @@ class ChapterRepositoryImpl(
                 )
              chapterQueries.selectLastInsertedRowId()
         }
+        
+        // Refresh cached chapter counts for the book (used by smart categories)
+        handler.await {
+            chapterQueries.refreshBookChapterCounts(chapter.bookId)
+        }
+        
+        return result
     }
 
     override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
@@ -128,7 +135,7 @@ class ChapterRepositoryImpl(
             dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         }
         
-        return handler.awaitListAsync(true) {
+        val result = handler.awaitListAsync(true) {
             chapters.forEach { chapter ->
                 chapterQueries.upsert(
                     chapter.id.toDB(),
@@ -149,6 +156,15 @@ class ChapterRepositoryImpl(
             }
             chapterQueries.selectLastInsertedRowId()
         }
+        
+        // Refresh cached chapter counts for affected books (used by smart categories)
+        handler.await {
+            bookIds.forEach { bookId ->
+                chapterQueries.refreshBookChapterCounts(bookId)
+            }
+        }
+        
+        return result
     }
 
 
@@ -156,14 +172,28 @@ class ChapterRepositoryImpl(
         handler.await {
             chapterQueries.deleteChaptersByBookId(bookId)
         }
+        
+        // Refresh cached chapter counts for the book (used by smart categories)
+        handler.await {
+            chapterQueries.refreshBookChapterCounts(bookId)
+        }
     }
 
     override suspend fun deleteChapters(chapters: List<Chapter>) {
         if (chapters.isEmpty()) return
         
+        val bookIds = chapters.map { it.bookId }.distinct()
+        
         handler.await(inTransaction = true) {
             chapters.forEach { chapter ->
                 chapterQueries.delete(chapter.id)
+            }
+        }
+        
+        // Refresh cached chapter counts for affected books (used by smart categories)
+        handler.await {
+            bookIds.forEach { bookId ->
+                chapterQueries.refreshBookChapterCounts(bookId)
             }
         }
     }
@@ -171,6 +201,11 @@ class ChapterRepositoryImpl(
     override suspend fun deleteChapter(chapter: Chapter) {
         handler.await {
             chapterQueries.delete(chapter.id)
+        }
+        
+        // Refresh cached chapter counts for the book (used by smart categories)
+        handler.await {
+            chapterQueries.refreshBookChapterCounts(chapter.bookId)
         }
     }
 

@@ -52,10 +52,10 @@ class GetSmartCategoryBooksUseCase(
         return when (smartCategory) {
             is SmartCategory.CurrentlyReading -> {
                 // Books with reading progress between 1% and 99% (1-99% progress)
+                // Use readCount + unreadCount > 0 instead of totalChapters > 0 for robustness
+                // in case cached_total_chapters is stale
                 books.filter { book ->
-                    book.totalChapters > 0 &&
-                    book.readCount > 0 && 
-                    book.unreadCount > 0
+                    book.readCount > 0 && book.unreadCount > 0
                 }
             }
             is SmartCategory.RecentlyAdded -> {
@@ -66,14 +66,16 @@ class GetSmartCategoryBooksUseCase(
             }
             is SmartCategory.Completed -> {
                 // Books with 100% reading progress (all chapters read)
+                // readCount > 0 ensures there are chapters, unreadCount == 0 means all read
                 books.filter { book ->
-                    book.unreadCount == 0 && book.totalChapters > 0
+                    book.readCount > 0 && book.unreadCount == 0
                 }
             }
             is SmartCategory.Unread -> {
                 // Books with 0% reading progress (no chapters read)
+                // unreadCount > 0 ensures there are chapters, readCount == 0 means none read
                 books.filter { book ->
-                    book.readCount == 0 && book.totalChapters > 0
+                    book.unreadCount > 0 && book.readCount == 0
                 }
             }
             is SmartCategory.Archived -> {

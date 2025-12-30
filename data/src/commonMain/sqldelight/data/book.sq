@@ -158,14 +158,14 @@ WHERE book.favorite = 1
 GROUP BY book._id, MC.category_id
 ORDER BY book.title;
 
--- Optimized query for low-end devices: fetch books without chapter counts
--- Chapter counts can be loaded separately/lazily
+-- Optimized query for low-end devices: uses cached chapter counts from book table
+-- No chapter table joins needed - counts are maintained by triggers
 getLibraryFast:
 SELECT 
     book.*,
     COALESCE(MC.category_id, 0) AS category,
-    0 AS unread_count,
-    0 AS read_count
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
 FROM book
 LEFT JOIN bookcategories MC ON book._id = MC.book_id
 WHERE book.favorite = 1
@@ -173,13 +173,13 @@ GROUP BY book._id, MC.category_id
 ORDER BY book.title;
 
 -- Ultra-fast query: just books, no joins at all
--- Use this for maximum performance on low-end devices
+-- Uses cached chapter counts from book table
 getLibraryUltraFast:
 SELECT 
     book.*,
     0 AS category,
-    0 AS unread_count,
-    0 AS read_count
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
 FROM book
 WHERE book.favorite = 1
 ORDER BY book.title;
@@ -345,7 +345,7 @@ getCurrentlyReadingCount:
 SELECT COUNT(DISTINCT book._id) AS count
 FROM book
 JOIN chapter ON book._id = chapter.book_id
-WHERE book.favorite = 1
+WHERE book.favorite = 1 AND book.is_archived = 0
 GROUP BY book._id
 HAVING 
     SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END) > 0
