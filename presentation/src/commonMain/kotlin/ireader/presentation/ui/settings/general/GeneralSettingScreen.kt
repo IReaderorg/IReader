@@ -303,6 +303,19 @@ fun GeneralSettingScreen(
                         subtitle = localizeHelper.localize(Res.string.max_performance_mode_subtitle),
                         icon = Icons.Filled.Speed
                 ),
+                Components.Dynamic {
+                    ChoicePreference<Int>(
+                        preference = vm.thumbnailQuality,
+                        choices = mapOf(
+                            0 to "Low (128px) - Fastest",
+                            1 to "Medium (256px)",
+                            2 to "High (384px) - Recommended",
+                            3 to "Ultra (512px) - Best for custom covers"
+                        ),
+                        title = "Thumbnail Quality",
+                        subtitle = "Higher quality = sharper covers but more memory"
+                    )
+                },
                 Components.Switch(
                         preference = vm.disableHapticFeedback,
                         title = localizeHelper.localize(Res.string.disable_haptic_feedback),
@@ -618,6 +631,7 @@ class GeneralSettingScreenViewModel(
     
     // User interface preferences
     val maxPerformanceMode = uiPreferences.maxPerformanceMode().asStateIn(scope)
+    val thumbnailQuality = uiPreferences.thumbnailQuality().asStateIn(scope)
     val disableHapticFeedback = uiPreferences.disableHapticFeedback().asStateIn(scope)
     val disableLoadingAnimations = uiPreferences.disableLoadingAnimations().asStateIn(scope)
     

@@ -45,8 +45,8 @@ data class PerformanceConfig(
     val enableBlurEffects: Boolean = false, // Expensive - disabled
     val enableShadows: Boolean = false, // Disabled for performance
     // Image loading - optimized for instant display
-    val maxImageSize: Int = 384, // Balanced quality/speed
-    val thumbnailSize: Int = 192, // Smaller thumbnails load faster
+    val maxImageSize: Int = 512, // Higher quality for custom covers
+    val thumbnailSize: Int = 384, // Higher default for better custom cover quality
     val enableImageCrossfade: Boolean = false, // CRITICAL: disabled for instant display
     val useRgb565: Boolean = false, // Keep quality
     val enableImagePlaceholder: Boolean = false, // No placeholder - instant display
@@ -55,6 +55,26 @@ data class PerformanceConfig(
     val enableLayerPromotion: Boolean = true, // Promote list items to GPU layers
     val enableHardwareAcceleration: Boolean = true // Use hardware bitmaps
 ) {
+    /**
+     * Thumbnail quality levels for user preference.
+     * Maps quality level (0-3) to pixel size.
+     */
+    enum class ThumbnailQuality(val size: Int, val maxSize: Int) {
+        LOW(128, 256),      // 0 - Low quality, fastest
+        MEDIUM(256, 384),   // 1 - Medium quality
+        HIGH(384, 512),     // 2 - High quality (default)
+        ULTRA(512, 768);    // 3 - Ultra quality, best for custom covers
+        
+        companion object {
+            fun fromLevel(level: Int): ThumbnailQuality = when(level) {
+                0 -> LOW
+                1 -> MEDIUM
+                2 -> HIGH
+                3 -> ULTRA
+                else -> HIGH
+            }
+        }
+    }
     companion object {
         /**
          * Default config - NATIVE-LIKE PERFORMANCE.
@@ -141,6 +161,19 @@ data class PerformanceConfig(
             enableLayerPromotion = true,
             enableHardwareAcceleration = true
         )
+        
+        /**
+         * Creates a PerformanceConfig with the specified thumbnail quality level.
+         * @param qualityLevel 0=Low, 1=Medium, 2=High, 3=Ultra
+         * @param baseConfig The base config to modify (defaults to Default)
+         */
+        fun withThumbnailQuality(qualityLevel: Int, baseConfig: PerformanceConfig = Default): PerformanceConfig {
+            val quality = ThumbnailQuality.fromLevel(qualityLevel)
+            return baseConfig.copy(
+                thumbnailSize = quality.size,
+                maxImageSize = quality.maxSize
+            )
+        }
     }
 }
 

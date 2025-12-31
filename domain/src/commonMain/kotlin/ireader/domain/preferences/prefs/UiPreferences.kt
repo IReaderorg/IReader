@@ -413,6 +413,16 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getBoolean("max_performance_mode", false)
     }
     
+    /**
+     * Thumbnail quality level for cover images in library grid.
+     * Higher values = better quality but more memory usage.
+     * Values: 0 = Low (128px), 1 = Medium (256px), 2 = High (384px), 3 = Ultra (512px)
+     * Default: 2 (High - 384px) for good quality custom covers
+     */
+    fun thumbnailQuality(): Preference<Int> {
+        return preferenceStore.getInt("thumbnail_quality", 2)
+    }
+    
     // ============================================================================
     // First Launch Settings
     // ============================================================================
