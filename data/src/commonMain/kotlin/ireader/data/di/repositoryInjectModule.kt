@@ -268,6 +268,11 @@ val repositoryInjectModule = module {
         }
     }
     
+    // Local Quote repository - for personal quote collection
+    single<ireader.domain.data.repository.LocalQuoteRepository> {
+        ireader.data.quote.LocalQuoteRepositoryImpl(get())
+    }
+    
     // Character Art Gallery repository
     single<ireader.domain.data.repository.CharacterArtRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()

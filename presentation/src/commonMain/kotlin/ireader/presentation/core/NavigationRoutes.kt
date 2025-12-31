@@ -82,6 +82,34 @@ object NavigationRoutes {
     const val PLUGIN_DETAILS = "pluginDetails/{pluginId}"
     const val PLUGIN_DETAILS_BASE = "pluginDetails"
     const val pluginManagement = "pluginManagement"
+    const val quoteCreation = "quoteCreation"
+    const val myQuotes = "myQuotes"
+    
+    fun quoteCreation(params: ireader.domain.models.quote.QuoteCreationParams): String {
+        val encodedBookTitle = params.bookTitle.encodeForNav()
+        val encodedChapterTitle = params.chapterTitle.encodeForNav()
+        val encodedAuthor = params.author?.encodeForNav()
+        
+        return buildString {
+            append("$quoteCreation?bookId=${params.bookId}")
+            append("&bookTitle=$encodedBookTitle")
+            append("&chapterTitle=$encodedChapterTitle")
+            params.chapterNumber?.let { append("&chapterNumber=$it") }
+            encodedAuthor?.let { append("&author=$it") }
+            params.currentChapterId?.let { append("&currentChapterId=$it") }
+            params.prevChapterId?.let { append("&prevChapterId=$it") }
+            params.nextChapterId?.let { append("&nextChapterId=$it") }
+        }
+    }
+    
+    private fun String.encodeForNav(): String = this
+        .replace("%", "%25")
+        .replace("&", "%26")
+        .replace("=", "%3D")
+        .replace("?", "%3F")
+        .replace("/", "%2F")
+        .replace(" ", "%20")
+        .replace("#", "%23")
     
     fun pluginDetails(pluginId: String) = "pluginDetails/$pluginId"
     

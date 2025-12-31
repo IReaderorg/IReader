@@ -40,6 +40,7 @@ fun CommunityHubScreen(
     onAllReviews: () -> Unit,
     onCharacterArtGallery: () -> Unit,
     onReadingBuddy: () -> Unit = {},
+    onMyQuotes: () -> Unit = {},
     onGlossary: () -> Unit = {},
     onCommunitySource: () -> Unit = {},
     onUserSources: () -> Unit = {},
@@ -167,6 +168,15 @@ fun CommunityHubScreen(
                     description = "Your reading companion with daily quotes",
                     icon = Icons.Filled.Pets,
                     onClick = onReadingBuddy
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "My Quotes",
+                    description = "View and manage your saved quotes from books",
+                    icon = Icons.Filled.FormatQuote,
+                    onClick = onMyQuotes
                 )
             }
             

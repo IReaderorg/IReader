@@ -1,0 +1,117 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+
+CREATE TABLE IF NOT EXISTS local_quote (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    text TEXT NOT NULL,
+    book_id INTEGER NOT NULL,
+    book_title TEXT NOT NULL,
+    chapter_title TEXT NOT NULL,
+    chapter_number INTEGER,
+    author TEXT,
+    created_at INTEGER AS Long NOT NULL,
+    has_context_backup INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_local_quote_book_id ON local_quote(book_id);
+CREATE INDEX IF NOT EXISTS idx_local_quote_created_at ON local_quote(created_at DESC);
+
+-- Quote context backup table
+CREATE TABLE IF NOT EXISTS quote_context (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    quote_id INTEGER NOT NULL,
+    chapter_id INTEGER NOT NULL,
+    chapter_title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    FOREIGN KEY (quote_id) REFERENCES local_quote(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_quote_context_quote_id ON quote_context(quote_id);
+
+-- Insert a new quote
+insert:
+INSERT INTO local_quote (text, book_id, book_title, chapter_title, chapter_number, author, created_at, has_context_backup)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Get last inserted row ID
+selectLastInsertedRowId:
+SELECT LAST_INSERT_ROWID();
+
+-- Update a quote
+update:
+UPDATE local_quote SET
+    text = ?,
+    book_title = ?,
+    chapter_title = ?,
+    chapter_number = ?,
+    author = ?,
+    has_context_backup = ?
+WHERE id = ?;
+
+-- Delete a quote by ID
+deleteById:
+DELETE FROM local_quote WHERE id = ?;
+
+-- Delete all quotes
+deleteAll:
+DELETE FROM local_quote;
+
+-- Get quote by ID
+getById:
+SELECT * FROM local_quote WHERE id = ? LIMIT 1;
+
+-- Get all quotes ordered by creation date
+getAll:
+SELECT * FROM local_quote ORDER BY created_at DESC;
+
+-- Get quotes by book ID
+getByBookId:
+SELECT * FROM local_quote WHERE book_id = ? ORDER BY created_at DESC;
+
+-- Search quotes by text content
+search:
+SELECT * FROM local_quote 
+WHERE text LIKE '%' || ? || '%' 
+   OR book_title LIKE '%' || ? || '%'
+   OR chapter_title LIKE '%' || ? || '%'
+ORDER BY created_at DESC;
+
+-- Get total quote count
+getCount:
+SELECT COUNT(*) FROM local_quote;
+
+-- Get quotes with pagination
+getAllPaginated:
+SELECT * FROM local_quote ORDER BY created_at DESC LIMIT ? OFFSET ?;
+
+-- Observe all quotes (for Flow)
+observeAll:
+SELECT * FROM local_quote ORDER BY created_at DESC;
+
+-- Observe quotes by book ID (for Flow)
+observeByBookId:
+SELECT * FROM local_quote WHERE book_id = ? ORDER BY created_at DESC;
+
+-- Context backup queries
+
+-- Insert context
+insertContext:
+INSERT INTO quote_context (quote_id, chapter_id, chapter_title, content)
+VALUES (?, ?, ?, ?);
+
+-- Get context for a quote
+getContextByQuoteId:
+SELECT * FROM quote_context WHERE quote_id = ? ORDER BY chapter_id;
+
+-- Delete context for a quote
+deleteContextByQuoteId:
+DELETE FROM quote_context WHERE quote_id = ?;
+
+-- Check if quote has context
+hasContext:
+SELECT COUNT(*) > 0 FROM quote_context WHERE quote_id = ?;
+
+-- Get distinct books that have quotes
+getDistinctBooks:
+SELECT DISTINCT book_id, book_title FROM local_quote ORDER BY book_title;

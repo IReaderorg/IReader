@@ -1,0 +1,27 @@
+-- Migration 35: Add local quotes tables for Quote Copy Mode feature
+
+CREATE TABLE IF NOT EXISTS local_quote (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    text TEXT NOT NULL,
+    book_id INTEGER NOT NULL,
+    book_title TEXT NOT NULL,
+    chapter_title TEXT NOT NULL,
+    chapter_number INTEGER,
+    author TEXT,
+    created_at INTEGER NOT NULL,
+    has_context_backup INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_local_quote_book_id ON local_quote(book_id);
+CREATE INDEX IF NOT EXISTS idx_local_quote_created_at ON local_quote(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS quote_context (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    quote_id INTEGER NOT NULL,
+    chapter_id INTEGER NOT NULL,
+    chapter_title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    FOREIGN KEY (quote_id) REFERENCES local_quote(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_quote_context_quote_id ON quote_context(quote_id);

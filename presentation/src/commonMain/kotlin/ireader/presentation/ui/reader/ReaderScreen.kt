@@ -104,7 +104,8 @@ fun ReadingScreen(
         onNavigateToTranslationSettings: () -> Unit,
         onNavigateToCharacterArtUpload: (bookTitle: String, chapterTitle: String, prompt: String) -> Unit = { _, _, _ -> },
         onChangeBrightness: (Float) -> Unit = {},
-        onToggleAutoBrightness: () -> Unit = {}
+        onToggleAutoBrightness: () -> Unit = {},
+        onNavigateToQuoteCreation: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null
 ) {
 
     val scope = rememberCoroutineScope()
@@ -140,7 +141,8 @@ fun ReadingScreen(
             chapter = chapter,
             showChapterReviews = showChapterReviews,
             onChangeBrightness = onChangeBrightness,
-            onToggleAutoBrightness = onToggleAutoBrightness
+            onToggleAutoBrightness = onToggleAutoBrightness,
+            onNavigateToQuoteCreation = onNavigateToQuoteCreation
         )
     }
 }
@@ -173,7 +175,8 @@ private fun ReadingScreenContent(
         chapter: Chapter?,
         showChapterReviews: androidx.compose.runtime.MutableState<Boolean>,
         onChangeBrightness: (Float) -> Unit,
-        onToggleAutoBrightness: () -> Unit
+        onToggleAutoBrightness: () -> Unit,
+        onNavigateToQuoteCreation: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Pre-compute background color to avoid repeated conversions
@@ -266,7 +269,8 @@ private fun ReadingScreenContent(
                                     if (vm.book != null && vm.stateChapter != null) {
                                         showChapterReviews.value = true
                                     }
-                                }
+                                },
+                                onCopyModeDone = onNavigateToQuoteCreation
                             )
                             
                             // Settings Bottom Sheet

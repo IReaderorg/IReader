@@ -537,6 +537,9 @@ data class ReaderScreenSpec(
                         },
                         onToggleAutoBrightness = {
                             vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
+                        },
+                        onNavigateToQuoteCreation = { params ->
+                            navController.navigate(NavigationRoutes.quoteCreation(params))
                         }
                     )
                     

@@ -172,6 +172,23 @@ val screenModelModule = module {
         )
     }
     
+    // Quote Creation ViewModel - for creating quotes from reader
+    factory { (params: ireader.domain.models.quote.QuoteCreationParams) ->
+        ireader.presentation.ui.quote.QuoteCreationViewModel(
+            localQuoteUseCases = get(),
+            quoteRepository = get(),
+            params = params
+        )
+    }
+    
+    // My Quotes ViewModel - for viewing personal quote collection
+    factory {
+        ireader.presentation.ui.quote.MyQuotesViewModel(
+            localQuoteUseCases = get(),
+            quoteRepository = get()
+        )
+    }
+    
     // Reading Hub ViewModel - unified statistics, buddy, and quotes
     factory {
         ireader.presentation.ui.readinghub.ReadingHubViewModel(

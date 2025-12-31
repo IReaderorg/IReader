@@ -784,6 +784,20 @@ fun GeneralScreenTab(
             )
         }
         item {
+            Components.Header(
+                "Actions"
+            ).Build()
+        }
+        item {
+            PreferenceRow(
+                onClick = {
+                    vm.enterCopyMode()
+                },
+                title = "Copy Quote",
+                subtitle = "Enable text selection to copy quotes from this chapter"
+            )
+        }
+        item {
             Spacer(modifier = Modifier.height(100.dp))
         }
     }

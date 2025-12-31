@@ -1729,6 +1729,57 @@ class ReaderScreenViewModel(
     // Reader theme savable state
     var readerThemeSavable by mutableStateOf(false)
     
+    // ==================== Quote Copy Mode ====================
+    
+    /**
+     * Whether copy mode is active (text selection enabled for quote capture)
+     */
+    var copyModeActive by mutableStateOf(false)
+        private set
+    
+    /**
+     * Enter copy mode - enables text selection for quote capture
+     */
+    fun enterCopyMode() {
+        // Enable reader mode so the UI is visible for copy mode
+        updateSuccessState { it.copy(isReaderModeEnabled = true) }
+        // Close settings bottom sheet if open
+        showSettingsBottomSheet = false
+        // Activate copy mode
+        copyModeActive = true
+    }
+    
+    /**
+     * Exit copy mode without saving
+     */
+    fun exitCopyMode() {
+        copyModeActive = false
+    }
+    
+    /**
+     * Finish copy mode and return params for quote creation
+     */
+    fun finishCopyMode(): ireader.domain.models.quote.QuoteCreationParams? {
+        copyModeActive = false
+        
+        val successState = _state.value as? ReaderState.Success ?: return null
+        val currentBook = successState.book
+        val currentChapter = successState.currentChapter
+        val chapters = successState.chapters
+        val currentIndex = chapters.indexOfFirst { it.id == currentChapter.id }
+        
+        return ireader.domain.models.quote.QuoteCreationParams(
+            bookId = currentBook.id,
+            bookTitle = currentBook.title,
+            chapterTitle = currentChapter.name,
+            chapterNumber = currentChapter.number?.toInt(),
+            author = currentBook.author,
+            currentChapterId = currentChapter.id,
+            prevChapterId = chapters.getOrNull(currentIndex - 1)?.id,
+            nextChapterId = chapters.getOrNull(currentIndex + 1)?.id
+        )
+    }
+    
     // Reading time preference
     val readingBreakInterval = readerPreferences.readingBreakInterval().asState()
     

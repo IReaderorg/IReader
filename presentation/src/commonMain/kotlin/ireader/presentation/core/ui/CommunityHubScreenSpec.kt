@@ -45,6 +45,9 @@ class CommunityHubScreenSpec {
             onReadingBuddy = {
                 navController.navigate(NavigationRoutes.readingHub)
             },
+            onMyQuotes = {
+                navController.navigate(NavigationRoutes.myQuotes)
+            },
             onGlossary = {
                 navController.navigate(NavigationRoutes.glossary)
             },

@@ -41,11 +41,12 @@ import ireader.presentation.core.ui.RepositoryScreenSpec
 import ireader.presentation.core.ui.SecuritySettingSpec
 import ireader.presentation.core.ui.SettingScreenSpec
 import ireader.presentation.core.ui.SourceMigrationScreenSpec
-import ireader.presentation.core.ui.TrackingSettingsScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import ireader.presentation.core.ui.TTSV2ScreenSpec
+import ireader.presentation.core.ui.TrackingSettingsScreenSpec
 import ireader.presentation.core.ui.TranslationScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
+import ireader.presentation.core.ui.getIViewModel
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
 import ireader.presentation.ui.plugins.integration.FeaturePluginIntegration
 import ireader.presentation.ui.plugins.integration.PluginNavigationExtensions
@@ -227,6 +228,83 @@ fun CommonNavHost(
         // Glossary Screen - Community feature for managing book glossaries
         composable(NavigationRoutes.glossary) {
             ireader.presentation.core.ui.GlossaryScreenSpec().Content()
+        }
+        
+        // Quote Creation Screen - Create quotes from reader copy mode
+        composable(
+            route = "${NavigationRoutes.quoteCreation}?bookId={bookId}&bookTitle={bookTitle}&chapterTitle={chapterTitle}&chapterNumber={chapterNumber}&author={author}&currentChapterId={currentChapterId}&prevChapterId={prevChapterId}&nextChapterId={nextChapterId}",
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType },
+                navArgument("bookTitle") { type = NavType.StringType },
+                navArgument("chapterTitle") { type = NavType.StringType },
+                navArgument("chapterNumber") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("author") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("currentChapterId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("prevChapterId") { type = NavType.StringType; nullable = true; defaultValue = null },
+                navArgument("nextChapterId") { type = NavType.StringType; nullable = true; defaultValue = null }
+            )
+        ) { backStackEntry ->
+            val bookIdValue = remember(backStackEntry) {
+                backStackEntry.getStringArg("bookId")?.toLongOrNull()
+            }
+            val bookTitle = remember(backStackEntry) {
+                (backStackEntry.getStringArg("bookTitle") ?: "").decodeUrlParam()
+            }
+            val chapterTitle = remember(backStackEntry) {
+                (backStackEntry.getStringArg("chapterTitle") ?: "").decodeUrlParam()
+            }
+            val chapterNumber = remember(backStackEntry) {
+                backStackEntry.getStringArg("chapterNumber")?.toIntOrNull()
+            }
+            val author = remember(backStackEntry) {
+                backStackEntry.getStringArg("author")?.decodeUrlParam()
+            }
+            val currentChapterId = remember(backStackEntry) {
+                backStackEntry.getStringArg("currentChapterId")?.toLongOrNull()
+            }
+            val prevChapterId = remember(backStackEntry) {
+                backStackEntry.getStringArg("prevChapterId")?.toLongOrNull()
+            }
+            val nextChapterId = remember(backStackEntry) {
+                backStackEntry.getStringArg("nextChapterId")?.toLongOrNull()
+            }
+            
+            // Early return if required params are missing
+            val bookId = bookIdValue ?: return@composable
+            if (bookTitle.isEmpty() || chapterTitle.isEmpty()) return@composable
+            
+            val params = ireader.domain.models.quote.QuoteCreationParams(
+                bookId = bookId,
+                bookTitle = bookTitle,
+                chapterTitle = chapterTitle,
+                chapterNumber = chapterNumber,
+                author = author,
+                currentChapterId = currentChapterId,
+                prevChapterId = prevChapterId,
+                nextChapterId = nextChapterId
+            )
+            
+            val vm: ireader.presentation.ui.quote.QuoteCreationViewModel = getIViewModel(
+                parameters = { org.koin.core.parameter.parametersOf(params) }
+            )
+            val navController = requireNotNull(LocalNavigator.current)
+            
+            ireader.presentation.ui.quote.QuoteCreationScreen(
+                vm = vm,
+                onBack = { navController.popBackStack() },
+                onSaveSuccess = { navController.popBackStack() }
+            )
+        }
+        
+        // My Quotes Screen - View and manage saved quotes
+        composable(NavigationRoutes.myQuotes) {
+            val vm: ireader.presentation.ui.quote.MyQuotesViewModel = getIViewModel()
+            val navController = requireNotNull(LocalNavigator.current)
+            
+            ireader.presentation.ui.community.QuotesScreen(
+                vm = vm,
+                onBack = { navController.popBackStack() }
+            )
         }
         
         // Community Source Config - Configure community translation sharing

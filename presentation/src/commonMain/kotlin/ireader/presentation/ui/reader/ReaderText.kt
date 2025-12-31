@@ -108,6 +108,7 @@ fun ReaderText(
     toggleReaderMode: () -> Unit,
     onChapterShown: (chapter: Chapter) -> Unit,
     onShowComments: (chapter: Chapter) -> Unit,
+    onCopyModeDone: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
@@ -260,7 +261,8 @@ fun ReaderText(
                             )
                         }
                 ) {
-                    TextSelectionContainer(selectable = vm.selectableMode.value) {
+                    // Use copy mode OR selectable mode for text selection
+                    TextSelectionContainer(selectable = vm.copyModeActive || vm.selectableMode.value) {
                         when (vm.readingMode.value) {
                             ReadingMode.Page -> {
                                 PagedReaderText(
@@ -304,6 +306,18 @@ fun ReaderText(
             }
 
         }
+        
+        // Copy Mode Overlay
+        ireader.presentation.ui.reader.components.CopyModeOverlay(
+            isActive = vm.copyModeActive,
+            onDone = {
+                val params = vm.finishCopyMode()
+                if (params != null && onCopyModeDone != null) {
+                    onCopyModeDone(params)
+                }
+            },
+            onCancel = { vm.exitCopyMode() }
+        )
 
     }
 

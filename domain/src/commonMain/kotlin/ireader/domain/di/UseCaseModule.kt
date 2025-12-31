@@ -212,4 +212,12 @@ val useCaseModule = module {
     
     // Book Prefetch Service - for faster book detail loading
     singleOf(::BookPrefetchService)
+    
+    // Local Quote use cases - for personal quote collection
+    single {
+        ireader.domain.usecases.quote.LocalQuoteUseCases(
+            localQuoteRepository = get(),
+            chapterRepository = get()
+        )
+    }
 }

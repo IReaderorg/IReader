@@ -17,6 +17,7 @@ import data.Download
 import data.Explore_book
 import data.Global_glossary
 import data.Glossary
+import data.Local_quote
 import data.NftWallets
 import data.Plugin
 import data.Plugin_analytics_event
@@ -31,7 +32,6 @@ import data.Plugin_review
 import data.Plugin_sync_change
 import data.Plugin_sync_conflict
 import data.Plugin_trial
-import data.User_source
 import data.Reader_theme
 import data.Reading_goal
 import data.Reading_milestone
@@ -40,9 +40,9 @@ import data.SourceComparison
 import data.Theme
 import data.Track
 import data.Translated_chapter
+import data.User_source
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.book.bookGenresConverter
-import ireader.data.book.booleanIntAdapter
 import ireader.data.book.floatDoubleColumnAdapter
 import ireader.data.book.intLongColumnAdapter
 import ireader.data.book.longConverter
@@ -246,6 +246,11 @@ fun createDatabase(driver: SqlDriver): Database {
             genreAdapter = bookGenresConverter,
             date_addedAdapter = longConverter
         ),
+        // Local quote table for Quote Copy Mode feature
+        local_quoteAdapter = Local_quote.Adapter(
+            created_atAdapter = longConverter,
+
+        )
     )
 
     return database

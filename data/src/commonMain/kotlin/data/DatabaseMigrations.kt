@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 34
+    const val CURRENT_VERSION = 35
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -99,6 +99,7 @@ object DatabaseMigrations {
             31 -> migrateV31toV32(driver)
             32 -> migrateV32toV33(driver)
             33 -> migrateV33toV34(driver)
+            34 -> migrateV34toV35(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2542,6 +2543,64 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(34, e)
+            // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+    
+    /**
+     * Migration from version 34 to 35
+     * Adds local_quote and quote_context tables for Quote Copy Mode feature
+     */
+    private fun migrateV34toV35(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(34, 35)
+            
+            // Create local_quote table
+            val createLocalQuoteTableSql = """
+                CREATE TABLE IF NOT EXISTS local_quote (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    text TEXT NOT NULL,
+                    book_id INTEGER NOT NULL,
+                    book_title TEXT NOT NULL,
+                    chapter_title TEXT NOT NULL,
+                    chapter_number INTEGER,
+                    author TEXT,
+                    created_at INTEGER NOT NULL,
+                    has_context_backup INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createLocalQuoteTableSql, 0)
+            Logger.logTableCreated("local_quote")
+            
+            // Create indexes for local_quote
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_local_quote_book_id ON local_quote(book_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_local_quote_created_at ON local_quote(created_at DESC);", 0)
+            Logger.logIndexCreated("local_quote indexes")
+            
+            // Create quote_context table
+            val createQuoteContextTableSql = """
+                CREATE TABLE IF NOT EXISTS quote_context (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    quote_id INTEGER NOT NULL,
+                    chapter_id INTEGER NOT NULL,
+                    chapter_title TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    FOREIGN KEY (quote_id) REFERENCES local_quote(id) ON DELETE CASCADE
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createQuoteContextTableSql, 0)
+            Logger.logTableCreated("quote_context")
+            
+            // Create index for quote_context
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_quote_context_quote_id ON quote_context(quote_id);", 0)
+            Logger.logIndexCreated("quote_context indexes")
+            
+            Logger.logMigrationSuccess(35)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(35, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }
