@@ -241,6 +241,11 @@ object LNReaderHtmlParser {
             .replace("&quot;", "\"")
             .replace("&#39;", "'")
             .replace("&apos;", "'")
+            // Fix escaped quotes from JSON-encoded content (common in LNReader plugins)
+            .replace("\\\"", "\"")
+            .replace("\\'", "'")
+            // Fix escaped backslashes
+            .replace("\\\\", "\\")
             .replace(Regex("&#(\\d+);")) { match ->
                 val code = match.groupValues[1].toIntOrNull()
                 if (code != null && code in 32..126) code.toChar().toString() else ""
@@ -256,6 +261,11 @@ object LNReaderHtmlParser {
             .replace("\r", "")
             // Replace tabs with spaces
             .replace("\t", " ")
+            // Fix escaped quotes from JSON-encoded content (common in LNReader plugins)
+            .replace("\\\"", "\"")
+            .replace("\\'", "'")
+            // Fix escaped backslashes
+            .replace("\\\\", "\\")
             // Normalize multiple spaces to single space
             .replace(Regex(" {2,}"), " ")
             // Normalize multiple newlines to double newline (paragraph break)
