@@ -5,6 +5,7 @@ import ireader.data.tracking.anilist.AniListRepositoryImpl
 import ireader.data.tracking.kitsu.KitsuRepositoryImpl
 import ireader.data.tracking.mal.MyAnimeListRepositoryImpl
 import ireader.data.tracking.mangaupdates.MangaUpdatesRepositoryImpl
+import ireader.data.tracking.mynovellist.MyNovelListRepositoryImpl
 import ireader.domain.data.repository.TrackingRepository
 import ireader.domain.data.repository.TrackingStatistics
 import ireader.domain.models.entities.*
@@ -18,13 +19,15 @@ import kotlinx.coroutines.flow.asStateFlow
  * - MyAnimeList (OAuth2 with PKCE)
  * - Kitsu (OAuth2 with username/password)
  * - MangaUpdates (Session-based with username/password)
+ * - MyNovelList (API key authentication)
  */
 class TrackingRepositoryImpl(
     private val handler: DatabaseHandler,
     private val aniListRepository: AniListRepositoryImpl,
     private val malRepository: MyAnimeListRepositoryImpl? = null,
     private val kitsuRepository: KitsuRepositoryImpl? = null,
-    private val mangaUpdatesRepository: MangaUpdatesRepositoryImpl? = null
+    private val mangaUpdatesRepository: MangaUpdatesRepositoryImpl? = null,
+    private val myNovelListRepository: MyNovelListRepositoryImpl? = null
 ) : TrackingRepository {
     
     private val _syncStatusFlows = mutableMapOf<Long, MutableStateFlow<List<TrackingSyncStatus>>>()
@@ -40,6 +43,7 @@ class TrackingRepositoryImpl(
                 TrackerService.MYANIMELIST -> malRepository?.isAuthenticated() == true
                 TrackerService.KITSU -> kitsuRepository?.isAuthenticated() == true
                 TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.isAuthenticated() == true
+                TrackerService.MYNOVELLIST -> myNovelListRepository?.isAuthenticated() == true
                 else -> false
             }
         }
@@ -68,6 +72,10 @@ class TrackingRepositoryImpl(
                 mangaUpdatesRepository?.logout()
                 true
             }
+            TrackerService.MYNOVELLIST -> {
+                myNovelListRepository?.logout()
+                true
+            }
             else -> false
         }
     }
@@ -88,6 +96,10 @@ class TrackingRepositoryImpl(
             TrackerService.MANGAUPDATES -> {
                 // MangaUpdates uses session token
                 mangaUpdatesRepository?.loginWithToken(credentials.accessToken) == true
+            }
+            TrackerService.MYNOVELLIST -> {
+                // MyNovelList uses API key
+                myNovelListRepository?.login(credentials.accessToken) == true
             }
             else -> false
         }
@@ -121,6 +133,10 @@ class TrackingRepositoryImpl(
                 mangaUpdatesRepository?.logout()
                 true
             }
+            TrackerService.MYNOVELLIST -> {
+                myNovelListRepository?.logout()
+                true
+            }
             else -> false
         }
     }
@@ -131,6 +147,7 @@ class TrackingRepositoryImpl(
             TrackerService.MYANIMELIST -> malRepository?.isAuthenticated() == true
             TrackerService.KITSU -> kitsuRepository?.isAuthenticated() == true
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.isAuthenticated() == true
+            TrackerService.MYNOVELLIST -> myNovelListRepository?.isAuthenticated() == true
             else -> false
         }
     }
@@ -173,6 +190,16 @@ class TrackingRepositoryImpl(
                         serviceId = serviceId,
                         accessToken = "",
                         username = mangaUpdatesRepository.getUsername(),
+                        isValid = true
+                    )
+                } else null
+            }
+            TrackerService.MYNOVELLIST -> {
+                if (myNovelListRepository?.isAuthenticated() == true) {
+                    TrackerCredentials(
+                        serviceId = serviceId,
+                        accessToken = "",
+                        username = "MyNovelList User",
                         isValid = true
                     )
                 } else null
@@ -282,6 +309,9 @@ class TrackingRepositoryImpl(
                 TrackerService.MANGAUPDATES -> {
                     mangaUpdatesRepository?.deleteTrack(track.mediaId)
                 }
+                TrackerService.MYNOVELLIST -> {
+                    myNovelListRepository?.deleteTrack(track.mediaId)
+                }
             }
         }
         
@@ -298,6 +328,7 @@ class TrackingRepositoryImpl(
             TrackerService.MYANIMELIST -> malRepository?.search(query) ?: emptyList()
             TrackerService.KITSU -> kitsuRepository?.search(query) ?: emptyList()
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.search(query) ?: emptyList()
+            TrackerService.MYNOVELLIST -> myNovelListRepository?.search(query) ?: emptyList()
             else -> emptyList()
         }
     }
@@ -308,6 +339,7 @@ class TrackingRepositoryImpl(
             TrackerService.MYANIMELIST -> malRepository?.bindBook(bookId, searchResult)
             TrackerService.KITSU -> kitsuRepository?.bindBook(bookId, searchResult)
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.bindBook(bookId, searchResult)
+            TrackerService.MYNOVELLIST -> myNovelListRepository?.bindBook(bookId, searchResult)
             else -> null
         }
         
@@ -331,6 +363,7 @@ class TrackingRepositoryImpl(
             TrackerService.MYANIMELIST -> malRepository?.syncTrack(track)
             TrackerService.KITSU -> kitsuRepository?.syncTrack(track)
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.syncTrack(track)
+            TrackerService.MYNOVELLIST -> myNovelListRepository?.syncTrack(track)
             else -> null
         }
         
@@ -456,6 +489,13 @@ class TrackingRepositoryImpl(
     suspend fun logoutFromMangaUpdates() = mangaUpdatesRepository?.logout()
     fun isMangaUpdatesAuthenticated(): Boolean = mangaUpdatesRepository?.isAuthenticated() == true
     
+    // MyNovelList
+    fun getMyNovelListBaseUrl(): String = myNovelListRepository?.getBaseUrl() ?: ""
+    fun setMyNovelListBaseUrl(url: String) = myNovelListRepository?.setBaseUrl(url)
+    suspend fun loginToMyNovelList(apiKey: String): Boolean = myNovelListRepository?.login(apiKey) == true
+    fun logoutFromMyNovelList() = myNovelListRepository?.logout()
+    fun isMyNovelListAuthenticated(): Boolean = myNovelListRepository?.isAuthenticated() == true
+    
     // ==================== Helper methods ====================
     
     private suspend fun syncToRemote(track: Track): Boolean {
@@ -468,6 +508,7 @@ class TrackingRepositoryImpl(
                 } else false
             }
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.updateTrack(track) == true
+            TrackerService.MYNOVELLIST -> myNovelListRepository?.updateTrack(track) == true
             else -> true
         }
     }

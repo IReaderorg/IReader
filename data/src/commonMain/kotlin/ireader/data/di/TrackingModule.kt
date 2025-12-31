@@ -5,12 +5,13 @@ import ireader.data.tracking.anilist.AniListRepositoryImpl
 import ireader.data.tracking.kitsu.KitsuRepositoryImpl
 import ireader.data.tracking.mal.MyAnimeListRepositoryImpl
 import ireader.data.tracking.mangaupdates.MangaUpdatesRepositoryImpl
+import ireader.data.tracking.mynovellist.MyNovelListRepositoryImpl
 import ireader.domain.data.repository.TrackingRepository
 import org.koin.dsl.module
 
 /**
  * Koin module for tracking-related dependencies.
- * Provides AniList, MyAnimeList, Kitsu, and MangaUpdates tracking service implementations.
+ * Provides AniList, MyAnimeList, Kitsu, MangaUpdates, and MyNovelList tracking service implementations.
  */
 val trackingModule = module {
     // AniList repository
@@ -45,6 +46,14 @@ val trackingModule = module {
         )
     }
     
+    // MyNovelList repository
+    single {
+        MyNovelListRepositoryImpl(
+            httpClient = get<ireader.core.http.HttpClients>().default,
+            preferenceStore = get()
+        )
+    }
+    
     // Main tracking repository with all services
     single<TrackingRepository> {
         TrackingRepositoryImpl(
@@ -52,7 +61,8 @@ val trackingModule = module {
             aniListRepository = get(),
             malRepository = get(),
             kitsuRepository = get(),
-            mangaUpdatesRepository = get()
+            mangaUpdatesRepository = get(),
+            myNovelListRepository = get()
         )
     }
 }

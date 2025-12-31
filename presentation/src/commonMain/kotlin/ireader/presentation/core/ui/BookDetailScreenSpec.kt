@@ -831,6 +831,15 @@ data class BookDetailScreenSpec constructor(
                         status = vm.mangaUpdatesStatus,
                         progress = vm.mangaUpdatesProgress,
                         score = vm.mangaUpdatesScore
+                    ),
+                    ireader.presentation.ui.book.components.TrackingServiceInfo(
+                        id = "mynovellist",
+                        name = "MyNovelList",
+                        isLoggedIn = vm.isMyNovelListLoggedIn,
+                        isTracked = vm.isMyNovelListTracked,
+                        status = vm.myNovelListStatus,
+                        progress = vm.myNovelListProgress,
+                        score = vm.myNovelListScore
                     )
                 ),
                 onServiceClick = { serviceId ->
@@ -845,6 +854,7 @@ data class BookDetailScreenSpec constructor(
                         "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
                         "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
                         "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        "mynovellist" -> ireader.domain.models.entities.TrackerService.MYNOVELLIST
                         else -> ireader.domain.models.entities.TrackerService.ANILIST
                     }
                     vm.searchOnService(trackerServiceId, book.title)
@@ -855,6 +865,7 @@ data class BookDetailScreenSpec constructor(
                         "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
                         "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
                         "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        "mynovellist" -> ireader.domain.models.entities.TrackerService.MYNOVELLIST
                         else -> ireader.domain.models.entities.TrackerService.ANILIST
                     }
                     vm.removeTrackingFromService(trackerServiceId)
@@ -865,6 +876,7 @@ data class BookDetailScreenSpec constructor(
                         "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
                         "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
                         "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        "mynovellist" -> ireader.domain.models.entities.TrackerService.MYNOVELLIST
                         else -> ireader.domain.models.entities.TrackerService.ANILIST
                     }
                     vm.updateServiceStatus(trackerServiceId, status)
@@ -875,6 +887,7 @@ data class BookDetailScreenSpec constructor(
                         "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
                         "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
                         "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        "mynovellist" -> ireader.domain.models.entities.TrackerService.MYNOVELLIST
                         else -> ireader.domain.models.entities.TrackerService.ANILIST
                     }
                     vm.updateServiceProgress(trackerServiceId, progress)
@@ -885,6 +898,7 @@ data class BookDetailScreenSpec constructor(
                         "mal" -> ireader.domain.models.entities.TrackerService.MYANIMELIST
                         "kitsu" -> ireader.domain.models.entities.TrackerService.KITSU
                         "mangaupdates" -> ireader.domain.models.entities.TrackerService.MANGAUPDATES
+                        "mynovellist" -> ireader.domain.models.entities.TrackerService.MYNOVELLIST
                         else -> ireader.domain.models.entities.TrackerService.ANILIST
                     }
                     vm.updateServiceScore(trackerServiceId, score)

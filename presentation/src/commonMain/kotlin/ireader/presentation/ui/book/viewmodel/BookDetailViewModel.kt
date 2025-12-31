@@ -2010,18 +2010,26 @@ class BookDetailViewModel(
     var mangaUpdatesScore by mutableStateOf<Float?>(null)
     private var mangaUpdatesTrack: ireader.domain.models.entities.Track? = null
     
+    // MyNovelList tracking state
+    var isMyNovelListLoggedIn by mutableStateOf(false)
+    var isMyNovelListTracked by mutableStateOf(false)
+    var myNovelListStatus by mutableStateOf<String?>(null)
+    var myNovelListProgress by mutableStateOf<Int?>(null)
+    var myNovelListScore by mutableStateOf<Float?>(null)
+    private var myNovelListTrack: ireader.domain.models.entities.Track? = null
+    
     // Legacy compatibility properties
     var isTracked: Boolean
-        get() = isAniListTracked || isMalTracked || isKitsuTracked || isMangaUpdatesTracked
+        get() = isAniListTracked || isMalTracked || isKitsuTracked || isMangaUpdatesTracked || isMyNovelListTracked
         set(value) { isAniListTracked = value }
     var trackingStatus: String?
-        get() = aniListStatus ?: malStatus ?: kitsuStatus ?: mangaUpdatesStatus
+        get() = aniListStatus ?: malStatus ?: kitsuStatus ?: mangaUpdatesStatus ?: myNovelListStatus
         set(value) { aniListStatus = value }
     var trackingProgress: Int?
-        get() = aniListProgress ?: malProgress ?: kitsuProgress ?: mangaUpdatesProgress
+        get() = aniListProgress ?: malProgress ?: kitsuProgress ?: mangaUpdatesProgress ?: myNovelListProgress
         set(value) { aniListProgress = value }
     var trackingScore: Float?
-        get() = aniListScore ?: malScore ?: kitsuScore ?: mangaUpdatesScore
+        get() = aniListScore ?: malScore ?: kitsuScore ?: mangaUpdatesScore ?: myNovelListScore
         set(value) { aniListScore = value }
     
     // Search state
@@ -2049,6 +2057,7 @@ class BookDetailViewModel(
                 isMalLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MYANIMELIST)
                 isKitsuLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.KITSU)
                 isMangaUpdatesLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MANGAUPDATES)
+                isMyNovelListLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MYNOVELLIST)
                 
                 // Load existing tracks for this book
                 val tracks = trackingRepository.getTracksByBook(bookId)
@@ -2088,6 +2097,15 @@ class BookDetailViewModel(
                     mangaUpdatesProgress = track.lastRead.toInt()
                     mangaUpdatesScore = track.score
                 }
+                
+                // MyNovelList track
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.MYNOVELLIST }?.let { track ->
+                    myNovelListTrack = track
+                    isMyNovelListTracked = true
+                    myNovelListStatus = track.status.name
+                    myNovelListProgress = track.lastRead.toInt()
+                    myNovelListScore = track.score
+                }
             } catch (e: Exception) {
                 Log.error(e, "Failed to load tracking status")
             }
@@ -2124,6 +2142,7 @@ class BookDetailViewModel(
                 isMalLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MYANIMELIST)
                 isKitsuLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.KITSU)
                 isMangaUpdatesLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MANGAUPDATES)
+                isMyNovelListLoggedIn = trackingRepository.isAuthenticated(ireader.domain.models.entities.TrackerService.MYNOVELLIST)
                 
                 // Sync and reload tracks
                 val tracks = trackingRepository.getTracksByBook(bookId)
@@ -2174,6 +2193,18 @@ class BookDetailViewModel(
                     mangaUpdatesStatus = track.status.name
                     mangaUpdatesProgress = track.lastRead.toInt()
                     mangaUpdatesScore = track.score
+                }
+                
+                // MyNovelList
+                if (isMyNovelListTracked && myNovelListTrack != null) {
+                    trackingRepository.syncTrack(bookId, ireader.domain.models.entities.TrackerService.MYNOVELLIST)
+                }
+                tracks.find { it.siteId == ireader.domain.models.entities.TrackerService.MYNOVELLIST }?.let { track ->
+                    myNovelListTrack = track
+                    isMyNovelListTracked = true
+                    myNovelListStatus = track.status.name
+                    myNovelListProgress = track.lastRead.toInt()
+                    myNovelListScore = track.score
                 }
             } catch (e: Exception) {
                 Log.error(e, "Failed to load tracking status")
@@ -2265,6 +2296,13 @@ class BookDetailViewModel(
                                 mangaUpdatesProgress = track.lastRead.toInt()
                                 mangaUpdatesScore = track.score
                             }
+                            ireader.domain.models.entities.TrackerService.MYNOVELLIST -> {
+                                myNovelListTrack = track
+                                isMyNovelListTracked = true
+                                myNovelListStatus = track.status.name
+                                myNovelListProgress = track.lastRead.toInt()
+                                myNovelListScore = track.score
+                            }
                         }
                     }
                     
@@ -2329,6 +2367,13 @@ class BookDetailViewModel(
                             mangaUpdatesProgress = null
                             mangaUpdatesScore = null
                         }
+                        ireader.domain.models.entities.TrackerService.MYNOVELLIST -> {
+                            myNovelListTrack = null
+                            isMyNovelListTracked = false
+                            myNovelListStatus = null
+                            myNovelListProgress = null
+                            myNovelListScore = null
+                        }
                     }
                     emitEvent(BookDetailEvent.ShowSnackbar("Tracking removed"))
                 } else {
@@ -2381,6 +2426,7 @@ class BookDetailViewModel(
                             ireader.domain.models.entities.TrackerService.MYANIMELIST -> malStatus = status
                             ireader.domain.models.entities.TrackerService.KITSU -> kitsuStatus = status
                             ireader.domain.models.entities.TrackerService.MANGAUPDATES -> mangaUpdatesStatus = status
+                            ireader.domain.models.entities.TrackerService.MYNOVELLIST -> myNovelListStatus = status
                         }
                         emitEvent(BookDetailEvent.ShowSnackbar("Status updated to $status"))
                     } else {
@@ -2419,6 +2465,7 @@ class BookDetailViewModel(
                             ireader.domain.models.entities.TrackerService.MYANIMELIST -> malProgress = progress
                             ireader.domain.models.entities.TrackerService.KITSU -> kitsuProgress = progress
                             ireader.domain.models.entities.TrackerService.MANGAUPDATES -> mangaUpdatesProgress = progress
+                            ireader.domain.models.entities.TrackerService.MYNOVELLIST -> myNovelListProgress = progress
                         }
                         emitEvent(BookDetailEvent.ShowSnackbar("Progress updated to $progress"))
                     } else {
@@ -2457,6 +2504,7 @@ class BookDetailViewModel(
                             ireader.domain.models.entities.TrackerService.MYANIMELIST -> malScore = score
                             ireader.domain.models.entities.TrackerService.KITSU -> kitsuScore = score
                             ireader.domain.models.entities.TrackerService.MANGAUPDATES -> mangaUpdatesScore = score
+                            ireader.domain.models.entities.TrackerService.MYNOVELLIST -> myNovelListScore = score
                         }
                         emitEvent(BookDetailEvent.ShowSnackbar("Score updated to ${score.formatDecimal(1)}"))
                     } else {
@@ -2475,6 +2523,7 @@ class BookDetailViewModel(
         ireader.domain.models.entities.TrackerService.MYANIMELIST -> "MyAnimeList"
         ireader.domain.models.entities.TrackerService.KITSU -> "Kitsu"
         ireader.domain.models.entities.TrackerService.MANGAUPDATES -> "MangaUpdates"
+        ireader.domain.models.entities.TrackerService.MYNOVELLIST -> "MyNovelList"
         else -> "Unknown"
     }
     

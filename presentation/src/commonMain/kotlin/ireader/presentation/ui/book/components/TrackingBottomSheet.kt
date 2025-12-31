@@ -342,7 +342,7 @@ private fun EmptyTrackingState() {
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Go to Settings → Tracking to set up AniList, MAL, or other services",
+            text = "Go to Settings → Tracking to set up AniList, MAL, MyNovelList, or other services",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )

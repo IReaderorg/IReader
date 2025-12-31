@@ -25,6 +25,7 @@ data class TrackerService(
         const val MANGAUPDATES = 4
         const val SHIKIMORI = 5
         const val BANGUMI = 6
+        const val MYNOVELLIST = 7
         
         val services = listOf(
             TrackerService(
@@ -62,6 +63,12 @@ data class TrackerService(
                 name = "Bangumi",
                 icon = "bangumi",
                 baseUrl = "https://bangumi.tv"
+            ),
+            TrackerService(
+                id = MYNOVELLIST,
+                name = "MyNovelList",
+                icon = "mynovellist",
+                baseUrl = "https://mynoveltracker.netlify.app"
             )
         )
     }

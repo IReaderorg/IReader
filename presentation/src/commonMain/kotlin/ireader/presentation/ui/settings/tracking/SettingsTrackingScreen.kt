@@ -57,6 +57,8 @@ fun SettingsTrackingScreen(
     val kitsuLoggedIn by viewModel.kitsuLoggedIn.collectAsState()
     val mangaUpdatesEnabled by viewModel.mangaUpdatesEnabled.collectAsState()
     val mangaUpdatesLoggedIn by viewModel.mangaUpdatesLoggedIn.collectAsState()
+    val myNovelListEnabled by viewModel.myNovelListEnabled.collectAsState()
+    val myNovelListLoggedIn by viewModel.myNovelListLoggedIn.collectAsState()
     
     // Auto-sync preferences
     val autoSyncEnabled by viewModel.autoSyncEnabled.collectAsState()
@@ -154,6 +156,19 @@ fun SettingsTrackingScreen(
                     onLogin = { viewModel.loginToMangaUpdates() },
                     onLogout = { viewModel.logoutFromMangaUpdates() },
                     onConfigure = { viewModel.configureMangaUpdates() }
+                )
+            }
+            
+            // MyNovelList
+            item {
+                TrackingServiceItem(
+                    serviceName = "MyNovelList",
+                    enabled = myNovelListEnabled,
+                    loggedIn = myNovelListLoggedIn,
+                    onToggleEnabled = viewModel::setMyNovelListEnabled,
+                    onLogin = { viewModel.loginToMyNovelList() },
+                    onLogout = { viewModel.logoutFromMyNovelList() },
+                    onConfigure = { viewModel.configureMyNovelList() }
                 )
             }
             
@@ -452,6 +467,15 @@ fun SettingsTrackingScreen(
         )
     }
     
+    // MyNovelList Login Dialog
+    if (viewModel.showMyNovelListLoginDialog) {
+        MyNovelListLoginDialog(
+            error = viewModel.myNovelListLoginError,
+            onDismiss = { viewModel.dismissMyNovelListLoginDialog() },
+            onLogin = { apiKey -> viewModel.completeMyNovelListLogin(apiKey) }
+        )
+    }
+    
     // Sync History Dialog
     if (viewModel.showSyncHistoryDialog) {
         SyncHistoryDialog(
@@ -461,6 +485,7 @@ fun SettingsTrackingScreen(
             malLoggedIn = malLoggedIn,
             kitsuLoggedIn = kitsuLoggedIn,
             mangaUpdatesLoggedIn = mangaUpdatesLoggedIn,
+            myNovelListLoggedIn = myNovelListLoggedIn,
             onDismiss = { viewModel.dismissSyncHistoryDialog() }
         )
     }
@@ -893,6 +918,86 @@ private fun MangaUpdatesLoginDialog(
     )
 }
 
+/**
+ * Dialog for MyNovelList login with API key.
+ */
+@Composable
+private fun MyNovelListLoginDialog(
+    error: String?,
+    onDismiss: () -> Unit,
+    onLogin: (String) -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var apiKey by remember { mutableStateOf("") }
+    var apiKeyVisible by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Login to MyNovelList") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Enter your MyNovelList API key:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Text(
+                    text = "You can generate an API key from your MyNovelList account settings at Settings → API Keys.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                OutlinedTextField(
+                    value = apiKey,
+                    onValueChange = { apiKey = it },
+                    label = { Text("API Key") },
+                    placeholder = { Text("mnl_xxxxxxxx...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (apiKeyVisible) {
+                        androidx.compose.ui.text.input.VisualTransformation.None
+                    } else {
+                        androidx.compose.ui.text.input.PasswordVisualTransformation()
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { apiKeyVisible = !apiKeyVisible }) {
+                            Icon(
+                                imageVector = if (apiKeyVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                contentDescription = if (apiKeyVisible) "Hide API key" else "Show API key"
+                            )
+                        }
+                    },
+                    isError = error != null
+                )
+                
+                if (error != null) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onLogin(apiKey) },
+                enabled = apiKey.isNotBlank()
+            ) {
+                Text(localizeHelper.localize(Res.string.login))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.cancel))
+            }
+        }
+    )
+}
+
 @Composable
 private fun TrackingServiceItem(
     serviceName: String,
@@ -1008,6 +1113,7 @@ private fun SyncHistoryDialog(
     malLoggedIn: Boolean,
     kitsuLoggedIn: Boolean,
     mangaUpdatesLoggedIn: Boolean,
+    myNovelListLoggedIn: Boolean,
     onDismiss: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -1092,6 +1198,13 @@ private fun SyncHistoryDialog(
                     icon = Icons.Outlined.Update,
                     serviceName = "MangaUpdates",
                     isConnected = mangaUpdatesLoggedIn
+                )
+                
+                // MyNovelList
+                ServiceStatusRow(
+                    icon = Icons.Outlined.MenuBook,
+                    serviceName = "MyNovelList",
+                    isConnected = myNovelListLoggedIn
                 )
             }
         },

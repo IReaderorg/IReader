@@ -60,6 +60,13 @@ class SettingsTrackingViewModel(
     private val _mangaUpdatesLoggedIn = MutableStateFlow(false)
     val mangaUpdatesLoggedIn: StateFlow<Boolean> = _mangaUpdatesLoggedIn.asStateFlow()
     
+    // MyNovelList state
+    private val _myNovelListEnabled = MutableStateFlow(preferenceStore.getBoolean("mynovellist_enabled", false).get())
+    val myNovelListEnabled: StateFlow<Boolean> = _myNovelListEnabled.asStateFlow()
+    
+    private val _myNovelListLoggedIn = MutableStateFlow(false)
+    val myNovelListLoggedIn: StateFlow<Boolean> = _myNovelListLoggedIn.asStateFlow()
+    
     // ==================== Auto-Sync Preferences ====================
     
     private val _autoSyncEnabled = MutableStateFlow(preferenceStore.getBoolean("auto_sync_enabled", false).get())
@@ -135,6 +142,12 @@ class SettingsTrackingViewModel(
     var mangaUpdatesLoginError by mutableStateOf<String?>(null)
         private set
     
+    // MyNovelList login state (API key)
+    var showMyNovelListLoginDialog by mutableStateOf(false)
+        private set
+    var myNovelListLoginError by mutableStateOf<String?>(null)
+        private set
+    
     // Snackbar message
     private val _snackbarMessage = MutableStateFlow<String?>(null)
     val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
@@ -173,6 +186,7 @@ class SettingsTrackingViewModel(
                 _malLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.MYANIMELIST)
                 _kitsuLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.KITSU)
                 _mangaUpdatesLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.MANGAUPDATES)
+                _myNovelListLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.MYNOVELLIST)
                 
                 // Update enabled states based on login
                 if (_aniListLoggedIn.value) {
@@ -190,6 +204,10 @@ class SettingsTrackingViewModel(
                 if (_mangaUpdatesLoggedIn.value) {
                     _mangaUpdatesEnabled.value = true
                     preferenceStore.getBoolean("mangaupdates_enabled", false).set(true)
+                }
+                if (_myNovelListLoggedIn.value) {
+                    _myNovelListEnabled.value = true
+                    preferenceStore.getBoolean("mynovellist_enabled", false).set(true)
                 }
                 
                 // Load tracking statistics
@@ -513,6 +531,68 @@ class SettingsTrackingViewModel(
     fun configureMangaUpdates() {
         showSnackbar("MangaUpdates is configured through login")
     }
+    
+    // ==================== MyNovelList Functions ====================
+    
+    fun setMyNovelListEnabled(enabled: Boolean) {
+        preferenceStore.getBoolean("mynovellist_enabled", false).set(enabled)
+        _myNovelListEnabled.value = enabled
+        if (!enabled) {
+            logoutFromMyNovelList()
+        }
+    }
+    
+    fun loginToMyNovelList() {
+        showMyNovelListLoginDialog = true
+        myNovelListLoginError = null
+    }
+    
+    fun dismissMyNovelListLoginDialog() {
+        showMyNovelListLoginDialog = false
+        myNovelListLoginError = null
+    }
+    
+    fun completeMyNovelListLogin(apiKey: String) {
+        scope.launch {
+            try {
+                val credentials = TrackerCredentials(
+                    serviceId = TrackerService.MYNOVELLIST,
+                    accessToken = apiKey
+                )
+                val success = trackingRepository.authenticate(TrackerService.MYNOVELLIST, credentials)
+                
+                if (success) {
+                    _myNovelListLoggedIn.value = true
+                    _myNovelListEnabled.value = true
+                    preferenceStore.getBoolean("mynovellist_enabled", false).set(true)
+                    showMyNovelListLoginDialog = false
+                    myNovelListLoginError = null
+                    showSnackbar("Successfully logged in to MyNovelList")
+                } else {
+                    myNovelListLoginError = "Login failed. Please check your API key."
+                }
+            } catch (e: Exception) {
+                Log.error(e, "MyNovelList login error")
+                myNovelListLoginError = "Login error: ${e.message}"
+            }
+        }
+    }
+    
+    fun logoutFromMyNovelList() {
+        scope.launch {
+            try {
+                trackingRepository.logout(TrackerService.MYNOVELLIST)
+                _myNovelListLoggedIn.value = false
+                showSnackbar("Logged out from MyNovelList")
+            } catch (e: Exception) {
+                Log.error(e, "MyNovelList logout error")
+            }
+        }
+    }
+    
+    fun configureMyNovelList() {
+        showSnackbar("MyNovelList is configured through login")
+    }
 
     
     // ==================== Auto-Sync Functions ====================
@@ -671,6 +751,12 @@ class SettingsTrackingViewModel(
                     _mangaUpdatesEnabled.value = false
                     preferenceStore.getBoolean("mangaupdates_enabled", false).set(false)
                 }
+                if (_myNovelListLoggedIn.value) {
+                    trackingRepository.logout(TrackerService.MYNOVELLIST)
+                    _myNovelListLoggedIn.value = false
+                    _myNovelListEnabled.value = false
+                    preferenceStore.getBoolean("mynovellist_enabled", false).set(false)
+                }
                 
                 preferenceStore.getBoolean("auto_sync_enabled", false).set(false)
                 _autoSyncEnabled.value = false
@@ -726,7 +812,8 @@ class SettingsTrackingViewModel(
             "anilist" to getSyncStatusForService(TrackerService.ANILIST),
             "mal" to getSyncStatusForService(TrackerService.MYANIMELIST),
             "kitsu" to getSyncStatusForService(TrackerService.KITSU),
-            "mangaupdates" to getSyncStatusForService(TrackerService.MANGAUPDATES)
+            "mangaupdates" to getSyncStatusForService(TrackerService.MANGAUPDATES),
+            "mynovellist" to getSyncStatusForService(TrackerService.MYNOVELLIST)
         )
     }
     
@@ -736,6 +823,7 @@ class SettingsTrackingViewModel(
             TrackerService.MYANIMELIST -> _malEnabled.value
             TrackerService.KITSU -> _kitsuEnabled.value
             TrackerService.MANGAUPDATES -> _mangaUpdatesEnabled.value
+            TrackerService.MYNOVELLIST -> _myNovelListEnabled.value
             else -> false
         }
         
@@ -744,6 +832,7 @@ class SettingsTrackingViewModel(
             TrackerService.MYANIMELIST -> _malLoggedIn.value
             TrackerService.KITSU -> _kitsuLoggedIn.value
             TrackerService.MANGAUPDATES -> _mangaUpdatesLoggedIn.value
+            TrackerService.MYNOVELLIST -> _myNovelListLoggedIn.value
             else -> false
         }
         
