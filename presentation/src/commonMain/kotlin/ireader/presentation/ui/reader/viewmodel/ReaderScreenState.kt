@@ -113,11 +113,11 @@ sealed interface ReaderState {
             get() = catalog?.source
         
         /**
-         * Check if chapter has content
+         * Check if chapter has actual content (not just placeholder)
          */
         @Stable
         val isChapterLoaded: Boolean
-            get() = content.isNotEmpty()
+            get() = currentContent.isNotEmpty()
         
         /**
          * Get drawer chapters (respects sort order)
@@ -127,14 +127,26 @@ sealed interface ReaderState {
             get() = if (isDrawerAsc) chapters else chapters.reversed()
         
         /**
-         * Get current content (original or translated based on preference)
+         * Get current content (original or translated based on preference).
+         * Filters out any placeholder content that should never be displayed to users.
          */
         @Stable
         val currentContent: List<Page>
-            get() = if (showTranslatedContent && hasTranslation && translatedContent.isNotEmpty()) {
-                translatedContent
-            } else {
-                content
+            get() {
+                val baseContent = if (showTranslatedContent && hasTranslation && translatedContent.isNotEmpty()) {
+                    translatedContent
+                } else {
+                    content
+                }
+                // Filter out placeholder content that should never be displayed
+                return baseContent.filter { page ->
+                    when (page) {
+                        is ireader.core.source.model.Text -> {
+                            !page.text.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER")
+                        }
+                        else -> true
+                    }
+                }
             }
         
         /**
