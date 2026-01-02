@@ -165,6 +165,8 @@
     <string name="reset">Reset</string>
     <string name="fetch">Fetch</string>
     <string name="delete">Delete</string>
+    <string name="delete_content">Delete Content</string>
+    <string name="delete_chapter">Delete Chapter</string>
     <string name="theme_was_saved">Theme was saved</string>
     <string name="theme_was_deleted">Theme was deleted</string>
     <string name="theme_was_not_valid">Theme is Not Part of Base Themes</string>

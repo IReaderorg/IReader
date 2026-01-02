@@ -135,12 +135,20 @@ fun ChapterDetailBottomBar(
                         }
                     }
                 )
+                // Delete chapter content only (keeps chapter record in DB)
                 AppIconButton(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = localize(Res.string.delete),
+                    contentDescription = localize(Res.string.delete_content),
+                    onClick = {
+                        vm.deleteChapterContent(vm.chapters.filter { it.id in vm.selection })
+                    }
+                )
+                // Delete chapter from DB entirely
+                AppIconButton(
+                    imageVector = Icons.Default.DeleteForever,
+                    contentDescription = localize(Res.string.delete_chapter),
                     onClick = {
                         vm.deleteChapters(vm.chapters.filter { it.id in vm.selection })
-                        vm.selection.clear()
                     }
                 )
             }

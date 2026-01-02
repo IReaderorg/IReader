@@ -1317,6 +1317,23 @@ class BookDetailViewModel(
             }
         }
     }
+    
+    /**
+     * Deletes only the content of selected chapters, keeping the chapter records in DB.
+     * This clears the downloaded text content while preserving chapter metadata.
+     */
+    fun deleteChapterContent(chapters: List<Chapter>) {
+        scope.launch(Dispatchers.IO) {
+            try {
+                val clearedChapters = chapters.map { it.copy(content = emptyList()) }
+                insertUseCases.insertChapters(clearedChapters)
+                selection.clear()
+                emitEvent(BookDetailEvent.ShowSnackbar("Chapter content deleted"))
+            } catch (e: Exception) {
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to delete chapter content: ${e.message}"))
+            }
+        }
+    }
 
     // ==================== Download Actions ====================
     
