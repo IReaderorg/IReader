@@ -10,8 +10,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -166,7 +170,8 @@ fun ReaderText(
             val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
             val totalItems = layoutInfo.totalItemsCount
             if (totalItems == 0) {
-                false
+                // When there's no content, consider it at bottom to enable navigation
+                true
             } else {
                 // At bottom if last item is fully visible
                 val isLastItemVisible = lastVisibleItem?.index == totalItems - 1
@@ -183,6 +188,25 @@ fun ReaderText(
             }
         }}
         
+        // Check if content doesn't fill the screen (both at top and bottom)
+        // This means nested scroll won't work, so we need direct drag handling
+        val contentDoesNotFillScreen by remember { derivedStateOf {
+            val layoutInfo = lazyListState.layoutInfo
+            val totalItems = layoutInfo.totalItemsCount
+            if (totalItems == 0) {
+                true // No content at all
+            } else {
+                // Check if all items fit within viewport
+                val firstItem = layoutInfo.visibleItemsInfo.firstOrNull()
+                val lastItem = layoutInfo.visibleItemsInfo.lastOrNull()
+                val isFirstVisible = firstItem?.index == 0
+                val isLastVisible = lastItem?.index == totalItems - 1
+                val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+                val contentHeight = layoutInfo.visibleItemsInfo.sumOf { it.size }
+                isFirstVisible && isLastVisible && contentHeight <= viewportHeight
+            }
+        }}
+        
         // Get chapter names for indicators
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
@@ -192,13 +216,16 @@ fun ReaderText(
         val nextChapterName = if (hasNextChapter) chapters.getOrNull(currentIndex + 1)?.name else null
 
         // Use lazyValue for immediate UI updates during slider drag
+        val refreshTriggerPx = with(androidx.compose.ui.platform.LocalDensity.current) { 80.dp.toPx() }
+        
         Box(
-            modifier = Modifier.padding(
-                top = vm.topMargin.lazyValue.dp,
-                bottom = vm.bottomMargin.lazyValue.dp,
-                start = vm.leftMargin.lazyValue.dp,
-                end = vm.rightMargin.lazyValue.dp
-            )
+            modifier = Modifier
+                .padding(
+                    top = vm.topMargin.lazyValue.dp,
+                    bottom = vm.bottomMargin.lazyValue.dp,
+                    start = vm.leftMargin.lazyValue.dp,
+                    end = vm.rightMargin.lazyValue.dp
+                )
         ) {
             MultiSwipeRefresh(
                 modifier = Modifier.fillMaxSize(),
@@ -253,12 +280,71 @@ fun ReaderText(
                             // Translate content based on swipe state for drag effect
                             translationY = swipeState.indicatorOffset * 0.3f
                         }
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onTap = {
-                                    debouncedToggleReaderMode()
+                        .pointerInput(contentDoesNotFillScreen, hasPrevChapter, hasNextChapter) {
+                            // Combined gesture handling
+                            if (contentDoesNotFillScreen && (hasPrevChapter || hasNextChapter)) {
+                                // When content doesn't fill screen, handle both tap and drag
+                                awaitEachGesture {
+                                    val down = awaitFirstDown(requireUnconsumed = false)
+                                    
+                                    var dragAmount = 0f
+                                    var isDragging = false
+                                    val touchSlop = viewConfiguration.touchSlop
+                                    
+                                    // Track pointer movement
+                                    var currentPosition = down.position
+                                    var pointer = down
+                                    
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        val change = event.changes.firstOrNull { it.id == pointer.id }
+                                        
+                                        if (change == null || !change.pressed) {
+                                            // Pointer released
+                                            if (isDragging) {
+                                                if (dragAmount > refreshTriggerPx && hasPrevChapter) {
+                                                    onPrev()
+                                                } else if (dragAmount < -refreshTriggerPx && hasNextChapter) {
+                                                    onNext()
+                                                }
+                                                swipeState.isSwipeInProgress = false
+                                                scope.launch {
+                                                    swipeState.animateOffsetTo(0f)
+                                                }
+                                            } else {
+                                                // It was a tap
+                                                debouncedToggleReaderMode()
+                                            }
+                                            break
+                                        }
+                                        
+                                        val delta = change.position.y - currentPosition.y
+                                        currentPosition = change.position
+                                        
+                                        if (!isDragging && kotlin.math.abs(change.position.y - down.position.y) > touchSlop) {
+                                            // Start dragging
+                                            isDragging = true
+                                            swipeState.isSwipeInProgress = true
+                                        }
+                                        
+                                        if (isDragging) {
+                                            dragAmount += delta
+                                            val dragMultiplier = 0.5f
+                                            scope.launch {
+                                                swipeState.dispatchScrollDelta(delta * dragMultiplier)
+                                            }
+                                            change.consume()
+                                        }
+                                    }
                                 }
-                            )
+                            } else {
+                                // Normal case - just tap detection
+                                detectTapGestures(
+                                    onTap = {
+                                        debouncedToggleReaderMode()
+                                    }
+                                )
+                            }
                         }
                 ) {
                     // Use copy mode OR selectable mode for text selection
