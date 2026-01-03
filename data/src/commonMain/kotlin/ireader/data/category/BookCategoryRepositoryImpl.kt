@@ -77,4 +77,20 @@ class BookCategoryRepositoryImpl(
         }
     }
 
+    override suspend fun replaceAll(bookId: Long, categoryIds: List<Long>) {
+        IReaderLog.info("BookCategoryRepositoryImpl.replaceAll() called for bookId=$bookId with ${categoryIds.size} categories", "BookCategoryRepo")
+        handler.await(inTransaction = true) {
+            // Delete all existing category assignments for this book
+            bookcategoryQueries.deleteByBookId(bookId)
+            
+            // Insert new category assignments
+            categoryIds.forEach { categoryId ->
+                bookcategoryQueries.insert(bookId, categoryId)
+            }
+        }
+        
+        // Notify library that book's categories changed
+        IReaderLog.info("BookCategoryRepositoryImpl.replaceAll(): Notifying CategoryChanged for bookId=$bookId", "BookCategoryRepo")
+        changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.CategoriesChanged(listOf(bookId)))
+    }
 }

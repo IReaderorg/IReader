@@ -226,6 +226,9 @@ data class ExploreScreenSpec(
                         },
                         onNavigateToDonation = {
                             navController.navigate(NavigationRoutes.donation)
+                        },
+                        onNavigateToCategoryManagement = {
+                            navController.navigate(NavigationRoutes.category)
                         }
                     )
                 } else {

@@ -2820,4 +2820,13 @@
     <string name="youve_completed_this_story">You've completed this story</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
+    
+    <!-- Category Dialog Strings -->
+    <string name="set_categories">Set Categories</string>
+    <string name="no_categories_create_one">No categories found. Create one first to organize your library.</string>
+    <string name="default_category">Default Category</string>
+    <string name="default_category_summary">Category to use when adding books to library</string>
+    <string name="always_ask">Always ask</string>
+    <string name="no_category">No category</string>
+    <string name="added_to_category">Added to %s</string>
 </resources>

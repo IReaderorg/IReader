@@ -33,10 +33,12 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.ModernLayoutComposable
+import ireader.presentation.ui.component.SimpleCategoryDialog
 import ireader.presentation.ui.component.components.BookShimmerLoading
 import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.home.explore.viewmodel.ExploreDialog
 import ireader.presentation.ui.home.explore.viewmodel.ExploreScreenState
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -71,7 +73,8 @@ fun ExploreScreen(
     prevPaddingValues: PaddingValues,
     onListingSelected: ((Listing) -> Unit)? = null,
     onNavigateToBadgeStore: () -> Unit = {},
-    onNavigateToDonation: () -> Unit = {}
+    onNavigateToDonation: () -> Unit = {},
+    onNavigateToCategoryManagement: () -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -347,6 +350,31 @@ fun ExploreScreen(
                 }
             }
         }
+    }
+    
+    // Handle dialogs
+    when (val dialog = state.dialog) {
+        is ExploreDialog.ChangeMangaCategory -> {
+            SimpleCategoryDialog(
+                categories = dialog.categories,
+                preselectedIds = dialog.preselectedIds,
+                onDismissRequest = { vm.dismissDialog() },
+                onEditCategories = {
+                    vm.dismissDialog()
+                    onNavigateToCategoryManagement()
+                },
+                onConfirm = { selectedIds ->
+                    vm.addBookToLibraryWithCategories(
+                        book = dialog.book,
+                        categoryIds = selectedIds,
+                        onFavorite = { book ->
+                            // Book was added to library with categories
+                        }
+                    )
+                }
+            )
+        }
+        else -> { /* No dialog to show */ }
     }
 }
 

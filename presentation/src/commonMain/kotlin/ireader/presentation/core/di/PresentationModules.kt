@@ -62,12 +62,15 @@ val PresentationModules = module {
 
     // ExploreViewModel - Simplified with ExploreUseCases aggregate (Requirements: 4.2, 4.4)
     // Reduced from 10 parameters to 6 using ExploreUseCases aggregate
+    // Added categoryRepository and setBookCategories for category selection dialog
     factory<ExploreViewModel> { (params: ExploreViewModel.Param) -> 
         ExploreViewModel(
             exploreUseCases = get(),           // Aggregate: groups 5 use cases (remote, insert, findDuplicate, openLocalFolder, browseScreenPref)
             catalogStore = get(),
             param = params,
             libraryPreferences = get(),
+            categoryRepository = get(),        // For getting categories in dialog
+            setBookCategories = get(),         // For setting book categories
             syncUseCases = getOrNull(),
             filterStateManager = getOrNull()
         )
@@ -184,7 +187,7 @@ val PresentationModules = module {
     // Enhanced Settings ViewModels following Mihon's patterns
     factory  { SettingsAppearanceViewModel(get()) }
     factory  { SettingsReaderViewModel(get()) }
-    factory  { SettingsLibraryViewModel(get()) }
+    factory  { SettingsLibraryViewModel(get(), get(), get()) }
     factory  { SettingsDownloadViewModel(get()) }
     factory  { SettingsSecurityViewModel(get(), get()) }
     factory  { SettingsNotificationViewModel(get()) }

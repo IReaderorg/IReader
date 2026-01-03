@@ -54,6 +54,10 @@ fun SettingsLibraryScreen(
     val updateOnlyNonCompleted by viewModel.updateOnlyNonCompleted.collectAsState()
     val skipTitlesWithoutChapters by viewModel.skipTitlesWithoutChapters.collectAsState()
     val refreshCoversToo by viewModel.refreshCoversToo.collectAsState()
+    
+    // Default category state
+    val defaultCategory by viewModel.defaultCategory.collectAsState()
+    val availableCategories by viewModel.availableCategories.collectAsState()
 
     IScaffold(
         modifier = modifier,
@@ -127,6 +131,21 @@ fun SettingsLibraryScreen(
                     checked = showContinueReadingButton,
                     onCheckedChange = viewModel::setShowContinueReadingButton
                 )
+            }
+            
+            item {
+                SettingsItemWithTrailing(
+                    title = localizeHelper.localize(Res.string.default_category),
+                    description = "Category to assign when adding books to library",
+                    icon = Icons.Outlined.Category,
+                    onClick = { viewModel.showDefaultCategoryDialog() }
+                ) {
+                    Text(
+                        text = viewModel.getCategoryDisplayName(defaultCategory),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
             
             // Badges Section
@@ -461,6 +480,84 @@ fun SettingsLibraryScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissUpdateRestrictionsDialog() }) {
+                    Text(localizeHelper.localize(Res.string.ok))
+                }
+            }
+        )
+    }
+    
+    // Default Category Dialog
+    if (viewModel.showDefaultCategoryDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissDefaultCategoryDialog() },
+            title = { Text(localizeHelper.localize(Res.string.default_category)) },
+            text = {
+                Column {
+                    // "Always ask" option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        RadioButton(
+                            selected = defaultCategory == ireader.domain.models.entities.Category.UNCATEGORIZED_ID,
+                            onClick = { 
+                                viewModel.setDefaultCategory(ireader.domain.models.entities.Category.UNCATEGORIZED_ID)
+                                viewModel.dismissDefaultCategoryDialog()
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Always ask",
+                            modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically)
+                        )
+                    }
+                    
+                    // "Default (no category)" option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        RadioButton(
+                            selected = defaultCategory == ireader.domain.models.entities.Category.ALL_ID,
+                            onClick = { 
+                                viewModel.setDefaultCategory(ireader.domain.models.entities.Category.ALL_ID)
+                                viewModel.dismissDefaultCategoryDialog()
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Default (no category)",
+                            modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically)
+                        )
+                    }
+                    
+                    // User categories
+                    availableCategories.forEach { category ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            RadioButton(
+                                selected = defaultCategory == category.id,
+                                onClick = { 
+                                    viewModel.setDefaultCategory(category.id)
+                                    viewModel.dismissDefaultCategoryDialog()
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = category.name,
+                                modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.dismissDefaultCategoryDialog() }) {
                     Text(localizeHelper.localize(Res.string.ok))
                 }
             }

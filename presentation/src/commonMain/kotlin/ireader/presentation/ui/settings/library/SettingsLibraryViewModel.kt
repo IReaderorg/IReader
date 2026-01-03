@@ -4,17 +4,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
+import ireader.domain.data.repository.CategoryRepository
+import ireader.domain.models.entities.Category
+import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for the enhanced library settings screen.
  * Manages comprehensive library preferences following Mihon's LibrarySettingsScreenModel.
  */
 class SettingsLibraryViewModel(
-    private val preferenceStore: PreferenceStore
+    private val preferenceStore: PreferenceStore,
+    private val libraryPreferences: LibraryPreferences? = null,
+    private val categoryRepository: CategoryRepository? = null
 ) : BaseViewModel() {
     
     // Display preferences
@@ -39,6 +45,14 @@ class SettingsLibraryViewModel(
     val skipTitlesWithoutChapters: StateFlow<Boolean> = preferenceStore.getBoolean("skip_titles_without_chapters", false).stateIn(scope)
     val refreshCoversToo: StateFlow<Boolean> = preferenceStore.getBoolean("refresh_covers_too", false).stateIn(scope)
     
+    // Default category preference
+    private val _defaultCategory = MutableStateFlow<Long>(Category.UNCATEGORIZED_ID)
+    val defaultCategory: StateFlow<Long> = _defaultCategory.asStateFlow()
+    
+    // Available categories for selection
+    private val _availableCategories = MutableStateFlow<List<Category>>(emptyList())
+    val availableCategories: StateFlow<List<Category>> = _availableCategories.asStateFlow()
+    
     // Dialog states
     var showDefaultSortDialog by mutableStateOf(false)
         private set
@@ -46,6 +60,27 @@ class SettingsLibraryViewModel(
         private set
     var showUpdateRestrictionsDialog by mutableStateOf(false)
         private set
+    var showDefaultCategoryDialog by mutableStateOf(false)
+        private set
+    
+    init {
+        loadDefaultCategory()
+        loadCategories()
+    }
+    
+    private fun loadDefaultCategory() {
+        scope.launch {
+            val categoryId = libraryPreferences?.defaultCategory()?.get() ?: Category.UNCATEGORIZED_ID
+            _defaultCategory.value = categoryId
+        }
+    }
+    
+    private fun loadCategories() {
+        scope.launch {
+            val categories = categoryRepository?.getAll()?.filter { it.id != Category.ALL_ID } ?: emptyList()
+            _availableCategories.value = categories
+        }
+    }
     
     // Display functions
     fun showDefaultSortDialog() {
@@ -140,6 +175,35 @@ class SettingsLibraryViewModel(
     
     fun setRefreshCoversToo(enabled: Boolean) {
         preferenceStore.getBoolean("refresh_covers_too", false).set(enabled)
+    }
+    
+    // Default category functions
+    fun showDefaultCategoryDialog() {
+        loadCategories() // Refresh categories list
+        showDefaultCategoryDialog = true
+    }
+    
+    fun dismissDefaultCategoryDialog() {
+        showDefaultCategoryDialog = false
+    }
+    
+    fun setDefaultCategory(categoryId: Long) {
+        scope.launch {
+            libraryPreferences?.defaultCategory()?.set(categoryId)
+            _defaultCategory.value = categoryId
+        }
+    }
+    
+    /**
+     * Get display name for a category ID.
+     * Special handling for system categories.
+     */
+    fun getCategoryDisplayName(categoryId: Long): String {
+        return when (categoryId) {
+            Category.UNCATEGORIZED_ID -> "Always ask"
+            Category.ALL_ID -> "Default (no category)"
+            else -> _availableCategories.value.find { it.id == categoryId }?.name ?: "Unknown"
+        }
     }
     
     // Navigation functions

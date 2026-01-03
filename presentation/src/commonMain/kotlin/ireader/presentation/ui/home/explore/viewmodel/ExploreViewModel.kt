@@ -6,11 +6,14 @@ import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangasPageInfo
 import ireader.domain.catalogs.interactor.GetLocalCatalogs
+import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
+import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.toBook
 import ireader.domain.preferences.prefs.LibraryPreferences
+import ireader.domain.usecases.category.SetBookCategories
 import ireader.domain.usecases.explore.ExploreUseCases
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.ioDispatcher
@@ -53,6 +56,8 @@ class ExploreViewModel(
     private val catalogStore: GetLocalCatalogs,
     private val param: Param,
     private val libraryPreferences: LibraryPreferences,
+    private val categoryRepository: CategoryRepository,
+    private val setBookCategories: SetBookCategories,
     private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
     private val filterStateManager: ireader.domain.filters.FilterStateManager? = null
 ) : BaseViewModel() {
@@ -455,6 +460,11 @@ class ExploreViewModel(
      * Add book to favorites using the new explore book architecture.
      * This promotes the book to the library and toggles the favorite status.
      * If the book already exists in the library, it toggles its current favorite status.
+     * 
+     * Following Mihon's pattern:
+     * - If book is already in library, toggle favorite status
+     * - If adding new book and default category is set, auto-assign
+     * - If adding new book and no default category, show category dialog
      */
     suspend fun addToFavorite(bookItem: BookItem, onFavorite: (Book) -> Unit) {
         val book = bookItem.toBook()
@@ -462,34 +472,111 @@ class ExploreViewModel(
         // First check if book already exists in library to get current favorite status
         val existingBook = exploreUseCases.exploreBook.promoteToLibrary.findExisting(book.key, book.sourceId)
         
-        // Determine the new favorite status
-        val newFavorite = if (existingBook != null) {
-            // Toggle the existing book's favorite status
-            !existingBook.favorite
+        if (existingBook != null) {
+            // Book exists - toggle favorite status
+            val newFavorite = !existingBook.favorite
+            
+            val result = exploreUseCases.exploreBook.promoteToLibrary.fromBookWithStatus(
+                book = book,
+                favorite = newFavorite
+            )
+            
+            if (result != null) {
+                val (bookId, isFavorite) = result
+                val updatedBook = book.copy(id = bookId, favorite = isFavorite)
+                updateBookInState(updatedBook)
+                
+                if (isFavorite) {
+                    syncUseCases?.syncBookToRemote?.invoke(updatedBook)
+                }
+                
+                onFavorite(updatedBook)
+            }
         } else {
-            // New book - set to favorite (since user is explicitly favoriting)
-            true
+            // New book - check default category preference
+            val defaultCategoryId = libraryPreferences.defaultCategory().get()
+            val categories = categoryRepository.getAll().filter { it.id != Category.ALL_ID }
+            
+            when {
+                // No user categories exist - just add to library
+                categories.isEmpty() -> {
+                    addBookToLibraryWithCategories(book, emptyList(), onFavorite)
+                }
+                // Default category is set (not "Always ask" which is UNCATEGORIZED_ID)
+                defaultCategoryId != Category.UNCATEGORIZED_ID -> {
+                    val categoryIds = if (defaultCategoryId == Category.ALL_ID) {
+                        emptyList() // "Default" means no specific category
+                    } else {
+                        listOf(defaultCategoryId)
+                    }
+                    addBookToLibraryWithCategories(book, categoryIds, onFavorite)
+                }
+                // Show category selection dialog
+                else -> {
+                    showCategoryDialog(book, categories)
+                }
+            }
         }
-        
-        // Use the promote use case to add/update in library with favorite status
-        val result = exploreUseCases.exploreBook.promoteToLibrary.fromBookWithStatus(
-            book = book,
-            favorite = newFavorite
-        )
-        
-        if (result != null) {
-            val (bookId, isFavorite) = result
-            val updatedBook = book.copy(id = bookId, favorite = isFavorite)
+    }
+    
+    /**
+     * Show category selection dialog for a book.
+     */
+    private fun showCategoryDialog(book: Book, categories: List<Category>) {
+        _state.update { 
+            it.copy(
+                dialog = ExploreDialog.ChangeMangaCategory(
+                    book = book,
+                    categories = categories,
+                    preselectedIds = emptySet()
+                )
+            )
+        }
+    }
+    
+    /**
+     * Dismiss the current dialog.
+     */
+    fun dismissDialog() {
+        _state.update { it.copy(dialog = null) }
+    }
+    
+    /**
+     * Add book to library with specified categories.
+     * Called from category dialog confirmation or when default category is set.
+     */
+    fun addBookToLibraryWithCategories(
+        book: Book,
+        categoryIds: List<Long>,
+        onFavorite: (Book) -> Unit
+    ) {
+        scope.launch {
+            // First add book to library
+            val result = exploreUseCases.exploreBook.promoteToLibrary.fromBookWithStatus(
+                book = book,
+                favorite = true
+            )
             
-            // Update state with new book
-            updateBookInState(updatedBook)
-            
-            // Sync to remote if book is being favorited
-            if (isFavorite) {
+            if (result != null) {
+                val (bookId, isFavorite) = result
+                val updatedBook = book.copy(id = bookId, favorite = isFavorite)
+                
+                // Set categories if any were selected
+                if (categoryIds.isNotEmpty()) {
+                    setBookCategories.await(bookId, categoryIds)
+                }
+                
+                // Update state with new book
+                updateBookInState(updatedBook)
+                
+                // Sync to remote
                 syncUseCases?.syncBookToRemote?.invoke(updatedBook)
+                
+                onFavorite(updatedBook)
             }
             
-            onFavorite(updatedBook)
+            // Dismiss dialog
+            dismissDialog()
         }
     }
     

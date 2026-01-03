@@ -122,6 +122,7 @@ val useCaseModule = module {
     singleOf(::RemoveBookFromCategoryUseCase)
     singleOf(::AutoCategorizeBookUseCase)
     singleOf(::ManageCategoryAutoRulesUseCase)
+    singleOf(::SetBookCategories)
     
     // CategoryUseCases aggregate
     single {
@@ -136,6 +137,7 @@ val useCaseModule = module {
             removeBookFromCategory = get(),
             autoCategorizeBook = get(),
             manageAutoRules = get(),
+            setBookCategories = get(),
         )
     }
     

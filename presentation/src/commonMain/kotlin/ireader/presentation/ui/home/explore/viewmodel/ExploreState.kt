@@ -120,6 +120,16 @@ sealed interface ExploreDialog {
     data object Filter : ExploreDialog
     data class AddToLibrary(val book: Book) : ExploreDialog
     data class Error(val message: UiText) : ExploreDialog
+    
+    /**
+     * Dialog for selecting categories when adding a book to library.
+     * Following Mihon's ChangeMangaCategory pattern.
+     */
+    data class ChangeMangaCategory(
+        val book: Book,
+        val categories: List<ireader.domain.models.entities.Category>,
+        val preselectedIds: Set<Long> = emptySet()
+    ) : ExploreDialog
 }
 
 /**
