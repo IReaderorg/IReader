@@ -382,7 +382,7 @@ val UseCasesInject = module {
     factory { SaveExploreBook(get()) }
     factory { SaveExploreBooks(get()) }
     factory { GetExploreBook(get()) }
-    factory { PromoteExploreBookToLibrary(get(), get()) }
+    factory { PromoteExploreBookToLibrary(get(), get(), get()) }
     factory { ClearExploreBooks(get()) }
     factory { ExploreBookUseCases(
         saveExploreBook = get(),

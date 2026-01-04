@@ -4,6 +4,7 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ExploreBookRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.ExploreBook
+import ireader.domain.services.library.LibraryChangeNotifier
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.withIOContext
 import ireader.core.log.Log
@@ -88,10 +89,14 @@ class GetExploreBook(
 /**
  * Promote an explore book to the main library (book table).
  * This is called when a user clicks on a book to view details or favorites it.
+ * 
+ * Now integrates with LibraryChangeNotifier to ensure library screen and detail screen
+ * are notified when books are added/updated from the explore screen.
  */
 class PromoteExploreBookToLibrary(
     private val exploreBookRepository: ExploreBookRepository,
-    private val bookRepository: BookRepository
+    private val bookRepository: BookRepository,
+    private val libraryChangeNotifier: LibraryChangeNotifier? = null
 ) {
     /**
      * Promote an explore book to the main book table.
@@ -109,6 +114,8 @@ class PromoteExploreBookToLibrary(
             // If favoriting, update the favorite status
             if (favorite && !existingBook.favorite) {
                 bookRepository.updateBook(existingBook.copy(favorite = true))
+                // Notify library that book was updated (favorite status changed)
+                notifyBookChange(existingBook.id, isNew = false)
             }
             return@withIOContext existingBook.id
         }
@@ -125,6 +132,11 @@ class PromoteExploreBookToLibrary(
         val bookId = bookRepository.upsert(book)
         
         Log.debug { "[PromoteExploreBook] Promoted explore book to library: ${book.title} (id: $bookId)" }
+        
+        // Notify library that a new book was added
+        if (favorite) {
+            notifyBookChange(bookId, isNew = true)
+        }
         
         // Optionally remove from explore table to save space
         // exploreBookRepository.deleteByUrlAndSource(url, sourceId)
@@ -154,6 +166,8 @@ class PromoteExploreBookToLibrary(
             // If favoriting and not already favorite, update the favorite status
             if (favorite && !existingBook.favorite) {
                 bookRepository.updateBook(existingBook.copy(favorite = true))
+                // Notify library that book was updated (favorite status changed)
+                notifyBookChange(existingBook.id, isNew = false)
             }
             // Return the existing book's ID - this ensures we navigate to the correct book
             return@withIOContext existingBook.id
@@ -168,6 +182,11 @@ class PromoteExploreBookToLibrary(
         val bookId = bookRepository.upsert(bookToInsert)
         
         Log.debug { "[PromoteExploreBook] Promoted book to library: ${book.title} (id: $bookId)" }
+        
+        // Notify library that a new book was added
+        if (favorite) {
+            notifyBookChange(bookId, isNew = true)
+        }
         
         return@withIOContext bookId
     }
@@ -188,17 +207,26 @@ class PromoteExploreBookToLibrary(
      * This is useful when you need to update the UI with the correct favorite status.
      * 
      * @param book The book from explore screen state
-     * @param favorite The desired favorite status to set
+     * @param favorite The desired favorite status to set. If null, preserves existing status.
      * @return Pair of (bookId, isFavorite) or null if failed
      */
-    suspend fun fromBookWithStatus(book: Book, favorite: Boolean = false): Pair<Long, Boolean>? = withIOContext {
+    suspend fun fromBookWithStatus(book: Book, favorite: Boolean? = null): Pair<Long, Boolean>? = withIOContext {
         // First check if book already exists in main table by URL and source
         val existingBook = bookRepository.find(book.key, book.sourceId)
         if (existingBook != null) {
             Log.debug { "[PromoteExploreBook] Book already exists in library: ${existingBook.title} (id: ${existingBook.id}, favorite: ${existingBook.favorite})" }
-            // Update the favorite status if it's different
+            
+            // If favorite is null, just return existing status without modifying
+            // This is used when navigating to detail screen - we don't want to change favorite status
+            if (favorite == null) {
+                return@withIOContext Pair(existingBook.id, existingBook.favorite)
+            }
+            
+            // Update the favorite status if it's different from desired
             val finalFavorite = if (favorite != existingBook.favorite) {
                 bookRepository.updateBook(existingBook.copy(favorite = favorite))
+                // Notify library that book was updated (favorite status changed)
+                notifyBookChange(existingBook.id, isNew = false)
                 favorite
             } else {
                 existingBook.favorite
@@ -207,19 +235,45 @@ class PromoteExploreBookToLibrary(
         }
         
         // Book doesn't exist - insert it
+        // If favorite is null, default to false for new books
+        val shouldFavorite = favorite ?: false
         val bookToInsert = book.copy(
             id = 0,
-            favorite = favorite,
+            favorite = shouldFavorite,
             dateAdded = if (book.dateAdded > 0) book.dateAdded else currentTimeToLong()
         )
         val bookId = bookRepository.upsert(bookToInsert)
         
         if (bookId > 0) {
             Log.debug { "[PromoteExploreBook] Promoted book to library: ${book.title} (id: $bookId)" }
-            return@withIOContext Pair(bookId, favorite)
+            // Notify library that a new book was added
+            if (shouldFavorite) {
+                notifyBookChange(bookId, isNew = true)
+            }
+            return@withIOContext Pair(bookId, shouldFavorite)
         }
         
         return@withIOContext null
+    }
+    
+    /**
+     * Notify the library that a book was added or updated.
+     * This ensures the library screen and detail screen stay in sync.
+     */
+    private fun notifyBookChange(bookId: Long, isNew: Boolean) {
+        if (libraryChangeNotifier == null) {
+            Log.debug { "[PromoteExploreBook] No LibraryChangeNotifier available, skipping notification" }
+            return
+        }
+        
+        val changeType = if (isNew) {
+            LibraryChangeNotifier.ChangeType.BookAdded(bookId)
+        } else {
+            LibraryChangeNotifier.ChangeType.BookUpdated(bookId)
+        }
+        
+        val emitted = libraryChangeNotifier.tryNotifyChange(changeType)
+        Log.debug { "[PromoteExploreBook] Notified library change: $changeType (emitted: $emitted)" }
     }
 }
 

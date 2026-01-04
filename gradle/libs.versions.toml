@@ -44,7 +44,7 @@ buildkonfig = "0.17.1"
 okhttp = "5.3.0"
 
 jsoup = "1.21.2"
-ksoup = "0.2.5"
+ksoup = "0.2.6"
 dex2jar = "2.4.32"
 coil = "3.3.0"
 uiText = "1.9.5"

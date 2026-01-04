@@ -182,7 +182,7 @@ kotlin {
 }
 
 // Version for the improved source-api with internal optimizations
-val packageVersion = "1.5.0"
+val packageVersion = "1.5.1"
 
 
 // Create empty javadoc jar for Maven Central requirements

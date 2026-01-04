@@ -27,6 +27,17 @@
 -keep,allowoptimization class okhttp3.** { public protected *; }
 -keep,allowoptimization class okio.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }
+
+# Ksoup - Kotlin Multiplatform HTML parser (keep all classes to prevent method stripping)
+-keep class com.fleeksoft.ksoup.** { *; }
+-keepclassmembers class com.fleeksoft.ksoup.** {
+    <fields>;
+    <methods>;
+}
+# Keep ksoup Node hierarchy - critical for parent() method resolution
+-keep class com.fleeksoft.ksoup.nodes.** { *; }
+-keep class com.fleeksoft.ksoup.select.** { *; }
+-keep class com.fleeksoft.ksoup.parser.** { *; }
 -keep,allowoptimization class kotlin.** { public protected *; }
 -keep,allowoptimization class io.ktor.** { public protected *; }
 -keep,allowoptimization class android.content.pm.** { public protected *; }
