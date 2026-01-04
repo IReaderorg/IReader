@@ -495,11 +495,12 @@ class ExploreViewModel(
         } else {
             // New book - check default category preference
             val defaultCategoryId = libraryPreferences.defaultCategory().get()
-            val categories = categoryRepository.getAll().filter { it.id != Category.ALL_ID }
+            // Filter out ALL system categories (ALL_ID and UNCATEGORIZED_ID)
+            val userCategories = categoryRepository.getAll().filter { !it.isSystemCategory }
             
             when {
-                // No user categories exist - just add to library
-                categories.isEmpty() -> {
+                // No user categories exist - just add to library directly (like detail screen)
+                userCategories.isEmpty() -> {
                     addBookToLibraryWithCategories(book, emptyList(), onFavorite)
                 }
                 // Default category is set (not "Always ask" which is UNCATEGORIZED_ID)
@@ -511,9 +512,9 @@ class ExploreViewModel(
                     }
                     addBookToLibraryWithCategories(book, categoryIds, onFavorite)
                 }
-                // Show category selection dialog
+                // Show category selection dialog only when user has created categories
                 else -> {
-                    showCategoryDialog(book, categories)
+                    showCategoryDialog(book, userCategories)
                 }
             }
         }
