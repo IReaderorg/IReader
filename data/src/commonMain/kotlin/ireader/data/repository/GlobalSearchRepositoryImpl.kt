@@ -5,6 +5,7 @@ import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.GlobalSearchRepository
 import ireader.domain.models.entities.GlobalSearchResult
+import ireader.domain.models.entities.JSPluginCatalog
 import ireader.domain.models.entities.SearchResultItem
 import ireader.domain.models.entities.SourceSearchResult
 import ireader.domain.models.library.LibrarySort
@@ -14,6 +15,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.collections.emptyList
 import kotlin.time.ExperimentalTime
 
@@ -29,6 +32,20 @@ class GlobalSearchRepositoryImpl(
 
     private val searchHistory = mutableListOf<String>()
     private val maxHistorySize = 50
+    
+    /**
+     * Mutex to ensure JS plugin sources are searched sequentially.
+     * JS engine is single-threaded, so concurrent JS source searches will fail.
+     */
+    private val jsSourceMutex = Mutex()
+    
+    /**
+     * Check if a source is a JS plugin source that requires sequential execution.
+     */
+    private fun isJSPluginSource(sourceId: Long): Boolean {
+        val catalog = catalogStore.catalogs.find { it.sourceId == sourceId }
+        return catalog is JSPluginCatalog
+    }
 
     @OptIn(ExperimentalTime::class)
     override suspend fun searchGlobal(
@@ -51,12 +68,25 @@ class GlobalSearchRepositoryImpl(
             )
             val libraryBookKeys = libraryBooks.map { it.key }.toSet()
 
+            // Separate JS and non-JS sources
+            val (jsSources, nonJsSources) = sourcesToSearch.partition { isJSPluginSource(it) }
+            
             val sourceResults = coroutineScope {
-                sourcesToSearch.map { sourceId ->
+                // Non-JS sources can run concurrently
+                val nonJsResults = nonJsSources.map { sourceId ->
                     async {
                         searchSource(sourceId, query, libraryBookKeys)
                     }
                 }.awaitAll()
+                
+                // JS sources must run sequentially due to single-threaded JS engine
+                val jsResults = jsSources.map { sourceId ->
+                    jsSourceMutex.withLock {
+                        searchSource(sourceId, query, libraryBookKeys)
+                    }
+                }
+                
+                nonJsResults + jsResults
             }
 
             val totalResults = sourceResults.sumOf { it.results.size }
@@ -100,6 +130,11 @@ class GlobalSearchRepositoryImpl(
             )
             val libraryBookKeys = libraryBooks.map { it.key }.toSet()
 
+            // Separate JS and non-JS sources
+            val (jsSources, nonJsSources) = sourcesToSearch.partition { isJSPluginSource(it) }
+            
+            Log.debug { "Global search: ${nonJsSources.size} non-JS sources, ${jsSources.size} JS sources" }
+
             // Emit initial state with loading sources
             val initialResults = sourcesToSearch.map { sourceId ->
                 val catalog = catalogStore.catalogs.find { it.sourceId == sourceId }
@@ -122,14 +157,37 @@ class GlobalSearchRepositoryImpl(
             // Search each source and emit progressive results
             val completedResults = mutableListOf<SourceSearchResult>()
             
-            for (sourceId in sourcesToSearch) {
+            // Process non-JS sources first (they can be searched without mutex)
+            for (sourceId in nonJsSources) {
                 val result = searchSource(sourceId, query, libraryBookKeys)
                 completedResults.add(result)
                 
                 val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                val remainingLoading = initialResults.filter { initial ->
+                    completedResults.none { it.sourceId == initial.sourceId }
+                }
                 emit(GlobalSearchResult(
                     query = query,
-                    sourceResults = completedResults + initialResults.drop(completedResults.size),
+                    sourceResults = completedResults + remainingLoading,
+                    totalResults = completedResults.sumOf { it.results.size },
+                    searchDuration = endTime - startTime
+                ))
+            }
+            
+            // Process JS sources sequentially with mutex to prevent JS engine conflicts
+            for (sourceId in jsSources) {
+                val result = jsSourceMutex.withLock {
+                    searchSource(sourceId, query, libraryBookKeys)
+                }
+                completedResults.add(result)
+                
+                val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                val remainingLoading = initialResults.filter { initial ->
+                    completedResults.none { it.sourceId == initial.sourceId }
+                }
+                emit(GlobalSearchResult(
+                    query = query,
+                    sourceResults = completedResults + remainingLoading,
                     totalResults = completedResults.sumOf { it.results.size },
                     searchDuration = endTime - startTime
                 ))

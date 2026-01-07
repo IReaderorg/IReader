@@ -471,6 +471,10 @@ class CatalogStore(
                         return@launch
                     }
 
+                    // Clear the DEX cache before loading to ensure fresh code is used
+                    // This is critical for reinstallation scenarios where the source code changed
+                    loader.clearCatalogCache(pkgName)
+
                     val catalog = if (isLocalInstall) {
                         loader.loadLocalCatalog(pkgName)
                     } else {
@@ -627,6 +631,43 @@ class CatalogStore(
     fun getLoadingSourcesFlow(): Flow<Set<Long>> = loadingSourcesFlow
 
     /**
+     * Force reload a single catalog by package name.
+     * Clears the DEX cache and reloads the catalog, useful for testing source changes.
+     * 
+     * @param pkgName The package name of the catalog to reload
+     * @return The reloaded catalog, or null if not found
+     */
+    suspend fun reloadCatalog(pkgName: String): CatalogLocal? {
+        return withContext(Dispatchers.Default) {
+            lock.withLock {
+                Log.info("CatalogStore: Reloading catalog $pkgName")
+                
+                // Clear the DEX cache for this specific catalog
+                loader.clearCatalogCache(pkgName)
+                
+                // Try to load as local catalog first
+                var catalog: CatalogLocal? = loader.loadLocalCatalog(pkgName)
+                
+                // If not found locally, try system-wide
+                if (catalog == null) {
+                    catalog = loader.loadSystemCatalog(pkgName)
+                }
+                
+                if (catalog != null) {
+                    // Process and update the catalog
+                    val processed = processCatalog(catalog)
+                    catalogUpdateChannel.trySend(CatalogUpdate.Add(processed))
+                    Log.info("CatalogStore: Catalog $pkgName reloaded successfully")
+                    processed
+                } else {
+                    Log.warn { "CatalogStore: Catalog $pkgName not found for reload" }
+                    null
+                }
+            }
+        }
+    }
+
+    /**
      * Force reload all catalogs.
      */
     suspend fun reloadCatalogs() {
@@ -634,6 +675,12 @@ class CatalogStore(
             lock.withLock {
                 stubSourceIds.clear()
                 cachedPinnedIds = pinnedCatalogsPreference.get()
+                
+                // Clear all cached catalogs' DEX cache before reloading
+                // This ensures fresh code is loaded for all reinstalled sources
+                catalogs.filterIsInstance<CatalogInstalled>().forEach { catalog ->
+                    loader.clearCatalogCache(catalog.pkgName)
+                }
                 
                 val loadedCatalogs = loader.loadAll()
                     .distinctBy { it.sourceId }

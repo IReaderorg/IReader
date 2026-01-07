@@ -80,6 +80,177 @@
 -dontwarn org.conscrypt.**
 
 
+##---------------Begin: proguard configuration for kotlinx-datetime  ----------
+# kotlinx-datetime - Keep all classes to prevent NoSuchMethodError on LocalDate.parse
+# Error: NoSuchMethodError: No static method parse$default in kotlinx.datetime.LocalDate$Companion
+# Used by IReader extensions (Madara sources) for date parsing
+
+# Keep ALL kotlinx.datetime classes - critical for extension compatibility
+-keep class kotlinx.datetime.** { *; }
+-keep interface kotlinx.datetime.** { *; }
+-keepclassmembers class kotlinx.datetime.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep LocalDate and its Companion object specifically (main error source)
+-keep class kotlinx.datetime.LocalDate { *; }
+-keep class kotlinx.datetime.LocalDate$* { *; }
+-keep class kotlinx.datetime.LocalDate$Companion { *; }
+-keepclassmembers class kotlinx.datetime.LocalDate$Companion {
+    public <methods>;
+    *** parse(...);
+    *** parse$default(...);
+}
+
+# Keep LocalDateTime and its Companion
+-keep class kotlinx.datetime.LocalDateTime { *; }
+-keep class kotlinx.datetime.LocalDateTime$* { *; }
+-keep class kotlinx.datetime.LocalDateTime$Companion { *; }
+-keepclassmembers class kotlinx.datetime.LocalDateTime$Companion {
+    public <methods>;
+    *** parse(...);
+    *** parse$default(...);
+}
+
+# Keep Instant and its Companion
+-keep class kotlinx.datetime.Instant { *; }
+-keep class kotlinx.datetime.Instant$* { *; }
+-keep class kotlinx.datetime.Instant$Companion { *; }
+-keepclassmembers class kotlinx.datetime.Instant$Companion {
+    public <methods>;
+    *** parse(...);
+    *** parse$default(...);
+    *** fromEpochMilliseconds(...);
+}
+
+# Keep TimeZone classes
+-keep class kotlinx.datetime.TimeZone { *; }
+-keep class kotlinx.datetime.TimeZone$* { *; }
+-keep class kotlinx.datetime.TimeZone$Companion { *; }
+-keepclassmembers class kotlinx.datetime.TimeZone$Companion {
+    public <methods>;
+}
+
+# Keep DateTimeFormat classes (used for custom date parsing)
+-keep class kotlinx.datetime.format.** { *; }
+-keepclassmembers class kotlinx.datetime.format.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep DateTimePeriod and DatePeriod
+-keep class kotlinx.datetime.DateTimePeriod { *; }
+-keep class kotlinx.datetime.DatePeriod { *; }
+
+# Keep all default parameter methods (Kotlin generates $default suffix methods)
+# This is CRITICAL - the error is specifically about parse$default method
+-keepclassmembers class kotlinx.datetime.** {
+    *** *$default(...);
+    synthetic <methods>;
+}
+
+# Keep internal implementation classes
+-keep class kotlinx.datetime.internal.** { *; }
+-keep class kotlinx.datetime.serializers.** { *; }
+
+-dontwarn kotlinx.datetime.**
+##---------------End: proguard configuration for kotlinx-datetime  ----------
+
+##---------------Begin: proguard configuration for kotlin.time  ----------
+# kotlin.time - Keep Clock and Duration classes used by extensions
+# Used by IReader extensions (Madara DateParser) for time calculations
+
+-keep class kotlin.time.** { *; }
+-keep interface kotlin.time.** { *; }
+-keepclassmembers class kotlin.time.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep Clock.System specifically (used in DateParser)
+-keep class kotlin.time.Clock { *; }
+-keep class kotlin.time.Clock$* { *; }
+-keep class kotlin.time.Clock$System { *; }
+-keepclassmembers class kotlin.time.Clock$System {
+    public <methods>;
+}
+
+# Keep Duration classes
+-keep class kotlin.time.Duration { *; }
+-keep class kotlin.time.Duration$* { *; }
+-keep class kotlin.time.Duration$Companion { *; }
+-keepclassmembers class kotlin.time.Duration$Companion {
+    public <methods>;
+}
+
+# Keep DurationUnit
+-keep class kotlin.time.DurationUnit { *; }
+
+# Keep all default parameter methods
+-keepclassmembers class kotlin.time.** {
+    *** *$default(...);
+    synthetic <methods>;
+}
+
+-dontwarn kotlin.time.**
+##---------------End: proguard configuration for kotlin.time  ----------
+
+##---------------Begin: proguard configuration for IReader Extensions  ----------
+# IReader Extensions - Keep all extension source classes and their dependencies
+# Extensions are loaded dynamically and use reflection
+
+# Keep all Madara source classes
+-keep class ireader.madara.** { *; }
+-keepclassmembers class ireader.madara.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep DateParser specifically (where the error occurs)
+-keep class ireader.madara.DateParser { *; }
+-keepclassmembers class ireader.madara.DateParser {
+    public <methods>;
+    *** parse*(...);
+}
+
+# Keep all extension source packages (dynamically loaded)
+-keep class ireader.*.** { *; }
+-keepclassmembers class ireader.*.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep HttpSource and SourceFactory base classes
+-keep class ireader.core.source.HttpSource { *; }
+-keep class ireader.core.source.SourceFactory { *; }
+-keep class ireader.core.source.SourceFactory$* { *; }
+-keepclassmembers class ireader.core.source.HttpSource {
+    <fields>;
+    <methods>;
+}
+-keepclassmembers class ireader.core.source.SourceFactory {
+    <fields>;
+    <methods>;
+}
+
+# Keep source model classes
+-keep class ireader.core.source.model.** { *; }
+-keepclassmembers class ireader.core.source.model.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep Dependencies class used by all sources
+-keep class ireader.core.source.Dependencies { *; }
+##---------------End: proguard configuration for IReader Extensions  ----------
+
 ##---------------Begin: proguard configuration for couroutines  ----------
 # When editing this file, update the following files as well:
 # - META-INF/com.android.tools/proguard/coroutines.pro

@@ -527,6 +527,45 @@ class AndroidCatalogLoader(
         }
     }
 
+    /**
+     * Clear the cached DEX/class data for a specific catalog.
+     * This clears both the secure APK copy and the compiled DEX cache,
+     * ensuring the next load will use the fresh APK file.
+     * 
+     * @param pkgName The package name of the catalog to clear cache for
+     */
+    override fun clearCatalogCache(pkgName: String) {
+        try {
+            Log.info("AndroidCatalogLoader: Clearing cache for $pkgName")
+            
+            // Clear the secure APK copy
+            val secureApkFile = File(secureExtensionsDir, "${pkgName}.apk")
+            if (secureApkFile.exists()) {
+                secureApkFile.delete()
+                Log.debug { "AndroidCatalogLoader: Deleted secure APK: ${secureApkFile.absolutePath}" }
+            }
+            
+            // Clear the DEX cache directory for this package
+            val dexCacheDir = File(secureDexCacheDir, pkgName)
+            if (dexCacheDir.exists() && dexCacheDir.isDirectory) {
+                dexCacheDir.deleteRecursively()
+                Log.debug { "AndroidCatalogLoader: Deleted DEX cache: ${dexCacheDir.absolutePath}" }
+            }
+            
+            // Also clear any .dex files that might be directly in the cache dir
+            secureDexCacheDir.listFiles()?.filter { 
+                it.name.startsWith(pkgName) && it.name.endsWith(".dex") 
+            }?.forEach { 
+                it.delete()
+                Log.debug { "AndroidCatalogLoader: Deleted DEX file: ${it.absolutePath}" }
+            }
+            
+            Log.info("AndroidCatalogLoader: Cache cleared for $pkgName")
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to clear cache for $pkgName", e)
+        }
+    }
+
     private companion object {
         const val EXTENSION_FEATURE = "ireader"
         const val METADATA_SOURCE_CLASS = "source.class"
