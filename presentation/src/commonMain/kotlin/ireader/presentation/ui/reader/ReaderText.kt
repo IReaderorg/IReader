@@ -284,11 +284,13 @@ fun ReaderText(
                             // Combined gesture handling
                             if (contentDoesNotFillScreen && (hasPrevChapter || hasNextChapter)) {
                                 // When content doesn't fill screen, handle both tap and drag
+                                // But allow horizontal gestures to pass through for drawer
                                 awaitEachGesture {
                                     val down = awaitFirstDown(requireUnconsumed = false)
                                     
                                     var dragAmount = 0f
                                     var isDragging = false
+                                    var isHorizontalGesture = false // Track if this is a horizontal gesture (drawer)
                                     val touchSlop = viewConfiguration.touchSlop
                                     
                                     // Track pointer movement
@@ -301,7 +303,7 @@ fun ReaderText(
                                         
                                         if (change == null || !change.pressed) {
                                             // Pointer released
-                                            if (isDragging) {
+                                            if (isDragging && !isHorizontalGesture) {
                                                 if (dragAmount > refreshTriggerPx && hasPrevChapter) {
                                                     onPrev()
                                                 } else if (dragAmount < -refreshTriggerPx && hasNextChapter) {
@@ -311,27 +313,49 @@ fun ReaderText(
                                                 scope.launch {
                                                     swipeState.animateOffsetTo(0f)
                                                 }
-                                            } else {
+                                            } else if (!isDragging && !isHorizontalGesture) {
                                                 // It was a tap
                                                 debouncedToggleReaderMode()
                                             }
                                             break
                                         }
                                         
-                                        val delta = change.position.y - currentPosition.y
+                                        // If already determined to be horizontal gesture, don't process further
+                                        if (isHorizontalGesture) {
+                                            continue
+                                        }
+                                        
+                                        val deltaY = change.position.y - currentPosition.y
+                                        val deltaX = change.position.x - currentPosition.x
                                         currentPosition = change.position
                                         
-                                        if (!isDragging && kotlin.math.abs(change.position.y - down.position.y) > touchSlop) {
-                                            // Start dragging
-                                            isDragging = true
-                                            swipeState.isSwipeInProgress = true
+                                        val totalDeltaY = change.position.y - down.position.y
+                                        val totalDeltaX = change.position.x - down.position.x
+                                        
+                                        if (!isDragging) {
+                                            // Check if movement exceeds touch slop
+                                            val absX = kotlin.math.abs(totalDeltaX)
+                                            val absY = kotlin.math.abs(totalDeltaY)
+                                            
+                                            if (absX > touchSlop || absY > touchSlop) {
+                                                // Determine gesture direction - if horizontal movement is dominant, let it pass through for drawer
+                                                if (absX > absY * 1.5f) {
+                                                    // Horizontal gesture - likely drawer swipe, don't consume
+                                                    isHorizontalGesture = true
+                                                    continue
+                                                } else if (absY > touchSlop) {
+                                                    // Vertical gesture - handle chapter navigation
+                                                    isDragging = true
+                                                    swipeState.isSwipeInProgress = true
+                                                }
+                                            }
                                         }
                                         
                                         if (isDragging) {
-                                            dragAmount += delta
+                                            dragAmount += deltaY
                                             val dragMultiplier = 0.5f
                                             scope.launch {
-                                                swipeState.dispatchScrollDelta(delta * dragMultiplier)
+                                                swipeState.dispatchScrollDelta(deltaY * dragMultiplier)
                                             }
                                             change.consume()
                                         }

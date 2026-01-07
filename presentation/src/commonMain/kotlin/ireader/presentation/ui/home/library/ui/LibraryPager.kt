@@ -132,19 +132,30 @@ internal fun LibraryPager(
                 }
             }
             
-            // Get saved scroll position for this category
-            // Note: We call getScrollPosition directly (not remembered) so it always gets the latest value
-            // This ensures scroll position is restored correctly when navigating back from detail screen
-            val savedPosition = getScrollPosition(categoryId)
+            // Create scroll states without initial position - we'll restore position after books load
+            val gridState = rememberLazyGridState()
+            val lazyListState = rememberLazyListState()
             
-            val gridState = rememberLazyGridState(
-                initialFirstVisibleItemIndex = savedPosition.first,
-                initialFirstVisibleItemScrollOffset = savedPosition.second
-            )
-            val lazyListState = rememberLazyListState(
-                initialFirstVisibleItemIndex = savedPosition.first,
-                initialFirstVisibleItemScrollOffset = savedPosition.second
-            )
+            // Track if we've restored scroll position for this category
+            // This flag ensures we only restore once when first entering the screen
+            val hasRestoredPosition = remember(categoryId) { androidx.compose.runtime.mutableStateOf(false) }
+            
+            // Restore scroll position AFTER books are loaded
+            // This fixes the bug where scroll position was lost when navigating back from detail screen
+            LaunchedEffect(categoryId, books.size, hasRestoredPosition.value) {
+                // Only restore once when books first load (not on pagination loads)
+                if (books.isNotEmpty() && !hasRestoredPosition.value) {
+                    val savedPosition = getScrollPosition(categoryId)
+                    if (savedPosition.first > 0 || savedPosition.second > 0) {
+                        // Only scroll if we have a valid saved position and enough items
+                        if (savedPosition.first < books.size) {
+                            gridState.scrollToItem(savedPosition.first, savedPosition.second)
+                            lazyListState.scrollToItem(savedPosition.first, savedPosition.second)
+                        }
+                    }
+                    hasRestoredPosition.value = true
+                }
+            }
             
             // Save scroll position when it changes - debounced to avoid excessive saves
             LaunchedEffect(gridState, categoryId) {
