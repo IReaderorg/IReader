@@ -241,9 +241,7 @@ class LibraryBackupRepositoryImpl(
             // Implement cloud upload based on provider
             when (provider) {
                 CloudProvider.GOOGLE_DRIVE -> uploadToGoogleDrive(uri)
-                CloudProvider.DROPBOX -> uploadToDropbox(uri)
-                CloudProvider.ONEDRIVE -> uploadToOneDrive(uri)
-                CloudProvider.ICLOUD -> uploadToICloud(uri)
+                CloudProvider.LOCAL -> true // Local doesn't need upload
             }
         } catch (e: Exception) {
             false
@@ -255,9 +253,7 @@ class LibraryBackupRepositoryImpl(
             // Implement cloud download based on provider
             when (provider) {
                 CloudProvider.GOOGLE_DRIVE -> downloadFromGoogleDrive(backupId)
-                CloudProvider.DROPBOX -> downloadFromDropbox(backupId)
-                CloudProvider.ONEDRIVE -> downloadFromOneDrive(backupId)
-                CloudProvider.ICLOUD -> downloadFromICloud(backupId)
+                CloudProvider.LOCAL -> null // Local doesn't need download
             }
         } catch (e: Exception) {
             null
@@ -408,38 +404,8 @@ class LibraryBackupRepositoryImpl(
         return true
     }
     
-    private suspend fun uploadToDropbox(uri: Uri): Boolean {
-        // Implement Dropbox upload
-        return true
-    }
-    
-    private suspend fun uploadToOneDrive(uri: Uri): Boolean {
-        // Implement OneDrive upload
-        return true
-    }
-    
-    private suspend fun uploadToICloud(uri: Uri): Boolean {
-        // Implement iCloud upload
-        return true
-    }
-    
     private suspend fun downloadFromGoogleDrive(backupId: String): Uri? {
         // Implement Google Drive download
-        return null
-    }
-    
-    private suspend fun downloadFromDropbox(backupId: String): Uri? {
-        // Implement Dropbox download
-        return null
-    }
-    
-    private suspend fun downloadFromOneDrive(backupId: String): Uri? {
-        // Implement OneDrive download
-        return null
-    }
-    
-    private suspend fun downloadFromICloud(backupId: String): Uri? {
-        // Implement iCloud download
         return null
     }
 }

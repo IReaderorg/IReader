@@ -35,15 +35,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.ireader.app.di.AppModule
+import org.ireader.app.crash.CrashHandler
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
-import org.ireader.app.crash.CrashHandler
 import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
+
+// BuildConfig for accessing build-time configuration
+import org.ireader.app.BuildConfig
 
 class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
     
@@ -163,6 +166,9 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         // Initialize SecureStorageHelper (fast, needed for plugins)
         initializeSecureStorage()
         
+        // Initialize Google Drive config with client ID from BuildConfig
+        initializeGoogleDriveConfig()
+        
         // Mark modules as fully initialized
         ireader.domain.di.ModuleInitializationState.markFullyInitialized()
         println("=== All modules loaded ===")
@@ -188,6 +194,20 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             }
         } catch (e: Exception) {
             println("SecureStorageHelper init failed: ${e.message}")
+        }
+    }
+    
+    private fun initializeGoogleDriveConfig() {
+        try {
+            val clientId = BuildConfig.GOOGLE_DRIVE_CLIENT_ID
+            if (clientId.isNotBlank()) {
+                ireader.data.backup.GoogleDriveConfig.initialize(clientId)
+                println("Google Drive config initialized")
+            } else {
+                println("Google Drive client ID not configured")
+            }
+        } catch (e: Exception) {
+            println("Google Drive config init failed: ${e.message}")
         }
     }
     

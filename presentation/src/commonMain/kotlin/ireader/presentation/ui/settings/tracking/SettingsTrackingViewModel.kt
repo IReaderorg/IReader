@@ -147,6 +147,8 @@ class SettingsTrackingViewModel(
         private set
     var myNovelListLoginError by mutableStateOf<String?>(null)
         private set
+    var myNovelListBaseUrl by mutableStateOf("https://mynoveltracker.netlify.app")
+        private set
     
     // Snackbar message
     private val _snackbarMessage = MutableStateFlow<String?>(null)
@@ -187,6 +189,11 @@ class SettingsTrackingViewModel(
                 _kitsuLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.KITSU)
                 _mangaUpdatesLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.MANGAUPDATES)
                 _myNovelListLoggedIn.value = trackingRepository.isAuthenticated(TrackerService.MYNOVELLIST)
+                
+                // Load MyNovelList base URL
+                myNovelListBaseUrl = trackingRepository.getMyNovelListBaseUrl().ifBlank { 
+                    "https://mynoveltracker.netlify.app" 
+                }
                 
                 // Update enabled states based on login
                 if (_aniListLoggedIn.value) {
@@ -552,9 +559,13 @@ class SettingsTrackingViewModel(
         myNovelListLoginError = null
     }
     
-    fun completeMyNovelListLogin(apiKey: String) {
+    fun completeMyNovelListLogin(apiKey: String, baseUrl: String) {
         scope.launch {
             try {
+                // Set the custom base URL before login
+                trackingRepository.setMyNovelListBaseUrl(baseUrl)
+                myNovelListBaseUrl = baseUrl
+                
                 val credentials = TrackerCredentials(
                     serviceId = TrackerService.MYNOVELLIST,
                     accessToken = apiKey
@@ -569,7 +580,7 @@ class SettingsTrackingViewModel(
                     myNovelListLoginError = null
                     showSnackbar("Successfully logged in to MyNovelList")
                 } else {
-                    myNovelListLoginError = "Login failed. Please check your API key."
+                    myNovelListLoginError = "Login failed. Please check your API key and server URL."
                 }
             } catch (e: Exception) {
                 Log.error(e, "MyNovelList login error")

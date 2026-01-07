@@ -129,6 +129,8 @@ jobs:
           COMMUNITY_D1_DATABASE_ID: ${{ secrets.COMMUNITY_D1_DATABASE_ID }}
           COMMUNITY_R2_BUCKET_NAME: ${{ secrets.COMMUNITY_R2_BUCKET_NAME }}
           COMMUNITY_R2_PUBLIC_URL: ${{ secrets.COMMUNITY_R2_PUBLIC_URL }}
+          # Google Drive Backup
+          GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
         with:
           arguments: >
             ${{ matrix.build }}

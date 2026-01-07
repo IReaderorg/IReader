@@ -7,7 +7,7 @@ import ireader.domain.models.BackupResult
  */
 interface CloudStorageProvider {
     /**
-     * Provider name (e.g., "Google Drive", "Dropbox")
+     * Provider name (e.g., "Google Drive")
      */
     val providerName: String
     
@@ -68,7 +68,6 @@ data class CloudBackupFile(
  */
 enum class CloudProvider {
     GOOGLE_DRIVE,
-    DROPBOX,
     LOCAL
 }
 

@@ -113,6 +113,8 @@
                     android:host="anilist-auth"
                     android:scheme="ireader" />
             </intent-filter>
+            
+            <!-- Google Drive OAuth is handled via Google Sign-In SDK, no intent filter needed -->
 
 
         </activity>

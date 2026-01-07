@@ -5,6 +5,7 @@ import ireader.domain.models.backup.BackupData
 import ireader.domain.models.backup.BackupInfo
 import ireader.domain.models.backup.ReadingProgress
 import ireader.domain.services.backup.GoogleDriveBackupService
+import ireader.domain.usecases.backup.GoogleDriveOAuthHandler
 import ireader.domain.usecases.book.BookUseCases
 import ireader.domain.usecases.category.CategoryUseCases
 import ireader.domain.usecases.chapter.ChapterUseCases
@@ -17,13 +18,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.currentTimeToLong
 
-/**
- * ViewModel for Google Drive backup operations
- * Refactored to use Clean Architecture use cases
- */
 class GoogleDriveViewModel(
     private val googleDriveService: GoogleDriveBackupService,
-    // NEW: Clean architecture use cases
     private val bookUseCases: BookUseCases,
     private val chapterUseCases: ChapterUseCases,
     private val categoryUseCases: CategoryUseCases,
@@ -38,7 +34,8 @@ class GoogleDriveViewModel(
         val isCreatingBackup: Boolean = false,
         val isRestoringBackup: Boolean = false,
         val errorMessage: String? = null,
-        val successMessage: String? = null
+        val successMessage: String? = null,
+        val needsOAuthFlow: Boolean = false
     )
     
     private val _isConnected = mutableStateOf(false)
@@ -65,24 +62,31 @@ class GoogleDriveViewModel(
     private val _successMessage = mutableStateOf<String?>(null)
     val successMessage: androidx.compose.runtime.State<String?> get() = _successMessage
     
+    private val _needsOAuthFlow = mutableStateOf(false)
+    val needsOAuthFlow: androidx.compose.runtime.State<Boolean> get() = _needsOAuthFlow
+    
     init {
         checkConnectionStatus()
+        checkPendingOAuthCallback()
+    }
+
+    private fun checkPendingOAuthCallback() {
+        if (GoogleDriveOAuthHandler.hasPendingData()) {
+            val error = GoogleDriveOAuthHandler.pendingError
+            if (error != null) {
+                _errorMessage.value = "Authentication failed: $error"
+                GoogleDriveOAuthHandler.clear()
+            }
+        }
     }
     
-    /**
-     * Check if connected to Google Drive
-     */
     fun checkConnectionStatus() {
         scope.launch {
             _isLoading.value = true
             try {
                 val isAuth = googleDriveService.isAuthenticated()
                 _isConnected.value = isAuth
-                
-                if (isAuth) {
-                    loadBackups()
-                }
-                
+                if (isAuth) loadBackups()
                 updateState { it.copy(isConnected = isAuth) }
             } catch (e: Exception) {
                 _isConnected.value = false
@@ -93,35 +97,28 @@ class GoogleDriveViewModel(
         }
     }
     
-    /**
-     * Connect to Google Drive
-     */
     fun connect() {
         scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-            
             try {
                 val result = googleDriveService.authenticate()
-                
                 result.onSuccess { email ->
                     _isConnected.value = true
                     _accountEmail.value = email
                     _successMessage.value = "Successfully connected to Google Drive"
-                    
-                    updateState { it.copy(
-                        isConnected = true,
-                        accountEmail = email,
-                        successMessage = _successMessage.value
-                    ) }
-                    
-                    // Load backups after successful connection
+                    _needsOAuthFlow.value = false
+                    updateState { it.copy(isConnected = true, accountEmail = email, needsOAuthFlow = false) }
                     loadBackups()
                 }.onFailure { error ->
-                    _errorMessage.value = error.message ?: "Failed to connect to Google Drive"
-                    updateState { it.copy(
-                        errorMessage = _errorMessage.value
-                    ) }
+                    val message = error.message ?: "Failed to connect"
+                    if (message.contains("must be initiated from UI", ignoreCase = true)) {
+                        _needsOAuthFlow.value = true
+                        updateState { it.copy(needsOAuthFlow = true) }
+                    } else {
+                        _errorMessage.value = message
+                        updateState { it.copy(errorMessage = message) }
+                    }
                 }
             } finally {
                 _isLoading.value = false
@@ -129,60 +126,60 @@ class GoogleDriveViewModel(
         }
     }
     
-    /**
-     * Disconnect from Google Drive
-     */
+    fun onOAuthSuccess(email: String) {
+        _isConnected.value = true
+        _accountEmail.value = email
+        _successMessage.value = "Successfully connected to Google Drive"
+        _needsOAuthFlow.value = false
+        updateState { it.copy(isConnected = true, accountEmail = email, needsOAuthFlow = false) }
+        GoogleDriveOAuthHandler.clear()
+        loadBackups()
+    }
+    
+    fun onOAuthError(error: String) {
+        _errorMessage.value = error
+        _needsOAuthFlow.value = false
+        updateState { it.copy(errorMessage = error, needsOAuthFlow = false) }
+        GoogleDriveOAuthHandler.clear()
+    }
+    
+    fun clearOAuthFlowFlag() {
+        _needsOAuthFlow.value = false
+        updateState { it.copy(needsOAuthFlow = false) }
+    }
+    
     fun disconnect() {
         scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-            
             try {
                 val result = googleDriveService.disconnect()
-                
                 result.onSuccess {
                     _isConnected.value = false
                     _accountEmail.value = null
                     _backups.value = emptyList()
                     _successMessage.value = "Disconnected from Google Drive"
-                    
-                    updateState { it.copy(
-                        isConnected = false,
-                        accountEmail = null,
-                        backups = emptyList(),
-                        successMessage = _successMessage.value
-                    ) }
+                    updateState { it.copy(isConnected = false, accountEmail = null, backups = emptyList()) }
                 }.onFailure { error ->
                     _errorMessage.value = error.message ?: "Failed to disconnect"
-                    updateState { it.copy(
-                        errorMessage = _errorMessage.value
-                    ) }
                 }
             } finally {
                 _isLoading.value = false
             }
         }
     }
-    
-    /**
-     * Load list of backups from Google Drive
-     */
+
     fun loadBackups() {
         scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-            
             try {
                 val result = googleDriveService.listBackups()
-                
                 result.onSuccess { backupList ->
                     _backups.value = backupList
                     updateState { it.copy(backups = backupList) }
                 }.onFailure { error ->
                     _errorMessage.value = "Failed to load backups: ${error.message}"
-                    updateState { it.copy(
-                        errorMessage = _errorMessage.value
-                    ) }
                 }
             } finally {
                 _isLoading.value = false
@@ -190,29 +187,19 @@ class GoogleDriveViewModel(
         }
     }
     
-    /**
-     * Create a new backup and upload to Google Drive
-     */
     fun createBackup() {
         scope.launch {
             _isCreatingBackup.value = true
             _errorMessage.value = null
-            
             try {
-                // Collect all data using use cases
                 val books = bookUseCases.getBooksInLibrary()
                 val allChapters = mutableListOf<ireader.domain.models.entities.Chapter>()
-                
-                // Get chapters for each book
                 books.forEach { book ->
                     val chapters = chapterUseCases.getChaptersByBookId(book.id)
                     allChapters.addAll(chapters)
                 }
                 
-                val chapters = allChapters
-                
-                // Create reading progress data from chapters with read status or progress
-                val readingProgress: List<ReadingProgress> = chapters
+                val readingProgress = allChapters
                     .filter { it.read || it.lastPageRead > 0 }
                     .map { chapter ->
                         ReadingProgress(
@@ -223,8 +210,7 @@ class GoogleDriveViewModel(
                         )
                     }
                 
-                // Create bookmarks data from bookmarked chapters
-                val bookmarks: List<ireader.domain.models.backup.Bookmark> = chapters
+                val bookmarks = allChapters
                     .filter { it.bookmark }
                     .map { chapter ->
                         ireader.domain.models.backup.Bookmark(
@@ -235,73 +221,40 @@ class GoogleDriveViewModel(
                         )
                     }
                 
-                // Collect app settings for backup
-                // Note: Settings are stored as Map<String, String> for serialization compatibility
-                val settings = mutableMapOf<String, String>()
-                // Settings will be added here when preference backup is implemented
-                // For now, we'll keep it empty to avoid serialization issues
-                
-                // Package backup data
                 val backupData = BackupData(
                     novels = books,
-                    chapters = chapters,
+                    chapters = allChapters,
                     readingProgress = readingProgress,
                     bookmarks = bookmarks,
-                    settings = settings
+                    settings = mutableMapOf()
                 )
                 
-                // Upload to Google Drive
                 val result = googleDriveService.createBackup(backupData)
-                
-                result.onSuccess { backupId ->
+                result.onSuccess {
                     _successMessage.value = "Backup created successfully"
-                    updateState { it.copy(
-                        successMessage = _successMessage.value
-                    ) }
-                    
-                    // Reload backups list
                     loadBackups()
                 }.onFailure { error ->
                     _errorMessage.value = "Failed to create backup: ${error.message}"
-                    updateState { it.copy(
-                        errorMessage = _errorMessage.value
-                    ) }
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to create backup: ${e.message}"
-                updateState { it.copy(
-                    errorMessage = _errorMessage.value
-                ) }
             } finally {
                 _isCreatingBackup.value = false
             }
         }
     }
-    
-    /**
-     * Restore a backup from Google Drive
-     * Note: This should be called after user confirms the restoration in the UI
-     */
+
     fun restoreBackup(backupInfo: BackupInfo, confirmed: Boolean = false) {
         scope.launch {
             _isRestoringBackup.value = true
             _errorMessage.value = null
-            
             try {
-                // Download backup from Google Drive
                 val result = googleDriveService.downloadBackup(backupInfo.id)
-                
                 result.onSuccess { backupData ->
-                    // Clear existing data from database using use cases
-                    // This is a destructive operation, so it should only happen after user confirmation
                     try {
-                        // Delete all existing books (use case handles cascade deletion of chapters, history, etc.)
                         val existingBooks = bookUseCases.getBooksInLibrary()
-                        existingBooks.forEach { book ->
-                            bookUseCases.deleteBook(book.id)
-                        }
+                        existingBooks.forEach { book -> bookUseCases.deleteBook(book.id) }
                         
-                        // Delete all categories (except system categories)
                         val existingCategories = categoryUseCases.getCategories()
                         existingCategories.forEach { category ->
                             if (!category.isSystemCategory) {
@@ -309,91 +262,44 @@ class GoogleDriveViewModel(
                             }
                         }
                         
-                        // Insert backed-up books
-                        if (backupData.novels.isNotEmpty()) {
-                            backupData.novels.forEach { book ->
-                                bookUseCases.updateBook(book)
-                            }
-                        }
-                        
-                        // Insert backed-up chapters using batch insert for efficiency
+                        backupData.novels.forEach { book -> bookUseCases.updateBook(book) }
                         if (backupData.chapters.isNotEmpty()) {
-                            // Use batch insert for all chapters at once - much more efficient
-                            // than individual inserts, especially for large backups
                             insertUseCases.insertChapters(backupData.chapters)
                         }
                         
-                        // Restore reading progress using use cases
                         backupData.readingProgress.forEach { progress ->
-                            chapterUseCases.updateReadStatus(
-                                progress.chapterId,
-                                isRead = progress.lastPageRead > 0
-                            )
+                            chapterUseCases.updateReadStatus(progress.chapterId, isRead = progress.lastPageRead > 0)
                         }
-                        
-                        // Restore bookmarks using use cases
                         backupData.bookmarks.forEach { bookmark ->
-                            chapterUseCases.updateBookmarkStatus(
-                                bookmark.chapterId,
-                                isBookmarked = true
-                            )
+                            chapterUseCases.updateBookmarkStatus(bookmark.chapterId, isBookmarked = true)
                         }
                         
-                        // Restore settings
-                        // Settings restoration would be implemented here when preference backup is added
-                        // For now, settings map is empty so no action needed
-                        
-                        _successMessage.value = "Backup restored successfully. Please restart the app to see changes."
-                        updateState { it.copy(
-                            successMessage = _successMessage.value
-                        ) }
+                        _successMessage.value = "Backup restored successfully. Please restart the app."
                     } catch (e: Exception) {
                         _errorMessage.value = "Failed to restore data: ${e.message}"
-                        updateState { it.copy(
-                            errorMessage = _errorMessage.value
-                        ) }
                     }
                 }.onFailure { error ->
                     _errorMessage.value = "Failed to download backup: ${error.message}"
-                    updateState { it.copy(
-                        errorMessage = _errorMessage.value
-                    ) }
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to restore backup: ${e.message}"
-                updateState { it.copy(
-                    errorMessage = _errorMessage.value
-                ) }
             } finally {
                 _isRestoringBackup.value = false
             }
         }
     }
     
-    /**
-     * Delete a backup from Google Drive
-     */
     fun deleteBackup(backupInfo: BackupInfo) {
         scope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-            
             try {
                 val result = googleDriveService.deleteBackup(backupInfo.id)
-                
                 result.onSuccess {
                     _successMessage.value = "Backup deleted successfully"
-                    updateState { it.copy(
-                        successMessage = _successMessage.value
-                    ) }
-                    
-                    // Reload backups list
                     loadBackups()
                 }.onFailure { error ->
                     _errorMessage.value = "Failed to delete backup: ${error.message}"
-                    updateState { it.copy(
-                        errorMessage = _errorMessage.value
-                    ) }
                 }
             } finally {
                 _isLoading.value = false
@@ -401,15 +307,9 @@ class GoogleDriveViewModel(
         }
     }
     
-    /**
-     * Clear messages
-     */
     fun clearMessages() {
         _errorMessage.value = null
         _successMessage.value = null
-        updateState { it.copy(
-            errorMessage = null,
-            successMessage = null
-        ) }
+        updateState { it.copy(errorMessage = null, successMessage = null) }
     }
 }

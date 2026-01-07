@@ -92,6 +92,18 @@ kotlin {
                 implementation(libs.sqldelight.android)
                 implementation(libs.androidSqlite)
                 implementation("androidx.biometric:biometric:1.1.0")
+                
+                // Encrypted SharedPreferences for secure token storage
+                implementation("androidx.security:security-crypto:1.1.0-alpha06")
+                
+                // Google Sign-In for Google Drive OAuth
+                implementation("com.google.android.gms:play-services-auth:21.0.0")
+                implementation("com.google.api-client:google-api-client-android:2.2.0") {
+                    exclude(group = "org.apache.httpcomponents")
+                }
+                implementation("com.google.apis:google-api-services-drive:v3-rev20231128-2.0.0") {
+                    exclude(group = "org.apache.httpcomponents")
+                }
             }
         }
         

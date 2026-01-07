@@ -8,6 +8,7 @@ package ireader.presentation.core
 object NavigationRoutes {
     const val changelog = "changelog"
     const val cloudBackup = "cloudBackup"
+    const val googleDriveBackup = "googleDriveBackup"
     const val translationSettings = "translationSettings"
     const val backupRestore = "backupRestore"
     const val donation = "donation"

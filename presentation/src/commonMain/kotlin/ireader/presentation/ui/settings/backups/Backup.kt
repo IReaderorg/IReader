@@ -128,7 +128,7 @@ fun BackUpAndRestoreScreen(
             Components.Header("Cloud Backup"),
             Components.Row(
                 title = localizeHelper.localize(Res.string.cloud_storage),
-                subtitle = localizeHelper.localize(Res.string.backup_to_google_drive_or_dropbox),
+                subtitle = localizeHelper.localize(Res.string.backup_and_restore_your_library_to_google_drive),
                 icon = Icons.Filled.Cloud,
                 onClick = {
                     onNavigateToCloudBackup()

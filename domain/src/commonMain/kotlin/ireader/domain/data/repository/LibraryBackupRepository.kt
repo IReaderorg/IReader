@@ -84,9 +84,7 @@ data class BackupRecord(
  */
 enum class CloudProvider {
     GOOGLE_DRIVE,
-    DROPBOX,
-    ONEDRIVE,
-    ICLOUD
+    LOCAL
 }
 
 /**

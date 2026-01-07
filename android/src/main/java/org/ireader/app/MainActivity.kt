@@ -54,6 +54,8 @@ import ireader.presentation.core.ProvideNavigator
 import ireader.presentation.core.popUntilRoot
 import ireader.presentation.core.theme.AppTheme
 import ireader.presentation.core.theme.LocaleHelper
+import ireader.presentation.core.ui.setGoogleDriveOAuthActivity
+import ireader.presentation.core.ui.handleGoogleDriveActivityResult
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
@@ -264,6 +266,21 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         super.onResume()
         // Trigger lazy initialization when app becomes visible
         (application as? MyApplication)?.onAppVisible()
+        // Set activity reference for Google Drive OAuth flow
+        setGoogleDriveOAuthActivity(this)
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Clear activity reference when paused
+        setGoogleDriveOAuthActivity(null)
+    }
+    
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        // Handle Google Drive sign-in result
+        handleGoogleDriveActivityResult(requestCode, resultCode, data)
     }
 
     // Note: SimpleStorage lifecycle methods removed - FileKit handles file picking via Compose
@@ -331,6 +348,29 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                     }
                 }
                 println("⚠️ AniList OAuth callback without valid token: $uri")
+                return true
+            }
+            
+            // Google Drive OAuth callback: com.googleusercontent.apps.{CLIENT_ID_PREFIX}:/oauth2redirect?code=...
+            // The scheme is the reversed client ID
+            if (scheme?.startsWith("com.googleusercontent.apps.") == true && uri.host == "oauth2redirect") {
+                val authCode = uri.getQueryParameter("code")
+                if (!authCode.isNullOrEmpty()) {
+                    println("✅ Google Drive OAuth callback detected with code")
+                    // Store the auth code for the backup screen to pick up
+                    ireader.domain.usecases.backup.GoogleDriveOAuthHandler.pendingAuthCode = authCode
+                    ireader.domain.usecases.backup.GoogleDriveOAuthHandler.pendingUri = uri.toString()
+                    // Navigate to Google Drive backup screen
+                    navController.navigate("googleDriveBackup") {
+                        launchSingleTop = true
+                    }
+                    return true
+                }
+                val error = uri.getQueryParameter("error")
+                if (error != null) {
+                    println("⚠️ Google Drive OAuth error: $error")
+                    ireader.domain.usecases.backup.GoogleDriveOAuthHandler.pendingError = error
+                }
                 return true
             }
             

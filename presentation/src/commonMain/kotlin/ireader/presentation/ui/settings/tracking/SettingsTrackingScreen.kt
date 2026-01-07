@@ -1,12 +1,15 @@
 package ireader.presentation.ui.settings.tracking
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -471,8 +474,9 @@ fun SettingsTrackingScreen(
     if (viewModel.showMyNovelListLoginDialog) {
         MyNovelListLoginDialog(
             error = viewModel.myNovelListLoginError,
+            initialBaseUrl = viewModel.myNovelListBaseUrl,
             onDismiss = { viewModel.dismissMyNovelListLoginDialog() },
-            onLogin = { apiKey -> viewModel.completeMyNovelListLogin(apiKey) }
+            onLogin = { apiKey, baseUrl -> viewModel.completeMyNovelListLogin(apiKey, baseUrl) }
         )
     }
     
@@ -919,17 +923,20 @@ private fun MangaUpdatesLoginDialog(
 }
 
 /**
- * Dialog for MyNovelList login with API key.
+ * Dialog for MyNovelList login with API key and optional custom URL.
  */
 @Composable
 private fun MyNovelListLoginDialog(
     error: String?,
+    initialBaseUrl: String,
     onDismiss: () -> Unit,
-    onLogin: (String) -> Unit
+    onLogin: (apiKey: String, baseUrl: String) -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var apiKey by remember { mutableStateOf("") }
     var apiKeyVisible by remember { mutableStateOf(false) }
+    var customUrl by remember { mutableStateOf(initialBaseUrl) }
+    var showAdvanced by remember { mutableStateOf(initialBaseUrl != "https://mynoveltracker.netlify.app") }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -973,6 +980,44 @@ private fun MyNovelListLoginDialog(
                     isError = error != null
                 )
                 
+                // Advanced settings toggle
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showAdvanced = !showAdvanced },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (showAdvanced) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Advanced Settings",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                // Custom URL field (shown when advanced is expanded)
+                if (showAdvanced) {
+                    OutlinedTextField(
+                        value = customUrl,
+                        onValueChange = { customUrl = it },
+                        label = { Text("Server URL") },
+                        placeholder = { Text("https://mynoveltracker.netlify.app") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        supportingText = {
+                            Text(
+                                text = "For self-hosted instances. Leave default for official server.",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    )
+                }
+                
                 if (error != null) {
                     Text(
                         text = error,
@@ -984,7 +1029,7 @@ private fun MyNovelListLoginDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onLogin(apiKey) },
+                onClick = { onLogin(apiKey, customUrl.ifBlank { "https://mynoveltracker.netlify.app" }) },
                 enabled = apiKey.isNotBlank()
             ) {
                 Text(localizeHelper.localize(Res.string.login))

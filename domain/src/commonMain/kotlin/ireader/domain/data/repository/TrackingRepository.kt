@@ -48,6 +48,10 @@ interface TrackingRepository {
     
     // Statistics
     suspend fun getTrackingStatistics(): TrackingStatistics
+    
+    // MyNovelList specific
+    fun getMyNovelListBaseUrl(): String
+    fun setMyNovelListBaseUrl(url: String)
 }
 
 /**

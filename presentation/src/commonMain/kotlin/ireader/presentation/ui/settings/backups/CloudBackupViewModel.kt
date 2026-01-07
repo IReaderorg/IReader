@@ -108,7 +108,6 @@ class CloudBackupViewModel(
                     // Using a special sourceId for cloud providers
                     val sourceId = when (provider) {
                         CloudProvider.GOOGLE_DRIVE -> -1L
-                        CloudProvider.DROPBOX -> -2L
                         CloudProvider.LOCAL -> -3L
                     }
                     credentialsRepository.storeCredentials(
@@ -156,7 +155,6 @@ class CloudBackupViewModel(
                     // Remove credentials from repository
                     val sourceId = when (provider) {
                         CloudProvider.GOOGLE_DRIVE -> -1L
-                        CloudProvider.DROPBOX -> -2L
                         CloudProvider.LOCAL -> -3L
                     }
                     credentialsRepository.removeCredentials(sourceId)
@@ -331,7 +329,6 @@ class CloudBackupViewModel(
     private fun getProviderName(provider: CloudProvider): String {
         return when (provider) {
             CloudProvider.GOOGLE_DRIVE -> "Google Drive"
-            CloudProvider.DROPBOX -> "Dropbox"
             CloudProvider.LOCAL -> "Local"
         }
     }

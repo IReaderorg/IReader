@@ -490,8 +490,8 @@ class TrackingRepositoryImpl(
     fun isMangaUpdatesAuthenticated(): Boolean = mangaUpdatesRepository?.isAuthenticated() == true
     
     // MyNovelList
-    fun getMyNovelListBaseUrl(): String = myNovelListRepository?.getBaseUrl() ?: ""
-    fun setMyNovelListBaseUrl(url: String) = myNovelListRepository?.setBaseUrl(url)
+    override fun getMyNovelListBaseUrl(): String = myNovelListRepository?.getBaseUrl() ?: "https://mynoveltracker.netlify.app"
+    override fun setMyNovelListBaseUrl(url: String) { myNovelListRepository?.setBaseUrl(url) }
     suspend fun loginToMyNovelList(apiKey: String): Boolean = myNovelListRepository?.login(apiKey) == true
     fun logoutFromMyNovelList() = myNovelListRepository?.logout()
     fun isMyNovelListAuthenticated(): Boolean = myNovelListRepository?.isAuthenticated() == true

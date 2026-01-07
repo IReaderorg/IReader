@@ -2,6 +2,8 @@ package ireader.data.di
 
 import ireader.data.backup.GoogleDriveAuthenticator
 import ireader.data.backup.GoogleDriveAuthenticatorAndroid
+import ireader.data.backup.GoogleDriveConfig
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -10,6 +12,14 @@ import org.koin.dsl.module
  */
 actual val backupPlatformModule: Module = module {
     single<GoogleDriveAuthenticator> {
-        GoogleDriveAuthenticatorAndroid()
+        GoogleDriveAuthenticatorAndroid().apply {
+            val clientId = GoogleDriveConfig.clientId ?: ""
+            initialize(androidContext(), clientId)
+        }
+    }
+    
+    // Also provide the concrete type for Activity-based auth flow
+    single<GoogleDriveAuthenticatorAndroid> {
+        get<GoogleDriveAuthenticator>() as GoogleDriveAuthenticatorAndroid
     }
 }

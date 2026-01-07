@@ -31,6 +31,7 @@ import ireader.presentation.core.ui.ExploreScreenSpec
 import ireader.presentation.core.ui.FontScreenSpec
 import ireader.presentation.core.ui.GeneralScreenSpec
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
+import ireader.presentation.core.ui.GoogleDriveBackupScreenSpec
 import ireader.presentation.core.ui.LocalNavigationViewModelStore
 import ireader.presentation.core.ui.NFTBadgeScreenSpec
 import ireader.presentation.core.ui.NavigationViewModelStore
@@ -118,6 +119,9 @@ fun CommonNavHost(
         }
         composable(NavigationRoutes.cloudBackup) {
             CloudBackupScreenSpec().Content()
+        }
+        composable(NavigationRoutes.googleDriveBackup) {
+            GoogleDriveBackupScreenSpec().Content()
         }
         composable(NavigationRoutes.supabaseConfig) {
             ireader.presentation.ui.settings.sync.SupabaseConfigScreen().Content()

@@ -131,7 +131,6 @@ object SecureStorageKeys {
     // Sync
     const val SYNC_TOKEN = "sync_token"
     const val GOOGLE_DRIVE_TOKEN = "google_drive_token"
-    const val DROPBOX_TOKEN = "dropbox_token"
     
     // Backup
     const val BACKUP_ENCRYPTION_KEY = "backup_encryption_key"

@@ -165,6 +165,9 @@ android {
         buildConfigField("String", "SUPABASE_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_REVIEWS_KEY", "supabase.reviews.key")}\"")
         buildConfigField("String", "SUPABASE_COMMUNITY_URL", "\"${getConfigProperty("SUPABASE_COMMUNITY_URL", "supabase.community.url")}\"")
         buildConfigField("String", "SUPABASE_COMMUNITY_KEY", "\"${getConfigProperty("SUPABASE_COMMUNITY_KEY", "supabase.community.key")}\"")
+        
+        // Google Drive backup configuration
+        buildConfigField("String", "GOOGLE_DRIVE_CLIENT_ID", "\"${getConfigProperty("GOOGLE_DRIVE_CLIENT_ID", "google.drive.client.id")}\"")
     }
     dependenciesInfo {
         includeInApk = false

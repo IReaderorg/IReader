@@ -75,7 +75,16 @@ class GoogleDriveBackupServiceImpl(
     }
     
     override suspend fun isAuthenticated(): Boolean {
-        return authenticator.isAuthenticated()
+        val isAuth = authenticator.isAuthenticated()
+        
+        // Initialize Drive client if authenticated but client not yet created
+        if (isAuth && driveClient == null) {
+            driveClient = GoogleDriveClient(
+                getAccessToken = { authenticator.getAccessToken() }
+            )
+        }
+        
+        return isAuth
     }
     
     override suspend fun createBackup(data: BackupData): Result<String> = withContext(ioDispatcher) {
@@ -88,7 +97,7 @@ class GoogleDriveBackupServiceImpl(
                 ?: return@withContext Result.failure(Exception("Drive client not initialized"))
             
             // Serialize backup data to JSON
-            val jsonString = json.encodeToString(data)
+            val jsonString = json.encodeToString(BackupData.serializer(), data)
             
             // Compress with GZIP using existing method
             val compressedData = compressData(jsonString.encodeToByteArray())
@@ -97,7 +106,7 @@ class GoogleDriveBackupServiceImpl(
             val timestamp = currentTimeToLong().formatForFilename()
             val fileName = "ireader_backup_$timestamp.json.gz"
             
-            // Upload to Google Drive appDataFolder
+            // Upload to Google Drive "IReader" folder (visible to user)
             val uploadResult = client.uploadFile(
                 fileName = fileName,
                 content = compressedData,
@@ -123,7 +132,7 @@ class GoogleDriveBackupServiceImpl(
             val client = driveClient 
                 ?: return@withContext Result.failure(Exception("Drive client not initialized"))
             
-            // Query Google Drive for backup files in appDataFolder
+            // Query Google Drive for backup files in "IReader" folder
             val listResult = client.listFiles("ireader_backup_*.json.gz")
             
             if (listResult.isFailure) {

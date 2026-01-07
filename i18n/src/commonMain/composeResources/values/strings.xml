@@ -1380,6 +1380,7 @@
     <string name="configure_js_plugins_and_enable">Configure JS plugins and enable LNReader-compatible sources</string>
     <string name="connect_with_us">Connect with us</string>
     <string name="connected">Connected</string>
+    <string name="not_connected">Not Connected</string>
     <string name="content_restrictions">Content Restrictions</string>
     <string name="contents">Contents</string>
     <string name="continue_reading_button">Continue Reading Button</string>

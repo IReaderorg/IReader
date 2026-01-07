@@ -91,8 +91,6 @@ interface SyncService : PlatformService {
  */
 enum class SyncProvider {
     GOOGLE_DRIVE,
-    DROPBOX,
-    ONEDRIVE,
     CUSTOM
 }
 

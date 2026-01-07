@@ -137,6 +137,9 @@ kotlin {
                 api(androidx.emoji)
                 api(androidx.work.runtime)
                 
+                // Guava ListenableFuture for WorkManager
+                api("com.google.guava:guava:32.1.3-android")
+                
                 // Preview only available on Android/Desktop
                 api(compose.preview)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)

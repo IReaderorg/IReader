@@ -3,7 +3,6 @@ package ireader.domain.di
 import okio.Path.Companion.toPath
 import ireader.domain.usecases.backup.ScheduleAutomaticBackup
 import ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl
-import ireader.domain.usecases.backup.DropboxProvider
 import ireader.domain.usecases.backup.GoogleDriveProvider
 import ireader.domain.usecases.services.StartDownloadServicesUseCase
 import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
@@ -31,7 +30,6 @@ import org.koin.dsl.module
  * 
  * ### Backup Services
  * - ScheduleAutomaticBackup: BGTaskScheduler-based automatic backup scheduling
- * - DropboxProvider: Dropbox HTTP API integration (requires OAuth token)
  * - GoogleDriveProvider: Google Drive REST API integration (requires OAuth token)
  * 
  * ### Background Services
@@ -72,7 +70,6 @@ actual val DomainModule: Module = module {
     // Cloud providers
     // Note: These require OAuth tokens to be set via setAccessToken()
     // OAuth flow should be implemented in the presentation layer
-    single { DropboxProvider() }
     single { GoogleDriveProvider() }
     
     // Background services
