@@ -100,12 +100,10 @@ class CharacterArtViewModel(
             val user = try {
                 getCurrentUser()
             } catch (e: Exception) {
-                println("CharacterArt: Failed to get current user - ${e.message}")
                 null
             }
             
             val isAdmin = user?.isAdmin == true
-            println("CharacterArt: User=${user?.email}, isAdmin=$isAdmin")
             
             _state.update { it.copy(isAdmin = isAdmin) }
             
@@ -115,8 +113,6 @@ class CharacterArtViewModel(
             
             if (isAdmin) {
                 loadPendingArt()
-            } else {
-                println("CharacterArt: Not loading pending art - user is not admin")
             }
         }
     }
@@ -174,14 +170,11 @@ class CharacterArtViewModel(
     
     private fun loadPendingArt() {
         scope.launch {
-            println("CharacterArt: Loading pending art for admin verification...")
             repository.getPendingArt()
                 .onSuccess { pending ->
-                    println("CharacterArt: Loaded ${pending.size} pending art items")
                     _state.update { it.copy(pendingArt = pending) }
                 }
                 .onFailure { error ->
-                    println("CharacterArt: Failed to load pending art - ${error.message}")
                     _state.update { 
                         it.copy(error = "Failed to load pending art: ${error.message}")
                     }
@@ -391,14 +384,11 @@ class CharacterArtViewModel(
      */
     fun loadPendingArtForVerification() {
         scope.launch {
-            println("CharacterArt: Force loading pending art for verification screen...")
             repository.getPendingArt()
                 .onSuccess { pending ->
-                    println("CharacterArt: Loaded ${pending.size} pending art items for verification")
                     _state.update { it.copy(pendingArt = pending) }
                 }
                 .onFailure { error ->
-                    println("CharacterArt: Failed to load pending art for verification - ${error.message}")
                     _state.update { 
                         it.copy(error = "Failed to load pending art: ${error.message}")
                     }

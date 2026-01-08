@@ -34,12 +34,9 @@ fun PluginThemeSection(
     currentThemeId: Long,
     modifier: Modifier = Modifier
 ) {
-    println("[PluginThemeSection] Composable called")
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val pluginExtension = rememberPluginThemeIntegration(pluginManager, viewModel)
-    println("[PluginThemeSection] Getting all themes...")
     val allThemes by pluginExtension.getAllThemesFlow().collectAsState(initial = pluginExtension.getAllThemes())
-    println("[PluginThemeSection] All themes count: ${allThemes.size}")
     val errors by rememberThemeErrors(pluginExtension.getErrorHandler())
     val scope = rememberCoroutineScope()
     

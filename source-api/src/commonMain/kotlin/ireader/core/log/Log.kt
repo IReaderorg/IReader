@@ -27,9 +27,10 @@ object Log {
     
     /**
      * Minimum severity level for logging.
-     * Set to Severity.Verbose to see all logs including Debug.
+     * Default to Warn for production to reduce log noise.
+     * Set to Severity.Verbose or Severity.Debug for development.
      */
-    var minSeverity: Severity = Severity.Verbose
+    var minSeverity: Severity = Severity.Warn
     
     /**
      * Whether to also print to stdout (useful for desktop where Kermit might not show logs)
@@ -37,8 +38,8 @@ object Log {
     var printToStdout: Boolean = true
     
     init {
-        // Enable verbose logging by default and set Kermit's min severity
-        Logger.setMinSeverity(Severity.Verbose)
+        // Default to Warn level to reduce log noise
+        Logger.setMinSeverity(Severity.Warn)
     }
     
     /**

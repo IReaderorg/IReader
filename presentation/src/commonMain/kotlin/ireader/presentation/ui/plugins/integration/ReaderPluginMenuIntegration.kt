@@ -113,8 +113,7 @@ object ReaderPluginMenuIntegration {
                 navController.navigate(route)
             }
         } catch (e: Exception) {
-            // Log error but don't crash
-            println("[ReaderPluginMenuIntegration] Failed to handle menu item click: ${e.message}")
+            // Failed to handle menu item click - ignore
         }
     }
 }

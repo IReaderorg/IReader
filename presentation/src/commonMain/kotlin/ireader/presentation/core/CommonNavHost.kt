@@ -687,7 +687,7 @@ fun CommonNavHost(
             try {
                 PluginNavigationExtensions.registerPluginScreens(this, featurePluginIntegration)
             } catch (e: Exception) {
-                println("[CommonNavHost] Plugin screen registration failed: ${e.message}")
+                // Plugin screen registration failed - ignore
             }
         }
         }

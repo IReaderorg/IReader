@@ -196,7 +196,6 @@ class FeatureStoreViewModel(
         // Check if we have valid cached data
         if (!forceRefresh && cachedPlugins != null && isCacheValid()) {
             val lastFetch = uiPreferences.featureStoreLastFetchTime().get()
-            println("[FeatureStore] Using cached plugin data (${cachedPlugins?.size} plugins)")
             _state.value = _state.value.copy(
                 plugins = cachedPlugins!!,
                 featuredPlugins = getFeaturedPlugins(cachedPlugins!!),
@@ -229,7 +228,6 @@ class FeatureStoreViewModel(
                 val errors = mutableListOf<String>()
 
                 // Fetch plugins from all enabled repositories in parallel
-                println("[FeatureStore] Fetching plugins from ${repositories.size} repositories...")
                 val results = repositories.map { repo ->
                     async {
                         repo to fetchPluginsFromRepository(repo)
@@ -252,7 +250,6 @@ class FeatureStoreViewModel(
                 cachedPlugins = uniquePlugins
                 updateCacheTimestamp()
                 val fetchTime = currentTimeToLong()
-                println("[FeatureStore] Cached ${uniquePlugins.size} plugins")
 
                 _state.value = _state.value.copy(
                     plugins = uniquePlugins,
@@ -318,7 +315,6 @@ class FeatureStoreViewModel(
                 val repositories = repositoryRepository.getEnabled().first()
                 val allPlugins = mutableListOf<PluginInfo>()
 
-                println("[FeatureStore] Force refreshing plugins from ${repositories.size} repositories...")
                 val results = repositories.map { repo ->
                     async { fetchPluginsFromRepository(repo) }
                 }.awaitAll()
@@ -335,7 +331,6 @@ class FeatureStoreViewModel(
                 cachedPlugins = uniquePlugins
                 updateCacheTimestamp()
                 val fetchTime = currentTimeToLong()
-                println("[FeatureStore] Refreshed and cached ${uniquePlugins.size} plugins")
 
                 _state.value = _state.value.copy(
                     plugins = uniquePlugins,
@@ -450,7 +445,6 @@ class FeatureStoreViewModel(
     private fun resolveDownloadUrl(downloadUrl: String, repositoryUrl: String): String {
         // If already absolute URL, return as-is
         if (downloadUrl.startsWith("http://") || downloadUrl.startsWith("https://")) {
-            println("[FeatureStore] Download URL is absolute: $downloadUrl")
             return downloadUrl
         }
         
@@ -464,7 +458,6 @@ class FeatureStoreViewModel(
             "$baseUrl/$downloadUrl"
         }
         
-        println("[FeatureStore] Resolved download URL: $downloadUrl -> $resolved (base: $baseUrl)")
         return resolved
     }
     
@@ -741,8 +734,6 @@ class FeatureStoreViewModel(
                     changeLog = null // Could be added if available in index
                 )
                 pluginsWithUpdates.add(remotePlugin)
-                
-                println("[FeatureStore] Update available for ${remotePlugin.manifest.name}: $installedVersion -> ${remotePlugin.manifest.version}")
             }
         }
         
@@ -750,10 +741,6 @@ class FeatureStoreViewModel(
             availableUpdates = updates,
             pluginsWithUpdates = pluginsWithUpdates
         )
-        
-        if (updates.isNotEmpty()) {
-            println("[FeatureStore] Found ${updates.size} plugin updates available")
-        }
     }
     
     /**

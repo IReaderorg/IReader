@@ -52,16 +52,11 @@ class PluginThemeManager(
      */
     private fun getPluginThemes(): List<ThemeOption.Plugin> {
         val enabledPlugins = pluginManager.getEnabledPlugins()
-        println("[PluginThemeManager] Enabled plugins: ${enabledPlugins.size}")
-        enabledPlugins.forEach { plugin ->
-            println("[PluginThemeManager] Plugin: ${plugin.manifest.id}, type: ${plugin.manifest.type}, class: ${plugin::class.simpleName}")
-        }
         
         // Filter by manifest type since filterIsInstance won't work across classloaders
         val themePlugins = enabledPlugins.filter { 
             it.manifest.type == ireader.plugin.api.PluginType.THEME 
         }
-        println("[PluginThemeManager] Theme plugins found by type: ${themePlugins.size}")
         
         return themePlugins.mapNotNull { plugin ->
             // Cast to ThemePlugin - this should work since we verified the type
@@ -72,7 +67,7 @@ class PluginThemeManager(
                     ThemeOption.Plugin(themePlugin, isDark = true)
                 )
             } catch (e: ClassCastException) {
-                println("[PluginThemeManager] Failed to cast ${plugin.manifest.id} to ThemePlugin: ${e.message}")
+                // Failed to cast plugin to ThemePlugin - skip silently
                 null
             }
         }.flatten()

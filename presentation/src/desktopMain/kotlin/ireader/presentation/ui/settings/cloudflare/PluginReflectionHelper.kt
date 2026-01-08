@@ -30,7 +30,7 @@ actual object PluginReflectionHelper {
             field.isAccessible = true
             field.set(plugin, onProgress)
         } catch (e: Exception) {
-            println("[PluginReflectionHelper] Failed to set progress callback: ${e.message}")
+            // Failed to set progress callback - continue anyway
         }
         
         // Start the download
@@ -57,7 +57,6 @@ actual object PluginReflectionHelper {
             }
             method?.invoke(plugin) as? T
         } catch (e: Exception) {
-            println("[PluginReflectionHelper] Failed to call $methodName: ${e.message}")
             null
         }
     }

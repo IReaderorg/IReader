@@ -34,10 +34,7 @@ class AppearanceViewModelPluginExtension(
      * Requirements: 3.1
      */
     fun getAllThemes(): List<ThemeOption> {
-        println("[AppearanceViewModelPluginExtension] getAllThemes() called")
-        val themes = pluginThemeManager.getAvailableThemes()
-        println("[AppearanceViewModelPluginExtension] Returning ${themes.size} themes")
-        return themes
+        return pluginThemeManager.getAvailableThemes()
     }
     
     /**

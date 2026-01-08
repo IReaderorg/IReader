@@ -140,11 +140,9 @@ class PluginDetailsViewModel(
                         updateAvailable = true,
                         updateInfo = updateInfo
                     )
-                    println("[PluginDetails] Update available: ${installedPlugin.manifest.version} -> ${remoteInfo.manifest.version}")
                 }
             } catch (e: Exception) {
                 // Silently fail - update check is not critical
-                println("[PluginDetails] Failed to check for updates: ${e.message}")
             }
         }
     }
@@ -420,7 +418,6 @@ class PluginDetailsViewModel(
                     )
                 }
                 .onFailure { error ->
-                    println("[PluginDetails] Failed to load reviews: ${error.message}")
                     _state.value = _state.value.copy(
                         reviews = emptyList(),
                         isLoadingReviews = false

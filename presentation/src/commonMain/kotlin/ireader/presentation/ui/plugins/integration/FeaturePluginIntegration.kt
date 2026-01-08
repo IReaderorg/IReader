@@ -76,7 +76,6 @@ class FeaturePluginIntegration(
                             errorMessage = e.message ?: "Unknown error"
                         ))
                     }
-                    println("[FeaturePluginIntegration] Plugin ${plugin.manifest.id} getMenuItems() failed: ${e.message}")
                     emptyList()
                 }
             }.sortedBy { it.order }
@@ -88,7 +87,6 @@ class FeaturePluginIntegration(
             
             menuItems
         } catch (e: Throwable) {
-            println("[FeaturePluginIntegration] getPluginMenuItems() failed: ${e.message}")
             emptyList()
         }
     }
@@ -117,7 +115,6 @@ class FeaturePluginIntegration(
                             errorMessage = e.message ?: "Unknown error"
                         ))
                     }
-                    println("[FeaturePluginIntegration] Plugin ${plugin.manifest.id} getScreens() failed: ${e.message}")
                     emptyList()
                 }
             }
@@ -135,7 +132,6 @@ class FeaturePluginIntegration(
             
             screens
         } catch (e: Throwable) {
-            println("[FeaturePluginIntegration] getPluginScreens() failed: ${e.message}")
             emptyList()
         }
     }
@@ -176,12 +172,10 @@ class FeaturePluginIntegration(
                     action?.let { actions.add(it) }
                 } catch (e: Throwable) {
                     // Log error but continue with other plugins
-                    println("[FeaturePluginIntegration] Plugin ${plugin.manifest.id} onReaderContext() failed: ${e.message}")
                 }
             }
         } catch (e: Throwable) {
             // Don't disrupt main app functionality
-            println("[FeaturePluginIntegration] handleReaderContext() failed: ${e.message}")
         }
         
         return actions

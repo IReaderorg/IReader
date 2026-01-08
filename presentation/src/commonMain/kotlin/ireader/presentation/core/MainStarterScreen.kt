@@ -85,7 +85,6 @@ object MainStarterScreen {
     suspend fun switchToTab(tabIndex: Int) {
         pendingTabIndex = tabIndex
         switchTabEvent.send(tabIndex)
-        println("✅ Tab switch event sent")
     }
     
     /**

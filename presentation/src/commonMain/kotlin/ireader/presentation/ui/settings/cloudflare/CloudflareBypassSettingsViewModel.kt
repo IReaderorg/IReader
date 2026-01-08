@@ -256,7 +256,6 @@ class CloudflareBypassSettingsViewModel(
                     )
                 }
             } catch (e: Exception) {
-                println("[CloudflareBypassSettings] Download error: ${e.message}")
                 flareSolverrDownloadState.updateProgress(
                     ExternalResourceDownloadProgress(
                         phase = DownloadPhase.ERROR,
@@ -290,7 +289,6 @@ class CloudflareBypassSettingsViewModel(
                     }
                     _isFlareSolverrRunning.value = false
                 } catch (e: Exception) {
-                    println("[CloudflareBypassSettings] Failed to start FlareSolverr: ${e.message}")
                     _isFlareSolverrRunning.value = false
                 }
             }
@@ -309,7 +307,7 @@ class CloudflareBypassSettingsViewModel(
                     PluginReflectionHelper.stopServer(plugin)
                     _isFlareSolverrRunning.value = false
                 } catch (e: Exception) {
-                    println("[CloudflareBypassSettings] Failed to stop FlareSolverr: ${e.message}")
+                    // Failed to stop, but update state anyway
                 }
             } else {
                 _isFlareSolverrRunning.value = false
