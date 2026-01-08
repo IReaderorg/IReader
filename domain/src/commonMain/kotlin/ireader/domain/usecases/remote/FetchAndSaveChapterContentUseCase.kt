@@ -1,6 +1,5 @@
 package ireader.domain.usecases.remote
 
-import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.CatalogLocal
@@ -29,10 +28,6 @@ class FetchAndSaveChapterContentUseCase(
     private val chapterRepository: ChapterRepository,
     private val findChapterById: FindChapterById
 ) {
-    companion object {
-        private const val TAG = "FetchAndSaveChapterContent"
-    }
-    
     /**
      * Fetch chapter content from remote, save to DB, and return filtered chapter.
      * 
@@ -52,12 +47,10 @@ class FetchAndSaveChapterContentUseCase(
         withContext(ioDispatcher) {
             try {
                 val source = catalog?.source ?: throw SourceNotFoundException()
-                Log.debug { "$TAG: Fetching content for chapter ${chapter.id}" }
                 
                 val pages = source.getPageList(chapter.toChapterInfo(), commands)
                 
                 if (pages.isEmpty()) {
-                    Log.warn { "$TAG: No content returned for chapter ${chapter.id}" }
                     onError(UiText.MStringResource(Res.string.cant_get_content))
                     return@withContext
                 }
@@ -70,22 +63,17 @@ class FetchAndSaveChapterContentUseCase(
                 
                 // Save to database
                 chapterRepository.insertChapter(updatedChapter)
-                Log.debug { "$TAG: Saved ${pages.size} pages to DB for chapter ${chapter.id}" }
                 
                 // Read back from DB to get filtered content
                 val filteredChapter = findChapterById(chapter.id)
                 
                 if (filteredChapter != null) {
-                    Log.debug { "$TAG: Returning filtered chapter with ${filteredChapter.content.size} pages" }
                     onSuccess(filteredChapter)
                 } else {
-                    // Fallback: return the updated chapter if DB read fails
-                    Log.warn { "$TAG: Failed to read back from DB, returning unfiltered content" }
                     onSuccess(updatedChapter)
                 }
                 
             } catch (e: Throwable) {
-                Log.error { "$TAG: Failed to fetch chapter content: ${e.message}" }
                 onError(exceptionHandler(e))
             }
         }

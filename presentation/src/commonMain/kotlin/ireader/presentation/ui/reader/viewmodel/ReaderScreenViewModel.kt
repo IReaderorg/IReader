@@ -825,12 +825,12 @@ class ReaderScreenViewModel(
             // Word count for reading time estimation
             totalWords = totalWords,
         )
-        
-        Log.debug { "loadChapter: chapterId=${chapter.id}, next=$next, scrollToEnd=$scrollToEnd, scrollToEndOnChapterChange=${scrollToEnd ?: !next}" }
 
         // Fetch remote content if needed
         val needsRemoteFetch = chapter.isEmpty() && catalog?.source != null
         if (needsRemoteFetch && !force) {
+            // Fetch content asynchronously
+            // The FetchAndSaveChapterContentUseCase already saves to DB before calling onSuccess
             fetchRemoteChapter(book, catalog, chapter)
         } else if (!needsRemoteFetch) {
             // Check chapter health
@@ -847,7 +847,8 @@ class ReaderScreenViewModel(
         val isLastChapter = effectiveIndex != -1 && effectiveIndex == effectiveChapters.lastIndex
         statisticsViewModel.onChapterOpened(chapter, isLastChapter)
 
-        // Trigger preload via ChapterController (Requirements: 9.2, 9.4, 9.5)
+        // Trigger preload - the current chapter save happens inside FetchAndSaveChapterContentUseCase
+        // which saves to DB before calling onSuccess, so preload timing is less critical now
         triggerPreloadNextChapter()
 
         // Load translation if available
@@ -867,13 +868,17 @@ class ReaderScreenViewModel(
             }
     }
 
+    /**
+     * Fetch chapter content from remote (async).
+     * The FetchAndSaveChapterContentUseCase saves to DB before calling onSuccess,
+     * ensuring the chapter is persisted.
+     */
     private suspend fun fetchRemoteChapter(book: Book, catalog: CatalogLocal?, chapter: Chapter) {
         remoteUseCases.fetchAndSaveChapterContent(
             chapter = chapter,
             catalog = catalog,
             onSuccess = { filteredChapter ->
                 // Chapter is already saved to DB and filtered
-                // ChapterNotifier will update the chapters list reactively
                 val totalWords = calculateTotalWords(filteredChapter.content)
                 
                 updateSuccessState { state ->
@@ -1092,19 +1097,27 @@ class ReaderScreenViewModel(
         val needsRemoteFetch = dbChapter == null || dbChapter.isEmpty()
 
         if (needsRemoteFetch && currentState.catalog != null) {
+            Log.debug { "preloadChapter: [START] Preloading chapter ${chapter.id} '${chapter.name}' from remote" }
             updateSuccessState { it.copy(isPreloading = true) }
 
             preloadChapterUseCase(chapter, currentState.catalog,
                 onSuccess = { preloadedChapter ->
                     preloadedChapters[chapter.id] = preloadedChapter
-                    scope.launch { insertUseCases.insertChapter(preloadedChapter) }
+                    scope.launch { 
+                        insertUseCases.insertChapter(preloadedChapter)
+                        // Enhanced logging: confirm preloaded chapter saved to DB (Req 3.3)
+                        Log.debug { "preloadChapter: [SAVED] Preloaded chapter ${chapter.id} '${chapter.name}' saved to DB with ${preloadedChapter.content.size} pages" }
+                    }
                     updateSuccessState { it.copy(isPreloading = false) }
                 },
-                onError = {
+                onError = { error ->
+                    // Enhanced logging: preload failure without affecting current chapter (Req 3.4)
+                    Log.warn { "preloadChapter: [FAILED] Preload failed for chapter ${chapter.id} '${chapter.name}': $error - current chapter display unaffected" }
                     updateSuccessState { it.copy(isPreloading = false) }
                 }
             )
         } else if (dbChapter != null && !dbChapter.isEmpty()) {
+            Log.debug { "preloadChapter: [CACHE-HIT] Chapter ${chapter.id} '${chapter.name}' already in DB with ${dbChapter.content.size} pages" }
             preloadedChapters[chapter.id] = dbChapter
         }
     }

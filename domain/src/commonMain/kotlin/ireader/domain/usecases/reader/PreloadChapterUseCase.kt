@@ -1,5 +1,4 @@
 package ireader.domain.usecases.reader
-import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.source.model.CommandList
 import ireader.domain.models.entities.CatalogLocal
@@ -7,11 +6,11 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.toChapterInfo
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
-import kotlinx.coroutines.Dispatchers
+import ireader.i18n.resources.cant_get_content
 import kotlinx.coroutines.withContext
 
 /**
@@ -31,8 +30,6 @@ class PreloadChapterUseCase {
         
         return withContext(ioDispatcher) {
             kotlin.runCatching {
-                ireader.core.log.Log.debug("PreloadChapterUseCase: Starting preload for chapter ${chapter.name}")
-                
                 val page = source.getPageList(chapter.toChapterInfo(), commands)
                 
                 if (page.isEmpty()) {
@@ -43,13 +40,10 @@ class PreloadChapterUseCase {
                         content = page,
                         dateFetch = currentTimeToLong()
                     )
-                    
-                    ireader.core.log.Log.debug("PreloadChapterUseCase: Successfully preloaded chapter ${chapter.name}")
                     onSuccess(preloadedChapter)
                     Result.success(preloadedChapter)
                 }
             }.getOrElse { e ->
-                ireader.core.log.Log.error("PreloadChapterUseCase: Failed to preload chapter ${chapter.name}", e)
                 onError(exceptionHandler(e))
                 Result.failure(e)
             }
