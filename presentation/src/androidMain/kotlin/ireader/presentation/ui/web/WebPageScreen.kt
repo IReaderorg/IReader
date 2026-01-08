@@ -3,12 +3,14 @@ package ireader.presentation.ui.web
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Message
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
@@ -40,9 +41,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,22 +75,55 @@ fun WebPageScreen(
     source: ireader.core.source.CatalogSource?,
     snackBarHostState: SnackbarHostState,
     scaffoldPadding: PaddingValues,
-    modifier: Modifier = Modifier.fillMaxSize()
+    modifier: Modifier = Modifier.fillMaxSize(),
+    onTabCountChange: ((Int) -> Unit)? = null,
+    onCloseTab: (() -> Unit)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val coroutineScope = rememberCoroutineScope()
+    
     val userAgent = remember {
         (source as? HttpSource)?.getCoverRequest("")?.second?.headers?.get(HttpHeaders.UserAgent)
     }
     
-    val webViewState = remember { WebViewState(viewModel.url) }
+    val headers = remember(userAgent) {
+        userAgent?.let { mapOf(HttpHeaders.UserAgent to it) } ?: emptyMap()
+    }
+    
+    // Window stack for managing multiple WebView windows (tabs)
+    // Note: WebView state is managed by the WebViewManager which handles config changes
+    val windowStack = remember {
+        mutableStateStackOf(
+            WebViewWindow(
+                WebContent.Url(viewModel.url, headers),
+                WebViewNavigator(coroutineScope)
+            )
+        )
+    }
+    
+    val currentWindow = windowStack.lastItemOrNull
     val webPageScreenState = remember { WebPageScreenState() }
     
-    // Setup effects and state management
-    WebPageScreenEffects(
-        webViewState = webViewState,
-        viewModel = viewModel,
-        screenState = webPageScreenState
-    )
+    // Notify parent about tab count changes
+    LaunchedEffect(windowStack.size) {
+        onTabCountChange?.invoke(windowStack.size)
+    }
+    
+    // Handle back press for window stack
+    BackHandler(enabled = windowStack.size > 1) {
+        val poppedWindow = windowStack.pop()
+        // Clean up the popped window's WebView
+        poppedWindow?.webView?.destroy()
+    }
+    
+    // Setup effects and state management for current window
+    currentWindow?.let { window ->
+        WebPageScreenEffects(
+            webViewState = window.state,
+            viewModel = viewModel,
+            screenState = webPageScreenState
+        )
+    }
 
     Box(modifier = modifier.padding(scaffoldPadding)) {
         when {
@@ -97,18 +133,28 @@ fun WebPageScreen(
                     localizeHelper = localizeHelper,
                     onRetry = { 
                         webPageScreenState.showError = false
-                        webPageScreenState.webView?.reload()
+                        currentWindow?.webView?.reload()
                     }
                 )
             }
-            else -> {
-                WebPageMainContent(
-                    webViewState = webViewState,
-                    viewModel = viewModel,
-                    userAgent = userAgent,
-                    screenState = webPageScreenState,
-                    localizeHelper = localizeHelper
-                )
+            currentWindow != null -> {
+                // Calculate the window index for URL tracking
+                val windowIndex = windowStack.items.indexOf(currentWindow).coerceAtLeast(0)
+                
+                // Key the WebView to the current window to properly handle window switches
+                key(currentWindow) {
+                    WebPageMainContent(
+                        window = currentWindow,
+                        windowStack = windowStack,
+                        viewModel = viewModel,
+                        userAgent = userAgent,
+                        headers = headers,
+                        screenState = webPageScreenState,
+                        localizeHelper = localizeHelper,
+                        coroutineScope = coroutineScope,
+                        windowIndex = windowIndex
+                    )
+                }
             }
         }
         
@@ -232,28 +278,41 @@ private fun WebPageErrorContent(
 }
 
 @Composable
-@Suppress("UNUSED_PARAMETER")
+@Suppress("UNUSED_PARAMETER", "LongParameterList")
 private fun WebPageMainContent(
-    webViewState: WebViewState,
+    window: WebViewWindow,
+    windowStack: MutableStateStack<WebViewWindow>,
     viewModel: WebViewPageModel,
     userAgent: String?,
+    headers: Map<String, String>,
     screenState: WebPageScreenState,
-    localizeHelper: ireader.i18n.LocalizeHelper
+    localizeHelper: ireader.i18n.LocalizeHelper,
+    coroutineScope: kotlinx.coroutines.CoroutineScope,
+    windowIndex: Int
 ) {
     AndroidView(
         factory = { ctx ->
-            createOptimizedWebView(ctx, viewModel, userAgent, webViewState, screenState)
+            createOrReuseWebView(ctx, window, windowStack, viewModel, userAgent, headers, screenState, coroutineScope, windowIndex)
         },
         update = { view ->
-            updateWebViewContent(view, webViewState)
+            updateWebViewContent(view, window.state)
         },
         modifier = Modifier.fillMaxSize()
     )
     
     // Cleanup on dispose
-    DisposableEffect(Unit) {
+    DisposableEffect(window) {
         onDispose {
-            // Any cleanup needed for the WebView
+            // Check if this window is still in the stack
+            val windowStillExists = window in windowStack
+            if (!windowStillExists) {
+                // Window was removed from stack, safe to destroy WebView
+                window.webView?.destroy()
+                window.webView = null
+            } else {
+                // Window still exists, preserve state for when it becomes active again
+                window.state.content = WebContent.NavigatorOnly
+            }
         }
     }
 }
@@ -280,23 +339,66 @@ private fun WebPageProgressIndicator(
     }
 }
 
-@Suppress("UNUSED_PARAMETER")
-private fun createOptimizedWebView(
+@Suppress("UNUSED_PARAMETER", "LongParameterList")
+private fun createOrReuseWebView(
     context: Context,
+    window: WebViewWindow,
+    windowStack: MutableStateStack<WebViewWindow>,
     viewModel: WebViewPageModel,
     userAgent: String?,
-    webViewState: WebViewState,
-    screenState: WebPageScreenState
+    headers: Map<String, String>,
+    screenState: WebPageScreenState,
+    coroutineScope: kotlinx.coroutines.CoroutineScope,
+    windowIndex: Int
 ): WebView {
-    // Get existing WebView from manager or create a new one
-    val webViewInstance = viewModel.webViewManager.init() as WebView
+    // Reuse existing WebView if available, otherwise create new one
+    val webViewInstance = window.webView ?: run {
+        // Try to get from manager first, or create new
+        val newWebView = try {
+            viewModel.webViewManager.init() as WebView
+        } catch (e: Exception) {
+            WebView(context)
+        }
+        window.webView = newWebView
+        newWebView
+    }
+    
+    // IMPORTANT: Remove WebView from its parent if it has one
+    // This prevents "The specified child already has a parent" error
+    // when reusing WebViews across configuration changes
+    (webViewInstance.parent as? android.view.ViewGroup)?.removeView(webViewInstance)
+    
     screenState.webView = webViewInstance
+    window.navigator.setWebView(webViewInstance)
     
     return webViewInstance.apply {
         configureWebViewSettings(userAgent)
-        setupWebViewClients(webViewState, screenState, viewModel)
-        loadUrl(viewModel.url)
+        setupWebViewClientsWithWindowStack(window.state, screenState, viewModel, windowStack, headers, coroutineScope, windowIndex)
+        
+        // Handle popup message if this is a popup window
+        window.popupMessage?.let { message ->
+            initializePopupWebView(this, message)
+        } ?: run {
+            // Normal window - load URL if needed
+            val content = window.state.content
+            if (content is WebContent.Url && content.url.isNotEmpty() && url != content.url) {
+                if (content.additionalHttpHeaders.isNotEmpty()) {
+                    loadUrl(content.url, content.additionalHttpHeaders)
+                } else {
+                    loadUrl(content.url)
+                }
+            }
+        }
     }
+}
+
+/**
+ * Initialize a WebView for a popup window using WebViewTransport
+ */
+private fun initializePopupWebView(webView: WebView, message: Message) {
+    val transport = message.obj as? WebView.WebViewTransport
+    transport?.webView = webView
+    message.sendToTarget()
 }
 
 private fun WebView.configureWebViewSettings(userAgent: String?) {
@@ -319,6 +421,10 @@ private fun WebView.configureWebViewSettings(userAgent: String?) {
         loadWithOverviewMode = true
         useWideViewPort = true
         setRenderPriority(android.webkit.WebSettings.RenderPriority.HIGH)
+        
+        // Enable support for multiple windows (new tabs)
+        setSupportMultipleWindows(true)
+        javaScriptCanOpenWindowsAutomatically = true
     }
     
     // Scrollbar and performance settings
@@ -327,19 +433,35 @@ private fun WebView.configureWebViewSettings(userAgent: String?) {
     setLayerType(WebView.LAYER_TYPE_HARDWARE, null)
 }
 
+private fun WebView.setupWebViewClientsWithWindowStack(
+    webViewState: WebViewState,
+    screenState: WebPageScreenState,
+    viewModel: WebViewPageModel,
+    windowStack: MutableStateStack<WebViewWindow>,
+    headers: Map<String, String>,
+    coroutineScope: kotlinx.coroutines.CoroutineScope,
+    windowIndex: Int
+) {
+    webViewClient = createOptimizedWebViewClient(webViewState, screenState, viewModel, headers, windowIndex)
+    webChromeClient = createWebChromeClientWithWindowSupport(webViewState, screenState, windowStack, coroutineScope, viewModel)
+}
+
+// Keep old method for backward compatibility
 private fun WebView.setupWebViewClients(
     webViewState: WebViewState,
     screenState: WebPageScreenState,
     viewModel: WebViewPageModel
 ) {
-    webViewClient = createOptimizedWebViewClient(webViewState, screenState, viewModel)
+    webViewClient = createOptimizedWebViewClient(webViewState, screenState, viewModel, emptyMap(), 0)
     webChromeClient = createOptimizedWebChromeClient(webViewState, screenState)
 }
 
 private fun createOptimizedWebViewClient(
     webViewState: WebViewState,
     screenState: WebPageScreenState,
-    viewModel: WebViewPageModel
+    viewModel: WebViewPageModel,
+    headers: Map<String, String>,
+    @Suppress("UNUSED_PARAMETER") windowIndex: Int
 ): WebViewClient {
     return object : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
@@ -364,6 +486,33 @@ private fun createOptimizedWebViewClient(
             }
         }
         
+        override fun shouldOverrideUrlLoading(
+            view: WebView?,
+            request: WebResourceRequest?
+        ): Boolean {
+            val url = request?.url?.toString() ?: return false
+            
+            // Ignore intent:// URLs (app deep links)
+            if (url.startsWith("intent://")) {
+                return true
+            }
+            
+            // Handle web URLs
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                // Only intercept if it's a different URL to prevent loops
+                if (url != view?.url) {
+                    if (headers.isNotEmpty()) {
+                        view?.loadUrl(url, headers)
+                    } else {
+                        view?.loadUrl(url)
+                    }
+                    return true
+                }
+            }
+            
+            return false
+        }
+        
         override fun shouldInterceptRequest(
             view: WebView,
             request: WebResourceRequest
@@ -381,19 +530,32 @@ private fun createOptimizedWebViewClient(
             error: WebResourceError
         ) {
             super.onReceivedError(view, request, error)
-            val errorDescription = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                error.description?.toString()
-            } else {
-                "Error"
+            // Only handle main frame errors
+            if (request.isForMainFrame) {
+                val errorDescription = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    error.description?.toString()
+                } else {
+                    "Error"
+                }
+                val errorCode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    error.errorCode
+                } else {
+                    0
+                }
+                webViewState.loadingState = LoadingState.Error(
+                    WebViewError(errorCode, errorDescription)
+                )
             }
-            val errorCode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                error.errorCode
-            } else {
-                0
+        }
+        
+        override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+            super.doUpdateVisitedHistory(view, url, isReload)
+            url?.let {
+                webViewState.lastLoadedUrl = it
+                viewModel.updateWebUrl(it)
             }
-            webViewState.loadingState = LoadingState.Error(
-                WebViewError(errorCode, errorDescription)
-            )
+            screenState.canGoBack = view?.canGoBack() == true
+            screenState.canGoForward = view?.canGoForward() == true
         }
     }
 }
@@ -411,12 +573,70 @@ private fun createOptimizedWebChromeClient(
     }
 }
 
+/**
+ * Creates a WebChromeClient that supports opening new windows (tabs)
+ */
+private fun createWebChromeClientWithWindowSupport(
+    webViewState: WebViewState,
+    screenState: WebPageScreenState,
+    windowStack: MutableStateStack<WebViewWindow>,
+    coroutineScope: kotlinx.coroutines.CoroutineScope,
+    @Suppress("UNUSED_PARAMETER") viewModel: WebViewPageModel
+): WebChromeClient {
+    return object : WebChromeClient() {
+        override fun onProgressChanged(view: WebView, newProgress: Int) {
+            super.onProgressChanged(view, newProgress)
+            screenState.progressValue = newProgress / 100f
+            webViewState.loadingState = LoadingState.Loading(screenState.progressValue)
+        }
+        
+        override fun onCreateWindow(
+            view: WebView,
+            isDialog: Boolean,
+            isUserGesture: Boolean,
+            resultMsg: Message
+        ): Boolean {
+            // Only handle user-initiated gestures to prevent unwanted popups
+            // This is the same behavior as Mihon and standard browsers
+            if (isUserGesture) {
+                // Create a new window and push it to the stack
+                val newWindow = WebViewWindow(
+                    popupMessage = resultMsg,
+                    navigator = WebViewNavigator(coroutineScope)
+                )
+                windowStack.push(newWindow)
+                return true
+            }
+            return false
+        }
+        
+        override fun onCloseWindow(window: WebView?) {
+            super.onCloseWindow(window)
+            // Find and remove the window from the stack
+            if (windowStack.size > 1) {
+                windowStack.pop()?.webView?.destroy()
+            }
+        }
+        
+        override fun onReceivedTitle(view: WebView?, title: String?) {
+            super.onReceivedTitle(view, title)
+            title?.let {
+                webViewState.pageTitle = it
+            }
+        }
+    }
+}
+
 private fun updateWebViewContent(view: WebView, webViewState: WebViewState) {
     when (val content = webViewState.content) {
         is WebContent.Url -> {
             val url = content.url
             if (url.isNotEmpty() && url != view.url) {
-                view.loadUrl(url)
+                if (content.additionalHttpHeaders.isNotEmpty()) {
+                    view.loadUrl(url, content.additionalHttpHeaders)
+                } else {
+                    view.loadUrl(url)
+                }
             }
         }
         is WebContent.Data -> {
@@ -427,6 +647,10 @@ private fun updateWebViewContent(view: WebView, webViewState: WebViewState) {
                 "utf-8",
                 null
             )
+        }
+        is WebContent.NavigatorOnly -> {
+            // Do nothing - content is loaded via WebViewTransport for popup windows
+            // or the WebView is preserving its state
         }
     }
 }

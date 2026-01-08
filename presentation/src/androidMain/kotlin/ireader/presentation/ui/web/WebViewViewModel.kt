@@ -63,20 +63,34 @@ sealed class FetchButtonState {
 /**
  * Custom WebViewState class to replace the one from Accompanist
  */
-class WebViewState(url: String) {
-    var content by mutableStateOf<WebContent>(WebContent.Url(url))
+class WebViewState(webContent: WebContent) {
+    var content by mutableStateOf<WebContent>(webContent)
     var loadingState by mutableStateOf<LoadingState>(LoadingState.Initializing)
     var pageTitle by mutableStateOf<String>("")
     var lastLoadedUrl by mutableStateOf<String?>(null)
     var canGoBack by mutableStateOf(false)
     var canGoForward by mutableStateOf(false)
     
+    // Secondary constructor for URL string (backward compatibility)
+    constructor(url: String) : this(WebContent.Url(url))
+    
     /**
      * Content type for WebView
      */
     sealed class WebContent {
-        data class Url(val url: String) : WebContent()
-        data class Data(val data: String, val baseUrl: String, val mimeType: String = "text/html") : WebContent()
+        data class Url(
+            val url: String,
+            val additionalHttpHeaders: Map<String, String> = emptyMap()
+        ) : WebContent()
+        data class Data(
+            val data: String,
+            val baseUrl: String,
+            val mimeType: String = "text/html"
+        ) : WebContent()
+        /**
+         * Used for popup windows where content is loaded via WebViewTransport
+         */
+        object NavigatorOnly : WebContent()
     }
     
     /**
@@ -96,6 +110,76 @@ class WebViewState(url: String) {
         val errorCode: Int,
         val description: String?
     )
+}
+
+/**
+ * Navigator class to control WebView navigation
+ */
+class WebViewNavigator(private val scope: kotlinx.coroutines.CoroutineScope) {
+    var canGoBack by mutableStateOf(false)
+        internal set
+    var canGoForward by mutableStateOf(false)
+        internal set
+    
+    private var webView: WebView? = null
+    
+    fun setWebView(view: WebView?) {
+        webView = view
+        updateNavigationState()
+    }
+    
+    fun navigateBack() {
+        webView?.goBack()
+    }
+    
+    fun navigateForward() {
+        webView?.goForward()
+    }
+    
+    fun reload() {
+        webView?.reload()
+    }
+    
+    fun stopLoading() {
+        webView?.stopLoading()
+    }
+    
+    fun loadUrl(url: String, headers: Map<String, String> = emptyMap()) {
+        if (headers.isNotEmpty()) {
+            webView?.loadUrl(url, headers)
+        } else {
+            webView?.loadUrl(url)
+        }
+    }
+    
+    internal fun updateNavigationState() {
+        canGoBack = webView?.canGoBack() == true
+        canGoForward = webView?.canGoForward() == true
+    }
+}
+
+/**
+ * Represents a single WebView window in the window stack.
+ * Each window has its own state, navigator, and WebView instance.
+ */
+class WebViewWindow(
+    webContent: WebViewState.WebContent,
+    val navigator: WebViewNavigator
+) {
+    var state by mutableStateOf(WebViewState(webContent))
+    var popupMessage: android.os.Message? = null
+        private set
+    var webView: WebView? = null
+    
+    /**
+     * Secondary constructor for popup windows created via onCreateWindow
+     */
+    constructor(
+        popupMessage: android.os.Message,
+        navigator: WebViewNavigator
+    ) : this(WebViewState.WebContent.NavigatorOnly, navigator) {
+        this.popupMessage = popupMessage
+    }
 }
 
 class WebViewPageModel(
@@ -415,7 +499,61 @@ class WebViewPageModel(
             source = source
         )
     }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Window Stack Management (for configuration change preservation)
+    // ═══════════════════════════════════════════════════════════════
+    
+    /**
+     * Add a window URL to the stack. Called when a new window is opened.
+     */
+    fun addWindowUrl(url: String, headers: Map<String, String> = emptyMap(), isPopup: Boolean = false) {
+        windowUrls.add(WindowUrlInfo(url, headers, isPopup))
+    }
+    
+    /**
+     * Remove the last window URL from the stack. Called when a window is closed.
+     */
+    fun removeLastWindowUrl() {
+        if (windowUrls.isNotEmpty()) {
+            windowUrls.removeAt(windowUrls.lastIndex)
+        }
+    }
+    
+    /**
+     * Update the URL of a window at a specific index. Called when navigation occurs.
+     */
+    fun updateWindowUrl(index: Int, url: String) {
+        if (index in windowUrls.indices) {
+            val current = windowUrls[index]
+            windowUrls[index] = current.copy(url = url)
+        }
+    }
+    
+    /**
+     * Initialize the window URLs list with the initial URL if empty.
+     */
+    fun initializeWindowUrls(initialUrl: String, headers: Map<String, String> = emptyMap()) {
+        if (windowUrls.isEmpty()) {
+            windowUrls.add(WindowUrlInfo(initialUrl, headers, isPopup = false))
+        }
+    }
+    
+    /**
+     * Get the current window count.
+     */
+    fun getWindowCount(): Int = windowUrls.size
 }
+
+/**
+ * Data class to hold window URL information for state preservation across configuration changes.
+ * This is stored in the ViewModel to survive config changes.
+ */
+data class WindowUrlInfo(
+    val url: String,
+    val headers: Map<String, String> = emptyMap(),
+    val isPopup: Boolean = false
+)
 
 interface WebViewPageState {
     var stateChapter: Chapter?
@@ -451,6 +589,12 @@ interface WebViewPageState {
     var fetchChaptersState: FetchButtonState
     
     var autoFetchEnabled: Boolean
+    
+    /**
+     * List of window URLs for preserving window stack across configuration changes.
+     * The first item is the main window, subsequent items are popup windows.
+     */
+    var windowUrls: SnapshotStateList<WindowUrlInfo>
 }
 
 open class WebViewPageStateImpl : WebViewPageState {
@@ -489,4 +633,6 @@ open class WebViewPageStateImpl : WebViewPageState {
     override var fetchChaptersState: FetchButtonState by mutableStateOf(FetchButtonState.Enabled)
     
     override var autoFetchEnabled: Boolean by mutableStateOf(false)
+    
+    override var windowUrls: SnapshotStateList<WindowUrlInfo> = mutableStateListOf()
 }

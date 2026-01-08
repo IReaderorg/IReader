@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Tab
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.BookmarkAdd
@@ -167,6 +168,7 @@ private class WebViewScreenState(
     var showActionMenu by mutableStateOf(false)
     var showFetchFeedback by mutableStateOf(false)
     var fetchFeedbackMessage by mutableStateOf("")
+    var tabCount by mutableStateOf(1)
     val urlFocusRequester = FocusRequester()
 }
 
@@ -217,7 +219,8 @@ private fun WebViewScreenContent(
                 canGoBack = webView?.canGoBack() == true,
                 canGoForward = webView?.canGoForward() == true,
                 onGoBack = { webView?.goBack() },
-                onGoForward = { webView?.goForward() }
+                onGoForward = { webView?.goForward() },
+                tabCount = screenState.tabCount
             )
         },
         floatingActionButton = {
@@ -233,7 +236,10 @@ private fun WebViewScreenContent(
                 source = vm.source,
                 snackBarHostState = host,
                 scaffoldPadding = paddingValues,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                onTabCountChange = { count ->
+                    screenState.tabCount = count
+                }
             )
             
             WebViewActionMenu(vm, scope, host, screenState, webView, vm.source)
@@ -259,7 +265,8 @@ private fun ModernWebViewTopBar(
     canGoBack: Boolean,
     canGoForward: Boolean,
     onGoBack: () -> Unit,
-    onGoForward: () -> Unit
+    onGoForward: () -> Unit,
+    tabCount: Int = 1
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
@@ -278,17 +285,41 @@ private fun ModernWebViewTopBar(
                     .padding(horizontal = ToolbarDimensions.MinimizedPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Close button
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
+                // Close button with tab indicator
+                Box(
+                    modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = localizeHelper.localize(Res.string.close),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
-                    )
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.size(ToolbarDimensions.MinimumTouchTarget)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = localizeHelper.localize(Res.string.close),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
+                        )
+                    }
+                    // Show tab count badge when multiple tabs are open
+                    if (tabCount > 1) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = tabCount.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                maxLines = 1
+                            )
+                        }
+                    }
                 }
                 
                 // Back navigation button
@@ -585,7 +616,8 @@ private fun WebViewTopBar(
         canGoBack = webView?.canGoBack() == true,
         canGoForward = webView?.canGoForward() == true,
         onGoBack = { webView?.goBack() },
-        onGoForward = { webView?.goForward() }
+        onGoForward = { webView?.goForward() },
+        tabCount = screenState.tabCount
     )
 }
 
