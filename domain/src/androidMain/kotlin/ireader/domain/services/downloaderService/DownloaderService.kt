@@ -3,7 +3,6 @@ package ireader.domain.services.downloaderService
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
-import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -11,8 +10,6 @@ import ireader.core.util.createICoroutineScope
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_COMPLETE
-import ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_PROGRESS
 import ireader.domain.notification.NotificationsIds.ID_DOWNLOAD_CHAPTER_PROGRESS
 import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_BOOKS_IDS
 import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_CHAPTERS_IDS
@@ -21,19 +18,30 @@ import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.notification.PlatformNotificationManager
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.R
-import ireader.i18n.resources.the_downloads_was_interrupted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * WorkManager-based download service that handles chapter downloads.
+ * 
+ * Uses the legacy runDownloadService() function which is proven to work correctly.
+ * The new DownloadManager system is available but not yet integrated here
+ * to avoid conflicts between the two systems.
+ * 
+ * Key features:
+ * - Sequential downloads (one chapter at a time)
+ * - Configurable delay between downloads
+ * - Pause/resume support via DownloadStateHolder
+ * - Foreground service for long-running downloads
+ * - Proper notification management
+ */
 class DownloaderService constructor(
     private val context: Context,
     params: WorkerParameters,
-
-    ) : CoroutineWorker(context, params), KoinComponent {
+) : CoroutineWorker(context, params), KoinComponent {
 
     private val bookRepo: BookRepository by inject()
     private val chapterRepo: ChapterRepository by inject()
@@ -46,10 +54,11 @@ class DownloaderService constructor(
     private val downloadServiceState: DownloadStateHolder by inject()
     private val notificationManager: PlatformNotificationManager by inject()
     private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences by inject()
+    
     private val downloadJob = Job()
     val scope = createICoroutineScope(Dispatchers.Main.immediate + downloadJob)
     
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var isCancelled = false
 
     /**
@@ -95,7 +104,7 @@ class DownloaderService constructor(
         
         downloadServiceState.setDownloadProgress(emptyMap())
         
-        // Cancel the progress notification immediately
+        // Cancel all download-related notifications
         notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
         ireader.core.log.Log.info { "DownloaderService: Cancelled notification $ID_DOWNLOAD_CHAPTER_PROGRESS" }
         
@@ -129,6 +138,7 @@ class DownloaderService constructor(
                 setForeground(getForegroundInfo())
             } catch (e: Exception) {
                 // Continue without foreground - some devices may not support it
+                ireader.core.log.Log.warn { "DownloaderService: Failed to set foreground: ${e.message}" }
             }
             
             // Check if work is stopped at the beginning
@@ -137,6 +147,7 @@ class DownloaderService constructor(
                 cleanupOnCancel()
                 return Result.failure()
             }
+            
             val inputtedChapterIds = inputData.getLongArray(DOWNLOADER_CHAPTERS_IDS)?.distinct()
             val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
             val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
@@ -148,12 +159,16 @@ class DownloaderService constructor(
             var currentChapterIndex = 0
             var totalChapters = 0
             
+            @Suppress("UNUSED_VARIABLE")
             val builder = defaultNotificationHelper.createDownloadNotification(
                 workManagerId = id,
                 bookName = "Preparing download...",
                 isPaused = false
             )
         
+        // Use the working legacy runDownloadService function
+        // This handles sequential downloads with proper pause/resume support
+        @Suppress("DEPRECATION")
         val result = runDownloadService(
             inputtedBooksIds = inputtedBooksIds?.toLongArray(),
             inputtedChapterIds = inputtedChapterIds?.toLongArray(),

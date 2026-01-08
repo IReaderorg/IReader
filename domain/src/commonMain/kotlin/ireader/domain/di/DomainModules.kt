@@ -9,6 +9,7 @@ import ireader.domain.plugins.PluginRegistry
 import ireader.domain.services.book.bookModule
 import ireader.domain.services.bookdetail.bookDetailModule
 import ireader.domain.services.chapter.chapterModule
+import ireader.domain.services.download.downloadModule
 import ireader.domain.services.downloaderService.DownloadStateHolder
 import ireader.domain.services.extension.extensionModule
 import ireader.domain.services.library.libraryModule
@@ -380,6 +381,10 @@ val DomainServices = module {
     // BookDetail Module - BookDetailController as factory (each screen gets its own instance)
     // Requirements: 3.1, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
     includes(bookDetailModule)
+    
+    // Download Module - DownloadManager, Downloader, and related services
+    // Provides: queue persistence, parallel downloads, retry logic, network-aware downloads
+    includes(downloadModule)
     
     // User Source Module - Custom user-defined sources for scraping
     includes(userSourceModule)

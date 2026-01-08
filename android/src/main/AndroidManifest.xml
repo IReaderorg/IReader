@@ -207,7 +207,7 @@
             </intent-filter>
         </receiver>
         
-        <!-- Download action receiver for pause/resume -->
+        <!-- Download action receiver for pause/resume/cancel and other actions -->
         <receiver
             android:name="ireader.domain.services.downloaderService.DownloadActionReceiver"
             android:exported="false">
@@ -215,6 +215,9 @@
                 <action android:name="ireader.action.DOWNLOAD_PAUSE" />
                 <action android:name="ireader.action.DOWNLOAD_RESUME" />
                 <action android:name="ireader.action.DOWNLOAD_CANCEL" />
+                <action android:name="ireader.action.DOWNLOAD_ALLOW_MOBILE" />
+                <action android:name="ireader.action.DOWNLOAD_RETRY_ALL" />
+                <action android:name="ireader.action.DOWNLOAD_CLEAR_FAILED" />
             </intent-filter>
         </receiver>
         

@@ -204,11 +204,11 @@ class DownloadQueueScreenModel(
         
         // Apply visibility filters
         if (!currentState.showCompleted) {
-            downloads = downloads.filter { it.status != DownloadStatus.COMPLETED }
+            downloads = downloads.filter { it.status != DownloadStatus.DOWNLOADED }
         }
         
         if (!currentState.showFailed) {
-            downloads = downloads.filter { it.status != DownloadStatus.FAILED }
+            downloads = downloads.filter { it.status != DownloadStatus.ERROR }
         }
         
         // Apply sort order

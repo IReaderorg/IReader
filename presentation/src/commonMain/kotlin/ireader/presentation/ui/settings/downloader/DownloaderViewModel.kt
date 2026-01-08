@@ -1,214 +1,445 @@
 package ireader.presentation.ui.settings.downloader
 
-import ireader.domain.models.entities.SavedDownload
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import ireader.domain.models.download.Download
+import ireader.domain.models.download.DownloadStatus
+import ireader.domain.models.entities.SavedDownloadWithInfo
+import ireader.domain.preferences.prefs.DownloadPreferences
 import ireader.domain.services.common.DownloadService
-import ireader.domain.services.common.NotificationPriority
-import ireader.domain.services.common.NotificationService
-import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.common.ServiceState
+import ireader.domain.services.download.NetworkStateProvider
+import ireader.domain.services.download.NetworkType
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.utils.extensions.ioDispatcher
-import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.download_failed_title
-import ireader.i18n.resources.downloads_stopped
-import ireader.i18n.resources.retry_failed
-import ireader.i18n.resources.retrying_download
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-
 /**
- * ViewModel for managing downloads
+ * ViewModel for the Download Queue screen.
  * 
- * Uses DownloadService interface to observe service state through StateFlow
- * and uses ServiceResult for error handling.
+ * Uses DownloadService as the backend for download operations.
+ * Provides a clean, modern API for the UI.
  */
 class DownloaderViewModel(
-        private val downloadUseCases: DownloadUseCases,
-        private val downloadState: DownloadStateImpl,
-        private val downloadService: DownloadService,  // ✅ Uses service interface
-        private val notificationService: NotificationService,
-        private val localizeHelper: LocalizeHelper
-) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DownloadState by downloadState {
+    private val downloadService: DownloadService,
+    private val downloadUseCases: DownloadUseCases,
+    private val networkStateProvider: NetworkStateProvider,
+    private val downloadPreferences: DownloadPreferences
+) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
-    // Expose service states
-    val downloadServiceState: StateFlow<ServiceState> = downloadService.state.stateIn(
-        scope = scope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ServiceState.IDLE
-    )
+    // ═══════════════════════════════════════════════════════════════
+    // Selection State (for multi-select in UI)
+    // ═══════════════════════════════════════════════════════════════
     
-    val downloadServiceProgress = downloadService.downloadProgress.stateIn(
+    val selection: SnapshotStateList<Long> = mutableStateListOf()
+    
+    val hasSelection: Boolean
+        get() = selection.isNotEmpty()
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Download Queue from Service
+    // ═══════════════════════════════════════════════════════════════
+    
+    private var subscribeJob: Job? = null
+    private val _downloads = MutableStateFlow<List<SavedDownloadWithInfo>>(emptyList())
+    val downloads: StateFlow<List<SavedDownloadWithInfo>> = _downloads.asStateFlow()
+    
+    /**
+     * Download queue converted to Download model for UI.
+     */
+    val downloadQueue: StateFlow<List<Download>> = _downloads
+        .map { list ->
+            list.map { saved ->
+                Download(
+                    chapterId = saved.chapterId,
+                    bookId = saved.bookId,
+                    sourceId = 0L, // Not available in SavedDownloadWithInfo
+                    chapterName = saved.chapterName,
+                    bookTitle = saved.bookName,
+                    coverUrl = "",
+                    status = getDownloadStatus(saved.chapterId),
+                    progress = getDownloadProgress(saved.chapterId),
+                    errorMessage = getDownloadError(saved.chapterId)
+                )
+            }
+        }
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+    
+    /**
+     * Progress map from service.
+     */
+    val progressMap = downloadService.downloadProgress.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
         initialValue = emptyMap()
     )
     
-    // Computed properties for UI - these are reactive through StateFlow collection
-    // Note: Use downloadServiceState.collectAsState() in Composables for reactivity
-
+    // ═══════════════════════════════════════════════════════════════
+    // Service State
+    // ═══════════════════════════════════════════════════════════════
+    
+    val serviceState: StateFlow<ServiceState> = downloadService.state.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = ServiceState.IDLE
+    )
+    
+    val isRunning: StateFlow<Boolean> = serviceState
+        .map { it == ServiceState.RUNNING }
+        .stateIn(scope, SharingStarted.Eagerly, false)
+    
+    val isPaused: StateFlow<Boolean> = serviceState
+        .map { it == ServiceState.PAUSED }
+        .stateIn(scope, SharingStarted.Eagerly, false)
+    
+    // Network-related pauses (simplified - check if paused and on mobile)
+    private val _isPausedDueToNetwork = MutableStateFlow(false)
+    val isPausedDueToNetwork: StateFlow<Boolean> = _isPausedDueToNetwork.asStateFlow()
+    
+    private val _isPausedDueToDiskSpace = MutableStateFlow(false)
+    val isPausedDueToDiskSpace: StateFlow<Boolean> = _isPausedDueToDiskSpace.asStateFlow()
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Statistics
+    // ═══════════════════════════════════════════════════════════════
+    
+    val downloadingCount: StateFlow<Int> = progressMap
+        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.DOWNLOADING } }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    val queuedCount: StateFlow<Int> = progressMap
+        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.QUEUED } }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    val completedCount: StateFlow<Int> = progressMap
+        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.COMPLETED } }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    val failedCount: StateFlow<Int> = progressMap
+        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.FAILED } }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    /**
+     * Combined stats for header display.
+     */
+    data class DownloadStats(
+        val downloading: Int = 0,
+        val queued: Int = 0,
+        val completed: Int = 0,
+        val failed: Int = 0
+    ) {
+        val total: Int get() = downloading + queued + completed + failed
+        val hasActiveDownloads: Boolean get() = downloading > 0 || queued > 0
+    }
+    
+    val stats: StateFlow<DownloadStats> = combine(
+        downloadingCount,
+        queuedCount,
+        completedCount,
+        failedCount
+    ) { downloading, queued, completed, failed ->
+        DownloadStats(downloading, queued, completed, failed)
+    }.stateIn(scope, SharingStarted.WhileSubscribed(5000), DownloadStats())
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Network State
+    // ═══════════════════════════════════════════════════════════════
+    
+    val networkType: StateFlow<NetworkType> = networkStateProvider.networkState.stateIn(
+        scope = scope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = NetworkType.NONE
+    )
+    
+    val isOnWifi: StateFlow<Boolean> = networkStateProvider.networkState
+        .map { it == NetworkType.WIFI }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), false)
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Preferences
+    // ═══════════════════════════════════════════════════════════════
+    
+    private val _isWifiOnlyMode = MutableStateFlow(false)
+    val isWifiOnlyMode: StateFlow<Boolean> = _isWifiOnlyMode.asStateFlow()
+    
+    /**
+     * Current download being processed.
+     */
+    val currentDownload: StateFlow<Download?> = progressMap
+        .map { map ->
+            map.entries.find { it.value.status == ireader.domain.services.common.DownloadStatus.DOWNLOADING }
+                ?.let { entry ->
+                    val saved = _downloads.value.find { it.chapterId == entry.key }
+                    if (saved != null) {
+                        Download(
+                            chapterId = entry.key,
+                            bookId = saved.bookId,
+                            sourceId = 0L,
+                            chapterName = saved.chapterName,
+                            bookTitle = saved.bookName,
+                            coverUrl = "",
+                            status = DownloadStatus.DOWNLOADING,
+                            progress = (entry.value.progress * 100).toInt()
+                        )
+                    } else null
+                }
+        }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), null)
+    
     init {
-        subscribeDownloads()
         scope.launch {
             downloadService.initialize()
-            notificationService.initialize()
+            _isWifiOnlyMode.value = downloadPreferences.downloadOnlyOnWifi().get()
         }
+        subscribeDownloads()
+        observeNetworkState()
     }
-
-    private var getBooksJob: Job? = null
+    
     private fun subscribeDownloads() {
-        getBooksJob?.cancel()
-        getBooksJob = scope.launch {
+        subscribeJob?.cancel()
+        subscribeJob = scope.launch {
             downloadUseCases.subscribeDownloadsUseCase().collect { list ->
-                downloads = list.filter { it.chapterId != 0L }
+                _downloads.value = list.filter { it.chapterId != 0L }
             }
         }
     }
-
-    /**
-     * Start or resume downloads
-     */
-    fun startDownloadService(chapterIds: List<Long>) {
+    
+    private fun observeNetworkState() {
         scope.launch {
-            val idsToDownload = if (chapterIds.isNotEmpty()) {
-                chapterIds
-            } else {
-                // Use downloads from database if no specific chapters provided
-                downloads.map { it.chapterId }
-            }
-            
-            if (idsToDownload.isEmpty()) return@launch
-            
-            // Always queue chapters - the service will handle deduplication
-            when (val result = downloadService.queueChapters(idsToDownload)) {
-                is ServiceResult.Success -> {
-                    // Don't show notification - the download service will show progress
-                }
-                is ServiceResult.Error -> {
-                    notificationService.showNotification(
-                        id = 1002,
-                        title = localizeHelper.localize(Res.string.download_failed_title),
-                        message = result.message,
-                        priority = NotificationPriority.HIGH
-                    )
-                }
-                else -> {}
+            combine(
+                isPaused,
+                isWifiOnlyMode,
+                networkType
+            ) { paused, wifiOnly, network ->
+                paused && wifiOnly && network != NetworkType.WIFI
+            }.collect { pausedDueToNetwork ->
+                _isPausedDueToNetwork.value = pausedDueToNetwork
             }
         }
     }
-
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Helper Functions
+    // ═══════════════════════════════════════════════════════════════
+    
+    private fun getDownloadStatus(chapterId: Long): DownloadStatus {
+        val serviceStatus = progressMap.value[chapterId]?.status
+        return when (serviceStatus) {
+            ireader.domain.services.common.DownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
+            ireader.domain.services.common.DownloadStatus.COMPLETED -> DownloadStatus.DOWNLOADED
+            ireader.domain.services.common.DownloadStatus.FAILED -> DownloadStatus.ERROR
+            ireader.domain.services.common.DownloadStatus.PAUSED -> DownloadStatus.QUEUE
+            ireader.domain.services.common.DownloadStatus.QUEUED -> DownloadStatus.QUEUE
+            else -> DownloadStatus.QUEUE
+        }
+    }
+    
+    private fun getDownloadProgress(chapterId: Long): Int {
+        return ((progressMap.value[chapterId]?.progress ?: 0f) * 100).toInt()
+    }
+    
+    private fun getDownloadError(chapterId: Long): String? {
+        return progressMap.value[chapterId]?.errorMessage
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Actions
+    // ═══════════════════════════════════════════════════════════════
+    
     /**
-     * Pause downloads
+     * Start downloading the queue.
+     */
+    fun startDownloads() {
+        scope.launch {
+            val chapterIds = _downloads.value.map { it.chapterId }
+            if (chapterIds.isNotEmpty()) {
+                downloadService.queueChapters(chapterIds)
+            }
+        }
+    }
+    
+    /**
+     * Pause all downloads.
      */
     fun pauseDownloads() {
         scope.launch {
             downloadService.pause()
         }
     }
-
+    
     /**
-     * Resume paused downloads
+     * Resume paused downloads.
      */
     fun resumeDownloads() {
         scope.launch {
             downloadService.resume()
         }
     }
-
+    
     /**
-     * Stop downloads completely
+     * Cancel all downloads and clear queue.
      */
-    fun stopDownloads() {
+    fun cancelAllDownloads() {
         scope.launch {
-            when (downloadService.cancelAll()) {
-                is ServiceResult.Success -> {
-                    notificationService.showNotification(
-                        id = 1003,
-                        title = localizeHelper.localize(Res.string.downloads_stopped),
-                        message = "All downloads cancelled",
-                        priority = NotificationPriority.DEFAULT
-                    )
-                }
-                is ServiceResult.Error -> {
-                    // Handle error silently
-                }
-                else -> {}
-            }
-        }
-    }
-
-    fun toggleExpandMenu(enable: Boolean = true) {
-        isMenuExpanded = enable
-    }
-
-    fun deleteAllDownloads() {
-        scope.launch(ioDispatcher) {
-            downloadUseCases.deleteAllSavedDownload()
-        }
-    }
-    fun deleteSelectedDownloads(list: List<SavedDownload>) {
-        scope.launch(ioDispatcher) {
-            downloadUseCases.deleteSavedDownloads(list.map { it.toDownload() })
+            downloadService.cancelAll()
         }
     }
     
     /**
-     * Reorder downloads by index (for drag-and-drop reordering)
-     * Note: Swipe-to-reorder requires a drag-and-drop library like 
-     * org.burnoutcrew.reorderable or similar. This function is ready
-     * to be connected when such a library is added.
+     * Remove a single download from queue.
      */
-    fun reorderDownloads(fromIndex: Int, toIndex: Int) {
+    fun removeDownload(chapterId: Long) {
         scope.launch(ioDispatcher) {
-            if (fromIndex == toIndex) return@launch
-            
-            val newList = downloads.toMutableList()
-            val item = newList.removeAt(fromIndex)
-            newList.add(toIndex, item)
-            
-            // Update all priorities based on new order
-            newList.forEachIndexed { index, download ->
-                downloadUseCases.updateDownloadPriority(download.chapterId, index)
+            downloadService.cancelDownload(chapterId)
+            val download = _downloads.value.find { it.chapterId == chapterId }
+            if (download != null) {
+                downloadUseCases.deleteSavedDownload(
+                    ireader.domain.models.entities.Download(
+                        chapterId = download.chapterId,
+                        bookId = download.bookId,
+                        priority = 0
+                    )
+                )
             }
         }
     }
     
     /**
-     * Retry a failed download
+     * Remove selected downloads.
      */
-    fun retryFailedDownload(chapterId: Long) {
+    fun removeSelectedDownloads() {
+        scope.launch(ioDispatcher) {
+            selection.forEach { chapterId ->
+                downloadService.cancelDownload(chapterId)
+                val download = _downloads.value.find { it.chapterId == chapterId }
+                if (download != null) {
+                    downloadUseCases.deleteSavedDownload(
+                        ireader.domain.models.entities.Download(
+                            chapterId = download.chapterId,
+                            bookId = download.bookId,
+                            priority = 0
+                        )
+                    )
+                }
+            }
+            selection.clear()
+        }
+    }
+    
+    /**
+     * Retry a failed download.
+     */
+    fun retryDownload(chapterId: Long) {
         scope.launch {
-            when (val result = downloadService.retryDownload(chapterId)) {
-                is ServiceResult.Success -> {
-                    notificationService.showNotification(
-                        id = 1004,
-                        title = localizeHelper.localize(Res.string.retrying_download),
-                        message = "Download queued for retry",
-                        priority = NotificationPriority.LOW
-                    )
-                }
-                is ServiceResult.Error -> {
-                    notificationService.showNotification(
-                        id = 1005,
-                        title = localizeHelper.localize(Res.string.retry_failed),
-                        message = result.message,
-                        priority = NotificationPriority.HIGH
-                    )
-                }
-                else -> {}
+            downloadService.retryDownload(chapterId)
+        }
+    }
+    
+    /**
+     * Retry all failed downloads.
+     */
+    fun retryAllFailed() {
+        scope.launch {
+            val failedIds = progressMap.value
+                .filter { it.value.status == ireader.domain.services.common.DownloadStatus.FAILED }
+                .keys
+            failedIds.forEach { chapterId ->
+                downloadService.retryDownload(chapterId)
             }
         }
     }
     
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.launch {
-            downloadService.cleanup()
-            notificationService.cleanup()
+    /**
+     * Clear completed downloads from queue.
+     */
+    fun clearCompleted() {
+        scope.launch(ioDispatcher) {
+            val completedIds = progressMap.value
+                .filter { it.value.status == ireader.domain.services.common.DownloadStatus.COMPLETED }
+                .keys
+            completedIds.forEach { chapterId ->
+                val download = _downloads.value.find { it.chapterId == chapterId }
+                if (download != null) {
+                    downloadUseCases.deleteSavedDownload(
+                        ireader.domain.models.entities.Download(
+                            chapterId = download.chapterId,
+                            bookId = download.bookId,
+                            priority = 0
+                        )
+                    )
+                }
+            }
         }
+    }
+    
+    /**
+     * Clear failed downloads from queue.
+     */
+    fun clearFailed() {
+        scope.launch(ioDispatcher) {
+            val failedIds = progressMap.value
+                .filter { it.value.status == ireader.domain.services.common.DownloadStatus.FAILED }
+                .keys
+            failedIds.forEach { chapterId ->
+                val download = _downloads.value.find { it.chapterId == chapterId }
+                if (download != null) {
+                    downloadUseCases.deleteSavedDownload(
+                        ireader.domain.models.entities.Download(
+                            chapterId = download.chapterId,
+                            bookId = download.bookId,
+                            priority = 0
+                        )
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Toggle WiFi-only mode.
+     */
+    fun setWifiOnlyMode(enabled: Boolean) {
+        scope.launch {
+            downloadPreferences.downloadOnlyOnWifi().set(enabled)
+            _isWifiOnlyMode.value = enabled
+        }
+    }
+    
+    /**
+     * Allow mobile data temporarily and resume downloads.
+     */
+    fun allowMobileDataTemporarily() {
+        scope.launch {
+            downloadService.resume()
+        }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // Selection Management
+    // ═══════════════════════════════════════════════════════════════
+    
+    fun toggleSelection(chapterId: Long) {
+        if (chapterId in selection) {
+            selection.remove(chapterId)
+        } else {
+            selection.add(chapterId)
+        }
+    }
+    
+    fun selectAll() {
+        selection.clear()
+        selection.addAll(_downloads.value.map { it.chapterId })
+    }
+    
+    fun clearSelection() {
+        selection.clear()
     }
 }

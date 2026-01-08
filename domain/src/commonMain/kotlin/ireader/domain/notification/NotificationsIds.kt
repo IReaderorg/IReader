@@ -103,6 +103,14 @@ object NotificationsIds {
     const val ID_DOWNLOAD_BATCH_PROGRESS = -204
     const val ID_DOWNLOAD_BATCH_COMPLETE = -205
     const val ID_DOWNLOAD_QUEUE_SUMMARY = -206
+    
+    /**
+     * Download warning notification ids (Mihon-style enhancements)
+     */
+    const val ID_DOWNLOAD_WIFI_WARNING = -207
+    const val ID_DOWNLOAD_DISK_SPACE_WARNING = -208
+    const val ID_DOWNLOAD_RETRY = -209
+    const val ID_DOWNLOAD_PARALLEL_PROGRESS = -210
 
     /**
      * Library update enhancement ids

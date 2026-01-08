@@ -1,8 +1,15 @@
 package ireader.domain.services.common
 
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.SavedDownload
+import ireader.domain.models.entities.buildSavedDownload
+import ireader.domain.services.download.DownloadManager
 import ireader.domain.services.downloaderService.DownloadStateHolder
+import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.services.StartDownloadServicesUseCase
+import ireader.domain.models.download.DownloadStatus as NewDownloadStatus
+import ireader.domain.services.downloaderService.DownloadStatus as LegacyDownloadStatus
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,25 +19,36 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 /**
- * Desktop implementation of DownloadService using coroutines
+ * Desktop implementation of DownloadService using coroutines.
  * 
- * This service integrates with the existing StartDownloadServicesUseCase
- * and DownloadStateHolder to provide a unified download management interface.
+ * This service now delegates to the new DownloadManager for core logic while
+ * maintaining backward compatibility with legacy state.
  * 
- * Key responsibilities:
- * - Queue downloads via StartDownloadServicesUseCase
- * - Observe and expose download state from DownloadStateHolder
- * - Provide pause/resume/cancel functionality
+ * The DownloadManager provides:
+ * - Queue persistence across app restarts
+ * - Filesystem cache for fast "is downloaded" checks
+ * - Parallel downloads per source
+ * - Exponential backoff retry
+ * - Network-aware downloads
+ * - Disk space validation
  */
 class DesktopDownloadService : DownloadService, KoinComponent {
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
-    // Inject the shared download state
+    // New DownloadManager for enhanced functionality
+    private val downloadManager: DownloadManager by inject()
+    
+    // Legacy state holder for backward compatibility
     private val downloadServiceState: DownloadStateHolder by inject()
     
-    // Inject the use case for starting downloads
+    // Inject the use case for starting downloads (legacy)
     private val startDownloadServicesUseCase: StartDownloadServicesUseCase by inject()
+    
+    // Repositories for chapter/book lookup
+    private val bookRepository: BookRepository by inject()
+    private val chapterRepository: ChapterRepository by inject()
+    private val downloadUseCases: DownloadUseCases by inject()
     
     // Map legacy state to new ServiceState
     private val _state = MutableStateFlow<ServiceState>(ServiceState.IDLE)
@@ -46,7 +64,49 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     override suspend fun initialize() {
         _state.value = ServiceState.INITIALIZING
         
-        // Observe legacy state and map to new state
+        // Initialize DownloadManager
+        downloadManager.init()
+        
+        // Observe DownloadManager state and bridge to service state
+        scope.launch {
+            combine(
+                downloadManager.isRunning,
+                downloadManager.isPaused,
+                downloadManager.isPausedDueToNetwork,
+                downloadManager.isPausedDueToDiskSpace
+            ) { isRunning, isPaused, isPausedNetwork, isPausedDisk ->
+                when {
+                    isPausedNetwork || isPausedDisk -> ServiceState.PAUSED
+                    isPaused -> ServiceState.PAUSED
+                    isRunning -> ServiceState.RUNNING
+                    else -> ServiceState.IDLE
+                }
+            }.collect { newState ->
+                _state.value = newState
+            }
+        }
+        
+        // Bridge DownloadManager queue to download progress
+        scope.launch {
+            downloadManager.queue.collect { queue ->
+                val progressMap = queue.associate { downloadState ->
+                    val download = downloadState.download
+                    download.chapterId to DownloadProgress(
+                        chapterId = download.chapterId,
+                        chapterName = download.chapterName,
+                        bookName = download.bookTitle,
+                        status = mapNewStatusToServiceStatus(download.status),
+                        progress = download.progressFloat,
+                        errorMessage = download.errorMessage,
+                        retryCount = download.retryCount,
+                        totalRetries = 3
+                    )
+                }
+                _downloadProgress.value = progressMap
+            }
+        }
+        
+        // Also observe legacy state for backward compatibility
         scope.launch {
             combine(
                 downloadServiceState.isRunning,
@@ -58,61 +118,81 @@ class DesktopDownloadService : DownloadService, KoinComponent {
                     else -> ServiceState.IDLE
                 }
             }.collect { newState ->
-                _state.value = newState
+                // Only update if DownloadManager is not running
+                if (!downloadManager.isRunning.value) {
+                    _state.value = newState
+                }
             }
         }
         
-        // Observe legacy download progress and map to new format
+        // Bridge legacy progress to our progress
         scope.launch {
             downloadServiceState.downloadProgress.collect { legacyProgress ->
-                _downloadProgress.value = legacyProgress.mapValues { (chapterId, legacy) ->
-                    DownloadProgress(
-                        chapterId = chapterId,
-                        chapterName = "",
-                        bookName = "",
-                        status = mapLegacyStatus(legacy.status),
-                        progress = legacy.progress,
-                        errorMessage = legacy.errorMessage,
-                        retryCount = legacy.retryCount,
-                        totalRetries = 3
-                    )
+                // Merge legacy progress with new progress
+                val newProgress = _downloadProgress.value.toMutableMap()
+                legacyProgress.forEach { (chapterId, legacy) ->
+                    if (!newProgress.containsKey(chapterId)) {
+                        newProgress[chapterId] = DownloadProgress(
+                            chapterId = chapterId,
+                            chapterName = "",
+                            bookName = "",
+                            status = mapLegacyStatusToServiceStatus(legacy.status),
+                            progress = legacy.progress,
+                            errorMessage = legacy.errorMessage,
+                            retryCount = legacy.retryCount,
+                            totalRetries = 3
+                        )
+                    }
                 }
+                _downloadProgress.value = newProgress
             }
         }
         
         _state.value = ServiceState.IDLE
     }
     
-    /**
-     * Map legacy DownloadStatus to new DownloadStatus
-     */
-    private fun mapLegacyStatus(legacyStatus: ireader.domain.services.downloaderService.DownloadStatus): DownloadStatus {
+    private fun mapNewStatusToServiceStatus(status: NewDownloadStatus): DownloadStatus {
+        return when (status) {
+            NewDownloadStatus.NOT_DOWNLOADED -> DownloadStatus.QUEUED
+            NewDownloadStatus.QUEUE -> DownloadStatus.QUEUED
+            NewDownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
+            NewDownloadStatus.DOWNLOADED -> DownloadStatus.COMPLETED
+            NewDownloadStatus.ERROR -> DownloadStatus.FAILED
+        }
+    }
+    
+    private fun mapLegacyStatusToServiceStatus(legacyStatus: LegacyDownloadStatus): DownloadStatus {
         return when (legacyStatus) {
-            ireader.domain.services.downloaderService.DownloadStatus.QUEUED -> DownloadStatus.QUEUED
-            ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
-            ireader.domain.services.downloaderService.DownloadStatus.PAUSED -> DownloadStatus.PAUSED
-            ireader.domain.services.downloaderService.DownloadStatus.COMPLETED -> DownloadStatus.COMPLETED
-            ireader.domain.services.downloaderService.DownloadStatus.FAILED -> DownloadStatus.FAILED
+            LegacyDownloadStatus.QUEUED -> DownloadStatus.QUEUED
+            LegacyDownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
+            LegacyDownloadStatus.PAUSED -> DownloadStatus.PAUSED
+            LegacyDownloadStatus.COMPLETED -> DownloadStatus.COMPLETED
+            LegacyDownloadStatus.FAILED -> DownloadStatus.FAILED
         }
     }
     
     override suspend fun start() {
         _state.value = ServiceState.RUNNING
+        downloadManager.startDownloads()
     }
     
     override suspend fun stop() {
         _state.value = ServiceState.STOPPED
         startDownloadServicesUseCase.stop()
+        downloadManager.cancelDownloads()
         downloadServiceState.setRunning(false)
         downloadServiceState.setPaused(false)
     }
     
     override fun isRunning(): Boolean {
-        return _state.value == ServiceState.RUNNING || downloadServiceState.isRunning.value
+        return _state.value == ServiceState.RUNNING || 
+               downloadManager.isRunning.value ||
+               downloadServiceState.isRunning.value
     }
     
     override suspend fun cleanup() {
         stop()
+        downloadManager.clearQueue()
         downloadServiceState.setDownloadProgress(emptyMap())
     }
     
@@ -122,49 +202,61 @@ class DesktopDownloadService : DownloadService, KoinComponent {
         }
         
         return try {
-            // Filter out already-downloaded chapters by checking their content
-            // This prevents re-downloading chapters that already have content
-            val chapterRepository: ireader.domain.data.repository.ChapterRepository by inject()
-            
-            val filteredChapterIds = withContext(Dispatchers.IO) {
-                chapterIds.filter { chapterId ->
-                    val chapter = chapterRepository.findChapterById(chapterId)
-                    if (chapter == null) {
-                        false
-                    } else {
-                        val contentText = chapter.content.joinToString("")
-                        // Only include chapters that don't have content yet
-                        contentText.isEmpty() || contentText.length < 50
+            val chaptersToDownload = withContext(Dispatchers.IO) {
+                chapterIds.mapNotNull { chapterId ->
+                    val chapter = chapterRepository.findChapterById(chapterId) ?: return@mapNotNull null
+                    val contentText = chapter.content.joinToString("")
+                    
+                    // Skip already downloaded chapters
+                    if (contentText.isNotEmpty() && contentText.length >= 50) {
+                        return@mapNotNull null
                     }
+                    val book = bookRepository.findBookById(chapter.bookId) ?: return@mapNotNull null
+                    chapter to book
                 }
             }
             
-            if (filteredChapterIds.isEmpty()) {
-                // All chapters already downloaded - just return success
+            if (chaptersToDownload.isEmpty()) {
                 return ServiceResult.Success(Unit)
             }
             
-            // Initialize progress for queued chapters
-            val initialProgress = filteredChapterIds.associateWith { chapterId ->
-                ireader.domain.services.downloaderService.DownloadProgress(
-                    chapterId = chapterId,
-                    status = ireader.domain.services.downloaderService.DownloadStatus.QUEUED
+            // Add to DownloadManager queue
+            val chapters = chaptersToDownload.map { it.first }
+            val books = chaptersToDownload.associate { (chapter, book) -> chapter.bookId to book }
+            downloadManager.addToQueue(chapters, books)
+            
+            // Also update legacy state for backward compatibility
+            val savedDownloads = chaptersToDownload.map { (chapter, book) ->
+                buildSavedDownload(book, chapter)
+            }
+            
+            withContext(Dispatchers.IO) {
+                downloadUseCases.insertDownloads(savedDownloads.map { it.toDownload() })
+            }
+            
+            val initialProgress = savedDownloads.associate { download ->
+                download.chapterId to ireader.domain.services.downloaderService.DownloadProgress(
+                    chapterId = download.chapterId,
+                    status = LegacyDownloadStatus.QUEUED
                 )
             }
             downloadServiceState.setDownloadProgress(
                 downloadServiceState.downloadProgress.value + initialProgress
             )
+            downloadServiceState.setDownloads(
+                downloadServiceState.downloads.value + savedDownloads
+            )
             
-            // Start the download using the existing use case with filtered chapter IDs
+            // Start downloads via legacy use case (for now)
             startDownloadServicesUseCase.start(
                 bookIds = null,
-                chapterIds = filteredChapterIds.toLongArray(),
+                chapterIds = chaptersToDownload.map { it.first.id }.toLongArray(),
                 downloadModes = false
             )
             
-            // Set running state so pause/resume buttons work correctly
             downloadServiceState.setRunning(true)
             downloadServiceState.setPaused(false)
+            
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue chapters: ${e.message}", e)
@@ -177,16 +269,54 @@ class DesktopDownloadService : DownloadService, KoinComponent {
         }
         
         return try {
-            // Start the download using the existing use case
+            val chaptersToDownload = withContext(Dispatchers.IO) {
+                bookIds.flatMap { bookId ->
+                    val book = bookRepository.findBookById(bookId) ?: return@flatMap emptyList()
+                    chapterRepository.findChaptersByBookId(bookId)
+                        .filter { it.content.joinToString("").let { c -> c.isEmpty() || c.length < 50 } }
+                        .map { it to book }
+                }
+            }
+            
+            if (chaptersToDownload.isEmpty()) return ServiceResult.Success(Unit)
+            
+            // Add to DownloadManager queue
+            val chapters = chaptersToDownload.map { it.first }
+            val books = chaptersToDownload.associate { (chapter, book) -> chapter.bookId to book }
+            downloadManager.addToQueue(chapters, books)
+            
+            // Also update legacy state for backward compatibility
+            val savedDownloads = chaptersToDownload.map { (chapter, book) ->
+                buildSavedDownload(book, chapter)
+            }
+            
+            withContext(Dispatchers.IO) {
+                downloadUseCases.insertDownloads(savedDownloads.map { it.toDownload() })
+            }
+            
+            val initialProgress = savedDownloads.associate { download ->
+                download.chapterId to ireader.domain.services.downloaderService.DownloadProgress(
+                    chapterId = download.chapterId,
+                    status = LegacyDownloadStatus.QUEUED
+                )
+            }
+            downloadServiceState.setDownloadProgress(
+                downloadServiceState.downloadProgress.value + initialProgress
+            )
+            downloadServiceState.setDownloads(
+                downloadServiceState.downloads.value + savedDownloads
+            )
+            
+            // Start downloads via legacy use case
             startDownloadServicesUseCase.start(
                 bookIds = bookIds.toLongArray(),
                 chapterIds = null,
                 downloadModes = false
             )
             
-            // Set running state so pause/resume buttons work correctly
             downloadServiceState.setRunning(true)
             downloadServiceState.setPaused(false)
+            
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue books: ${e.message}", e)
@@ -194,15 +324,17 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     }
     
     override suspend fun pause() {
-        // Set paused state - the init collector will update _state automatically
+        // Pause via DownloadManager
+        downloadManager.pauseDownloads()
+        
+        // Also update legacy state for backward compatibility
         downloadServiceState.setPaused(true)
         downloadServiceState.setRunning(true)
         
-        // Update all downloading items to paused status
         val currentProgress = downloadServiceState.downloadProgress.value
-        val updatedProgress = currentProgress.mapValues { (chapterId, progress) ->
-            if (progress.status == ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING) {
-                progress.copy(status = ireader.domain.services.downloaderService.DownloadStatus.PAUSED)
+        val updatedProgress = currentProgress.mapValues { (_, progress) ->
+            if (progress.status == LegacyDownloadStatus.DOWNLOADING) {
+                progress.copy(status = LegacyDownloadStatus.PAUSED)
             } else {
                 progress
             }
@@ -211,15 +343,17 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     }
     
     override suspend fun resume() {
-        // Clear paused state - the init collector will update _state automatically
+        // Resume via DownloadManager
+        downloadManager.resumeDownloads()
+        
+        // Also update legacy state for backward compatibility
         downloadServiceState.setPaused(false)
         downloadServiceState.setRunning(true)
         
-        // Update all paused items back to downloading status
         val currentProgress = downloadServiceState.downloadProgress.value
-        val updatedProgress = currentProgress.mapValues { (chapterId, progress) ->
-            if (progress.status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED) {
-                progress.copy(status = ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING)
+        val updatedProgress = currentProgress.mapValues { (_, progress) ->
+            if (progress.status == LegacyDownloadStatus.PAUSED) {
+                progress.copy(status = LegacyDownloadStatus.QUEUED)
             } else {
                 progress
             }
@@ -228,27 +362,30 @@ class DesktopDownloadService : DownloadService, KoinComponent {
         
         // Check if there are pending downloads that need to be restarted
         val pendingChapterIds = currentProgress
-            .filter { it.value.status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED ||
-                     it.value.status == ireader.domain.services.downloaderService.DownloadStatus.QUEUED }
+            .filter { 
+                it.value.status == LegacyDownloadStatus.PAUSED ||
+                it.value.status == LegacyDownloadStatus.QUEUED 
+            }
             .keys.toList()
         
         if (pendingChapterIds.isNotEmpty()) {
-            // Restart the download using downloader mode (reads from database)
-            startDownloadServicesUseCase.start(
-                bookIds = null,
-                chapterIds = null,
-                downloadModes = true
-            )
+            // Restart downloads if not running
+            if (!downloadManager.isRunning.value) {
+                downloadManager.startDownloads()
+            }
         }
     }
     
     override suspend fun cancelDownload(chapterId: Long): ServiceResult<Unit> {
         return try {
-            // Update status to failed (cancelled) in progress map
+            // Remove from DownloadManager queue
+            downloadManager.removeFromQueue(chapterId)
+            
+            // Also update legacy state
             val currentProgress = downloadServiceState.downloadProgress.value.toMutableMap()
             currentProgress[chapterId] = ireader.domain.services.downloaderService.DownloadProgress(
                 chapterId = chapterId,
-                status = ireader.domain.services.downloaderService.DownloadStatus.FAILED,
+                status = LegacyDownloadStatus.FAILED,
                 errorMessage = "Cancelled by user"
             )
             downloadServiceState.setDownloadProgress(currentProgress)
@@ -261,13 +398,21 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     
     override suspend fun cancelAll(): ServiceResult<Unit> {
         return try {
-            // Stop the download service
+            // Clear DownloadManager queue
+            downloadManager.clearQueue()
+            
+            // Stop the legacy download service
             startDownloadServicesUseCase.stop()
             
             // Reset state
             downloadServiceState.setRunning(false)
             downloadServiceState.setPaused(false)
             downloadServiceState.setDownloadProgress(emptyMap())
+            downloadServiceState.setDownloads(emptyList())
+            
+            withContext(Dispatchers.IO) {
+                downloadUseCases.deleteAllSavedDownload()
+            }
             
             _state.value = ServiceState.IDLE
             ServiceResult.Success(Unit)
@@ -278,32 +423,113 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     
     override suspend fun retryDownload(chapterId: Long): ServiceResult<Unit> {
         return try {
+            // Retry via DownloadManager
+            downloadManager.retryDownload(chapterId)
+            
+            // Also update legacy state
             val current = downloadServiceState.downloadProgress.value[chapterId]
-            if (current == null) {
-                return ServiceResult.Error("Download not found")
-            }
-            if (current.status != ireader.domain.services.downloaderService.DownloadStatus.FAILED) {
-                return ServiceResult.Error("Can only retry failed downloads")
+            if (current != null && current.status == LegacyDownloadStatus.FAILED) {
+                val updatedProgress = downloadServiceState.downloadProgress.value.toMutableMap()
+                updatedProgress[chapterId] = current.copy(
+                    status = LegacyDownloadStatus.QUEUED,
+                    errorMessage = null,
+                    retryCount = current.retryCount + 1
+                )
+                downloadServiceState.setDownloadProgress(updatedProgress)
+                
+                // Restart downloads if not running
+                if (!downloadManager.isRunning.value) {
+                    queueChapters(listOf(chapterId))
+                }
             }
             
-            // Update status to queued with incremented retry count
-            val updatedProgress = downloadServiceState.downloadProgress.value.toMutableMap()
-            updatedProgress[chapterId] = current.copy(
-                status = ireader.domain.services.downloaderService.DownloadStatus.QUEUED,
-                errorMessage = null,
-                retryCount = current.retryCount + 1
-            )
-            downloadServiceState.setDownloadProgress(updatedProgress)
-            
-            // Re-queue the chapter
-            queueChapters(listOf(chapterId))
+            ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to retry download: ${e.message}", e)
         }
     }
     
     override fun getDownloadStatus(chapterId: Long): DownloadStatus? {
-        val legacyStatus = downloadServiceState.downloadProgress.value[chapterId]?.status
-        return legacyStatus?.let { mapLegacyStatus(it) }
+        // Check DownloadManager first
+        val managerStatus = downloadManager.queue.value
+            .find { it.download.chapterId == chapterId }
+            ?.download?.status
+        
+        if (managerStatus != null) {
+            return mapNewStatusToServiceStatus(managerStatus)
+        }
+        
+        // Fall back to legacy state
+        return downloadServiceState.downloadProgress.value[chapterId]?.status?.let { 
+            mapLegacyStatusToServiceStatus(it) 
+        }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // NEW METHODS - Enhanced functionality from DownloadManager
+    // ═══════════════════════════════════════════════════════════════
+    
+    /**
+     * Check if a chapter is downloaded using the new DownloadCache.
+     */
+    fun isChapterDownloaded(bookId: Long, chapterId: Long): Boolean {
+        return downloadManager.isChapterDownloaded(bookId, chapterId)
+    }
+    
+    /**
+     * Get all downloaded chapter IDs for a book using the new DownloadCache.
+     */
+    fun getDownloadedChapterIds(bookId: Long): Set<Long> {
+        return downloadManager.getDownloadedChapterIds(bookId)
+    }
+    
+    /**
+     * Check if downloads are paused due to network conditions.
+     */
+    fun isPausedDueToNetwork(): Boolean {
+        return downloadManager.isPausedDueToNetwork.value
+    }
+    
+    /**
+     * Check if downloads are paused due to low disk space.
+     */
+    fun isPausedDueToDiskSpace(): Boolean {
+        return downloadManager.isPausedDueToDiskSpace.value
+    }
+    
+    /**
+     * Retry all failed downloads.
+     */
+    suspend fun retryAllFailed(): ServiceResult<Unit> {
+        return try {
+            downloadManager.retryAllFailed()
+            ServiceResult.Success(Unit)
+        } catch (e: Exception) {
+            ServiceResult.Error("Failed to retry all downloads: ${e.message}", e)
+        }
+    }
+    
+    /**
+     * Clear completed downloads from the queue.
+     */
+    suspend fun clearCompleted(): ServiceResult<Unit> {
+        return try {
+            downloadManager.clearCompleted()
+            ServiceResult.Success(Unit)
+        } catch (e: Exception) {
+            ServiceResult.Error("Failed to clear completed downloads: ${e.message}", e)
+        }
+    }
+    
+    /**
+     * Clear failed downloads from the queue.
+     */
+    suspend fun clearFailed(): ServiceResult<Unit> {
+        return try {
+            downloadManager.clearFailed()
+            ServiceResult.Success(Unit)
+        } catch (e: Exception) {
+            ServiceResult.Error("Failed to clear failed downloads: ${e.message}", e)
+        }
     }
 }

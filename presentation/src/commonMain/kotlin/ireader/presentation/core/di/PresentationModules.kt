@@ -24,7 +24,6 @@ import ireader.presentation.ui.settings.backups.BackupScreenViewModel
 import ireader.presentation.ui.settings.backups.CloudBackupViewModel
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
 import ireader.presentation.ui.settings.data.SettingsDataViewModel
-import ireader.presentation.ui.settings.downloader.DownloadStateImpl
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
 import ireader.presentation.ui.settings.downloads.SettingsDownloadViewModel
 import ireader.presentation.ui.settings.font_screens.FontScreenStateImpl
@@ -54,7 +53,7 @@ val PresentationModules = module {
     factory   { ireader.presentation.ui.settings.backups.GoogleDriveViewModel(get(), get(), get(), get(), get()) }
 
     factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
-    factory <DownloadStateImpl> { DownloadStateImpl() }
+    // DownloadStateImpl removed - DownloaderViewModel now uses DownloadManager directly
     factory <FontScreenStateImpl> { FontScreenStateImpl() }
 
     factory  { ScreenContentViewModel(get(), get(), get()) }
@@ -172,7 +171,9 @@ val PresentationModules = module {
     factory  { AppearanceViewModel(get(), get(), get()) }
 
     factory  { CategoryScreenViewModel(get(), get(), get(), get(), get()) }
-    factory  { DownloaderViewModel(get(), get(), get(), get(),get()) }
+    // DownloaderViewModel - Uses DownloadService for download operations
+    // Dependencies: downloadService, downloadUseCases, networkStateProvider, downloadPreferences
+    factory  { DownloaderViewModel(get(), get(), get(), get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get(),get()) }
     factory  { TranslationSettingsViewModel(get(), get(), getOrNull(), get()) }

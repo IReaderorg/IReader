@@ -21,8 +21,28 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.first
 
 /**
- * Main download service function with proper pause/resume support
+ * Main download service function with proper pause/resume support.
+ * 
+ * @deprecated This function is deprecated and will be removed in a future version.
+ * Use [ireader.domain.services.download.DownloadManager] instead, which provides:
+ * - Queue persistence across app restarts
+ * - Filesystem cache for fast "is downloaded" checks
+ * - Parallel downloads per source
+ * - Exponential backoff retry (2s, 4s, 8s)
+ * - Network-aware downloads (WiFi-only option)
+ * - Disk space validation
+ * 
+ * Migration: Replace calls to runDownloadService() with DownloadManager.startDownloads()
+ * after adding chapters to the queue via DownloadManager.addToQueue().
  */
+@Deprecated(
+    message = "Use DownloadManager.startDownloads() instead for enhanced download functionality",
+    replaceWith = ReplaceWith(
+        "downloadManager.startDownloads()",
+        "ireader.domain.services.download.DownloadManager"
+    ),
+    level = DeprecationLevel.WARNING
+)
 suspend fun runDownloadService(
     inputtedChapterIds: LongArray?,
     inputtedBooksIds: LongArray?,

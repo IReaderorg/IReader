@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.download.androidDownloadModule
 import ireader.domain.services.platform.*
 import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
 import kotlinx.coroutines.flow.Flow
@@ -68,6 +69,9 @@ actual val platformServiceModule = module {
     single<PlatformCapabilities> {
         ireader.domain.services.platform.AndroidPlatformCapabilities(androidContext())
     }
+    
+    // Include Android-specific download module
+    includes(androidDownloadModule)
 }
 
 /**

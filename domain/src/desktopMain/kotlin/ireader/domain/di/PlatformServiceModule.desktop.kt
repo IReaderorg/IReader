@@ -1,6 +1,7 @@
 package ireader.domain.di
 
 import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.download.desktopDownloadModule
 import ireader.domain.services.platform.*
 import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +71,9 @@ actual val platformServiceModule = module {
     single<PlatformCapabilities> {
         ireader.domain.services.platform.DesktopPlatformCapabilities()
     }
+    
+    // Include Desktop-specific download module
+    includes(desktopDownloadModule)
 }
 
 /**

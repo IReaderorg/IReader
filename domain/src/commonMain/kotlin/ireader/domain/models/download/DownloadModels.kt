@@ -1,11 +1,10 @@
-﻿package ireader.domain.models.download
+package ireader.domain.models.download
 
-import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.Chapter
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
- * Download queue item with enhanced metadata
+ * Download queue item with enhanced metadata.
+ * Uses DownloadStatus from DownloadStatus.kt for status tracking.
  */
 data class DownloadItem(
     val chapterId: Long,
@@ -15,7 +14,7 @@ data class DownloadItem(
     val chapterTitle: String,
     val chapterUrl: String,
     val priority: Int = 0,
-    val status: DownloadStatus = DownloadStatus.QUEUED,
+    val status: DownloadStatus = DownloadStatus.QUEUE,
     val progress: Float = 0f,
     val totalBytes: Long = 0L,
     val downloadedBytes: Long = 0L,
@@ -27,18 +26,6 @@ data class DownloadItem(
     val startedAt: Long? = null,
     val completedAt: Long? = null
 )
-
-/**
- * Download status
- */
-enum class DownloadStatus {
-    QUEUED,
-    DOWNLOADING,
-    COMPLETED,
-    FAILED,
-    PAUSED,
-    CANCELLED
-}
 
 /**
  * Download queue configuration
@@ -134,4 +121,16 @@ data class DownloadFilter(
     val sourceId: Long? = null,
     val priority: Int? = null,
     val hasError: Boolean? = null
-)
+) {
+    /**
+     * Check if a download matches this filter.
+     */
+    fun matches(download: Download): Boolean {
+        if (status != null && download.status != status) return false
+        if (bookId != null && download.bookId != bookId) return false
+        if (sourceId != null && download.sourceId != sourceId) return false
+        if (priority != null && download.priority != priority) return false
+        if (hasError != null && (download.errorMessage != null) != hasError) return false
+        return true
+    }
+}
