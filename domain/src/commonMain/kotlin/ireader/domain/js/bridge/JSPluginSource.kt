@@ -4,7 +4,16 @@ import ireader.core.log.Log
 import ireader.core.source.Dependencies
 import ireader.core.source.HttpSource
 import ireader.core.source.SourceHelpers
-import ireader.core.source.model.*
+import ireader.core.source.model.ChapterInfo
+import ireader.core.source.model.ChaptersPageInfo
+import ireader.core.source.model.Command
+import ireader.core.source.model.Filter
+import ireader.core.source.model.FilterList
+import ireader.core.source.model.Listing
+import ireader.core.source.model.MangaInfo
+import ireader.core.source.model.MangasPageInfo
+import ireader.core.source.model.Page
+import ireader.core.source.model.Text
 import ireader.core.util.LNReaderHtmlParser
 import ireader.domain.js.models.PluginMetadata
 import ireader.domain.js.util.JSFilterConverter
@@ -58,7 +67,6 @@ class JSPluginSource(
         // Validate that the extracted baseUrl has a proper domain (contains a dot)
         // This prevents invalid URLs like "https://libraryofheader" from being used
         if (extracted != null && !extracted.contains(".") && !extracted.contains("localhost")) {
-            Log.warn("JSPluginSource: [$name] Rejected invalid baseUrl: $extracted (no TLD)")
             return null
         }
         
@@ -72,7 +80,6 @@ class JSPluginSource(
         if (_baseUrl.isBlank() && url.startsWith("http")) {
             extractBaseUrl(url)?.let { detected ->
                 _baseUrl = detected
-                Log.info("JSPluginSource: [$name] Auto-detected baseUrl: $_baseUrl")
             }
         }
     }
@@ -102,49 +109,25 @@ class JSPluginSource(
     }
 
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        Log.info("JSPluginSource: [$name] getMangaList(sort) called - sort=$sort, page=$page")
-        
         return try {
-            // Check for cancellation before starting
             currentCoroutineContext().ensureActive()
             
-            // Map IReader's Listing to LNReader plugin methods
             val novels = when (sort) {
-                is PopularListing -> {
-                    Log.debug("JSPluginSource: Calling plugin.popularNovels($page)")
-                    plugin.popularNovels(page)
-                }
-                is LatestListing -> {
-                    Log.debug("JSPluginSource: Calling plugin.latestNovels($page)")
-                    plugin.latestNovels(page)
-                }
-                else -> {
-                    // Default to popular if no listing specified
-                    Log.debug("JSPluginSource: No listing specified, defaulting to popularNovels($page)")
-                    plugin.popularNovels(page)
-                }
+                is PopularListing -> plugin.popularNovels(page)
+                is LatestListing -> plugin.latestNovels(page)
+                else -> plugin.popularNovels(page)
             }
             
-            // Check for cancellation after fetch
             currentCoroutineContext().ensureActive()
-            
-            Log.info("JSPluginSource: Got ${novels.size} novels from plugin")
-            if (novels.isEmpty()) {
-                Log.warn("JSPluginSource: Plugin returned empty list!")
-            } else {
-                Log.debug("JSPluginSource: First novel: ${novels.first().name}")
-            }
             
             MangasPageInfo(
                 mangas = novels.map { it.toMangaInfo() },
                 hasNextPage = novels.isNotEmpty()
             )
         } catch (e: CancellationException) {
-            // Re-throw cancellation exceptions - don't treat them as errors
             throw e
         } catch (e: Exception) {
-            Log.error("JSPluginSource: Error in getMangaList(sort): ${e.message}", e)
-            e.printStackTrace()
+            Log.error("JSPluginSource: [$name] Error in getMangaList(sort): ${e.message}", e)
             MangasPageInfo(emptyList(), false)
         }
     }
@@ -171,13 +154,6 @@ class JSPluginSource(
             // Check for cancellation after fetch
             currentCoroutineContext().ensureActive()
             
-            Log.info("JSPluginSource: Got ${novels.size} novels from plugin")
-            if (novels.isEmpty()) {
-                Log.warn("JSPluginSource: Plugin returned empty list!")
-            } else {
-                Log.debug("JSPluginSource: First novel: ${novels.first().name}")
-            }
-            
             MangasPageInfo(
                 mangas = novels.map { it.toMangaInfo() },
                 hasNextPage = novels.isNotEmpty()
@@ -193,15 +169,11 @@ class JSPluginSource(
     }
     
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
-        Log.info("JSPluginSource: [$name] getMangaDetails START for ${manga.key}")
         return try {
             // Convert URL to plugin format (relative path if needed)
             val pluginUrl = toPluginUrl(manga.key)
-            Log.info("JSPluginSource: [$name] getMangaDetails calling plugin.getNovelDetails with $pluginUrl")
             
             val details = plugin.getNovelDetails(pluginUrl)
-            
-            Log.info("JSPluginSource: [$name] getMangaDetails got response: name=${details.name}, cover=${details.cover}")
             
             // Only convert cover to absolute if we have a valid baseUrl
             val coverUrl = if (details.cover.isNotBlank()) {
@@ -216,7 +188,7 @@ class JSPluginSource(
                 ""
             }
             
-            val result = manga.copy(
+            manga.copy(
                 title = details.name,
                 cover = coverUrl,
                 author = details.author ?: "",
@@ -224,10 +196,8 @@ class JSPluginSource(
                 genres = details.genres,
                 status = parseStatus(details.status)
             )
-            Log.info("JSPluginSource: [$name] getMangaDetails SUCCESS: title=${result.title}")
-            result
         } catch (e: Exception) {
-            Log.error("JSPluginSource: [$name] getMangaDetails ERROR: ${e.message}", e)
+            Log.error("JSPluginSource: [$name] getMangaDetails error: ${e.message}", e)
             manga
         }
     }
@@ -236,18 +206,14 @@ class JSPluginSource(
         return try {
             // Convert URL to plugin format (relative path)
             val pluginUrl = toPluginUrl(manga.key)
-            Log.info("JSPluginSource: [$name] getChapterList called for ${manga.key} -> $pluginUrl")
-            
             val chapters = plugin.getChapters(pluginUrl)
-            
-            Log.info("JSPluginSource: [$name] Got ${chapters.size} chapters from plugin")
             
             // Store chapter URLs as ABSOLUTE URLs
             chapters.mapIndexed { index, chapter ->
                 convertToChapterInfo(chapter, index)
             }
         } catch (e: Exception) {
-            Log.error("JSPluginSource: Error in getChapterList", e)
+            Log.error("JSPluginSource: [$name] getChapterList error", e)
             emptyList()
         }
     }
@@ -263,11 +229,7 @@ class JSPluginSource(
     ): ChaptersPageInfo {
         return try {
             val pluginUrl = toPluginUrl(manga.key)
-            Log.info("JSPluginSource: [$name] getChapterListPaged called for ${manga.key} page=$page")
-            
             val chapterPage = plugin.getChaptersPage(pluginUrl, page)
-            
-            Log.info("JSPluginSource: [$name] Got ${chapterPage.chapters.size} chapters, page ${chapterPage.currentPage}/${chapterPage.totalPages}")
             
             // Cache the total pages for this novel
             chapterPageCountCache[pluginUrl] = chapterPage.totalPages
@@ -286,7 +248,7 @@ class JSPluginSource(
                 totalPages = chapterPage.totalPages
             )
         } catch (e: Exception) {
-            Log.error("JSPluginSource: Error in getChapterListPaged", e)
+            Log.error("JSPluginSource: [$name] getChapterListPaged error", e)
             // Fallback to non-paginated method
             val chapters = getChapterList(manga, commands)
             ChaptersPageInfo.singlePage(chapters)
@@ -306,11 +268,9 @@ class JSPluginSource(
             // Fetch from plugin
             val pageCount = plugin.getChapterPageCount(pluginUrl)
             chapterPageCountCache[pluginUrl] = pageCount
-            
-            Log.info("JSPluginSource: [$name] Chapter page count for ${manga.key}: $pageCount")
             pageCount
         } catch (e: Exception) {
-            Log.error("JSPluginSource: Error getting chapter page count", e)
+            Log.error("JSPluginSource: [$name] getChapterPageCount error", e)
             1
         }
     }
@@ -355,23 +315,17 @@ class JSPluginSource(
         return try {
             // Convert URL to plugin format (relative path if needed)
             val pluginUrl = toPluginUrl(chapter.key)
-            Log.info("JSPluginSource: [$name] getPageList called for ${chapter.key} -> $pluginUrl")
-            
             val content = plugin.getChapterContent(pluginUrl)
             
             if (content.isBlank()) {
-                Log.warn("JSPluginSource: Empty content returned for ${chapter.key}")
                 return emptyList()
             }
-            
-            Log.info("JSPluginSource: Got ${content.length} chars of content")
             
             // Parse HTML content using LNReaderHtmlParser
             // This handles HTML stripping, \n \r removal, and paragraph splitting
             val pages = LNReaderHtmlParser.parseToPages(content)
             
             if (pages.isEmpty()) {
-                Log.warn("JSPluginSource: No paragraphs extracted from HTML")
                 // Fallback to single page with cleaned raw content
                 val cleanedContent = content
                     .replace(Regex("<[^>]+>"), "") // Strip HTML tags
@@ -382,10 +336,9 @@ class JSPluginSource(
                 return if (cleanedContent.isNotBlank()) listOf(Text(cleanedContent)) else emptyList()
             }
             
-            Log.info("JSPluginSource: Extracted ${pages.size} paragraphs")
             pages
         } catch (e: Exception) {
-            Log.error("JSPluginSource: Error in getPageList", e)
+            Log.error("JSPluginSource: [$name] getPageList error", e)
             emptyList()
         }
     }
@@ -450,8 +403,6 @@ class JSPluginSource(
         } else {
             this.url  // Keep as-is if no baseUrl available
         }
-        
-        Log.debug("JSPluginSource: [$name] toMangaInfo: ${this.url} -> $absoluteUrl (baseUrl=$_baseUrl)")
         
         return MangaInfo(
             key = absoluteUrl,  // Store ABSOLUTE URL

@@ -8,15 +8,19 @@ import ireader.domain.services.download.DownloadManager
 import ireader.domain.services.downloaderService.DownloadStateHolder
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.services.StartDownloadServicesUseCase
-import ireader.domain.models.download.DownloadStatus as NewDownloadStatus
-import ireader.domain.services.downloaderService.DownloadStatus as LegacyDownloadStatus
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ireader.domain.models.download.DownloadStatus as NewDownloadStatus
+import ireader.domain.services.downloaderService.DownloadStatus as LegacyDownloadStatus
 
 /**
  * Desktop implementation of DownloadService using coroutines.
@@ -158,6 +162,7 @@ class DesktopDownloadService : DownloadService, KoinComponent {
             NewDownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
             NewDownloadStatus.DOWNLOADED -> DownloadStatus.COMPLETED
             NewDownloadStatus.ERROR -> DownloadStatus.FAILED
+            else -> DownloadStatus.FAILED
         }
     }
     

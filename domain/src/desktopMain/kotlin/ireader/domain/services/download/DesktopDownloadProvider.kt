@@ -2,18 +2,15 @@ package ireader.domain.services.download
 
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
-import ireader.domain.preferences.prefs.DownloadPreferences
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
 /**
  * Desktop implementation of DownloadProvider.
- * Uses user home directory for downloads with support for custom locations.
+ * Uses user home directory for downloads.
  */
-class DesktopDownloadProvider(
-    private val downloadPreferences: DownloadPreferences
-) : DownloadProvider {
+class DesktopDownloadProvider : DownloadProvider {
     
     private val defaultDownloadsDir: File by lazy {
         val userHome = System.getProperty("user.home")
@@ -21,14 +18,7 @@ class DesktopDownloadProvider(
     }
     
     private val downloadsDir: File
-        get() {
-            val customPath = downloadPreferences.downloadLocation().get()
-            return if (customPath.isNotEmpty()) {
-                File(customPath)
-            } else {
-                defaultDownloadsDir
-            }.also { it.mkdirs() }
-        }
+        get() = defaultDownloadsDir.also { it.mkdirs() }
     
     override fun getDownloadsRoot(): String = downloadsDir.absolutePath
     

@@ -43,9 +43,12 @@ class GetRemoteBooksUseCase() {
                     } else {
                         throw EmptyQuery()
                     }
-                } else if (filters != null) {
+                } else if (!filters.isNullOrEmpty()) {
+                    // Only use filters path if filters are actually provided
+                    // Empty list should fall through to listing path
                     item = source.getMangaList(filters = filters, page)
                 } else {
+                    // Use listing (sort) path for Popular/Latest selection
                     item = source.getMangaList(sort = listing, page)
                 }
                 

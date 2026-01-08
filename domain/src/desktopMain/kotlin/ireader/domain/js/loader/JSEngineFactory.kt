@@ -1074,48 +1074,100 @@ private object AdapterCodeCache {
             wrapper.getIcon = function() { return plugin.icon || ""; };
 
             wrapper.searchNovels = function(query, page) {
+                console.log('[LNReader Wrapper] searchNovels called with query:', query, 'page:', page);
+                console.log('[LNReader Wrapper] plugin.searchNovels exists:', typeof plugin.searchNovels === 'function');
+                
                 if (typeof plugin.searchNovels === 'function') {
                     return Promise.resolve(plugin.searchNovels(query, page)).then(function(results) {
+                        console.log('[LNReader Wrapper] searchNovels returned:', results ? (Array.isArray(results) ? results.length + ' items' : typeof results) : 'null/undefined');
                         if (!Array.isArray(results)) return [];
                         return results.map(function(r) {
                             var novelUrl = r.url || r.path || "";
                             var novelCover = resolveUrl(r.cover || r.image || "", plugin.site);
                             return { name: r.name || r.title || "", url: novelUrl, cover: novelCover };
                         });
+                    }).catch(function(err) {
+                        console.log('[LNReader Wrapper] searchNovels ERROR:', err.message || String(err));
+                        return [];
                     });
                 }
+                console.log('[LNReader Wrapper] No searchNovels method found');
                 return Promise.resolve([]);
             };
 
             wrapper.popularNovels = function(page) {
+                console.log('[LNReader Wrapper] ========== POPULAR NOVELS START ==========');
+                console.log('[LNReader Wrapper] popularNovels called with page:', page);
+                console.log('[LNReader Wrapper] plugin.popularNovels exists:', typeof plugin.popularNovels === 'function');
+                console.log('[LNReader Wrapper] plugin.popularNovels.length (arg count):', typeof plugin.popularNovels === 'function' ? plugin.popularNovels.length : 'N/A');
+                
                 if (typeof plugin.popularNovels === 'function') {
                     var result;
+                    var options = { showLatestNovels: false, filters: plugin.filters };
                     if (plugin.popularNovels.length <= 1) {
+                        console.log('[LNReader Wrapper] Calling popularNovels with 1 arg (page only)');
                         result = plugin.popularNovels(page);
                     } else {
-                        result = plugin.popularNovels(page, { showLatestNovels: false, filters: plugin.filters || {} });
+                        // Pass showLatestNovels: false to get Popular sorting.
+                        // Pass plugin.filters (filter definitions with default values) to support
+                        // plugins that require filters (like LightNovelPub).
+                        // For plugins like NovelFire that check showLatestNovels first, this still works
+                        // because the default filter values produce the same Popular sorting.
+                        console.log('[LNReader Wrapper] Calling popularNovels with 2 args');
+                        console.log('[LNReader Wrapper] options.showLatestNovels:', options.showLatestNovels);
+                        console.log('[LNReader Wrapper] options.filters exists:', !!options.filters);
+                        if (options.filters && options.filters.sort) {
+                            console.log('[LNReader Wrapper] options.filters.sort.value:', options.filters.sort.value);
+                        }
+                        result = plugin.popularNovels(page, options);
                     }
                     return Promise.resolve(result).then(function(results) {
+                        console.log('[LNReader Wrapper] popularNovels returned:', results ? (Array.isArray(results) ? results.length + ' items' : typeof results) : 'null/undefined');
+                        if (results && results.length > 0) {
+                            console.log('[LNReader Wrapper] POPULAR First 3 novels:', results.slice(0, 3).map(function(r) { return r.name || r.title; }).join(', '));
+                        }
+                        console.log('[LNReader Wrapper] ========== POPULAR NOVELS END ==========');
                         if (!Array.isArray(results)) return [];
                         return results.map(function(r) {
                             var novelUrl = r.url || r.path || "";
                             var novelCover = resolveUrl(r.cover || r.image || "", plugin.site);
                             return { name: r.name || r.title || "", url: novelUrl, cover: novelCover };
                         });
+                    }).catch(function(err) {
+                        console.log('[LNReader Wrapper] popularNovels ERROR:', err.message || String(err));
+                        console.log('[LNReader Wrapper] ========== POPULAR NOVELS END (ERROR) ==========');
+                        return [];
                     });
                 }
+                console.log('[LNReader Wrapper] No popularNovels method found');
+                console.log('[LNReader Wrapper] ========== POPULAR NOVELS END ==========');
                 return Promise.resolve([]);
             };
 
             wrapper.latestNovels = function(page) {
+                console.log('[LNReader Wrapper] ========== LATEST NOVELS START ==========');
+                console.log('[LNReader Wrapper] latestNovels called with page:', page);
+                console.log('[LNReader Wrapper] plugin.latestNovels exists:', typeof plugin.latestNovels === 'function');
+                console.log('[LNReader Wrapper] plugin.popularNovels exists:', typeof plugin.popularNovels === 'function');
+                console.log('[LNReader Wrapper] plugin.popularNovels.length (arg count):', typeof plugin.popularNovels === 'function' ? plugin.popularNovels.length : 'N/A');
+                
                 if (typeof plugin.latestNovels === 'function') {
+                    console.log('[LNReader Wrapper] Using native latestNovels method');
                     var result;
                     if (plugin.latestNovels.length <= 1) {
                         result = plugin.latestNovels(page);
                     } else {
-                        result = plugin.latestNovels(page, { showLatestNovels: true, filters: plugin.filters || {} });
+                        // Pass showLatestNovels: true to get Latest sorting.
+                        // Pass plugin.filters to support plugins that require filters.
+                        // The showLatestNovels: true flag takes precedence in plugins like NovelFire.
+                        result = plugin.latestNovels(page, { showLatestNovels: true, filters: plugin.filters });
                     }
                     return Promise.resolve(result).then(function(results) {
+                        console.log('[LNReader Wrapper] latestNovels returned', results ? results.length : 0, 'items');
+                        if (results && results.length > 0) {
+                            console.log('[LNReader Wrapper] LATEST First 3 novels:', results.slice(0, 3).map(function(r) { return r.name || r.title; }).join(', '));
+                        }
+                        console.log('[LNReader Wrapper] ========== LATEST NOVELS END ==========');
                         if (!Array.isArray(results)) return [];
                         return results.map(function(r) {
                             var novelUrl = r.url || r.path || "";
@@ -1124,7 +1176,35 @@ private object AdapterCodeCache {
                         });
                     });
                 }
-                return wrapper.popularNovels(page);
+                // Fallback: Call popularNovels with showLatestNovels: true
+                // This is the standard LNReader pattern - most plugins only have popularNovels
+                // with a showLatestNovels option to switch between Latest and Popular.
+                console.log('[LNReader Wrapper] FALLBACK: No native latestNovels, calling popularNovels with showLatestNovels: true');
+                if (typeof plugin.popularNovels === 'function') {
+                    var options = { showLatestNovels: true, filters: plugin.filters };
+                    console.log('[LNReader Wrapper] options.showLatestNovels:', options.showLatestNovels);
+                    console.log('[LNReader Wrapper] options.filters exists:', !!options.filters);
+                    if (options.filters && options.filters.sort) {
+                        console.log('[LNReader Wrapper] options.filters.sort.value:', options.filters.sort.value);
+                    }
+                    var result = plugin.popularNovels(page, options);
+                    return Promise.resolve(result).then(function(results) {
+                        console.log('[LNReader Wrapper] popularNovels (as latest) returned', results ? results.length : 0, 'items');
+                        if (results && results.length > 0) {
+                            console.log('[LNReader Wrapper] LATEST (via popularNovels) First 3 novels:', results.slice(0, 3).map(function(r) { return r.name || r.title; }).join(', '));
+                        }
+                        console.log('[LNReader Wrapper] ========== LATEST NOVELS END ==========');
+                        if (!Array.isArray(results)) return [];
+                        return results.map(function(r) {
+                            var novelUrl = r.url || r.path || "";
+                            var novelCover = resolveUrl(r.cover || r.image || "", plugin.site);
+                            return { name: r.name || r.title || "", url: novelUrl, cover: novelCover };
+                        });
+                    });
+                }
+                console.log('[LNReader Wrapper] No popularNovels method found, returning empty');
+                console.log('[LNReader Wrapper] ========== LATEST NOVELS END ==========');
+                return Promise.resolve([]);
             };
 
             wrapper.getNovelDetails = function(url) {
@@ -1591,8 +1671,17 @@ private class GraalVMPluginWrapper(
     override suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(Dispatchers.IO) {
         mutex.withLock {
             try {
+                Log.error { "[GraalVM-Kotlin] ========== POPULAR NOVELS START ==========" }
+                Log.error { "[GraalVM-Kotlin] popularNovels called: page=$page, plugin=$cachedName" }
                 val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page)")
-                parseNovelList(resultJson)
+                val novels = parseNovelList(resultJson)
+                Log.error { "[GraalVM-Kotlin] POPULAR returned ${novels.size} novels" }
+                if (novels.isNotEmpty()) {
+                    val first3 = novels.take(3).mapIndexed { i, n -> "${i+1}. ${n.name}" }.joinToString(", ")
+                    Log.error { "[GraalVM-Kotlin] POPULAR First 3: $first3" }
+                }
+                Log.error { "[GraalVM-Kotlin] ========== POPULAR NOVELS END ==========" }
+                novels
             } catch (e: Exception) {
                 Log.error { "GraalVMPluginWrapper: Error in popularNovels: ${e.message}" }
                 emptyList()
@@ -1603,8 +1692,17 @@ private class GraalVMPluginWrapper(
     override suspend fun latestNovels(page: Int): List<PluginNovel> = withContext(Dispatchers.IO) {
         mutex.withLock {
             try {
+                Log.error { "[GraalVM-Kotlin] ========== LATEST NOVELS START ==========" }
+                Log.error { "[GraalVM-Kotlin] latestNovels called: page=$page, plugin=$cachedName" }
                 val resultJson = awaitPromise("__wrappedPlugin.latestNovels($page)")
-                parseNovelList(resultJson)
+                val novels = parseNovelList(resultJson)
+                Log.error { "[GraalVM-Kotlin] LATEST returned ${novels.size} novels" }
+                if (novels.isNotEmpty()) {
+                    val first3 = novels.take(3).mapIndexed { i, n -> "${i+1}. ${n.name}" }.joinToString(", ")
+                    Log.error { "[GraalVM-Kotlin] LATEST First 3: $first3" }
+                }
+                Log.error { "[GraalVM-Kotlin] ========== LATEST NOVELS END ==========" }
+                novels
             } catch (e: Exception) {
                 Log.error { "GraalVMPluginWrapper: Error in latestNovels: ${e.message}" }
                 emptyList()

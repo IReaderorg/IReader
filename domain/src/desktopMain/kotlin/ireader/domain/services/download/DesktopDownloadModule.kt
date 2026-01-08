@@ -15,9 +15,7 @@ val desktopDownloadModule = module {
     
     // DownloadProvider - Desktop implementation using user home directory
     single<DownloadProvider> {
-        DesktopDownloadProvider(
-            downloadPreferences = get()
-        )
+        DesktopDownloadProvider()
     }
     
     // DownloadStore - Desktop implementation using file-based storage
@@ -28,7 +26,7 @@ val desktopDownloadModule = module {
     // DownloadCache - Desktop implementation with filesystem scanning
     single<DownloadCache> {
         DesktopDownloadCache(
-            downloadProvider = get()
+            chapterRepository = get()
         )
     }
     

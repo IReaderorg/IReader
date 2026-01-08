@@ -973,19 +973,14 @@ class JSPluginBridge(
             return emptyList()
         }
 
-        Log.info { "[JSPlugin] parseNovelList received result type: ${result::class.simpleName}" }
-        Log.info { "[JSPlugin] parseNovelList result value: $result" }
-
         return when (result) {
             is List<*> -> {
-                Log.info { "[JSPlugin] Result is List with ${result.size} items" }
                 result.mapNotNull { parseNovelItem(it) }
             }
 
             is JSValue -> {
                 if (!result.isNull() && !result.isUndefined()) {
                     val list = result.asList()
-                    Log.info { "[JSPlugin] Result is JSValue (list) with ${list.size} items" }
                     list.mapNotNull { parseNovelItem(it) }
                 } else {
                     Log.warn { "[JSPlugin] Result is JSValue but null or undefined" }
@@ -1005,27 +1000,21 @@ class JSPluginBridge(
      */
     private fun parseNovelItem(item: Any?): JSNovelItem? {
         if (item == null) {
-            Log.warn { "[JSPlugin] parseNovelItem received null item" }
             return null
         }
 
         return try {
-            Log.info { "[JSPlugin] parseNovelItem processing item type: ${item::class.simpleName}" }
-
             val map = when (item) {
                 is Map<*, *> -> {
-                    Log.info { "[JSPlugin] Item is Map with keys: ${(item as Map<String, Any?>).keys}" }
                     item as Map<String, Any?>
                 }
 
                 is JSValue -> {
-                    val itemMap = item.asMap()
-                    Log.info { "[JSPlugin] Item is JSValue (map) with keys: ${itemMap.keys}" }
-                    itemMap
+                    item.asMap()
                 }
 
                 else -> {
-                    Log.warn { "[JSPlugin] Item is unexpected type: ${item::class.qualifiedName}, value: $item" }
+                    Log.warn { "[JSPlugin] Item is unexpected type: ${item::class.qualifiedName}" }
                     return null
                 }
             }
@@ -1034,20 +1023,12 @@ class JSPluginBridge(
             val path = map["path"]?.toString()
             val cover = map["cover"]?.toString()
 
-            Log.info {
-                "[JSPlugin] Parsed item - name: $name, path: $path, cover: ${
-                    cover?.take(
-                        50
-                    )
-                }"
-            }
-
             if (name == null) {
-                Log.warn { "[JSPlugin] Item missing 'name' field. Available fields: ${map.keys}" }
+                Log.warn { "[JSPlugin] Item missing 'name' field" }
                 return null
             }
             if (path == null) {
-                Log.warn { "[JSPlugin] Item missing 'path' field. Available fields: ${map.keys}" }
+                Log.warn { "[JSPlugin] Item missing 'path' field" }
                 return null
             }
 
@@ -1140,7 +1121,6 @@ class JSPluginBridge(
             }
 
             val label = map["label"]?.toString() ?: ""
-            Log.debug { "[JSPlugin] Parsing filter with type='$type', label='$label'" }
 
             when (type.lowercase()) {
                 "picker" -> {
@@ -1160,13 +1140,10 @@ class JSPluginBridge(
                 }
 
                 "checkboxgroup", "checkbox" -> {
-                    Log.debug { "[JSPlugin] Parsing CheckboxGroup filter" }
                     val options = parseFilterOptions(map["options"])
-                    Log.debug { "[JSPlugin] Parsed ${options.size} options" }
                     // Check both 'value' and 'defaultValues' for compatibility
                     val defaultValues = parseStringList(map["value"])
                         ?: parseStringList(map["defaultValues"])
-                    Log.debug { "[JSPlugin] Default values: $defaultValues" }
                     FilterDefinition.CheckboxGroup(label, options, defaultValues)
                 }
 
