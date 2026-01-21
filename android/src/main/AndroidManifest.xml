@@ -147,7 +147,11 @@
             android:name="ireader.domain.services.tts_service.v2.TTSV2Service"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
 
         <!-- App Update Download Service -->
         <service
