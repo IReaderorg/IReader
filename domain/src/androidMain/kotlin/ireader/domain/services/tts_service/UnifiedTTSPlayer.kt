@@ -49,6 +49,7 @@ class NativeTTSPlayer(
     private var callback: TTSCallback? = null
     private var isInitialized = false
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var pendingVoice: ireader.domain.preferences.models.prefs.IReaderVoice? = null
     
     // Pending speak request to execute when TTS is ready
     private var pendingSpeak: Pair<String, String>? = null
@@ -58,6 +59,12 @@ class NativeTTSPlayer(
             if (status == TextToSpeech.SUCCESS) {
                 isInitialized = true
                 Log.info { "Native TTS initialized successfully" }
+                
+                // Apply pending voice if set before initialization
+                pendingVoice?.let { voice ->
+                    applyVoice(voice)
+                    pendingVoice = null
+                }
                 
                 // Notify that TTS is ready
                 scope.launch {
@@ -79,6 +86,39 @@ class NativeTTSPlayer(
                     }
                 }
             }
+        }
+    }
+    
+    /**
+     * Set voice by IReaderVoice
+     */
+    fun setVoice(voice: ireader.domain.preferences.models.prefs.IReaderVoice): Int {
+        if (!isInitialized) {
+            // Store voice to apply after initialization
+            pendingVoice = voice
+            Log.warn { "TTS not initialized yet, voice will be applied after initialization" }
+            return TextToSpeech.SUCCESS
+        }
+        
+        return applyVoice(voice)
+    }
+    
+    /**
+     * Apply voice to TTS engine
+     */
+    private fun applyVoice(voice: ireader.domain.preferences.models.prefs.IReaderVoice): Int {
+        val ttsVoice = tts?.voices?.find { it.name == voice.name }
+        return if (ttsVoice != null) {
+            val result = tts?.setVoice(ttsVoice)
+            if (result == TextToSpeech.SUCCESS) {
+                Log.info { "Voice applied successfully: ${voice.name}" }
+            } else {
+                Log.warn { "Failed to apply voice: ${voice.name}, result: $result" }
+            }
+            result ?: TextToSpeech.ERROR
+        } else {
+            Log.warn { "Voice not found: ${voice.name}" }
+            TextToSpeech.ERROR
         }
     }
     

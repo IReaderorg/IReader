@@ -143,6 +143,7 @@ actual val DomainModule = module {
                 get()
         )
     }
+    factory  { ireader.domain.usecases.tts.GetNativeTTSVoicesUseCase(get()) }
     factory  {
         StartExtensionManagerService(
                 get()

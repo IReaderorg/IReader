@@ -1218,6 +1218,8 @@
     <string name="view_payment_proof">View Payment Proof</string>
     <string name="visit_marketplace">Visit Marketplace</string>
     <string name="voice_selection">Voice Selection</string>
+    <string name="available_voices">Available Voices</string>
+    <string name="no_voices_available_for_this_language">No voices available for this language</string>
     <string name="voice_settings">Voice Settings</string>
     <string name="wallet_address">Wallet Address</string>
     <string name="warning">Warning</string>
@@ -1997,6 +1999,7 @@
     <string name="system_integration_multiple_engines_supported">✓ System integration • ✓ Multiple engines supported • ✓ No downloads needed</string>
     <string name="system_notifications">System &amp; Notifications</string>
     <string name="system_notifications_1">System Notifications</string>
+    <string name="system_settings">System Settings</string>
     <string name="system_tts_settings">System TTS Settings</string>
     <string name="tab_content">tab_content</string>
     <string name="tap_the_eye_icon_to_preview_fonts">Tap the eye icon to preview fonts</string>

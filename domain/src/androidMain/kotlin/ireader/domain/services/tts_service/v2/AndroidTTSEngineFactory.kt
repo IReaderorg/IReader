@@ -65,13 +65,14 @@ actual object TTSEngineFactory : KoinComponent {
  * Android Native TTS Engine wrapper for v2 architecture
  * Wraps the existing NativeTTSPlayer and converts callbacks to Flow events
  */
-class AndroidNativeTTSEngineV2(context: Context) : TTSEngine {
+class AndroidNativeTTSEngineV2(private val context: Context) : TTSEngine, KoinComponent {
     companion object {
         private const val TAG = "AndroidNativeTTSV2"
     }
     
     private val player = NativeTTSPlayer(context)
     private val _events = MutableSharedFlow<EngineEvent>(extraBufferCapacity = 10)
+    private val textReaderPrefUseCase: ireader.domain.usecases.preferences.TextReaderPrefUseCase by inject()
     
     override val events: Flow<EngineEvent> = _events
     override val name: String = "Native Android TTS"
@@ -96,8 +97,43 @@ class AndroidNativeTTSEngineV2(context: Context) : TTSEngine {
             override fun onReady() {
                 Log.warn { "$TAG: onReady()" }
                 _events.tryEmit(EngineEvent.Ready)
+                
+                // Apply saved voice and pitch preferences after TTS is ready
+                kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+                    applySavedPreferences()
+                }
             }
         })
+    }
+    
+    /**
+     * Apply saved voice and pitch preferences from storage
+     */
+    private suspend fun applySavedPreferences() {
+        try {
+            // Apply saved voice
+            val savedVoice = textReaderPrefUseCase.readVoice()
+            if (savedVoice != null && savedVoice.name.isNotEmpty()) {
+                Log.info { "$TAG: Applying saved voice: ${savedVoice.name}" }
+                player.setVoice(savedVoice)
+            }
+            
+            // Apply saved pitch
+            val savedPitch = textReaderPrefUseCase.readPitch()
+            if (savedPitch > 0) {
+                Log.info { "$TAG: Applying saved pitch: $savedPitch" }
+                player.setPitch(savedPitch)
+            }
+            
+            // Apply saved speech rate
+            val savedRate = textReaderPrefUseCase.readRate()
+            if (savedRate > 0) {
+                Log.info { "$TAG: Applying saved rate: $savedRate" }
+                player.setSpeed(savedRate)
+            }
+        } catch (e: Exception) {
+            Log.error { "$TAG: Error applying saved preferences: ${e.message}" }
+        }
     }
     
     override suspend fun speak(text: String, utteranceId: String) {
@@ -120,8 +156,22 @@ class AndroidNativeTTSEngineV2(context: Context) : TTSEngine {
         player.resume()
     }
     
-    override fun setSpeed(speed: Float) = player.setSpeed(speed)
-    override fun setPitch(pitch: Float) = player.setPitch(pitch)
+    override fun setSpeed(speed: Float) {
+        player.setSpeed(speed)
+        // Save to preferences
+        kotlinx.coroutines.GlobalScope.launch {
+            textReaderPrefUseCase.saveRate(speed)
+        }
+    }
+    
+    override fun setPitch(pitch: Float) {
+        player.setPitch(pitch)
+        // Save to preferences
+        kotlinx.coroutines.GlobalScope.launch {
+            textReaderPrefUseCase.savePitch(pitch)
+        }
+    }
+    
     override fun isReady() = player.isReady()
     
     override fun release() {

@@ -206,7 +206,8 @@ private fun openAndroidSystemTTSSettings(context: android.content.Context) {
 /**
  * Android implementation of TTS Voice Selection Screen
  * 
- * Shows available system TTS voices
+ * Shows native voice selector when native engine is selected,
+ * otherwise shows system TTS settings option
  */
 @Composable
 @Suppress("LongMethod")
@@ -216,62 +217,79 @@ actual fun TTSVoiceSelectionScreen(
 ) {
     val context = LocalContext.current
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(localizeHelper.localize(Res.string.voice_selection))
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = localizeHelper.localize(Res.string.voice_selection_is_managed_through),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                
-                OutlinedCard(
-                    onClick = {
-                        openAndroidSystemTTSSettings(context)
-                        onDismiss()
-                    },
-                    modifier = Modifier.fillMaxWidth()
+    
+    // Check if native TTS engine is selected
+    val appPreferences: ireader.domain.preferences.prefs.AppPreferences = org.koin.compose.koinInject()
+    val isNativeEngineSelected by remember {
+        derivedStateOf {
+            // Check if current engine is NATIVE (not Gradio)
+            // Native TTS is used when Gradio TTS is not enabled
+            !appPreferences.useGradioTTS().get()
+        }
+    }
+    
+    if (isNativeEngineSelected) {
+        // Show native voice selection UI
+        NativeTTSVoiceSelectionScreen(onDismiss = onDismiss)
+    } else {
+        // Show system settings option for remote TTS
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(localizeHelper.localize(Res.string.voice_selection))
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Text(
+                        text = localizeHelper.localize(Res.string.voice_selection_is_managed_through),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    
+                    OutlinedCard(
+                        onClick = {
+                            openAndroidSystemTTSSettings(context)
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(
-                            Icons.Default.RecordVoiceOver,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.open_tts_settings),
-                                style = MaterialTheme.typography.titleSmall
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.RecordVoiceOver,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
                             )
-                            Text(
-                                text = localizeHelper.localize(Res.string.select_voice_language_and_speech_rate),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = localizeHelper.localize(Res.string.open_tts_settings),
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                                Text(
+                                    text = localizeHelper.localize(Res.string.select_voice_language_and_speech_rate),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Icon(
+                                Icons.Default.ChevronRight,
+                                contentDescription = null
                             )
                         }
-                        Icon(
-                            Icons.Default.ChevronRight,
-                            contentDescription = null
-                        )
                     }
                 }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(localizeHelper.localize(Res.string.close))
+                }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(localizeHelper.localize(Res.string.close))
-            }
-        }
-    )
+        )
+    }
 }

@@ -232,30 +232,9 @@ fun AndroidTTSMManagerSettingsScreen(
             // Native TTS Info
             item {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                Card {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = localizeHelper.localize(Res.string.native_android_tts),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = localizeHelper.localize(Res.string.ireader_uses_your_devices_built),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = localizeHelper.localize(Res.string.system_integration_multiple_engines_supported),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+                NativeAndroidTTSSection(
+                    localizeHelper = localizeHelper
+                )
             }
             
             // Error message
@@ -302,3 +281,14 @@ fun AndroidTTSMManagerSettingsScreen(
 
 
 
+
+
+/**
+ * Native Android TTS Section
+ * Shows information about native TTS and provides voice selection button
+ */
+@Composable
+expect fun NativeAndroidTTSSection(
+    localizeHelper: ireader.i18n.LocalizeHelper,
+    modifier: Modifier = Modifier
+)
