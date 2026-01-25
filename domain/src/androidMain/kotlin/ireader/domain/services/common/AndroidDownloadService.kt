@@ -181,8 +181,10 @@ class AndroidDownloadService(
                 buildSavedDownload(book, chapter)
             }
             
-            // Insert into database
+            // Clear ALL previous saved downloads from database to prevent mixing with old cancelled downloads
+            // Then insert only the new requested downloads
             withContext(Dispatchers.IO) {
+                downloadUseCases.deleteAllSavedDownload()
                 downloadUseCases.insertDownloads(savedDownloads.map { it.toDownload() })
             }
             
@@ -225,8 +227,10 @@ class AndroidDownloadService(
                 buildSavedDownload(book, chapter)
             }
             
-            // Insert into database
+            // Clear ALL previous saved downloads from database to prevent mixing with old cancelled downloads
+            // Then insert only the new requested downloads
             withContext(Dispatchers.IO) {
+                downloadUseCases.deleteAllSavedDownload()
                 downloadUseCases.insertDownloads(savedDownloads.map { it.toDownload() })
             }
             

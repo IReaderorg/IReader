@@ -1490,6 +1490,7 @@ class BookDetailViewModel(
     /**
      * Download chapters in the specified range (inclusive).
      * Range is 1-based (chapter number 1 = index 0).
+     * Uses the existing selection and download mechanism.
      */
     fun downloadChapterRange() {
         val allChapters = chapters
@@ -1528,21 +1529,23 @@ class BookDetailViewModel(
         
         // Get chapters in range (inclusive)
         val chaptersInRange = allChapters.subList(startIndex, endIndex + 1)
-        val chapterIds = chaptersInRange.map { it.id }
         
         hideChapterRangeDownloadDialog()
         
-        scope.launch {
-            when (val result = downloadService.queueChapters(chapterIds)) {
-                is ServiceResult.Success -> {
-                    emitEvent(BookDetailEvent.ShowSnackbar("Downloading chapters $start to $end (${chapterIds.size} chapters)"))
-                }
-                is ServiceResult.Error -> {
-                    emitEvent(BookDetailEvent.ShowSnackbar("Download failed: ${result.message ?: "Unknown error"}"))
-                }
-                else -> {}
-            }
+        // Clear current selection and add chapters in range
+        selection.clear()
+        chaptersInRange.forEach { chapter ->
+            selection.add(chapter.id)
         }
+        
+        // Also update ChapterController for UI consistency
+        chapterController.dispatch(ChapterCommand.ClearSelection)
+        chaptersInRange.forEach { chapter ->
+            chapterController.dispatch(ChapterCommand.SelectChapter(chapter.id))
+        }
+        
+        // Use the existing downloadChapters() which works correctly
+        downloadChapters()
     }
 
 

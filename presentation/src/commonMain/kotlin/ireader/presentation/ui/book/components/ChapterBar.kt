@@ -1,5 +1,7 @@
 package ireader.presentation.ui.book.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
@@ -22,6 +24,7 @@ import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChapterBar(
         vm: BookDetailViewModel,
@@ -81,19 +84,29 @@ fun ChapterBar(
             ) {
                 // Bulk download menu
                 Box {
-                    FilledTonalIconButton(
-                        onClick = { showDownloadMenu = true },
-                        modifier = Modifier.size(36.dp),
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                    Surface(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .combinedClickable(
+                                onClick = { showDownloadMenu = true },
+                                onLongClick = { 
+                                    vm.showChapterRangeDownloadDialog()
+                                }
+                            ),
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = localizeHelper.localize(Res.string.download_chapters),
-                            modifier = Modifier.size(18.dp)
-                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Download,
+                                contentDescription = localizeHelper.localize(Res.string.download_chapters),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                     
                     DropdownMenu(
