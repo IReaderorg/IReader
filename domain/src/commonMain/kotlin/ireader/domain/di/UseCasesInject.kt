@@ -210,7 +210,7 @@ val UseCasesInject = module {
         DownloadUseCases(
             downloadChapter = ireader.domain.usecases.download.DownloadChapterUseCase(get()),
             downloadChapters = ireader.domain.usecases.download.DownloadChaptersUseCase(get()),
-            downloadUnreadChapters = ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get()),
+            downloadUnreadChapters = ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get(), get()),
             cancelDownload = ireader.domain.usecases.download.CancelDownloadUseCase(get()),
             pauseDownload = ireader.domain.usecases.download.PauseDownloadUseCase(get()),
             resumeDownload = ireader.domain.usecases.download.ResumeDownloadUseCase(get()),
@@ -261,7 +261,7 @@ val UseCasesInject = module {
     factory { ireader.domain.usecases.glossary.GetGlossaryAsMapUseCase(get()) }
     
     // Batch operations use cases - factory
-    factory { ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get()) }
+    factory { ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get(), get()) }
     factory { ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase(get()) }
     
     // Smart categories use case - factory

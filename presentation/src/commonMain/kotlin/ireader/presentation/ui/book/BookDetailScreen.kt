@@ -51,6 +51,7 @@ import ireader.presentation.ui.book.components.ModernBookHeader
 import ireader.presentation.ui.book.components.ModernBookSummary
 import ireader.presentation.ui.book.components.NovelInfoFab
 import ireader.presentation.ui.book.components.TranslationWarningDialog
+import ireader.presentation.ui.book.components.ChapterRangeDownloadDialog
 import ireader.presentation.ui.book.components.CharacterArtSection
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import androidx.compose.runtime.mutableStateOf
@@ -236,6 +237,12 @@ fun BookDetailScreen(
             onDismiss = { vm.showTranslationWarningDialog = false }
         )
     }
+    
+    // Chapter range download dialog
+    ChapterRangeDownloadDialog(
+        vm = vm,
+        totalChapters = chapters.value.size
+    )
 
     // Responsive layout: tablet uses two-panel, phone uses single column
     if (isTablet) {

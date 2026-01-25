@@ -19,6 +19,11 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
     suspend fun findHistoryByBookId(bookId: Long): History? {
         return historyRepository.findHistoryByBookId(bookId)
     }
+    
+    suspend fun findHistoriesByBookId(bookId: Long): List<History> {
+        return historyRepository.findHistoriesByBookId(bookId)
+    }
+    
     fun subscribeHistoryByBookId(bookId: Long?): Flow<History?> {
         if (bookId == null) return emptyFlow()
         return historyRepository.subscribeHistoryByBookId(bookId)

@@ -1020,6 +1020,8 @@
     <string name="download_all_unread">Download all unread</string>
     <string name="download_chapters">Download chapters</string>
     <string name="download_unread">Download unread</string>
+    <string name="download_from_last_read">Download from last read</string>
+    <string name="download_unread_from_last_read_desc">Download chapters starting after your most recently read chapter instead of from the first unread chapter</string>
     <string name="drag_to_reorder">Drag to reorder</string>
     <string name="dropdown">Dropdown</string>
     <string name="edit">Edit</string>

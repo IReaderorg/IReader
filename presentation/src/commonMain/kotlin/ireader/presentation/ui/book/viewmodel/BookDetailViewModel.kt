@@ -175,7 +175,14 @@ class BookDetailViewModel(
     var showEpubExportDialog by mutableStateOf(false)
     var showImagePickerDialog by mutableStateOf(false)
     var showCategorySelectionDialog by mutableStateOf(false)
+    var showChapterRangeDownloadDialog by mutableStateOf(false)
     var availableMigrationSources by mutableStateOf<List<CatalogLocal>>(emptyList())
+    
+    // Chapter range download state
+    var chapterRangeStart by mutableStateOf("")
+        private set
+    var chapterRangeEnd by mutableStateOf("")
+        private set
     
     // Translation export state
     var hasTranslationsForExport by mutableStateOf(false)
@@ -1373,16 +1380,50 @@ class BookDetailViewModel(
     }
     
     fun downloadUnreadChapters() {
-        val unreadChapterIds = chapters.filter { !it.read }.map { it.id }
-        if (unreadChapterIds.isEmpty()) {
-            emitEvent(BookDetailEvent.ShowSnackbar("No unread chapters to download"))
-            return
-        }
-        
         scope.launch {
-            when (val result = downloadService.queueChapters(unreadChapterIds)) {
+            // Find the most recently read chapter via History
+            val currentBook = book
+            if (currentBook == null) {
+                emitEvent(BookDetailEvent.ShowSnackbar("No book loaded"))
+                return@launch
+            }
+            
+            val allChapters = chapters
+            if (allChapters.isEmpty()) {
+                emitEvent(BookDetailEvent.ShowSnackbar("No chapters available"))
+                return@launch
+            }
+            
+            // Get reading history for this book
+            val histories = historyUseCase.findHistoriesByBookId(currentBook.id)
+            val lastReadHistory = histories.maxByOrNull { it.readAt ?: 0L }
+            
+            val chaptersToDownload = if (lastReadHistory != null) {
+                // Find the index of the last read chapter
+                val lastReadChapterIndex = allChapters.indexOfFirst { it.id == lastReadHistory.chapterId }
+                
+                if (lastReadChapterIndex >= 0) {
+                    // Download chapters AFTER the last read chapter that don't have content
+                    allChapters.drop(lastReadChapterIndex + 1)
+                        .filter { it.content.joinToString("").isBlank() }
+                } else {
+                    // Last read chapter not found in current chapter list, download all without content
+                    allChapters.filter { it.content.joinToString("").isBlank() }
+                }
+            } else {
+                // No reading history - download all chapters without content
+                allChapters.filter { it.content.joinToString("").isBlank() }
+            }
+            
+            val chapterIds = chaptersToDownload.map { it.id }
+            if (chapterIds.isEmpty()) {
+                emitEvent(BookDetailEvent.ShowSnackbar("No chapters to download"))
+                return@launch
+            }
+            
+            when (val result = downloadService.queueChapters(chapterIds)) {
                 is ServiceResult.Success -> {
-                    emitEvent(BookDetailEvent.ShowSnackbar("Downloading ${unreadChapterIds.size} unread chapters"))
+                    emitEvent(BookDetailEvent.ShowSnackbar("Downloading ${chapterIds.size} chapters from last read position"))
                 }
                 is ServiceResult.Error -> {
                     emitEvent(BookDetailEvent.ShowSnackbar("Download failed: ${result.message ?: "Unknown error"}"))
@@ -1411,6 +1452,99 @@ class BookDetailViewModel(
             }
         }
     }
+
+    // ==================== Chapter Range Download ====================
+    
+    /**
+     * Shows the chapter range download dialog.
+     */
+    fun showChapterRangeDownloadDialog() {
+        chapterRangeStart = ""
+        chapterRangeEnd = ""
+        showChapterRangeDownloadDialog = true
+    }
+    
+    /**
+     * Hides the chapter range download dialog.
+     */
+    fun hideChapterRangeDownloadDialog() {
+        showChapterRangeDownloadDialog = false
+        chapterRangeStart = ""
+        chapterRangeEnd = ""
+    }
+    
+    /**
+     * Update chapter range start value.
+     */
+    fun updateChapterRangeStart(value: String) {
+        chapterRangeStart = value
+    }
+    
+    /**
+     * Update chapter range end value.
+     */
+    fun updateChapterRangeEnd(value: String) {
+        chapterRangeEnd = value
+    }
+    
+    /**
+     * Download chapters in the specified range (inclusive).
+     * Range is 1-based (chapter number 1 = index 0).
+     */
+    fun downloadChapterRange() {
+        val allChapters = chapters
+        if (allChapters.isEmpty()) {
+            emitEvent(BookDetailEvent.ShowSnackbar("No chapters available"))
+            hideChapterRangeDownloadDialog()
+            return
+        }
+        
+        val start = chapterRangeStart.toIntOrNull()
+        val end = chapterRangeEnd.toIntOrNull()
+        
+        if (start == null || end == null) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Please enter valid chapter numbers"))
+            return
+        }
+        
+        if (start < 1 || end < 1) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Chapter numbers must be greater than 0"))
+            return
+        }
+        
+        if (start > end) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Start chapter must be less than or equal to end chapter"))
+            return
+        }
+        
+        if (start > allChapters.size || end > allChapters.size) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Chapter range exceeds available chapters (${allChapters.size})"))
+            return
+        }
+        
+        // Convert 1-based to 0-based indices
+        val startIndex = start - 1
+        val endIndex = end - 1
+        
+        // Get chapters in range (inclusive)
+        val chaptersInRange = allChapters.subList(startIndex, endIndex + 1)
+        val chapterIds = chaptersInRange.map { it.id }
+        
+        hideChapterRangeDownloadDialog()
+        
+        scope.launch {
+            when (val result = downloadService.queueChapters(chapterIds)) {
+                is ServiceResult.Success -> {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Downloading chapters $start to $end (${chapterIds.size} chapters)"))
+                }
+                is ServiceResult.Error -> {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Download failed: ${result.message ?: "Unknown error"}"))
+                }
+                else -> {}
+            }
+        }
+    }
+
 
     // ==================== Mass Translation ====================
     

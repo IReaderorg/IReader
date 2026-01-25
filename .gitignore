@@ -47,8 +47,8 @@ render.experimental.xml
 # Android Profiling
 *.hprof
 /.kotlin
-# Nati
-ve libraries (should be downloaded/built by developers)
+
+# Native libraries (should be downloaded/built by developers)
 native/libs/
 native/piper/
 *.dll
@@ -63,6 +63,13 @@ voice_models/
 # Build artifacts
 native/build/
 native/cmake-build-*/
+
+# Binary files and compiled outputs
+bin/
+*.class
+*.dex
+*.ap_
+*.aab
 
 # Supabase configuration files (contain sensitive credentials)
 config.properties

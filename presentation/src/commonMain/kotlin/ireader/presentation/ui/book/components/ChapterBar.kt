@@ -134,6 +134,13 @@ fun ChapterBar(
                             }
                         )
                         DropdownMenuItem(
+                            text = { Text("Download Chapter Range") },
+                            onClick = {
+                                showDownloadMenu = false
+                                vm.showChapterRangeDownloadDialog()
+                            }
+                        )
+                        DropdownMenuItem(
                             text = { Text(localizeHelper.localize(Res.string.download_all)) },
                             onClick = {
                                 showDownloadMenu = false
