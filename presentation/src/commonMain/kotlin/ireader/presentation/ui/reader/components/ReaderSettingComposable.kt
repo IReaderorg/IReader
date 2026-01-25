@@ -693,9 +693,8 @@ fun GeneralScreenTab(
         }
         item {
             SwitchPreference(
-                preference = vm.showReadingTime,
+                preference = vm.showReadingTimeIndicator,
                 title = localizeHelper.localize(Res.string.show_reading_time),
-                onValueChange = { vm.showReadingTime = it }
             )
         }
         item {

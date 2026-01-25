@@ -51,6 +51,7 @@ import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.components.PreloadIndicator
 import ireader.presentation.ui.reader.components.ReaderSettingsBottomSheet
 import ireader.presentation.ui.reader.components.ReadingTimeEstimator
+import ireader.presentation.ui.reader.components.ReadingTimeIndicator
 import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
 import ireader.presentation.ui.reader.components.ChapterArtFocusDialog
 import ireader.presentation.ui.reader.components.ChapterArtGeneratingDialog
@@ -454,6 +455,15 @@ private fun ReadingScreenContent(
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 16.dp)
+                            )
+                            
+                            // Current reading time indicator
+                            ReadingTimeIndicator(
+                                sessionStartTime = vm.statisticsViewModel.currentSessionStartTime,
+                                isVisible = vm.showReadingTimeIndicator.value && !vm.isLoading,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(bottom = 16.dp, end = 16.dp)
                             )
                         }
                         

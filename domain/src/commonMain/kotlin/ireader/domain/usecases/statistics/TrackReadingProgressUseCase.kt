@@ -20,13 +20,16 @@ class TrackReadingProgressUseCase(
 
     /**
      * Track reading time in minutes.
-     * Only tracks if duration is at least 1 minute to avoid noise.
+     * Always saves reading time, rounding up partial minutes.
      */
     suspend fun trackReadingTime(durationMillis: Long) {
-        val minutes = durationMillis.milliseconds.inWholeMinutes
-        if (minutes > 0) {
-            statisticsRepository.addReadingTime(minutes)
-        }
+        // Convert to minutes, rounding up (ceiling)
+        // This ensures even short reading sessions (e.g., 30 seconds) are counted as 1 minute
+        val minutes = ((durationMillis + 59999) / 60000).coerceAtLeast(1)
+        
+        println("[TrackReadingProgress] Tracking reading time: ${durationMillis}ms = $minutes minutes")
+        statisticsRepository.addReadingTime(minutes)
+        println("[TrackReadingProgress] Successfully saved $minutes minutes")
     }
 
     /**

@@ -179,28 +179,71 @@ data class ReaderScreenSpec(
         }
         
 
-        
         // Track reading time - records time spent in reader screen
+        // Save periodically to avoid losing data if app crashes or user reads for long periods
         DisposableEffect(key1 = Unit) {
             val startTime = currentTimeToLong()
+            var lastSaveTime = startTime
+            Log.info { "Reading time tracking started at: $startTime" }
             
-            onDispose {
-                val endTime = currentTimeToLong()
-                val durationMillis = endTime - startTime
-                
-                // Only track if user spent at least 5 seconds reading (to avoid accidental opens)
-                if (durationMillis >= 5000) {
-                    scope.launch {
+            // Launch a coroutine to save reading time periodically (every 30 seconds)
+            val saveJob = scope.launch {
+                while (true) {
+                    delay(30000) // 30 seconds
+                    val currentTime = currentTimeToLong()
+                    val durationSinceLastSave = currentTime - lastSaveTime
+                    val durationMinutes = durationSinceLastSave / 60000
+                    
+                    Log.info { "Periodic save check: duration since last save = ${durationSinceLastSave}ms (${durationMinutes}min)" }
+                    
+                    // Save incremental time
+                    if (durationSinceLastSave >= 5000) { // At least 5 seconds
                         try {
-                            vm.trackReadingProgressUseCase.trackReadingTime(durationMillis)
-                            
-                            // Also update reading streak
-                            vm.trackReadingProgressUseCase.updateReadingStreak(endTime)
+                            Log.info { "Saving reading time: ${durationMinutes} minutes" }
+                            vm.trackReadingProgressUseCase.trackReadingTime(durationSinceLastSave)
+                            vm.trackReadingProgressUseCase.updateReadingStreak(currentTime)
+                            lastSaveTime = currentTime
+                            Log.info { "Reading time saved successfully" }
                         } catch (e: Exception) {
-                            Log.error { "Failed to track reading time" }
+                            Log.error { "Failed to track reading time periodically: ${e.message}" }
+                            e.printStackTrace()
                         }
                     }
                 }
+            }
+            
+            onDispose {
+                // Cancel periodic save job
+                saveJob.cancel()
+                
+                // Save final reading time
+                val endTime = currentTimeToLong()
+                val finalDuration = endTime - lastSaveTime
+                val totalDuration = endTime - startTime
+                val finalMinutes = finalDuration / 60000
+                val totalMinutes = totalDuration / 60000
+                
+                Log.info { "Reading session ended. Final duration: ${finalDuration}ms (${finalMinutes}min), Total: ${totalDuration}ms (${totalMinutes}min)" }
+                
+                // Only track if user spent at least 5 seconds reading since last save
+                if (finalDuration >= 5000) {
+                    scope.launch {
+                        try {
+                            Log.info { "Saving final reading time: ${finalMinutes} minutes" }
+                            vm.trackReadingProgressUseCase.trackReadingTime(finalDuration)
+                            vm.trackReadingProgressUseCase.updateReadingStreak(endTime)
+                            Log.info { "Final reading time saved successfully" }
+                        } catch (e: Exception) {
+                            Log.error { "Failed to track final reading time: ${e.message}" }
+                            e.printStackTrace()
+                        }
+                    }
+                } else {
+                    Log.info { "Skipping final save: duration (${finalDuration}ms) is less than 5 seconds" }
+                }
+                
+                // Clear process state when user intentionally leaves the screen
+                processStateManager.clearReaderState()
             }
         }
 

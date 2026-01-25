@@ -174,6 +174,7 @@ class TTSV2ScreenSpec(
         val gradioTTSManager: GradioTTSManager = koinInject()
         val processStateManager: ProcessStateManager = koinInject()
         val chapterNotifier: ChapterNotifier = koinInject()
+        val trackReadingProgressUseCase: ireader.domain.usecases.statistics.TrackReadingProgressUseCase = koinInject()
         
         // Set up platform-specific intents for notification actions
         LaunchedEffect(Unit) {
@@ -754,6 +755,30 @@ class TTSV2ScreenSpec(
                         timestamp = currentTimeToLong()
                     )
                 )
+            }
+        }
+        
+        // Track reading time - records time spent in TTS screen
+        DisposableEffect(key1 = Unit) {
+            val startTime = currentTimeToLong()
+            
+            onDispose {
+                val endTime = currentTimeToLong()
+                val durationMillis = endTime - startTime
+                
+                // Only track if user spent at least 5 seconds listening (to avoid accidental opens)
+                if (durationMillis >= 5000) {
+                    scope.launch {
+                        try {
+                            trackReadingProgressUseCase.trackReadingTime(durationMillis)
+                            
+                            // Also update reading streak
+                            trackReadingProgressUseCase.updateReadingStreak(endTime)
+                        } catch (e: Exception) {
+                            Log.error { "Failed to track TTS reading time" }
+                        }
+                    }
+                }
             }
         }
         

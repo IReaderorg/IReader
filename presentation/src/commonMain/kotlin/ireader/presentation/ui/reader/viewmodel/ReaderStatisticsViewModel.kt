@@ -36,6 +36,10 @@ class ReaderStatisticsViewModel(
     private var sessionStartTime: Long? = null
     private var totalReadingTimeMs: Long = 0
     
+    // Public accessor for session start time (for UI display)
+    val currentSessionStartTime: Long?
+        get() = sessionStartTime
+    
     // Current chapter info
     var currentChapterId by mutableStateOf<Long?>(null)
         private set

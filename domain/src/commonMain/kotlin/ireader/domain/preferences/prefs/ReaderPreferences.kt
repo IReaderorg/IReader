@@ -625,6 +625,11 @@ Visit.*for more chapters"""
     fun dailyReadingGoal(): Preference<Int> {
         return preferenceStore.getInt("daily_reading_goal", 30)
     }
+    
+    // Show reading time indicator in reader screen
+    fun showReadingTimeIndicator(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_reading_time_indicator", false)
+    }
 
     // TTS preferences
     fun ttsSpeed(): Preference<Float> {

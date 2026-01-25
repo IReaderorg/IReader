@@ -1802,6 +1802,9 @@ class ReaderScreenViewModel(
     // TTS with translated text preference
     val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().asState()
     
+    // Show reading time indicator preference
+    val showReadingTimeIndicator = readerPreferences.showReadingTimeIndicator().asState()
+    
     // Note: customFonts and selectedFontId are declared before init block
     
     // ==================== UI Action Methods ====================
