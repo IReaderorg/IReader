@@ -33,7 +33,7 @@ class MyAnimeListApi(
         const val BASE_MANGA_URL = "https://myanimelist.net/manga/"
         
         // Register your app at https://myanimelist.net/apiconfig
-        const val CLIENT_ID = "6114d00ca681b7701d1e15fe11a4987e" // IReader MAL client ID
+        const val CLIENT_ID = "b57bb4b4baefbe85d9f4ca61a38c58b3" // IReader MAL client ID
     }
     
     private var accessToken: String? = null

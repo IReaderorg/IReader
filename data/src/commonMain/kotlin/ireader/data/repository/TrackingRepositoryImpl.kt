@@ -472,8 +472,8 @@ class TrackingRepositoryImpl(
     fun isAniListAuthenticated(): Boolean = aniListRepository.isAuthenticated()
     
     // MyAnimeList
-    fun getMalAuthUrl(): String? = malRepository?.getAuthUrl()
-    suspend fun loginToMal(authCode: String): Boolean = malRepository?.login(authCode) == true
+    override suspend fun getMalAuthUrl(): String = malRepository?.getAuthUrl() ?: throw IllegalStateException("MAL repository not available")
+    override suspend fun loginToMal(authCode: String): Boolean = malRepository?.login(authCode) == true
     fun logoutFromMal() = malRepository?.logout()
     fun isMalAuthenticated(): Boolean = malRepository?.isAuthenticated() == true
     

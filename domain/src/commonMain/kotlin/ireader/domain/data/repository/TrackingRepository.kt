@@ -52,6 +52,10 @@ interface TrackingRepository {
     // MyNovelList specific
     fun getMyNovelListBaseUrl(): String
     fun setMyNovelListBaseUrl(url: String)
+    
+    // MAL OAuth specific
+    suspend fun getMalAuthUrl(): String
+    suspend fun loginToMal(authCode: String): Boolean
 }
 
 /**
