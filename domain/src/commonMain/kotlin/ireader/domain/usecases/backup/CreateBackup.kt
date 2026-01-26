@@ -79,7 +79,7 @@ class CreateBackup  internal constructor(
     }
 
     private suspend fun dumpChapters(bookId: Long, currentEvent: (String) -> Unit): List<ChapterProto> {
-        return chapterRepository.findChaptersByBookId(bookId).fastMap { chapter ->
+        return chapterRepository.findChaptersByBookIdWithContent(bookId).fastMap { chapter ->
             currentEvent(chapter.name)
             ChapterProto.fromDomain(chapter)
         }
