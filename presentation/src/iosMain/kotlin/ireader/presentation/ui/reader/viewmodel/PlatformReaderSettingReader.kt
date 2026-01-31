@@ -37,7 +37,8 @@ actual class PlatformReaderSettingReader {
         stateChapter?.let { chapter ->
             scope.launch(kotlinx.coroutines.NonCancellable) {
                 ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: lazyScrollPosition=$lazyScrollPosition" }
-                insertUseCases.insertChapter(chapter.copy(lastPageRead = lazyScrollPosition))
+                // Use the dedicated updateLastPageRead method for efficient update
+                saveScrollPosition(lazyScrollPosition)
                 getChapterUseCase.updateLastReadTime(chapter)
             }
         }

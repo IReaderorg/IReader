@@ -135,94 +135,97 @@ fun ReaderText(
     
     // Single LaunchedEffect to handle initial scroll position restoration
     // This runs for BOTH Page and Continues modes
-    LaunchedEffect(key1 = currentChapterId, key2 = successState?.scrollToEndOnChapterChange) {
+    // Key: chapter ID change triggers this, scrollToEnd is handled separately
+    LaunchedEffect(key1 = currentChapterId) {
         val chapterId = currentChapterId ?: return@LaunchedEffect
-        val shouldScrollToEnd = successState?.scrollToEndOnChapterChange ?: false
-        val contentSize = successState?.currentChapter?.content?.size ?: 0
         
-        ireader.core.log.Log.debug { "ReaderText Scroll LaunchedEffect: chapterId=$chapterId, lastScrolledChapterId=$lastScrolledChapterId, shouldScrollToEnd=$shouldScrollToEnd, contentSize=$contentSize, lastPageRead=$lastPageRead, hasRestoredInitialPosition=$hasRestoredInitialPosition" }
+        // Get the fresh state inside the effect (not composition capture)
+        val freshState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+        val currentLastPageRead = freshState?.currentChapter?.lastPageRead ?: 0L
+        val contentSize = freshState?.currentChapter?.content?.size ?: 0
+        val shouldScrollToEnd = freshState?.scrollToEndOnChapterChange ?: false
         
-        // Skip if same chapter and not a scroll-to-end request
-        if (chapterId == lastScrolledChapterId && !shouldScrollToEnd) return@LaunchedEffect
+        ireader.core.log.Log.debug { "=== SCROLL RESTORATION ===" }
+        ireader.core.log.Log.debug { "chapterId=$chapterId, lastScrolledChapterId=$lastScrolledChapterId" }
+        ireader.core.log.Log.debug { "lastPageRead=$currentLastPageRead, contentSize=$contentSize, shouldScrollToEnd=$shouldScrollToEnd" }
+        ireader.core.log.Log.debug { "hasRestoredInitialPosition=$hasRestoredInitialPosition" }
         
-        if (shouldScrollToEnd && contentSize > 0) {
-            // Previous chapter navigation - scroll to end (void space)
-            // Structure: content items (indices 0..N-1) + void (index N)
-            val voidIndex = contentSize
-            
-            // Wait for LazyColumn to be populated, then scroll
-            repeat(20) {
-                kotlinx.coroutines.delay(16) // ~1 frame
-                val totalItems = lazyListState.layoutInfo.totalItemsCount
-                if (totalItems > voidIndex) {
-                    lazyListState.scrollToItem(voidIndex)
-                    lastScrolledChapterId = chapterId
-                    hasRestoredInitialPosition = true
-                    vm.scrollToEndOnChapterChange = false
-                    ireader.core.log.Log.debug { "Scrolled to end at index $voidIndex" }
-                    return@LaunchedEffect
-                }
-            }
-            // Fallback: scroll to last available item
-            val totalItems = lazyListState.layoutInfo.totalItemsCount
-            if (totalItems > 0) {
-                lazyListState.scrollToItem(totalItems - 1)
-            }
-            vm.scrollToEndOnChapterChange = false
-            lastScrolledChapterId = chapterId
+        // Check if this is the same chapter we already processed
+        if (chapterId == lastScrolledChapterId) {
+            ireader.core.log.Log.debug { "Same chapter, skipping restoration" }
+            return@LaunchedEffect
+        }
+        
+        // Mark that we're processing this chapter
+        val isFirstChapterOfSession = lastScrolledChapterId == null
+        lastScrolledChapterId = chapterId
+        
+        ireader.core.log.Log.debug { "isFirstChapterOfSession=$isFirstChapterOfSession" }
+        
+        // Wait for LazyColumn to have items
+        var totalItems = 0
+        repeat(50) { // Wait up to ~800ms for content
+            kotlinx.coroutines.delay(16) // ~1 frame
+            totalItems = lazyListState.layoutInfo.totalItemsCount
+            if (totalItems > 0) return@repeat
+        }
+        
+        ireader.core.log.Log.debug { "LazyColumn has $totalItems items" }
+        
+        if (totalItems == 0) {
+            ireader.core.log.Log.debug { "No items in LazyColumn, aborting scroll" }
             hasRestoredInitialPosition = true
-        } else if (chapterId != lastScrolledChapterId) {
-            // Check if this is initial screen open (lastScrolledChapterId is null)
-            val isInitialOpen = lastScrolledChapterId == null
-            
-            ireader.core.log.Log.debug { "Chapter change: isInitialOpen=$isInitialOpen, lastPageRead=$lastPageRead, contentSize=$contentSize" }
-            
-            // Wait for content to be ready before making any scroll decision
-            var waitedForContent = false
-            repeat(30) { // Wait up to ~500ms for content
-                kotlinx.coroutines.delay(16) // ~1 frame
+            return@LaunchedEffect
+        }
+        
+        // Decide what scroll action to take
+        when {
+            shouldScrollToEnd -> {
+                // Previous chapter navigation - scroll to end
+                val targetIndex = (totalItems - 1).coerceAtLeast(0)
+                ireader.core.log.Log.debug { "Scrolling to END (previous chapter): targetIndex=$targetIndex" }
+                lazyListState.scrollToItem(targetIndex)
+                vm.scrollToEndOnChapterChange = false
+            }
+            isFirstChapterOfSession && currentLastPageRead > 0 -> {
+                // Initial open with saved position - restore from lastPageRead
+                val targetIndex = currentLastPageRead.toInt().coerceIn(0, totalItems - 1)
+                ireader.core.log.Log.debug { "RESTORING saved position: lastPageRead=$currentLastPageRead -> targetIndex=$targetIndex" }
+                lazyListState.scrollToItem(targetIndex)
+            }
+            !isFirstChapterOfSession -> {
+                // Next chapter navigation - scroll to top
+                ireader.core.log.Log.debug { "Scrolling to TOP (next chapter)" }
+                lazyListState.scrollToItem(0)
+            }
+            else -> {
+                // Initial open with no saved position - scroll to top
+                ireader.core.log.Log.debug { "Scrolling to TOP (initial, no saved position)" }
+                lazyListState.scrollToItem(0)
+            }
+        }
+        
+        hasRestoredInitialPosition = true
+        ireader.core.log.Log.debug { "=== SCROLL RESTORATION COMPLETE ===" }
+    }
+    
+    // Separate LaunchedEffect for scrollToEnd changes (when navigating to previous chapter)
+    LaunchedEffect(key1 = successState?.scrollToEndOnChapterChange) {
+        val shouldScrollToEnd = successState?.scrollToEndOnChapterChange ?: false
+        if (!shouldScrollToEnd) return@LaunchedEffect
+        
+        // Only scroll to end if we've already set up this chapter
+        if (lastScrolledChapterId == currentChapterId && hasRestoredInitialPosition) {
+            repeat(20) {
+                kotlinx.coroutines.delay(16)
                 val totalItems = lazyListState.layoutInfo.totalItemsCount
                 if (totalItems > 0) {
-                    waitedForContent = true
-                    
-                    if (isInitialOpen && lastPageRead > 0 && !hasRestoredInitialPosition) {
-                        // Initial open with saved position - restore from lastPageRead
-                        val targetIndex = if (lastPageRead < totalItems * 2) {
-                            lastPageRead.toInt().coerceIn(0, totalItems - 1)
-                        } else {
-                            // Legacy pixel offset - estimate item index
-                            val estimatedIndex = (lastPageRead / 100).toInt()
-                            estimatedIndex.coerceIn(0, totalItems - 1)
-                        }
-                        
-                        ireader.core.log.Log.debug { "Restoring scroll position: lastPageRead=$lastPageRead, totalItems=$totalItems, targetIndex=$targetIndex" }
-                        lazyListState.scrollToItem(targetIndex)
-                        lastScrolledChapterId = chapterId
-                        hasRestoredInitialPosition = true
-                        return@LaunchedEffect
-                    } else if (!isInitialOpen) {
-                        // Actual chapter navigation (next chapter) - scroll to start
-                        ireader.core.log.Log.debug { "Next chapter navigation - scrolling to top" }
-                        lazyListState.scrollToItem(0)
-                        lastScrolledChapterId = chapterId
-                        hasRestoredInitialPosition = true
-                        return@LaunchedEffect
-                    } else {
-                        // Initial open with no saved position (lastPageRead == 0) - scroll to top
-                        ireader.core.log.Log.debug { "Initial open with no saved position - scrolling to top" }
-                        lazyListState.scrollToItem(0)
-                        lastScrolledChapterId = chapterId
-                        hasRestoredInitialPosition = true
-                        return@LaunchedEffect
-                    }
+                    val targetIndex = (totalItems - 1).coerceAtLeast(0)
+                    ireader.core.log.Log.debug { "Late scrollToEnd: targetIndex=$targetIndex" }
+                    lazyListState.scrollToItem(targetIndex)
+                    vm.scrollToEndOnChapterChange = false
+                    return@LaunchedEffect
                 }
-            }
-            
-            // Fallback if content never loaded
-            if (!waitedForContent) {
-                ireader.core.log.Log.debug { "Content never loaded, marking chapter as scrolled" }
-                lastScrolledChapterId = chapterId
-                hasRestoredInitialPosition = true
             }
         }
     }
@@ -247,7 +250,8 @@ fun ReaderText(
                 val positionToSave = currentPosition.toLong()
                 ireader.core.log.Log.debug { "Periodic save: saving scroll position $positionToSave for chapter ${chapter.id}" }
                 
-                vm.insertUseCases.insertChapter(chapter.copy(lastPageRead = positionToSave))
+                // Use the dedicated saveScrollPosition method which uses an efficient SQL update
+                vm.saveScrollPosition(positionToSave)
                 lastSavedScrollPosition = currentPosition
             }
         }
