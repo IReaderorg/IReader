@@ -262,7 +262,11 @@ class GoogleDriveViewModel(
                             }
                         }
                         
-                        backupData.novels.forEach { book -> bookUseCases.updateBook(book) }
+                        // First, insert books using insertBooks (uses upsert to ensure books exist)
+                        // This must be done BEFORE inserting chapters to avoid foreign key constraint errors
+                        insertUseCases.insertBooks(backupData.novels)
+                        
+                        // Now insert chapters - books now exist so foreign key constraints will pass
                         if (backupData.chapters.isNotEmpty()) {
                             insertUseCases.insertChapters(backupData.chapters)
                         }
