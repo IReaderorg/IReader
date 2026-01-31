@@ -215,6 +215,12 @@ class ChapterRepositoryImpl(
             chapterQueries.delelteAllChapters()
         }
     }
+    
+    override suspend fun updateLastPageRead(chapterId: Long, lastPageRead: Long) {
+        handler.await {
+            chapterQueries.updateLastPageRead(lastPageRead, chapterId)
+        }
+    }
 
     override suspend fun findChaptersByBookIdWithContent(bookId: Long): List<Chapter> {
         // Use full query with content for EPUB export

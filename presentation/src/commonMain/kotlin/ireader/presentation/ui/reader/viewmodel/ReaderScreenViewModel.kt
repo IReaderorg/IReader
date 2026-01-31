@@ -299,6 +299,27 @@ class ReaderScreenViewModel(
     }
     
     /**
+     * Saves the current scroll position for the current chapter.
+     * This is called periodically as the user scrolls to prevent data loss.
+     * Uses a dedicated update query that only modifies lastPageRead field.
+     * 
+     * @param scrollPosition The scroll position (LazyColumn item index) to save
+     */
+    fun saveScrollPosition(scrollPosition: Long) {
+        val chapter = stateChapter ?: return
+        scope.launch {
+            try {
+                // Use the repository's dedicated updateLastPageRead method
+                // which only updates the lastPageRead field without touching content
+                readerUseCasesAggregate.chapterRepository.updateLastPageRead(chapter.id, scrollPosition)
+                Log.debug { "Saved scroll position $scrollPosition for chapter ${chapter.id}" }
+            } catch (e: Exception) {
+                Log.error("Failed to save scroll position", e)
+            }
+        }
+    }
+    
+    /**
      * Load custom fonts asynchronously.
      * Separated from init to ensure customFonts property delegate is fully initialized.
      */
@@ -771,6 +792,8 @@ class ReaderScreenViewModel(
             showSnackBar(UiText.DynamicString("Chapter not found"))
             return null
         }
+        
+        Log.debug { "loadChapter: chapterId=${chapter.id}, lastPageRead=${chapter.lastPageRead}, contentSize=${chapter.content.size}" }
 
         // Get chapters - prefer ChapterController but fallback to database
         // This ensures we have chapters even if ChapterController hasn't loaded yet

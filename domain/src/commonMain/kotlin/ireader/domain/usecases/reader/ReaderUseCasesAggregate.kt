@@ -83,5 +83,8 @@ data class ReaderUseCasesAggregate(
     val importGlossary: ImportGlossaryUseCase,
     
     /** Use case for filtering content with regex patterns */
-    val contentFilter: ContentFilterUseCase
+    val contentFilter: ContentFilterUseCase,
+    
+    /** Chapter repository for direct database operations like updateLastPageRead */
+    val chapterRepository: ireader.domain.data.repository.ChapterRepository
 )

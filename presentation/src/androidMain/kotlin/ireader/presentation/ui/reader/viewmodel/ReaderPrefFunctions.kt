@@ -7,7 +7,6 @@ import android.view.WindowManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.lifecycleScope
 import ireader.core.http.WebViewManger
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.brightness
@@ -110,22 +109,31 @@ actual class PlatformReaderSettingReader(
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
             screenAlwaysOnUseCase(false)
+            
+            // Capture scroll position from LazyListState (used by optimized reader)
+            // We save the first visible item index which can be restored on re-entry
+            val lazyScrollPosition = lazyScrollState.firstVisibleItemIndex.toLong()
+            
             when (readingMode.value) {
                 ReadingMode.Page -> {
                     stateChapter?.let { chapter ->
-                        activity.lifecycleScope.launch {
-                            insertUseCases.insertChapter(chapter.copy(lastPageRead = scrollState.value.toLong()))
+                        // Use ViewModel scope with NonCancellable to ensure save completes
+                        // even when activity is being destroyed (back press)
+                        scope.launch(kotlinx.coroutines.NonCancellable) {
+                            ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: lazyScrollPosition=$lazyScrollPosition" }
+                            insertUseCases.insertChapter(chapter.copy(lastPageRead = lazyScrollPosition))
                             getChapterUseCase.updateLastReadTime(chapter)
                         }
                     }
                 }
                 ReadingMode.Continues -> {
-                    val index = stateChapters.indexOfFirst { it.id == stateChapter?.id }
-                    if (index != -1) {
-                        stateChapters.getOrNull(index)?.let { chapter ->
-                            activity.lifecycleScope.launch {
-                                getChapterUseCase.updateLastReadTime(chapter)
-                            }
+                    // Save scroll position in Continues mode too (fixes issue where position was lost)
+                    stateChapter?.let { chapter ->
+                        // Use ViewModel scope with NonCancellable to ensure save completes
+                        scope.launch(kotlinx.coroutines.NonCancellable) {
+                            ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: lazyScrollPosition=$lazyScrollPosition" }
+                            insertUseCases.insertChapter(chapter.copy(lastPageRead = lazyScrollPosition))
+                            getChapterUseCase.updateLastReadTime(chapter)
                         }
                     }
                 }

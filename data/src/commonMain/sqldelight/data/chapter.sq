@@ -126,6 +126,12 @@ SET book_id = coalesce(:mangaId, book_id),
     date_upload = coalesce(:dateUpload, date_upload)
 WHERE _id = :chapterId;
 
+-- Update only the lastPageRead field for scroll position saving
+updateLastPageRead:
+UPDATE chapter
+SET last_page_read = :lastPageRead
+WHERE _id = :chapterId;
+
 
 delelteAllChapters:
 DELETE FROM chapter;

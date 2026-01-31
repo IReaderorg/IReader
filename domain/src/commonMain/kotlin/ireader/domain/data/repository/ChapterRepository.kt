@@ -128,6 +128,16 @@ interface ChapterRepository : ChapterReadRepository, ChapterWriteRepository {
     override suspend fun deleteAllChapters()
     
     /**
+     * Updates only the lastPageRead field for a chapter.
+     * This is an efficient operation for saving scroll position without
+     * affecting other chapter data like content.
+     * 
+     * @param chapterId The unique identifier of the chapter
+     * @param lastPageRead The scroll position to save
+     */
+    suspend fun updateLastPageRead(chapterId: Long, lastPageRead: Long)
+    
+    /**
      * Subscribes to chapter changes for a specific book.
      * 
      * @param bookId The unique identifier of the book
