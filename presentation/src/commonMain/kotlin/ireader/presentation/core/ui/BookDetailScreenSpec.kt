@@ -281,6 +281,17 @@ data class BookDetailScreenSpec constructor(
             initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
         )
         
+        // Restore scroll position when screen is re-entered
+        // rememberLazyListState only uses initial values on first composition,
+        // so we need to explicitly scroll when navigating back
+        LaunchedEffect(Unit) {
+            if (vm.savedScrollIndex > 0 || vm.savedScrollOffset > 0) {
+                // Wait a frame for the list to be laid out
+                kotlinx.coroutines.delay(50)
+                scrollState.scrollToItem(vm.savedScrollIndex, vm.savedScrollOffset)
+            }
+        }
+        
         // Sheet state
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         
