@@ -302,19 +302,53 @@ class ReaderScreenViewModel(
      * Saves the current scroll position for the current chapter.
      * This is called periodically as the user scrolls to prevent data loss.
      * Uses a dedicated update query that only modifies lastPageRead field.
+     * Also updates the in-memory state so the value is available if ViewModel is cached.
      * 
      * @param scrollPosition The scroll position (LazyColumn item index) to save
      */
     fun saveScrollPosition(scrollPosition: Long) {
         val chapter = stateChapter ?: return
+        
+        // Update in-memory state immediately
+        _currentScrollPosition = scrollPosition
+        
+        // Also update the state's currentChapter.lastPageRead so it's reflected in the cached ViewModel
+        updateSuccessState { state ->
+            state.copy(
+                currentChapter = state.currentChapter.copy(lastPageRead = scrollPosition)
+            )
+        }
+        
+        // Save to database asynchronously
         scope.launch {
             try {
                 // Use the repository's dedicated updateLastPageRead method
                 // which only updates the lastPageRead field without touching content
                 readerUseCasesAggregate.chapterRepository.updateLastPageRead(chapter.id, scrollPosition)
-                Log.debug { "Saved scroll position $scrollPosition for chapter ${chapter.id}" }
             } catch (e: Exception) {
                 Log.error("Failed to save scroll position", e)
+            }
+        }
+    }
+    
+    // Track the current scroll position (used for saving when navigating away)
+    private var _currentScrollPosition: Long = 0L
+    val currentScrollPosition: Long get() = _currentScrollPosition
+    
+    /**
+     * Force save the current scroll position to the database immediately.
+     * This should be called before navigating to a new chapter.
+     */
+    fun saveCurrentScrollPositionToDatabase() {
+        val chapter = stateChapter ?: return
+        val position = _currentScrollPosition
+        if (position > 0) {
+            scope.launch {
+                try {
+                    readerUseCasesAggregate.chapterRepository.updateLastPageRead(chapter.id, position)
+                } catch (e: Exception) {
+                    Log.error("Failed to force save scroll position", e)
+                }
             }
         }
     }
@@ -483,6 +517,31 @@ class ReaderScreenViewModel(
                     )
                 }
                 Log.debug { "Reloaded chapter: read=${freshChapter.read}, content=${freshChapter.content.size} pages" }
+            }
+        }
+    }
+    
+    /**
+     * Refresh the current chapter from the database to get the latest saved scroll position.
+     * This should be called when the screen is re-entered (e.g., after navigating back)
+     * to ensure the cached ViewModel state has the fresh lastPageRead value from the database.
+     * 
+     * This is important because the ViewModel may be cached for performance, meaning
+     * the lastPageRead in ViewModel state could be stale if scrolling was saved during
+     * the previous session but not reflected in the cached state.
+     */
+    fun refreshCurrentChapterFromDatabase() {
+        val currentState = _state.value as? ReaderState.Success ?: return
+        scope.launch {
+            val freshChapter = getChapterUseCase.findChapterById(currentState.currentChapter.id)
+            if (freshChapter != null) {
+                updateSuccessState { state ->
+                    state.copy(
+                        currentChapter = freshChapter,
+                        // Preserve content from current state if fresh chapter has no content (light query)
+                        content = if (freshChapter.content.isNotEmpty()) freshChapter.content else state.content
+                    )
+                }
             }
         }
     }
@@ -777,6 +836,10 @@ class ReaderScreenViewModel(
         force: Boolean = false,
         scrollToEnd: Boolean? = null
     ): Chapter? {
+        // Save current scroll position before loading new chapter
+        // This ensures we don't lose progress when navigating between chapters
+        saveCurrentScrollPositionToDatabase()
+        
         // Track chapter close before loading new chapter
         statisticsViewModel.onChapterClosed()
 
