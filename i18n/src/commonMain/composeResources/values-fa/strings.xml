@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">افزودن ورودی اصطلاح نامه</string>
     <string name="add_more_time">افزودن زمان بیشتر:</string>
     <string name="add_new_book_glossary">افزودن واژه‌نامه جدید کتاب</string>
+    <string name="add_new_rule">افزودن قانون جدید</string>
     <string name="add_novels_to_library_only">فقط هنگام یافتن در نتایج جستجو، رمان ها را به کتابخانه اضافه کنید</string>
     <string name="add_parameter">افزودن پارامتر</string>
     <string name="add_plugin_repository">افزودن مخزن افزونه</string>
     <string name="add_repository">افزودن مخزن</string>
     <string name="add_repository_1">افزودن مخزن</string>
+    <string name="add_rule">افزودن قانون</string>
     <string name="add_to_category">افزودن به دسته بندی</string>
     <string name="add_to_library">افزودن به کتابخانه</string>
+    <string name="add_without_category">افزودن بدون دسته‌بندی</string>
+    <string name="added_genre_rule">قانون ژانر اضافه شد: %1$s</string>
+    <string name="added_source_rule">قانون منبع اضافه شد: %1$s</string>
+    <string name="added_to_category">به %s اضافه شد</string>
     <string name="added_to_library">به کتابخانه اضافه شد</string>
     <string name="additional_details">جزئیات بیشتر:</string>
     <string name="additional_details_optional">جزئیات اضافی (اختیاری)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">همه زمان ها</string>
     <string name="all_types">همه انواع</string>
     <string name="allow_loading_lnreader_compatible_javascript">مجوز بارگیری افزونه های جاوا اسکریپت سازگار با LNReader</string>
+    <string name="allow_mobile_data">اجازه استفاده از داده همراه</string>
     <string name="alpha">آلفا</string>
     <string name="alphaanimation">alphaAnimation</string>
+    <string name="always_ask">همیشه بپرس</string>
     <string name="an_image">یک تصویر</string>
     <string name="analytics">تجزیه و تحلیل</string>
     <string name="analyze_page">تجزیه و تحلیل صفحه</string>
@@ -145,6 +153,9 @@
     <string name="auto">خودکار</string>
     <string name="auto_approve_7_days_old">تایید خودکار موارد ۷+ روزه</string>
     <string name="auto_backup">پشتیبان گیری خودکار</string>
+    <string name="auto_categorization">دسته‌بندی خودکار</string>
+    <string name="auto_categorization_description">رمان‌هایی که با این قوانین مطابقت دارند، به صورت خودکار به این دسته‌بندی اضافه خواهند شد.</string>
+    <string name="auto_categorization_rules">قوانین دسته‌بندی خودکار</string>
     <string name="auto_cleanup">پاکسازی خودکار</string>
     <string name="auto_delete">حذف خودکار</string>
     <string name="auto_delete_chapters">حذف خودکار فصل ها</string>
@@ -192,6 +203,7 @@
     <string name="available_for_download">قابل دسترس برای دانلود</string>
     <string name="available_kokoro_voices">صداهای Kokoro موجود:</string>
     <string name="available_languages">زبان های موجود:</string>
+    <string name="available_voices">صداهای موجود</string>
     <string name="average_reading_speed">میانگین سرعت خواندن</string>
     <string name="avg_cpu">میانگین CPU</string>
     <string name="avg_response_time">میانگین زمان پاسخ</string>
@@ -424,6 +436,7 @@
     <string name="clear_completed">پاک کردن موارد تکمیل شده</string>
     <string name="clear_download_cache">پاک کردن حافظه پنهان دانلود</string>
     <string name="clear_download_cache_confirmation">با این کار تمام فایل‌های موقت دانلود حذف می‌شوند. فصل‌های دانلود شده تحت تأثیر قرار نمی‌گیرند.</string>
+    <string name="clear_failed">پاک کردن شکست‌خورده‌ها</string>
     <string name="clear_filters">پاک کردن فیلترها</string>
     <string name="clear_not_in_library_books">پاک کردن تمام کتاب های غیر موجود در کتابخانه</string>
     <string name="clear_search">پاک کردن جستجو</string>
@@ -556,6 +569,7 @@
     <string name="current_engine">موتور فعلی</string>
     <string name="current_location">موقعیت فعلی:</string>
     <string name="current_progress">پیشرفت فعلی</string>
+    <string name="current_rules">قوانین فعلی</string>
     <string name="currently_reading">در حال خواندن</string>
     <string name="currently_viewing_a_plugin_screen">در حال حاضر در حال مشاهده صفحه یک افزونه هستید</string>
     <string name="custom">سفارشی</string>
@@ -605,6 +619,8 @@
     <string name="deepseek_configuration">پیکربندی DeepSeek</string>
     <string name="deepseek_login_required">ورود به DeepSeek الزامی است</string>
     <string name="deepseek_payment_required">پرداخت DeepSeek مورد نیاز است یا سهمیه API فراتر رفته است</string>
+    <string name="default_category">دسته‌بندی پیش‌فرض</string>
+    <string name="default_category_summary">دسته‌بندی مورد استفاده هنگام افزودن کتاب به کتابخانه</string>
     <string name="default_chapter_sort">مرتب سازی پیش فرض فصل</string>
     <string name="default_reading_mode">حالت خواندن پیش فرض</string>
     <string name="default_reading_mode_for_new_books">حالت خواندن پیش فرض برای کتاب های جدید</string>
@@ -624,11 +640,14 @@
     <string name="delete_art">حذف هنر؟</string>
     <string name="delete_backup">حذف پشتیبان؟</string>
     <string name="delete_category">حذف دسته بندی؟</string>
+    <string name="delete_chapter">حذف فصل</string>
+    <string name="delete_content">حذف محتوا</string>
     <string name="delete_custom_theme">حذف پوسته سفارشی</string>
     <string name="delete_entry">حذف ورودی</string>
     <string name="delete_failed">حذف ناموفق بود: %1$s</string>
     <string name="delete_font">حذف فونت</string>
     <string name="delete_font_1">حذف فونت</string>
+    <string name="delete_rule">حذف قانون</string>
     <string name="delete_source">حذف منبع</string>
     <string name="delete_update">حذف بروزرسانی</string>
     <string name="delete_voice">حذف صدا</string>
@@ -670,6 +689,7 @@
     <string name="discord">Discord</string>
     <string name="discover">کشف</string>
     <string name="discover_plugins_to_enhance_your_reading">افزونه‌ها را برای بهبود تجربه خواندن خود کشف کنید</string>
+    <string name="disk_space_warning">بارگیری‌ها متوقف شد - فضای دیسک کم است</string>
     <string name="dismiss">رد کردن</string>
     <string name="display">نمایش</string>
     <string name="display_adult_content_in_search_results">نمایش محتوای بزرگسالان در نتایج جستجو</string>
@@ -713,6 +733,7 @@
     <string name="download_delay">تاخیر دانلود</string>
     <string name="download_failed">دانلود با خطا مواجه شد: %1$s</string>
     <string name="download_failed_title">بارگیری ناموفق بود</string>
+    <string name="download_from_last_read">بارگیری از آخرین خوانده شده</string>
     <string name="download_information">اطلاعات دانلود</string>
     <string name="download_install">دانلود و نصب</string>
     <string name="download_language_models">دانلود مدل‌های زبان</string>
@@ -735,6 +756,7 @@
     <string name="download_settings">تنظیمات دانلود</string>
     <string name="download_unread">دانلود خوانده نشده ها</string>
     <string name="download_unread_1">دانلود خوانده نشده</string>
+    <string name="download_unread_from_last_read_desc">فصل‌ها را از بعد از آخرین فصل خوانده شده توسط شما بارگیری کنید، نه از اولین فصل نخوانده شده.</string>
     <string name="download_update">بارگیری به‌روزرسانی</string>
     <string name="downloadarrow">پیکان دانلود</string>
     <string name="downloaded">دانلود شد</string>
@@ -744,6 +766,7 @@
     <string name="downloading_1">در حال دانلود...</string>
     <string name="downloading_chapter_audio">در حال بارگیری صدای فصل</string>
     <string name="downloading_chapters">در حال دانلود %1$s فصل</string>
+    <string name="downloading_count">%d در حال بارگیری</string>
     <string name="downloading_unread_chapters">در حال دانلود %1$s فصل خوانده نشده</string>
     <string name="downloading_update">در حال دانلود به‌روزرسانی</string>
     <string name="downloading_update_1">در حال دانلود به‌روزرسانی...</string>
@@ -919,10 +942,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">ناموفق</string>
+    <string name="failed_count">%d ناموفق</string>
     <string name="failed_files">فایل‌های ناموفق</string>
     <string name="failed_imports">وارد کردن‌های ناموفق</string>
     <string name="failed_to_add_entry">افزودن مدخل ناموفق بود: %1$s</string>
     <string name="failed_to_add_repository">افزودن مخزن ناموفق بود: %1$s</string>
+    <string name="failed_to_add_rule">افزودن قانون ناموفق بود: %1$s</string>
     <string name="failed_to_apply_plugin_theme">اعمال پوسته افزونه ناموفق بود: %1$s. استفاده از پوسته پیش‌فرض.</string>
     <string name="failed_to_check_updates">بررسی برای به روز رسانی ها انجام نشد</string>
     <string name="failed_to_copy">کپی با خطا مواجه شد: %1$s</string>
@@ -1058,6 +1083,9 @@
     <string name="generating_audio_for_entire_chapter">درحال تولید صدا برای کل فصل...</string>
     <string name="generating_prompt">در حال تولید درخواست...</string>
     <string name="generation_failed">تولید شکست خورد</string>
+    <string name="genre_name">نام ژانر</string>
+    <string name="genre_placeholder">مثلاً، فانتزی، عاشقانه، اکشن</string>
+    <string name="genre_rule">ژانر</string>
     <string name="genre_selector">انتخاب‌کننده ژانر</string>
     <string name="genrekind_selector">انتخاب‌کننده ژانر/نوع</string>
     <string name="genreprogress">genreProgress</string>
@@ -1174,6 +1202,8 @@
     <string name="import_from_url">وارد کردن از URL</string>
     <string name="import_glossary">وارد کردن واژه‌نامه</string>
     <string name="import_legado_sources">وارد کردن منابع Legado</string>
+    <string name="import_pdf">وارد کردن PDF</string>
+    <string name="import_pdf_files_into_your_library">فایل‌های PDF را برای خواندن و تبدیل متن به گفتار (TTS) به کتابخانه خود وارد کنید</string>
     <string name="import_sources">وارد کردن منابع</string>
     <string name="import_sources_from_legadoyuedu_json">وارد کردن منابع از فرمت Legado/Yuedu JSON. می‌توانید JSON را مستقیماً جای‌گذاری کنید، یک URL وارد کنید، یا از کلیپ‌بورد وارد کنید.</string>
     <string name="import_theme">وارد کردن تم</string>
@@ -1518,7 +1548,9 @@
     <string name="no_badges_yet_earn_badges">هنوز نشانی وجود ندارد. با خرید آنها یا داشتن NFT های IReader نشان کسب کنید!</string>
     <string name="no_book_found_error">هیچ کتابی با این شناسه وجود ندارد.</string>
     <string name="no_books_in_library">هیچ کتابی در کتابخانه نیست</string>
+    <string name="no_categories_create_one">هیچ دسته‌بندی یافت نشد. ابتدا یک دسته‌بندی ایجاد کنید تا کتابخانه خود را سازماندهی کنید.</string>
     <string name="no_categories_found">هیچ دسته ای یافت نشد</string>
+    <string name="no_category">بدون دسته‌بندی</string>
     <string name="no_chapter_found_error">هیچ فصلی با این نام وجود ندارد.</string>
     <string name="no_chapter_is_available">هیچ فصلی در دسترس نیست.</string>
     <string name="no_chapters_available">هیچ فصلی در دسترس نیست</string>
@@ -1571,6 +1603,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">هنوز هیچ نظری برای این فصل وجود ندارد</string>
     <string name="no_reviews_yet">هنوز نظری ثبت نشده است</string>
     <string name="no_reviews_yet_be_the_first_to_review">هنوز نظری ثبت نشده است. اولین نفری باشید که نظر می دهید!</string>
+    <string name="no_rules_configured">هیچ قانونی پیکربندی نشده است. برای دسته‌بندی خودکار رمان‌ها، یک قانون اضافه کنید.</string>
     <string name="no_settings_found">هیچ تنظیمی یافت نشد</string>
     <string name="no_sources_available">هیچ منبعی در دسترس نیست</string>
     <string name="no_sources_available_for_migration">هیچ منبعی برای انتقال در دسترس نیست</string>
@@ -1582,8 +1615,10 @@
     <string name="no_usage_data_available_yet">هنوز هیچ داده استفاده ای در دسترس نیست</string>
     <string name="no_voice_models_available">هیچ مدل صوتی در دسترس نیست</string>
     <string name="no_voices_available">هیچ صدایی در دسترس نیست</string>
+    <string name="no_voices_available_for_this_language">هیچ صدایی برای این زبان موجود نیست</string>
     <string name="none">هیچ کدام</string>
     <string name="normal">عادی</string>
+    <string name="not_connected">متصل نیست</string>
     <string name="not_implemented_yet">هنوز پیاده‌سازی نشده است</string>
     <string name="not_installed">نصب نشده</string>
     <string name="not_tested">تست نشده</string>
@@ -1652,6 +1687,7 @@
     <string name="open_location">باز کردن مکان</string>
     <string name="open_random">باز کردن تصادفی</string>
     <string name="open_site">باز کردن سایت</string>
+    <string name="open_storage_settings">باز کردن تنظیمات ذخیره‌سازی</string>
     <string name="open_tts_manager">باز کردن مدیریت TTS</string>
     <string name="open_tts_screen">نمایش</string>
     <string name="open_tts_settings">باز کردن تنظیمات TTS</string>
@@ -1713,6 +1749,7 @@
     <string name="paste_the_theme_json_below">JSON تم را در زیر جایگذاری کنید:</string>
     <string name="pause">مکث</string>
     <string name="pause_all">توقف همه</string>
+    <string name="pause_downloads">توقف بارگیری‌ها</string>
     <string name="paused">متوقف شده</string>
     <string name="payment_method">روش پرداخت</string>
     <string name="pen">قلم</string>
@@ -1864,6 +1901,7 @@
     <string name="query_must_not_be_empty">پرس و جو نباید خالی باشد.</string>
     <string name="queue_failed">صف ناموفق بود</string>
     <string name="queued">در صف</string>
+    <string name="queued_count">%d در صف</string>
     <string name="quick_add_popular_repositories">افزودن سریع مخازن محبوب</string>
     <string name="quick_add_repository">اضافه کردن سریع مخزن</string>
     <string name="quick_fill_same_url_for_all_projects">پر کردن سریع (URL یکسان برای همه پروژه ها)</string>
@@ -2022,7 +2060,9 @@
     <string name="resume">ادامه</string>
     <string name="resume_all">ادامه همه</string>
     <string name="resume_download">ادامه دانلود</string>
+    <string name="resume_downloads">ادامه بارگیری‌ها</string>
     <string name="retry">تلاش مجدد</string>
+    <string name="retry_all_failed">تلاش مجدد برای همه شکست‌خورده‌ها</string>
     <string name="retry_failed">تلاش مجدد برای ناموفق‌ها</string>
     <string name="retry_loading">تلاش مجدد برای بارگیری</string>
     <string name="retrying_download">تلاش مجدد برای دانلود</string>
@@ -2042,7 +2082,10 @@
     <string name="right">راست</string>
     <string name="rotate_screen_automatically">چرخش خودکار صفحه</string>
     <string name="rotation">چرخش</string>
+    <string name="rule_already_exists">قانونی برای این مورد از قبل در این دسته‌بندی وجود دارد</string>
+    <string name="rule_count">%1$d قانون</string>
     <string name="rule_syntax_help">راهنمای نحو قانون</string>
+    <string name="rules_count">%1$d قانون</string>
     <string name="run_health_check">اجرای بررسی سلامت</string>
     <string name="run_the_migration_community_sourcesql">فایل migration_community_source.sql را در ویرایشگر SQL Supabase خود اجرا کنید تا این جداول ایجاد شوند.</string>
     <string name="sample_text">متن نمونه</string>
@@ -2117,6 +2160,7 @@
     <string name="select_backup_file">انتخاب فایل پشتیبان</string>
     <string name="select_between">انتخاب بین</string>
     <string name="select_books_to_migrate">انتخاب کتاب ها برای انتقال</string>
+    <string name="select_categories">انتخاب دسته‌بندی‌ها</string>
     <string name="select_chapters">انتخاب فصل ها</string>
     <string name="select_cloud_provider">انتخاب ارائه دهنده ابر</string>
     <string name="select_engine">انتخاب موتور</string>
@@ -2132,6 +2176,7 @@
     <string name="select_model">مدل را انتخاب کنید</string>
     <string name="select_navigation_style">انتخاب سبک پیمایش</string>
     <string name="select_source_to_migrate_to">منبع برای انتقال به را انتخاب کنید</string>
+    <string name="select_storage_folder">انتخاب پوشه ذخیره‌سازی</string>
     <string name="select_target_source">انتخاب منبع هدف</string>
     <string name="select_the_languages_you_want">زبان هایی را که می خواهید هنگام مرور و جستجوی محتوا ببینید انتخاب کنید. می توانید چندین زبان را انتخاب کنید.</string>
     <string name="select_the_languages_you_want_1">زبان هایی را که می خواهید هنگام مرور منابع ببینید انتخاب کنید. فقط زبان هایی با منابع موجود نشان داده می شوند.</string>
@@ -2155,6 +2200,7 @@
     <string name="selectors_for_the_explorelatest_page">انتخاب‌گرها برای صفحه کاوش/آخرین‌ها (اختیاری، اگر خالی باشد از قوانین جستجو استفاده می‌کند)</string>
     <string name="send_reset_email">ارسال ایمیل بازنشانی</string>
     <string name="sentence_highlighting">برجسته‌سازی جمله</string>
+    <string name="set_categories">تنظیم دسته‌بندی‌ها</string>
     <string name="set_eth_wallet_address">تنظیم آدرس کیف پول ETH</string>
     <string name="set_name">تنظیم نام</string>
     <string name="sets_the_tone_of_translated_text">لحن متن ترجمه شده را تعیین می‌کند</string>
@@ -2257,10 +2303,13 @@
     <string name="source_browse_latest">مرور آخرین</string>
     <string name="source_extension_not_installed">افزونه منبع نصب نشده است</string>
     <string name="source_id">شناسه منبع</string>
+    <string name="source_id_or_name">شناسه یا نام منبع</string>
     <string name="source_json">JSON منبع</string>
     <string name="source_name">نام منبع *</string>
     <string name="source_needs_update">منبع نیاز به به‌روزرسانی دارد</string>
     <string name="source_not_available">این منبع در دستگاه شما در دسترس نیست.</string>
+    <string name="source_placeholder">مثلاً، 12345 یا NovelUpdates</string>
+    <string name="source_rule">منبع</string>
     <string name="source_term">عبارت منبع</string>
     <string name="source_title">عنوان منبع</string>
     <string name="source_unavailable">منبع در دسترس نیست</string>
@@ -2287,11 +2336,16 @@
     <string name="stop">توقف</string>
     <string name="stop_playback_after">توقف پخش پس از:</string>
     <string name="storage">ذخیره سازی</string>
+    <string name="storage_access_lost">دسترسی به فضای ذخیره‌سازی از دست رفت</string>
+    <string name="storage_access_lost_description">آی‌ریدر دیگر به پوشه ذخیره‌سازی دسترسی ندارد. لطفاً یک پوشه انتخاب کنید تا بتوانید از برنامه استفاده کنید.</string>
+    <string name="storage_access_lost_reasons">پوشه ممکن است حذف یا جابجا شده باشد، یا دسترسی آن لغو شده باشد. این اتفاق ممکن است پس از به‌روزرسانی برنامه یا تغییرات سیستمی رخ دهد.</string>
+    <string name="storage_is_needed_for">فضای ذخیره‌سازی برای موارد زیر مورد نیاز است:</string>
     <string name="storage_permission_privacy_note">IReader فقط به پوشه‌ای که انتخاب می‌کنید دسترسی دارد. سایر فایل‌های شما خصوصی و دست‌نخورده باقی می‌مانند.</string>
     <string name="storage_permission_required_explanation">توضیح مجوز مورد نیاز برای ذخیره سازی
     </string>
     <string name="storage_permission_subtitle">پوشه‌ای را انتخاب کنید که IReader دانلودها، افزونه‌ها و پشتیبان‌های شما را در آن ذخیره کند</string>
     <string name="storage_permission_title">انتخاب پوشه ذخیره‌سازی</string>
+    <string name="storage_required">فضای ذخیره‌سازی مورد نیاز است</string>
     <string name="storage_settings">تنظیمات ذخیره‌سازی</string>
     <string name="storage_setup">تنظیمات ذخیره‌سازی</string>
     <string name="storage_usage">میزان استفاده از حافظه</string>
@@ -2359,6 +2413,7 @@
     <string name="system_integration_multiple_engines_supported">✓ یکپارچه‌سازی سیستم • ✓ پشتیبانی از چند موتور • ✓ بدون نیاز به دانلود</string>
     <string name="system_notifications">سیستم و اعلان‌ها</string>
     <string name="system_notifications_1">اعلان‌های سیستم</string>
+    <string name="system_settings">تنظیمات سیستم</string>
     <string name="system_tts_settings">تنظیمات TTS سیستم</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">زبانه ها</string>
@@ -2722,11 +2777,14 @@
     <string name="whats_new_1">چه خبر؟</string>
     <string name="whats_new_2">چه خبر:</string>
     <string name="while_charging">در حین شارژ</string>
+    <string name="why_did_this_happen">چرا این اتفاق افتاد؟</string>
     <string name="why_donate">چرا اهدا کنیم؟</string>
     <string name="why_is_this_needed">چرا این مورد نیاز است؟</string>
     <string name="width">عرض</string>
     <string name="width_1">عرض</string>
     <string name="wifi_only">فقط WiFi</string>
+    <string name="wifi_only_mode">حالت فقط وای‌فای</string>
+    <string name="wifi_only_warning">بارگیری‌ها متوقف شد - حالت فقط وای‌فای فعال است</string>
     <string name="with_trailing_content">با محتوای انتهایی</string>
     <string name="wizard">جادوگر</string>
     <string name="wizard_step">مرحله جادوگر</string>

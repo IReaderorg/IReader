@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">Lisää sanastomerkintä</string>
     <string name="add_more_time">Lisää aikaa:</string>
     <string name="add_new_book_glossary">Lisää uusi kirjan sanasto</string>
+    <string name="add_new_rule">Lisää uusi sääntö</string>
     <string name="add_novels_to_library_only">Lisää romaanit kirjastoon vain, kun ne löytyvät hakutuloksista</string>
     <string name="add_parameter">Lisää parametri</string>
     <string name="add_plugin_repository">Lisää liitännäisvarasto</string>
     <string name="add_repository">Lisää tietovarasto</string>
     <string name="add_repository_1">Lisää varasto</string>
+    <string name="add_rule">Lisää sääntö</string>
     <string name="add_to_category">Lisää luokkaan</string>
     <string name="add_to_library">Lisää kirjastoon</string>
+    <string name="add_without_category">Lisää ilman luokkaa</string>
+    <string name="added_genre_rule">Lisätty lajisääntö: %1$s</string>
+    <string name="added_source_rule">Lisätty lähdesääntö: %1$s</string>
+    <string name="added_to_category">Lisätty luokkaan %s</string>
     <string name="added_to_library">Lisätty kirjastoon</string>
     <string name="additional_details">Lisätietoja:</string>
     <string name="additional_details_optional">Lisätiedot (valinnainen)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">Kaikki aika</string>
     <string name="all_types">Kaikki tyypit</string>
     <string name="allow_loading_lnreader_compatible_javascript">Salli LNReader-yhteensopivien JavaScript-lisäosien lataaminen</string>
+    <string name="allow_mobile_data">Salli mobiilidata</string>
     <string name="alpha">alpha</string>
     <string name="alphaanimation">alphaAnimaatio</string>
+    <string name="always_ask">Kysy aina</string>
     <string name="an_image">kuva</string>
     <string name="analytics">Analytiikka</string>
     <string name="analyze_page">Analysoi sivu</string>
@@ -145,6 +153,9 @@
     <string name="auto">Auto</string>
     <string name="auto_approve_7_days_old">Hyväksy automaattisesti yli 7 päivää vanhat</string>
     <string name="auto_backup">Automaattinen varmuuskopiointi</string>
+    <string name="auto_categorization">Automaattinen luokittelu</string>
+    <string name="auto_categorization_description">Näitä sääntöjä vastaavat romaanit lisätään automaattisesti tähän luokkaan.</string>
+    <string name="auto_categorization_rules">Automaattisen luokittelun säännöt</string>
     <string name="auto_cleanup">Automaattinen siivous</string>
     <string name="auto_delete">Automaattinen poisto</string>
     <string name="auto_delete_chapters">Poista luvut automaattisesti</string>
@@ -192,6 +203,7 @@
     <string name="available_for_download">Ladattavissa</string>
     <string name="available_kokoro_voices">Saatavilla olevat Kokoro-äänet:</string>
     <string name="available_languages">Saatavilla olevat kielet:</string>
+    <string name="available_voices">Käytettävissä olevat äänet</string>
     <string name="average_reading_speed">Keskimääräinen lukunopeus</string>
     <string name="avg_cpu">Keskim. CPU</string>
     <string name="avg_response_time">Keskim. vasteaika</string>
@@ -424,6 +436,7 @@
     <string name="clear_completed">Tyhjennä valmiit</string>
     <string name="clear_download_cache">Tyhjennä latausvälimuisti</string>
     <string name="clear_download_cache_confirmation">Tämä poistaa kaikki väliaikaiset lataustiedostot. Ladatut luvut eivät vaikuta.</string>
+    <string name="clear_failed">Tyhjennä epäonnistuneet</string>
     <string name="clear_filters">Tyhjennä suodattimet</string>
     <string name="clear_not_in_library_books">Tyhjennä kaikki kirjat, jotka eivät ole kirjastossa</string>
     <string name="clear_search">Tyhjennä haku</string>
@@ -556,6 +569,7 @@
     <string name="current_engine">Nykyinen moottori</string>
     <string name="current_location">Nykyinen sijainti:</string>
     <string name="current_progress">Nykyinen edistyminen</string>
+    <string name="current_rules">Nykyiset säännöt</string>
     <string name="currently_reading">Luetaan parhaillaan</string>
     <string name="currently_viewing_a_plugin_screen">Näytetään lisäosan näyttöä</string>
     <string name="custom">Mukautettu</string>
@@ -605,6 +619,8 @@
     <string name="deepseek_configuration">DeepSeek-asetukset</string>
     <string name="deepseek_login_required">DeepSeek-kirjautuminen vaaditaan</string>
     <string name="deepseek_payment_required">DeepSeek -maksu vaaditaan tai API-kiintiö ylitetty</string>
+    <string name="default_category">Oletusluokka</string>
+    <string name="default_category_summary">Luokka, jota käytetään kirjoja kirjastoon lisättäessä</string>
     <string name="default_chapter_sort">Lajittelujärjestys luvuille</string>
     <string name="default_reading_mode">Oletuslukutila</string>
     <string name="default_reading_mode_for_new_books">Uusien kirjojen oletuslukutila</string>
@@ -624,11 +640,14 @@
     <string name="delete_art">Poista taide?</string>
     <string name="delete_backup">Poistetaanko varmuuskopio?</string>
     <string name="delete_category">Poistetaanko kategoria?</string>
+    <string name="delete_chapter">Poista luku</string>
+    <string name="delete_content">Poista sisältö</string>
     <string name="delete_custom_theme">Poista mukautettu teema</string>
     <string name="delete_entry">Poista merkintä</string>
     <string name="delete_failed">Poisto epäonnistui: %1$s</string>
     <string name="delete_font">Poista fontti</string>
     <string name="delete_font_1">Poista fontti</string>
+    <string name="delete_rule">Poista sääntö</string>
     <string name="delete_source">Poista lähde</string>
     <string name="delete_update">Poista päivitys</string>
     <string name="delete_voice">Poista ääni</string>
@@ -676,6 +695,7 @@
     <string name="discord">Discord</string>
     <string name="discover">Löydä</string>
     <string name="discover_plugins_to_enhance_your_reading">Löydä liitännäisiä parantaaksesi lukukokemustasi</string>
+    <string name="disk_space_warning">Lataukset keskeytetty – levytila vähissä</string>
     <string name="dismiss">Hylkää</string>
     <string name="display">Näyttö</string>
     <string name="display_adult_content_in_search_results">Näytä aikuisille tarkoitettu sisältö hakutuloksissa</string>
@@ -719,6 +739,7 @@
     <string name="download_delay">Latausviive</string>
     <string name="download_failed">Lataus epäonnistui: %1$s</string>
     <string name="download_failed_title">Lataus epäonnistui</string>
+    <string name="download_from_last_read">Lataa viimeksi luetusta</string>
     <string name="download_information">Lataustiedot</string>
     <string name="download_install">Lataa ja asenna</string>
     <string name="download_language_models">Lataa kielimalleja</string>
@@ -742,6 +763,7 @@
     <string name="download_settings">Latausasetukset</string>
     <string name="download_unread">Lataa lukemattomat</string>
     <string name="download_unread_1">Lataa lukemattomat</string>
+    <string name="download_unread_from_last_read_desc">Lataa luvut alkaen viimeksi luetun luvun jälkeisestä sen sijaan, että lataisit ensimmäisestä lukemattomasta luvusta.</string>
     <string name="download_update">Lataa päivitys</string>
     <string name="downloadarrow">latausNuoli</string>
     <string name="downloaded">Ladattu</string>
@@ -751,6 +773,7 @@
     <string name="downloading_1">Ladataan...</string>
     <string name="downloading_chapter_audio">Ladataan luvun ääntä</string>
     <string name="downloading_chapters">Ladataan %1$s lukua</string>
+    <string name="downloading_count">%d latautuu</string>
     <string name="downloading_unread_chapters">Ladataan %1$s lukematonta lukua</string>
     <string name="downloading_update">Ladataan päivitystä</string>
     <string name="downloading_update_1">Ladataan päivitystä...</string>
@@ -927,10 +950,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">Epäonnistui</string>
+    <string name="failed_count">%d epäonnistui</string>
     <string name="failed_files">Epäonnistuneet tiedostot</string>
     <string name="failed_imports">Epäonnistuneet tuonnit</string>
     <string name="failed_to_add_entry">Merkinnän lisääminen epäonnistui: %1$s</string>
     <string name="failed_to_add_repository">Arkiston lisääminen epäonnistui: %1$s</string>
+    <string name="failed_to_add_rule">Säännön lisääminen epäonnistui: %1$s</string>
     <string name="failed_to_apply_plugin_theme">Liitännäisteeman käyttöönotto epäonnistui: %1$s. Käytetään oletusteemaa.</string>
     <string name="failed_to_check_updates">Päivitysten tarkistus epäonnistui</string>
     <string name="failed_to_copy">Kopiointi epäonnistui: %1$s</string>
@@ -1066,6 +1091,9 @@
     <string name="generating_audio_for_entire_chapter">Generoidaan ääntä koko luvulle...</string>
     <string name="generating_prompt">Luodaan kehote...</string>
     <string name="generation_failed">Luonti epäonnistui</string>
+    <string name="genre_name">Lajin nimi</string>
+    <string name="genre_placeholder">esim. fantasia, romantiikka, toiminta</string>
+    <string name="genre_rule">Laji</string>
     <string name="genre_selector">Genren valitsin</string>
     <string name="genrekind_selector">Genren/lajin valitsin</string>
     <string name="genreprogress">genreProgress</string>
@@ -1182,6 +1210,8 @@
     <string name="import_from_url">Tuo URL-osoitteesta</string>
     <string name="import_glossary">Tuo sanasto</string>
     <string name="import_legado_sources">Tuo Legado-lähteet</string>
+    <string name="import_pdf">Tuo PDF</string>
+    <string name="import_pdf_files_into_your_library">Tuo PDF-tiedostoja kirjastoosi lukemista ja puhesynteesiä varten</string>
     <string name="import_sources">Tuo lähteet</string>
     <string name="import_sources_from_legadoyuedu_json">Tuo lähteet Legado/Yuedu JSON-muodossa. Voit liittää JSON-tiedoston suoraan, syöttää URL-osoitteen tai tuoda leikepöydältä.</string>
     <string name="import_theme">Tuo teema</string>
@@ -1531,7 +1561,9 @@
     <string name="no_badges_yet_earn_badges">Ei vielä merkkejä. Ansaitse merkkejä ostamalla niitä tai omistamalla IReader NFT:itä!</string>
     <string name="no_book_found_error">Tällä tunnuksella ei ole kirjaa.</string>
     <string name="no_books_in_library">Ei kirjoja kirjastossa</string>
+    <string name="no_categories_create_one">Luokkia ei löytynyt. Luo ensin luokka järjestelläksesi kirjastoasi.</string>
     <string name="no_categories_found">Kategorioita ei löytynyt</string>
+    <string name="no_category">Ei luokkaa</string>
     <string name="no_chapter_found_error">Tällä nimellä ei ole lukua.</string>
     <string name="no_chapter_is_available">Lukuja ei ole saatavilla.</string>
     <string name="no_chapters_available">Lukuja ei ole saatavilla</string>
@@ -1584,6 +1616,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">Tälle luvulle ei ole vielä arvosteluja</string>
     <string name="no_reviews_yet">Ei vielä arvosteluja</string>
     <string name="no_reviews_yet_be_the_first_to_review">Ei vielä arvosteluja. Ole ensimmäinen, joka arvostelee!</string>
+    <string name="no_rules_configured">Sääntöjä ei ole määritetty. Lisää sääntö luokitellaksesi romaanit automaattisesti.</string>
     <string name="no_settings_found">Asetuksia ei löytynyt</string>
     <string name="no_sources_available">Lähteitä ei ole saatavilla</string>
     <string name="no_sources_available_for_migration">Siirrettäviä lähteitä ei ole saatavilla</string>
@@ -1595,8 +1628,10 @@
     <string name="no_usage_data_available_yet">Käyttötietoja ei ole vielä saatavilla</string>
     <string name="no_voice_models_available">Äänimalleja ei ole saatavilla</string>
     <string name="no_voices_available">Ääniä ei ole saatavilla</string>
+    <string name="no_voices_available_for_this_language">Tälle kielelle ei ole käytettävissä ääniä</string>
     <string name="none">Ei mitään</string>
     <string name="normal">Normaali</string>
+    <string name="not_connected">Ei yhteydessä</string>
     <string name="not_implemented_yet">Ei vielä toteutettu</string>
     <string name="not_installed">Ei asennettu</string>
     <string name="not_tested">Ei testattu</string>
@@ -1665,6 +1700,7 @@
     <string name="open_location">Avaa sijainti</string>
     <string name="open_random">Avaa satunnainen</string>
     <string name="open_site">Avaa sivusto</string>
+    <string name="open_storage_settings">Avaa tallennusasetukset</string>
     <string name="open_tts_manager">Avaa TTS-hallinta</string>
     <string name="open_tts_screen">Näytä</string>
     <string name="open_tts_settings">Avaa TTS-asetukset</string>
@@ -1727,6 +1763,7 @@
     <string name="paste_the_theme_json_below">Liitä teeman JSON alle:</string>
     <string name="pause">Tauko</string>
     <string name="pause_all">Keskeytä kaikki</string>
+    <string name="pause_downloads">Keskeytä lataukset</string>
     <string name="paused">Pysäytetty</string>
     <string name="payment_method">Maksutapa</string>
     <string name="pen">kynä</string>
@@ -1881,6 +1918,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="query_must_not_be_empty">kysely ei saa olla tyhjä.</string>
     <string name="queue_failed">Jono epäonnistui</string>
     <string name="queued">Jonossa</string>
+    <string name="queued_count">%d jonossa</string>
     <string name="quick_add_popular_repositories">Lisää nopeasti suosittuja arkistoja</string>
     <string name="quick_add_repository">Lisää arkisto nopeasti</string>
     <string name="quick_fill_same_url_for_all_projects">Pikatäyttö (sama URL-osoite kaikille projekteille)</string>
@@ -2039,7 +2077,9 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="resume">Jatka</string>
     <string name="resume_all">Jatka kaikkia</string>
     <string name="resume_download">Jatka latausta</string>
+    <string name="resume_downloads">Jatka latauksia</string>
     <string name="retry">Yritä uudelleen</string>
+    <string name="retry_all_failed">Yritä uudelleen kaikki epäonnistuneet</string>
     <string name="retry_failed">Yritä uudelleen epäonnistuneet</string>
     <string name="retry_loading">Yritä ladata uudelleen</string>
     <string name="retrying_download">Yritetään latausta uudelleen</string>
@@ -2059,7 +2099,10 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="right">Oikea</string>
     <string name="rotate_screen_automatically">Kierrä näyttöä automaattisesti</string>
     <string name="rotation">kierto</string>
+    <string name="rule_already_exists">Sääntö tälle on jo olemassa tässä luokassa</string>
+    <string name="rule_count">%1$d sääntö</string>
     <string name="rule_syntax_help">Sääntösyntaksin ohje</string>
+    <string name="rules_count">%1$d sääntöä</string>
     <string name="run_health_check">Suorita kuntotarkastus</string>
     <string name="run_the_migration_community_sourcesql">Aja migration_community_source.sql -tiedosto Supabase SQL Editorissa luodaksesi nämä taulukot.</string>
     <string name="sample_text">Esimerkkiteksti</string>
@@ -2134,6 +2177,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="select_backup_file">Valitse varmuuskopiotiedosto</string>
     <string name="select_between">Valitse väliltä</string>
     <string name="select_books_to_migrate">Valitse siirrettävät kirjat</string>
+    <string name="select_categories">Valitse luokat</string>
     <string name="select_chapters">Valitse luvut</string>
     <string name="select_cloud_provider">Valitse pilvipalvelun tarjoaja</string>
     <string name="select_engine">Valitse moottori</string>
@@ -2149,6 +2193,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="select_model">Valitse malli</string>
     <string name="select_navigation_style">Valitse navigointityyli</string>
     <string name="select_source_to_migrate_to">Valitse lähde, johon siirretään</string>
+    <string name="select_storage_folder">Valitse tallennuskansio</string>
     <string name="select_target_source">Valitse kohdelähde</string>
     <string name="select_the_languages_you_want">Valitse kielet, jotka haluat nähdä sisältöä selatessasi ja etsiessäsi. Voit valita useita kieliä.</string>
     <string name="select_the_languages_you_want_1">Valitse kielet, jotka haluat nähdä lähteitä selatessasi. Vain kielet, joilla on saatavilla lähteitä, näytetään.</string>
@@ -2172,6 +2217,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="selectors_for_the_explorelatest_page">Valitsimet löytö-/uusimmat-sivulle (valinnainen, käyttää hakusääntöjä, jos tyhjä)</string>
     <string name="send_reset_email">Lähetä salasanan palautusviesti</string>
     <string name="sentence_highlighting">Lauseiden korostus</string>
+    <string name="set_categories">Aseta luokat</string>
     <string name="set_eth_wallet_address">Aseta ETH-lompakon osoite</string>
     <string name="set_name">Aseta nimi</string>
     <string name="sets_the_tone_of_translated_text">Asettaa käännetyn tekstin sävyn</string>
@@ -2274,10 +2320,13 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="source_browse_latest">Selaa uusimpia</string>
     <string name="source_extension_not_installed">Lähdelaajennusta ei ole asennettu</string>
     <string name="source_id">Lähteen tunnus</string>
+    <string name="source_id_or_name">Lähteen tunnus tai nimi</string>
     <string name="source_json">Lähde-JSON</string>
     <string name="source_name">Lähteen nimi *</string>
     <string name="source_needs_update">Lähde vaatii päivityksen</string>
     <string name="source_not_available">Tämä lähde ei ole käytettävissä laitteessasi.</string>
+    <string name="source_placeholder">esim. 12345 tai NovelUpdates</string>
+    <string name="source_rule">Lähde</string>
     <string name="source_term">Lähdetermi</string>
     <string name="source_title">Lähteen otsikko</string>
     <string name="source_unavailable">Lähde ei saatavilla</string>
@@ -2304,11 +2353,16 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="stop">Pysäytä</string>
     <string name="stop_playback_after">Pysäytä toisto, kun:</string>
     <string name="storage">Tallennustila</string>
+    <string name="storage_access_lost">Tallennustilan käyttöoikeus menetettiin</string>
+    <string name="storage_access_lost_description">IReaderillä ei enää ole pääsyä tallennuskansioon. Valitse kansio jatkaaksesi sovelluksen käyttöä.</string>
+    <string name="storage_access_lost_reasons">Kansio on ehkä poistettu, siirretty tai lupa peruutettu. Tämä voi tapahtua sovelluspäivitysten tai järjestelmämuutosten jälkeen.</string>
+    <string name="storage_is_needed_for">Tallennustilaa tarvitaan:</string>
     <string name="storage_permission_privacy_note">IReader pääsee käsiksi vain valitsemaasi kansioon. Muut tiedostosi pysyvät yksityisinä ja koskemattomina.</string>
     <string name="storage_permission_required_explanation">Tallennuslupa vaaditaan selitykseen
     </string>
     <string name="storage_permission_subtitle">Valitse kansio, johon IReader tallentaa lataukset, laajennukset ja varmuuskopiot</string>
     <string name="storage_permission_title">Valitse tallennuskansio</string>
+    <string name="storage_required">Tallennustilaa tarvitaan</string>
     <string name="storage_settings">Tallennusasetukset</string>
     <string name="storage_setup">Tallennuksen asennus</string>
     <string name="storage_usage">Tallennustilan käyttö</string>
@@ -2376,6 +2430,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="system_integration_multiple_engines_supported">✓ Järjestelmäintegraatio • ✓ Useita moottoreita tuetaan • ✓ Latauksia ei tarvita</string>
     <string name="system_notifications">Järjestelmä &amp; Ilmoitukset</string>
     <string name="system_notifications_1">Järjestelmäilmoitukset</string>
+    <string name="system_settings">Järjestelmäasetukset</string>
     <string name="system_tts_settings">Järjestelmän TTS-asetukset</string>
     <string name="tab_content">välilehden_sisältö</string>
     <string name="tabs">Välilehdet</string>
@@ -2738,11 +2793,14 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="whats_new_1">Uutta</string>
     <string name="whats_new_2">Uutta:</string>
     <string name="while_charging">Latauksen aikana</string>
+    <string name="why_did_this_happen">Miksi näin tapahtui?</string>
     <string name="why_donate">Miksi lahjoittaa?</string>
     <string name="why_is_this_needed">Miksi tätä tarvitaan?</string>
     <string name="width">Leveys</string>
     <string name="width_1">leveys</string>
     <string name="wifi_only">Vain WiFi</string>
+    <string name="wifi_only_mode">Vain Wi-Fi -tila</string>
+    <string name="wifi_only_warning">Lataukset keskeytetty – vain Wi-Fi -tila käytössä</string>
     <string name="with_trailing_content">Seuraavan sisällön kanssa</string>
     <string name="wizard">Ohjattu toiminto</string>
     <string name="wizard_step">wizard_step</string>

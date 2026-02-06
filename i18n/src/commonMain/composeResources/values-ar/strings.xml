@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">إضافة إدخال للمسرد</string>
     <string name="add_more_time">أضف المزيد من الوقت:</string>
     <string name="add_new_book_glossary">إضافة مسرد كتاب جديد</string>
+    <string name="add_new_rule">إضافة قاعدة جديدة</string>
     <string name="add_novels_to_library_only">إضافة الروايات إلى المكتبة فقط عند العثور عليها في نتائج البحث</string>
     <string name="add_parameter">إضافة معامل</string>
     <string name="add_plugin_repository">إضافة مستودع برامج مساعدة</string>
     <string name="add_repository">إضافة مستودع</string>
     <string name="add_repository_1">إضافة مستودع</string>
+    <string name="add_rule">إضافة قاعدة</string>
     <string name="add_to_category">أضف إلى الفئة</string>
     <string name="add_to_library">أضف إلى المكتبة</string>
+    <string name="add_without_category">إضافة بدون فئة</string>
+    <string name="added_genre_rule">تمت إضافة قاعدة النوع الأدبي: %1$s</string>
+    <string name="added_source_rule">تمت إضافة قاعدة المصدر: %1$s</string>
+    <string name="added_to_category">تمت الإضافة إلى %s</string>
     <string name="added_to_library">تمت الإضافة إلى المكتبة</string>
     <string name="additional_details">تفاصيل إضافية:</string>
     <string name="additional_details_optional">تفاصيل إضافية (اختياري)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">كل الأوقات</string>
     <string name="all_types">جميع الأنواع</string>
     <string name="allow_loading_lnreader_compatible_javascript">السماح بتحميل ملحقات JavaScript المتوافقة مع LNReader</string>
+    <string name="allow_mobile_data">السماح ببيانات الجوال</string>
     <string name="alpha">ألفا</string>
     <string name="alphaanimation">alphaAnimation</string>
+    <string name="always_ask">اسأل دائمًا</string>
     <string name="an_image">صورة</string>
     <string name="analytics">تحليلات</string>
     <string name="analyze_page">تحليل الصفحة</string>
@@ -145,6 +153,9 @@
     <string name="auto">تلقائي</string>
     <string name="auto_approve_7_days_old">موافقة تلقائية على ما تجاوز عمره 7 أيام</string>
     <string name="auto_backup">نسخ احتياطي تلقائي</string>
+    <string name="auto_categorization">التصنيف التلقائي</string>
+    <string name="auto_categorization_description">ستتم إضافة الروايات المطابقة لهذه القواعد تلقائيًا إلى هذه الفئة.</string>
+    <string name="auto_categorization_rules">قواعد التصنيف التلقائي</string>
     <string name="auto_cleanup">تنظيف تلقائي</string>
     <string name="auto_delete">حذف تلقائي</string>
     <string name="auto_delete_chapters">حذف الفصول تلقائيًا</string>
@@ -192,6 +203,7 @@
     <string name="available_for_download">متاح للتنزيل</string>
     <string name="available_kokoro_voices">أصوات Kokoro المتاحة:</string>
     <string name="available_languages">اللغات المتاحة:</string>
+    <string name="available_voices">الأصوات المتاحة</string>
     <string name="average_reading_speed">متوسط سرعة القراءة</string>
     <string name="avg_cpu">متوسط وحدة المعالجة المركزية</string>
     <string name="avg_response_time">متوسط ​​وقت الاستجابة</string>
@@ -424,6 +436,7 @@
     <string name="clear_completed">مسح المكتمل</string>
     <string name="clear_download_cache">مسح ذاكرة التخزين المؤقتة للتنزيل</string>
     <string name="clear_download_cache_confirmation">سيؤدي هذا إلى إزالة جميع ملفات التنزيل المؤقتة. لن تتأثر الفصول التي تم تنزيلها.</string>
+    <string name="clear_failed">مسح الفاشل</string>
     <string name="clear_filters">مسح الفلاتر</string>
     <string name="clear_not_in_library_books">مسح جميع الكتب غير الموجودة في المكتبة</string>
     <string name="clear_search">مسح البحث</string>
@@ -556,6 +569,7 @@
     <string name="current_engine">المحرك الحالي</string>
     <string name="current_location">الموقع الحالي:</string>
     <string name="current_progress">التقدم الحالي</string>
+    <string name="current_rules">القواعد الحالية</string>
     <string name="currently_reading">أقرأ حاليا</string>
     <string name="currently_viewing_a_plugin_screen">أنت تعرض حاليًا شاشة ملحق</string>
     <string name="custom">مخصص</string>
@@ -605,6 +619,8 @@
     <string name="deepseek_configuration">تكوين DeepSeek</string>
     <string name="deepseek_login_required">تسجيل الدخول إلى DeepSeek مطلوب</string>
     <string name="deepseek_payment_required">مطلوب دفع DeepSeek أو تجاوز حصة API</string>
+    <string name="default_category">الفئة الافتراضية</string>
+    <string name="default_category_summary">الفئة المستخدمة عند إضافة الكتب إلى المكتبة</string>
     <string name="default_chapter_sort">الترتيب الافتراضي للفصل</string>
     <string name="default_reading_mode">وضع القراءة الافتراضي</string>
     <string name="default_reading_mode_for_new_books">وضع القراءة الافتراضي للكتب الجديدة</string>
@@ -624,11 +640,14 @@
     <string name="delete_art">حذف الرسم؟</string>
     <string name="delete_backup">حذف النسخة الاحتياطية؟</string>
     <string name="delete_category">حذف الفئة؟</string>
+    <string name="delete_chapter">حذف الفصل</string>
+    <string name="delete_content">حذف المحتوى</string>
     <string name="delete_custom_theme">حذف مظهر مخصص</string>
     <string name="delete_entry">حذف الإدخال</string>
     <string name="delete_failed">فشل الحذف: %1$s</string>
     <string name="delete_font">حذف الخط</string>
     <string name="delete_font_1">حذف الخط</string>
+    <string name="delete_rule">حذف القاعدة</string>
     <string name="delete_source">حذف المصدر</string>
     <string name="delete_update">حذف التحديث</string>
     <string name="delete_voice">حذف الصوت</string>
@@ -676,6 +695,7 @@
     <string name="discord">ديسكورد</string>
     <string name="discover">اكتشف</string>
     <string name="discover_plugins_to_enhance_your_reading">اكتشف الإضافات لتحسين قراءتك</string>
+    <string name="disk_space_warning">تم إيقاف التنزيلات مؤقتًا - مساحة القرص منخفضة</string>
     <string name="dismiss">رفض</string>
     <string name="display">عرض</string>
     <string name="display_adult_content_in_search_results">عرض محتوى البالغين في نتائج البحث</string>
@@ -719,6 +739,7 @@
     <string name="download_delay">تأخير التنزيل</string>
     <string name="download_failed">فشل التنزيل: %1$s</string>
     <string name="download_failed_title">فشل التنزيل</string>
+    <string name="download_from_last_read">تنزيل من آخر قراءة</string>
     <string name="download_information">معلومات التنزيل</string>
     <string name="download_install">تنزيل وتثبيت</string>
     <string name="download_language_models">تنزيل نماذج اللغة</string>
@@ -741,6 +762,7 @@
     <string name="download_settings">إعدادات التنزيل</string>
     <string name="download_unread">تنزيل غير المقروء</string>
     <string name="download_unread_1">تنزيل غير المقروءة</string>
+    <string name="download_unread_from_last_read_desc">تنزيل الفصول التي تلي آخر فصل قرأته بدلًا من تنزيلها من أول فصل غير مقروء</string>
     <string name="download_update">تنزيل التحديث</string>
     <string name="downloadarrow">سهم التنزيل</string>
     <string name="downloaded">تم التنزيل</string>
@@ -750,6 +772,7 @@
     <string name="downloading_1">جارٍ التنزيل...</string>
     <string name="downloading_chapter_audio">يتم تنزيل صوت الفصل</string>
     <string name="downloading_chapters">جارٍ تنزيل %1$s فصلًا</string>
+    <string name="downloading_count">%d قيد التنزيل</string>
     <string name="downloading_unread_chapters">جارٍ تنزيل %1$s فصلًا غير مقروء</string>
     <string name="downloading_update">جارٍ تنزيل التحديث</string>
     <string name="downloading_update_1">يتم تنزيل التحديث...</string>
@@ -925,10 +948,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">فشل</string>
+    <string name="failed_count">%d فشلت</string>
     <string name="failed_files">الملفات الفاشلة</string>
     <string name="failed_imports">عمليات الاستيراد الفاشلة</string>
     <string name="failed_to_add_entry">فشل إضافة إدخال: %1$s</string>
     <string name="failed_to_add_repository">فشل إضافة المستودع: %1$s</string>
+    <string name="failed_to_add_rule">فشل في إضافة القاعدة: %1$s</string>
     <string name="failed_to_apply_plugin_theme">فشل تطبيق مظهر المكون الإضافي: %1$s. يتم استخدام المظهر الافتراضي.</string>
     <string name="failed_to_check_updates">فشل التحقق من وجود تحديثات</string>
     <string name="failed_to_copy">فشل النسخ: %1$s</string>
@@ -1064,6 +1089,9 @@
     <string name="generating_audio_for_entire_chapter">يتم إنشاء صوت للفصل بأكمله...</string>
     <string name="generating_prompt">جاري توليد الإشعار...</string>
     <string name="generation_failed">فشل التوليد</string>
+    <string name="genre_name">اسم النوع الأدبي</string>
+    <string name="genre_placeholder">مثال: خيال، رومانسية، أكشن</string>
+    <string name="genre_rule">النوع الأدبي</string>
     <string name="genre_selector">محدد النوع</string>
     <string name="genrekind_selector">محدد النوع/الصنف</string>
     <string name="genreprogress">genreProgress</string>
@@ -1180,6 +1208,8 @@
     <string name="import_from_url">استيراد من الرابط</string>
     <string name="import_glossary">استيراد مسرد</string>
     <string name="import_legado_sources">استيراد مصادر Legado</string>
+    <string name="import_pdf">استيراد PDF</string>
+    <string name="import_pdf_files_into_your_library">استيراد ملفات PDF إلى مكتبتك للقراءة وتحويل النص إلى كلام</string>
     <string name="import_sources">استيراد مصادر</string>
     <string name="import_sources_from_legadoyuedu_json">استيراد المصادر بتنسيق Legado/Yuedu JSON. يمكنك لصق JSON مباشرة، أو إدخال رابط، أو الاستيراد من الحافظة.</string>
     <string name="import_theme">استيراد سمة</string>
@@ -1527,7 +1557,9 @@
     <string name="no_badges_yet_earn_badges">لا توجد شارات حتى الآن. اربح شارات عن طريق شرائها أو امتلاك IReader NFTs!</string>
     <string name="no_book_found_error">لا يوجد كتاب بهذا المعرف.</string>
     <string name="no_books_in_library">لا توجد كتب في المكتبة</string>
+    <string name="no_categories_create_one">لم يتم العثور على فئات. أنشئ واحدة أولاً لتنظيم مكتبتك.</string>
     <string name="no_categories_found">لم يتم العثور على فئات</string>
+    <string name="no_category">لا توجد فئة</string>
     <string name="no_chapter_found_error">لا يوجد فصل بهذا الاسم.</string>
     <string name="no_chapter_is_available">لا يوجد فصل متاح.</string>
     <string name="no_chapters_available">لا توجد فصول متاحة</string>
@@ -1580,6 +1612,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">لا توجد مراجعات لهذا الفصل حتى الآن</string>
     <string name="no_reviews_yet">لا توجد مراجعات حتى الآن</string>
     <string name="no_reviews_yet_be_the_first_to_review">لا توجد مراجعات حتى الآن. كن أول من يراجع!</string>
+    <string name="no_rules_configured">لم يتم تكوين أي قواعد. أضف قاعدة لتصنيف الروايات تلقائيًا.</string>
     <string name="no_settings_found">لم يتم العثور على إعدادات</string>
     <string name="no_sources_available">لا توجد مصادر متاحة</string>
     <string name="no_sources_available_for_migration">لا توجد مصادر متاحة للترحيل</string>
@@ -1591,8 +1624,10 @@
     <string name="no_usage_data_available_yet">لا تتوفر بيانات الاستخدام حتى الآن</string>
     <string name="no_voice_models_available">لا توجد نماذج صوتية متاحة</string>
     <string name="no_voices_available">لا توجد أصوات متاحة</string>
+    <string name="no_voices_available_for_this_language">لا توجد أصوات متاحة لهذه اللغة</string>
     <string name="none">لا شيء</string>
     <string name="normal">عادي</string>
+    <string name="not_connected">غير متصل</string>
     <string name="not_implemented_yet">لم يتم التنفيذ بعد</string>
     <string name="not_installed">غير مثبت</string>
     <string name="not_tested">لم يتم اختباره</string>
@@ -1661,6 +1696,7 @@
     <string name="open_location">فتح الموقع</string>
     <string name="open_random">فتح عشوائي</string>
     <string name="open_site">فتح الموقع</string>
+    <string name="open_storage_settings">فتح إعدادات التخزين</string>
     <string name="open_tts_manager">فتح مدير TTS</string>
     <string name="open_tts_screen">عرض</string>
     <string name="open_tts_settings">فتح إعدادات تحويل النص إلى كلام</string>
@@ -1722,6 +1758,7 @@
     <string name="paste_the_theme_json_below">ألصق JSON الخاص بالسمة أدناه:</string>
     <string name="pause">إيقاف مؤقت</string>
     <string name="pause_all">إيقاف الكل مؤقتًا</string>
+    <string name="pause_downloads">إيقاف التنزيلات مؤقتًا</string>
     <string name="paused">متوقف مؤقتًا</string>
     <string name="payment_method">طريقة الدفع</string>
     <string name="pen">قلم</string>
@@ -1876,6 +1913,7 @@
     <string name="query_must_not_be_empty">يجب ألا يكون الاستعلام فارغًا.</string>
     <string name="queue_failed">فشل الانتظار في الصف</string>
     <string name="queued">في الانتظار</string>
+    <string name="queued_count">%d في قائمة الانتظار</string>
     <string name="quick_add_popular_repositories">إضافة سريعة للمستودعات الشائعة</string>
     <string name="quick_add_repository">إضافة مستودع سريع</string>
     <string name="quick_fill_same_url_for_all_projects">ملء سريع (نفس عنوان URL لجميع المشاريع)</string>
@@ -2034,7 +2072,9 @@
     <string name="resume">استئناف</string>
     <string name="resume_all">استئناف الكل</string>
     <string name="resume_download">استئناف التنزيل</string>
+    <string name="resume_downloads">استئناف التنزيلات</string>
     <string name="retry">إعادة المحاولة</string>
+    <string name="retry_all_failed">إعادة محاولة الكل الفاشل</string>
     <string name="retry_failed">إعادة المحاولة للفاشلة</string>
     <string name="retry_loading">إعادة محاولة التحميل</string>
     <string name="retrying_download">إعادة محاولة التنزيل</string>
@@ -2054,7 +2094,10 @@
     <string name="right">يمين</string>
     <string name="rotate_screen_automatically">تدوير الشاشة تلقائيًا</string>
     <string name="rotation">تدوير</string>
+    <string name="rule_already_exists">يوجد بالفعل قاعدة لهذا في هذه الفئة</string>
+    <string name="rule_count">%1$d قاعدة</string>
     <string name="rule_syntax_help">مساعدة بناء جملة القاعدة</string>
+    <string name="rules_count">%1$d قواعد</string>
     <string name="run_health_check">تشغيل فحص السلامة</string>
     <string name="run_the_migration_community_sourcesql">قم بتشغيل ملف migration_community_source.sql في محرر Supabase SQL الخاص بك لإنشاء هذه الجداول.</string>
     <string name="sample_text">نص تجريبي</string>
@@ -2129,6 +2172,7 @@
     <string name="select_backup_file">حدد ملف النسخ الاحتياطي</string>
     <string name="select_between">اختر بين</string>
     <string name="select_books_to_migrate">حدد الكتب المراد ترحيلها</string>
+    <string name="select_categories">تحديد الفئات</string>
     <string name="select_chapters">تحديد الفصول</string>
     <string name="select_cloud_provider">تحديد موفر خدمة سحابية</string>
     <string name="select_engine">تحديد المحرك</string>
@@ -2144,6 +2188,7 @@
     <string name="select_model">حدد النموذج</string>
     <string name="select_navigation_style">حدد نمط التنقل</string>
     <string name="select_source_to_migrate_to">حدد المصدر المراد الترحيل إليه</string>
+    <string name="select_storage_folder">تحديد مجلد التخزين</string>
     <string name="select_target_source">حدد المصدر الهدف</string>
     <string name="select_the_languages_you_want">حدد اللغات التي تريد رؤيتها عند تصفح المحتوى والبحث عنه. يمكنك تحديد لغات متعددة.</string>
     <string name="select_the_languages_you_want_1">حدد اللغات التي تريد رؤيتها عند تصفح المصادر. يتم عرض اللغات التي لديها مصادر متاحة فقط.</string>
@@ -2167,6 +2212,7 @@
     <string name="selectors_for_the_explorelatest_page">محددات لصفحة الاستكشاف/الأحدث (اختياري، يستخدم قواعد البحث إذا كان فارغًا)</string>
     <string name="send_reset_email">إرسال بريد إلكتروني لإعادة التعيين</string>
     <string name="sentence_highlighting">تمييز الجمل</string>
+    <string name="set_categories">تعيين الفئات</string>
     <string name="set_eth_wallet_address">تعيين عنوان محفظة ETH</string>
     <string name="set_name">تعيين الاسم</string>
     <string name="sets_the_tone_of_translated_text">يحدد نبرة النص المترجم</string>
@@ -2269,10 +2315,13 @@
     <string name="source_browse_latest">تصفح الأحدث</string>
     <string name="source_extension_not_installed">لم يتم تثبيت ملحق المصدر</string>
     <string name="source_id">معرف المصدر</string>
+    <string name="source_id_or_name">معرّف المصدر أو اسمه</string>
     <string name="source_json">JSON المصدر</string>
     <string name="source_name">اسم المصدر *</string>
     <string name="source_needs_update">المصدر يحتاج إلى تحديث</string>
     <string name="source_not_available">هذا المصدر غير متوفر في جهازك.</string>
+    <string name="source_placeholder">مثال: 12345 أو NovelUpdates</string>
+    <string name="source_rule">المصدر</string>
     <string name="source_term">مصطلح المصدر</string>
     <string name="source_title">عنوان المصدر</string>
     <string name="source_unavailable">المصدر غير متاح</string>
@@ -2299,11 +2348,16 @@
     <string name="stop">إيقاف</string>
     <string name="stop_playback_after">إيقاف التشغيل بعد:</string>
     <string name="storage">التخزين</string>
+    <string name="storage_access_lost">فقدان الوصول إلى التخزين</string>
+    <string name="storage_access_lost_description">لم يعد IReader يمتلك صلاحية الوصول إلى مجلد التخزين. الرجاء تحديد مجلد لمتابعة استخدام التطبيق.</string>
+    <string name="storage_access_lost_reasons">ربما تم حذف المجلد، أو نقله، أو تم إلغاء الإذن. قد يحدث هذا بعد تحديثات التطبيق أو تغييرات النظام.</string>
+    <string name="storage_is_needed_for">التخزين مطلوب لـ:</string>
     <string name="storage_permission_privacy_note">يصل IReader فقط إلى المجلد الذي تختاره. تظل ملفاتك الأخرى خاصة وغير متأثرة.</string>
     <string name="storage_permission_required_explanation">تفسير إذن التخزين المطلوب
     </string>
     <string name="storage_permission_subtitle">اختر مجلدًا حيث سيقوم IReader بتخزين تنزيلاتك، إضافاتك، ونسخك الاحتياطية</string>
     <string name="storage_permission_title">اختر مجلد التخزين</string>
+    <string name="storage_required">التخزين مطلوب</string>
     <string name="storage_settings">إعدادات التخزين</string>
     <string name="storage_setup">إعداد التخزين</string>
     <string name="storage_usage">استخدام التخزين</string>
@@ -2371,6 +2425,7 @@
     <string name="system_integration_multiple_engines_supported">✓ تكامل النظام • ✓ دعم محركات متعددة • ✓ لا حاجة إلى تنزيلات</string>
     <string name="system_notifications">النظام والإشعارات</string>
     <string name="system_notifications_1">إشعارات النظام</string>
+    <string name="system_settings">إعدادات النظام</string>
     <string name="system_tts_settings">إعدادات نظام تحويل النص إلى كلام</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">علامات التبويب</string>
@@ -2734,11 +2789,14 @@
     <string name="whats_new_1">ما الجديد</string>
     <string name="whats_new_2">ما الجديد:</string>
     <string name="while_charging">أثناء الشحن</string>
+    <string name="why_did_this_happen">لماذا حدث هذا؟</string>
     <string name="why_donate">لماذا تتبرع؟</string>
     <string name="why_is_this_needed">لماذا هذا ضروري؟</string>
     <string name="width">عرض</string>
     <string name="width_1">عرض</string>
     <string name="wifi_only">Wi-Fi فقط</string>
+    <string name="wifi_only_mode">وضع Wi-Fi فقط</string>
+    <string name="wifi_only_warning">تم إيقاف التنزيلات مؤقتًا - تم تمكين وضع Wi-Fi فقط</string>
     <string name="with_trailing_content">مع محتوى لاحق</string>
     <string name="wizard">معالج</string>
     <string name="wizard_step">wizard_step</string>

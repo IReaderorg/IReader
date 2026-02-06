@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">Glossareintrag hinzufügen</string>
     <string name="add_more_time">Mehr Zeit hinzufügen:</string>
     <string name="add_new_book_glossary">Neues Buchglossar hinzufügen</string>
+    <string name="add_new_rule">Neue Regel hinzufügen</string>
     <string name="add_novels_to_library_only">Romane nur dann zur Bibliothek hinzufügen, wenn sie in Suchergebnissen gefunden werden</string>
     <string name="add_parameter">Parameter hinzufügen</string>
     <string name="add_plugin_repository">Plugin-Repository hinzufügen</string>
     <string name="add_repository">Repository hinzufügen</string>
     <string name="add_repository_1">Repository hinzufügen</string>
+    <string name="add_rule">Regel hinzufügen</string>
     <string name="add_to_category">Zur Kategorie hinzufügen</string>
     <string name="add_to_library">Zur Bibliothek hinzufügen</string>
+    <string name="add_without_category">Ohne Kategorie hinzufügen</string>
+    <string name="added_genre_rule">Genre-Regel hinzugefügt: %1$s</string>
+    <string name="added_source_rule">Quellen-Regel hinzugefügt: %1$s</string>
+    <string name="added_to_category">Zu %s hinzugefügt</string>
     <string name="added_to_library">Zur Bibliothek hinzugefügt</string>
     <string name="additional_details">Zusätzliche Details:</string>
     <string name="additional_details_optional">Zusätzliche Details (optional)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">Gesamte Zeit</string>
     <string name="all_types">Alle Typen</string>
     <string name="allow_loading_lnreader_compatible_javascript">Erlaube das Laden von LNReader-kompatiblen JavaScript-Plugins</string>
+    <string name="allow_mobile_data">Mobile Daten zulassen</string>
     <string name="alpha">Alpha</string>
     <string name="alphaanimation">alphaAnimation</string>
+    <string name="always_ask">Immer fragen</string>
     <string name="an_image">ein Bild</string>
     <string name="analytics">Analytik</string>
     <string name="analyze_page">Seite analysieren</string>
@@ -145,6 +153,9 @@
     <string name="auto">Auto</string>
     <string name="auto_approve_7_days_old">Automatisch genehmigen (älter als 7 Tage)</string>
     <string name="auto_backup">Automatische Sicherung</string>
+    <string name="auto_categorization">Automatische Kategorisierung</string>
+    <string name="auto_categorization_description">Romane, die diesen Regeln entsprechen, werden automatisch dieser Kategorie hinzugefügt.</string>
+    <string name="auto_categorization_rules">Regeln zur automatischen Kategorisierung</string>
     <string name="auto_cleanup">Automatische Bereinigung</string>
     <string name="auto_delete">Automatisch löschen</string>
     <string name="auto_delete_chapters">Kapitel automatisch löschen</string>
@@ -192,6 +203,7 @@
     <string name="available_for_download">Zum Download verfügbar</string>
     <string name="available_kokoro_voices">Verfügbare Kokoro-Stimmen:</string>
     <string name="available_languages">Verfügbare Sprachen:</string>
+    <string name="available_voices">Verfügbare Stimmen</string>
     <string name="average_reading_speed">Durchschnittliche Lesegeschwindigkeit</string>
     <string name="avg_cpu">Durchschn. CPU</string>
     <string name="avg_response_time">Durchschn. Reaktionszeit</string>
@@ -424,6 +436,7 @@
     <string name="clear_completed">Abgeschlossene löschen</string>
     <string name="clear_download_cache">Download-Cache leeren</string>
     <string name="clear_download_cache_confirmation">Dadurch werden alle temporären Download-Dateien entfernt. Heruntergeladene Kapitel sind davon nicht betroffen.</string>
+    <string name="clear_failed">Fehlgeschlagene löschen</string>
     <string name="clear_filters">Filter löschen</string>
     <string name="clear_not_in_library_books">Alle Bücher löschen, die nicht in der Bibliothek sind</string>
     <string name="clear_search">Suche löschen</string>
@@ -556,6 +569,7 @@
     <string name="current_engine">Aktuelle Engine</string>
     <string name="current_location">Aktueller Ort:</string>
     <string name="current_progress">Aktueller Fortschritt</string>
+    <string name="current_rules">Aktuelle Regeln</string>
     <string name="currently_reading">Derzeit gelesen</string>
     <string name="currently_viewing_a_plugin_screen">Derzeit wird ein Plugin-Bildschirm angezeigt</string>
     <string name="custom">Benutzerdefiniert</string>
@@ -605,6 +619,8 @@
     <string name="deepseek_configuration">DeepSeek-Konfiguration</string>
     <string name="deepseek_login_required">DeepSeek-Anmeldung erforderlich</string>
     <string name="deepseek_payment_required">DeepSeek Zahlung erforderlich oder API-Kontingent überschritten</string>
+    <string name="default_category">Standardkategorie</string>
+    <string name="default_category_summary">Kategorie, die beim Hinzufügen von Büchern zur Bibliothek verwendet wird</string>
     <string name="default_chapter_sort">Standardkapitelsortierung</string>
     <string name="default_reading_mode">Standard-Lesemodus</string>
     <string name="default_reading_mode_for_new_books">Standard-Lesemodus für neue Bücher</string>
@@ -624,11 +640,14 @@
     <string name="delete_art">Kunst löschen?</string>
     <string name="delete_backup">Backup löschen?</string>
     <string name="delete_category">Kategorie löschen?</string>
+    <string name="delete_chapter">Kapitel löschen</string>
+    <string name="delete_content">Inhalt löschen</string>
     <string name="delete_custom_theme">Benutzerdefiniertes Theme löschen</string>
     <string name="delete_entry">Eintrag löschen</string>
     <string name="delete_failed">Löschen fehlgeschlagen: %1$s</string>
     <string name="delete_font">Schriftart löschen</string>
     <string name="delete_font_1">Schriftart löschen</string>
+    <string name="delete_rule">Regel löschen</string>
     <string name="delete_source">Quelle löschen</string>
     <string name="delete_update">Update löschen</string>
     <string name="delete_voice">Stimme löschen</string>
@@ -676,6 +695,7 @@
     <string name="discord">Discord</string>
     <string name="discover">Entdecken</string>
     <string name="discover_plugins_to_enhance_your_reading">Entdecken Sie Plugins, um Ihr Leseerlebnis zu verbessern</string>
+    <string name="disk_space_warning">Downloads pausiert – Wenig Speicherplatz</string>
     <string name="dismiss">Verwerfen</string>
     <string name="display">Anzeige</string>
     <string name="display_adult_content_in_search_results">Erwachseneninhalte in Suchergebnissen anzeigen</string>
@@ -719,6 +739,7 @@
     <string name="download_delay">Download-Verzögerung</string>
     <string name="download_failed">Download fehlgeschlagen: %1$s</string>
     <string name="download_failed_title">Download fehlgeschlagen</string>
+    <string name="download_from_last_read">Ab zuletzt gelesen herunterladen</string>
     <string name="download_information">Download-Informationen</string>
     <string name="download_install">Herunterladen &amp; Installieren</string>
     <string name="download_language_models">Sprachmodelle herunterladen</string>
@@ -742,6 +763,7 @@
     <string name="download_settings">Download-Einstellungen</string>
     <string name="download_unread">Ungelesene herunterladen</string>
     <string name="download_unread_1">Ungelesene herunterladen</string>
+    <string name="download_unread_from_last_read_desc">Kapitel ab dem zuletzt gelesenen Kapitel herunterladen, anstatt ab dem ersten ungelesenen Kapitel</string>
     <string name="download_update">Update herunterladen</string>
     <string name="downloadarrow">Download-Pfeil</string>
     <string name="downloaded">Heruntergeladen</string>
@@ -751,6 +773,7 @@
     <string name="downloading_1">Herunterladen...</string>
     <string name="downloading_chapter_audio">Kapitel-Audio wird heruntergeladen</string>
     <string name="downloading_chapters">Lade %1$s Kapitel herunter</string>
+    <string name="downloading_count">%d werden heruntergeladen</string>
     <string name="downloading_unread_chapters">Lade %1$s ungelesene Kapitel herunter</string>
     <string name="downloading_update">Update wird heruntergeladen</string>
     <string name="downloading_update_1">Update wird heruntergeladen...</string>
@@ -927,10 +950,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">Fehlgeschlagen</string>
+    <string name="failed_count">%d fehlgeschlagen</string>
     <string name="failed_files">Fehlgeschlagene Dateien</string>
     <string name="failed_imports">Fehlgeschlagene Importe</string>
     <string name="failed_to_add_entry">Eintrag hinzufügen fehlgeschlagen: %1$s</string>
     <string name="failed_to_add_repository">Repository hinzufügen fehlgeschlagen: %1$s</string>
+    <string name="failed_to_add_rule">Regel konnte nicht hinzugefügt werden: %1$s</string>
     <string name="failed_to_apply_plugin_theme">Plugin-Theme konnte nicht angewendet werden: %1$s. Standard-Theme wird verwendet.</string>
     <string name="failed_to_check_updates">Fehler beim Suchen nach Aktualisierungen</string>
     <string name="failed_to_copy">Kopieren fehlgeschlagen: %1$s</string>
@@ -1066,6 +1091,9 @@
     <string name="generating_audio_for_entire_chapter">Audio für das gesamte Kapitel wird generiert...</string>
     <string name="generating_prompt">Prompt wird generiert...</string>
     <string name="generation_failed">Generierung fehlgeschlagen</string>
+    <string name="genre_name">Genre-Name</string>
+    <string name="genre_placeholder">z.B. Fantasy, Romanze, Action</string>
+    <string name="genre_rule">Genre</string>
     <string name="genre_selector">Genre-Auswahl</string>
     <string name="genrekind_selector">Genre/Art-Auswahl</string>
     <string name="genreprogress">genreProgress</string>
@@ -1182,6 +1210,8 @@
     <string name="import_from_url">Von URL importieren</string>
     <string name="import_glossary">Glossar importieren</string>
     <string name="import_legado_sources">Legado-Quellen importieren</string>
+    <string name="import_pdf">PDF importieren</string>
+    <string name="import_pdf_files_into_your_library">PDF-Dateien zum Lesen und für TTS in Ihre Bibliothek importieren</string>
     <string name="import_sources">Quellen importieren</string>
     <string name="import_sources_from_legadoyuedu_json">Quellen im Legado/Yuedu JSON-Format importieren. Sie können JSON direkt einfügen, eine URL eingeben oder aus der Zwischenablage importieren.</string>
     <string name="import_theme">Theme importieren</string>
@@ -1531,7 +1561,9 @@
     <string name="no_badges_yet_earn_badges">Noch keine Badges. Verdiene Badges, indem du sie kaufst oder IReader NFTs besitzt!</string>
     <string name="no_book_found_error">Es gibt kein Buch mit dieser ID.</string>
     <string name="no_books_in_library">Keine Bücher in der Bibliothek</string>
+    <string name="no_categories_create_one">Keine Kategorien gefunden. Erstellen Sie zuerst eine, um Ihre Bibliothek zu organisieren.</string>
     <string name="no_categories_found">Keine Kategorien gefunden</string>
+    <string name="no_category">Keine Kategorie</string>
     <string name="no_chapter_found_error">Es gibt kein Kapitel mit diesem Namen.</string>
     <string name="no_chapter_is_available">Kein Kapitel verfügbar.</string>
     <string name="no_chapters_available">Keine Kapitel verfügbar</string>
@@ -1584,6 +1616,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">Noch keine Rezensionen für dieses Kapitel</string>
     <string name="no_reviews_yet">Noch keine Rezensionen</string>
     <string name="no_reviews_yet_be_the_first_to_review">Noch keine Rezensionen. Sei der/die Erste, der/die eine Rezension schreibt!</string>
+    <string name="no_rules_configured">Keine Regeln konfiguriert. Fügen Sie eine Regel hinzu, um Romane automatisch zu kategorisieren.</string>
     <string name="no_settings_found">Keine Einstellungen gefunden</string>
     <string name="no_sources_available">Keine Quellen verfügbar</string>
     <string name="no_sources_available_for_migration">Keine Quellen für die Migration verfügbar</string>
@@ -1595,8 +1628,10 @@
     <string name="no_usage_data_available_yet">Noch keine Nutzungsdaten verfügbar</string>
     <string name="no_voice_models_available">Keine Sprachmodelle verfügbar</string>
     <string name="no_voices_available">Keine Stimmen verfügbar</string>
+    <string name="no_voices_available_for_this_language">Keine Stimmen für diese Sprache verfügbar</string>
     <string name="none">Keine</string>
     <string name="normal">Normal</string>
+    <string name="not_connected">Nicht verbunden</string>
     <string name="not_implemented_yet">Noch nicht implementiert</string>
     <string name="not_installed">Nicht installiert</string>
     <string name="not_tested">Nicht getestet</string>
@@ -1665,6 +1700,7 @@
     <string name="open_location">Speicherort öffnen</string>
     <string name="open_random">Zufällig öffnen</string>
     <string name="open_site">Seite öffnen</string>
+    <string name="open_storage_settings">Speichereinstellungen öffnen</string>
     <string name="open_tts_manager">TTS-Manager öffnen</string>
     <string name="open_tts_screen">Ansehen</string>
     <string name="open_tts_settings">TTS-Einstellungen öffnen</string>
@@ -1727,6 +1763,7 @@
     <string name="paste_the_theme_json_below">Fügen Sie das Theme-JSON unten ein:</string>
     <string name="pause">Pause</string>
     <string name="pause_all">Alle pausieren</string>
+    <string name="pause_downloads">Downloads pausieren</string>
     <string name="paused">Pausiert</string>
     <string name="payment_method">Zahlungsmethode</string>
     <string name="pen">Stift</string>
@@ -1882,6 +1919,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="query_must_not_be_empty">Die Abfrage darf nicht leer sein.</string>
     <string name="queue_failed">Warteschlange fehlgeschlagen</string>
     <string name="queued">In der Warteschlange</string>
+    <string name="queued_count">%d in Warteschlange</string>
     <string name="quick_add_popular_repositories">Schnelles Hinzufügen beliebter Repositories</string>
     <string name="quick_add_repository">Repository schnell hinzufügen</string>
     <string name="quick_fill_same_url_for_all_projects">Schnelles Ausfüllen (gleiche URL für alle Projekte)</string>
@@ -2040,7 +2078,9 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="resume">Fortsetzen</string>
     <string name="resume_all">Alle fortsetzen</string>
     <string name="resume_download">Download fortsetzen</string>
+    <string name="resume_downloads">Downloads fortsetzen</string>
     <string name="retry">Wiederholen</string>
+    <string name="retry_all_failed">Alle fehlgeschlagenen wiederholen</string>
     <string name="retry_failed">Fehlgeschlagene wiederholen</string>
     <string name="retry_loading">Neu laden</string>
     <string name="retrying_download">Download wird erneut versucht</string>
@@ -2060,7 +2100,10 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="right">Rechts</string>
     <string name="rotate_screen_automatically">Bildschirm automatisch drehen</string>
     <string name="rotation">Drehung</string>
+    <string name="rule_already_exists">Eine Regel hierfür existiert bereits in dieser Kategorie</string>
+    <string name="rule_count">%1$d Regel</string>
     <string name="rule_syntax_help">Regelsyntax-Hilfe</string>
+    <string name="rules_count">%1$d Regeln</string>
     <string name="run_health_check">Integritätsprüfung ausführen</string>
     <string name="run_the_migration_community_sourcesql">Führen Sie die Datei migration_community_source.sql in Ihrem Supabase SQL Editor aus, um diese Tabellen zu erstellen.</string>
     <string name="sample_text">Beispieltext</string>
@@ -2135,6 +2178,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="select_backup_file">Sicherungsdatei auswählen</string>
     <string name="select_between">Zwischen Auswählen</string>
     <string name="select_books_to_migrate">Bücher zum Migrieren auswählen</string>
+    <string name="select_categories">Kategorien auswählen</string>
     <string name="select_chapters">Kapitel auswählen</string>
     <string name="select_cloud_provider">Cloud-Anbieter auswählen</string>
     <string name="select_engine">Engine auswählen</string>
@@ -2150,6 +2194,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="select_model">Modell auswählen</string>
     <string name="select_navigation_style">Navigationsstil auswählen</string>
     <string name="select_source_to_migrate_to">Quelle auswählen, zu der migriert werden soll</string>
+    <string name="select_storage_folder">Speicherordner auswählen</string>
     <string name="select_target_source">Zielquelle auswählen</string>
     <string name="select_the_languages_you_want">Wähle die Sprachen aus, die du beim Durchsuchen und Suchen von Inhalten sehen möchtest. Du kannst mehrere Sprachen auswählen.</string>
     <string name="select_the_languages_you_want_1">Wähle die Sprachen aus, die du beim Durchsuchen von Quellen sehen möchtest. Es werden nur Sprachen mit verfügbaren Quellen angezeigt.</string>
@@ -2173,6 +2218,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="selectors_for_the_explorelatest_page">Selektoren für die Erkunden-/Neueste-Seite (optional, verwendet Suchregeln, falls leer)</string>
     <string name="send_reset_email">Reset-E-Mail senden</string>
     <string name="sentence_highlighting">Satzhervorhebung</string>
+    <string name="set_categories">Kategorien festlegen</string>
     <string name="set_eth_wallet_address">ETH-Wallet-Adresse festlegen</string>
     <string name="set_name">Name festlegen</string>
     <string name="sets_the_tone_of_translated_text">Legt den Ton des übersetzten Textes fest</string>
@@ -2275,10 +2321,13 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="source_browse_latest">Neuestes durchsuchen</string>
     <string name="source_extension_not_installed">Quellenerweiterung nicht installiert</string>
     <string name="source_id">Quell-ID</string>
+    <string name="source_id_or_name">Quellen-ID oder Name</string>
     <string name="source_json">Quell-JSON</string>
     <string name="source_name">Quellname *</string>
     <string name="source_needs_update">Quelle muss aktualisiert werden</string>
     <string name="source_not_available">Diese Quelle ist auf Ihrem Gerät nicht verfügbar.</string>
+    <string name="source_placeholder">z.B. 12345 oder NovelUpdates</string>
+    <string name="source_rule">Quelle</string>
     <string name="source_term">Quellbegriff</string>
     <string name="source_title">Quellentitel</string>
     <string name="source_unavailable">Quelle nicht verfügbar</string>
@@ -2305,11 +2354,16 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="stop">Stopp</string>
     <string name="stop_playback_after">Wiedergabe stoppen nach:</string>
     <string name="storage">Speicher</string>
+    <string name="storage_access_lost">Speicherzugriff verloren</string>
+    <string name="storage_access_lost_description">IReader hat keinen Zugriff mehr auf den Speicherordner. Bitte wählen Sie einen Ordner, um die App weiterhin zu nutzen.</string>
+    <string name="storage_access_lost_reasons">Der Ordner wurde möglicherweise gelöscht, verschoben oder die Berechtigung wurde entzogen. Dies kann nach App-Updates oder Systemänderungen geschehen.</string>
+    <string name="storage_is_needed_for">Speicher wird benötigt für:</string>
     <string name="storage_permission_privacy_note">IReader greift nur auf den von Ihnen ausgewählten Ordner zu. Ihre anderen Dateien bleiben privat und unberührt.</string>
     <string name="storage_permission_required_explanation">Speicherberechtigung erforderlich Erklärung
     </string>
     <string name="storage_permission_subtitle">Wählen Sie einen Ordner, in dem IReader Ihre Downloads, Erweiterungen und Sicherungen speichern wird.</string>
     <string name="storage_permission_title">Speicherordner auswählen</string>
+    <string name="storage_required">Speicher erforderlich</string>
     <string name="storage_settings">Speichereinstellungen</string>
     <string name="storage_setup">Speicher-Einrichtung</string>
     <string name="storage_usage">Speichernutzung</string>
@@ -2379,6 +2433,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="system_integration_multiple_engines_supported">✓ Systemintegration • ✓ Mehrere Engines unterstützt • ✓ Keine Downloads erforderlich</string>
     <string name="system_notifications">System &amp; Benachrichtigungen</string>
     <string name="system_notifications_1">Systembenachrichtigungen</string>
+    <string name="system_settings">Systemeinstellungen</string>
     <string name="system_tts_settings">System-TTS-Einstellungen</string>
     <string name="tab_content">Tab-Inhalt</string>
     <string name="tabs">Tabs</string>
@@ -2745,11 +2800,14 @@ Mehr lesen unter.*</string>
     <string name="whats_new_1">Was ist neu</string>
     <string name="whats_new_2">Was ist neu:</string>
     <string name="while_charging">Während des Ladevorgangs</string>
+    <string name="why_did_this_happen">Warum ist das passiert?</string>
     <string name="why_donate">Warum spenden?</string>
     <string name="why_is_this_needed">Warum wird das benötigt?</string>
     <string name="width">Breite</string>
     <string name="width_1">Breite</string>
     <string name="wifi_only">Nur WLAN</string>
+    <string name="wifi_only_mode">Nur WLAN-Modus</string>
+    <string name="wifi_only_warning">Downloads pausiert – Nur WLAN-Modus aktiviert</string>
     <string name="with_trailing_content">Mit nachfolgendem Inhalt</string>
     <string name="wizard">Assistent</string>
     <string name="wizard_step">wizard_step</string>
