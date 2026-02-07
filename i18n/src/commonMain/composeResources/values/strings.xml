@@ -659,6 +659,7 @@
     <string name="export_epub_option_description">Download as ePub file for offline reading</string>
     <string name="export_epub">Export ePub</string>
     <string name="update_library">Update Library</string>
+    <string name="update_all_books">Update All Books</string>
     <string name="update_category">Update Category</string>
     <string name="import_epub">Import EPUB</string>
     <string name="import_pdf">Import PDF</string>

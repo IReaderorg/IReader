@@ -75,6 +75,7 @@ fun LibraryScreenTopBar(
     hideModalSheet:() -> Unit,
     isModalVisible:Boolean,
     onUpdateLibrary: () -> Unit = {},
+    onUpdateAllBooks: () -> Unit = {},
     onUpdateCategory: () -> Unit = {},
     onImportEpub: () -> Unit = {},
     onImportPdf: () -> Unit = {},
@@ -120,6 +121,7 @@ fun LibraryScreenTopBar(
                 isModalVisible = isModalVisible,
                 showModalSheet = showModalSheet,
                 onUpdateLibrary = onUpdateLibrary,
+                onUpdateAllBooks = onUpdateAllBooks,
                 onUpdateCategory = onUpdateCategory,
                 onImportEpub = onImportEpub,
                 onImportPdf = onImportPdf,
@@ -146,6 +148,7 @@ private fun RegularTopBar(
     hideModalSheet:() -> Unit,
     isModalVisible:Boolean,
     onUpdateLibrary: () -> Unit = {},
+    onUpdateAllBooks: () -> Unit = {},
     onUpdateCategory: () -> Unit = {},
     onImportEpub: () -> Unit = {},
     onImportPdf: () -> Unit = {},
@@ -263,6 +266,16 @@ private fun RegularTopBar(
                             },
                             leadingIcon = {
                                 Icon(Icons.Outlined.Update, contentDescription = null)
+                            }
+                        )
+                        ireader.presentation.ui.component.components.IDropdownMenuItem(
+                            text = { Text("Update All Books") }, // TODO: Use localize(Res.string.update_all_books) after resource generation
+                            onClick = {
+                                onUpdateAllBooks()
+                                setShowMoreMenu(false)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.CloudDownload, contentDescription = null)
                             }
                         )
                         ireader.presentation.ui.component.components.IDropdownMenuItem(

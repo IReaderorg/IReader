@@ -143,6 +143,7 @@ object LibraryScreenSpec {
                         showModalSheet = { scope.launch { sheetState.partialExpand() } },
                         isModalVisible = sheetState.isVisible,
                         onUpdateLibrary = { vm.updateLibrary() },
+                        onUpdateAllBooks = { vm.updateAllBooks() },
                         onUpdateCategory = { vm.showUpdateCategoryDialog() },
                         onImportEpub = { vm.setShowImportEpubDialog(true) },
                         onImportPdf = { vm.setShowImportPdfDialog(true) },

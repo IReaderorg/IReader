@@ -730,7 +730,20 @@ class LibraryViewModel(
     fun updateLibrary() {
         scope.launch {
             _uiState.update { it.copy(isUpdatingLibrary = true) }
-            serviceUseCases.startLibraryUpdateServicesUseCase.start()
+            serviceUseCases.startLibraryUpdateServicesUseCase.start(forceUpdate = false)
+            _uiState.update { it.copy(isUpdatingLibrary = false) }
+        }
+    }
+    
+    /**
+     * Update all books in the library, including those that are fully read.
+     * This forces an update check on every book, ignoring read status.
+     * Useful for users who want to download all updates before going offline.
+     */
+    fun updateAllBooks() {
+        scope.launch {
+            _uiState.update { it.copy(isUpdatingLibrary = true) }
+            serviceUseCases.startLibraryUpdateServicesUseCase.start(forceUpdate = true)
             _uiState.update { it.copy(isUpdatingLibrary = false) }
         }
     }
