@@ -996,8 +996,7 @@ private fun StyleText(
             translatedText = translatedText,
             mode = bilingualMode,
             modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.lazyValue.dp),
+                .fillMaxWidth(),
             fontSize = vm.fontSize.lazyValue.sp,
             fontFamily = remember(vm.font?.value, vm.fontVersion) { 
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
@@ -1060,8 +1059,7 @@ private fun StyleText(
         SelectableTranslatableText(
             text = originalText,
             modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.lazyValue.dp),
+                .fillMaxWidth(),
             fontSize = vm.fontSize.lazyValue.sp,
             fontFamily = remember(vm.font?.value, vm.fontVersion) { 
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
@@ -1106,7 +1104,8 @@ private fun StyleTextOptimized(
         isLastIndex, 
         vm.topContentPadding.lazyValue,
         vm.distanceBetweenParagraphs.lazyValue,
-        vm.bottomContentPadding.lazyValue
+        vm.bottomContentPadding.lazyValue,
+        vm.paragraphsIndent.lazyValue
     ) {
         setText(
             text = page.text,
@@ -1114,7 +1113,8 @@ private fun StyleTextOptimized(
             isLast = isLastIndex,
             topContentPadding = vm.topContentPadding.lazyValue,
             contentPadding = vm.distanceBetweenParagraphs.lazyValue,
-            bottomContentPadding = vm.bottomContentPadding.lazyValue
+            bottomContentPadding = vm.bottomContentPadding.lazyValue,
+            paragraphIndent = vm.paragraphsIndent.lazyValue
         )
     }
     
@@ -1135,8 +1135,7 @@ private fun StyleTextOptimized(
             translatedText = translatedText,
             mode = bilingualMode,
             modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = styleParams.paragraphIndent.dp),
+                .fillMaxWidth(),
             fontSize = styleParams.fontSize.sp,
             fontFamily = styleParams.fontFamily,
             textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
@@ -1170,8 +1169,7 @@ private fun StyleTextOptimized(
         Text(
             text = bionicText,
             modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = styleParams.paragraphIndent.dp),
+                .fillMaxWidth(),
             fontSize = styleParams.fontSize.sp,
             fontFamily = styleParams.fontFamily,
             textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
@@ -1185,8 +1183,7 @@ private fun StyleTextOptimized(
         SelectableTranslatableText(
             text = originalText,
             modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = styleParams.paragraphIndent.dp),
+                .fillMaxWidth(),
             fontSize = styleParams.fontSize.sp,
             fontFamily = styleParams.fontFamily,
             textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
@@ -1940,6 +1937,7 @@ private fun setText(
     topContentPadding: Int,
     bottomContentPadding: Int,
     contentPadding: Int,
+    paragraphIndent: Int = 0,
 ): String {
     // Handle null or empty text safely
     if (text.isEmpty()) {
@@ -1962,6 +1960,15 @@ private fun setText(
         text
     }
     
+    // Add first-line indent by prepending spaces
+    // Each indent unit represents approximately 4 spaces for readability
+    val indentSpaces = if (paragraphIndent > 0) {
+        " ".repeat((paragraphIndent / 2).coerceAtLeast(0))
+    } else {
+        ""
+    }
+    
+    stringBuilder.append(indentSpaces)
     stringBuilder.append(cleanedText)
     
     // Add bottom padding if this is the last chunk
