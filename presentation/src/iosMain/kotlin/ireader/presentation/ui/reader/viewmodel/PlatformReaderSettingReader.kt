@@ -3,6 +3,7 @@ package ireader.presentation.ui.reader.viewmodel
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.launch
 
 actual class PlatformReaderSettingReader {
 
