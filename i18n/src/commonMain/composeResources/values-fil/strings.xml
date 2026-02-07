@@ -2083,6 +2083,7 @@
     <string name="rules_count">%1$d na panuntunan</string>
     <string name="run_health_check">Patakbuhin ang Health Check</string>
     <string name="run_the_migration_community_source_sql">Patakbuhin ang migration_community_source.sql file sa iyong Supabase SQL Editor upang likhain ang mga talahanayang ito.</string>
+    <string name="run_the_migration_community_sourcesql">Ipatakbo ang migration_community_source.sql file sa iyong Supabase SQL Editor upang likhain ang mga talahanayang ito.</string>
     <string name="sample_text">Sample na Teksto</string>
     <string name="save">I-save</string>
     <string name="save_backup">I-save ang Backup</string>

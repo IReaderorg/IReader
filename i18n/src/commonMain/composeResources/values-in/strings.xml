@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">Tambahkan Entri Glosarium</string>
     <string name="add_more_time">Tambahkan waktu lagi:</string>
     <string name="add_new_book_glossary">Tambah Glosarium Buku Baru</string>
+    <string name="add_new_rule">Tambah Aturan Baru</string>
     <string name="add_novels_to_library_only">Tambahkan novel ke perpustakaan hanya saat ditemukan dalam hasil pencarian</string>
     <string name="add_parameter">Tambahkan Parameter</string>
     <string name="add_plugin_repository">Tambah Repositori Plugin</string>
     <string name="add_repository">Tambah Repositori</string>
     <string name="add_repository_1">Tambah repositori</string>
+    <string name="add_rule">Tambah Aturan</string>
     <string name="add_to_category">Tambahkan ke Kategori</string>
     <string name="add_to_library">Tambahkan ke Pustaka</string>
+    <string name="add_without_category">Tambah Tanpa Kategori</string>
+    <string name="added_genre_rule">Aturan genre ditambahkan: %1$s</string>
+    <string name="added_source_rule">Aturan sumber ditambahkan: %1$s</string>
+    <string name="added_to_category">Ditambahkan ke %s</string>
     <string name="added_to_library">Ditambahkan ke Pustaka</string>
     <string name="additional_details">Detail Tambahan:</string>
     <string name="additional_details_optional">Detail tambahan (opsional)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">Sepanjang Waktu</string>
     <string name="all_types">Semua Tipe</string>
     <string name="allow_loading_lnreader_compatible_javascript">Izinkan memuat plugin JavaScript yang kompatibel dengan LNReader</string>
+    <string name="allow_mobile_data">Izinkan Data Seluler</string>
     <string name="alpha">alfa</string>
     <string name="alphaanimation">alphaAnimation</string>
+    <string name="always_ask">Selalu tanya</string>
     <string name="an_image">sebuah gambar</string>
     <string name="analytics">Analitik</string>
     <string name="analyze_page">Analisis Halaman</string>
@@ -145,6 +153,9 @@
     <string name="auto">Otomatis</string>
     <string name="auto_approve_7_days_old">Setujui otomatis yang berusia 7+ hari</string>
     <string name="auto_backup">Cadangan otomatis</string>
+    <string name="auto_categorization">Kategorisasi Otomatis</string>
+    <string name="auto_categorization_description">Novel yang cocok dengan aturan ini akan otomatis ditambahkan ke kategori ini.</string>
+    <string name="auto_categorization_rules">Aturan Kategorisasi Otomatis</string>
     <string name="auto_cleanup">Pembersihan Otomatis</string>
     <string name="auto_delete">Hapus Otomatis</string>
     <string name="auto_delete_chapters">Hapus Bab Otomatis</string>
@@ -192,6 +203,7 @@
     <string name="available_for_download">Tersedia untuk Diunduh</string>
     <string name="available_kokoro_voices">Suara Kokoro yang tersedia:</string>
     <string name="available_languages">Bahasa yang tersedia:</string>
+    <string name="available_voices">Suara Tersedia</string>
     <string name="average_reading_speed">Kecepatan Membaca Rata-rata</string>
     <string name="avg_cpu">CPU Rata-rata</string>
     <string name="avg_response_time">Waktu Respons Rata-rata</string>
@@ -424,6 +436,7 @@
     <string name="clear_completed">Bersihkan yang Selesai</string>
     <string name="clear_download_cache">Hapus Cache Unduhan</string>
     <string name="clear_download_cache_confirmation">Ini akan menghapus semua file unduhan sementara. Bab yang diunduh tidak akan terpengaruh.</string>
+    <string name="clear_failed">Hapus yang Gagal</string>
     <string name="clear_filters">Bersihkan Filter</string>
     <string name="clear_not_in_library_books">Bersihkan Semua buku yang tidak ada di perpustakaan</string>
     <string name="clear_search">Bersihkan pencarian</string>
@@ -556,6 +569,7 @@
     <string name="current_engine">Mesin Saat Ini</string>
     <string name="current_location">Lokasi saat ini:</string>
     <string name="current_progress">Kemajuan Saat Ini</string>
+    <string name="current_rules">Aturan Saat Ini</string>
     <string name="currently_reading">Saat Ini Dibaca</string>
     <string name="currently_viewing_a_plugin_screen">Saat ini melihat layar plugin</string>
     <string name="custom">Kustom</string>
@@ -605,6 +619,8 @@
     <string name="deepseek_configuration">Konfigurasi DeepSeek</string>
     <string name="deepseek_login_required">Diperlukan Login DeepSeek</string>
     <string name="deepseek_payment_required">Pembayaran DeepSeek diperlukan atau kuota API terlampaui</string>
+    <string name="default_category">Kategori Default</string>
+    <string name="default_category_summary">Kategori yang digunakan saat menambahkan buku ke perpustakaan</string>
     <string name="default_chapter_sort">Urutan Bab Default</string>
     <string name="default_reading_mode">Mode Membaca Default</string>
     <string name="default_reading_mode_for_new_books">Mode Membaca Default untuk Buku Baru</string>
@@ -624,11 +640,14 @@
     <string name="delete_art">Hapus Seni?</string>
     <string name="delete_backup">Hapus Cadangan?</string>
     <string name="delete_category">Hapus Kategori?</string>
+    <string name="delete_chapter">Hapus Bab</string>
+    <string name="delete_content">Hapus Konten</string>
     <string name="delete_custom_theme">Hapus tema kustom</string>
     <string name="delete_entry">Hapus Entri</string>
     <string name="delete_failed">Hapus gagal: %1$s</string>
     <string name="delete_font">Hapus Font</string>
     <string name="delete_font_1">Hapus font</string>
+    <string name="delete_rule">Hapus aturan</string>
     <string name="delete_source">Hapus Sumber</string>
     <string name="delete_update">Hapus Pembaruan</string>
     <string name="delete_voice">Hapus suara</string>
@@ -676,6 +695,7 @@
     <string name="discord">Discord</string>
     <string name="discover">Temukan</string>
     <string name="discover_plugins_to_enhance_your_reading">Temukan plugin untuk meningkatkan pengalaman membaca Anda</string>
+    <string name="disk_space_warning">Unduhan dijeda - Ruang disk rendah</string>
     <string name="dismiss">Tutup</string>
     <string name="display">Tampilan</string>
     <string name="display_adult_content_in_search_results">Tampilkan konten dewasa di hasil pencarian</string>
@@ -719,6 +739,7 @@
     <string name="download_delay">Tunda Unduhan</string>
     <string name="download_failed">Unduhan gagal: %1$s</string>
     <string name="download_failed_title">Unduhan Gagal</string>
+    <string name="download_from_last_read">Unduh dari yang terakhir dibaca</string>
     <string name="download_information">Informasi Unduhan</string>
     <string name="download_install">Unduh &amp; Instal</string>
     <string name="download_language_models">Unduh Model Bahasa</string>
@@ -742,6 +763,7 @@
     <string name="download_settings">Pengaturan Unduhan</string>
     <string name="download_unread">Unduh yang belum dibaca</string>
     <string name="download_unread_1">Unduh yang Belum Dibaca</string>
+    <string name="download_unread_from_last_read_desc">Unduh bab yang dimulai setelah bab terakhir Anda baca, bukan dari bab pertama yang belum dibaca</string>
     <string name="download_update">Unduh Pembaruan</string>
     <string name="downloadarrow">panahUnduh</string>
     <string name="downloaded">Terunduh</string>
@@ -751,6 +773,7 @@
     <string name="downloading_1">Mengunduh...</string>
     <string name="downloading_chapter_audio">Mengunduh Audio Bab</string>
     <string name="downloading_chapters">Mengunduh %1$s bab</string>
+    <string name="downloading_count">%d mengunduh</string>
     <string name="downloading_unread_chapters">Mengunduh %1$s bab yang belum dibaca</string>
     <string name="downloading_update">Mengunduh Pembaruan</string>
     <string name="downloading_update_1">Mengunduh Pembaruan...</string>
@@ -926,10 +949,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">Gagal</string>
+    <string name="failed_count">%d gagal</string>
     <string name="failed_files">File Gagal</string>
     <string name="failed_imports">Impor Gagal</string>
     <string name="failed_to_add_entry">Gagal menambahkan entri: %1$s</string>
     <string name="failed_to_add_repository">Gagal menambahkan repositori: %1$s</string>
+    <string name="failed_to_add_rule">Gagal menambahkan aturan: %1$s</string>
     <string name="failed_to_apply_plugin_theme">Gagal menerapkan tema plugin: %1$s. Menggunakan tema default.</string>
     <string name="failed_to_check_updates">Gagal memeriksa pembaruan</string>
     <string name="failed_to_copy">Gagal menyalin: %1$s</string>
@@ -1065,6 +1090,9 @@
     <string name="generating_audio_for_entire_chapter">Membuat audio untuk seluruh bab...</string>
     <string name="generating_prompt">Menghasilkan Prompt...</string>
     <string name="generation_failed">Generasi Gagal</string>
+    <string name="genre_name">Nama genre</string>
+    <string name="genre_placeholder">mis., Fantasi, Romansa, Aksi</string>
+    <string name="genre_rule">Genre</string>
     <string name="genre_selector">Pemilih Genre</string>
     <string name="genrekind_selector">Pemilih Genre/Jenis</string>
     <string name="genreprogress">genreProgress</string>
@@ -1181,6 +1209,8 @@
     <string name="import_from_url">Impor dari URL</string>
     <string name="import_glossary">Impor Glosarium</string>
     <string name="import_legado_sources">Impor Sumber Legado</string>
+    <string name="import_pdf">Impor PDF</string>
+    <string name="import_pdf_files_into_your_library">Impor file PDF ke perpustakaan Anda untuk dibaca dan TTS</string>
     <string name="import_sources">Impor Sumber</string>
     <string name="import_sources_from_legadoyuedu_json">Impor sumber dari format JSON Legado/Yuedu. Anda dapat menempel JSON langsung, memasukkan URL, atau mengimpor dari clipboard.</string>
     <string name="import_theme">Impor Tema</string>
@@ -1528,7 +1558,9 @@
     <string name="no_badges_yet_earn_badges">Belum ada lencana. Dapatkan lencana dengan membelinya atau memiliki NFT IReader!</string>
     <string name="no_book_found_error">Tidak ada buku dengan id ini.</string>
     <string name="no_books_in_library">Tidak ada buku di perpustakaan</string>
+    <string name="no_categories_create_one">Tidak ada kategori ditemukan. Buat satu terlebih dahulu untuk mengatur perpustakaan Anda.</string>
     <string name="no_categories_found">Tidak ada kategori yang ditemukan</string>
+    <string name="no_category">Tanpa kategori</string>
     <string name="no_chapter_found_error">Tidak Ada bab dengan nama ini.</string>
     <string name="no_chapter_is_available">Tidak Ada Bab yang Tersedia.</string>
     <string name="no_chapters_available">Tidak ada bab yang tersedia</string>
@@ -1581,6 +1613,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">Belum ada ulasan untuk bab ini</string>
     <string name="no_reviews_yet">Belum ada ulasan</string>
     <string name="no_reviews_yet_be_the_first_to_review">Belum ada ulasan. Jadilah yang pertama memberikan ulasan!</string>
+    <string name="no_rules_configured">Tidak ada aturan yang dikonfigurasi. Tambahkan aturan untuk mengkategorikan novel secara otomatis.</string>
     <string name="no_settings_found">Tidak ada pengaturan yang ditemukan</string>
     <string name="no_sources_available">Tidak ada sumber yang tersedia</string>
     <string name="no_sources_available_for_migration">Tidak ada sumber yang tersedia untuk migrasi</string>
@@ -1592,8 +1625,10 @@
     <string name="no_usage_data_available_yet">Tidak ada data penggunaan yang tersedia saat ini</string>
     <string name="no_voice_models_available">Tidak ada model suara yang tersedia</string>
     <string name="no_voices_available">Tidak ada suara yang tersedia</string>
+    <string name="no_voices_available_for_this_language">Tidak ada suara yang tersedia untuk bahasa ini</string>
     <string name="none">Tidak Ada</string>
     <string name="normal">Normal</string>
+    <string name="not_connected">Tidak Terhubung</string>
     <string name="not_implemented_yet">Belum Diimplementasikan</string>
     <string name="not_installed">Tidak terpasang</string>
     <string name="not_tested">Tidak diuji</string>
@@ -1662,6 +1697,7 @@
     <string name="open_location">Buka Lokasi</string>
     <string name="open_random">Buka Acak</string>
     <string name="open_site">Buka Situs</string>
+    <string name="open_storage_settings">Buka Pengaturan Penyimpanan</string>
     <string name="open_tts_manager">Buka Pengelola TTS</string>
     <string name="open_tts_screen">Lihat</string>
     <string name="open_tts_settings">Buka Pengaturan TTS</string>
@@ -1724,6 +1760,7 @@
     <string name="paste_the_theme_json_below">Tempel JSON tema di bawah:</string>
     <string name="pause">Jeda</string>
     <string name="pause_all">Jeda Semua</string>
+    <string name="pause_downloads">Jeda Unduhan</string>
     <string name="paused">Dijeda</string>
     <string name="payment_method">Metode Pembayaran</string>
     <string name="pen">pena</string>
@@ -1877,6 +1914,7 @@
     <string name="query_must_not_be_empty">query tidak boleh kosong.</string>
     <string name="queue_failed">Antrean Gagal</string>
     <string name="queued">Antre</string>
+    <string name="queued_count">%d dalam antrean</string>
     <string name="quick_add_popular_repositories">Tambahkan Repository Populer dengan Cepat</string>
     <string name="quick_add_repository">Tambahkan Repositori Cepat</string>
     <string name="quick_fill_same_url_for_all_projects">Isi Cepat (URL yang Sama untuk semua proyek)</string>
@@ -2035,7 +2073,9 @@
     <string name="resume">Lanjutkan</string>
     <string name="resume_all">Lanjutkan Semua</string>
     <string name="resume_download">Lanjutkan Unduhan</string>
+    <string name="resume_downloads">Lanjutkan Unduhan</string>
     <string name="retry">Coba Lagi</string>
+    <string name="retry_all_failed">Coba Lagi Semua yang Gagal</string>
     <string name="retry_failed">Coba Lagi yang Gagal</string>
     <string name="retry_loading">Coba Muat Ulang</string>
     <string name="retrying_download">Mencoba Kembali Unduhan</string>
@@ -2055,7 +2095,10 @@
     <string name="right">Kanan</string>
     <string name="rotate_screen_automatically">Putar layar secara otomatis</string>
     <string name="rotation">rotasi</string>
+    <string name="rule_already_exists">Aturan untuk ini sudah ada dalam kategori ini</string>
+    <string name="rule_count">%1$d aturan</string>
     <string name="rule_syntax_help">Bantuan Sintaks Aturan</string>
+    <string name="rules_count">%1$d aturan</string>
     <string name="run_health_check">Jalankan Pemeriksaan Kesehatan</string>
     <string name="run_the_migration_community_sourcesql">Jalankan file migration_community_source.sql di Supabase SQL Editor Anda untuk membuat tabel ini.</string>
     <string name="sample_text">Contoh Teks</string>
@@ -2130,6 +2173,7 @@
     <string name="select_backup_file">Pilih File Cadangan</string>
     <string name="select_between">Pilih Di Antara</string>
     <string name="select_books_to_migrate">Pilih Buku untuk Dipindahkan</string>
+    <string name="select_categories">Pilih Kategori</string>
     <string name="select_chapters">Pilih Bab</string>
     <string name="select_cloud_provider">Pilih Penyedia Cloud</string>
     <string name="select_engine">Pilih Mesin</string>
@@ -2145,6 +2189,7 @@
     <string name="select_model">Pilih model</string>
     <string name="select_navigation_style">Pilih Gaya Navigasi</string>
     <string name="select_source_to_migrate_to">Pilih sumber untuk migrasi</string>
+    <string name="select_storage_folder">Pilih Folder Penyimpanan</string>
     <string name="select_target_source">Pilih Sumber Target</string>
     <string name="select_the_languages_you_want">Pilih bahasa yang ingin Anda lihat saat menjelajah dan mencari konten. Anda dapat memilih beberapa bahasa.</string>
     <string name="select_the_languages_you_want_1">Pilih bahasa yang ingin Anda lihat saat menjelajahi sumber. Hanya bahasa dengan sumber yang tersedia yang ditampilkan.</string>
@@ -2168,6 +2213,7 @@
     <string name="selectors_for_the_explorelatest_page">Selektor untuk halaman jelajahi/terbaru (opsional, menggunakan aturan pencarian jika kosong)</string>
     <string name="send_reset_email">Kirim Email Reset</string>
     <string name="sentence_highlighting">Penyorotan Kalimat</string>
+    <string name="set_categories">Atur Kategori</string>
     <string name="set_eth_wallet_address">Setel Alamat Dompet ETH</string>
     <string name="set_name">Setel Nama</string>
     <string name="sets_the_tone_of_translated_text">Menentukan nada teks terjemahan</string>
@@ -2270,10 +2316,13 @@
     <string name="source_browse_latest">Telusuri Terbaru</string>
     <string name="source_extension_not_installed">Ekstensi Sumber Tidak Terpasang</string>
     <string name="source_id">ID Sumber</string>
+    <string name="source_id_or_name">ID atau nama sumber</string>
     <string name="source_json">JSON Sumber</string>
     <string name="source_name">Nama Sumber *</string>
     <string name="source_needs_update">Sumber Membutuhkan Pembaruan</string>
     <string name="source_not_available">Sumber ini tidak tersedia di perangkat Anda.</string>
+    <string name="source_placeholder">mis., 12345 atau NovelUpdates</string>
+    <string name="source_rule">Sumber</string>
     <string name="source_term">Istilah Sumber</string>
     <string name="source_title">Judul Sumber</string>
     <string name="source_unavailable">Sumber Tidak Tersedia</string>
@@ -2300,11 +2349,16 @@
     <string name="stop">Berhenti</string>
     <string name="stop_playback_after">Hentikan pemutaran setelah:</string>
     <string name="storage">Penyimpanan</string>
+    <string name="storage_access_lost">Akses Penyimpanan Hilang</string>
+    <string name="storage_access_lost_description">IReader tidak lagi memiliki akses ke folder penyimpanan. Mohon pilih folder untuk melanjutkan penggunaan aplikasi.</string>
+    <string name="storage_access_lost_reasons">Folder mungkin telah dihapus, dipindahkan, atau izinnya dicabut. Ini dapat terjadi setelah pembaruan aplikasi atau perubahan sistem.</string>
+    <string name="storage_is_needed_for">Penyimpanan dibutuhkan untuk:</string>
     <string name="storage_permission_privacy_note">IReader hanya mengakses folder yang Anda pilih. File Anda yang lain tetap pribadi dan tidak tersentuh.</string>
     <string name="storage_permission_required_explanation">Penjelasan Izin Penyimpanan Diperlukan
     </string>
     <string name="storage_permission_subtitle">Pilih folder tempat IReader akan menyimpan unduhan, ekstensi, dan cadangan Anda</string>
     <string name="storage_permission_title">Pilih Folder Penyimpanan</string>
+    <string name="storage_required">Penyimpanan Diperlukan</string>
     <string name="storage_settings">Pengaturan Penyimpanan</string>
     <string name="storage_setup">Penyiapan Penyimpanan</string>
     <string name="storage_usage">Penggunaan Penyimpanan</string>
@@ -2372,6 +2426,7 @@
     <string name="system_integration_multiple_engines_supported">✓ Integrasi sistem • ✓ Beberapa mesin didukung • ✓ Tidak perlu unduhan</string>
     <string name="system_notifications">Sistem &amp; Pemberitahuan</string>
     <string name="system_notifications_1">Pemberitahuan Sistem</string>
+    <string name="system_settings">Pengaturan Sistem</string>
     <string name="system_tts_settings">Pengaturan TTS Sistem</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">Tab</string>
@@ -2735,11 +2790,14 @@
     <string name="whats_new_1">Apa yang Baru</string>
     <string name="whats_new_2">Apa yang Baru:</string>
     <string name="while_charging">Saat Mengisi Daya</string>
+    <string name="why_did_this_happen">Mengapa ini terjadi?</string>
     <string name="why_donate">Mengapa Berdonasi?</string>
     <string name="why_is_this_needed">Mengapa ini diperlukan?</string>
     <string name="width">Lebar</string>
     <string name="width_1">lebar</string>
     <string name="wifi_only">Hanya WiFi</string>
+    <string name="wifi_only_mode">Mode Hanya WiFi</string>
+    <string name="wifi_only_warning">Unduhan dijeda - Mode hanya WiFi diaktifkan</string>
     <string name="with_trailing_content">Dengan Konten Tambahan</string>
     <string name="wizard">Wizard</string>
     <string name="wizard_step">wizard_step</string>

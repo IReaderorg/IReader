@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">Dodaj unos u glosar</string>
     <string name="add_more_time">Dodaj više vremena:</string>
     <string name="add_new_book_glossary">Dodaj novi rječnik pojmova za knjigu</string>
+    <string name="add_new_rule">Dodaj novo pravilo</string>
     <string name="add_novels_to_library_only">Dodaj romane u biblioteku samo kada se pronađu u rezultatima pretraživanja</string>
     <string name="add_parameter">Dodaj parametar</string>
     <string name="add_plugin_repository">Dodaj spremište dodataka</string>
     <string name="add_repository">Dodaj repozitorij</string>
     <string name="add_repository_1">Dodaj spremište</string>
+    <string name="add_rule">Dodaj pravilo</string>
     <string name="add_to_category">Dodaj u kategoriju</string>
     <string name="add_to_library">Dodaj u biblioteku</string>
+    <string name="add_without_category">Dodaj bez kategorije</string>
+    <string name="added_genre_rule">Dodano pravilo žanra: %1$s</string>
+    <string name="added_source_rule">Dodano pravilo izvora: %1$s</string>
+    <string name="added_to_category">Dodano u %s</string>
     <string name="added_to_library">Dodano u biblioteku</string>
     <string name="additional_details">Dodatni detalji:</string>
     <string name="additional_details_optional">Dodatni detalji (izborno)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">Sve vrijeme</string>
     <string name="all_types">Sve vrste</string>
     <string name="allow_loading_lnreader_compatible_javascript">Dopusti učitavanje JavaScript dodataka kompatibilnih s LNReaderom</string>
+    <string name="allow_mobile_data">Dopusti mobilne podatke</string>
     <string name="alpha">alfa</string>
     <string name="alphaanimation">alfaAnimacija</string>
+    <string name="always_ask">Uvijek pitaj</string>
     <string name="an_image">slika</string>
     <string name="analytics">Analitika</string>
     <string name="analyze_page">Analiziraj stranicu</string>
@@ -145,6 +153,9 @@
     <string name="auto">Automatski</string>
     <string name="auto_approve_7_days_old">Automatski odobri starije od 7 dana</string>
     <string name="auto_backup">Automatska sigurnosna kopija</string>
+    <string name="auto_categorization">Automatska kategorizacija</string>
+    <string name="auto_categorization_description">Romani koji odgovaraju ovim pravilima bit će automatski dodani u ovu kategoriju.</string>
+    <string name="auto_categorization_rules">Pravila automatske kategorizacije</string>
     <string name="auto_cleanup">Automatsko čišćenje</string>
     <string name="auto_delete">Automatsko brisanje</string>
     <string name="auto_delete_chapters">Automatsko brisanje poglavlja</string>
@@ -192,6 +203,7 @@
     <string name="available_for_download">Dostupno za preuzimanje</string>
     <string name="available_kokoro_voices">Dostupni Kokoro glasovi:</string>
     <string name="available_languages">Dostupni jezici:</string>
+    <string name="available_voices">Dostupni glasovi</string>
     <string name="average_reading_speed">Prosječna brzina čitanja</string>
     <string name="avg_cpu">Prosječni CPU</string>
     <string name="avg_response_time">Prosječno vrijeme odziva</string>
@@ -424,6 +436,7 @@
     <string name="clear_completed">Očisti završeno</string>
     <string name="clear_download_cache">Obriši predmemoriju preuzimanja</string>
     <string name="clear_download_cache_confirmation">Ovo će ukloniti sve privremene datoteke preuzimanja. Preuzeta poglavlja neće biti pogođena.</string>
+    <string name="clear_failed">Očisti neuspjele</string>
     <string name="clear_filters">Očisti filtere</string>
     <string name="clear_not_in_library_books">Obriši sve knjige koje nisu u biblioteci</string>
     <string name="clear_search">Očisti pretragu</string>
@@ -556,6 +569,7 @@
     <string name="current_engine">Trenutni pogon</string>
     <string name="current_location">Trenutna lokacija:</string>
     <string name="current_progress">Trenutni napredak</string>
+    <string name="current_rules">Trenutna pravila</string>
     <string name="currently_reading">Trenutno se čita</string>
     <string name="currently_viewing_a_plugin_screen">Trenutno gledate zaslon dodatka</string>
     <string name="custom">Prilagođeno</string>
@@ -605,6 +619,8 @@
     <string name="deepseek_configuration">DeepSeek konfiguracija</string>
     <string name="deepseek_login_required">Potrebna prijava za DeepSeek</string>
     <string name="deepseek_payment_required">Potrebna je DeepSeek uplata ili je prekoračena API kvota</string>
+    <string name="default_category">Zadana kategorija</string>
+    <string name="default_category_summary">Kategorija za korištenje prilikom dodavanja knjiga u knjižnicu</string>
     <string name="default_chapter_sort">Zadano sortiranje poglavlja</string>
     <string name="default_reading_mode">Zadani način čitanja</string>
     <string name="default_reading_mode_for_new_books">Zadani način čitanja za nove knjige</string>
@@ -624,11 +640,14 @@
     <string name="delete_art">Izbrisati umjetničko djelo?</string>
     <string name="delete_backup">Izbrisati sigurnosnu kopiju?</string>
     <string name="delete_category">Izbrisati kategoriju?</string>
+    <string name="delete_chapter">Izbriši poglavlje</string>
+    <string name="delete_content">Izbriši sadržaj</string>
     <string name="delete_custom_theme">Izbriši prilagođenu temu</string>
     <string name="delete_entry">Izbriši unos</string>
     <string name="delete_failed">Brisanje nije uspjelo: %1$s</string>
     <string name="delete_font">Izbriši font</string>
     <string name="delete_font_1">Izbriši font</string>
+    <string name="delete_rule">Izbriši pravilo</string>
     <string name="delete_source">Izbriši izvor</string>
     <string name="delete_update">Izbriši ažuriranje</string>
     <string name="delete_voice">Izbriši glas</string>
@@ -676,6 +695,7 @@
     <string name="discord">Discord</string>
     <string name="discover">Otkrij</string>
     <string name="discover_plugins_to_enhance_your_reading">Otkrijte dodatke za poboljšanje vašeg čitanja</string>
+    <string name="disk_space_warning">Preuzimanja pauzirana – malo prostora na disku</string>
     <string name="dismiss">Odbaci</string>
     <string name="display">Prikaz</string>
     <string name="display_adult_content_in_search_results">Prikaži sadržaj za odrasle u rezultatima pretraživanja</string>
@@ -719,6 +739,7 @@
     <string name="download_delay">Odgoda preuzimanja</string>
     <string name="download_failed">Preuzimanje nije uspjelo: %1$s</string>
     <string name="download_failed_title">Preuzimanje nije uspjelo</string>
+    <string name="download_from_last_read">Preuzmi od zadnjeg čitanja</string>
     <string name="download_information">Informacije o preuzimanju</string>
     <string name="download_install">Preuzmi i instaliraj</string>
     <string name="download_language_models">Preuzmi jezične modele</string>
@@ -740,6 +761,7 @@
     <string name="download_settings">Postavke preuzimanja</string>
     <string name="download_unread">Preuzmi nepročitano</string>
     <string name="download_unread_1">Preuzmi nepročitano</string>
+    <string name="download_unread_from_last_read_desc">Preuzmi poglavlja počevši od poglavlja koje ste zadnje pročitali umjesto od prvog nepročitanog poglavlja</string>
     <string name="download_update">Preuzmi ažuriranje</string>
     <string name="downloadarrow">downloadArrow</string>
     <string name="downloaded">Preuzeto</string>
@@ -749,6 +771,7 @@
     <string name="downloading_1">Preuzimanje...</string>
     <string name="downloading_chapter_audio">Preuzimanje audio zapisa poglavlja</string>
     <string name="downloading_chapters">Preuzimanje %1$s poglavlja</string>
+    <string name="downloading_count">%d se preuzima</string>
     <string name="downloading_unread_chapters">Preuzimanje %1$s nepročitanih poglavlja</string>
     <string name="downloading_update">Preuzimanje ažuriranja</string>
     <string name="downloading_update_1">Preuzimam ažuriranje...</string>
@@ -923,10 +946,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">Neuspjelo</string>
+    <string name="failed_count">%d neuspjelih</string>
     <string name="failed_files">Neuspjele datoteke</string>
     <string name="failed_imports">Neuspješni uvozi</string>
     <string name="failed_to_add_entry">Dodavanje unosa nije uspjelo: %1$s</string>
     <string name="failed_to_add_repository">Dodavanje repozitorija nije uspjelo: %1$s</string>
+    <string name="failed_to_add_rule">Nije uspjelo dodati pravilo: %1$s</string>
     <string name="failed_to_apply_plugin_theme">Primjena teme dodatka nije uspjela: %1$s. Koristi se zadana tema.</string>
     <string name="failed_to_check_updates">Nije uspjelo provjeriti ažuriranja</string>
     <string name="failed_to_copy">Kopiranje nije uspjelo: %1$s</string>
@@ -1062,6 +1087,9 @@
     <string name="generating_audio_for_entire_chapter">Generiranje zvuka za cijelo poglavlje...</string>
     <string name="generating_prompt">Generiranje upita...</string>
     <string name="generation_failed">Generiranje neuspješno</string>
+    <string name="genre_name">Naziv žanra</string>
+    <string name="genre_placeholder">npr., Fantazija, Romantika, Akcija</string>
+    <string name="genre_rule">Žanr</string>
     <string name="genre_selector">Odabir žanra</string>
     <string name="genrekind_selector">Odabir žanra/vrste</string>
     <string name="genreprogress">genreProgress</string>
@@ -1178,6 +1206,8 @@
     <string name="import_from_url">Uvezi s URL-a</string>
     <string name="import_glossary">Uvezi rječnik pojmova</string>
     <string name="import_legado_sources">Uvezi Legado izvore</string>
+    <string name="import_pdf">Uvezi PDF</string>
+    <string name="import_pdf_files_into_your_library">Uvezite PDF datoteke u svoju knjižnicu za čitanje i TTS</string>
     <string name="import_sources">Uvezi izvore</string>
     <string name="import_sources_from_legadoyuedu_json">Uvezite izvore iz Legado/Yuedu JSON formata. Možete izravno zalijepiti JSON, unijeti URL ili uvesti iz međuspremnika.</string>
     <string name="import_theme">Uvezi temu</string>
@@ -1521,7 +1551,9 @@
     <string name="no_badges_yet_earn_badges">Još nema znački. Zaradite značke kupnjom ili posjedovanjem IReader NFT-ova!</string>
     <string name="no_book_found_error">Nema knjige s ovim ID-om.</string>
     <string name="no_books_in_library">Nema knjiga u knjižnici</string>
+    <string name="no_categories_create_one">Nije pronađena nijedna kategorija. Prvo stvorite jednu kako biste organizirali svoju knjižnicu.</string>
     <string name="no_categories_found">Nije pronađena nijedna kategorija</string>
+    <string name="no_category">Nema kategorije</string>
     <string name="no_chapter_found_error">Nema poglavlja s ovim imenom.</string>
     <string name="no_chapter_is_available">Nema dostupnih poglavlja.</string>
     <string name="no_chapters_available">Nema dostupnih poglavlja</string>
@@ -1574,6 +1606,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">Još nema recenzija za ovo poglavlje</string>
     <string name="no_reviews_yet">Još nema recenzija</string>
     <string name="no_reviews_yet_be_the_first_to_review">Još nema recenzija. Budite prvi koji će napisati recenziju!</string>
+    <string name="no_rules_configured">Nema konfiguriranih pravila. Dodajte pravilo za automatsko kategoriziranje romana.</string>
     <string name="no_settings_found">Nema pronađenih postavki</string>
     <string name="no_sources_available">Nema dostupnih izvora</string>
     <string name="no_sources_available_for_migration">Nema dostupnih izvora za migraciju</string>
@@ -1585,8 +1618,10 @@
     <string name="no_usage_data_available_yet">Još nema dostupnih podataka o upotrebi</string>
     <string name="no_voice_models_available">Nema dostupnih glasovnih modela</string>
     <string name="no_voices_available">Nema dostupnih glasova</string>
+    <string name="no_voices_available_for_this_language">Nema dostupnih glasova za ovaj jezik</string>
     <string name="none">Nijedan</string>
     <string name="normal">Normalno</string>
+    <string name="not_connected">Nije povezano</string>
     <string name="not_implemented_yet">Još nije implementirano</string>
     <string name="not_installed">Nije instalirano</string>
     <string name="not_tested">Nije testirano</string>
@@ -1655,6 +1690,7 @@
     <string name="open_location">Otvori lokaciju</string>
     <string name="open_random">Otvori nasumično</string>
     <string name="open_site">Otvori web stranicu</string>
+    <string name="open_storage_settings">Otvori postavke pohrane</string>
     <string name="open_tts_manager">Otvori TTS upravitelj</string>
     <string name="open_tts_screen">Pogled</string>
     <string name="open_tts_settings">Otvori TTS postavke</string>
@@ -1715,6 +1751,7 @@
     <string name="paste_the_theme_json_below">Zalijepite JSON teme ispod:</string>
     <string name="pause">Pauziraj</string>
     <string name="pause_all">Pauziraj sve</string>
+    <string name="pause_downloads">Pauziraj preuzimanja</string>
     <string name="paused">Pauzirano</string>
     <string name="payment_method">Način plaćanja</string>
     <string name="pen">olovka</string>
@@ -1868,6 +1905,7 @@
     <string name="query_must_not_be_empty">Upit ne smije biti prazan.</string>
     <string name="queue_failed">Red čekanja nije uspio</string>
     <string name="queued">U redu čekanja</string>
+    <string name="queued_count">%d u redu čekanja</string>
     <string name="quick_add_popular_repositories">Brzo dodavanje popularnih repozitorija</string>
     <string name="quick_add_repository">Brzo dodavanje repozitorija</string>
     <string name="quick_fill_same_url_for_all_projects">Brzo ispunjavanje (isti URL za sve projekte)</string>
@@ -2026,7 +2064,9 @@
     <string name="resume">Nastavi</string>
     <string name="resume_all">Nastavi sve</string>
     <string name="resume_download">Nastavi preuzimanje</string>
+    <string name="resume_downloads">Nastavi preuzimanja</string>
     <string name="retry">Ponovi</string>
+    <string name="retry_all_failed">Ponovi sve neuspjele</string>
     <string name="retry_failed">Pokušaj ponovno za neuspjele</string>
     <string name="retry_loading">Pokušaj ponovno učitavanje</string>
     <string name="retrying_download">Pokušavam ponovno preuzimanje</string>
@@ -2046,7 +2086,10 @@
     <string name="right">Desno</string>
     <string name="rotate_screen_automatically">Automatski zakreni zaslon</string>
     <string name="rotation">rotacija</string>
+    <string name="rule_already_exists">Pravilo za ovo već postoji u ovoj kategoriji</string>
+    <string name="rule_count">%1$d pravilo</string>
     <string name="rule_syntax_help">Pomoć za sintaksu pravila</string>
+    <string name="rules_count">%1$d pravila</string>
     <string name="run_health_check">Pokreni provjeru zdravlja</string>
     <string name="run_the_migration_community_sourcesql">Pokrenite datoteku migration_community_source.sql u svom Supabase SQL uređivaču kako biste stvorili ove tablice.</string>
     <string name="sample_text">Primjer teksta</string>
@@ -2121,6 +2164,7 @@
     <string name="select_backup_file">Odaberite datoteku sigurnosne kopije</string>
     <string name="select_between">Odaberi između</string>
     <string name="select_books_to_migrate">Odaberite knjige za migraciju</string>
+    <string name="select_categories">Odaberite kategorije</string>
     <string name="select_chapters">Odaberi poglavlja</string>
     <string name="select_cloud_provider">Odaberite pružatelja usluga u oblaku</string>
     <string name="select_engine">Odaberite pogon</string>
@@ -2136,6 +2180,7 @@
     <string name="select_model">Odaberite model</string>
     <string name="select_navigation_style">Odaberite stil navigacije</string>
     <string name="select_source_to_migrate_to">Odaberite izvor za migraciju</string>
+    <string name="select_storage_folder">Odaberite mapu za pohranu</string>
     <string name="select_target_source">Odaberite ciljni izvor</string>
     <string name="select_the_languages_you_want">Odaberite jezike koje želite vidjeti prilikom pregledavanja i pretraživanja sadržaja. Možete odabrati više jezika.</string>
     <string name="select_the_languages_you_want_1">Odaberite jezike koje želite vidjeti prilikom pregledavanja izvora. Prikazuju se samo jezici s dostupnim izvorima.</string>
@@ -2159,6 +2204,7 @@
     <string name="selectors_for_the_explorelatest_page">Selektori za stranicu istraživanja/najnovijeg (neobavezno, koristi pravila pretraživanja ako je prazno)</string>
     <string name="send_reset_email">Pošalji e-poštu za poništavanje</string>
     <string name="sentence_highlighting">Isticanje rečenica</string>
+    <string name="set_categories">Postavi kategorije</string>
     <string name="set_eth_wallet_address">Postavite adresu ETH novčanika</string>
     <string name="set_name">Postavi ime</string>
     <string name="sets_the_tone_of_translated_text">Postavlja ton prevedenog teksta</string>
@@ -2261,10 +2307,13 @@
     <string name="source_browse_latest">Pregledaj najnovije</string>
     <string name="source_extension_not_installed">Ekstenzija izvora nije instalirana</string>
     <string name="source_id">ID izvora</string>
+    <string name="source_id_or_name">ID ili naziv izvora</string>
     <string name="source_json">Izvorni JSON</string>
     <string name="source_name">Naziv izvora *</string>
     <string name="source_needs_update">Izvor treba ažuriranje</string>
     <string name="source_not_available">ovaj izvor nije dostupan na vašem uređaju.</string>
+    <string name="source_placeholder">npr., 12345 ili NovelUpdates</string>
+    <string name="source_rule">Izvor</string>
     <string name="source_term">Izvorni pojam</string>
     <string name="source_title">Naziv izvora</string>
     <string name="source_unavailable">Izvor nedostupan</string>
@@ -2291,11 +2340,16 @@
     <string name="stop">Zaustavi</string>
     <string name="stop_playback_after">Zaustavi reprodukciju nakon:</string>
     <string name="storage">Pohrana</string>
+    <string name="storage_access_lost">Pristup pohrani izgubljen</string>
+    <string name="storage_access_lost_description">IReader više nema pristup mapi za pohranu. Molimo odaberite mapu za nastavak korištenja aplikacije.</string>
+    <string name="storage_access_lost_reasons">Mapa je možda izbrisana, premještena ili je dozvola opozvana. To se može dogoditi nakon ažuriranja aplikacije ili promjena sustava.</string>
+    <string name="storage_is_needed_for">Pohrana je potrebna za:</string>
     <string name="storage_permission_privacy_note">IReader pristupa samo mapi koju odaberete. Vaše ostale datoteke ostaju privatne i netaknute.</string>
     <string name="storage_permission_required_explanation">Objašnjenje za potrebno dopuštenje za pohranu
 	</string>
     <string name="storage_permission_subtitle">Odaberite mapu u koju će IReader spremati vaša preuzimanja, proširenja i sigurnosne kopije</string>
     <string name="storage_permission_title">Odaberite mapu za pohranu</string>
+    <string name="storage_required">Pohrana potrebna</string>
     <string name="storage_settings">Postavke pohrane</string>
     <string name="storage_setup">Postavljanje pohrane</string>
     <string name="storage_usage">Iskorištenost prostora za pohranu</string>
@@ -2363,6 +2417,7 @@
     <string name="system_integration_multiple_engines_supported">✓ Integracija sustava • ✓ Podržano više motora • ✓ Nisu potrebna preuzimanja</string>
     <string name="system_notifications">Sustav i obavijesti</string>
     <string name="system_notifications_1">Obavijesti sustava</string>
+    <string name="system_settings">Postavke sustava</string>
     <string name="system_tts_settings">Postavke TTS-a sustava</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">Kartice</string>
@@ -2726,11 +2781,14 @@
     <string name="whats_new_1">Što je novo</string>
     <string name="whats_new_2">Što je novo:</string>
     <string name="while_charging">Tijekom punjenja</string>
+    <string name="why_did_this_happen">Zašto se ovo dogodilo?</string>
     <string name="why_donate">Zašto donirati?</string>
     <string name="why_is_this_needed">Zašto je to potrebno?</string>
     <string name="width">Širina</string>
     <string name="width_1">širina</string>
     <string name="wifi_only">Samo WiFi</string>
+    <string name="wifi_only_mode">Samo WiFi način</string>
+    <string name="wifi_only_warning">Preuzimanja pauzirana – omogućen je način rada samo putem WiFi-ja</string>
     <string name="with_trailing_content">Sa sadržajem koji slijedi</string>
     <string name="wizard">Čarobnjak</string>
     <string name="wizard_step">wizard_step</string>

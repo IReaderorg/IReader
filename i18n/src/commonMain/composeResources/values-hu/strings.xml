@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">Szószedet bejegyzés hozzáadása</string>
     <string name="add_more_time">Több idő hozzáadása:</string>
     <string name="add_new_book_glossary">Új könyv szószedet hozzáadása</string>
+    <string name="add_new_rule">Új szabály hozzáadása</string>
     <string name="add_novels_to_library_only">Csak akkor adja hozzá a regényeket a könyvtárhoz, ha megtalálhatók a keresési eredményekben</string>
     <string name="add_parameter">Paraméter hozzáadása</string>
     <string name="add_plugin_repository">Bővítménytároló hozzáadása</string>
     <string name="add_repository">Tároló hozzáadása</string>
     <string name="add_repository_1">Tároló hozzáadása</string>
+    <string name="add_rule">Szabály hozzáadása</string>
     <string name="add_to_category">Hozzáadás kategóriához</string>
     <string name="add_to_library">Hozzáadás a könyvtárhoz</string>
+    <string name="add_without_category">Kategória nélkül hozzáad</string>
+    <string name="added_genre_rule">Hozzáadott műfaji szabály: %1$s</string>
+    <string name="added_source_rule">Hozzáadott forrás szabály: %1$s</string>
+    <string name="added_to_category">Hozzáadva ehhez: %s</string>
     <string name="added_to_library">Hozzáadva a könyvtárhoz</string>
     <string name="additional_details">További részletek:</string>
     <string name="additional_details_optional">További részletek (opcionális)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">Összes idő</string>
     <string name="all_types">Minden típus</string>
     <string name="allow_loading_lnreader_compatible_javascript">LNReader-kompatibilis JavaScript pluginok betöltésének engedélyezése</string>
+    <string name="allow_mobile_data">Mobiladat engedélyezése</string>
     <string name="alpha">alfa</string>
     <string name="alphaanimation">alphaAnimáció</string>
+    <string name="always_ask">Mindig kérdezze meg</string>
     <string name="an_image">egy kép</string>
     <string name="analytics">Analitika</string>
     <string name="analyze_page">Oldal elemzése</string>
@@ -145,6 +153,9 @@
     <string name="auto">Auto</string>
     <string name="auto_approve_7_days_old">Automatikus jóváhagyás (7+ napos)</string>
     <string name="auto_backup">Automatikus biztonsági mentés</string>
+    <string name="auto_categorization">Automatikus kategorizálás</string>
+    <string name="auto_categorization_description">Az ezeknek a szabályoknak megfelelő regények automatikusan ebbe a kategóriába kerülnek.</string>
+    <string name="auto_categorization_rules">Automatikus kategorizálási szabályok</string>
     <string name="auto_cleanup">Automatikus tisztítás</string>
     <string name="auto_delete">Automatikus törlés</string>
     <string name="auto_delete_chapters">Fejezetek automatikus törlése</string>
@@ -192,6 +203,7 @@
     <string name="available_for_download">Letölthető</string>
     <string name="available_kokoro_voices">Elérhető Kokoro hangok:</string>
     <string name="available_languages">Elérhető nyelvek:</string>
+    <string name="available_voices">Elérhető hangok</string>
     <string name="average_reading_speed">Átlagos olvasási sebesség</string>
     <string name="avg_cpu">Átl. CPU</string>
     <string name="avg_response_time">Átl. válaszidő</string>
@@ -424,6 +436,7 @@
     <string name="clear_completed">Befejezettek törlése</string>
     <string name="clear_download_cache">Letöltési gyorsítótár törlése</string>
     <string name="clear_download_cache_confirmation">Ezzel eltávolítod az összes ideiglenes letöltési fájlt. A letöltött fejezeteket ez nem érinti.</string>
+    <string name="clear_failed">Sikertelenek törlése</string>
     <string name="clear_filters">Szűrők törlése</string>
     <string name="clear_not_in_library_books">A könyvtárban nem szereplő összes könyv törlése</string>
     <string name="clear_search">Keresés törlése</string>
@@ -556,6 +569,7 @@
     <string name="current_engine">Jelenlegi motor</string>
     <string name="current_location">Jelenlegi hely:</string>
     <string name="current_progress">Jelenlegi haladás</string>
+    <string name="current_rules">Jelenlegi szabályok</string>
     <string name="currently_reading">Jelenleg olvasott</string>
     <string name="currently_viewing_a_plugin_screen">Éppen egy bővítmény képernyőjét nézi</string>
     <string name="custom">Egyéni</string>
@@ -605,6 +619,8 @@
     <string name="deepseek_configuration">DeepSeek konfiguráció</string>
     <string name="deepseek_login_required">DeepSeek bejelentkezés szükséges</string>
     <string name="deepseek_payment_required">DeepSeek fizetés szükséges vagy az API kvóta túllépve</string>
+    <string name="default_category">Alapértelmezett kategória</string>
+    <string name="default_category_summary">Kategória, amelyet a könyvek könyvtárhoz adásakor használni kell</string>
     <string name="default_chapter_sort">Alapértelmezett fejezetrendezés</string>
     <string name="default_reading_mode">Alapértelmezett olvasási mód</string>
     <string name="default_reading_mode_for_new_books">Alapértelmezett olvasási mód új könyvekhez</string>
@@ -624,11 +640,14 @@
     <string name="delete_art">Törli a rajzot?</string>
     <string name="delete_backup">Biztonsági mentés törlése?</string>
     <string name="delete_category">Kategória törlése?</string>
+    <string name="delete_chapter">Fejezet törlése</string>
+    <string name="delete_content">Tartalom törlése</string>
     <string name="delete_custom_theme">Egyéni téma törlése</string>
     <string name="delete_entry">Bejegyzés törlése</string>
     <string name="delete_failed">Törlés sikertelen: %1$s</string>
     <string name="delete_font">Betűtípus törlése</string>
     <string name="delete_font_1">Betűtípus törlése</string>
+    <string name="delete_rule">Szabály törlése</string>
     <string name="delete_source">Forrás törlése</string>
     <string name="delete_update">Frissítés törlése</string>
     <string name="delete_voice">Hang törlése</string>
@@ -676,6 +695,7 @@
     <string name="discord">Discord</string>
     <string name="discover">Felfedezés</string>
     <string name="discover_plugins_to_enhance_your_reading">Fedezzen fel bővítményeket az olvasási élmény fokozásához</string>
+    <string name="disk_space_warning">Letöltések szünetelnek – Kevés lemezterület</string>
     <string name="dismiss">Elutasítás</string>
     <string name="display">Megjelenítés</string>
     <string name="display_adult_content_in_search_results">Felnőtt tartalom megjelenítése a keresési eredményekben</string>
@@ -719,6 +739,7 @@
     <string name="download_delay">Letöltési késleltetés</string>
     <string name="download_failed">Sikertelen letöltés: %1$s</string>
     <string name="download_failed_title">Letöltés sikertelen</string>
+    <string name="download_from_last_read">Letöltés az utolsó olvasottól</string>
     <string name="download_information">Letöltési információk</string>
     <string name="download_install">Letöltés és telepítés</string>
     <string name="download_language_models">Nyelvmodellek letöltése</string>
@@ -742,6 +763,7 @@
     <string name="download_settings">Letöltési beállítások</string>
     <string name="download_unread">Olvasatlan letöltése</string>
     <string name="download_unread_1">Olvasatlan letöltése</string>
+    <string name="download_unread_from_last_read_desc">Fejezetek letöltése az utoljára olvasott fejezet után kezdődően, az első olvasatlan fejezet helyett.</string>
     <string name="download_update">Frissítés letöltése</string>
     <string name="downloadarrow">letöltésNyíl</string>
     <string name="downloaded">Letöltve</string>
@@ -751,6 +773,7 @@
     <string name="downloading_1">Letöltés...</string>
     <string name="downloading_chapter_audio">Fejezet hanganyagának letöltése</string>
     <string name="downloading_chapters">%1$s fejezet letöltése</string>
+    <string name="downloading_count">%d letöltés alatt</string>
     <string name="downloading_unread_chapters">%1$s olvasatlan fejezet letöltése</string>
     <string name="downloading_update">Frissítés letöltése</string>
     <string name="downloading_update_1">Frissítés letöltése...</string>
@@ -927,10 +950,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">Sikertelen</string>
+    <string name="failed_count">%d sikertelen</string>
     <string name="failed_files">Sikertelen fájlok</string>
     <string name="failed_imports">Sikertelen importálások</string>
     <string name="failed_to_add_entry">Nem sikerült bejegyzést hozzáadni: %1$s</string>
     <string name="failed_to_add_repository">Nem sikerült a tároló hozzáadása: %1$s</string>
+    <string name="failed_to_add_rule">Nem sikerült hozzáadni a szabályt: %1$s</string>
     <string name="failed_to_apply_plugin_theme">Nem sikerült a plugin téma alkalmazása: %1$s. Az alapértelmezett téma használata.</string>
     <string name="failed_to_check_updates">Nem sikerült ellenőrizni a frissítéseket</string>
     <string name="failed_to_copy">Sikertelen másolás: %1$s</string>
@@ -1066,6 +1091,9 @@
     <string name="generating_audio_for_entire_chapter">Hang generálása a teljes fejezethez...</string>
     <string name="generating_prompt">Felhívás generálása...</string>
     <string name="generation_failed">Generálás sikertelen</string>
+    <string name="genre_name">Műfaj neve</string>
+    <string name="genre_placeholder">pl. Fantázia, Romantikus, Akció</string>
+    <string name="genre_rule">Műfaj</string>
     <string name="genre_selector">Műfajválasztó</string>
     <string name="genrekind_selector">Műfaj/Típus választó</string>
     <string name="genreprogress">műfajFolyamat</string>
@@ -1182,6 +1210,8 @@
     <string name="import_from_url">Importálás URL-ről</string>
     <string name="import_glossary">Szószedet importálása</string>
     <string name="import_legado_sources">Legado források importálása</string>
+    <string name="import_pdf">PDF importálása</string>
+    <string name="import_pdf_files_into_your_library">PDF fájlok importálása a könyvtárba olvasáshoz és felolvasáshoz (TTS)</string>
     <string name="import_sources">Források importálása</string>
     <string name="import_sources_from_legadoyuedu_json">Források importálása Legado/Yuedu JSON formátumból. Közvetlenül beilleszthetsz JSON-t, megadhatsz URL-t, vagy importálhatsz vágólapról.</string>
     <string name="import_theme">Téma importálása</string>
@@ -1530,7 +1560,9 @@
     <string name="no_badges_yet_earn_badges">Még nincsenek jelvényeid. Szerezz jelvényeket vásárlással vagy IReader NFT-k birtoklásával!</string>
     <string name="no_book_found_error">Nincs könyv ezzel az azonosítóval.</string>
     <string name="no_books_in_library">Nincsenek könyvek a könyvtárban</string>
+    <string name="no_categories_create_one">Nincsenek kategóriák. Hozzon létre egyet először a könyvtár rendszerezéséhez.</string>
     <string name="no_categories_found">Nem található kategória</string>
+    <string name="no_category">Nincs kategória</string>
     <string name="no_chapter_found_error">Nincs fejezet ezzel a névvel.</string>
     <string name="no_chapter_is_available">Nincs elérhető fejezet.</string>
     <string name="no_chapters_available">Nincsenek elérhető fejezetek</string>
@@ -1583,6 +1615,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">Ehhez a fejezethez még nincsenek vélemények</string>
     <string name="no_reviews_yet">Még nincsenek vélemények</string>
     <string name="no_reviews_yet_be_the_first_to_review">Még nincsenek vélemények. Legyél az első, aki véleményt ír!</string>
+    <string name="no_rules_configured">Nincsenek beállított szabályok. Adjon hozzá egy szabályt a regények automatikus kategorizálásához.</string>
     <string name="no_settings_found">Nem található beállítás</string>
     <string name="no_sources_available">Nincs elérhető forrás</string>
     <string name="no_sources_available_for_migration">Nincsenek elérhető források a migrációhoz</string>
@@ -1594,8 +1627,10 @@
     <string name="no_usage_data_available_yet">Még nincsenek elérhető használati adatok</string>
     <string name="no_voice_models_available">Nincsenek elérhető hangmodellek</string>
     <string name="no_voices_available">Nincsenek elérhető hangok</string>
+    <string name="no_voices_available_for_this_language">Nincs elérhető hang ehhez a nyelvhez</string>
     <string name="none">Nincs</string>
     <string name="normal">Normál</string>
+    <string name="not_connected">Nincs kapcsolat</string>
     <string name="not_implemented_yet">Még nincs implementálva</string>
     <string name="not_installed">Nincs telepítve</string>
     <string name="not_tested">Nincs tesztelve</string>
@@ -1664,6 +1699,7 @@
     <string name="open_location">Hely megnyitása</string>
     <string name="open_random">Véletlenszerű megnyitása</string>
     <string name="open_site">Oldal megnyitása</string>
+    <string name="open_storage_settings">Tárhelybeállítások megnyitása</string>
     <string name="open_tts_manager">TTS Kezelő megnyitása</string>
     <string name="open_tts_screen">Megtekintés</string>
     <string name="open_tts_settings">TTS Beállítások Megnyitása</string>
@@ -1726,6 +1762,7 @@
     <string name="paste_the_theme_json_below">Illessze be az alábbi téma JSON-t:</string>
     <string name="pause">Szünet</string>
     <string name="pause_all">Összes szüneteltetése</string>
+    <string name="pause_downloads">Letöltések szüneteltetése</string>
     <string name="paused">Szüneteltetve</string>
     <string name="payment_method">Fizetési Mód</string>
     <string name="pen">toll</string>
@@ -1879,6 +1916,7 @@
     <string name="query_must_not_be_empty">A lekérdezés nem lehet üres.</string>
     <string name="queue_failed">Sorba állítás sikertelen</string>
     <string name="queued">Sorban áll</string>
+    <string name="queued_count">%d várólistán</string>
     <string name="quick_add_popular_repositories">Népszerű tárolók gyors hozzáadása</string>
     <string name="quick_add_repository">Tároló Gyors Hozzáadása</string>
     <string name="quick_fill_same_url_for_all_projects">Gyors Kitöltés (Ugyanaz az URL minden projekthez)</string>
@@ -2037,7 +2075,9 @@
     <string name="resume">Folytatás</string>
     <string name="resume_all">Összes folytatása</string>
     <string name="resume_download">Letöltés folytatása</string>
+    <string name="resume_downloads">Letöltések folytatása</string>
     <string name="retry">Újra</string>
+    <string name="retry_all_failed">Összes sikertelen újrapróbálása</string>
     <string name="retry_failed">Sikertelenek újrapróbálása</string>
     <string name="retry_loading">Újratöltés</string>
     <string name="retrying_download">Letöltés Újrapróbálkozása</string>
@@ -2057,7 +2097,10 @@
     <string name="right">Jobb</string>
     <string name="rotate_screen_automatically">Képernyő automatikus elforgatása</string>
     <string name="rotation">elforgatás</string>
+    <string name="rule_already_exists">Ehhez a kategóriában már létezik szabály.</string>
+    <string name="rule_count">%1$d szabály</string>
     <string name="rule_syntax_help">Szabály szintaxis súgó</string>
+    <string name="rules_count">%1$d szabály</string>
     <string name="run_health_check">Egészségügyi ellenőrzés futtatása</string>
     <string name="run_the_migration_community_sourcesql">Futtassa a migration_community_source.sql fájlt a Supabase SQL szerkesztőjében ezen táblák létrehozásához.</string>
     <string name="sample_text">Minta Szöveg</string>
@@ -2132,6 +2175,7 @@
     <string name="select_backup_file">Válassz mentési fájlt</string>
     <string name="select_between">Kijelölés között</string>
     <string name="select_books_to_migrate">Válaszd ki az áttelepítendő könyveket</string>
+    <string name="select_categories">Kategóriák kiválasztása</string>
     <string name="select_chapters">Fejezetek kiválasztása</string>
     <string name="select_cloud_provider">Felhőszolgáltató kiválasztása</string>
     <string name="select_engine">Motor kiválasztása</string>
@@ -2147,6 +2191,7 @@
     <string name="select_model">Modell kiválasztása</string>
     <string name="select_navigation_style">Válassz navigációs stílust</string>
     <string name="select_source_to_migrate_to">Válassz forrást a migráláshoz</string>
+    <string name="select_storage_folder">Tárhely mappa kiválasztása</string>
     <string name="select_target_source">Válaszd ki a cél forrást</string>
     <string name="select_the_languages_you_want">Válaszd ki a nyelveket, amelyeket látni szeretnél a tartalom böngészése és keresése közben. Több nyelvet is választhatsz.</string>
     <string name="select_the_languages_you_want_1">Válaszd ki a nyelveket, amelyeket látni szeretnél a források böngészése közben. Csak a elérhető forrásokkal rendelkező nyelvek jelennek meg.</string>
@@ -2170,6 +2215,7 @@
     <string name="selectors_for_the_explorelatest_page">Szelektálók a felfedező/legújabb oldalhoz (opcionális, üresen hagyva keresési szabályokat használ)</string>
     <string name="send_reset_email">Jelszó-helyreállító e-mail küldése</string>
     <string name="sentence_highlighting">Mondatkiemelés</string>
+    <string name="set_categories">Kategóriák beállítása</string>
     <string name="set_eth_wallet_address">ETH Pénztárca cím beállítása</string>
     <string name="set_name">Név beállítása</string>
     <string name="sets_the_tone_of_translated_text">Meghatározza a lefordított szöveg hangulatát</string>
@@ -2272,10 +2318,13 @@
     <string name="source_browse_latest">Legfrissebbek böngészése</string>
     <string name="source_extension_not_installed">Forrás kiterjesztés nincs telepítve</string>
     <string name="source_id">Forrás azonosító</string>
+    <string name="source_id_or_name">Forrás azonosítója vagy neve</string>
     <string name="source_json">Forrás JSON</string>
     <string name="source_name">Forrás neve *</string>
     <string name="source_needs_update">A forrás frissítésre szorul</string>
     <string name="source_not_available">Ez a forrás nem elérhető az eszközén.</string>
+    <string name="source_placeholder">pl. 12345 vagy NovelUpdates</string>
+    <string name="source_rule">Forrás</string>
     <string name="source_term">Forrás kifejezés</string>
     <string name="source_title">Forrás címe</string>
     <string name="source_unavailable">Forrás nem elérhető</string>
@@ -2302,11 +2351,16 @@
     <string name="stop">Leállítás</string>
     <string name="stop_playback_after">Lejátszás leállítása ennyi idő után:</string>
     <string name="storage">Tárhely</string>
+    <string name="storage_access_lost">Tárhely-hozzáférés elveszett</string>
+    <string name="storage_access_lost_description">Az IReader már nem fér hozzá a tárhely mappához. Kérjük, válasszon egy mappát az alkalmazás további használatához.</string>
+    <string name="storage_access_lost_reasons">A mappa törölve, áthelyezve, vagy az engedély visszavonva lett. Ez előfordulhat alkalmazásfrissítések vagy rendszerbeli változások után.</string>
+    <string name="storage_is_needed_for">Tárhely szükséges a következőkhöz:</string>
     <string name="storage_permission_privacy_note">Az IReader csak a kiválasztott mappához fér hozzá. Más fájljai privátak és érintetlenek maradnak.</string>
     <string name="storage_permission_required_explanation">Tárhely engedély szükséges
     </string>
     <string name="storage_permission_subtitle">Válasszon egy mappát, ahová az IReader a letöltéseit, bővítményeit és biztonsági mentéseit fogja tárolni.</string>
     <string name="storage_permission_title">Tárolómappa kiválasztása</string>
+    <string name="storage_required">Tárhely szükséges</string>
     <string name="storage_settings">Tárhelybeállítások</string>
     <string name="storage_setup">Tárhely beállítása</string>
     <string name="storage_usage">Tárhely használat</string>
@@ -2376,6 +2430,7 @@
     <string name="system_integration_multiple_engines_supported">✓ Rendszerintegráció • ✓ Több motor támogatott • ✓ Nincs szükség letöltésre</string>
     <string name="system_notifications">Rendszer és értesítések</string>
     <string name="system_notifications_1">Rendszer értesítések</string>
+    <string name="system_settings">Rendszerbeállítások</string>
     <string name="system_tts_settings">Rendszer TTS beállítások</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">Fülek</string>
@@ -2740,11 +2795,14 @@
     <string name="whats_new_1">Újdonságok</string>
     <string name="whats_new_2">Újdonságok:</string>
     <string name="while_charging">Töltés közben</string>
+    <string name="why_did_this_happen">Miért történt ez?</string>
     <string name="why_donate">Miért adományozz?</string>
     <string name="why_is_this_needed">Miért van erre szükség?</string>
     <string name="width">Szélesség</string>
     <string name="width_1">szélesség</string>
     <string name="wifi_only">Csak WiFi</string>
+    <string name="wifi_only_mode">Csak Wi-Fi mód</string>
+    <string name="wifi_only_warning">Letöltések szünetelnek – Csak Wi-Fi mód engedélyezve</string>
     <string name="with_trailing_content">Záró tartalommal</string>
     <string name="wizard">Varázsló</string>
     <string name="wizard_step">varázsló_lépés</string>
