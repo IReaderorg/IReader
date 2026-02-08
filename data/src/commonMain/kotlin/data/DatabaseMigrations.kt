@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 35
+    const val CURRENT_VERSION = 36
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -100,6 +100,7 @@ object DatabaseMigrations {
             32 -> migrateV32toV33(driver)
             33 -> migrateV33toV34(driver)
             34 -> migrateV34toV35(driver)
+            35 -> migrateV35toV36(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2601,6 +2602,42 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(35, e)
+            // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+    
+    /**
+     * Migration from version 35 to version 36
+     * Adds unique constraint on (book_id, url) to chapter table to prevent duplicate chapters
+     * when fetching from remote sources.
+     */
+    private fun migrateV35toV36(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(35, 36)
+            
+            // First, remove any duplicate chapters that may exist (keep the one with lowest _id)
+            // This is necessary before adding the unique constraint
+            driver.execute(null, """
+                DELETE FROM chapter
+                WHERE _id NOT IN (
+                    SELECT MIN(_id)
+                    FROM chapter
+                    GROUP BY book_id, url
+                );
+            """.trimIndent(), 0)
+            Logger.logDebug("Removed duplicate chapters before adding unique constraint")
+            
+            // Create unique index on (book_id, url) to prevent duplicate chapters
+            driver.execute(null, """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_chapter_book_url_unique
+                ON chapter(book_id, url);
+            """.trimIndent(), 0)
+            Logger.logIndexCreated("idx_chapter_book_url_unique")
+            
+            Logger.logMigrationSuccess(36)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(36, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }
