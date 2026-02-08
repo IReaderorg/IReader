@@ -2642,6 +2642,7 @@
     <string name="upcoming_releases">Prochaines sorties</string>
     <string name="update">Mettre à jour</string>
     <string name="update_all">Tout mettre à jour</string>
+    <string name="update_all_books">Mettre à jour tous les livres</string>
     <string name="update_available">Mise à jour disponible</string>
     <string name="update_available_1">Mise à jour disponible</string>
     <string name="update_category">Mettre à jour la catégorie</string>

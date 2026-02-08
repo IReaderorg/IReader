@@ -2661,6 +2661,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="upcoming_releases">Tulevat julkaisut</string>
     <string name="update">Päivitä</string>
     <string name="update_all">Päivitä kaikki</string>
+    <string name="update_all_books">Päivitä kaikki kirjat</string>
     <string name="update_available">Päivitys saatavilla</string>
     <string name="update_available_1">Päivitys saatavilla</string>
     <string name="update_category">Päivitä kategoria</string>

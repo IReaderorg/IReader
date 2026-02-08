@@ -2666,6 +2666,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="upcoming_releases">Bevorstehende Veröffentlichungen</string>
     <string name="update">Aktualisieren</string>
     <string name="update_all">Alle aktualisieren</string>
+    <string name="update_all_books">Alle Bücher aktualisieren</string>
     <string name="update_available">Aktualisierung verfügbar</string>
     <string name="update_available_1">Update verfügbar</string>
     <string name="update_category">Kategorie aktualisieren</string>
