@@ -689,6 +689,110 @@ WHERE book.favorite = 1 AND MC.category_id = :categoryId
 ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.cached_total_chapters DESC
 LIMIT :limit OFFSET :offset;
 
+-- Fast category pagination sorted by total chapters ascending
+getLibraryByCategoryByTotalChaptersAsc:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.cached_total_chapters ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast category pagination sorted by source
+getLibraryByCategoryBySource:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.source ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast category pagination sorted by source descending
+getLibraryByCategoryBySourceDesc:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.source DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast category pagination sorted by date added
+getLibraryByCategoryByDateAdded:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.date_added DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast category pagination sorted by date added ascending
+getLibraryByCategoryByDateAddedAsc:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.date_added ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast category pagination sorted by last read ascending
+getLibraryByCategoryByLastReadAsc:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.last_read_at ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast category pagination sorted by last update ascending
+getLibraryByCategoryByLastUpdateAsc:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.last_update ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast category pagination sorted by unread count ascending
+getLibraryByCategoryByUnreadAsc:
+SELECT 
+    book.*,
+    MC.category_id AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.cached_unread_count ASC
+LIMIT :limit OFFSET :offset;
+
 -- Search with pagination
 searchBooksPaginated:
 SELECT * FROM book 
@@ -772,6 +876,102 @@ SELECT
 FROM book
 WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
 ORDER BY book.date_added DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by date added ascending
+searchPaginatedByDateAddedAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.date_added ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by source
+searchPaginatedBySource:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.source ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by source descending
+searchPaginatedBySourceDesc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.source DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by total chapters
+searchPaginatedByTotalChapters:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.cached_total_chapters DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by total chapters ascending
+searchPaginatedByTotalChaptersAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.cached_total_chapters ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by last read ascending
+searchPaginatedByLastReadAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.last_read_at ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by last update ascending
+searchPaginatedByLastUpdateAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.last_update ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast search sorted by unread count ascending
+searchPaginatedByUnreadAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 AND book.title LIKE '%' || :query || '%'
+ORDER BY book.cached_unread_count ASC
 LIMIT :limit OFFSET :offset;
 
 
@@ -873,6 +1073,110 @@ FROM book
 WHERE book.favorite = 1 
     AND book._id NOT IN (SELECT book_id FROM bookcategories)
 ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.cached_total_chapters DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by total chapters ascending
+getUncategorizedByTotalChaptersAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.cached_total_chapters ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by source
+getUncategorizedBySource:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.source ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by source descending
+getUncategorizedBySourceDesc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.source DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by date added
+getUncategorizedByDateAdded:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.date_added DESC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by date added ascending
+getUncategorizedByDateAddedAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.date_added ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by last read ascending
+getUncategorizedByLastReadAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.last_read_at ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by last update ascending
+getUncategorizedByLastUpdateAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.last_update ASC
+LIMIT :limit OFFSET :offset;
+
+-- Fast uncategorized pagination sorted by unread count ascending
+getUncategorizedByUnreadAsc:
+SELECT 
+    book.*,
+    0 AS category,
+    book.cached_unread_count AS unread_count,
+    book.cached_read_count AS read_count
+FROM book
+WHERE book.favorite = 1 
+    AND book._id NOT IN (SELECT book_id FROM bookcategories)
+ORDER BY book.is_pinned DESC, book.pinned_order ASC, book.cached_unread_count ASC
 LIMIT :limit OFFSET :offset;
 
 -- Get count of uncategorized books

@@ -322,21 +322,28 @@ class LibraryRepositoryImpl(
                     else bookQueries.getLibraryByCategoryByTitleDesc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.LastRead -> {
-                    bookQueries.getLibraryByCategoryByLastRead(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryByLastReadAsc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryByLastRead(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.LastUpdated -> {
-                    bookQueries.getLibraryByCategoryByLastUpdate(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryByLastUpdateAsc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryByLastUpdate(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.Unread -> {
-                    bookQueries.getLibraryByCategoryByUnread(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryByUnreadAsc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryByUnread(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.TotalChapters -> {
-                    bookQueries.getLibraryByCategoryByTotalChapters(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryByTotalChaptersAsc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryByTotalChapters(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
-                LibrarySort.Type.Source, LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
-                    // Fall back to title sort for these (can add more queries if needed)
-                    if (sort.isAscending) bookQueries.getLibraryByCategoryPaginatedFast(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
-                    else bookQueries.getLibraryByCategoryByTitleDesc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                LibrarySort.Type.Source -> {
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryBySource(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryBySourceDesc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
+                    if (sort.isAscending) bookQueries.getLibraryByCategoryByDateAddedAsc(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getLibraryByCategoryByDateAdded(categoryId, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
             }
         }.filterArchived(includeArchived)
@@ -365,21 +372,28 @@ class LibraryRepositoryImpl(
                     else bookQueries.getUncategorizedByTitleDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.LastRead -> {
-                    bookQueries.getUncategorizedByLastRead(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getUncategorizedByLastReadAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedByLastRead(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.LastUpdated -> {
-                    bookQueries.getUncategorizedByLastUpdate(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getUncategorizedByLastUpdateAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedByLastUpdate(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.Unread -> {
-                    bookQueries.getUncategorizedByUnread(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getUncategorizedByUnreadAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedByUnread(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.TotalChapters -> {
-                    bookQueries.getUncategorizedByTotalChapters(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.getUncategorizedByTotalChaptersAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedByTotalChapters(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
-                LibrarySort.Type.Source, LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
-                    // Fall back to title sort for these
-                    if (sort.isAscending) bookQueries.getUncategorizedPaginatedFast(limit.toLong(), offset.toLong(), getLibraryFastMapper)
-                    else bookQueries.getUncategorizedByTitleDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                LibrarySort.Type.Source -> {
+                    if (sort.isAscending) bookQueries.getUncategorizedBySource(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedBySourceDesc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
+                    if (sort.isAscending) bookQueries.getUncategorizedByDateAddedAsc(limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.getUncategorizedByDateAdded(limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
             }
         }.filterArchived(includeArchived)
@@ -410,21 +424,28 @@ class LibraryRepositoryImpl(
                     else bookQueries.searchPaginatedByTitleDesc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.LastRead -> {
-                    bookQueries.searchPaginatedByLastRead(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.searchPaginatedByLastReadAsc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedByLastRead(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.LastUpdated -> {
-                    bookQueries.searchPaginatedByLastUpdate(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.searchPaginatedByLastUpdateAsc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedByLastUpdate(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.Unread -> {
-                    bookQueries.searchPaginatedByUnread(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.searchPaginatedByUnreadAsc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedByUnread(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
                 LibrarySort.Type.DateAdded, LibrarySort.Type.DateFetched -> {
-                    bookQueries.searchPaginatedByDateAdded(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    if (sort.isAscending) bookQueries.searchPaginatedByDateAddedAsc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedByDateAdded(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
-                LibrarySort.Type.TotalChapters, LibrarySort.Type.Source -> {
-                    // Fall back to title sort
-                    if (sort.isAscending) bookQueries.searchPaginatedFast(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
-                    else bookQueries.searchPaginatedByTitleDesc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                LibrarySort.Type.TotalChapters -> {
+                    if (sort.isAscending) bookQueries.searchPaginatedByTotalChaptersAsc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedByTotalChapters(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                }
+                LibrarySort.Type.Source -> {
+                    if (sort.isAscending) bookQueries.searchPaginatedBySource(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
+                    else bookQueries.searchPaginatedBySourceDesc(query, limit.toLong(), offset.toLong(), getLibraryFastMapper)
                 }
             }
         }.filterArchived(includeArchived)
