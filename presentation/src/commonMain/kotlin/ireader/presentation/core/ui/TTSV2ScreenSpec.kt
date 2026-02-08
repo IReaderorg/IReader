@@ -281,6 +281,9 @@ class TTSV2ScreenSpec(
         val mergeWordsRemote by readerPreferences.ttsMergeWordsRemote().changes().collectAsState(
             initial = readerPreferences.ttsMergeWordsRemote().get()
         )
+        val mergeWordsNative by readerPreferences.ttsMergeWordsNative().changes().collectAsState(
+            initial = readerPreferences.ttsMergeWordsNative().get()
+        )
         
         // Cache state
         val isChapterCached by remember(state.chapter?.id, state.paragraphs) {
@@ -388,10 +391,15 @@ class TTSV2ScreenSpec(
                     }
                 }
                 
-                // Ensure chunk mode is enabled if Gradio TTS is active and not already enabled
-                if (useGradioTTS && mergeWordsRemote > 0 && !currentState.chunkModeEnabled) {
-                    Log.warn { "TTSV2ScreenSpec: Re-enabling chunk mode with $mergeWordsRemote words (was disabled)" }
-                    viewModel.adapter.enableChunkMode(mergeWordsRemote)
+                // Ensure chunk mode is enabled if not already enabled (for both Gradio and Native TTS)
+                if (!currentState.chunkModeEnabled) {
+                    if (useGradioTTS && mergeWordsRemote > 0) {
+                        Log.warn { "TTSV2ScreenSpec: Re-enabling chunk mode with $mergeWordsRemote words (was disabled)" }
+                        viewModel.adapter.enableChunkMode(mergeWordsRemote)
+                    } else if (!useGradioTTS && mergeWordsNative > 0) {
+                        Log.warn { "TTSV2ScreenSpec: Re-enabling chunk mode for native TTS with $mergeWordsNative words (was disabled)" }
+                        viewModel.adapter.enableChunkMode(mergeWordsNative)
+                    }
                 }
             } else {
                 // Clear existing translation state
@@ -452,6 +460,12 @@ class TTSV2ScreenSpec(
                     Log.warn { "TTSV2ScreenSpec: Gradio engine configured: ${gradioTTSConfig.name}" }
                 } else {
                     Log.warn { "TTSV2ScreenSpec: Gradio config not found: $activeGradioConfigId" }
+                }
+            } else if (!useGradioTTS && !alreadyLoaded) {
+                // Native TTS - enable chunk mode if configured
+                if (mergeWordsNative > 0) {
+                    viewModel.adapter.enableChunkMode(mergeWordsNative)
+                    Log.warn { "TTSV2ScreenSpec: Chunk mode enabled for native TTS with $mergeWordsNative words" }
                 }
             }
             
@@ -542,19 +556,28 @@ class TTSV2ScreenSpec(
             } else if (!useGradioTTS) {
                 // Switch back to native TTS
                 viewModel.adapter.useNativeTTS()
-                viewModel.adapter.disableChunkMode()
-                Log.warn { "TTSV2ScreenSpec: Switched to native TTS" }
+                // Enable chunk mode for native TTS if configured
+                if (mergeWordsNative > 0) {
+                    viewModel.adapter.enableChunkMode(mergeWordsNative)
+                    Log.warn { "TTSV2ScreenSpec: Switched to native TTS with chunk mode $mergeWordsNative words" }
+                } else {
+                    viewModel.adapter.disableChunkMode()
+                    Log.warn { "TTSV2ScreenSpec: Switched to native TTS without chunk mode" }
+                }
             }
         }
         
         // Watch for merge words changes (when user changes chunk word count in settings)
-        var previousMergeWords by remember { mutableStateOf(mergeWordsRemote) }
+        var previousMergeWordsRemote by remember { mutableStateOf(mergeWordsRemote) }
+        var previousMergeWordsNative by remember { mutableStateOf(mergeWordsNative) }
+        
+        // Watch for remote merge words changes (Gradio TTS)
         LaunchedEffect(mergeWordsRemote) {
             // Skip initial composition
-            if (previousMergeWords == mergeWordsRemote) return@LaunchedEffect
-            previousMergeWords = mergeWordsRemote
+            if (previousMergeWordsRemote == mergeWordsRemote) return@LaunchedEffect
+            previousMergeWordsRemote = mergeWordsRemote
             
-            Log.warn { "TTSV2ScreenSpec: Merge words changed to $mergeWordsRemote" }
+            Log.warn { "TTSV2ScreenSpec: Merge words remote changed to $mergeWordsRemote" }
             
             if (useGradioTTS && state.hasContent) {
                 if (mergeWordsRemote > 0) {
@@ -565,6 +588,27 @@ class TTSV2ScreenSpec(
                     // Disable chunk mode
                     viewModel.adapter.disableChunkMode()
                     Log.warn { "TTSV2ScreenSpec: Chunk mode disabled" }
+                }
+            }
+        }
+        
+        // Watch for native merge words changes (Native TTS)
+        LaunchedEffect(mergeWordsNative) {
+            // Skip initial composition
+            if (previousMergeWordsNative == mergeWordsNative) return@LaunchedEffect
+            previousMergeWordsNative = mergeWordsNative
+            
+            Log.warn { "TTSV2ScreenSpec: Merge words native changed to $mergeWordsNative" }
+            
+            if (!useGradioTTS && state.hasContent) {
+                if (mergeWordsNative > 0) {
+                    // Re-enable chunk mode with new word count
+                    viewModel.adapter.enableChunkMode(mergeWordsNative)
+                    Log.warn { "TTSV2ScreenSpec: Chunk mode re-enabled for native TTS with $mergeWordsNative words" }
+                } else {
+                    // Disable chunk mode
+                    viewModel.adapter.disableChunkMode()
+                    Log.warn { "TTSV2ScreenSpec: Chunk mode disabled for native TTS" }
                 }
             }
         }

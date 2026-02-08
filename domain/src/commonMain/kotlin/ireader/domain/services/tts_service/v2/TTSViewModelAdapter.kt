@@ -310,6 +310,14 @@ class TTSViewModelAdapter(
     }
     
     /**
+     * Enable Native TTS with chunk mode
+     */
+    fun useNativeTTSWithChunks(targetWordCount: Int = 50) {
+        useNativeTTS()
+        enableChunkMode(targetWordCount)
+    }
+    
+    /**
      * Generate audio data for text (for caching/download)
      * Only supported by remote TTS engines (Gradio).
      * 

@@ -66,10 +66,15 @@ class TTSV2ViewModel(
     
     /**
      * Switch to native TTS
+     * @param targetWordCount Optional words per chunk for text merging (0 to disable chunk mode)
      */
-    fun useNativeTTS() {
+    fun useNativeTTS(targetWordCount: Int = 0) {
         adapter.useNativeTTS()
-        adapter.disableChunkMode()
+        if (targetWordCount > 0) {
+            adapter.enableChunkMode(targetWordCount)
+        } else {
+            adapter.disableChunkMode()
+        }
     }
     
     // ========== Sleep Timer ==========
