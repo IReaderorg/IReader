@@ -268,6 +268,15 @@ class FeaturePluginIntegration(
     }
     
     /**
+     * Get all enabled feature plugins (public API)
+     *
+     * @return List of enabled FeaturePlugin instances
+     */
+    fun getFeaturePlugins(): List<FeaturePlugin> {
+        return getEnabledFeaturePlugins()
+    }
+    
+    /**
      * Check if any feature plugins are available
      */
     fun hasFeaturePlugins(): Boolean {

@@ -105,7 +105,14 @@ data class ReaderScreenSpec(
         val pluginMenuItems = remember(featurePluginIntegration) {
             featurePluginIntegration?.getPluginMenuItems() ?: emptyList()
         }
+        
+        // Get FeaturePlugin instances that implement PluginUIProvider for declarative UI rendering
+        val featurePlugins = remember(featurePluginIntegration) {
+            featurePluginIntegration?.getFeaturePlugins() ?: emptyList()
+        }
+        
         var showPluginMenu by rememberSaveable { mutableStateOf(false) }
+        var selectedPluginId by rememberSaveable { mutableStateOf<String?>(null) }
         
         // Extract values from state
         val successState = readerState as? ReaderState.Success
@@ -642,20 +649,32 @@ data class ReaderScreenSpec(
                             onChapterArt = {
                                 vm.showChapterArtDialog()
                             },
-                            hasPluginMenuItems = pluginMenuItems.isNotEmpty(),
+                            hasPluginMenuItems = featurePlugins.isNotEmpty(),
                             onPluginMenu = {
                                 showPluginMenu = true
                             }
                         )
                     
-                    // Plugin menu bottom sheet
-                    if (showPluginMenu && pluginMenuItems.isNotEmpty()) {
-                        ireader.presentation.ui.plugins.integration.PluginMenuBottomSheet(
-                            menuItems = pluginMenuItems,
-                            navController = navController,
-                            scope = scope,
-                            onDismiss = { showPluginMenu = false }
-                        )
+                    // Plugin panel bottom sheet - uses ReaderPluginPanel for declarative UI
+                    if (showPluginMenu && featurePlugins.isNotEmpty()) {
+                        androidx.compose.material3.ModalBottomSheet(
+                            onDismissRequest = { showPluginMenu = false },
+                            sheetState = androidx.compose.material3.rememberModalBottomSheetState()
+                        ) {
+                            ireader.presentation.ui.reader.plugins.ReaderPluginPanel(
+                                plugins = featurePlugins,
+                                context = ireader.plugin.api.PluginScreenContext(
+                                    bookId = bookId,
+                                    chapterId = chapterId,
+                                    bookTitle = successState?.book?.title,
+                                    chapterTitle = chapter?.name,
+                                    selectedText = null,
+                                    chapterContent = null
+                                ),
+                                onDismiss = { showPluginMenu = false },
+                                initialPluginId = selectedPluginId
+                            )
+                        }
                     }
                     
                     // Modal sheet rendered inside the Box to ensure it appears above content
