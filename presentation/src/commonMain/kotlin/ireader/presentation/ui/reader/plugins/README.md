@@ -542,12 +542,158 @@ class DictionaryPlugin : FeaturePlugin, PluginUIProvider {
 }
 ```
 
+## UI Builder DSL
+
+The `ReaderPluginUIBuilder` provides a convenient DSL for creating plugin UIs without boilerplate:
+
+### Basic Usage
+
+```kotlin
+import ireader.presentation.ui.reader.plugins.*
+
+// Create a screen using the DSL
+val screen = pluginScreen("main", "My Plugin") {
+    title("Welcome")
+    spacer(16)
+    textField("input", "Enter text")
+    row {
+        primaryButton("submit", "Submit")
+        secondaryButton("cancel", "Cancel")
+    }
+}
+```
+
+### Available DSL Methods
+
+| Method | Description |
+|--------|-------------|
+| `text(text, style)` | Add text with optional style |
+| `title(text)` | Add large title text |
+| `subtitle(text)` | Add medium subtitle text |
+| `body(text)` | Add body text |
+| `textField(id, label, value, multiline, maxLines)` | Add text input |
+| `textArea(id, label, value, maxLines)` | Add multiline text input |
+| `button(id, label, style, icon)` | Add button |
+| `primaryButton(id, label, icon)` | Add primary button |
+| `secondaryButton(id, label, icon)` | Add secondary button |
+| `outlinedButton(id, label, icon)` | Add outlined button |
+| `textButton(id, label, icon)` | Add text button |
+| `card { }` | Add card container |
+| `row(spacing) { }` | Add row layout |
+| `column(spacing) { }` | Add column layout |
+| `switch(id, label, checked)` | Add switch |
+| `chip(id, label, selected)` | Add chip |
+| `chipGroup(id, singleSelection) { }` | Add chip group |
+| `list(id, items)` | Add list |
+| `tabs { }` | Add tabs |
+| `loading(message)` | Add loading indicator |
+| `empty(message, icon, description)` | Add empty state |
+| `error(message)` | Add error message |
+| `spacer(height)` | Add spacer |
+| `divider(thickness)` | Add divider |
+| `progressBar(progress, label)` | Add progress bar |
+| `image(url, width, height, contentDescription)` | Add image |
+| `ifElse(condition, { }, { })` | Conditional content |
+
+### Complete Example with DSL
+
+```kotlin
+class MyPlugin : FeaturePlugin, PluginUIProvider {
+    
+    override fun getScreen(screenId: String, context: PluginScreenContext): PluginUIScreen? {
+        return when (screenId) {
+            "main" -> pluginScreen("main", "My Plugin") {
+                // Header with book info
+                context.bookTitle?.let { title(it) }
+                context.chapterTitle?.let { subtitle(it) }
+                spacer(16)
+                
+                // Options
+                text("Options:", TextStyle.LABEL)
+                chipGroup("options", singleSelection = true) {
+                    chip("opt1", "Option 1", selected = true)
+                    chip("opt2", "Option 2")
+                    chip("opt3", "Option 3")
+                }
+                spacer(16)
+                
+                // Settings
+                switch("setting1", "Enable feature", checked = true)
+                switch("setting2", "Show details")
+                spacer(16)
+                
+                // Actions
+                row(spacing = 8) {
+                    primaryButton("action", "Run", icon = "auto_awesome")
+                    textButton("settings", "Settings", icon = "settings")
+                }
+            }
+            
+            "settings" -> pluginScreen("settings", "Settings") {
+                text("Configure the plugin", TextStyle.BODY)
+                spacer(16)
+                textField("api_key", "API Key")
+                spacer(8)
+                switch("auto_run", "Run automatically")
+                spacer(16)
+                primaryButton("save", "Save", icon = "save")
+            }
+            
+            else -> null
+        }
+    }
+    
+    override suspend fun handleEvent(
+        screenId: String,
+        event: PluginUIEvent,
+        context: PluginScreenContext
+    ): PluginUIScreen? {
+        return when (event.componentId) {
+            "action" -> pluginScreen("result", "Results") {
+                loading("Processing...")
+            }
+            "settings" -> getScreen("settings", context)
+            "save" -> pluginScreen("saved", "Saved") {
+                card {
+                    text("✓ Settings saved!", TextStyle.TITLE_MEDIUM)
+                }
+                spacer(16)
+                primaryButton("back", "Back")
+            }
+            "back" -> getScreen("main", context)
+            else -> getScreen(screenId, context)
+        }
+    }
+}
+```
+
+## Built-in Plugins
+
+The reader plugin system includes these built-in plugins:
+
+### AI Summarizer (`SummarizerPlugin.kt`)
+- Summarizes chapter content using AI
+- Configurable summary length (short, medium, detailed)
+- Multiple output styles (bullet points, paragraph, key points)
+- Options to include quotes and character list
+- History of previous summaries
+
+### Smart Dictionary (`DictionaryPlugin.kt`)
+- Word definitions with examples
+- Translation to multiple languages
+- Synonyms and related words
+- Vocabulary bookmarking
+- Lookup history
+
 ## Related Files
 
+- [`ReaderPluginUIBuilder.kt`](./ReaderPluginUIBuilder.kt) - DSL for building plugin UIs
+- [`SummarizerPlugin.kt`](./SummarizerPlugin.kt) - AI Summarizer example plugin
+- [`DictionaryPlugin.kt`](./DictionaryPlugin.kt) - Smart Dictionary example plugin
+- [`ReaderPluginModule.kt`](./ReaderPluginModule.kt) - Koin module for built-in plugins
 - [`plugin-api/src/commonMain/kotlin/ireader/plugin/api/PluginUI.kt`](../../../../../../../plugin-api/src/commonMain/kotlin/ireader/plugin/api/PluginUI.kt) - Core UI definitions
 - [`plugin-api/src/commonMain/kotlin/ireader/plugin/api/FeaturePlugin.kt`](../../../../../../../plugin-api/src/commonMain/kotlin/ireader/plugin/api/FeaturePlugin.kt) - Feature plugin interface
 - [`presentation/src/commonMain/kotlin/ireader/presentation/ui/plugins/PluginUIRenderer.kt`](../../plugins/PluginUIRenderer.kt) - Renders declarative UI to Compose
-- [`presentation/src/commonMain/kotlin/ireader/presentation/ui/plugins/PluginScreenHost.kt`](../../plugins/PluginScreenHost.kt) - Host for plugin screens
 
 ## Best Practices
 
@@ -562,3 +708,7 @@ class DictionaryPlugin : FeaturePlugin, PluginUIProvider {
 5. **Event Processing**: Process events asynchronously and return updated screens.
 
 6. **Resource Management**: Don't hold references to Context or other Android resources.
+
+7. **Use the DSL**: The `ReaderPluginUIBuilder` DSL makes code more readable and maintainable.
+
+8. **State Management**: Use `rememberSaveable` in the renderer ensures text field state survives recomposition.

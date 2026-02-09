@@ -1,20 +1,94 @@
 package ireader.presentation.ui.plugins
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Coffee
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import ireader.plugin.api.*
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.delete
+import ireader.plugin.api.ButtonStyle
+import ireader.plugin.api.PluginUIComponent
+import ireader.plugin.api.PluginUIEvent
+import ireader.plugin.api.PluginUIScreen
+import ireader.plugin.api.TextStyle
+import ireader.plugin.api.UIEventType
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
+import kotlinx.coroutines.launch
 
 /**
  * Renders declarative UI components from plugins.
@@ -31,7 +105,32 @@ fun PluginUIRenderer(
         modifier = modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(screen.components, key = { it.hashCode() }) { component ->
+        items(
+            items = screen.components,
+            key = { component ->
+                // Use stable key based on component type and id
+                when (component) {
+                    is PluginUIComponent.TextField -> "textfield_${component.id}"
+                    is PluginUIComponent.Button -> "button_${component.id}"
+                    is PluginUIComponent.Switch -> "switch_${component.id}"
+                    is PluginUIComponent.Chip -> "chip_${component.id}"
+                    is PluginUIComponent.ChipGroup -> "chipgroup_${component.id}"
+                    is PluginUIComponent.ItemList -> "list_${component.id}"
+                    is PluginUIComponent.Text -> "text_${component.text.hashCode()}"
+                    is PluginUIComponent.Card -> "card_${component.hashCode()}"
+                    is PluginUIComponent.Row -> "row_${component.hashCode()}"
+                    is PluginUIComponent.Column -> "column_${component.hashCode()}"
+                    is PluginUIComponent.Tabs -> "tabs_${component.hashCode()}"
+                    is PluginUIComponent.Loading -> "loading_${component.message?.hashCode() ?: 0}"
+                    is PluginUIComponent.Empty -> "empty_${component.message.hashCode()}"
+                    is PluginUIComponent.Error -> "error_${component.message.hashCode()}"
+                    is PluginUIComponent.Spacer -> "spacer_${component.height}"
+                    is PluginUIComponent.Divider -> "divider_${component.thickness}"
+                    is PluginUIComponent.ProgressBar -> "progress_${component.label?.hashCode() ?: 0}"
+                    is PluginUIComponent.Image -> "image_${component.url.hashCode()}"
+                }
+            }
+        ) { component ->
             RenderComponent(component, onEvent)
         }
     }
@@ -82,22 +181,33 @@ private fun RenderTextField(
     component: PluginUIComponent.TextField,
     onEvent: (PluginUIEvent) -> Unit
 ) {
-    var value by remember(component.value) { mutableStateOf(component.value) }
+    // Use remember with key to maintain state during recomposition
+    var value by remember(component.id) { mutableStateOf(component.value) }
+    
+    // Debounce job tracking
+    var debounceJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+    val scope = rememberCoroutineScope()
     
     OutlinedTextField(
         value = value,
         onValueChange = { newValue ->
             value = newValue
-            onEvent(PluginUIEvent(
-                componentId = component.id,
-                eventType = UIEventType.TEXT_CHANGED,
-                data = mapOf("value" to newValue)
-            ))
+            // Cancel previous debounce job and start a new one
+            debounceJob?.cancel()
+            debounceJob = scope.launch {
+                kotlinx.coroutines.delay(500) // 500ms debounce
+                onEvent(PluginUIEvent(
+                    componentId = component.id,
+                    eventType = UIEventType.TEXT_CHANGED,
+                    data = mapOf("value" to newValue)
+                ))
+            }
         },
         label = { Text(component.label) },
         modifier = Modifier.fillMaxWidth(),
         maxLines = if (component.multiline) component.maxLines else 1,
-        minLines = if (component.multiline) 2 else 1
+        minLines = if (component.multiline) 2 else 1,
+        singleLine = !component.multiline
     )
 }
 
@@ -277,7 +387,8 @@ private fun RenderSwitch(
     component: PluginUIComponent.Switch,
     onEvent: (PluginUIEvent) -> Unit
 ) {
-    var checked by remember(component.checked) { mutableStateOf(component.checked) }
+    // Use remember with key to maintain state during recomposition
+    var checked by remember(component.id) { mutableStateOf(component.checked) }
     
     Row(
         modifier = Modifier.fillMaxWidth(),

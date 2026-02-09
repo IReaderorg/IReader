@@ -84,9 +84,14 @@ fun ReaderPluginPanel(
     
     // Handle events from plugin UI
     val handleEvent: (PluginUIEvent) -> Unit = { event ->
+        // Don't show loading for text changes to prevent keyboard dismissal
+        val showLoading = event.eventType != UIEventType.TEXT_CHANGED
+        
         scope.launch {
             if (uiProvider != null) {
-                isLoading = true
+                if (showLoading) {
+                    isLoading = true
+                }
                 error = null
                 try {
                     val updatedScreen = uiProvider.handleEvent("main", event, context)
@@ -96,7 +101,9 @@ fun ReaderPluginPanel(
                 } catch (e: Exception) {
                     error = e.message ?: "Failed to handle event"
                 }
-                isLoading = false
+                if (showLoading) {
+                    isLoading = false
+                }
             }
         }
     }
@@ -144,11 +151,11 @@ fun ReaderPluginPanel(
                 }
             }
             
-            // Content area
+            // Content area - LazyColumn inside PluginUIRenderer handles its own scrolling
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false)
+                    .heightIn(min = 200.dp, max = 400.dp)
             ) {
                 when {
                     isLoading -> {
