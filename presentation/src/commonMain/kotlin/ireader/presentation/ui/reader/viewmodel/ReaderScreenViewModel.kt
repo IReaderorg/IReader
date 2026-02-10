@@ -432,10 +432,12 @@ class ReaderScreenViewModel(
                             refreshChaptersFromController()
                         }
                         is ireader.domain.services.chapter.ChapterNotifier.ChangeType.ContentFetched -> {
+                            Log.debug { "ChapterNotifier: Content fetched for chapter ${change.chapterId}" }
                             if (change.chapterId == currentState.currentChapter.id) {
-                                Log.debug { "ChapterNotifier: Content fetched for current chapter ${change.chapterId}" }
                                 reloadCurrentChapterContent()
                             }
+                            // Always refresh chapters list to update downloaded status in drawer
+                            refreshChaptersFromController()
                         }
                         is ireader.domain.services.chapter.ChapterNotifier.ChangeType.ChapterUpdated -> {
                             Log.debug { "ChapterNotifier: Chapter ${change.chapterId} updated" }
@@ -478,8 +480,16 @@ class ReaderScreenViewModel(
         
         scope.launch {
             try {
+                // Invalidate cache first to ensure fresh data
+                // This is important because the drawer checks is_downloaded based on content length
+                ireader.core.log.Log.debug { "refreshChaptersFromController: Refreshing chapters for book ${currentState.book.id}" }
+                
                 // Fetch fresh chapters from database
                 val chapters = getChapterUseCase.findChaptersByBookId(currentState.book.id)
+                ireader.core.log.Log.debug { 
+                    "refreshChaptersFromController: Got ${chapters.size} chapters, current chapter id=${currentState.currentChapter.id}" 
+                }
+                
                 if (chapters.isNotEmpty()) {
                     updateSuccessState { state ->
                         val newIndex = chapters.indexOfFirst { it.id == state.currentChapter.id }

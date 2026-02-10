@@ -95,7 +95,7 @@ class ChapterRepositoryImpl(
 
 
     override suspend fun insertChapter(chapter: Chapter): Long {
-        // Invalidate cache for the affected book
+        // Invalidate cache BEFORE the insert to prevent stale reads during insert
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
         
         val result = handler.awaitOneAsync(inTransaction = true) {
@@ -118,6 +118,11 @@ class ChapterRepositoryImpl(
              chapterQueries.selectLastInsertedRowId()
         }
         
+        // Invalidate cache AFTER the insert to ensure fresh data is read
+        // This double invalidation prevents race conditions where another thread
+        // might read and cache stale data between the insert and invalidation
+        dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
+        
         // Refresh cached chapter counts for the book (used by smart categories)
         handler.await {
             chapterQueries.refreshBookChapterCounts(chapter.bookId)
@@ -129,8 +134,9 @@ class ChapterRepositoryImpl(
     override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
         if (chapters.isEmpty()) return emptyList()
         
-        // Invalidate cache for affected books
         val bookIds = chapters.map { it.bookId }.distinct()
+        
+        // Invalidate cache BEFORE the insert to prevent stale reads during insert
         bookIds.forEach { bookId ->
             dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         }
@@ -155,6 +161,13 @@ class ChapterRepositoryImpl(
                 )
             }
             chapterQueries.selectLastInsertedRowId()
+        }
+        
+        // Invalidate cache AFTER the insert to ensure fresh data is read
+        // This double invalidation prevents race conditions where another thread
+        // might read and cache stale data between the insert and invalidation
+        bookIds.forEach { bookId ->
+            dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         }
         
         // Refresh cached chapter counts for affected books (used by smart categories)

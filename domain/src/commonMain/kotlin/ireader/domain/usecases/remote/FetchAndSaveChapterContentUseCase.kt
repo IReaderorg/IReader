@@ -23,6 +23,7 @@ import kotlinx.coroutines.withContext
  * 1. Content is always saved to DB first
  * 2. Content is read back through FindChapterById which applies filtering
  * 3. Consistent filtering across all content access paths
+ * 4. Handles both new chapters (id=0) and existing chapters correctly
  */
 class FetchAndSaveChapterContentUseCase(
     private val chapterRepository: ChapterRepository,
@@ -61,19 +62,54 @@ class FetchAndSaveChapterContentUseCase(
                     dateFetch = currentTimeToLong()
                 )
                 
-                // Save to database
-                chapterRepository.insertChapter(updatedChapter)
+                // Debug logging
+                ireader.core.log.Log.debug { 
+                    "FetchAndSaveChapterContent: Saving chapter id=${chapter.id}, key=${chapter.key}, bookId=${chapter.bookId}, contentSize=${pages.size}" 
+                }
                 
-                // Read back from DB to get filtered content
-                val filteredChapter = findChapterById(chapter.id)
+                // Save to database and get the returned ID
+                // Note: For existing chapters (id != 0), the upsert updates based on (book_id, url)
+                // and LAST_INSERT_ROWID() may not return the correct ID for UPDATE operations
+                val returnedId = chapterRepository.insertChapter(updatedChapter)
+                
+                // Determine the correct ID to use for reading back
+                // Always prefer the original chapter ID if it's non-zero (existing chapter)
+                // Only use returnedId if the original ID was 0 (new chapter)
+                val effectiveId = if (chapter.id != 0L) {
+                    chapter.id  // Existing chapter - use original ID
+                } else if (returnedId != 0L) {
+                    returnedId  // New chapter - use database-generated ID
+                } else {
+                    0L  // Fallback
+                }
+                
+                ireader.core.log.Log.debug { 
+                    "FetchAndSaveChapterContent: After save - chapter.id=${chapter.id}, returnedId=$returnedId, effectiveId=$effectiveId" 
+                }
+                
+                // Read back from DB to get filtered content and confirm save
+                val filteredChapter = if (effectiveId != 0L) {
+                    val result = findChapterById(effectiveId)
+                    ireader.core.log.Log.debug { 
+                        "FetchAndSaveChapterContent: Read back chapter id=$effectiveId, found=${result != null}, hasContent=${result?.content?.isNotEmpty() ?: false}" 
+                    }
+                    result
+                } else {
+                    null
+                }
                 
                 if (filteredChapter != null) {
                     onSuccess(filteredChapter)
                 } else {
-                    onSuccess(updatedChapter)
+                    // Fallback: use updated chapter with the correct ID
+                    ireader.core.log.Log.warn { 
+                        "FetchAndSaveChapterContent: Could not read back chapter with id=$effectiveId, using fallback" 
+                    }
+                    onSuccess(updatedChapter.copy(id = effectiveId))
                 }
                 
             } catch (e: Throwable) {
+                ireader.core.log.Log.error("FetchAndSaveChapterContent: Error saving chapter", e)
                 onError(exceptionHandler(e))
             }
         }
