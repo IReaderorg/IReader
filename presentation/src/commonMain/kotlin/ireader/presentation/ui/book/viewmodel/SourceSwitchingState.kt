@@ -19,11 +19,22 @@ class SourceSwitchingState {
     var migrationProgress by mutableStateOf<MigrateToSourceUseCase.MigrationProgress?>(null)
     var betterSourceName by mutableStateOf<String?>(null)
     
+    // Track last migration attempt for retry functionality
+    var lastMigrationSourceId by mutableStateOf<Long?>(null)
+    var lastMigrationFlags by mutableStateOf<ireader.domain.models.migration.MigrationFlags?>(null)
+    
     fun reset() {
         sourceComparison = null
         showBanner = false
         showMigrationDialog = false
         migrationProgress = null
         betterSourceName = null
+        // Don't reset lastMigration* - keep for retry
+    }
+    
+    fun resetAll() {
+        reset()
+        lastMigrationSourceId = null
+        lastMigrationFlags = null
     }
 }

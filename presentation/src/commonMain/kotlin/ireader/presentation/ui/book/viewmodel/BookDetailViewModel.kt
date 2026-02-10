@@ -1767,6 +1767,10 @@ class BookDetailViewModel(
         showMigrationDialog = false
         sourceSwitchingState.showMigrationDialog = true
         
+        // Store migration details for potential retry
+        sourceSwitchingState.lastMigrationSourceId = targetSourceId
+        sourceSwitchingState.lastMigrationFlags = flags
+        
         scope.launch {
             try {
                 migrateToSourceUseCase(currentBook.id, targetSourceId, flags).collect { progress ->
@@ -1774,23 +1778,34 @@ class BookDetailViewModel(
                     
                     if (progress.isComplete) {
                         if (progress.error == null) {
-                            delay(1000)
+                            // Success - auto-dismiss after short delay
+                            delay(1500)
                             sourceSwitchingState.showMigrationDialog = false
-                            sourceSwitchingState.reset()
+                            sourceSwitchingState.resetAll()
                             showSnackBar(UiText.DynamicString("Successfully migrated to ${targetSourceName ?: "new source"}"))
-                        } else {
-                            delay(2000)
-                            sourceSwitchingState.showMigrationDialog = false
-                            showSnackBar(UiText.DynamicString("Migration failed: ${progress.error}"))
                         }
+                        // If there's an error, keep dialog open to show error with retry option
                     }
                 }
             } catch (e: Exception) {
                 Log.error("Migration error", e)
-                sourceSwitchingState.showMigrationDialog = false
-                showSnackBar(UiText.DynamicString("Migration failed: ${e.message}"))
+                // Set error progress for UI to display
+                sourceSwitchingState.migrationProgress = MigrateToSourceUseCase.MigrationProgress(
+                    currentStep = "Migration failed",
+                    progress = 0f,
+                    isComplete = true,
+                    error = e.message ?: "Unknown error",
+                    errorType = MigrateToSourceUseCase.MigrationErrorType.UNKNOWN_ERROR,
+                    canRetry = true
+                )
             }
         }
+    }
+    
+    fun retryMigration() {
+        val sourceId = sourceSwitchingState.lastMigrationSourceId ?: return
+        val flags = sourceSwitchingState.lastMigrationFlags ?: ireader.domain.models.migration.MigrationFlags()
+        startMigration(sourceId, flags)
     }
     
     fun migrateToSource() {

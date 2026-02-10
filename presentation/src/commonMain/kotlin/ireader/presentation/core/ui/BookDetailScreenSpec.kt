@@ -650,10 +650,15 @@ data class BookDetailScreenSpec constructor(
                     currentStep = progress.currentStep,
                     progress = progress.progress,
                     onDismiss = {
-                        if (progress.isComplete) {
-                            vm.sourceSwitchingState.showMigrationDialog = false
-                        }
-                    }
+                        vm.sourceSwitchingState.showMigrationDialog = false
+                    },
+                    error = progress.error,
+                    errorType = progress.errorType,
+                    canRetry = progress.canRetry,
+                    onRetry = if (progress.canRetry) {
+                        { vm.retryMigration() }
+                    } else null,
+                    detailedInfo = progress.detailedInfo
                 )
             }
         }

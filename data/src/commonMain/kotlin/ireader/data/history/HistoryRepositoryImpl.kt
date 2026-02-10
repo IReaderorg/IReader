@@ -38,7 +38,7 @@ class HistoryRepositoryImpl constructor(
     }
 
     override suspend fun findHistoriesByBookId(bookId: Long): List<History> {
-        return handler.awaitList { historyQueries.findHistoryByBookId(bookId, historyMapper) }
+        return handler.awaitList { historyQueries.findHistoriesByBookId(bookId, historyMapper) }
     }
 
     override fun subscribeHistoryByBookId(bookId: Long): Flow<History?> {

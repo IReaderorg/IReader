@@ -1691,6 +1691,15 @@
     <string name="migrating_book">Migrating Book</string>
     <string name="migration_complete">Migration Complete!</string>
     <string name="migration_options">Migration Options</string>
+    <string name="source_not_found">Source Not Found</string>
+    <string name="book_not_in_target_source">Book Not Found in Target Source</string>
+    <string name="chapter_fetch_failed">Chapter Fetch Failed</string>
+    <string name="validation_error">Validation Error</string>
+    <string name="network_error">Network Error</string>
+    <string name="check_internet_connection">Please check your internet connection and try again.</string>
+    <string name="try_different_source">The source may be unavailable. Try a different source.</string>
+    <string name="search_book_manually">Try searching for the book manually in the source to verify availability.</string>
+    <string name="try_again_later">Your data is preserved. Please try again later.</string>
     <string name="minimum_rating">Minimum Rating</string>
     <string name="model_to_use_for_translation_eg_mistral_llama2">Model to use for translation (e.g., mistral, llama2)</string>
     <string name="monthly">Monthly</string>

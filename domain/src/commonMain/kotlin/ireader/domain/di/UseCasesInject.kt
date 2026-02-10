@@ -309,8 +309,14 @@ val UseCasesInject = module {
     factory { ireader.domain.usecases.source.MigrateToSourceUseCase(
         bookRepository = get(),
         chapterRepository = get(),
+        historyRepository = get(),
         sourceComparisonRepository = get(),
-        catalogStore = get()
+        catalogStore = get(),
+        migrateChaptersWithPreservation = get()
+    ) }
+    factory { ireader.domain.usecases.source.MigrateChaptersWithPreservationUseCase(
+        chapterRepository = get(),
+        historyRepository = get()
     ) }
     
     // Migration use cases - factory

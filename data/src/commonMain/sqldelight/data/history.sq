@@ -19,12 +19,19 @@ findHistoryByChapterId:
 SELECT * FROM history WHERE chapter_id = :chapterId ORDER BY history.last_read DESC LIMIT 1;
 
 findHistoryByBookId:
-SELECT history.* 
+SELECT history.*
 FROM history
 JOIN chapter ON history.chapter_id = chapter._id
 WHERE chapter.book_id = :bookId
-ORDER BY history.last_read DESC 
+ORDER BY history.last_read DESC
 LIMIT 1;
+
+findHistoriesByBookId:
+SELECT history.*
+FROM history
+JOIN chapter ON history.chapter_id = chapter._id
+WHERE chapter.book_id = :bookId
+ORDER BY history.last_read DESC;
 
 
 findHistories:
