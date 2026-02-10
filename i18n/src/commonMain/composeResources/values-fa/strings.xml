@@ -176,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">مرتب سازی خودکار فصل ها در پایگاه داده</string>
     <string name="auto_sync">همگام سازی خودکار</string>
     <string name="auto_sync_1">همگام سازی خودکار</string>
+    <string name="auto_translate_descriptions">ترجمه خودکار توضیحات</string>
     <string name="auto_translate_next_chapter">ترجمه خودکار فصل بعدی</string>
     <string name="auto_translate_next_chapter_summary">ترجمه خودکار فصل بعدی هنگام پیمایش با استفاده از موتور ترجمه انتخاب شده</string>
+    <string name="auto_translate_novel_names">ترجمه خودکار نام رمان‌ها</string>
     <string name="auto_update">به روز رسانی خودکار</string>
     <string name="auto_update_1">بروز رسانی خودکار</string>
     <string name="auto_update_2">به روز رسانی خودکار</string>
@@ -196,6 +198,8 @@
     <string name="automatically_share_your_translations_with">به صورت خودکار ترجمه‌های خود را با جامعه به اشتراک بگذارید</string>
     <string name="automatically_stop_playback_after_set_time">به طور خودکار پخش را پس از زمان تعیین شده متوقف کنید</string>
     <string name="automatically_sync_reading_progress">به طور خودکار پیشرفت خواندن را همگام سازی کنید</string>
+    <string name="automatically_translate_novel_descriptions_when">هنگام مرور منابع، توضیحات رمان‌ها را به‌طور خودکار ترجمه کنید.</string>
+    <string name="automatically_translate_novel_titles_when">هنگام مرور منابع، عناوین رمان‌ها را به‌طور خودکار ترجمه کنید.</string>
     <string name="autoscroll">پیمایش خودکار</string>
     <string name="available">در دسترس</string>
     <string name="available_backups">پشتیبان گیری های موجود</string>
@@ -270,6 +274,7 @@
     <string name="book_name_selector">انتخابگر نام کتاب *</string>
     <string name="book_name_selector_1">انتخابگر نام کتاب</string>
     <string name="book_not_found">کتاب یافت نشد</string>
+    <string name="book_not_in_target_source">کتاب در منبع مورد نظر یافت نشد</string>
     <string name="book_queued_for_download">کتاب در صف دانلود قرار گرفت</string>
     <string name="book_reviews">نقد و بررسی کتاب</string>
     <string name="book_title">عنوان کتاب</string>
@@ -372,6 +377,7 @@
     <string name="chapter_complete">فصل تکمیل شد</string>
     <string name="chapter_completed">فصل به پایان رسید</string>
     <string name="chapter_content_extracted">محتوای فصل با استفاده از %1$s استخراج شد</string>
+    <string name="chapter_fetch_failed">دریافت فصل با شکست مواجه شد</string>
     <string name="chapter_filters">فیلترهای فصل</string>
     <string name="chapter_heading_size">اندازه عنوان فصل</string>
     <string name="chapter_list">لیست فصل‌ها</string>
@@ -402,6 +408,7 @@
     <string name="check_community_first">ابتدا جامعه را بررسی کنید</string>
     <string name="check_for_app_updates">بررسی به‌روزرسانی‌های برنامه</string>
     <string name="check_for_updates">بررسی برای به روز رسانی</string>
+    <string name="check_internet_connection">لطفاً اتصال اینترنت خود را بررسی کرده و دوباره امتحان کنید.</string>
     <string name="check_permissions">بررسی مجوزها</string>
     <string name="check_the_update">بررسی به روز رسانی</string>
     <string name="checking_for_updates">در حال بررسی به روز رسانی ها…</string>
@@ -1065,6 +1072,7 @@
     <string name="gb_total_storage_7_500mb">3.5 گیگابایت فضای ذخیره سازی کل (7 × 500 مگابایت) - هر پروژه را پیکربندی کنید یا از آدرس URL یکسان برای همه استفاده کنید</string>
     <string name="gemini_api_information">اطلاعات API جمینی</string>
     <string name="gemini_api_key">کلید Gemini API</string>
+    <string name="gemini_api_key_invalid">کلید API جیمنای نامعتبر است یا منقضی شده است. لطفاً کلید جدیدی از Google AI Studio دریافت کنید.</string>
     <string name="gemini_api_key_not_set">کلید Gemini API تنظیم نشده است. لطفا آن را در
 تنظیمات پیکربندی کنید.
 </string>
@@ -1303,6 +1311,7 @@
     <string name="language_code">کد زبان</string>
     <string name="language_filter">فیلتر زبان</string>
     <string name="language_preferences">تنظیمات برگزیده زبان</string>
+    <string name="language_preferences_saved">ترجیحات زبان برای این کتاب ذخیره شد</string>
     <string name="language_translation">زبان و ترجمه</string>
     <string name="languages">زبان‌ها</string>
     <string name="large">بزرگ</string>
@@ -1509,6 +1518,7 @@
     <string name="need_help">به کمک احتیاج دارید؟</string>
     <string name="network">شبکه</string>
     <string name="network_cache">حافظه پنهان شبکه</string>
+    <string name="network_error">خطای شبکه</string>
     <string name="network_settings">تنظیمات شبکه</string>
     <string name="neutral">خنثی</string>
     <string name="new_chapter_notifications">اعلان‌های فصل جدید</string>
@@ -1835,6 +1845,8 @@
     <string name="pref_relative_time_long">بلند (کوتاه+, n روز پیش)</string>
     <string name="pref_relative_time_short">کوتاه (امروز، دیروز)</string>
     <string name="prefer_saf_storage">ترجیح ذخیره‌سازی SAF</string>
+    <string name="preferred_source_language">زبان مبدأ ترجیحی</string>
+    <string name="preferred_target_language">زبان مقصد ترجیحی</string>
     <string name="preload_next_chapter">پیش بارگذاری فصل بعدی</string>
     <string name="preload_only_on_wifi">پیش بارگذاری فقط در WiFi</string>
     <string name="preload_only_on_wifi_summary">محدود کردن پیش بارگذاری خودکار فقط به اتصالات WiFi</string>
@@ -1979,6 +1991,7 @@
     <string name="reload">بارگذاری مجدد</string>
     <string name="reload_plugin_themes">بارگیری مجدد قالب های افزونه</string>
     <string name="remaining">باقی مانده</string>
+    <string name="remember_my_languages">انتخاب‌های زبان من را به خاطر بسپار</string>
     <string name="remind_me_again_in">دوباره به من یادآوری کن در:</string>
     <string name="reminder_interval">فاصله یادآوری</string>
     <string name="remove">حذف</string>
@@ -2096,6 +2109,7 @@
     <string name="save_custom_theme">ذخیره پوسته سفارشی</string>
     <string name="save_epub">ذخیره EPUB</string>
     <string name="save_js_sources_extensions_backups">ذخیره منابع JS، افزونه‌ها، پشتیبان‌ها و epubs در پوشه SAF در صورت موجود بودن. در صورت عدم دسترسی به کش برمی‌گردد.</string>
+    <string name="save_language_preferences">ذخیره ترجیحات زبان</string>
     <string name="save_multi_endpoint_configuration">ذخیره پیکربندی چند نقطه پایانی</string>
     <string name="save_patterns">ذخیره الگوها</string>
     <string name="saved_local_source_location">منابع ذخیره شده در حافظه پنهان</string>
@@ -2114,6 +2128,7 @@
     <string name="search_across_all_sources">جستجو در همه منابع</string>
     <string name="search_across_all_sources_1">جستجو در تمام منابع...</string>
     <string name="search_bar">نوار جستجو</string>
+    <string name="search_book_manually">برای تأیید موجود بودن کتاب، آن را به‌صورت دستی در منبع جستجو کنید.</string>
     <string name="search_characters_books">جستجوی شخصیت‌ها، کتاب‌ها...</string>
     <string name="search_features">جستجوی امکانات...</string>
     <string name="search_fonts">جستجوی فونت ها...</string>
@@ -2308,6 +2323,7 @@
     <string name="source_name">نام منبع *</string>
     <string name="source_needs_update">منبع نیاز به به‌روزرسانی دارد</string>
     <string name="source_not_available">این منبع در دستگاه شما در دسترس نیست.</string>
+    <string name="source_not_found">منبع یافت نشد</string>
     <string name="source_placeholder">مثلاً، 12345 یا NovelUpdates</string>
     <string name="source_rule">منبع</string>
     <string name="source_term">عبارت منبع</string>
@@ -2563,14 +2579,38 @@
     <string name="translated">ترجمه شده</string>
     <string name="translating">در حال ترجمه... ممکن است لحظاتی طول بکشد.</string>
     <string name="translation">ترجمه</string>
+    <string name="translation_api_key_invalid">کلید API برای %1$s نامعتبر است یا منقضی شده است. لطفاً کلید خود را در تنظیمات ← ترجمه بررسی کنید.</string>
+    <string name="translation_api_key_not_set">%1$s به کلید API نیاز دارد. لطفاً به تنظیمات ← ترجمه رفته و کلید API خود را پیکربندی کنید.</string>
+    <string name="translation_auth_required">برای استفاده از این ویژگی ترجمه، باید وارد %1$s شوید.</string>
+    <string name="translation_captcha_required">%1$s نیاز به تأیید دارد. لطفاً برای ادامه، CAPTCHA را تکمیل کنید.</string>
     <string name="translation_complete">ترجمه کامل شد.</string>
+    <string name="translation_empty_response">%1$s یک پاسخ خالی برگرداند. این ممکن است یک مشکل موقتی باشد - لطفاً دوباره امتحان کنید.</string>
     <string name="translation_engine">موتور ترجمه</string>
+    <string name="translation_engine_not_available">%1$s در این نسخه از برنامه در دسترس نیست. لطفاً از موتور ترجمه دیگری استفاده کنید.</string>
     <string name="translation_engines_refreshed">موتورهای ترجمه به روز شدند</string>
     <string name="translation_error">خطای ترجمه</string>
+    <string name="translation_language_model_not_available">مدل زبان برای %1$s ← %2$s دانلود نشده است. لطفاً برای دانلود آن به تنظیمات ← ترجمه بروید.</string>
+    <string name="translation_language_pair_not_supported">%1$s از ترجمه از %2$s به %3$s پشتیبانی نمی‌کند. لطفاً زبان‌های متفاوتی را انتخاب کنید.</string>
+    <string name="translation_model_not_found">مدل هوش مصنوعی برای %1$s یافت نشد. لطفاً تنظیمات خود را بررسی کنید.</string>
+    <string name="translation_model_not_found_with_name">مدل '%2$s' در %1$s یافت نشد. لطفاً مدل دیگری را در تنظیمات انتخاب کنید.</string>
+    <string name="translation_network_error">نمی‌توان به %1$s متصل شد. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره امتحان کنید.</string>
+    <string name="translation_parse_error">پاسخ از %1$s قابل درک نبود. ممکن است سرویس با مشکل مواجه شده باشد.</string>
+    <string name="translation_plugin_error">افزونه ترجمه '%1$s' با خطا مواجه شد. لطفاً تنظیمات افزونه را بررسی کرده یا موتور دیگری را امتحان کنید.</string>
     <string name="translation_plugins_extend_ireader_with">افزونه‌های ترجمه، IReader را با خدمات ترجمه اضافی گسترش می‌دهند</string>
     <string name="translation_progress">پیشرفت ترجمه</string>
+    <string name="translation_quota_exceeded">سهمیه ترجمه %1$s به اتمام رسیده است. لطفاً طرح و صورت‌حساب خود را بررسی کرده یا بعداً دوباره امتحان کنید.</string>
+    <string name="translation_rate_limit">%1$s درخواست‌های زیادی دریافت می‌کند. لطفاً کمی صبر کرده و دوباره امتحان کنید.</string>
     <string name="translation_rate_limit_delay">تاخیر محدودیت نرخ ترجمه</string>
+    <string name="translation_rate_limit_with_retry">محدودیت نرخ %1$s به پایان رسیده است. لطفاً %2$d ثانیه صبر کرده و دوباره امتحان کنید.</string>
+    <string name="translation_server_error">سرور %1$s در حال حاضر با مشکل مواجه است. لطفاً بعداً دوباره امتحان کنید.</string>
+    <string name="translation_server_error_with_code">خطای سرور %1$s (کد: %2$d). لطفاً بعداً دوباره امتحان کنید.</string>
     <string name="translation_settings">تنظیمات ترجمه</string>
+    <string name="translation_text_too_long">متن برای پردازش توسط %1$s خیلی طولانی است. بخش‌های کوچکتر را ترجمه کنید.</string>
+    <string name="translation_text_too_long_with_limit">متن از محدودیت %2$d کاراکتری %1$s تجاوز کرده است. بخش‌های کوچکتر را ترجمه کنید.</string>
+    <string name="translation_timeout">%1$s برای پاسخگویی بیش از حد طول کشید. لطفاً دوباره امتحان کنید.</string>
+    <string name="translation_timeout_with_seconds">%1$s ظرف %2$d ثانیه پاسخ نداد. لطفاً دوباره امتحان کنید.</string>
+    <string name="translation_unknown_error">%1$s با خطای غیرمنتظره‌ای مواجه شد. لطفاً دوباره امتحان کنید.</string>
+    <string name="translation_unknown_error_with_details">خطای %1$s: %2$s</string>
     <string name="translation_warning">هشدار ترجمه</string>
     <string name="translations">ترجمه ها</string>
     <string name="trending_now">در حال حاضر محبوب</string>
@@ -2580,9 +2620,11 @@
     <string name="trust_level_updated">سطح اطمینان به‌روزرسانی شد</string>
     <string name="try_a_different_search_term">یک عبارت جستجوی دیگر را امتحان کنید</string>
     <string name="try_again">دوباره امتحان کنید</string>
+    <string name="try_again_later">اطلاعات شما حفظ شده است. لطفاً بعداً دوباره امتحان کنید.</string>
     <string name="try_alternative_url">امتحان آدرس جایگزین</string>
     <string name="try_another_search">جستجوی دیگری را امتحان کنید</string>
     <string name="try_different_search">یک عبارت جستجوی متفاوت را امتحان کنید</string>
+    <string name="try_different_source">ممکن است منبع در دسترس نباشد. منبع دیگری را امتحان کنید.</string>
     <string name="try_these_fixes">این راه‌حل‌ها را امتحان کنید:</string>
     <string name="trying_in_few_second">چند ثانیه دیگر دوباره امتحان کنید.</string>
     <string name="trying_to_fetch">تلاش برای واکشی…</string>
@@ -2699,6 +2741,7 @@
     <string name="use_password">استفاده از رمز عبور</string>
     <string name="use_pin">استفاده از PIN</string>
     <string name="use_pinpassword_instead">به جای آن از PIN/رمز عبور استفاده کنید</string>
+    <string name="use_saved_languages">استفاده از زبان‌های ذخیره شده</string>
     <string name="use_separate_supabase_projects_for">برای مقیاس‌پذیری بهتر، از پروژه‌های Supabase جداگانه استفاده کنید</string>
     <string name="use_static_indicators_instead_of_animated_ones">استفاده از نشانگرهای ثابت به جای متحرک</string>
     <string name="use_translated_text_for_text">در صورت وجود، از متن ترجمه شده برای تبدیل متن به گفتار استفاده شود</string>
@@ -2712,6 +2755,7 @@
     <string name="users">کاربران</string>
     <string name="uuid_of_your_d1_database">UUID پایگاه داده D1 شما</string>
     <string name="validate">اعتبارسنجی</string>
+    <string name="validation_error">خطای اعتبارسنجی</string>
     <string name="verification_details">جزئیات تأیید</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• تأیید خودکار است و چند ثانیه طول می‌کشد</string>
     <string name="verification_is_cached_for_24">تأیید به مدت 24 ساعت ذخیره می‌شود. در صورت عدم موفقیت در تأیید مجدد، نشان به مدت 7 روز فعال باقی می‌ماند.</string>

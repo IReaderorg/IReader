@@ -255,7 +255,7 @@ open class WebscrapingTranslateEngine(
         onError: (UiText) -> Unit
     ) {
         if (texts.isEmpty()) {
-            onError(UiText.MStringResource(Res.string.no_text_to_translate))
+            onError(TranslationError.NoTextToTranslate.toUiText())
             return
         }
         
@@ -263,9 +263,14 @@ open class WebscrapingTranslateEngine(
             _translationInProgress.value = true
             onProgress(10)
             
-            // Check login state
+            // Check login state - provide specific error based on service
             if (!isLoggedIn()) {
-                onError(UiText.MStringResource(Res.string.sign_in_to_chatgpt))
+                val authError = when (currentService) {
+                    AI_SERVICE.CHATGPT -> TranslationError.AuthenticationRequired("ChatGPT WebView")
+                    AI_SERVICE.DEEPSEEK -> TranslationError.AuthenticationRequired("DeepSeek WebView")
+                    AI_SERVICE.GEMINI -> TranslationError.ApiKeyNotSet("Google Gemini")
+                }
+                onError(authError.toUiText())
                 _loginState.value = LoginState.LOGGED_OUT
                 return
             }
@@ -376,7 +381,14 @@ open class WebscrapingTranslateEngine(
             
         } catch (e: Exception) {
             _translationInProgress.value = false
-            onError(UiText.ExceptionString(e))
+            // Use TranslationError for user-friendly error messages
+            val translationError = TranslationError.fromException(
+                exception = e,
+                engineName = engineName,
+                sourceLanguage = source,
+                targetLanguage = target
+            )
+            onError(translationError.toUiText())
         }
     }
     

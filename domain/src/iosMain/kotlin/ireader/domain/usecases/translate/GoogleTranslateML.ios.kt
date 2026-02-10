@@ -76,7 +76,7 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
         onError: (UiText) -> Unit
     ) {
         if (texts.isEmpty()) {
-            onSuccess(emptyList())
+            onError(TranslationError.NoTextToTranslate.toUiText())
             return
         }
         
@@ -120,7 +120,14 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
             
         } catch (e: Exception) {
             println("[GoogleTranslateML] Translation error: ${e.message}")
-            onError(UiText.DynamicString("Translation failed: ${e.message}"))
+            // Use TranslationError for user-friendly error messages
+            val translationError = TranslationError.fromException(
+                exception = e,
+                engineName = engineName,
+                sourceLanguage = source,
+                targetLanguage = target
+            )
+            onError(translationError.toUiText())
         }
     }
     

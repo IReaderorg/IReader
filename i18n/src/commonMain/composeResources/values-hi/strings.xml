@@ -175,8 +175,10 @@
     <string name="auto_sort_chapters_in_db">DB में अध्यायों को स्वतः सॉर्ट करें</string>
     <string name="auto_sync">स्वचालित सिंक</string>
     <string name="auto_sync_1">ऑटो-सिंक</string>
+    <string name="auto_translate_descriptions">विवरणों का स्वतः अनुवाद करें</string>
     <string name="auto_translate_next_chapter">अगले अध्याय का स्वतः अनुवाद करें</string>
     <string name="auto_translate_next_chapter_summary">चयनित अनुवाद इंजन का उपयोग करके नेविगेट करते समय अगले अध्याय का स्वचालित रूप से अनुवाद करें</string>
+    <string name="auto_translate_novel_names">उपन्यास के नामों का स्वतः अनुवाद करें</string>
     <string name="auto_update">स्वचालित अपडेट</string>
     <string name="auto_update_1">स्वचालित अपडेट</string>
     <string name="auto_update_2">ऑटो-अपडेट</string>
@@ -195,6 +197,8 @@
     <string name="automatically_share_your_translations_with">अपने अनुवाद समुदाय के साथ स्वचालित रूप से साझा करें</string>
     <string name="automatically_stop_playback_after_set_time">निर्धारित समय के बाद प्लेबैक को स्वचालित रूप से बंद करें</string>
     <string name="automatically_sync_reading_progress">पठन प्रगति को स्वचालित रूप से सिंक करें</string>
+    <string name="automatically_translate_novel_descriptions_when">स्रोत ब्राउज़ करते समय उपन्यास के विवरणों का स्वतः अनुवाद करें</string>
+    <string name="automatically_translate_novel_titles_when">स्रोत ब्राउज़ करते समय उपन्यास के शीर्षकों का स्वतः अनुवाद करें</string>
     <string name="autoscroll">ऑटोस्क्रॉल</string>
     <string name="available">उपलब्ध</string>
     <string name="available_backups">उपलब्ध बैकअप</string>
@@ -269,6 +273,7 @@
     <string name="book_name_selector">पुस्तक नाम चयनकर्ता *</string>
     <string name="book_name_selector_1">पुस्तक नाम चयनकर्ता</string>
     <string name="book_not_found">पुस्तक नहीं मिली</string>
+    <string name="book_not_in_target_source">लक्षित स्रोत में किताब नहीं मिली</string>
     <string name="book_queued_for_download">पुस्तक डाउनलोड के लिए कतारबद्ध</string>
     <string name="book_reviews">पुस्तक समीक्षाएं</string>
     <string name="book_title">पुस्तक का शीर्षक</string>
@@ -371,6 +376,7 @@
     <string name="chapter_complete">अध्याय पूरा हुआ</string>
     <string name="chapter_completed">अध्याय पूरा हुआ</string>
     <string name="chapter_content_extracted">अध्याय सामग्री %1$s का उपयोग करके निकाली गई</string>
+    <string name="chapter_fetch_failed">अध्याय लाने में विफल</string>
     <string name="chapter_filters">अध्याय फ़िल्टर</string>
     <string name="chapter_heading_size">अध्याय शीर्षक आकार</string>
     <string name="chapter_list">अध्याय सूची</string>
@@ -401,6 +407,7 @@
     <string name="check_community_first">पहले समुदाय की जाँच करें</string>
     <string name="check_for_app_updates">ऐप अपडेट के लिए जाँच करें</string>
     <string name="check_for_updates">अपडेट जांचें</string>
+    <string name="check_internet_connection">कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।</string>
     <string name="check_permissions">अनुमतियां जांचें</string>
     <string name="check_the_update">अपडेट जांचें</string>
     <string name="checking_for_updates">अपडेट की जांच हो रही है…</string>
@@ -602,6 +609,7 @@
     <string name="date_fetched">प्राप्त की गई तारीख</string>
     <string name="date_format">दिनांक स्वरूप</string>
     <string name="date_time">दिनांक और समय</string>
+    <string name="day_streak">दिन की लकीर</string>
     <string name="days">घंटा</string>
     <string name="debug_mode">डीबग मोड</string>
     <string name="decrease">घटाएं</string>
@@ -1067,6 +1075,7 @@
     <string name="gb_total_storage_7_500mb">3.5GB कुल स्टोरेज (7 × 500MB) - प्रत्येक प्रोजेक्ट को कॉन्फ़िगर करें या सभी के लिए एक ही यूआरएल का उपयोग करें</string>
     <string name="gemini_api_information">जेमिनी एपीआई जानकारी</string>
     <string name="gemini_api_key">जेमिनी API कुंजी</string>
+    <string name="gemini_api_key_invalid">Gemini API कुंजी अमान्य या समाप्त हो गई है। कृपया Google AI Studio से एक नई कुंजी प्राप्त करें।</string>
     <string name="gemini_api_key_not_set">जेमिनी API कुंजी सेट नहीं है। कृपया इसे सेटिंग्स में कॉन्फ़िगर करें।</string>
     <string name="gemini_model">जेमिनी मॉडल</string>
     <string name="gemini_payment_required">आपने जेमिनी API के लिए अपना वर्तमान कोटा पार कर लिया है। कृपया https://ai.google.dev/gemini-api/docs/rate-limits पर अपनी योजना और बिलिंग विवरण जांचें।</string>
@@ -1305,6 +1314,7 @@
     <string name="language_code">भाषा कोड</string>
     <string name="language_filter">भाषा फ़िल्टर</string>
     <string name="language_preferences">भाषा प्राथमिकताएँ</string>
+    <string name="language_preferences_saved">इस किताब के लिए भाषा प्राथमिकताएँ सहेज ली गईं</string>
     <string name="language_translation">भाषा और अनुवाद</string>
     <string name="languages">भाषाएँ</string>
     <string name="large">बड़ा</string>
@@ -1510,6 +1520,7 @@
     <string name="need_help">मदद चाहिए?</string>
     <string name="network">नेटवर्क</string>
     <string name="network_cache">नेटवर्क कैश</string>
+    <string name="network_error">नेटवर्क त्रुटि</string>
     <string name="network_settings">नेटवर्क सेटिंग्स</string>
     <string name="neutral">तटस्थ</string>
     <string name="new_chapter_notifications">नए अध्याय की सूचनाएँ</string>
@@ -1839,6 +1850,8 @@
     <string name="pref_relative_time_long">लंबा (छोटा+, n दिन पहले)</string>
     <string name="pref_relative_time_short">छोटा (आज, कल)</string>
     <string name="prefer_saf_storage">SAF स्टोरेज को प्राथमिकता दें</string>
+    <string name="preferred_source_language">पसंदीदा स्रोत भाषा</string>
+    <string name="preferred_target_language">पसंदीदा लक्ष्य भाषा</string>
     <string name="preload_next_chapter">अगला अध्याय प्रीलोड करें</string>
     <string name="preload_only_on_wifi">केवल वाईफ़ाई पर प्रीलोड करें</string>
     <string name="preload_only_on_wifi_summary">स्वचालित प्रीलोडिंग को केवल वाईफ़ाई कनेक्शन तक सीमित रखें</string>
@@ -1983,6 +1996,7 @@
     <string name="reload">पुनः लोड करें</string>
     <string name="reload_plugin_themes">प्लगइन थीम पुनः लोड करें</string>
     <string name="remaining">शेष</string>
+    <string name="remember_my_languages">मेरी भाषा पसंद याद रखें</string>
     <string name="remind_me_again_in">मुझे फिर से याद दिलाएँ इसमें:</string>
     <string name="reminder_interval">अनुस्मारक अंतराल</string>
     <string name="remove">हटाएं</string>
@@ -2100,6 +2114,7 @@
     <string name="save_custom_theme">कस्टम थीम सहेजें</string>
     <string name="save_epub">EPUB सहेजें</string>
     <string name="save_js_sources_extensions_backups">उपलब्ध होने पर JS स्रोतों, एक्सटेंशनों, बैकअप और ईपब को SAF फ़ोल्डर में सहेजें। अनुपलब्ध होने पर कैश पर वापस जाता है।</string>
+    <string name="save_language_preferences">भाषा प्राथमिकताएँ सहेजें</string>
     <string name="save_multi_endpoint_configuration">मल्टी-एंडपॉइंट कॉन्फ़िगरेशन सहेजें</string>
     <string name="save_patterns">पैटर्न सहेजें</string>
     <string name="saved_local_source_location">कैश में सहेजे गए स्रोत</string>
@@ -2118,6 +2133,7 @@
     <string name="search_across_all_sources">सभी स्रोतों में खोजें</string>
     <string name="search_across_all_sources_1">सभी स्रोतों में खोजें...</string>
     <string name="search_bar">खोज बार</string>
+    <string name="search_book_manually">उपलब्धता सत्यापित करने के लिए स्रोत में किताब को मैन्युअल रूप से खोजने का प्रयास करें।</string>
     <string name="search_characters_books">पात्रों, किताबों की खोज करें...</string>
     <string name="search_features">सुविधाएँ खोजें...</string>
     <string name="search_fonts">फ़ॉन्ट खोजें...</string>
@@ -2311,6 +2327,7 @@
     <string name="source_name">स्रोत का नाम *</string>
     <string name="source_needs_update">स्रोत को अपडेट की आवश्यकता है</string>
     <string name="source_not_available">यह स्रोत आपके डिवाइस में उपलब्ध नहीं है।</string>
+    <string name="source_not_found">स्रोत नहीं मिला</string>
     <string name="source_placeholder">उदा., 12345 या NovelUpdates</string>
     <string name="source_rule">स्रोत</string>
     <string name="source_term">स्रोत शब्द</string>
@@ -2563,14 +2580,38 @@
     <string name="translated">अनुवादित</string>
     <string name="translating">अनुवाद हो रहा है... इसमें थोड़ा समय लग सकता है।</string>
     <string name="translation">अनुवाद</string>
+    <string name="translation_api_key_invalid">%1$s के लिए API कुंजी अमान्य या समाप्त हो गई है। कृपया सेटिंग्स → अनुवाद में अपनी कुंजी जांचें।</string>
+    <string name="translation_api_key_not_set">%1$s को एक API कुंजी की आवश्यकता है। कृपया सेटिंग्स → अनुवाद पर जाएं और अपनी API कुंजी कॉन्फ़िगर करें।</string>
+    <string name="translation_auth_required">इस अनुवाद सुविधा का उपयोग करने के लिए आपको %1$s में साइन इन करना होगा।</string>
+    <string name="translation_captcha_required">%1$s को सत्यापन की आवश्यकता है। जारी रखने के लिए कृपया CAPTCHA पूरा करें।</string>
     <string name="translation_complete">अनुवाद पूर्ण।</string>
+    <string name="translation_empty_response">%1$s ने एक खाली प्रतिक्रिया दी। यह एक अस्थायी समस्या हो सकती है - कृपया पुनः प्रयास करें।</string>
     <string name="translation_engine">अनुवाद इंजन</string>
+    <string name="translation_engine_not_available">इस ऐप संस्करण में %1$s उपलब्ध नहीं है। कृपया एक भिन्न अनुवाद इंजन का उपयोग करें।</string>
     <string name="translation_engines_refreshed">अनुवाद इंजन ताज़ा किए गए</string>
     <string name="translation_error">अनुवाद त्रुटि</string>
+    <string name="translation_language_model_not_available">%1$s → %2$s के लिए भाषा मॉडल डाउनलोड नहीं किया गया है। इसे डाउनलोड करने के लिए कृपया सेटिंग्स → अनुवाद पर जाएं।</string>
+    <string name="translation_language_pair_not_supported">%1$s, %2$s से %3$s में अनुवाद का समर्थन नहीं करता है। कृपया भिन्न भाषाएँ चुनें।</string>
+    <string name="translation_model_not_found">%1$s के लिए AI मॉडल नहीं मिल सका। कृपया अपनी सेटिंग्स जांचें।</string>
+    <string name="translation_model_not_found_with_name">मॉडल '%2$s', %1$s में नहीं मिला। कृपया सेटिंग्स में एक भिन्न मॉडल चुनें।</string>
+    <string name="translation_network_error">%1$s से कनेक्ट नहीं हो सकता। कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।</string>
+    <string name="translation_parse_error">%1$s से मिली प्रतिक्रिया को समझा नहीं जा सका। सेवा समस्याओं का सामना कर रही होगी।</string>
+    <string name="translation_plugin_error">अनुवाद प्लगइन '%1$s' में एक त्रुटि आ गई है। कृपया प्लगइन सेटिंग्स जांचें या एक भिन्न इंजन आज़माएँ।</string>
     <string name="translation_plugins_extend_ireader_with">अनुवाद प्लगइन्स IReader को अतिरिक्त अनुवाद सेवाओं के साथ विस्तारित करते हैं</string>
     <string name="translation_progress">अनुवाद प्रगति</string>
+    <string name="translation_quota_exceeded">%1$s अनुवाद कोटा समाप्त हो गया है। कृपया अपनी योजना और बिलिंग जांचें, या बाद में पुनः प्रयास करें।</string>
+    <string name="translation_rate_limit">%1$s बहुत अधिक अनुरोध प्राप्त कर रहा है। कृपया थोड़ी देर प्रतीक्षा करें और पुनः प्रयास करें।</string>
     <string name="translation_rate_limit_delay">अनुवाद रेट लिमिट देरी</string>
+    <string name="translation_rate_limit_with_retry">%1$s की दर सीमा तक पहुँच गया है। कृपया %2$d सेकंड प्रतीक्षा करें और पुनः प्रयास करें।</string>
+    <string name="translation_server_error">%1$s सर्वर समस्याओं का सामना कर रहा है। कृपया बाद में पुनः प्रयास करें।</string>
+    <string name="translation_server_error_with_code">%1$s सर्वर त्रुटि (कोड: %2$d)। कृपया बाद में पुनः प्रयास करें।</string>
     <string name="translation_settings">अनुवाद सेटिंग्स</string>
+    <string name="translation_text_too_long">पाठ %1$s द्वारा संसाधित करने के लिए बहुत लंबा है। छोटे अनुभागों का अनुवाद करने का प्रयास करें।</string>
+    <string name="translation_text_too_long_with_limit">पाठ %1$s की %2$d अक्षरों की सीमा से अधिक है। छोटे अनुभागों का अनुवाद करने का प्रयास करें।</string>
+    <string name="translation_timeout">%1$s ने प्रतिक्रिया देने में बहुत अधिक समय लिया। कृपया पुनः प्रयास करें।</string>
+    <string name="translation_timeout_with_seconds">%1$s ने %2$d सेकंड के भीतर प्रतिक्रिया नहीं दी। कृपया पुनः प्रयास करें।</string>
+    <string name="translation_unknown_error">%1$s में एक अप्रत्याशित त्रुटि आ गई है। कृपया पुनः प्रयास करें।</string>
+    <string name="translation_unknown_error_with_details">%1$s त्रुटि: %2$s</string>
     <string name="translation_warning">अनुवाद चेतावनी</string>
     <string name="translations">अनुवाद</string>
     <string name="trending_now">अभी ट्रेंडिंग</string>
@@ -2580,9 +2621,11 @@
     <string name="trust_level_updated">विश्वास स्तर अपडेट किया गया</string>
     <string name="try_a_different_search_term">एक भिन्न खोज शब्द का प्रयास करें</string>
     <string name="try_again">पुनः प्रयास करें</string>
+    <string name="try_again_later">आपका डेटा सुरक्षित है। कृपया बाद में पुनः प्रयास करें।</string>
     <string name="try_alternative_url">वैकल्पिक यूआरएल आज़माएँ</string>
     <string name="try_another_search">कोई और खोज प्रयास करें</string>
     <string name="try_different_search">कोई भिन्न खोज शब्द आज़माएं</string>
+    <string name="try_different_source">स्रोत अनुपलब्ध हो सकता है। कोई भिन्न स्रोत आज़माएँ।</string>
     <string name="try_these_fixes">इन सुधारों को आज़माएँ:</string>
     <string name="trying_in_few_second">कुछ सेकंड में फिर से प्रयास करें।</string>
     <string name="trying_to_fetch">लाने का प्रयास किया जा रहा है…</string>
@@ -2645,6 +2688,7 @@
     <string name="upcoming_releases">आगामी रिलीज़</string>
     <string name="update">अपडेट करें</string>
     <string name="update_all">सभी अपडेट करें</string>
+    <string name="update_all_books">सभी किताबें अपडेट करें</string>
     <string name="update_available">अपडेट उपलब्ध है</string>
     <string name="update_available_1">अपडेट उपलब्ध है</string>
     <string name="update_category">श्रेणी अपडेट करें</string>
@@ -2698,6 +2742,7 @@
     <string name="use_password">पासवर्ड का उपयोग करें</string>
     <string name="use_pin">पिन का उपयोग करें</string>
     <string name="use_pinpassword_instead">इसके बजाय पिन/पासवर्ड का उपयोग करें</string>
+    <string name="use_saved_languages">सहेजी गई भाषाओं का उपयोग करें</string>
     <string name="use_separate_supabase_projects_for">बेहतर स्केलेबिलिटी के लिए अलग सुपबेस प्रोजेक्ट्स का उपयोग करें</string>
     <string name="use_static_indicators_instead_of_animated_ones">एनिमेटेड के बजाय स्थिर संकेतकों का उपयोग करें</string>
     <string name="use_translated_text_for_text">उपलब्ध होने पर टेक्स्ट-टू-स्पीच के लिए अनुवादित टेक्स्ट का उपयोग करें</string>
@@ -2711,6 +2756,7 @@
     <string name="users">यूज़र</string>
     <string name="uuid_of_your_d1_database">आपके D1 डेटाबेस का UUID</string>
     <string name="validate">सत्यापित करें</string>
+    <string name="validation_error">सत्यापन त्रुटि</string>
     <string name="verification_details">सत्यापन विवरण</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• सत्यापन स्वचालित है और इसमें कुछ सेकंड लगते हैं</string>
     <string name="verification_is_cached_for_24">सत्यापन 24 घंटे के लिए कैश किया जाता है। यदि पुनः-सत्यापन विफल हो जाता है तो बैज 7 दिनों तक सक्रिय रहता है।</string>

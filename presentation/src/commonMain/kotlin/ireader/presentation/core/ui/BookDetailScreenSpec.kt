@@ -394,14 +394,10 @@ data class BookDetailScreenSpec constructor(
                 bottomSheetState = sheetState
             ) {
                 val isTablet = isTableUi()
-                val scrollBehavior = if (isTablet) {
-                    TopAppBarDefaults.pinnedScrollBehavior(topbarState)
-                } else {
-                    TopAppBarDefaults.enterAlwaysScrollBehavior(
-                        state = topbarState,
-                        canScroll = { true }
-                    )
-                }
+                // Use pinned scroll behavior for modern toolbar design
+                // This keeps the back button and action buttons always accessible
+                // and prevents scrollbar overlap issues
+                val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topbarState)
                 
                 IScaffold(
                         topBarScrollBehavior = scrollBehavior,

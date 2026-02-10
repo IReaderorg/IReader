@@ -248,6 +248,13 @@ val UseCasesInject = module {
             translationEnginesManager = get()
         ) 
     }
+    factory { 
+        ireader.domain.usecases.translate.TranslateBookMetadataUseCase(
+            translationEnginesManager = get(),
+            translationPreferences = get(),
+            readerPreferences = get()
+        ) 
+    }
     
     // Glossary use cases - factory
     factory { ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase(get()) }

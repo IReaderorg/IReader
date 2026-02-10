@@ -11,14 +11,7 @@ import ireader.domain.plugins.TranslationPlugin
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.api_rate_limit_exceeded
-import ireader.i18n.resources.api_response_error
-import ireader.i18n.resources.deepseek_api_key_not_set
-import ireader.i18n.resources.deepseek_payment_required
-import ireader.i18n.resources.no_text_to_translate
-import ireader.i18n.resources.openai_api_key_invalid
-import ireader.i18n.resources.openai_api_key_not_set
-import ireader.i18n.resources.openai_quota_exceeded
+import ireader.i18n.resources.*
 
 /**
  * Sealed class representing translation engine sources
@@ -486,7 +479,7 @@ class TranslationEnginesManager(
         // Check if texts is empty or null
         if (texts.isNullOrEmpty()) {
             println("Translation error: No text to translate")
-            onError(UiText.MStringResource(Res.string.no_text_to_translate))
+            onError(TranslationError.NoTextToTranslate.toUiText())
             return
         }
         
@@ -497,25 +490,13 @@ class TranslationEnginesManager(
             // Log which engine is being used
             println("Using translation engine: ${engine.engineName} (ID: ${engine.id})")
             
-            // Validate API keys if required
+            // Validate API keys if required - use TranslationError for better messages
             if (engine.requiresApiKey) {
-                when (engine.id) {
-                    2L -> { // OpenAI
-                        val apiKey = readerPreferences.openAIApiKey().get()
-                        if (apiKey.isBlank()) {
-                            println("Translation error: OpenAI API key not set")
-                            onError(UiText.MStringResource(Res.string.openai_api_key_not_set))
-                            return
-                        }
-                    }
-                    3L -> { // DeepSeek
-                        val apiKey = readerPreferences.deepSeekApiKey().get()
-                        if (apiKey.isBlank()) {
-                            println("Translation error: DeepSeek API key not set")
-                            onError(UiText.MStringResource(Res.string.deepseek_api_key_not_set))
-                            return
-                        }
-                    }
+                val apiKeyError = validateApiKey(engine)
+                if (apiKeyError != null) {
+                    println("Translation error: API key not configured for ${engine.engineName}")
+                    onError(apiKeyError.toUiText())
+                    return
                 }
             }
             
@@ -549,32 +530,48 @@ class TranslationEnginesManager(
                     }
                 }
                 
-                // Provide a user-friendly error message
-                val errorMessage = when {
-                    e.message?.contains("401") == true || e.message?.contains("unauthorized") == true -> 
-                        UiText.MStringResource(Res.string.openai_api_key_invalid)
-                    e.message?.contains("402") == true ->
-                        UiText.MStringResource(when (engine.id) {
-                            2L -> Res.string.openai_quota_exceeded
-                            3L -> Res.string.deepseek_payment_required
-                            else -> Res.string.api_rate_limit_exceeded
-                        })
-                    e.message?.contains("429") == true || e.message?.contains("rate limit") == true ->
-                        UiText.MStringResource(Res.string.api_rate_limit_exceeded)
-                    e is NullPointerException && e.message?.contains("isEmpty") == true ->
-                        UiText.MStringResource(Res.string.api_response_error)
-                    else -> UiText.ExceptionString(e)
-                }
-                
-                onError(errorMessage)
+                // Use TranslationError for user-friendly error messages
+                val translationError = TranslationError.fromException(
+                    exception = e,
+                    engineName = engine.engineName,
+                    sourceLanguage = source,
+                    targetLanguage = target
+                )
+                onError(translationError.toUiText())
             }
         } catch (e: Exception) {
             // Log the error for debugging
             println("Translation error: ${e}")
             e.printStackTrace()
             
-            // Provide a user-friendly error message
-            onError(UiText.MStringResource(Res.string.api_response_error))
+            // Use TranslationError for consistent error handling
+            val translationError = TranslationError.fromException(
+                exception = e,
+                engineName = get().engineName
+            )
+            onError(translationError.toUiText())
+        }
+    }
+    
+    /**
+     * Validate API key for the given engine
+     * @return TranslationError if API key is not configured, null if valid
+     */
+    private fun validateApiKey(engine: TranslateEngine): TranslationError? {
+        return when (engine.id) {
+            2L -> { // OpenAI
+                val apiKey = readerPreferences.openAIApiKey().get()
+                if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("OpenAI") else null
+            }
+            3L -> { // DeepSeek
+                val apiKey = readerPreferences.deepSeekApiKey().get()
+                if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("DeepSeek") else null
+            }
+            8L -> { // Gemini
+                val apiKey = readerPreferences.geminiApiKey().get()
+                if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("Google Gemini") else null
+            }
+            else -> null
         }
     }
 }

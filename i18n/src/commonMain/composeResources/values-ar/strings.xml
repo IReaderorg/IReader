@@ -176,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">الفرز التلقائي للفصول في قاعدة البيانات</string>
     <string name="auto_sync">مزامنة تلقائية</string>
     <string name="auto_sync_1">مزامنة تلقائية</string>
+    <string name="auto_translate_descriptions">ترجمة الأوصاف تلقائيًا</string>
     <string name="auto_translate_next_chapter">ترجمة تلقائية للفصل التالي</string>
     <string name="auto_translate_next_chapter_summary">ترجمة الفصل التالي تلقائيًا عند التنقل باستخدام محرك الترجمة المحدد</string>
+    <string name="auto_translate_novel_names">ترجمة أسماء الروايات تلقائيًا</string>
     <string name="auto_update">تحديث تلقائي</string>
     <string name="auto_update_1">تحديث تلقائي</string>
     <string name="auto_update_2">تحديث تلقائي</string>
@@ -196,6 +198,8 @@
     <string name="automatically_share_your_translations_with">شارك ترجماتك تلقائيًا مع المجتمع</string>
     <string name="automatically_stop_playback_after_set_time">إيقاف التشغيل تلقائيًا بعد وقت محدد</string>
     <string name="automatically_sync_reading_progress">مزامنة تقدم القراءة تلقائيًا</string>
+    <string name="automatically_translate_novel_descriptions_when">ترجمة أوصاف الروايات تلقائيًا عند تصفح المصادر</string>
+    <string name="automatically_translate_novel_titles_when">ترجمة عناوين الروايات تلقائيًا عند تصفح المصادر</string>
     <string name="autoscroll">التمرير التلقائي</string>
     <string name="available">متاح</string>
     <string name="available_backups">النسخ الاحتياطية المتاحة</string>
@@ -270,6 +274,7 @@
     <string name="book_name_selector">محدد اسم الكتاب *</string>
     <string name="book_name_selector_1">محدد اسم الكتاب</string>
     <string name="book_not_found">الكتاب غير موجود</string>
+    <string name="book_not_in_target_source">الكتاب غير موجود في المصدر الهدف</string>
     <string name="book_queued_for_download">تمت إضافة الكتاب إلى قائمة انتظار التنزيل</string>
     <string name="book_reviews">مراجعات الكتب</string>
     <string name="book_title">عنوان الكتاب</string>
@@ -372,6 +377,7 @@
     <string name="chapter_complete">اكتمل الفصل</string>
     <string name="chapter_completed">تم إكمال الفصل</string>
     <string name="chapter_content_extracted">تم استخراج محتوى الفصل باستخدام %1$s</string>
+    <string name="chapter_fetch_failed">فشل جلب الفصل</string>
     <string name="chapter_filters">فلاتر الفصل</string>
     <string name="chapter_heading_size">حجم عنوان الفصل</string>
     <string name="chapter_list">قائمة الفصول</string>
@@ -402,6 +408,7 @@
     <string name="check_community_first">تحقق من المجتمع أولاً</string>
     <string name="check_for_app_updates">التحقق من تحديثات التطبيق</string>
     <string name="check_for_updates">التحقق من وجود تحديثات</string>
+    <string name="check_internet_connection">يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</string>
     <string name="check_permissions">التحقق من الأذونات</string>
     <string name="check_the_update">تحقق من التحديث</string>
     <string name="checking_for_updates">جارٍ التحقق من وجود تحديثات…</string>
@@ -1071,6 +1078,7 @@
     <string name="gb_total_storage_7_500mb">إجمالي مساحة التخزين 3.5 جيجابايت (7 × 500 ميجابايت) - قم بتكوين كل مشروع أو استخدم نفس عنوان URL للجميع</string>
     <string name="gemini_api_information">معلومات عن Gemini API</string>
     <string name="gemini_api_key">مفتاح Gemini API</string>
+    <string name="gemini_api_key_invalid">مفتاح API الخاص بـ Gemini غير صالح أو انتهت صلاحيته. يرجى الحصول على مفتاح جديد من Google AI Studio.</string>
     <string name="gemini_api_key_not_set">لم يتم تعيين مفتاح Gemini API. يرجى تكوينه في
         الإعدادات.
     </string>
@@ -1310,6 +1318,7 @@
     <string name="language_code">رمز اللغة</string>
     <string name="language_filter">فلتر اللغة</string>
     <string name="language_preferences">تفضيلات اللغة</string>
+    <string name="language_preferences_saved">تم حفظ تفضيلات اللغة لهذا الكتاب</string>
     <string name="language_translation">اللغة والترجمة</string>
     <string name="languages">اللغات</string>
     <string name="large">كبير</string>
@@ -1516,6 +1525,7 @@
     <string name="need_help">تحتاج مساعدة؟</string>
     <string name="network">شبكة</string>
     <string name="network_cache">ذاكرة التخزين المؤقت للشبكة</string>
+    <string name="network_error">خطأ في الشبكة</string>
     <string name="network_settings">إعدادات الشبكة</string>
     <string name="neutral">محايد</string>
     <string name="new_chapter_notifications">إشعارات الفصول الجديدة</string>
@@ -1847,6 +1857,8 @@
     <string name="pref_relative_time_long">طويل (قصير + ، قبل ن أيام)</string>
     <string name="pref_relative_time_short">قصير (اليوم ، أمس)</string>
     <string name="prefer_saf_storage">تفضيل تخزين SAF</string>
+    <string name="preferred_source_language">لغة المصدر المفضلة</string>
+    <string name="preferred_target_language">لغة الهدف المفضلة</string>
     <string name="preload_next_chapter">تحميل الفصل التالي مسبقًا</string>
     <string name="preload_only_on_wifi">التحميل المسبق فقط على شبكة WiFi</string>
     <string name="preload_only_on_wifi_summary">اقتصر على التحميل المسبق التلقائي على اتصالات WiFi فقط</string>
@@ -1991,6 +2003,7 @@
     <string name="reload">إعادة تحميل</string>
     <string name="reload_plugin_themes">إعادة تحميل سمات الملحقات</string>
     <string name="remaining">المتبقي</string>
+    <string name="remember_my_languages">تذكر خياراتي للغات</string>
     <string name="remind_me_again_in">ذكرني مرة أخرى بعد:</string>
     <string name="reminder_interval">الفاصل الزمني للتذكير</string>
     <string name="remove">إزالة</string>
@@ -2108,6 +2121,7 @@
     <string name="save_custom_theme">حفظ مظهر مخصص</string>
     <string name="save_epub">حفظ EPUB</string>
     <string name="save_js_sources_extensions_backups">حفظ مصادر JS والإضافات والنسخ الاحتياطية وملفات epub في مجلد SAF عند توفره. يعود إلى الذاكرة المؤقتة إذا لم يكن متوفرًا.</string>
+    <string name="save_language_preferences">حفظ تفضيلات اللغة</string>
     <string name="save_multi_endpoint_configuration">حفظ تكوين النقاط المتعددة</string>
     <string name="save_patterns">حفظ الأنماط</string>
     <string name="saved_local_source_location">تم حفظ المصادر في ذاكرة التخزين المؤقت</string>
@@ -2126,6 +2140,7 @@
     <string name="search_across_all_sources">البحث في جميع المصادر</string>
     <string name="search_across_all_sources_1">البحث في جميع المصادر...</string>
     <string name="search_bar">شريط البحث</string>
+    <string name="search_book_manually">حاول البحث عن الكتاب يدويًا في المصدر للتحقق من توفره.</string>
     <string name="search_characters_books">البحث عن شخصيات، كتب...</string>
     <string name="search_features">البحث عن ميزات...</string>
     <string name="search_fonts">البحث عن الخطوط...</string>
@@ -2320,6 +2335,7 @@
     <string name="source_name">اسم المصدر *</string>
     <string name="source_needs_update">المصدر يحتاج إلى تحديث</string>
     <string name="source_not_available">هذا المصدر غير متوفر في جهازك.</string>
+    <string name="source_not_found">المصدر غير موجود</string>
     <string name="source_placeholder">مثال: 12345 أو NovelUpdates</string>
     <string name="source_rule">المصدر</string>
     <string name="source_term">مصطلح المصدر</string>
@@ -2575,14 +2591,38 @@
     <string name="translated">مترجم</string>
     <string name="translating">جارٍ الترجمة... قد يستغرق هذا بعض الوقت.</string>
     <string name="translation">الترجمة</string>
+    <string name="translation_api_key_invalid">مفتاح API الخاص بـ %1$s غير صالح أو انتهت صلاحيته. يرجى التحقق من مفتاحك في الإعدادات ← الترجمة.</string>
+    <string name="translation_api_key_not_set">يتطلب %1$s مفتاح API. يرجى الذهاب إلى الإعدادات ← الترجمة وتكوين مفتاح API الخاص بك.</string>
+    <string name="translation_auth_required">تحتاج إلى تسجيل الدخول إلى %1$s لاستخدام ميزة الترجمة هذه.</string>
+    <string name="translation_captcha_required">يتطلب %1$s التحقق. يرجى إكمال الكابتشا للمتابعة.</string>
     <string name="translation_complete">اكتملت الترجمة.</string>
+    <string name="translation_empty_response">أرجع %1$s استجابة فارغة. قد تكون هذه مشكلة مؤقتة - يرجى المحاولة مرة أخرى.</string>
     <string name="translation_engine">محرك الترجمة</string>
+    <string name="translation_engine_not_available">المحرك %1$s غير متاح في هذا الإصدار من التطبيق. يرجى استخدام محرك ترجمة مختلف.</string>
     <string name="translation_engines_refreshed">تم تحديث محركات الترجمة</string>
     <string name="translation_error">خطأ في الترجمة</string>
+    <string name="translation_language_model_not_available">نموذج اللغة لـ %1$s ← %2$s لم يتم تنزيله. يرجى الذهاب إلى الإعدادات ← الترجمة لتنزيله.</string>
+    <string name="translation_language_pair_not_supported">لا يدعم %1$s الترجمة من %2$s إلى %3$s. يرجى اختيار لغات مختلفة.</string>
+    <string name="translation_model_not_found">تعذر العثور على نموذج الذكاء الاصطناعي لـ %1$s. يرجى التحقق من إعداداتك.</string>
+    <string name="translation_model_not_found_with_name">النموذج '%2$s' غير موجود في %1$s. يرجى تحديد نموذج مختلف في الإعدادات.</string>
+    <string name="translation_network_error">لا يمكن الاتصال بـ %1$s. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</string>
+    <string name="translation_parse_error">تعذر فهم الاستجابة من %1$s. قد تكون الخدمة تواجه مشكلات.</string>
+    <string name="translation_plugin_error">واجه المكون الإضافي للترجمة '%1$s' خطأً. يرجى التحقق من إعدادات المكون الإضافي أو تجربة محرك مختلف.</string>
     <string name="translation_plugins_extend_ireader_with">تعمل مكونات الترجمة الإضافية على توسيع IReader بخدمات ترجمة إضافية</string>
     <string name="translation_progress">التقدم في الترجمة</string>
+    <string name="translation_quota_exceeded">تم تجاوز حصة ترجمة %1$s. يرجى التحقق من خطتك وفواتيرك، أو المحاولة مرة أخرى لاحقًا.</string>
+    <string name="translation_rate_limit">يتلقى %1$s عددًا كبيرًا جدًا من الطلبات. يرجى الانتظار لحظة والمحاولة مرة أخرى.</string>
     <string name="translation_rate_limit_delay">تأخير حد معدل الترجمة</string>
+    <string name="translation_rate_limit_with_retry">تم الوصول إلى حد معدل %1$s. يرجى الانتظار %2$d ثانية والمحاولة مرة أخرى.</string>
+    <string name="translation_server_error">خادم %1$s يواجه مشكلات. يرجى المحاولة مرة أخرى لاحقًا.</string>
+    <string name="translation_server_error_with_code">خطأ في خادم %1$s (الرمز: %2$d). يرجى المحاولة مرة أخرى لاحقًا.</string>
     <string name="translation_settings">إعدادات الترجمة</string>
+    <string name="translation_text_too_long">النص طويل جدًا بحيث لا يمكن لـ %1$s معالجته. حاول ترجمة أقسام أصغر.</string>
+    <string name="translation_text_too_long_with_limit">النص يتجاوز حد %1$s البالغ %2$d حرفًا. حاول ترجمة أقسام أصغر.</string>
+    <string name="translation_timeout">استغرق %1$s وقتًا طويلاً جدًا للاستجابة. يرجى المحاولة مرة أخرى.</string>
+    <string name="translation_timeout_with_seconds">لم يستجب %1$s خلال %2$d ثانية. يرجى المحاولة مرة أخرى.</string>
+    <string name="translation_unknown_error">واجه %1$s خطأً غير متوقع. يرجى المحاولة مرة أخرى.</string>
+    <string name="translation_unknown_error_with_details">خطأ %1$s: %2$s</string>
     <string name="translation_warning">تحذير الترجمة</string>
     <string name="translations">ترجمة</string>
     <string name="trending_now">الرائج الآن</string>
@@ -2592,9 +2632,11 @@
     <string name="trust_level_updated">تم تحديث مستوى الثقة</string>
     <string name="try_a_different_search_term">جرب مصطلح بحث مختلف</string>
     <string name="try_again">حاول مرة أخرى</string>
+    <string name="try_again_later">بياناتك محفوظة. يرجى المحاولة مرة أخرى لاحقًا.</string>
     <string name="try_alternative_url">جرب عنوان URL بديل</string>
     <string name="try_another_search">جرب بحثًا آخر</string>
     <string name="try_different_search">جرب مصطلح بحث مختلف</string>
+    <string name="try_different_source">قد يكون المصدر غير متاح. جرب مصدرًا مختلفًا.</string>
     <string name="try_these_fixes">جرب هذه الإصلاحات:</string>
     <string name="trying_in_few_second">حاول مرة أخرى في بضع ثوان.</string>
     <string name="trying_to_fetch">جارٍ محاولة الجلب…</string>
@@ -2711,6 +2753,7 @@
     <string name="use_password">استخدام كلمة المرور</string>
     <string name="use_pin">استخدام رمز PIN</string>
     <string name="use_pinpassword_instead">استخدام رقم التعريف الشخصي/كلمة المرور بدلاً من ذلك</string>
+    <string name="use_saved_languages">استخدام اللغات المحفوظة</string>
     <string name="use_separate_supabase_projects_for">استخدام مشاريع Supabase منفصلة لتحسين قابلية التوسع</string>
     <string name="use_static_indicators_instead_of_animated_ones">استخدام مؤشرات ثابتة بدلاً من المؤشرات المتحركة</string>
     <string name="use_translated_text_for_text">استخدام النص المترجم لتحويل النص إلى كلام عند توفره</string>
@@ -2724,6 +2767,7 @@
     <string name="users">المستخدمون</string>
     <string name="uuid_of_your_d1_database">UUID لقاعدة بيانات D1 الخاصة بك</string>
     <string name="validate">تحقق</string>
+    <string name="validation_error">خطأ في التحقق</string>
     <string name="verification_details">تفاصيل التحقق</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• التحقق تلقائي ويستغرق بضع ثوان</string>
     <string name="verification_is_cached_for_24">يتم تخزين التحقق مؤقتًا لمدة 24 ساعة. تظل الشارة نشطة لمدة 7 أيام إذا فشل إعادة التحقق.</string>

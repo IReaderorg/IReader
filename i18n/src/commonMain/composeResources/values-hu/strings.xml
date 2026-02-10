@@ -176,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">Fejezetek automatikus rendezése az adatbázisban</string>
     <string name="auto_sync">Automatikus szinkronizálás</string>
     <string name="auto_sync_1">Automatikus szinkronizálás</string>
+    <string name="auto_translate_descriptions">Leírások automatikus fordítása</string>
     <string name="auto_translate_next_chapter">Következő fejezet automatikus fordítása</string>
     <string name="auto_translate_next_chapter_summary">A következő fejezet automatikus lefordítása a kiválasztott fordítómotor használatával, amikor navigál</string>
+    <string name="auto_translate_novel_names">Regénynevek automatikus fordítása</string>
     <string name="auto_update">Automatikus frissítés</string>
     <string name="auto_update_1">Automatikus frissítés</string>
     <string name="auto_update_2">Automatikus frissítés</string>
@@ -196,6 +198,8 @@
     <string name="automatically_share_your_translations_with">Fordításai automatikus megosztása a közösséggel</string>
     <string name="automatically_stop_playback_after_set_time">Lejátszás automatikus leállítása a beállított idő után</string>
     <string name="automatically_sync_reading_progress">Olvasási folyamat automatikus szinkronizálása</string>
+    <string name="automatically_translate_novel_descriptions_when">Regényleírások automatikus fordítása források böngészésekor</string>
+    <string name="automatically_translate_novel_titles_when">Regénycímek automatikus fordítása források böngészésekor</string>
     <string name="autoscroll">Automatikus görgetés</string>
     <string name="available">Elérhető</string>
     <string name="available_backups">Elérhető biztonsági másolatok</string>
@@ -270,6 +274,7 @@
     <string name="book_name_selector">Könyvnév választó *</string>
     <string name="book_name_selector_1">Könyvnév választó</string>
     <string name="book_not_found">A könyv nem található</string>
+    <string name="book_not_in_target_source">A könyv nem található a célforrásban</string>
     <string name="book_queued_for_download">Könyv letöltésre vár</string>
     <string name="book_reviews">Könyvismertetők</string>
     <string name="book_title">Könyv címe</string>
@@ -372,6 +377,7 @@
     <string name="chapter_complete">FEJEZET KÉSZ</string>
     <string name="chapter_completed">Fejezet befejezve</string>
     <string name="chapter_content_extracted">A fejezet tartalma kinyerve ezzel: %1$s</string>
+    <string name="chapter_fetch_failed">Fejezet letöltése sikertelen</string>
     <string name="chapter_filters">Fejezet szűrők</string>
     <string name="chapter_heading_size">Fejezet cím mérete</string>
     <string name="chapter_list">Fejezetlista</string>
@@ -402,6 +408,7 @@
     <string name="check_community_first">Először ellenőrizze a közösséget</string>
     <string name="check_for_app_updates">Alkalmazásfrissítések keresése</string>
     <string name="check_for_updates">Frissítések keresése</string>
+    <string name="check_internet_connection">Kérjük, ellenőrizze internetkapcsolatát, majd próbálja újra.</string>
     <string name="check_permissions">Engedélyek ellenőrzése</string>
     <string name="check_the_update">Frissítés ellenőrzése</string>
     <string name="checking_for_updates">Frissítések keresése…</string>
@@ -1073,6 +1080,7 @@
     <string name="gb_total_storage_7_500mb">3,5 GB összes tárhely (7 × 500 MB) - Konfiguráljon minden projektet, vagy használjon ugyanazt az URL-t mindhez</string>
     <string name="gemini_api_information">Gemini API információk</string>
     <string name="gemini_api_key">Gemini API kulcs</string>
+    <string name="gemini_api_key_invalid">A Gemini API kulcs érvénytelen vagy lejárt. Kérjük, szerezzen be egy új kulcsot a Google AI Studio-ból.</string>
     <string name="gemini_api_key_not_set">A Gemini API kulcs nincs beállítva. Kérjük, konfigurálja a
         beállításokban.
     </string>
@@ -1313,6 +1321,7 @@
     <string name="language_code">Nyelvi kód</string>
     <string name="language_filter">Nyelvi szűrő</string>
     <string name="language_preferences">Nyelvi beállítások</string>
+    <string name="language_preferences_saved">Nyelvi beállítások elmentve ehhez a könyvhöz</string>
     <string name="language_translation">Nyelv és fordítás</string>
     <string name="languages">Nyelvek</string>
     <string name="large">Nagy</string>
@@ -1519,6 +1528,7 @@
     <string name="need_help">Segítségre van szükséged?</string>
     <string name="network">Hálózat</string>
     <string name="network_cache">Hálózati Gyorsítótár</string>
+    <string name="network_error">Hálózati hiba</string>
     <string name="network_settings">Hálózati Beállítások</string>
     <string name="neutral">Semleges</string>
     <string name="new_chapter_notifications">Értesítések új fejezetekről</string>
@@ -1850,6 +1860,8 @@
     <string name="pref_relative_time_long">Hosszú (Rövid+, n nappal ezelőtt)</string>
     <string name="pref_relative_time_short">Rövid (Ma, Tegnap)</string>
     <string name="prefer_saf_storage">Előnyben részesíti a SAF tárolást</string>
+    <string name="preferred_source_language">Előnyben részesített forrásnyelv</string>
+    <string name="preferred_target_language">Előnyben részesített célnyelv</string>
     <string name="preload_next_chapter">Következő Fejezet Előbetöltése</string>
     <string name="preload_only_on_wifi">Előbetöltés csak WiFi-n</string>
     <string name="preload_only_on_wifi_summary">Az automatikus előbetöltés korlátozása csak WiFi kapcsolatokra</string>
@@ -1994,6 +2006,7 @@
     <string name="reload">Újratöltés</string>
     <string name="reload_plugin_themes">Plugin témák újratöltése</string>
     <string name="remaining">Hátralévő</string>
+    <string name="remember_my_languages">Nyelvi választásaim megjegyzése</string>
     <string name="remind_me_again_in">Emlékeztess újra:</string>
     <string name="reminder_interval">Emlékeztető Intervallum</string>
     <string name="remove">Eltávolítás</string>
@@ -2111,6 +2124,7 @@
     <string name="save_custom_theme">Egyéni téma mentése</string>
     <string name="save_epub">Mentés EPUB formátumban</string>
     <string name="save_js_sources_extensions_backups">JS források, kiterjesztések, biztonsági másolatok és epubok mentése SAF mappába, ha elérhető. Ha nem elérhető, visszaesik a gyorsítótárba.</string>
+    <string name="save_language_preferences">Nyelvi beállítások mentése</string>
     <string name="save_multi_endpoint_configuration">Többvégpontos konfiguráció mentése</string>
     <string name="save_patterns">Minták mentése</string>
     <string name="saved_local_source_location">Mentett források a gyorsítótárba</string>
@@ -2129,6 +2143,7 @@
     <string name="search_across_all_sources">Keresés az összes forrásban</string>
     <string name="search_across_all_sources_1">Keresés az összes forrásban...</string>
     <string name="search_bar">keresősáv</string>
+    <string name="search_book_manually">Próbálja meg manuálisan megkeresni a könyvet a forrásban az elérhetőség ellenőrzéséhez.</string>
     <string name="search_characters_books">Keresés karakterek, könyvek...</string>
     <string name="search_features">Funkciók keresése...</string>
     <string name="search_fonts">Betűtípusok keresése...</string>
@@ -2323,6 +2338,7 @@
     <string name="source_name">Forrás neve *</string>
     <string name="source_needs_update">A forrás frissítésre szorul</string>
     <string name="source_not_available">Ez a forrás nem elérhető az eszközén.</string>
+    <string name="source_not_found">Forrás nem található</string>
     <string name="source_placeholder">pl. 12345 vagy NovelUpdates</string>
     <string name="source_rule">Forrás</string>
     <string name="source_term">Forrás kifejezés</string>
@@ -2581,14 +2597,38 @@
     <string name="translated">Lefordítva</string>
     <string name="translating">Fordítás... Ez eltarthat egy ideig.</string>
     <string name="translation">Fordítás</string>
+    <string name="translation_api_key_invalid">A %1$s API kulcsa érvénytelen vagy lejárt. Kérjük, ellenőrizze kulcsát a Beállítások → Fordítás menüpontban.</string>
+    <string name="translation_api_key_not_set">%1$s API kulcsot igényel. Kérjük, menjen a Beállítások → Fordítás menüpontba, és konfigurálja az API kulcsát.</string>
+    <string name="translation_auth_required">Be kell jelentkeznie a %1$s-be a fordítási funkció használatához.</string>
+    <string name="translation_captcha_required">%1$s ellenőrzést igényel. Kérjük, töltse ki a CAPTCHA-t a folytatáshoz.</string>
     <string name="translation_complete">A fordítás befejeződött.</string>
+    <string name="translation_empty_response">%1$s üres választ adott. Ez átmeneti probléma lehet – kérjük, próbálja újra.</string>
     <string name="translation_engine">Fordítómotor</string>
+    <string name="translation_engine_not_available">%1$s nem érhető el az alkalmazás ezen verziójában. Kérjük, használjon másik fordítómotort.</string>
     <string name="translation_engines_refreshed">Fordítómotorok frissítve</string>
     <string name="translation_error">Fordítási hiba</string>
+    <string name="translation_language_model_not_available">A %1$s → %2$s nyelvi modell nincs letöltve. Kérjük, menjen a Beállítások → Fordítás menüpontba a letöltéséhez.</string>
+    <string name="translation_language_pair_not_supported">%1$s nem támogatja a fordítást %2$s-ről %3$s-re. Kérjük, válasszon más nyelveket.</string>
+    <string name="translation_model_not_found">A %1$s mesterséges intelligencia modellje nem található. Kérjük, ellenőrizze beállításait.</string>
+    <string name="translation_model_not_found_with_name">A '%2$s' modell nem található a %1$s-ben. Kérjük, válasszon másik modellt a beállításokban.</string>
+    <string name="translation_network_error">Nem tud csatlakozni a %1$s-hez. Kérjük, ellenőrizze internetkapcsolatát, majd próbálja újra.</string>
+    <string name="translation_parse_error">Nem sikerült értelmezni a %1$s válaszát. A szolgáltatás problémákat tapasztalhat.</string>
+    <string name="translation_plugin_error">A(z) '%1$s' fordító beépülő modul hibát észlelt. Kérjük, ellenőrizze a beépülő modul beállításait, vagy próbáljon meg egy másik motort.</string>
     <string name="translation_plugins_extend_ireader_with">A fordító pluginok további fordítási szolgáltatásokkal bővítik az IReadert</string>
     <string name="translation_progress">Fordítási folyamat</string>
+    <string name="translation_quota_exceeded">%1$s fordítási kvóta túllépve. Kérjük, ellenőrizze előfizetését és számlázását, vagy próbálja újra később.</string>
+    <string name="translation_rate_limit">%1$s túl sok kérést kap. Kérjük, várjon egy pillanatot, majd próbálja újra.</string>
     <string name="translation_rate_limit_delay">Fordítási aránykorlát késleltetése</string>
+    <string name="translation_rate_limit_with_retry">%1$s sebességkorlát elérve. Kérjük, várjon %2$d másodpercet, majd próbálja újra.</string>
+    <string name="translation_server_error">A %1$s szerver problémákat tapasztal. Kérjük, próbálja újra később.</string>
+    <string name="translation_server_error_with_code">%1$s szerverhiba (kód: %2$d). Kérjük, próbálja újra később.</string>
     <string name="translation_settings">Fordítási beállítások</string>
+    <string name="translation_text_too_long">A szöveg túl hosszú ahhoz, hogy a %1$s feldolgozza. Próbálja meg kisebb szakaszokat fordítani.</string>
+    <string name="translation_text_too_long_with_limit">A szöveg túllépi a %1$s %2$d karakteres korlátját. Próbálja meg kisebb szakaszokat fordítani.</string>
+    <string name="translation_timeout">%1$s túl sokáig tartott a válaszadás. Kérjük, próbálja újra.</string>
+    <string name="translation_timeout_with_seconds">%1$s nem válaszolt %2$d másodpercen belül. Kérjük, próbálja újra.</string>
+    <string name="translation_unknown_error">%1$s váratlan hibát észlelt. Kérjük, próbálja újra.</string>
+    <string name="translation_unknown_error_with_details">%1$s hiba: %2$s</string>
     <string name="translation_warning">Fordítási figyelmeztetés</string>
     <string name="translations">fordítások</string>
     <string name="trending_now">Felkapott most</string>
@@ -2598,9 +2638,11 @@
     <string name="trust_level_updated">Bizalmi szint frissítve</string>
     <string name="try_a_different_search_term">Próbálj ki egy másik keresési kifejezést</string>
     <string name="try_again">Próbálja újra</string>
+    <string name="try_again_later">Adatai megmaradtak. Kérjük, próbálja meg később.</string>
     <string name="try_alternative_url">Alternatív URL kipróbálása</string>
     <string name="try_another_search">Próbáljon ki egy másik keresést</string>
     <string name="try_different_search">Próbálj más keresési kifejezést</string>
+    <string name="try_different_source">A forrás valószínűleg nem elérhető. Próbáljon meg egy másik forrást.</string>
     <string name="try_these_fixes">Próbálja ki ezeket a javításokat:</string>
     <string name="trying_in_few_second">Próbálkozzon újra néhány másodperc múlva.</string>
     <string name="trying_to_fetch">Lekérés folyamatban…</string>
@@ -2717,6 +2759,7 @@
     <string name="use_password">Jelszó használata</string>
     <string name="use_pin">PIN kód használata</string>
     <string name="use_pinpassword_instead">PIN/Jelszó használata helyette</string>
+    <string name="use_saved_languages">Mentett nyelvek használata</string>
     <string name="use_separate_supabase_projects_for">Külön Supabase projektek használata a jobb skálázhatóság érdekében</string>
     <string name="use_static_indicators_instead_of_animated_ones">Statikus jelzők használata animáltak helyett</string>
     <string name="use_translated_text_for_text">Fordított szöveg használata szövegfelolvasáshoz, ha elérhető</string>
@@ -2730,6 +2773,7 @@
     <string name="users">Felhasználók</string>
     <string name="uuid_of_your_d1_database">D1 adatbázisának UUID azonosítója</string>
     <string name="validate">Érvényesítés</string>
+    <string name="validation_error">Érvényesítési hiba</string>
     <string name="verification_details">Ellenőrzési részletek</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Az ellenőrzés automatikus és néhány másodpercet vesz igénybe</string>
     <string name="verification_is_cached_for_24">Az ellenőrzés 24 órán át gyorsítótárazva van. A jelvény 7 napig aktív marad, ha az újbóli ellenőrzés sikertelen.</string>

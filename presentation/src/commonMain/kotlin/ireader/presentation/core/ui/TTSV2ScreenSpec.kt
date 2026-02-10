@@ -753,6 +753,7 @@ class TTSV2ScreenSpec(
                                 val sourceLang = readerPreferences.translatorOriginLanguage().get()
                                 val targetLang = readerPreferences.translatorTargetLanguage().get()
                                 
+                                // Use priority = true to avoid cancelling existing mass translations
                                 translationService.queueChapters(
                                     bookId = bookId,
                                     chapterIds = listOf(nextChapter.id),
@@ -760,7 +761,7 @@ class TTSV2ScreenSpec(
                                     targetLanguage = targetLang,
                                     engineId = engineId,
                                     bypassWarning = true,
-                                    priority = false
+                                    priority = true  // Changed from false to true to avoid cancelling existing translations
                                 )
                             }
                         }

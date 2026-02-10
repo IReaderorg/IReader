@@ -319,7 +319,10 @@ fun BookDetailScreen(
                 modifier = Modifier.align(Alignment.TopCenter)
             )
             
-            IVerticalFastScroller(listState = scrollState) {
+            IVerticalFastScroller(
+                listState = scrollState,
+                endContentPadding = 16.dp // Add padding to prevent scrollbar overlap with toolbar actions
+            ) {
                 LazyColumn(
                     modifier = Modifier,
                     verticalArrangement = Arrangement.Top,
@@ -673,7 +676,10 @@ private fun ChapterListPanel(
         value = true
     }
     
-    IVerticalFastScroller(listState = scrollState) {
+    IVerticalFastScroller(
+        listState = scrollState,
+        endContentPadding = 16.dp // Add padding to prevent scrollbar overlap
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,

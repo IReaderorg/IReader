@@ -179,7 +179,7 @@ actual class GoogleTranslateML : TranslateEngine() {
     ) {
         // Validate inputs
         if (texts.isNullOrEmpty()) {
-            onError(UiText.MStringResource(Res.string.no_text_to_translate))
+            onError(TranslationError.NoTextToTranslate.toUiText())
             return
         }
         
@@ -189,7 +189,7 @@ actual class GoogleTranslateML : TranslateEngine() {
             // Get translator client
             val client = getTranslatorClient(source, target)
             if (client == null) {
-                onError(UiText.DynamicString("Translation feature is not available in this build. Please use the Play Store version for ML Kit translation."))
+                onError(TranslationError.EngineNotAvailable("Google ML Kit").toUiText())
                 return
             }
             
@@ -198,7 +198,7 @@ actual class GoogleTranslateML : TranslateEngine() {
             // Ensure model is downloaded first
             val modelReady = ensureModelDownloaded(client)
             if (!modelReady) {
-                onError(UiText.DynamicString("Failed to download language model. Please check your internet connection and try again."))
+                onError(TranslationError.LanguageModelNotAvailable(source, target).toUiText())
                 return
             }
             
@@ -216,7 +216,8 @@ actual class GoogleTranslateML : TranslateEngine() {
                 
                 val translatedChunk = translateChunk(client, chunk)
                 if (translatedChunk == null) {
-                    onError(UiText.DynamicString("Translation failed for chunk ${chunkIndex + 1}"))
+                    onError(TranslationError.Unknown("Google ML Kit",
+                        Exception("Translation failed for chunk ${chunkIndex + 1}")).toUiText())
                     return
                 }
                 allResults.addAll(translatedChunk)
@@ -235,12 +236,19 @@ actual class GoogleTranslateML : TranslateEngine() {
         } catch (e: ClassNotFoundException) {
             // ML Kit not available (F-Droid build)
             onProgress(0)
-            onError(UiText.DynamicString("Translation feature is not available in this build. Please use the Play Store version for ML Kit translation."))
+            onError(TranslationError.EngineNotAvailable("Google ML Kit").toUiText())
         } catch (e: Exception) {
             onProgress(0)
             println("Google Translate ML error: ${e.message}")
             e.printStackTrace()
-            onError(UiText.ExceptionString(e))
+            // Use TranslationError for user-friendly error messages
+            val translationError = TranslationError.fromException(
+                exception = e,
+                engineName = "Google ML Kit",
+                sourceLanguage = source,
+                targetLanguage = target
+            )
+            onError(translationError.toUiText())
         }
     }
     

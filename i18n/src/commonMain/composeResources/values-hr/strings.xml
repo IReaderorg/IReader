@@ -176,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">Automatski sortiraj poglavlja u bazi podataka</string>
     <string name="auto_sync">Automatska sinkronizacija</string>
     <string name="auto_sync_1">Automatska sinkronizacija</string>
+    <string name="auto_translate_descriptions">Automatski prevodi opise</string>
     <string name="auto_translate_next_chapter">Automatski prevedi sljedeće poglavlje</string>
     <string name="auto_translate_next_chapter_summary">Automatski prevedi sljedeće poglavlje prilikom navigacije pomoću odabranog prevoditeljskog mehanizma</string>
+    <string name="auto_translate_novel_names">Automatski prevodi nazive romana</string>
     <string name="auto_update">Automatsko ažuriranje</string>
     <string name="auto_update_1">Automatsko ažuriranje</string>
     <string name="auto_update_2">Automatsko ažuriranje</string>
@@ -196,6 +198,8 @@
     <string name="automatically_share_your_translations_with">Automatski dijelite svoje prijevode s zajednicom</string>
     <string name="automatically_stop_playback_after_set_time">Automatski zaustavi reprodukciju nakon postavljenog vremena</string>
     <string name="automatically_sync_reading_progress">Automatski sinkroniziraj napredak čitanja</string>
+    <string name="automatically_translate_novel_descriptions_when">Automatski prevodi opise romana prilikom pregledavanja izvora</string>
+    <string name="automatically_translate_novel_titles_when">Automatski prevodi naslove romana prilikom pregledavanja izvora</string>
     <string name="autoscroll">Automatsko pomicanje</string>
     <string name="available">Dostupno</string>
     <string name="available_backups">Dostupne sigurnosne kopije</string>
@@ -270,6 +274,7 @@
     <string name="book_name_selector">Selektor naziva knjige *</string>
     <string name="book_name_selector_1">Selektor naziva knjige</string>
     <string name="book_not_found">Knjiga nije pronađena</string>
+    <string name="book_not_in_target_source">Knjiga nije pronađena u ciljanom izvoru</string>
     <string name="book_queued_for_download">Knjiga u redu za preuzimanje</string>
     <string name="book_reviews">Recenzije knjiga</string>
     <string name="book_title">Naslov knjige</string>
@@ -372,6 +377,7 @@
     <string name="chapter_complete">POGLAVLJE ZAVRŠENO</string>
     <string name="chapter_completed">Poglavlje dovršeno</string>
     <string name="chapter_content_extracted">Sadržaj poglavlja izvučen pomoću %1$s</string>
+    <string name="chapter_fetch_failed">Dohvaćanje poglavlja nije uspjelo</string>
     <string name="chapter_filters">Filtri poglavlja</string>
     <string name="chapter_heading_size">Veličina naslova poglavlja</string>
     <string name="chapter_list">Popis poglavlja</string>
@@ -402,6 +408,7 @@
     <string name="check_community_first">Prvo provjeri zajednicu</string>
     <string name="check_for_app_updates">Provjeri ima li ažuriranja aplikacije</string>
     <string name="check_for_updates">Provjeri ažuriranja</string>
+    <string name="check_internet_connection">Provjerite internetsku vezu i pokušajte ponovo.</string>
     <string name="check_permissions">Provjeri dopuštenja</string>
     <string name="check_the_update">Provjeri ažuriranje</string>
     <string name="checking_for_updates">Provjera ažuriranja…</string>
@@ -1069,6 +1076,7 @@
     <string name="gb_total_storage_7_500mb">Ukupno 3,5 GB prostora za pohranu (7 × 500 MB) - Konfigurirajte svaki projekt ili upotrijebite isti URL za sve</string>
     <string name="gemini_api_information">Informacije o Gemini API-ju</string>
     <string name="gemini_api_key">Gemini API ključ</string>
+    <string name="gemini_api_key_invalid">Gemini API ključ je nevažeći ili je istekao. Nabavite novi ključ iz Google AI Studija.</string>
     <string name="gemini_api_key_not_set">Gemini API ključ nije postavljen. Molimo konfigurirajte ga u
 		postavkama.
 	</string>
@@ -1304,6 +1312,7 @@
     <string name="language_code">Jezični kod</string>
     <string name="language_filter">Filtar jezika</string>
     <string name="language_preferences">Jezične postavke</string>
+    <string name="language_preferences_saved">Jezične postavke spremljene za ovu knjigu</string>
     <string name="language_translation">Jezik i prijevod</string>
     <string name="languages">Jezici</string>
     <string name="large">Veliko</string>
@@ -1510,6 +1519,7 @@
     <string name="need_help">Trebate pomoć?</string>
     <string name="network">Mreža</string>
     <string name="network_cache">Mreža predmemorije</string>
+    <string name="network_error">Mrežna greška</string>
     <string name="network_settings">Mrežne postavke</string>
     <string name="neutral">Neutralno</string>
     <string name="new_chapter_notifications">Obavijesti o novim poglavljima</string>
@@ -1839,6 +1849,8 @@
     <string name="pref_relative_time_long">Dugo (Kratko+, prije n dana)</string>
     <string name="pref_relative_time_short">Kratko (Danas, Jučer)</string>
     <string name="prefer_saf_storage">Preferiraj SAF pohranu</string>
+    <string name="preferred_source_language">Preferirani izvorni jezik</string>
+    <string name="preferred_target_language">Preferirani ciljni jezik</string>
     <string name="preload_next_chapter">Predučitaj sljedeće poglavlje</string>
     <string name="preload_only_on_wifi">Predučitaj samo putem WiFi-a</string>
     <string name="preload_only_on_wifi_summary">Ograniči automatsko predučitavanje samo na WiFi veze</string>
@@ -1983,6 +1995,7 @@
     <string name="reload">Ponovno učitaj</string>
     <string name="reload_plugin_themes">Ponovno učitaj teme dodataka</string>
     <string name="remaining">Preostalo</string>
+    <string name="remember_my_languages">Zapamti moje odabire jezika</string>
     <string name="remind_me_again_in">Podsjeti me opet za:</string>
     <string name="reminder_interval">Interval podsjetnika</string>
     <string name="remove">Ukloni</string>
@@ -2100,6 +2113,7 @@
     <string name="save_custom_theme">Spremi prilagođenu temu</string>
     <string name="save_epub">Spremi kao EPUB</string>
     <string name="save_js_sources_extensions_backups">Spremite JS izvore, proširenja, sigurnosne kopije i epub datoteke u SAF mapu kada je dostupno. Ako nije dostupno, vraća se na predmemoriju.</string>
+    <string name="save_language_preferences">Spremi jezične postavke</string>
     <string name="save_multi_endpoint_configuration">Spremi konfiguraciju s više krajnjih točaka</string>
     <string name="save_patterns">Spremi uzorke</string>
     <string name="saved_local_source_location">Spremljeni izvori u predmemoriju</string>
@@ -2118,6 +2132,7 @@
     <string name="search_across_all_sources">Pretraži sve izvore</string>
     <string name="search_across_all_sources_1">Pretražite po svim izvorima...</string>
     <string name="search_bar">traka za pretraživanje</string>
+    <string name="search_book_manually">Pokušajte ručno pretražiti knjigu u izvoru kako biste provjerili dostupnost.</string>
     <string name="search_characters_books">Pretraži likove, knjige...</string>
     <string name="search_features">Pretražite značajke...</string>
     <string name="search_fonts">Pretraži fontove...</string>
@@ -2312,6 +2327,7 @@
     <string name="source_name">Naziv izvora *</string>
     <string name="source_needs_update">Izvor treba ažuriranje</string>
     <string name="source_not_available">ovaj izvor nije dostupan na vašem uređaju.</string>
+    <string name="source_not_found">Izvor nije pronađen</string>
     <string name="source_placeholder">npr., 12345 ili NovelUpdates</string>
     <string name="source_rule">Izvor</string>
     <string name="source_term">Izvorni pojam</string>
@@ -2567,14 +2583,38 @@
     <string name="translated">Prevedeno</string>
     <string name="translating">Prevođenje u tijeku... Ovo može potrajati.</string>
     <string name="translation">Prijevod</string>
+    <string name="translation_api_key_invalid">API ključ za %1$s je nevažeći ili je istekao. Provjerite svoj ključ u Postavke → Prijevod.</string>
+    <string name="translation_api_key_not_set">%1$s zahtijeva API ključ. Idite na Postavke → Prijevod i konfigurirajte svoj API ključ.</string>
+    <string name="translation_auth_required">Morate se prijaviti u %1$s da biste koristili ovu značajku prevođenja.</string>
+    <string name="translation_captcha_required">%1$s zahtijeva provjeru. Molimo ispunite CAPTCHA za nastavak.</string>
     <string name="translation_complete">Prevođenje dovršeno.</string>
+    <string name="translation_empty_response">%1$s je vratio prazan odgovor. To može biti privremeni problem - molimo pokušajte ponovo.</string>
     <string name="translation_engine">Mehanizam prevođenja</string>
+    <string name="translation_engine_not_available">%1$s nije dostupan u ovoj verziji aplikacije. Molimo koristite drugi prevoditeljski mehanizam.</string>
     <string name="translation_engines_refreshed">Mehanizmi prevođenja su osvježeni</string>
     <string name="translation_error">Pogreška u prijevodu</string>
+    <string name="translation_language_model_not_available">Jezični model za %1$s → %2$s nije preuzet. Idite na Postavke → Prijevod za preuzimanje.</string>
+    <string name="translation_language_pair_not_supported">%1$s ne podržava prevođenje s %2$s na %3$s. Odaberite druge jezike.</string>
+    <string name="translation_model_not_found">AI model za %1$s nije pronađen. Provjerite svoje postavke.</string>
+    <string name="translation_model_not_found_with_name">Model '%2$s' nije pronađen u %1$s. Odaberite drugi model u postavkama.</string>
+    <string name="translation_network_error">Neuspješno povezivanje s %1$s. Provjerite internetsku vezu i pokušajte ponovo.</string>
+    <string name="translation_parse_error">Nije moguće razumjeti odgovor od %1$s. Usluga možda ima problema.</string>
+    <string name="translation_plugin_error">Dodatak za prijevod '%1$s' naišao je na grešku. Provjerite postavke dodatka ili pokušajte s drugim mehanizmom.</string>
     <string name="translation_plugins_extend_ireader_with">Dodaci za prevođenje proširuju IReader dodatnim uslugama prevođenja</string>
     <string name="translation_progress">Napredak prijevoda</string>
+    <string name="translation_quota_exceeded">Prekoračena kvota prijevoda za %1$s. Provjerite svoj plan i naplatu, ili pokušajte ponovo kasnije.</string>
+    <string name="translation_rate_limit">%1$s prima previše zahtjeva. Pričekajte trenutak i pokušajte ponovo.</string>
     <string name="translation_rate_limit_delay">Odgoda ograničenja stope prijevoda</string>
+    <string name="translation_rate_limit_with_retry">Dosegnuto ograničenje zahtjeva za %1$s. Pričekajte %2$d sekundi i pokušajte ponovo.</string>
+    <string name="translation_server_error">Server %1$s ima problema. Molimo pokušajte ponovo kasnije.</string>
+    <string name="translation_server_error_with_code">Greška servera %1$s (kod: %2$d). Molimo pokušajte ponovo kasnije.</string>
     <string name="translation_settings">Postavke prevođenja</string>
+    <string name="translation_text_too_long">Tekst je predugačak za obradu od strane %1$s. Pokušajte prevesti manje dijelove.</string>
+    <string name="translation_text_too_long_with_limit">Tekst prekoračuje ograničenje od %2$d znakova za %1$s. Pokušajte prevesti manje dijelove.</string>
+    <string name="translation_timeout">%1$s je predugo odgovarao. Molimo pokušajte ponovo.</string>
+    <string name="translation_timeout_with_seconds">%1$s nije odgovorio u roku od %2$d sekundi. Molimo pokušajte ponovo.</string>
+    <string name="translation_unknown_error">%1$s je naišao na neočekivanu grešku. Molimo pokušajte ponovo.</string>
+    <string name="translation_unknown_error_with_details">Greška %1$s: %2$s</string>
     <string name="translation_warning">Upozorenje o prijevodu</string>
     <string name="translations">prijevod</string>
     <string name="trending_now">Trenutno popularno</string>
@@ -2584,9 +2624,11 @@
     <string name="trust_level_updated">Razina povjerenja ažurirana</string>
     <string name="try_a_different_search_term">Isprobajte drugi pojam za pretraživanje</string>
     <string name="try_again">Pokušajte ponovno</string>
+    <string name="try_again_later">Vaši podaci su sačuvani. Molimo pokušajte ponovo kasnije.</string>
     <string name="try_alternative_url">Pokušajte s alternativnim URL-om</string>
     <string name="try_another_search">Pokušajte s drugom pretragom</string>
     <string name="try_different_search">Pokušajte s drugim pojmom za pretraživanje</string>
+    <string name="try_different_source">Izvor možda nije dostupan. Pokušajte s drugim izvorom.</string>
     <string name="try_these_fixes">Isprobajte ova rješenja:</string>
     <string name="trying_in_few_second">Pokušajte ponovo za nekoliko sekundi.</string>
     <string name="trying_to_fetch">Pokušavam dohvatiti…</string>
@@ -2703,6 +2745,7 @@
     <string name="use_password">Koristi lozinku</string>
     <string name="use_pin">Koristi PIN</string>
     <string name="use_pinpassword_instead">Upotrijebite PIN/Lozinku umjesto toga</string>
+    <string name="use_saved_languages">Koristi spremljene jezike</string>
     <string name="use_separate_supabase_projects_for">Koristi zasebne Supabase projekte za bolju skalabilnost</string>
     <string name="use_static_indicators_instead_of_animated_ones">Koristi statičke indikatore umjesto animiranih</string>
     <string name="use_translated_text_for_text">Koristi prevedeni tekst za pretvaranje teksta u govor kada je dostupan</string>
@@ -2716,6 +2759,7 @@
     <string name="users">Korisnici</string>
     <string name="uuid_of_your_d1_database">UUID vaše D1 baze podataka</string>
     <string name="validate">Provjeri valjanost</string>
+    <string name="validation_error">Greška provjere valjanosti</string>
     <string name="verification_details">Detalji verifikacije</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Verifikacija je automatska i traje nekoliko sekundi</string>
     <string name="verification_is_cached_for_24">Verifikacija se sprema u predmemoriju na 24 sata. Značka ostaje aktivna 7 dana ako ponovna verifikacija ne uspije.</string>

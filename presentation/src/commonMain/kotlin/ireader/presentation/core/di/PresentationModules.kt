@@ -71,7 +71,8 @@ val PresentationModules = module {
             categoryRepository = get(),        // For getting categories in dialog
             setBookCategories = get(),         // For setting book categories
             syncUseCases = getOrNull(),
-            filterStateManager = getOrNull()
+            filterStateManager = getOrNull(),
+            translateBookMetadataUseCase = getOrNull()  // For auto-translating novel names
         )
     }
     // Changed from single to factory - these ViewModels are heavy and should be created on-demand

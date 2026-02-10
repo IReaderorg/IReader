@@ -176,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">Järjestä luvut automaattisesti tietokannassa</string>
     <string name="auto_sync">Automaattinen synkronointi</string>
     <string name="auto_sync_1">Automaattinen synkronointi</string>
+    <string name="auto_translate_descriptions">Käännä kuvaukset automaattisesti</string>
     <string name="auto_translate_next_chapter">Automaattinen käännös seuraavalle luvulle</string>
     <string name="auto_translate_next_chapter_summary">Käännä seuraava luku automaattisesti navigoidessa valitulla käännösmoottorilla</string>
+    <string name="auto_translate_novel_names">Käännä romaanien nimet automaattisesti</string>
     <string name="auto_update">Automaattinen päivitys</string>
     <string name="auto_update_1">Automaattinen päivitys</string>
     <string name="auto_update_2">Automaattinen päivitys</string>
@@ -196,6 +198,8 @@
     <string name="automatically_share_your_translations_with">Jaa käännöksesi automaattisesti yhteisön kanssa</string>
     <string name="automatically_stop_playback_after_set_time">Pysäytä toisto automaattisesti asetetun ajan kuluttua</string>
     <string name="automatically_sync_reading_progress">Synkronoi lukemisen edistyminen automaattisesti</string>
+    <string name="automatically_translate_novel_descriptions_when">Käännä romaanien kuvaukset automaattisesti lähteitä selatessa</string>
+    <string name="automatically_translate_novel_titles_when">Käännä romaanien nimet automaattisesti lähteitä selatessa</string>
     <string name="autoscroll">Automaattinen vieritys</string>
     <string name="available">Saatavilla</string>
     <string name="available_backups">Saatavilla olevat varmuuskopiot</string>
@@ -270,6 +274,7 @@
     <string name="book_name_selector">Kirjan nimen valitsin *</string>
     <string name="book_name_selector_1">Kirjan nimen valitsin</string>
     <string name="book_not_found">Kirjaa ei löytynyt</string>
+    <string name="book_not_in_target_source">Kirjaa ei löydy valitusta lähteestä</string>
     <string name="book_queued_for_download">Kirja lisätty latausjonoon</string>
     <string name="book_reviews">Kirja-arvostelut</string>
     <string name="book_title">Kirjan nimi</string>
@@ -372,6 +377,7 @@
     <string name="chapter_complete">LUKU VALMIS</string>
     <string name="chapter_completed">Luku suoritettu</string>
     <string name="chapter_content_extracted">Luvun sisältö poimittu käyttämällä %1$s</string>
+    <string name="chapter_fetch_failed">Luvun haku epäonnistui</string>
     <string name="chapter_filters">Luvun suodattimet</string>
     <string name="chapter_heading_size">Luvun otsikon koko</string>
     <string name="chapter_list">Lukulista</string>
@@ -402,6 +408,7 @@
     <string name="check_community_first">Tarkista ensin yhteisö</string>
     <string name="check_for_app_updates">Tarkista sovelluspäivitykset</string>
     <string name="check_for_updates">Tarkista päivitykset</string>
+    <string name="check_internet_connection">Tarkista internetyhteytesi ja yritä uudelleen.</string>
     <string name="check_permissions">Tarkista käyttöoikeudet</string>
     <string name="check_the_update">Tarkista päivitys</string>
     <string name="checking_for_updates">Etsitään päivityksiä…</string>
@@ -1073,6 +1080,7 @@
     <string name="gb_total_storage_7_500mb">3,5 Gt tallennustilaa yhteensä (7 × 500 Mt) - Määritä jokainen projekti erikseen tai käytä samaa URL:ia kaikille</string>
     <string name="gemini_api_information">Gemini API -tiedot</string>
     <string name="gemini_api_key">Gemini API -avain</string>
+    <string name="gemini_api_key_invalid">Geminin API-avain on virheellinen tai vanhentunut. Hanki uusi avain Google AI Studion kautta.</string>
     <string name="gemini_api_key_not_set">Gemini API -avain ei ole asetettu. Määritä se
         asetuksissa.
     </string>
@@ -1314,6 +1322,7 @@
     <string name="language_code">Kielikoodi</string>
     <string name="language_filter">Kielisuodatin</string>
     <string name="language_preferences">Kieliasetukset</string>
+    <string name="language_preferences_saved">Tämän kirjan kieliasetukset on tallennettu</string>
     <string name="language_translation">Kieli ja kääntäminen</string>
     <string name="languages">Kielet</string>
     <string name="large">Suuri</string>
@@ -1520,6 +1529,7 @@
     <string name="need_help">Tarvitsetko apua?</string>
     <string name="network">Verkko</string>
     <string name="network_cache">Verkkokäyttömuisti</string>
+    <string name="network_error">Verkkovirhe</string>
     <string name="network_settings">Verkkoasetukset</string>
     <string name="neutral">Neutraali</string>
     <string name="new_chapter_notifications">Uusien lukujen ilmoitukset</string>
@@ -1852,6 +1862,8 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="pref_relative_time_long">Pitkä (Lyhyt+, n päivää sitten)</string>
     <string name="pref_relative_time_short">Lyhyt (Tänään, Eilen)</string>
     <string name="prefer_saf_storage">Suosi SAF-tallennustilaa</string>
+    <string name="preferred_source_language">Ensisijainen lähdekieli</string>
+    <string name="preferred_target_language">Ensisijainen kohdekieli</string>
     <string name="preload_next_chapter">Esilataa seuraava luku</string>
     <string name="preload_only_on_wifi">Esilataa vain WiFin kautta</string>
     <string name="preload_only_on_wifi_summary">Rajoita automaattinen esilataus vain WiFi-yhteyksiin</string>
@@ -1996,6 +2008,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="reload">Lataa uudelleen</string>
     <string name="reload_plugin_themes">Lataa lisäosien teemat uudelleen</string>
     <string name="remaining">Jäljellä</string>
+    <string name="remember_my_languages">Muista kielivalintani</string>
     <string name="remind_me_again_in">Muistuta minua uudelleen:</string>
     <string name="reminder_interval">Muistutusväli</string>
     <string name="remove">Poista</string>
@@ -2113,6 +2126,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="save_custom_theme">Tallenna mukautettu teema</string>
     <string name="save_epub">Tallenna EPUB</string>
     <string name="save_js_sources_extensions_backups">Tallenna JS-lähteet, laajennukset, varmuuskopiot ja epubit SAF-kansioon, jos saatavilla. Palaa välimuistiin, jos ei saatavilla.</string>
+    <string name="save_language_preferences">Tallenna kieliasetukset</string>
     <string name="save_multi_endpoint_configuration">Tallenna monipisteinen määritys</string>
     <string name="save_patterns">Tallenna kuviot</string>
     <string name="saved_local_source_location">Tallensi lähteet välimuistiin</string>
@@ -2131,6 +2145,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="search_across_all_sources">Hae kaikista lähteistä</string>
     <string name="search_across_all_sources_1">Hae kaikista lähteistä...</string>
     <string name="search_bar">hakupalkki</string>
+    <string name="search_book_manually">Kokeile etsiä kirjaa lähteestä manuaalisesti tarkistaaksesi sen saatavuuden.</string>
     <string name="search_characters_books">Hae hahmoja, kirjoja...</string>
     <string name="search_features">Etsi ominaisuuksia...</string>
     <string name="search_fonts">Hae fontteja...</string>
@@ -2325,6 +2340,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="source_name">Lähteen nimi *</string>
     <string name="source_needs_update">Lähde vaatii päivityksen</string>
     <string name="source_not_available">Tämä lähde ei ole käytettävissä laitteessasi.</string>
+    <string name="source_not_found">Lähdettä ei löydy</string>
     <string name="source_placeholder">esim. 12345 tai NovelUpdates</string>
     <string name="source_rule">Lähde</string>
     <string name="source_term">Lähdetermi</string>
@@ -2579,14 +2595,38 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="translated">Käännetty</string>
     <string name="translating">Käännetään... Tämä voi kestää hetken.</string>
     <string name="translation">Käännös</string>
+    <string name="translation_api_key_invalid">%1$s:n API-avain on virheellinen tai vanhentunut. Tarkista avaimesi kohdasta Asetukset → Käännös.</string>
+    <string name="translation_api_key_not_set">%1$s vaatii API-avaimen. Mene Asetukset → Käännös ja määritä API-avaimesi.</string>
+    <string name="translation_auth_required">Sinun on kirjauduttava sisään %1$s:ään käyttääksesi tätä käännösominaisuutta.</string>
+    <string name="translation_captcha_required">%1$s vaatii vahvistuksen. Suorita CAPTCHA jatkaaksesi.</string>
     <string name="translation_complete">Käännös valmis.</string>
+    <string name="translation_empty_response">%1$s palautti tyhjän vastauksen. Tämä voi olla tilapäinen ongelma – yritä uudelleen.</string>
     <string name="translation_engine">Käännöskone</string>
+    <string name="translation_engine_not_available">%1$s ei ole saatavilla tässä sovelluksen versiossa. Käytä toista käännöskonetta.</string>
     <string name="translation_engines_refreshed">Käännöskoneet päivitetty</string>
     <string name="translation_error">Käännösvirhe</string>
+    <string name="translation_language_model_not_available">Kielimallia %1$s → %2$s ei ole ladattu. Lataa se kohdasta Asetukset → Käännös.</string>
+    <string name="translation_language_pair_not_supported">%1$s ei tue käännöstä kielestä %2$s kielelle %3$s. Valitse eri kielet.</string>
+    <string name="translation_model_not_found">AI-mallia %1$s:lle ei löytynyt. Tarkista asetuksesi.</string>
+    <string name="translation_model_not_found_with_name">Mallia '%2$s' ei löytynyt %1$s:stä. Valitse toinen malli asetuksista.</string>
+    <string name="translation_network_error">Yhteyttä ei saada %1$s:ään. Tarkista internetyhteytesi ja yritä uudelleen.</string>
+    <string name="translation_parse_error">%1$s:n vastausta ei voitu ymmärtää. Palvelussa saattaa olla ongelmia.</string>
+    <string name="translation_plugin_error">Käännösliitännäisessä '%1$s' tapahtui virhe. Tarkista liitännäisen asetukset tai kokeile toista konetta.</string>
     <string name="translation_plugins_extend_ireader_with">Käännöslisäosat laajentavat IReaderia lisäkäännöspalveluilla</string>
     <string name="translation_progress">Käännöksen edistyminen</string>
+    <string name="translation_quota_exceeded">%1$s:n käännöskiintiö on ylittynyt. Tarkista tilauksesi ja laskutuksesi, tai yritä uudelleen myöhemmin.</string>
+    <string name="translation_rate_limit">%1$s vastaanottaa liikaa pyyntöjä. Odota hetki ja yritä uudelleen.</string>
     <string name="translation_rate_limit_delay">Käännösten nopeusrajoituksen viive</string>
+    <string name="translation_rate_limit_with_retry">%1$s:n käyttöraja on saavutettu. Odota %2$d sekuntia ja yritä uudelleen.</string>
+    <string name="translation_server_error">%1$s-palvelimella on ongelmia. Yritä uudelleen myöhemmin.</string>
+    <string name="translation_server_error_with_code">%1$s-palvelinvirhe (koodi: %2$d). Yritä uudelleen myöhemmin.</string>
     <string name="translation_settings">Käännösasetukset</string>
+    <string name="translation_text_too_long">Teksti on liian pitkä %1$s:lle käsiteltäväksi. Kokeile kääntää pienempiä osia.</string>
+    <string name="translation_text_too_long_with_limit">Teksti ylittää %1$s:n %2$d merkin rajan. Kokeile kääntää pienempiä osia.</string>
+    <string name="translation_timeout">%1$s kesti liian kauan vastata. Yritä uudelleen.</string>
+    <string name="translation_timeout_with_seconds">%1$s ei vastannut %2$d sekunnissa. Yritä uudelleen.</string>
+    <string name="translation_unknown_error">%1$s kohtasi odottamattoman virheen. Yritä uudelleen.</string>
+    <string name="translation_unknown_error_with_details">%1$s virhe: %2$s</string>
     <string name="translation_warning">Käännösvaroitus</string>
     <string name="translations">käännös</string>
     <string name="trending_now">Juuri nyt suosittua</string>
@@ -2596,9 +2636,11 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="trust_level_updated">Luottamustaso päivitetty</string>
     <string name="try_a_different_search_term">Kokeile toista hakusanaa</string>
     <string name="try_again">Yritä uudelleen</string>
+    <string name="try_again_later">Tietosi on tallennettu. Yritä uudelleen myöhemmin.</string>
     <string name="try_alternative_url">Kokeile vaihtoehtoista URL:ia</string>
     <string name="try_another_search">Kokeile toista hakua</string>
     <string name="try_different_search">Kokeile toista hakusanaa</string>
+    <string name="try_different_source">Lähde saattaa olla pois käytöstä. Kokeile toista lähdettä.</string>
     <string name="try_these_fixes">Kokeile näitä korjauksia:</string>
     <string name="trying_in_few_second">Yritä uudelleen muutaman sekunnin kuluttua.</string>
     <string name="trying_to_fetch">Yritetään hakea…</string>
@@ -2715,6 +2757,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="use_password">Käytä salasanaa</string>
     <string name="use_pin">Käytä PIN-koodia</string>
     <string name="use_pinpassword_instead">Käytä PIN-koodia/salasanaa sen sijaan</string>
+    <string name="use_saved_languages">Käytä tallennettuja kieliä</string>
     <string name="use_separate_supabase_projects_for">Käytä erillisiä Supabase-projekteja paremman skaalautuvuuden takaamiseksi</string>
     <string name="use_static_indicators_instead_of_animated_ones">Käytä staattisia indikaattoreita animoitujen sijaan</string>
     <string name="use_translated_text_for_text">Käytä käännettyä tekstiä tekstistä puheeksi -toiminnossa, kun se on saatavilla</string>
@@ -2728,6 +2771,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="users">Käyttäjät</string>
     <string name="uuid_of_your_d1_database">D1-tietokantasi UUID</string>
     <string name="validate">Vahvista</string>
+    <string name="validation_error">Validointivirhe</string>
     <string name="verification_details">Varmennustiedot</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Varmennus on automaattinen ja kestää muutaman sekunnin</string>
     <string name="verification_is_cached_for_24">Varmennus on tallennettu välimuistiin 24 tunniksi. Merkki pysyy aktiivisena 7 päivää, jos uudelleenvarmennus epäonnistuu.</string>

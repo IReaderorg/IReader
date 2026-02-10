@@ -14,6 +14,8 @@ class TranslationPreferences(
         const val TRANSLATION_RATE_LIMIT_DELAY_MS = "translation_rate_limit_delay_ms"
         const val TRANSLATION_WARNING_THRESHOLD = "translation_warning_threshold"
         const val AUTO_DOWNLOAD_BEFORE_TRANSLATE = "auto_download_before_translate"
+        const val AUTO_TRANSLATE_NOVEL_NAMES = "auto_translate_novel_names"
+        const val AUTO_TRANSLATE_DESCRIPTIONS = "auto_translate_descriptions"
     }
 
     /**
@@ -49,5 +51,23 @@ class TranslationPreferences(
      */
     fun autoDownloadBeforeTranslate(): Preference<Boolean> {
         return preferenceStore.getBoolean(AUTO_DOWNLOAD_BEFORE_TRANSLATE, true)
+    }
+
+    /**
+     * Automatically translate novel names when browsing/fetching from sources.
+     * When enabled, book titles will be translated to the user's preferred language.
+     * Default: false
+     */
+    fun autoTranslateNovelNames(): Preference<Boolean> {
+        return preferenceStore.getBoolean(AUTO_TRANSLATE_NOVEL_NAMES, false)
+    }
+
+    /**
+     * Automatically translate novel descriptions when browsing/fetching from sources.
+     * When enabled, book descriptions will be translated to the user's preferred language.
+     * Default: false
+     */
+    fun autoTranslateDescriptions(): Preference<Boolean> {
+        return preferenceStore.getBoolean(AUTO_TRANSLATE_DESCRIPTIONS, false)
     }
 }

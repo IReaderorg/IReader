@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.History
@@ -285,6 +286,26 @@ fun GeneralSettingScreen(
                             valueRange = 1000f..10000f,
                             steps = 17,
                             trailingFormatter = { value -> "${(value / 1000).toInt()}s" }
+                        )
+                    }
+                },
+                Components.Dynamic {
+                    vm.autoTranslateNovelNames?.let { pref ->
+                        ireader.presentation.ui.component.components.SwitchPreference(
+                            preference = pref,
+                            title = localizeHelper.localize(Res.string.auto_translate_novel_names),
+                            subtitle = localizeHelper.localize(Res.string.automatically_translate_novel_titles_when),
+                            icon = Icons.Filled.Translate
+                        )
+                    }
+                },
+                Components.Dynamic {
+                    vm.autoTranslateDescriptions?.let { pref ->
+                        ireader.presentation.ui.component.components.SwitchPreference(
+                            preference = pref,
+                            title = localizeHelper.localize(Res.string.auto_translate_descriptions),
+                            subtitle = localizeHelper.localize(Res.string.automatically_translate_novel_descriptions_when),
+                            icon = Icons.Filled.Description
                         )
                     }
                 },
@@ -616,6 +637,8 @@ class GeneralSettingScreenViewModel(
     // Translation preferences
     val bypassTranslationWarning = translationPreferences?.bypassTranslationWarning()?.asStateIn(scope)
     val translationRateLimitDelay = translationPreferences?.translationRateLimitDelayMs()?.asStateIn(scope)
+    val autoTranslateNovelNames = translationPreferences?.autoTranslateNovelNames()?.asStateIn(scope)
+    val autoTranslateDescriptions = translationPreferences?.autoTranslateDescriptions()?.asStateIn(scope)
     
     // New General Settings Enhancements
     // Library preferences

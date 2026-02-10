@@ -15,12 +15,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import ireader.domain.plugins.PluginPreferences
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import org.koin.compose.koinInject
 
 /**
  * Compact engine-specific configuration sections
@@ -266,15 +268,21 @@ private fun HuggingFacePluginConfig(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val pluginPreferences: PluginPreferences = koinInject()
     val plugin = pluginEngine.getPlugin()
+    val pluginId = pluginEngine.pluginId
+    
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    var saveSuccess by remember { mutableStateOf(false) }
     
-    // Load saved values from plugin
-    LaunchedEffect(pluginEngine) {
-        val savedApiKey = plugin.getConfigValue("api_key") as? String
+    // Load saved API key from PluginPreferences (persistent storage)
+    LaunchedEffect(pluginId) {
+        val savedApiKey = pluginPreferences.getPluginApiKey(pluginId).get()
         if (!savedApiKey.isNullOrBlank()) {
             apiKey = savedApiKey
+            // Also configure the plugin with the saved key
+            plugin.configureApiKey(savedApiKey)
         }
     }
     
@@ -306,6 +314,14 @@ private fun HuggingFacePluginConfig(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (saveSuccess) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Saved",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
             
             // API Key Input
@@ -313,24 +329,60 @@ private fun HuggingFacePluginConfig(
                 value = apiKey,
                 onValueChange = { newKey ->
                     apiKey = newKey
-                    plugin.onConfigChanged("api_key", newKey)
-                    plugin.configureApiKey(newKey)
                 },
-                label = { Text("API Key (optional)", maxLines = 1) },
+                label = { Text("API Key", maxLines = 1) },
                 placeholder = { Text("hf_...", maxLines = 1) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconButton(onClick = { showApiKey = !showApiKey }) {
-                        Icon(
-                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (showApiKey) "Hide" else "Show"
-                        )
+                    Row {
+                        if (apiKey.isNotBlank()) {
+                            IconButton(onClick = {
+                                // Save to persistent storage
+                                pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                                // Configure the plugin
+                                plugin.configureApiKey(apiKey)
+                                plugin.onConfigChanged("api_key", apiKey)
+                                saveSuccess = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Save,
+                                    contentDescription = "Save"
+                                )
+                            }
+                        }
+                        IconButton(onClick = { showApiKey = !showApiKey }) {
+                            Icon(
+                                imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (showApiKey) "Hide" else "Show"
+                            )
+                        }
                     }
                 },
                 textStyle = MaterialTheme.typography.bodyMedium
             )
+            
+            // Save button for clarity
+            if (apiKey.isNotBlank()) {
+                Button(
+                    onClick = {
+                        pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                        plugin.configureApiKey(apiKey)
+                        plugin.onConfigChanged("api_key", apiKey)
+                        saveSuccess = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Save API Key")
+                }
+            }
 
             // Info
             Text(
@@ -351,15 +403,20 @@ private fun OpenAIPluginConfig(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val pluginPreferences: PluginPreferences = koinInject()
     val plugin = pluginEngine.getPlugin()
+    val pluginId = pluginEngine.pluginId
+    
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    var saveSuccess by remember { mutableStateOf(false) }
     
-    // Load saved values from plugin
-    LaunchedEffect(pluginEngine) {
-        val savedApiKey = plugin.getConfigValue("api_key") as? String
+    // Load saved API key from PluginPreferences (persistent storage)
+    LaunchedEffect(pluginId) {
+        val savedApiKey = pluginPreferences.getPluginApiKey(pluginId).get()
         if (!savedApiKey.isNullOrBlank()) {
             apiKey = savedApiKey
+            plugin.configureApiKey(savedApiKey)
         }
     }
     
@@ -391,6 +448,14 @@ private fun OpenAIPluginConfig(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (saveSuccess) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Saved",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
             
             // API Key Input
@@ -398,8 +463,6 @@ private fun OpenAIPluginConfig(
                 value = apiKey,
                 onValueChange = { newKey ->
                     apiKey = newKey
-                    plugin.onConfigChanged("api_key", newKey)
-                    plugin.configureApiKey(newKey)
                 },
                 label = { Text("API Key", maxLines = 1) },
                 placeholder = { Text("sk-...", maxLines = 1) },
@@ -407,15 +470,51 @@ private fun OpenAIPluginConfig(
                 singleLine = true,
                 visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconButton(onClick = { showApiKey = !showApiKey }) {
-                        Icon(
-                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (showApiKey) "Hide" else "Show"
-                        )
+                    Row {
+                        if (apiKey.isNotBlank()) {
+                            IconButton(onClick = {
+                                pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                                plugin.configureApiKey(apiKey)
+                                plugin.onConfigChanged("api_key", apiKey)
+                                saveSuccess = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Save,
+                                    contentDescription = "Save"
+                                )
+                            }
+                        }
+                        IconButton(onClick = { showApiKey = !showApiKey }) {
+                            Icon(
+                                imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (showApiKey) "Hide" else "Show"
+                            )
+                        }
                     }
                 },
                 textStyle = MaterialTheme.typography.bodyMedium
             )
+            
+            // Save button
+            if (apiKey.isNotBlank()) {
+                Button(
+                    onClick = {
+                        pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                        plugin.configureApiKey(apiKey)
+                        plugin.onConfigChanged("api_key", apiKey)
+                        saveSuccess = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Save API Key")
+                }
+            }
 
             // Info
             Text(
@@ -436,15 +535,20 @@ private fun DeepSeekPluginConfig(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val pluginPreferences: PluginPreferences = koinInject()
     val plugin = pluginEngine.getPlugin()
+    val pluginId = pluginEngine.pluginId
+    
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    var saveSuccess by remember { mutableStateOf(false) }
     
-    // Load saved values from plugin
-    LaunchedEffect(pluginEngine) {
-        val savedApiKey = plugin.getConfigValue("api_key") as? String
+    // Load saved API key from PluginPreferences (persistent storage)
+    LaunchedEffect(pluginId) {
+        val savedApiKey = pluginPreferences.getPluginApiKey(pluginId).get()
         if (!savedApiKey.isNullOrBlank()) {
             apiKey = savedApiKey
+            plugin.configureApiKey(savedApiKey)
         }
     }
     
@@ -476,6 +580,14 @@ private fun DeepSeekPluginConfig(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (saveSuccess) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Saved",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
             
             // API Key Input
@@ -483,8 +595,6 @@ private fun DeepSeekPluginConfig(
                 value = apiKey,
                 onValueChange = { newKey ->
                     apiKey = newKey
-                    plugin.onConfigChanged("api_key", newKey)
-                    plugin.configureApiKey(newKey)
                 },
                 label = { Text("API Key", maxLines = 1) },
                 placeholder = { Text("sk-...", maxLines = 1) },
@@ -492,15 +602,51 @@ private fun DeepSeekPluginConfig(
                 singleLine = true,
                 visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconButton(onClick = { showApiKey = !showApiKey }) {
-                        Icon(
-                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (showApiKey) "Hide" else "Show"
-                        )
+                    Row {
+                        if (apiKey.isNotBlank()) {
+                            IconButton(onClick = {
+                                pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                                plugin.configureApiKey(apiKey)
+                                plugin.onConfigChanged("api_key", apiKey)
+                                saveSuccess = true
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Save,
+                                    contentDescription = "Save"
+                                )
+                            }
+                        }
+                        IconButton(onClick = { showApiKey = !showApiKey }) {
+                            Icon(
+                                imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (showApiKey) "Hide" else "Show"
+                            )
+                        }
                     }
                 },
                 textStyle = MaterialTheme.typography.bodyMedium
             )
+            
+            // Save button
+            if (apiKey.isNotBlank()) {
+                Button(
+                    onClick = {
+                        pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                        plugin.configureApiKey(apiKey)
+                        plugin.onConfigChanged("api_key", apiKey)
+                        saveSuccess = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Save,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Save API Key")
+                }
+            }
 
             // Info
             Text(
@@ -521,17 +667,22 @@ private fun GenericPluginConfig(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val pluginPreferences: PluginPreferences = koinInject()
     val plugin = pluginEngine.getPlugin()
+    val pluginId = pluginEngine.pluginId
     val requiresApiKey = pluginEngine.requiresApiKey
+    
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    var saveSuccess by remember { mutableStateOf(false) }
     
-    // Load saved values from plugin
-    LaunchedEffect(pluginEngine) {
+    // Load saved API key from PluginPreferences (persistent storage)
+    LaunchedEffect(pluginId) {
         if (requiresApiKey) {
-            val savedApiKey = plugin.getConfigValue("api_key") as? String
+            val savedApiKey = pluginPreferences.getPluginApiKey(pluginId).get()
             if (!savedApiKey.isNullOrBlank()) {
                 apiKey = savedApiKey
+                plugin.configureApiKey(savedApiKey)
             }
         }
     }
@@ -564,6 +715,14 @@ private fun GenericPluginConfig(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (saveSuccess) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Saved",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
             
             // Description from manifest
@@ -579,23 +738,57 @@ private fun GenericPluginConfig(
                     value = apiKey,
                     onValueChange = { newKey ->
                         apiKey = newKey
-                        plugin.onConfigChanged("api_key", newKey)
-                        plugin.configureApiKey(newKey)
                     },
                     label = { Text("API Key", maxLines = 1) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        IconButton(onClick = { showApiKey = !showApiKey }) {
-                            Icon(
-                                imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (showApiKey) "Hide" else "Show"
-                            )
+                        Row {
+                            if (apiKey.isNotBlank()) {
+                                IconButton(onClick = {
+                                    pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                                    plugin.configureApiKey(apiKey)
+                                    plugin.onConfigChanged("api_key", apiKey)
+                                    saveSuccess = true
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Save,
+                                        contentDescription = "Save"
+                                    )
+                                }
+                            }
+                            IconButton(onClick = { showApiKey = !showApiKey }) {
+                                Icon(
+                                    imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (showApiKey) "Hide" else "Show"
+                                )
+                            }
                         }
                     },
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
+                
+                // Save button
+                if (apiKey.isNotBlank()) {
+                    Button(
+                        onClick = {
+                            pluginPreferences.setPluginApiKey(pluginId, apiKey)
+                            plugin.configureApiKey(apiKey)
+                            plugin.onConfigChanged("api_key", apiKey)
+                            saveSuccess = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Save,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Save API Key")
+                    }
+                }
             } else {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

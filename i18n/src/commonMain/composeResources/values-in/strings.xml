@@ -176,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">Urutkan Otomatis Bab di DB</string>
     <string name="auto_sync">Sinkronisasi Otomatis</string>
     <string name="auto_sync_1">Sinkronisasi Otomatis</string>
+    <string name="auto_translate_descriptions">Terjemahkan Otomatis Deskripsi</string>
     <string name="auto_translate_next_chapter">Terjemahkan otomatis bab berikutnya</string>
     <string name="auto_translate_next_chapter_summary">Otomatis menerjemahkan bab berikutnya saat bernavigasi menggunakan mesin terjemahan yang dipilih</string>
+    <string name="auto_translate_novel_names">Terjemahkan Otomatis Nama Novel</string>
     <string name="auto_update">Pembaruan otomatis</string>
     <string name="auto_update_1">Pembaruan Otomatis</string>
     <string name="auto_update_2">Pembaruan Otomatis</string>
@@ -196,6 +198,8 @@
     <string name="automatically_share_your_translations_with">Bagikan terjemahan Anda secara otomatis dengan komunitas</string>
     <string name="automatically_stop_playback_after_set_time">Secara otomatis hentikan pemutaran setelah waktu yang ditentukan</string>
     <string name="automatically_sync_reading_progress">Secara otomatis sinkronkan kemajuan membaca</string>
+    <string name="automatically_translate_novel_descriptions_when">Terjemahkan deskripsi novel secara otomatis saat menjelajahi sumber</string>
+    <string name="automatically_translate_novel_titles_when">Terjemahkan judul novel secara otomatis saat menjelajahi sumber</string>
     <string name="autoscroll">Gulir Otomatis</string>
     <string name="available">Tersedia</string>
     <string name="available_backups">Cadangan yang Tersedia</string>
@@ -270,6 +274,7 @@
     <string name="book_name_selector">Pemilih Nama Buku *</string>
     <string name="book_name_selector_1">Pemilih Nama Buku</string>
     <string name="book_not_found">Buku tidak ditemukan</string>
+    <string name="book_not_in_target_source">Buku Tidak Ditemukan di Sumber Target</string>
     <string name="book_queued_for_download">Buku antri untuk diunduh</string>
     <string name="book_reviews">Ulasan Buku</string>
     <string name="book_title">Judul Buku</string>
@@ -372,6 +377,7 @@
     <string name="chapter_complete">BAB SELESAI</string>
     <string name="chapter_completed">Bab Selesai</string>
     <string name="chapter_content_extracted">Konten bab diekstraksi menggunakan %1$s</string>
+    <string name="chapter_fetch_failed">Gagal Mengambil Bab</string>
     <string name="chapter_filters">Filter Bab</string>
     <string name="chapter_heading_size">Ukuran Judul Bab</string>
     <string name="chapter_list">Daftar Bab</string>
@@ -402,6 +408,7 @@
     <string name="check_community_first">Periksa Komunitas Dulu</string>
     <string name="check_for_app_updates">Periksa Pembaruan Aplikasi</string>
     <string name="check_for_updates">Periksa Pembaruan</string>
+    <string name="check_internet_connection">Mohon periksa koneksi internet Anda dan coba lagi.</string>
     <string name="check_permissions">Periksa Izin</string>
     <string name="check_the_update">Periksa Pembaruan</string>
     <string name="checking_for_updates">Memeriksa pembaruan…</string>
@@ -1072,6 +1079,7 @@
     <string name="gb_total_storage_7_500mb">Penyimpanan total 3,5GB (7 × 500MB) - Konfigurasikan setiap proyek atau gunakan URL yang sama untuk semua</string>
     <string name="gemini_api_information">Informasi API Gemini</string>
     <string name="gemini_api_key">Kunci API Gemini</string>
+    <string name="gemini_api_key_invalid">Kunci API Gemini tidak valid atau telah kedaluwarsa. Mohon dapatkan kunci baru dari Google AI Studio.</string>
     <string name="gemini_api_key_not_set">Kunci API Gemini belum diatur. Harap konfigurasi di
         pengaturan.
     </string>
@@ -1312,6 +1320,7 @@
     <string name="language_code">Kode Bahasa</string>
     <string name="language_filter">Filter Bahasa</string>
     <string name="language_preferences">Preferensi Bahasa</string>
+    <string name="language_preferences_saved">Preferensi bahasa tersimpan untuk buku ini</string>
     <string name="language_translation">Bahasa &amp; Terjemahan</string>
     <string name="languages">Bahasa</string>
     <string name="large">Besar</string>
@@ -1518,6 +1527,7 @@
     <string name="need_help">Butuh Bantuan?</string>
     <string name="network">Jaringan</string>
     <string name="network_cache">Cache Jaringan</string>
+    <string name="network_error">Kesalahan Jaringan</string>
     <string name="network_settings">Pengaturan Jaringan</string>
     <string name="neutral">Netral</string>
     <string name="new_chapter_notifications">Notifikasi Bab Baru</string>
@@ -1848,6 +1858,8 @@
     <string name="pref_relative_time_long">Panjang (Pendek+, n hari yang lalu)</string>
     <string name="pref_relative_time_short">Pendek (Hari Ini, Kemarin)</string>
     <string name="prefer_saf_storage">Pilih Penyimpanan SAF</string>
+    <string name="preferred_source_language">Bahasa Sumber Pilihan</string>
+    <string name="preferred_target_language">Bahasa Target Pilihan</string>
     <string name="preload_next_chapter">Muat Bab Berikutnya</string>
     <string name="preload_only_on_wifi">Pra-muat hanya pada WiFi</string>
     <string name="preload_only_on_wifi_summary">Batasi pra-pemuatan otomatis hanya untuk koneksi WiFi</string>
@@ -1992,6 +2004,7 @@
     <string name="reload">Muat Ulang</string>
     <string name="reload_plugin_themes">Muat ulang tema plugin</string>
     <string name="remaining">Tersisa</string>
+    <string name="remember_my_languages">Ingat pilihan bahasa saya</string>
     <string name="remind_me_again_in">Ingatkan saya lagi dalam:</string>
     <string name="reminder_interval">Interval Pengingat</string>
     <string name="remove">Hapus</string>
@@ -2109,6 +2122,7 @@
     <string name="save_custom_theme">Simpan tema kustom</string>
     <string name="save_epub">Simpan EPUB</string>
     <string name="save_js_sources_extensions_backups">Simpan sumber JS, ekstensi, cadangan, dan epub ke folder SAF jika tersedia. Kembali ke cache jika tidak tersedia.</string>
+    <string name="save_language_preferences">Simpan Preferensi Bahasa</string>
     <string name="save_multi_endpoint_configuration">Simpan Konfigurasi Multi-Endpoint</string>
     <string name="save_patterns">Simpan Pola</string>
     <string name="saved_local_source_location">Sumber Tersimpan ke Cache</string>
@@ -2127,6 +2141,7 @@
     <string name="search_across_all_sources">Cari di semua sumber</string>
     <string name="search_across_all_sources_1">Cari di semua sumber...</string>
     <string name="search_bar">bilah pencarian</string>
+    <string name="search_book_manually">Coba cari buku secara manual di sumber untuk memverifikasi ketersediaan.</string>
     <string name="search_characters_books">Cari karakter, buku...</string>
     <string name="search_features">Cari fitur...</string>
     <string name="search_fonts">Cari font...</string>
@@ -2321,6 +2336,7 @@
     <string name="source_name">Nama Sumber *</string>
     <string name="source_needs_update">Sumber Membutuhkan Pembaruan</string>
     <string name="source_not_available">Sumber ini tidak tersedia di perangkat Anda.</string>
+    <string name="source_not_found">Sumber Tidak Ditemukan</string>
     <string name="source_placeholder">mis., 12345 atau NovelUpdates</string>
     <string name="source_rule">Sumber</string>
     <string name="source_term">Istilah Sumber</string>
@@ -2576,14 +2592,38 @@
     <string name="translated">Diterjemahkan</string>
     <string name="translating">Menerjemahkan... Ini mungkin memerlukan waktu sejenak.</string>
     <string name="translation">Terjemahan</string>
+    <string name="translation_api_key_invalid">Kunci API untuk %1$s tidak valid atau telah kedaluwarsa. Mohon periksa kunci Anda di Pengaturan → Terjemahan.</string>
+    <string name="translation_api_key_not_set">%1$s membutuhkan kunci API. Mohon buka Pengaturan → Terjemahan dan konfigurasikan kunci API Anda.</string>
+    <string name="translation_auth_required">Anda perlu masuk ke %1$s untuk menggunakan fitur terjemahan ini.</string>
+    <string name="translation_captcha_required">%1$s membutuhkan verifikasi. Mohon lengkapi CAPTCHA untuk melanjutkan.</string>
     <string name="translation_complete">Terjemahan selesai.</string>
+    <string name="translation_empty_response">%1$s mengembalikan respons kosong. Ini mungkin masalah sementara - mohon coba lagi.</string>
     <string name="translation_engine">Mesin Terjemahan</string>
+    <string name="translation_engine_not_available">%1$s tidak tersedia di versi aplikasi ini. Mohon gunakan mesin terjemahan yang berbeda.</string>
     <string name="translation_engines_refreshed">Mesin terjemahan disegarkan</string>
     <string name="translation_error">Kesalahan Terjemahan</string>
+    <string name="translation_language_model_not_available">Model bahasa untuk %1$s → %2$s belum diunduh. Mohon buka Pengaturan → Terjemahan untuk mengunduhnya.</string>
+    <string name="translation_language_pair_not_supported">%1$s tidak mendukung terjemahan dari %2$s ke %3$s. Mohon pilih bahasa yang berbeda.</string>
+    <string name="translation_model_not_found">Model AI untuk %1$s tidak dapat ditemukan. Mohon periksa pengaturan Anda.</string>
+    <string name="translation_model_not_found_with_name">Model '%2$s' tidak ditemukan di %1$s. Mohon pilih model yang berbeda di pengaturan.</string>
+    <string name="translation_network_error">Tidak dapat terhubung ke %1$s. Mohon periksa koneksi internet Anda dan coba lagi.</string>
+    <string name="translation_parse_error">Tidak dapat memahami respons dari %1$s. Layanan mungkin sedang mengalami masalah.</string>
+    <string name="translation_plugin_error">Plugin terjemahan '%1$s' mengalami kesalahan. Mohon periksa pengaturan plugin atau coba mesin yang berbeda.</string>
     <string name="translation_plugins_extend_ireader_with">Plugin terjemahan memperluas IReader dengan layanan terjemahan tambahan</string>
     <string name="translation_progress">Kemajuan Terjemahan</string>
+    <string name="translation_quota_exceeded">Kuota terjemahan %1$s telah terlampaui. Mohon periksa paket dan tagihan Anda, atau coba lagi nanti.</string>
+    <string name="translation_rate_limit">%1$s menerima terlalu banyak permintaan. Mohon tunggu sebentar dan coba lagi.</string>
     <string name="translation_rate_limit_delay">Penundaan Batas Laju Terjemahan</string>
+    <string name="translation_rate_limit_with_retry">Batas laju %1$s tercapai. Mohon tunggu %2$d detik dan coba lagi.</string>
+    <string name="translation_server_error">Server %1$s sedang mengalami masalah. Mohon coba lagi nanti.</string>
+    <string name="translation_server_error_with_code">Kesalahan server %1$s (kode: %2$d). Mohon coba lagi nanti.</string>
     <string name="translation_settings">Pengaturan Terjemahan</string>
+    <string name="translation_text_too_long">Teks terlalu panjang untuk diproses oleh %1$s. Coba terjemahkan bagian yang lebih kecil.</string>
+    <string name="translation_text_too_long_with_limit">Teks melebihi batas %1$s yaitu %2$d karakter. Coba terjemahkan bagian yang lebih kecil.</string>
+    <string name="translation_timeout">%1$s terlalu lama merespons. Mohon coba lagi.</string>
+    <string name="translation_timeout_with_seconds">%1$s tidak merespons dalam %2$d detik. Mohon coba lagi.</string>
+    <string name="translation_unknown_error">%1$s mengalami kesalahan tak terduga. Mohon coba lagi.</string>
+    <string name="translation_unknown_error_with_details">Kesalahan %1$s: %2$s</string>
     <string name="translation_warning">Peringatan Terjemahan</string>
     <string name="translations">terjemahan</string>
     <string name="trending_now">Sedang Tren</string>
@@ -2593,9 +2633,11 @@
     <string name="trust_level_updated">Tingkat kepercayaan diperbarui</string>
     <string name="try_a_different_search_term">Coba istilah pencarian yang berbeda</string>
     <string name="try_again">Coba Lagi</string>
+    <string name="try_again_later">Data Anda tersimpan. Mohon coba lagi nanti.</string>
     <string name="try_alternative_url">Coba URL Alternatif</string>
     <string name="try_another_search">Coba pencarian lain</string>
     <string name="try_different_search">Coba istilah pencarian yang berbeda</string>
+    <string name="try_different_source">Sumber mungkin tidak tersedia. Coba sumber lain.</string>
     <string name="try_these_fixes">Coba perbaikan ini:</string>
     <string name="trying_in_few_second">Coba lagi dalam beberapa detik.</string>
     <string name="trying_to_fetch">Mencoba mengambil…</string>
@@ -2712,6 +2754,7 @@
     <string name="use_password">Gunakan Kata Sandi</string>
     <string name="use_pin">Gunakan PIN</string>
     <string name="use_pinpassword_instead">Gunakan PIN/Kata Sandi Sebagai Gantinya</string>
+    <string name="use_saved_languages">Gunakan Bahasa Tersimpan</string>
     <string name="use_separate_supabase_projects_for">Gunakan proyek Supabase terpisah untuk skalabilitas yang lebih baik</string>
     <string name="use_static_indicators_instead_of_animated_ones">Gunakan indikator statis sebagai pengganti yang animasi</string>
     <string name="use_translated_text_for_text">Gunakan teks terjemahan untuk text-to-speech jika tersedia</string>
@@ -2725,6 +2768,7 @@
     <string name="users">Pengguna</string>
     <string name="uuid_of_your_d1_database">UUID basis data D1 Anda</string>
     <string name="validate">Validasi</string>
+    <string name="validation_error">Kesalahan Validasi</string>
     <string name="verification_details">Detail Verifikasi</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Verifikasi otomatis dan membutuhkan beberapa detik</string>
     <string name="verification_is_cached_for_24">Verifikasi di-cache selama 24 jam. Lencana tetap aktif selama 7 hari jika verifikasi ulang gagal.</string>

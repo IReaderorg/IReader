@@ -15,6 +15,7 @@ import ireader.domain.models.entities.toBook
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.category.SetBookCategories
 import ireader.domain.usecases.explore.ExploreUseCases
+import ireader.domain.usecases.translate.TranslateBookMetadataUseCase
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.i18n.UiText
@@ -59,7 +60,8 @@ class ExploreViewModel(
     private val categoryRepository: CategoryRepository,
     private val setBookCategories: SetBookCategories,
     private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
-    private val filterStateManager: ireader.domain.filters.FilterStateManager? = null
+    private val filterStateManager: ireader.domain.filters.FilterStateManager? = null,
+    private val translateBookMetadataUseCase: TranslateBookMetadataUseCase? = null
 ) : BaseViewModel() {
     
     // Expose insertUseCases for backward compatibility with UI code
@@ -337,9 +339,32 @@ class ExploreViewModel(
     private suspend fun processSuccessResult(pageInfo: MangasPageInfo) {
         val sourceId = source?.id ?: return
         
+        // Auto-translate book metadata if enabled
+        val translatedPageInfo = if (translateBookMetadataUseCase != null) {
+            val translateNames = translateBookMetadataUseCase.isAutoTranslateNamesEnabled()
+            val translateDescriptions = translateBookMetadataUseCase.isAutoTranslateDescriptionsEnabled()
+            
+            if (translateNames || translateDescriptions) {
+                try {
+                    translateBookMetadataUseCase.translateMangasPage(
+                        page = pageInfo,
+                        translateTitles = translateNames,
+                        translateDescriptions = translateDescriptions
+                    )
+                } catch (e: Exception) {
+                    Log.error { "[ExploreViewModel] Auto-translation failed: ${e.message}" }
+                    pageInfo // Return original on error
+                }
+            } else {
+                pageInfo
+            }
+        } else {
+            pageInfo
+        }
+        
         // Convert and deduplicate books efficiently (in-memory only)
         val newBooks = withContext(Dispatchers.Default) {
-            pageInfo.mangas
+            translatedPageInfo.mangas
                 .filter { manga -> 
                     // Deduplicate by URL (like Mihon's seenManga) - in-memory only
                     val key = "${manga.key}_$sourceId"
@@ -356,7 +381,7 @@ class ExploreViewModel(
             currentState.copy(
                 books = currentState.books + newBooks,
                 page = currentState.page + 1,
-                endReached = !pageInfo.hasNextPage,
+                endReached = !translatedPageInfo.hasNextPage,
                 error = null
             )
         }

@@ -175,8 +175,10 @@
     <string name="auto_sort_chapters_in_db">Awtomatikong Ayusin ang mga Kabanata sa DB</string>
     <string name="auto_sync">Auto Sync</string>
     <string name="auto_sync_1">Auto-Sync</string>
+    <string name="auto_translate_descriptions">Awtomatikong isalin ang mga deskripsyon</string>
     <string name="auto_translate_next_chapter">Awtomatikong isalin ang susunod na kabanata</string>
     <string name="auto_translate_next_chapter_summary">Awtomatikong isalin ang susunod na kabanata kapag nag-navigate gamit ang napiling translation engine</string>
+    <string name="auto_translate_novel_names">Awtomatikong isalin ang mga pangalan ng nobela</string>
     <string name="auto_update">Awtomatikong pag-update</string>
     <string name="auto_update_1">Auto Update</string>
     <string name="auto_update_2">Auto-Update</string>
@@ -195,6 +197,8 @@
     <string name="automatically_share_your_translations_with">Awtomatikong ibahagi ang iyong mga salin sa komunidad</string>
     <string name="automatically_stop_playback_after_set_time">Awtomatikong ihinto ang pag-playback pagkatapos ng itinakdang oras</string>
     <string name="automatically_sync_reading_progress">Awtomatikong i-sync ang pag-usad ng pagbabasa</string>
+    <string name="automatically_translate_novel_descriptions_when">Awtomatikong isalin ang mga deskripsyon ng nobela kapag nagba-browse ng mga source</string>
+    <string name="automatically_translate_novel_titles_when">Awtomatikong isalin ang mga pamagat ng nobela kapag nagba-browse ng mga source</string>
     <string name="autoscroll">Awtomatikong Pag-scroll</string>
     <string name="available">Available</string>
     <string name="available_backups">Mga Available na Backup</string>
@@ -269,6 +273,7 @@
     <string name="book_name_selector">Selector ng Pangalan ng Aklat *</string>
     <string name="book_name_selector_1">Selector ng Pangalan ng Aklat</string>
     <string name="book_not_found">Hindi Nakita ang Aklat</string>
+    <string name="book_not_in_target_source">Hindi Natagpuan ang Aklat sa Target na Source</string>
     <string name="book_queued_for_download">Naka-queue ang libro para i-download</string>
     <string name="book_reviews">Mga Review ng Aklat</string>
     <string name="book_title">Pamagat ng Aklat</string>
@@ -371,6 +376,7 @@
     <string name="chapter_complete">KUMPLETO NA ANG KABANATA</string>
     <string name="chapter_completed">Natapos ang Kabanata</string>
     <string name="chapter_content_extracted">Na-extract ang nilalaman ng kabanata gamit ang %1$s</string>
+    <string name="chapter_fetch_failed">Nabigo ang Pagkuha ng Kabanata</string>
     <string name="chapter_filters">Mga Filter ng Kabanata</string>
     <string name="chapter_heading_size">Laki ng Pamagat ng Kabanata</string>
     <string name="chapter_list">Listahan ng Kabanata</string>
@@ -401,6 +407,7 @@
     <string name="check_community_first">Suriin Muna ang Komunidad</string>
     <string name="check_for_app_updates">Suriin ang Mga Update ng App</string>
     <string name="check_for_updates">Suriin ang mga Update</string>
+    <string name="check_internet_connection">Pakisuri ang iyong koneksyon sa internet at subukang muli.</string>
     <string name="check_permissions">Suriin ang Mga Pahintulot</string>
     <string name="check_the_update">Suriin ang Update</string>
     <string name="checking_for_updates">Sinisiyasat ang mga update…</string>
@@ -1061,6 +1068,7 @@
     <string name="gb_total_storage_7_500mb">3.5GB kabuuang storage (7 × 500MB) - I-configure ang bawat proyekto o gamitin ang parehong URL para sa lahat</string>
     <string name="gemini_api_information">Impormasyon ng Gemini API</string>
     <string name="gemini_api_key">Gemini API Key</string>
+    <string name="gemini_api_key_invalid">Ang Gemini API key ay invalid o nag-expire. Mangyaring kumuha ng bagong key mula sa Google AI Studio.</string>
     <string name="gemini_api_key_not_set">Hindi nakatakda ang Gemini API key. Pakiconfigure ito sa mga setting.</string>
     <string name="gemini_model">Modelong Gemini</string>
     <string name="gemini_payment_required">Nalampasan mo ang iyong kasalukuyang quota para sa Gemini API. Pakisuri ang iyong plano at mga detalye ng billing sa https://ai.google.dev/gemini-api/docs/rate-limits</string>
@@ -1298,6 +1306,7 @@
     <string name="language_code">Code ng Wika</string>
     <string name="language_filter">Filter ng Wika</string>
     <string name="language_preferences">Mga Kagustuhan sa Wika</string>
+    <string name="language_preferences_saved">Na-save ang kagustuhan sa wika para sa aklat na ito</string>
     <string name="language_translation">Wika at Pagsasalin</string>
     <string name="languages">Mga Wika</string>
     <string name="large">Malaki</string>
@@ -1503,6 +1512,7 @@
     <string name="need_help">Kailangan ng Tulong?</string>
     <string name="network">Network</string>
     <string name="network_cache">Network Cache</string>
+    <string name="network_error">Error sa Network</string>
     <string name="network_settings">Mga Setting ng Network</string>
     <string name="neutral">Neutral</string>
     <string name="new_chapter_notifications">Mga Notification ng Bagong Kabanata</string>
@@ -1830,6 +1840,8 @@
     <string name="pref_relative_time_long">Mahaba (Maikli+, n araw na ang nakalipas)</string>
     <string name="pref_relative_time_short">Maikli (Ngayon, Kahapon)</string>
     <string name="prefer_saf_storage">Mas Gusto ang SAF Storage</string>
+    <string name="preferred_source_language">Ginustong Wika ng Pinagmulan</string>
+    <string name="preferred_target_language">Ginustong Target na Wika</string>
     <string name="preload_next_chapter">I-preload ang Susunod na Kabanata</string>
     <string name="preload_only_on_wifi">Mag-preload lang sa WiFi</string>
     <string name="preload_only_on_wifi_summary">Limitahan ang awtomatikong preloading sa mga koneksyon sa WiFi lang</string>
@@ -1974,6 +1986,7 @@
     <string name="reload">I-reload</string>
     <string name="reload_plugin_themes">I-reload ang mga tema ng plugin</string>
     <string name="remaining">Natitira</string>
+    <string name="remember_my_languages">Tandaan ang aking mga piniling wika</string>
     <string name="remind_me_again_in">Paalalahanan ulit ako sa:</string>
     <string name="reminder_interval">Interval ng Paalala</string>
     <string name="remove">Alisin</string>
@@ -2092,6 +2105,7 @@
     <string name="save_custom_theme">I-save ang custom na tema</string>
     <string name="save_epub">I-save ang EPUB</string>
     <string name="save_js_sources_extensions_backups">I-save ang mga JS source, extension, backup, at epub sa SAF folder kapag available. Babalik sa cache kung hindi available.</string>
+    <string name="save_language_preferences">I-save ang Kagustuhan sa Wika</string>
     <string name="save_multi_endpoint_configuration">I-save ang Multi-Endpoint na Konpigurasyon</string>
     <string name="save_patterns">I-save ang mga Pattern</string>
     <string name="saved_local_source_location">Mga Na-save na Pinagmulan sa Cache</string>
@@ -2110,6 +2124,7 @@
     <string name="search_across_all_sources">Maghanap sa lahat ng pinagmulan</string>
     <string name="search_across_all_sources_1">Maghanap sa lahat ng pinagmulan...</string>
     <string name="search_bar">search_bar</string>
+    <string name="search_book_manually">Subukang hanapin ang aklat nang manu-mano sa source upang mapatunayan ang availability.</string>
     <string name="search_characters_books">Maghanap ng mga karakter, libro...</string>
     <string name="search_features">Maghanap ng mga feature...</string>
     <string name="search_fonts">Maghanap ng mga font...</string>
@@ -2303,6 +2318,7 @@
     <string name="source_name">Pangalan ng Source *</string>
     <string name="source_needs_update">Kailangan ng Update ang Source</string>
     <string name="source_not_available">Hindi available ang Source na ito sa iyong device.</string>
+    <string name="source_not_found">Hindi Natagpuan ang Source</string>
     <string name="source_placeholder">hal., 12345 o NovelUpdates</string>
     <string name="source_rule">Source</string>
     <string name="source_term">Termino ng Source</string>
@@ -2555,14 +2571,38 @@
     <string name="translated">Naisalin</string>
     <string name="translating">Nagsasalin... Ito ay maaaring tumagal nang kaunti.</string>
     <string name="translation">Pagsasalin</string>
+    <string name="translation_api_key_invalid">Ang API key para sa %1$s ay invalid o nag-expire. Pakisuri ang iyong key sa Mga Setting → Pagsasalin.</string>
+    <string name="translation_api_key_not_set">Ang %1$s ay nangangailangan ng API key. Mangyaring pumunta sa Mga Setting → Pagsasalin at i-configure ang iyong API key.</string>
+    <string name="translation_auth_required">Kailangan mong mag-sign in sa %1$s upang magamit ang feature na ito ng pagsasalin.</string>
+    <string name="translation_captcha_required">Nangangailangan ng verification ang %1$s. Mangyaring kumpletuhin ang CAPTCHA upang magpatuloy.</string>
     <string name="translation_complete">Kumpleto na ang Pagsasalin.</string>
+    <string name="translation_empty_response">Nagbalik ang %1$s ng walang laman na tugon. Maaaring pansamantala lang ito - pakisubukan muli.</string>
     <string name="translation_engine">Translation Engine</string>
+    <string name="translation_engine_not_available">Hindi available ang %1$s sa bersyong ito ng app. Mangyaring gumamit ng ibang translation engine.</string>
     <string name="translation_engines_refreshed">Na-refresh ang mga translation engine</string>
     <string name="translation_error">Error sa Pagsasalin</string>
+    <string name="translation_language_model_not_available">Ang modelo ng wika para sa %1$s → %2$s ay hindi na-download. Mangyaring pumunta sa Mga Setting → Pagsasalin upang i-download ito.</string>
+    <string name="translation_language_pair_not_supported">Hindi sinusuportahan ng %1$s ang pagsasalin mula %2$s patungong %3$s. Mangyaring pumili ng ibang mga wika.</string>
+    <string name="translation_model_not_found">Hindi natagpuan ang AI model para sa %1$s. Pakisuri ang iyong mga setting.</string>
+    <string name="translation_model_not_found_with_name">Hindi natagpuan ang model '%2$s' sa %1$s. Mangyaring pumili ng ibang model sa mga setting.</string>
+    <string name="translation_network_error">Hindi makakonekta sa %1$s. Pakisuri ang iyong koneksyon sa internet at subukang muli.</string>
+    <string name="translation_parse_error">Hindi maunawaan ang tugon mula sa %1$s. Maaaring nakakaranas ng isyu ang serbisyo.</string>
+    <string name="translation_plugin_error">Ang translation plugin '%1$s' ay nakaranas ng error. Pakisuri ang mga setting ng plugin o subukan ang ibang engine.</string>
     <string name="translation_plugins_extend_ireader_with">Pinapalawak ng mga translation plugin ang IReader sa karagdagang mga serbisyo ng pagsasalin</string>
     <string name="translation_progress">Progress ng Pagsasalin</string>
+    <string name="translation_quota_exceeded">Naabot na ang translation quota ng %1$s. Pakisuri ang iyong plan at billing, o subukang muli mamaya.</string>
+    <string name="translation_rate_limit">Nakakatanggap ng napakaraming request ang %1$s. Mangyaring maghintay sandali at subukang muli.</string>
     <string name="translation_rate_limit_delay">Pagkaantala sa Limitasyon ng Rate ng Pagsasalin</string>
+    <string name="translation_rate_limit_with_retry">Naabot na ang rate limit ng %1$s. Mangyaring maghintay ng %2$d segundo at subukang muli.</string>
+    <string name="translation_server_error">Ang server ng %1$s ay nakakaranas ng isyu. Pakisubukan muli mamaya.</string>
+    <string name="translation_server_error_with_code">Error sa server ng %1$s (code: %2$d). Pakisubukan muli mamaya.</string>
     <string name="translation_settings">Mga Setting ng Pagsasalin</string>
+    <string name="translation_text_too_long">Masyadong mahaba ang teksto para iproseso ng %1$s. Subukang isalin ang mas maliliit na seksyon.</string>
+    <string name="translation_text_too_long_with_limit">Lumampas ang teksto sa limitasyon ng %1$s na %2$d karakter. Subukang isalin ang mas maliliit na seksyon.</string>
+    <string name="translation_timeout">Masyadong matagal bago tumugon ang %1$s. Pakisubukan muli.</string>
+    <string name="translation_timeout_with_seconds">Hindi tumugon ang %1$s sa loob ng %2$d segundo. Pakisubukan muli.</string>
+    <string name="translation_unknown_error">Ang %1$s ay nakaranas ng hindi inaasahang error. Pakisubukan muli.</string>
+    <string name="translation_unknown_error_with_details">Error sa %1$s: %2$s</string>
     <string name="translation_warning">Babala sa Pagsasalin</string>
     <string name="translations">Pagsasalin</string>
     <string name="trending_now">Trending Ngayon</string>
@@ -2572,9 +2612,11 @@
     <string name="trust_level_updated">Na-update ang antas ng tiwala</string>
     <string name="try_a_different_search_term">Subukan ang ibang termino sa paghahanap</string>
     <string name="try_again">Subukang Muli</string>
+    <string name="try_again_later">Nai-preserba ang iyong data. Pakisubukan muli mamaya.</string>
     <string name="try_alternative_url">Subukan ang Alternatibong URL</string>
     <string name="try_another_search">Subukan ang ibang paghahanap</string>
     <string name="try_different_search">Subukan ang ibang termino sa paghahanap</string>
+    <string name="try_different_source">Maaaring hindi available ang source. Subukan ang ibang source.</string>
     <string name="try_these_fixes">Subukan ang mga pagwawastong ito:</string>
     <string name="trying_in_few_second">Subukang muli sa loob ng ilang segundo.</string>
     <string name="trying_to_fetch">Sinusubukang kunin…</string>
@@ -2691,6 +2733,7 @@
     <string name="use_password">Gumamit ng Password</string>
     <string name="use_pin">Gumamit ng PIN</string>
     <string name="use_pinpassword_instead">Gumamit ng PIN/Password sa Halip</string>
+    <string name="use_saved_languages">Gamitin ang Na-save na mga Wika</string>
     <string name="use_separate_supabase_projects_for">Gumamit ng magkahiwalay na Supabase project para sa mas mahusay na scalability</string>
     <string name="use_static_indicators_instead_of_animated_ones">Gumamit ng static na indicator sa halip na animated</string>
     <string name="use_translated_text_for_text">Gamitin ang isinaling teksto para sa text-to-speech kapag available</string>
@@ -2704,6 +2747,7 @@
     <string name="users">Mga User</string>
     <string name="uuid_of_your_d1_database">UUID ng iyong D1 database</string>
     <string name="validate">I-validate</string>
+    <string name="validation_error">Error sa Pagpapatunay</string>
     <string name="verification_details">Mga Detalye ng Pagpapatunay</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Awtomatiko ang pagpapatunay at tumatagal ng ilang segundo</string>
     <string name="verification_is_cached_for_24">Naka-cache ang pagpapatunay sa loob ng 24 oras. Mananatiling aktibo ang badge sa loob ng 7 araw kung mabigo ang muling pagpapatunay.</string>

@@ -176,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">Trier automatiquement les chapitres dans la base de données</string>
     <string name="auto_sync">Synchronisation automatique</string>
     <string name="auto_sync_1">Synchronisation automatique</string>
+    <string name="auto_translate_descriptions">Traduction automatique des descriptions</string>
     <string name="auto_translate_next_chapter">Traduire automatiquement le prochain chapitre</string>
     <string name="auto_translate_next_chapter_summary">Traduire automatiquement le prochain chapitre lors de la navigation en utilisant le moteur de traduction sélectionné</string>
+    <string name="auto_translate_novel_names">Traduction automatique des titres de romans</string>
     <string name="auto_update">Mise à jour automatique</string>
     <string name="auto_update_1">Mise à jour automatique</string>
     <string name="auto_update_2">Mise à jour automatique</string>
@@ -196,6 +198,8 @@
     <string name="automatically_share_your_translations_with">Partagez automatiquement vos traductions avec la communauté</string>
     <string name="automatically_stop_playback_after_set_time">Arrêter automatiquement la lecture après un temps défini</string>
     <string name="automatically_sync_reading_progress">Synchroniser automatiquement la progression de lecture</string>
+    <string name="automatically_translate_novel_descriptions_when">Traduire automatiquement les descriptions de romans lors de la navigation dans les sources</string>
+    <string name="automatically_translate_novel_titles_when">Traduire automatiquement les titres de romans lors de la navigation dans les sources</string>
     <string name="autoscroll">Défilement automatique</string>
     <string name="available">Disponible</string>
     <string name="available_backups">Sauvegardes disponibles</string>
@@ -270,6 +274,7 @@
     <string name="book_name_selector">Sélecteur de nom de livre *</string>
     <string name="book_name_selector_1">Sélecteur de nom de livre</string>
     <string name="book_not_found">Livre non trouvé</string>
+    <string name="book_not_in_target_source">Livre introuvable dans la source cible</string>
     <string name="book_queued_for_download">Livre mis en file d'attente pour le téléchargement</string>
     <string name="book_reviews">Critiques de livres</string>
     <string name="book_title">Titre du livre</string>
@@ -372,6 +377,7 @@
     <string name="chapter_complete">CHAPITRE TERMINÉ</string>
     <string name="chapter_completed">Chapitre terminé</string>
     <string name="chapter_content_extracted">Contenu du chapitre extrait à l'aide de %1$s</string>
+    <string name="chapter_fetch_failed">Échec de la récupération du chapitre</string>
     <string name="chapter_filters">Filtres de chapitres</string>
     <string name="chapter_heading_size">Taille du titre du chapitre</string>
     <string name="chapter_list">Liste des chapitres</string>
@@ -402,6 +408,7 @@
     <string name="check_community_first">Vérifier d'abord la communauté</string>
     <string name="check_for_app_updates">Rechercher les mises à jour de l'application</string>
     <string name="check_for_updates">Vérifier les mises à jour</string>
+    <string name="check_internet_connection">Veuillez vérifier votre connexion Internet et réessayer.</string>
     <string name="check_permissions">Vérifier les permissions</string>
     <string name="check_the_update">Vérifier la mise à jour</string>
     <string name="checking_for_updates">Vérification des mises à jour…</string>
@@ -1066,6 +1073,7 @@
     <string name="gb_total_storage_7_500mb">3.5 Go de stockage total (7 × 500 Mo) - Configurer chaque projet ou utiliser la même URL pour tous</string>
     <string name="gemini_api_information">Informations sur l'API Gemini</string>
     <string name="gemini_api_key">Clé API Gemini</string>
+    <string name="gemini_api_key_invalid">La clé API Gemini est invalide ou a expiré. Veuillez obtenir une nouvelle clé auprès de Google AI Studio.</string>
     <string name="gemini_api_key_not_set">La clé API Gemini n'est pas définie. Veuillez la configurer dans les
         paramètres.
     </string>
@@ -1301,6 +1309,7 @@
     <string name="language_code">Code de langue</string>
     <string name="language_filter">Filtre de langue</string>
     <string name="language_preferences">Préférences de langue</string>
+    <string name="language_preferences_saved">Préférences linguistiques enregistrées pour ce livre</string>
     <string name="language_translation">Langue et traduction</string>
     <string name="languages">Langues</string>
     <string name="large">Grand</string>
@@ -1507,6 +1516,7 @@
     <string name="need_help">Besoin d'aide ?</string>
     <string name="network">Réseau</string>
     <string name="network_cache">Cache réseau</string>
+    <string name="network_error">Erreur réseau</string>
     <string name="network_settings">Paramètres réseau</string>
     <string name="neutral">Neutre</string>
     <string name="new_chapter_notifications">Notifications de nouveaux chapitres</string>
@@ -1832,6 +1842,8 @@
     <string name="pref_relative_time_long">Long (Court+, il y a n jours)</string>
     <string name="pref_relative_time_short">Court (Aujourd'hui, Hier)</string>
     <string name="prefer_saf_storage">Préférer le stockage SAF</string>
+    <string name="preferred_source_language">Langue source préférée</string>
+    <string name="preferred_target_language">Langue cible préférée</string>
     <string name="preload_next_chapter">Précharger le chapitre suivant</string>
     <string name="preload_only_on_wifi">Précharger uniquement en WiFi</string>
     <string name="preload_only_on_wifi_summary">Restreindre le préchargement automatique aux connexions WiFi uniquement</string>
@@ -1976,6 +1988,7 @@
     <string name="reload">Recharger</string>
     <string name="reload_plugin_themes">Recharger les thèmes du plugin</string>
     <string name="remaining">Restant</string>
+    <string name="remember_my_languages">Mémoriser mes choix de langues</string>
     <string name="remind_me_again_in">Me rappeler dans :</string>
     <string name="reminder_interval">Intervalle de rappel</string>
     <string name="remove">Supprimer</string>
@@ -2093,6 +2106,7 @@
     <string name="save_custom_theme">Enregistrer le thème personnalisé</string>
     <string name="save_epub">Enregistrer en EPUB</string>
     <string name="save_js_sources_extensions_backups">Enregistre les sources JS, extensions, sauvegardes et epubs dans le dossier SAF si disponible. Revient au cache si non disponible.</string>
+    <string name="save_language_preferences">Enregistrer les préférences linguistiques</string>
     <string name="save_multi_endpoint_configuration">Enregistrer la configuration multi-point de terminaison</string>
     <string name="save_patterns">Enregistrer les motifs</string>
     <string name="saved_local_source_location">Sources enregistrées dans le cache</string>
@@ -2111,6 +2125,7 @@
     <string name="search_across_all_sources">Rechercher dans toutes les sources</string>
     <string name="search_across_all_sources_1">Rechercher dans toutes les sources...</string>
     <string name="search_bar">barre_de_recherche</string>
+    <string name="search_book_manually">Essayez de rechercher le livre manuellement dans la source pour vérifier sa disponibilité.</string>
     <string name="search_characters_books">Rechercher personnages, livres...</string>
     <string name="search_features">Rechercher des fonctionnalités...</string>
     <string name="search_fonts">Rechercher des polices...</string>
@@ -2305,6 +2320,7 @@
     <string name="source_name">Nom de la source *</string>
     <string name="source_needs_update">La source nécessite une mise à jour</string>
     <string name="source_not_available">Cette source n'est pas disponible sur votre appareil.</string>
+    <string name="source_not_found">Source introuvable</string>
     <string name="source_placeholder">ex. : 12345 ou NovelUpdates</string>
     <string name="source_rule">Source</string>
     <string name="source_term">Terme source</string>
@@ -2560,14 +2576,38 @@
     <string name="translated">Traduit</string>
     <string name="translating">Traduction en cours... Cela peut prendre un moment.</string>
     <string name="translation">Traduction</string>
+    <string name="translation_api_key_invalid">La clé API pour %1$s est invalide ou a expiré. Veuillez vérifier votre clé dans Paramètres → Traduction.</string>
+    <string name="translation_api_key_not_set">%1$s nécessite une clé API. Veuillez aller dans Paramètres → Traduction et configurer votre clé API.</string>
+    <string name="translation_auth_required">Vous devez vous connecter à %1$s pour utiliser cette fonctionnalité de traduction.</string>
+    <string name="translation_captcha_required">%1$s nécessite une vérification. Veuillez compléter le CAPTCHA pour continuer.</string>
     <string name="translation_complete">Traduction terminée.</string>
+    <string name="translation_empty_response">%1$s a renvoyé une réponse vide. Cela peut être un problème temporaire - veuillez réessayer.</string>
     <string name="translation_engine">Moteur de traduction</string>
+    <string name="translation_engine_not_available">%1$s n'est pas disponible dans cette version de l'application. Veuillez utiliser un moteur de traduction différent.</string>
     <string name="translation_engines_refreshed">Moteurs de traduction actualisés</string>
     <string name="translation_error">Erreur de traduction</string>
+    <string name="translation_language_model_not_available">Le modèle linguistique pour %1$s → %2$s n'est pas téléchargé. Veuillez aller dans Paramètres → Traduction pour le télécharger.</string>
+    <string name="translation_language_pair_not_supported">%1$s ne prend pas en charge la traduction de %2$s vers %3$s. Veuillez sélectionner des langues différentes.</string>
+    <string name="translation_model_not_found">Le modèle d'IA pour %1$s n'a pas pu être trouvé. Veuillez vérifier vos paramètres.</string>
+    <string name="translation_model_not_found_with_name">Modèle '%2$s' introuvable dans %1$s. Veuillez sélectionner un modèle différent dans les paramètres.</string>
+    <string name="translation_network_error">Impossible de se connecter à %1$s. Veuillez vérifier votre connexion Internet et réessayer.</string>
+    <string name="translation_parse_error">Impossible de comprendre la réponse de %1$s. Le service rencontre peut-être des problèmes.</string>
+    <string name="translation_plugin_error">Le plugin de traduction '%1$s' a rencontré une erreur. Veuillez vérifier les paramètres du plugin ou essayer un moteur différent.</string>
     <string name="translation_plugins_extend_ireader_with">Les plugins de traduction étendent IReader avec des services de traduction supplémentaires</string>
     <string name="translation_progress">Progression de la traduction</string>
+    <string name="translation_quota_exceeded">Quota de traduction %1$s dépassé. Veuillez vérifier votre forfait et votre facturation, ou réessayer plus tard.</string>
+    <string name="translation_rate_limit">%1$s reçoit trop de requêtes. Veuillez patienter un instant et réessayer.</string>
     <string name="translation_rate_limit_delay">Délai de limite de taux de traduction</string>
+    <string name="translation_rate_limit_with_retry">Limite de débit %1$s atteinte. Veuillez attendre %2$d secondes et réessayer.</string>
+    <string name="translation_server_error">Le serveur %1$s rencontre des problèmes. Veuillez réessayer plus tard.</string>
+    <string name="translation_server_error_with_code">Erreur de serveur %1$s (code : %2$d). Veuillez réessayer plus tard.</string>
     <string name="translation_settings">Paramètres de traduction</string>
+    <string name="translation_text_too_long">Le texte est trop long pour être traité par %1$s. Essayez de traduire des sections plus petites.</string>
+    <string name="translation_text_too_long_with_limit">Le texte dépasse la limite de %2$d caractères de %1$s. Essayez de traduire des sections plus petites.</string>
+    <string name="translation_timeout">%1$s a mis trop de temps à répondre. Veuillez réessayer.</string>
+    <string name="translation_timeout_with_seconds">%1$s n'a pas répondu dans les %2$d secondes. Veuillez réessayer.</string>
+    <string name="translation_unknown_error">%1$s a rencontré une erreur inattendue. Veuillez réessayer.</string>
+    <string name="translation_unknown_error_with_details">Erreur %1$s : %2$s</string>
     <string name="translation_warning">Avertissement de traduction</string>
     <string name="translations">traduction</string>
     <string name="trending_now">Tendances actuelles</string>
@@ -2577,9 +2617,11 @@
     <string name="trust_level_updated">Niveau de confiance mis à jour</string>
     <string name="try_a_different_search_term">Essayez un terme de recherche différent</string>
     <string name="try_again">Réessayer</string>
+    <string name="try_again_later">Vos données sont préservées. Veuillez réessayer plus tard.</string>
     <string name="try_alternative_url">Essayer une URL alternative</string>
     <string name="try_another_search">Essayez une autre recherche</string>
     <string name="try_different_search">Essayez un terme de recherche différent</string>
+    <string name="try_different_source">La source peut être indisponible. Essayez une source différente.</string>
     <string name="try_these_fixes">Essayez ces correctifs :</string>
     <string name="trying_in_few_second">Réessayez dans quelques secondes.</string>
     <string name="trying_to_fetch">Tentative de récupération…</string>
@@ -2696,6 +2738,7 @@
     <string name="use_password">Utiliser un mot de passe</string>
     <string name="use_pin">Utiliser un code PIN</string>
     <string name="use_pinpassword_instead">Utiliser un code PIN/mot de passe à la place</string>
+    <string name="use_saved_languages">Utiliser les langues enregistrées</string>
     <string name="use_separate_supabase_projects_for">Utiliser des projets Supabase séparés pour une meilleure évolutivité</string>
     <string name="use_static_indicators_instead_of_animated_ones">Utiliser des indicateurs statiques au lieu d'indicateurs animés</string>
     <string name="use_translated_text_for_text">Utiliser le texte traduit pour la synthèse vocale lorsque disponible</string>
@@ -2709,6 +2752,7 @@
     <string name="users">Utilisateurs</string>
     <string name="uuid_of_your_d1_database">UUID de votre base de données D1</string>
     <string name="validate">Valider</string>
+    <string name="validation_error">Erreur de validation</string>
     <string name="verification_details">Détails de la vérification</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• La vérification est automatique et prend quelques secondes</string>
     <string name="verification_is_cached_for_24">La vérification est mise en cache pendant 24 heures. Le badge reste actif pendant 7 jours si la revérification échoue.</string>
