@@ -267,6 +267,19 @@ Visit.*for more chapters"""
     fun geminiApiKey(): Preference<String> {
         return preferenceStore.getString("gemini_api_key", "")
     }
+    fun openRouterApiKey(): Preference<String> {
+        return preferenceStore.getString("openrouter_api_key", "")
+    }
+    fun openRouterModel(): Preference<String> {
+        return preferenceStore.getString("openrouter_model", "openrouter/auto")
+    }
+    
+    fun nvidiaApiKey(): Preference<String> {
+        return preferenceStore.getString("nvidia_api_key", "")
+    }
+    fun nvidiaModel(): Preference<String> {
+        return preferenceStore.getString("nvidia_model", "meta/llama-3.1-8b-instruct")
+    }
     
     fun huggingFaceApiKey(): Preference<String> {
         return preferenceStore.getString("huggingface_api_key", "")

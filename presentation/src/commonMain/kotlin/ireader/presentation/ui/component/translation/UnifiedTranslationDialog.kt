@@ -665,7 +665,8 @@ object TranslationEngines {
     // Only built-in engines - plugins are loaded dynamically
     val BUILT_IN = listOf(
         TranslationEngine(0L, "Google ML Kit", isOffline = true),
-        TranslationEngine(8L, "Gemini API", requiresApiKey = true, requiresRateLimiting = true)
+        TranslationEngine(8L, "Gemini API", requiresApiKey = true, requiresRateLimiting = true),
+        TranslationEngine(9L, "OpenRouter AI", requiresApiKey = true, requiresRateLimiting = true)
     )
     
     // For backward compatibility - returns only built-in engines

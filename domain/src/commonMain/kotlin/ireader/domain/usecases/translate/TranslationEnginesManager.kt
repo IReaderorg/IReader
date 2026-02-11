@@ -35,13 +35,17 @@ class TranslationEnginesManager(
     private val pluginManager: PluginManager? = null
 ) {
 
-    // Only keep essential built-in engines:
+    // Built-in translation engines:
     // - Google ML Kit (offline, default)
     // - Gemini API (requires API key, for users who prefer Google's AI)
+    // - OpenRouter AI (requires API key, access to multiple AI models)
+    // - NVIDIA NIM (requires API key, access to NVIDIA-optimized AI models)
     // Other engines are available as plugins from the Feature Store
     private val builtInEngines = listOf(
         GoogleTranslateML(),  // id=0, offline, default
-        GeminiTranslateEngine(httpClients, readerPreferences)  // id=8, requires API key
+        GeminiTranslateEngine(httpClients, readerPreferences),  // id=8, requires API key
+        OpenRouterTranslateEngine(httpClients, readerPreferences),  // id=9, requires API key
+        NvidiaTranslateEngine(httpClients, readerPreferences)  // id=10, requires API key
     )
     
     // Cache for translation results to improve performance
@@ -570,6 +574,14 @@ class TranslationEnginesManager(
             8L -> { // Gemini
                 val apiKey = readerPreferences.geminiApiKey().get()
                 if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("Google Gemini") else null
+            }
+            9L -> { // OpenRouter
+                val apiKey = readerPreferences.openRouterApiKey().get()
+                if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("OpenRouter AI") else null
+            }
+            10L -> { // NVIDIA NIM
+                val apiKey = readerPreferences.nvidiaApiKey().get()
+                if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("NVIDIA NIM") else null
             }
             else -> null
         }

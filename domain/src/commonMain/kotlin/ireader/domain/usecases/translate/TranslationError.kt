@@ -2,7 +2,43 @@ package ireader.domain.usecases.translate
 
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.deepseek_api_key_invalid
+import ireader.i18n.resources.deepseek_api_key_not_set
+import ireader.i18n.resources.deepseek_payment_required
+import ireader.i18n.resources.gemini_api_key_invalid
+import ireader.i18n.resources.gemini_api_key_not_set
+import ireader.i18n.resources.gemini_payment_required
+import ireader.i18n.resources.no_text_to_translate
+import ireader.i18n.resources.openai_api_key_invalid
+import ireader.i18n.resources.openai_api_key_not_set
+import ireader.i18n.resources.openai_quota_exceeded
+import ireader.i18n.resources.sign_in_to_chatgpt
+import ireader.i18n.resources.sign_in_to_deepseek
+import ireader.i18n.resources.translation_api_key_invalid
+import ireader.i18n.resources.translation_api_key_not_set
+import ireader.i18n.resources.translation_auth_required
+import ireader.i18n.resources.translation_captcha_required
+import ireader.i18n.resources.translation_empty_response
+import ireader.i18n.resources.translation_engine_not_available
+import ireader.i18n.resources.translation_language_model_not_available
+import ireader.i18n.resources.translation_language_pair_not_supported
+import ireader.i18n.resources.translation_model_not_found
+import ireader.i18n.resources.translation_model_not_found_with_name
+import ireader.i18n.resources.translation_network_error
+import ireader.i18n.resources.translation_parse_error
+import ireader.i18n.resources.translation_plugin_error
+import ireader.i18n.resources.translation_quota_exceeded
+import ireader.i18n.resources.translation_rate_limit
+import ireader.i18n.resources.translation_rate_limit_with_retry
+import ireader.i18n.resources.translation_same_as_original
+import ireader.i18n.resources.translation_server_error
+import ireader.i18n.resources.translation_server_error_with_code
+import ireader.i18n.resources.translation_text_too_long
+import ireader.i18n.resources.translation_text_too_long_with_limit
+import ireader.i18n.resources.translation_timeout
+import ireader.i18n.resources.translation_timeout_with_seconds
+import ireader.i18n.resources.translation_unknown_error
+import ireader.i18n.resources.translation_unknown_error_with_details
 
 /**
  * Sealed class representing specific translation errors with user-friendly messages.

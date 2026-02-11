@@ -1,11 +1,54 @@
 package ireader.presentation.ui.settings.translation
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.NetworkCheck
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -13,15 +56,47 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import ireader.domain.plugins.PluginPreferences
 import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.deepseek_configuration
+import ireader.i18n.resources.download_language_models
+import ireader.i18n.resources.enter_gemini_api_key
+import ireader.i18n.resources.failed
+import ireader.i18n.resources.free_and_open_source_no_api_key_required
+import ireader.i18n.resources.from
+import ireader.i18n.resources.gemini_api_key
+import ireader.i18n.resources.gemini_model
+import ireader.i18n.resources.get_your_api_key_from_huggingfacecosettingstokens
+import ireader.i18n.resources.get_your_api_key_from_platformdeepseekcom
+import ireader.i18n.resources.get_your_api_key_from_platformopenaicomapi_keys
+import ireader.i18n.resources.google_ml_kit_requires_downloading
+import ireader.i18n.resources.huggingface_configuration
+import ireader.i18n.resources.install_ollama_from_ollamaai
+import ireader.i18n.resources.install_ollama_from_ollamaai_make
+import ireader.i18n.resources.libretranslate_no_api_key_required
+import ireader.i18n.resources.libretranslate_ready_to_use
+import ireader.i18n.resources.no_api_key_required
+import ireader.i18n.resources.nvidia_api_key
+import ireader.i18n.resources.nvidia_fetch_models
+import ireader.i18n.resources.nvidia_info
+import ireader.i18n.resources.nvidia_model
+import ireader.i18n.resources.nvidia_nim
+import ireader.i18n.resources.ok
+import ireader.i18n.resources.ollama_configuration
+import ireader.i18n.resources.openai_configuration
+import ireader.i18n.resources.openrouter_api_key
+import ireader.i18n.resources.openrouter_fetch_models
+import ireader.i18n.resources.openrouter_info
+import ireader.i18n.resources.openrouter_model
+import ireader.i18n.resources.ready
+import ireader.i18n.resources.refresh_models
+import ireader.i18n.resources.sign_in_required
+import ireader.i18n.resources.to
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
 import org.koin.compose.koinInject
 
 /**
@@ -74,6 +149,36 @@ fun EngineSpecificConfig(
         7L -> WebViewLoginConfig(
             engineName = "DeepSeek",
             onLoginClick = { onNavigateToLogin?.invoke("deepseek") },
+            modifier = modifier
+        )
+        8L -> GeminiConfig(
+            apiKey = viewModel.geminiApiKey.value,
+            selectedModel = viewModel.geminiModel.value,
+            onApiKeyChange = { viewModel.updateGeminiApiKey(it) },
+            onModelChange = { viewModel.updateGeminiModel(it) },
+            onLoadModels = { viewModel.loadGeminiModels() },
+            availableModels = viewModel.geminiModels,
+            isLoadingModels = viewModel.isLoadingGeminiModels,
+            modifier = modifier
+        )
+        9L -> OpenRouterConfig(
+            apiKey = viewModel.openRouterApiKey.value,
+            selectedModel = viewModel.openRouterModel.value,
+            onApiKeyChange = { viewModel.updateOpenRouterApiKey(it) },
+            onModelChange = { viewModel.updateOpenRouterModel(it) },
+            onLoadModels = { viewModel.loadOpenRouterModels() },
+            availableModels = viewModel.openRouterModels,
+            isLoadingModels = viewModel.isLoadingOpenRouterModels,
+            modifier = modifier
+        )
+        10L -> NvidiaConfig(
+            apiKey = viewModel.nvidiaApiKey.value,
+            selectedModel = viewModel.nvidiaModel.value,
+            onApiKeyChange = { viewModel.updateNvidiaApiKey(it) },
+            onModelChange = { viewModel.updateNvidiaModel(it) },
+            onLoadModels = { viewModel.loadNvidiaModels() },
+            availableModels = viewModel.nvidiaModels,
+            isLoadingModels = viewModel.isLoadingNvidiaModels,
             modifier = modifier
         )
     }
@@ -1333,6 +1438,411 @@ private fun LanguageDropdown(
                     }
                 )
             }
+        }
+    }
+}
+
+/**
+ * Gemini API configuration
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GeminiConfig(
+    apiKey: String,
+    selectedModel: String,
+    onApiKeyChange: (String) -> Unit,
+    onModelChange: (String) -> Unit,
+    onLoadModels: () -> Unit,
+    availableModels: List<Pair<String, String>>,
+    isLoadingModels: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var showApiKey by remember { mutableStateOf(false) }
+    var modelExpanded by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "Google Gemini",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // API Key Input
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = onApiKeyChange,
+                label = { Text(localizeHelper.localize(Res.string.gemini_api_key), maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+            
+            // Model Selection
+            ExposedDropdownMenuBox(
+                expanded = modelExpanded,
+                onExpandedChange = { modelExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = availableModels.find { it.first == selectedModel }?.second ?: selectedModel,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(localizeHelper.localize(Res.string.gemini_model), maxLines = 1) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    textStyle = MaterialTheme.typography.bodyMedium
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = modelExpanded,
+                    onDismissRequest = { modelExpanded = false }
+                ) {
+                    availableModels.forEach { (modelId, modelName) ->
+                        DropdownMenuItem(
+                            text = { Text(modelName, style = MaterialTheme.typography.bodySmall) },
+                            onClick = {
+                                onModelChange(modelId)
+                                modelExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            
+            // Load Models Button
+            FilledTonalButton(
+                onClick = onLoadModels,
+                enabled = apiKey.isNotBlank() && !isLoadingModels,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isLoadingModels) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Loading models...")
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(localizeHelper.localize(Res.string.refresh_models))
+                }
+            }
+            
+            // Info
+            Text(
+                text = localizeHelper.localize(Res.string.enter_gemini_api_key),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * OpenRouter API configuration
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OpenRouterConfig(
+    apiKey: String,
+    selectedModel: String,
+    onApiKeyChange: (String) -> Unit,
+    onModelChange: (String) -> Unit,
+    onLoadModels: () -> Unit,
+    availableModels: List<Pair<String, String>>,
+    isLoadingModels: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var showApiKey by remember { mutableStateOf(false) }
+    var modelExpanded by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Hub,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "OpenRouter AI",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // API Key Input
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = onApiKeyChange,
+                label = { Text(localizeHelper.localize(Res.string.openrouter_api_key), maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+            
+            // Model Selection
+            ExposedDropdownMenuBox(
+                expanded = modelExpanded,
+                onExpandedChange = { modelExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = availableModels.find { it.first == selectedModel }?.second ?: selectedModel.ifEmpty { "Auto (Best Value)" },
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(localizeHelper.localize(Res.string.openrouter_model), maxLines = 1) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    textStyle = MaterialTheme.typography.bodyMedium
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = modelExpanded,
+                    onDismissRequest = { modelExpanded = false }
+                ) {
+                    availableModels.forEach { (modelId, modelName) ->
+                        DropdownMenuItem(
+                            text = { Text(modelName, style = MaterialTheme.typography.bodySmall) },
+                            onClick = {
+                                onModelChange(modelId)
+                                modelExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            
+            // Load Models Button
+            FilledTonalButton(
+                onClick = onLoadModels,
+                enabled = apiKey.isNotBlank() && !isLoadingModels,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isLoadingModels) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Loading models...")
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(localizeHelper.localize(Res.string.openrouter_fetch_models))
+                }
+            }
+            
+            // Info
+            Text(
+                text = localizeHelper.localize(Res.string.openrouter_info),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * NVIDIA NIM configuration UI
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NvidiaConfig(
+    apiKey: String,
+    selectedModel: String,
+    onApiKeyChange: (String) -> Unit,
+    onModelChange: (String) -> Unit,
+    onLoadModels: () -> Unit,
+    availableModels: List<Pair<String, String>>,
+    isLoadingModels: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var showApiKey by remember { mutableStateOf(false) }
+    var modelExpanded by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Memory,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = localizeHelper.localize(Res.string.nvidia_nim),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // API Key Input
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = onApiKeyChange,
+                label = { Text(localizeHelper.localize(Res.string.nvidia_api_key), maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+            
+            // Model Selection
+            ExposedDropdownMenuBox(
+                expanded = modelExpanded,
+                onExpandedChange = { modelExpanded = it }
+            ) {
+                OutlinedTextField(
+                    value = availableModels.find { it.first == selectedModel }?.second ?: selectedModel.ifEmpty { "Llama 3.1 8B" },
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(localizeHelper.localize(Res.string.nvidia_model), maxLines = 1) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    textStyle = MaterialTheme.typography.bodyMedium
+                )
+                
+                ExposedDropdownMenu(
+                    expanded = modelExpanded,
+                    onDismissRequest = { modelExpanded = false }
+                ) {
+                    availableModels.forEach { (modelId, modelName) ->
+                        DropdownMenuItem(
+                            text = { Text(modelName, style = MaterialTheme.typography.bodySmall) },
+                            onClick = {
+                                onModelChange(modelId)
+                                modelExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            
+            // Load Models Button
+            FilledTonalButton(
+                onClick = onLoadModels,
+                enabled = apiKey.isNotBlank() && !isLoadingModels,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isLoadingModels) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Loading models...")
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(localizeHelper.localize(Res.string.nvidia_fetch_models))
+                }
+            }
+            
+            // Info
+            Text(
+                text = localizeHelper.localize(Res.string.nvidia_info),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
         }
     }
 }

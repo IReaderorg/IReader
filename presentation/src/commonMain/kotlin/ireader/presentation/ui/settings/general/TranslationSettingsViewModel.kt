@@ -3,13 +3,13 @@ package ireader.presentation.ui.settings.general
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import ireader.core.http.HttpClients
 import ireader.domain.data.engines.ContentType
 import ireader.domain.data.engines.ToneType
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.launch
@@ -32,7 +32,8 @@ class TranslationSettingsViewModel(
     private val readerPreferences: ReaderPreferences,
     val translationEnginesManager: TranslationEnginesManager,
     private val communityPreferences: ireader.domain.community.CommunityPreferences? = null,
-    private val localizeHelper: LocalizeHelper
+    private val localizeHelper: LocalizeHelper,
+    private val httpClient: HttpClients
 ) : BaseViewModel() {
 
     val translatorEngine = readerPreferences.translatorEngine().asState()
@@ -40,6 +41,10 @@ class TranslationSettingsViewModel(
     val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()
     val geminiApiKey = readerPreferences.geminiApiKey().asState()
     val geminiModel = readerPreferences.geminiModel().asState()
+    val openRouterApiKey = readerPreferences.openRouterApiKey().asState()
+    val openRouterModel = readerPreferences.openRouterModel().asState()
+    val nvidiaApiKey = readerPreferences.nvidiaApiKey().asState()
+    val nvidiaModel = readerPreferences.nvidiaModel().asState()
     val translatorContentType = readerPreferences.translatorContentType().asState()
     val translatorToneType = readerPreferences.translatorToneType().asState()
     val translatorPreserveStyle = readerPreferences.translatorPreserveStyle().asState()
@@ -76,6 +81,23 @@ class TranslationSettingsViewModel(
     var modelRefreshMessage by mutableStateOf<String?>(null)
         private set
     
+    // OpenRouter model state
+    var openRouterModels by mutableStateOf<List<Pair<String, String>>>(emptyList())
+        private set
+    
+    var isLoadingGeminiModels by mutableStateOf(false)
+        private set
+    
+    var isLoadingOpenRouterModels by mutableStateOf(false)
+        private set
+    
+    // NVIDIA model state
+    var nvidiaModels by mutableStateOf<List<Pair<String, String>>>(emptyList())
+        private set
+    
+    var isLoadingNvidiaModels by mutableStateOf(false)
+        private set
+    
     fun updateTranslatorEngine(value: Long) {
         translatorEngine.value = value
     }
@@ -94,6 +116,22 @@ class TranslationSettingsViewModel(
     
     fun updateGeminiModel(value: String) {
         geminiModel.value = value
+    }
+    
+    fun updateOpenRouterApiKey(value: String) {
+        openRouterApiKey.value = value
+    }
+    
+    fun updateOpenRouterModel(value: String) {
+        openRouterModel.value = value
+    }
+    
+    fun updateNvidiaApiKey(value: String) {
+        nvidiaApiKey.value = value
+    }
+    
+    fun updateNvidiaModel(value: String) {
+        nvidiaModel.value = value
     }
     
     fun updateTranslatorContentType(value: Int) {
@@ -132,6 +170,7 @@ class TranslationSettingsViewModel(
                         2L -> openAIApiKey.value // OpenAI
                         3L -> deepSeekApiKey.value // DeepSeek
                         8L -> geminiApiKey.value // Gemini
+                        9L -> openRouterApiKey.value // OpenRouter
                         else -> ""
                     }
                     
@@ -369,6 +408,186 @@ class TranslationSettingsViewModel(
      */
     fun loadCachedGeminiModels() {
         geminiModels = ireader.domain.usecases.translate.WebscrapingTranslateEngine.AVAILABLE_GEMINI_MODELS
+    }
+    
+    /**
+     * Load Gemini models - wrapper for refreshGeminiModels
+     */
+    fun loadGeminiModels() {
+        refreshGeminiModels()
+    }
+    
+    /**
+     * Load OpenRouter models from API
+     */
+    fun loadOpenRouterModels() {
+        scope.launch {
+            isLoadingOpenRouterModels = true
+            modelRefreshMessage = null
+            
+            try {
+                // Get the OpenRouter engine
+                val engines = translationEnginesManager.getAvailableEngines()
+                val openRouterEngineSource = engines.find { source ->
+                    when (source) {
+                        is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn ->
+                            source.engine.id == 9L // OpenRouter engine ID
+                        else -> false
+                    }
+                }
+                
+                val openRouterEngine = when (openRouterEngineSource) {
+                    is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn ->
+                        openRouterEngineSource.engine as? ireader.domain.usecases.translate.OpenRouterTranslateEngine
+                    else -> null
+                }
+                
+                if (openRouterEngine != null) {
+                    val result = openRouterEngine.fetchAvailableModels()
+                    
+                    if (result.isSuccess) {
+                        val models = result.getOrNull() ?: emptyList()
+                        openRouterModels = models
+                        modelRefreshMessage = if (models.isNotEmpty()) {
+                            "Loaded ${models.size} models successfully"
+                        } else {
+                            "No models available"
+                        }
+                    } else {
+                        val error = result.exceptionOrNull()
+                        modelRefreshMessage = when {
+                            error?.message?.contains("401") == true || 
+                            error?.message?.contains("API key") == true -> 
+                                "Invalid API key. Please check your key and try again."
+                            error?.message?.contains("403") == true -> 
+                                "Access forbidden. Please check your API key permissions."
+                            error?.message?.contains("429") == true -> 
+                                "Rate limit exceeded. Please try again later."
+                            error?.message?.contains("timeout") == true -> 
+                                "Request timed out. Please check your internet connection."
+                            else -> 
+                                "Failed to fetch models: ${error?.message ?: "Unknown error"}"
+                        }
+                        openRouterModels = emptyList()
+                    }
+                } else {
+                    // Use static models if engine not available
+                    openRouterModels = ireader.domain.usecases.translate.OpenRouterTranslateEngine(
+                        httpClient,
+                        readerPreferences
+                    ).availableModels
+                    modelRefreshMessage = "Using default model list"
+                }
+            } catch (e: Exception) {
+                modelRefreshMessage = "Error: ${e.message ?: "Unknown error occurred"}"
+                openRouterModels = emptyList()
+            } finally {
+                isLoadingOpenRouterModels = false
+            }
+        }
+    }
+    
+    /**
+     * Load cached OpenRouter models (static list)
+     */
+    fun loadCachedOpenRouterModels() {
+        openRouterModels = ireader.domain.usecases.translate.OpenRouterTranslateEngine(
+            httpClient,
+            readerPreferences
+        ).availableModels
+    }
+    
+    /**
+     * Load NVIDIA models dynamically from API
+     */
+    fun loadNvidiaModels() {
+        scope.launch {
+            isLoadingNvidiaModels = true
+            modelRefreshMessage = null
+            
+            try {
+                // Get the NVIDIA engine
+                val engines = translationEnginesManager.getAvailableEngines()
+                val nvidiaEngineSource = engines.find { source ->
+                    when (source) {
+                        is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                            source.engine.id == 10L // NVIDIA engine ID
+                        else -> false
+                    }
+                }
+                
+                if (nvidiaEngineSource == null) {
+                    modelRefreshMessage = "NVIDIA engine not found. Please restart the app."
+                    isLoadingNvidiaModels = false
+                    return@launch
+                }
+                
+                // Validate API key
+                if (nvidiaApiKey.value.isBlank()) {
+                    modelRefreshMessage = "Please enter your NVIDIA API key first"
+                    isLoadingNvidiaModels = false
+                    return@launch
+                }
+                
+                // Cast to get the engine
+                val nvidiaEngine = when (nvidiaEngineSource) {
+                    is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                        nvidiaEngineSource.engine as? ireader.domain.usecases.translate.NvidiaTranslateEngine
+                    else -> null
+                }
+                
+                if (nvidiaEngine == null) {
+                    modelRefreshMessage = "Unable to access NVIDIA engine"
+                    isLoadingNvidiaModels = false
+                    return@launch
+                }
+                
+                // Fetch models from API
+                val result = nvidiaEngine.fetchAvailableModels()
+                
+                if (result.isSuccess) {
+                    val models = result.getOrNull()
+                    if (models.isNullOrEmpty()) {
+                        modelRefreshMessage = "No models found. Please check your API key."
+                        nvidiaModels = emptyList()
+                    } else {
+                        nvidiaModels = models
+                        modelRefreshMessage = "Successfully loaded ${models.size} model(s)"
+                    }
+                } else {
+                    val error = result.exceptionOrNull()
+                    modelRefreshMessage = when {
+                        error?.message?.contains("401") == true || 
+                        error?.message?.contains("API key") == true -> 
+                            "Invalid API key. Please check your key and try again."
+                        error?.message?.contains("403") == true -> 
+                            "Access forbidden. Please check your API key permissions."
+                        error?.message?.contains("429") == true -> 
+                            "Rate limit exceeded. Please try again later."
+                        error?.message?.contains("timeout") == true -> 
+                            "Request timed out. Please check your internet connection."
+                        else -> 
+                            "Failed to fetch models: ${error?.message ?: "Unknown error"}"
+                    }
+                    nvidiaModels = emptyList()
+                }
+            } catch (e: Exception) {
+                modelRefreshMessage = "Error: ${e.message ?: "Unknown error occurred"}"
+                nvidiaModels = emptyList()
+            } finally {
+                isLoadingNvidiaModels = false
+            }
+        }
+    }
+    
+    /**
+     * Load cached NVIDIA models (static list)
+     */
+    fun loadCachedNvidiaModels() {
+        nvidiaModels = ireader.domain.usecases.translate.NvidiaTranslateEngine(
+            httpClient,
+            readerPreferences
+        ).availableModels
     }
     
     fun resetModelRefreshMessage() {
