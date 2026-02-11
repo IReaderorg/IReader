@@ -54,7 +54,8 @@ val PluginModule = module {
     factory {
         PluginSecurityManager(
             permissionManager = get(),
-            fileSystem = get()
+            fileSystem = get(),
+            httpClient = getOrNull() // HttpClient is provided by platform modules
         )
     }
     

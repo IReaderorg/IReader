@@ -242,6 +242,18 @@ sealed class TranslationError {
     }
     
     /**
+     * Translation returned same text as original (translation may have failed silently)
+     */
+    data class SameAsOriginal(
+        val engineName: String
+    ) : TranslationError() {
+        override fun toUiText(): UiText = UiText.MStringResource(
+            Res.string.translation_same_as_original,
+            arrayOf(engineName)
+        )
+    }
+    
+    /**
      * Unknown/unexpected error
      */
     data class Unknown(
@@ -282,6 +294,7 @@ sealed class TranslationError {
         is EngineNotAvailable -> "Engine Unavailable"
         is ModelNotFound -> "Model Not Found"
         is PluginError -> "Plugin Error"
+        is SameAsOriginal -> "Translation Unchanged"
         is Unknown -> "Translation Error"
     }
     

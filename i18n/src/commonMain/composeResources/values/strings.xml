@@ -2832,6 +2832,7 @@
     <string name="translation_plugin_error">Translation plugin '%1$s' encountered an error. Please check the plugin settings or try a different engine.</string>
     <string name="translation_unknown_error">%1$s encountered an unexpected error. Please try again.</string>
     <string name="translation_unknown_error_with_details">%1$s error: %2$s</string>
+    <string name="translation_same_as_original">%1$s returned the text unchanged. The translation may have failed or the text may already be in the target language.</string>
     <string name="gemini_api_key_invalid">Gemini API key is invalid or has expired. Please get a new key from Google AI Studio.</string>
     
     <!-- Translation Language Preferences -->

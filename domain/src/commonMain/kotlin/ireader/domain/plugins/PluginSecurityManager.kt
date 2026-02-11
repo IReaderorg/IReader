@@ -5,17 +5,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+import io.ktor.client.HttpClient
+
 /**
  * Central security manager coordinating plugin sandboxing, permissions, and resource monitoring
  * Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 11.1, 11.2, 11.3, 11.4, 11.5
  */
 class PluginSecurityManager(
     private val permissionManager: PluginPermissionManager,
-    private val fileSystem: FileSystem
+    private val fileSystem: FileSystem,
+    private val httpClient: HttpClient? = null
 ) {
     private val mutex = Mutex()
     private val sandboxes = mutableMapOf<String, PluginSandbox>()
-    private val contextFactory = PluginContextFactory(permissionManager, fileSystem)
+    private val contextFactory = PluginContextFactory(permissionManager, fileSystem, httpClient)
     
     /**
      * Pending permission requests from plugins
