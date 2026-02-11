@@ -2,6 +2,7 @@ package ireader.domain.usecases.translate
 
 import ireader.core.log.Log
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -150,7 +151,7 @@ class TranslationRetryHandler {
                     .coerceAtMost(config.maxDelayMs)
                 
                 // Add jitter (±10%) to prevent thundering herd
-                val jitter = currentDelay * (0.9 + Math.random() * 0.2)
+                val jitter = currentDelay * (0.9 + Random.nextDouble() * 0.2)
                 currentDelay = jitter.toLong()
             }
         }
