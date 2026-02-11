@@ -2606,6 +2606,7 @@
     <string name="translation_rate_limit">%1$s prima previše zahtjeva. Pričekajte trenutak i pokušajte ponovo.</string>
     <string name="translation_rate_limit_delay">Odgoda ograničenja stope prijevoda</string>
     <string name="translation_rate_limit_with_retry">Dosegnuto ograničenje zahtjeva za %1$s. Pričekajte %2$d sekundi i pokušajte ponovo.</string>
+    <string name="translation_same_as_original">%1$s je vratio tekst nepromijenjen. Prevođenje možda nije uspjelo ili je tekst već na ciljnom jeziku.</string>
     <string name="translation_server_error">Server %1$s ima problema. Molimo pokušajte ponovo kasnije.</string>
     <string name="translation_server_error_with_code">Greška servera %1$s (kod: %2$d). Molimo pokušajte ponovo kasnije.</string>
     <string name="translation_settings">Postavke prevođenja</string>

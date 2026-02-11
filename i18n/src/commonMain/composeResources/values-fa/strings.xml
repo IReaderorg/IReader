@@ -2602,6 +2602,7 @@
     <string name="translation_rate_limit">%1$s درخواست‌های زیادی دریافت می‌کند. لطفاً کمی صبر کرده و دوباره امتحان کنید.</string>
     <string name="translation_rate_limit_delay">تاخیر محدودیت نرخ ترجمه</string>
     <string name="translation_rate_limit_with_retry">محدودیت نرخ %1$s به پایان رسیده است. لطفاً %2$d ثانیه صبر کرده و دوباره امتحان کنید.</string>
+    <string name="translation_same_as_original">%1$s متن را بدون تغییر برگرداند. ممکن است ترجمه ناموفق بوده باشد یا متن از قبل به زبان مقصد بوده باشد.</string>
     <string name="translation_server_error">سرور %1$s در حال حاضر با مشکل مواجه است. لطفاً بعداً دوباره امتحان کنید.</string>
     <string name="translation_server_error_with_code">خطای سرور %1$s (کد: %2$d). لطفاً بعداً دوباره امتحان کنید.</string>
     <string name="translation_settings">تنظیمات ترجمه</string>

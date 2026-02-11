@@ -2594,6 +2594,7 @@
     <string name="translation_rate_limit">Nakakatanggap ng napakaraming request ang %1$s. Mangyaring maghintay sandali at subukang muli.</string>
     <string name="translation_rate_limit_delay">Pagkaantala sa Limitasyon ng Rate ng Pagsasalin</string>
     <string name="translation_rate_limit_with_retry">Naabot na ang rate limit ng %1$s. Mangyaring maghintay ng %2$d segundo at subukang muli.</string>
+    <string name="translation_same_as_original">%1$s ibinalik ang teksto nang hindi binago. Maaaring nabigo ang pagsasalin o maaaring nasa target na wika na ang teksto.</string>
     <string name="translation_server_error">Ang server ng %1$s ay nakakaranas ng isyu. Pakisubukan muli mamaya.</string>
     <string name="translation_server_error_with_code">Error sa server ng %1$s (code: %2$d). Pakisubukan muli mamaya.</string>
     <string name="translation_settings">Mga Setting ng Pagsasalin</string>

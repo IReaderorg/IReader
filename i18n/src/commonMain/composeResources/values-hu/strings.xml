@@ -2620,6 +2620,7 @@
     <string name="translation_rate_limit">%1$s túl sok kérést kap. Kérjük, várjon egy pillanatot, majd próbálja újra.</string>
     <string name="translation_rate_limit_delay">Fordítási aránykorlát késleltetése</string>
     <string name="translation_rate_limit_with_retry">%1$s sebességkorlát elérve. Kérjük, várjon %2$d másodpercet, majd próbálja újra.</string>
+    <string name="translation_same_as_original">%1$s változatlanul hagyta a szöveget. Lehet, hogy a fordítás sikertelen volt, vagy a szöveg már a célnyelven van.</string>
     <string name="translation_server_error">A %1$s szerver problémákat tapasztal. Kérjük, próbálja újra később.</string>
     <string name="translation_server_error_with_code">%1$s szerverhiba (kód: %2$d). Kérjük, próbálja újra később.</string>
     <string name="translation_settings">Fordítási beállítások</string>

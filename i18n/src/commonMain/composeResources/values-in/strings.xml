@@ -2615,6 +2615,7 @@
     <string name="translation_rate_limit">%1$s menerima terlalu banyak permintaan. Mohon tunggu sebentar dan coba lagi.</string>
     <string name="translation_rate_limit_delay">Penundaan Batas Laju Terjemahan</string>
     <string name="translation_rate_limit_with_retry">Batas laju %1$s tercapai. Mohon tunggu %2$d detik dan coba lagi.</string>
+    <string name="translation_same_as_original">%1$s mengembalikan teks tanpa perubahan. Terjemahan mungkin gagal atau teks mungkin sudah dalam bahasa target.</string>
     <string name="translation_server_error">Server %1$s sedang mengalami masalah. Mohon coba lagi nanti.</string>
     <string name="translation_server_error_with_code">Kesalahan server %1$s (kode: %2$d). Mohon coba lagi nanti.</string>
     <string name="translation_settings">Pengaturan Terjemahan</string>

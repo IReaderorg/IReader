@@ -2599,6 +2599,7 @@
     <string name="translation_rate_limit">%1$s reçoit trop de requêtes. Veuillez patienter un instant et réessayer.</string>
     <string name="translation_rate_limit_delay">Délai de limite de taux de traduction</string>
     <string name="translation_rate_limit_with_retry">Limite de débit %1$s atteinte. Veuillez attendre %2$d secondes et réessayer.</string>
+    <string name="translation_same_as_original">%1$s a renvoyé le texte tel quel. La traduction a peut-être échoué ou le texte était peut-être déjà dans la langue cible.</string>
     <string name="translation_server_error">Le serveur %1$s rencontre des problèmes. Veuillez réessayer plus tard.</string>
     <string name="translation_server_error_with_code">Erreur de serveur %1$s (code : %2$d). Veuillez réessayer plus tard.</string>
     <string name="translation_settings">Paramètres de traduction</string>

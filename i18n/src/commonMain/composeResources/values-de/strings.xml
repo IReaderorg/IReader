@@ -2623,6 +2623,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="translation_rate_limit">%1$s erhält zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.</string>
     <string name="translation_rate_limit_delay">Verzögerung der Übersetzungs-Ratenbegrenzung</string>
     <string name="translation_rate_limit_with_retry">Das Anfragelimit für %1$s wurde erreicht. Bitte warten Sie %2$d Sekunden und versuchen Sie es erneut.</string>
+    <string name="translation_same_as_original">%1$s hat den Text unverändert zurückgegeben. Die Übersetzung ist möglicherweise fehlgeschlagen oder der Text ist bereits in der Zielsprache.</string>
     <string name="translation_server_error">Der Server von %1$s hat Probleme. Bitte versuchen Sie es später erneut.</string>
     <string name="translation_server_error_with_code">Serverfehler bei %1$s (Code: %2$d). Bitte versuchen Sie es später erneut.</string>
     <string name="translation_settings">Übersetzungseinstellungen</string>

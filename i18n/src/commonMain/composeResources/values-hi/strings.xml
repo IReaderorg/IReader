@@ -2603,6 +2603,7 @@
     <string name="translation_rate_limit">%1$s बहुत अधिक अनुरोध प्राप्त कर रहा है। कृपया थोड़ी देर प्रतीक्षा करें और पुनः प्रयास करें।</string>
     <string name="translation_rate_limit_delay">अनुवाद रेट लिमिट देरी</string>
     <string name="translation_rate_limit_with_retry">%1$s की दर सीमा तक पहुँच गया है। कृपया %2$d सेकंड प्रतीक्षा करें और पुनः प्रयास करें।</string>
+    <string name="translation_same_as_original">%1$s ने टेक्स्ट को बिना किसी बदलाव के वापस कर दिया। अनुवाद विफल हो गया होगा या टेक्स्ट पहले से ही लक्षित भाषा में हो सकता है।</string>
     <string name="translation_server_error">%1$s सर्वर समस्याओं का सामना कर रहा है। कृपया बाद में पुनः प्रयास करें।</string>
     <string name="translation_server_error_with_code">%1$s सर्वर त्रुटि (कोड: %2$d)। कृपया बाद में पुनः प्रयास करें।</string>
     <string name="translation_settings">अनुवाद सेटिंग्स</string>

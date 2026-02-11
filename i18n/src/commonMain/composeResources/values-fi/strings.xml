@@ -2618,6 +2618,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="translation_rate_limit">%1$s vastaanottaa liikaa pyyntöjä. Odota hetki ja yritä uudelleen.</string>
     <string name="translation_rate_limit_delay">Käännösten nopeusrajoituksen viive</string>
     <string name="translation_rate_limit_with_retry">%1$s:n käyttöraja on saavutettu. Odota %2$d sekuntia ja yritä uudelleen.</string>
+    <string name="translation_same_as_original">%1$s palautti tekstin muuttumattomana. Käännös saattoi epäonnistua tai teksti on jo kohdekielellä.</string>
     <string name="translation_server_error">%1$s-palvelimella on ongelmia. Yritä uudelleen myöhemmin.</string>
     <string name="translation_server_error_with_code">%1$s-palvelinvirhe (koodi: %2$d). Yritä uudelleen myöhemmin.</string>
     <string name="translation_settings">Käännösasetukset</string>

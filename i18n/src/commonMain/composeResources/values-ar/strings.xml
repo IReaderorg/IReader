@@ -2614,6 +2614,7 @@
     <string name="translation_rate_limit">يتلقى %1$s عددًا كبيرًا جدًا من الطلبات. يرجى الانتظار لحظة والمحاولة مرة أخرى.</string>
     <string name="translation_rate_limit_delay">تأخير حد معدل الترجمة</string>
     <string name="translation_rate_limit_with_retry">تم الوصول إلى حد معدل %1$s. يرجى الانتظار %2$d ثانية والمحاولة مرة أخرى.</string>
+    <string name="translation_same_as_original">لم يقم %1$s بتغيير النص. قد تكون الترجمة قد فشلت، أو قد يكون النص باللغة الهدف بالفعل.</string>
     <string name="translation_server_error">خادم %1$s يواجه مشكلات. يرجى المحاولة مرة أخرى لاحقًا.</string>
     <string name="translation_server_error_with_code">خطأ في خادم %1$s (الرمز: %2$d). يرجى المحاولة مرة أخرى لاحقًا.</string>
     <string name="translation_settings">إعدادات الترجمة</string>

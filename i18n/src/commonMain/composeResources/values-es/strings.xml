@@ -2603,6 +2603,7 @@
     <string name="translation_rate_limit">%1$s está recibiendo demasiadas solicitudes. Por favor, espera un momento e inténtalo de nuevo.</string>
     <string name="translation_rate_limit_delay">Retraso de límite de peticiones de traducción</string>
     <string name="translation_rate_limit_with_retry">Se ha alcanzado el límite de velocidad de %1$s. Por favor, espera %2$d segundos e inténtalo de nuevo.</string>
+    <string name="translation_same_as_original">%1$s devolvió el texto sin cambios. Puede que la traducción haya fallado o que el texto ya esté en el idioma de destino.</string>
     <string name="translation_server_error">El servidor de %1$s está experimentando problemas. Por favor, inténtalo de nuevo más tarde.</string>
     <string name="translation_server_error_with_code">Error del servidor de %1$s (código: %2$d). Por favor, inténtalo de nuevo más tarde.</string>
     <string name="translation_settings">Ajustes de traducción</string>
