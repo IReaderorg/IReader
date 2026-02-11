@@ -1675,6 +1675,15 @@
     <string name="novel_info">معلومات الرواية</string>
     <string name="now_try_creating_a_source">الآن حاول إنشاء مصدر لموقعك المفضل.</string>
     <string name="number_of_sources_to_search">عدد المصادر المراد البحث فيها في وقت واحد. القيم الأعلى أسرع ولكنها تستهلك المزيد من الموارد.</string>
+    <string name="nvidia_api_key">مفتاح API لـ NVIDIA</string>
+    <string name="nvidia_api_key_invalid">مفتاح API لـ NVIDIA غير صالح. الرجاء التحقق من مفتاحك على build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">لم يتم تعيين مفتاح API لـ NVIDIA. الرجاء تهيئته في الإعدادات.</string>
+    <string name="nvidia_fetch_models">جلب النماذج المتاحة</string>
+    <string name="nvidia_info">يوفر NVIDIA NIM وصولاً إلى نماذج ذكاء اصطناعي محسّنة بما في ذلك لاما، وميسترال، وجيما، والمزيد. احصل على مفتاح API الخاص بك من build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">رصيد API لـ NVIDIA غير كافٍ. الرجاء التحقق من حسابك على build.nvidia.com</string>
+    <string name="nvidia_model">نموذج NVIDIA</string>
+    <string name="nvidia_models_loaded">تم تحميل نماذج NVIDIA بنجاح</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">من</string>
     <string name="off">إيقاف</string>
     <string name="offline_mode">وضع عدم الاتصال</string>
@@ -1717,6 +1726,14 @@
     </string>
     <string name="openai_configuration">إعدادات OpenAI</string>
     <string name="openai_quota_exceeded">تجاوزت حصة Openai</string>
+    <string name="openrouter_api_key">مفتاح API لـ OpenRouter</string>
+    <string name="openrouter_api_key_invalid">مفتاح API لـ OpenRouter غير صالح. الرجاء التحقق من مفتاحك على openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">لم يتم تعيين مفتاح API لـ OpenRouter. الرجاء تهيئته في الإعدادات.</string>
+    <string name="openrouter_fetch_models">جلب النماذج المتاحة</string>
+    <string name="openrouter_info">يوفر OpenRouter وصولاً موحدًا إلى نماذج ذكاء اصطناعي متعددة بما في ذلك GPT-4، وكلود، ولاما، والمزيد. احصل على مفتاح API الخاص بك من openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">رصيد OpenRouter غير كافٍ. الرجاء إضافة رصيد على openrouter.ai/credits</string>
+    <string name="openrouter_model">نموذج OpenRouter</string>
+    <string name="openrouter_models_loaded">تم تحميل نماذج OpenRouter بنجاح</string>
     <string name="optimize">تحسين</string>
     <string name="optimize_database">تحسين قاعدة البيانات</string>
     <string name="optimizes_translation_for_specific_content">يحسن الترجمة لمحتوى معين</string>
@@ -1989,6 +2006,7 @@
     <string name="refresh_all">تحديث الكل</string>
     <string name="refresh_covers_too">تحديث الأغلفة أيضًا</string>
     <string name="refresh_metrics">تحديث المقاييس</string>
+    <string name="refresh_models">تحديث النماذج</string>
     <string name="refreshed">تم التحديث</string>
     <string name="refreshing">جارٍ التحديث</string>
     <string name="refreshing_1">تحديث...</string>

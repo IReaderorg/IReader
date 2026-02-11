@@ -20,6 +20,9 @@ import ireader.domain.services.common.TranslationServiceConstants
 import ireader.domain.services.common.TranslationStatus
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.domain.usecases.translate.TranslationPriority
+import ireader.domain.usecases.translate.TranslationQueueManager
+import ireader.domain.usecases.translate.TranslationRetryHandler
 import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
 import ireader.domain.usecases.translation.SaveTranslatedChapterUseCase
 import ireader.i18n.LocalizeHelper
@@ -39,6 +42,16 @@ import kotlin.time.ExperimentalTime
 /**
  * Implementation of TranslationService for mass chapter translation.
  * Handles rate limiting, progress tracking, and foreground service notifications.
+ * 
+ * Integrates with TranslationQueueManager to coordinate with metadata translations:
+ * - Content translation has highest priority
+ * - When content translation starts, metadata translations are cancelled
+ * 
+ * Reliability features:
+ * - Automatic retry with exponential backoff for transient errors
+ * - Error categorization (network, rate limit, auth, etc.)
+ * - User-friendly error messages
+ * - Circuit breaker pattern for repeated failures
  */
 class TranslationServiceImpl(
     private val chapterRepository: ChapterRepository,
@@ -54,7 +67,8 @@ class TranslationServiceImpl(
     private val stateHolder: TranslationStateHolder = TranslationStateHolder(),
     private val autoShareTranslationUseCase: ireader.domain.community.cloudflare.AutoShareTranslationUseCase? = null,
     private val communityPreferences: ireader.domain.community.CommunityPreferences? = null,
-    private val localizeHelper: LocalizeHelper
+    private val localizeHelper: LocalizeHelper,
+    private val translationQueueManager: TranslationQueueManager? = null
 ) : TranslationService {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -76,6 +90,15 @@ class TranslationServiceImpl(
     private var requestCount = 0
     private var lastRequestTime = 0L
     
+    // Retry handler for robust error handling
+    private val retryHandler = TranslationRetryHandler()
+    
+    // Track consecutive failures for circuit breaker
+    private var consecutiveFailures = 0
+    private var lastFailureTime = 0L
+    private val circuitBreakerThreshold = 5
+    private val circuitBreakerCooldownMs = 60000L // 1 minute
+    
     // Offline engines that don't need rate limiting
     private val offlineEngineIds = setOf(
         0L,  // Google ML Kit (offline)
@@ -90,6 +113,8 @@ class TranslationServiceImpl(
         6L,  // ChatGPT WebView
         7L,  // DeepSeek WebView
         8L,  // Gemini API
+        9L,  // OpenRouter
+        10L, // NVIDIA NIM
     )
 
     override suspend fun initialize() {
@@ -253,6 +278,16 @@ class TranslationServiceImpl(
         _state.value = ServiceState.RUNNING
         stateHolder.setRunning(true)
         
+        // Register content translation with queue manager (cancels metadata translations)
+        val requestId = translationQueueManager?.let { manager ->
+            kotlinx.coroutines.runBlocking {
+                manager.registerRequest(
+                    priority = TranslationPriority.CONTENT,
+                    description = "Chapter content translation"
+                )
+            }
+        }
+        
         translationJob = scope.launch {
             try {
                 processQueue()
@@ -263,6 +298,15 @@ class TranslationServiceImpl(
             } finally {
                 _state.value = ServiceState.IDLE
                 stateHolder.setRunning(false)
+                
+                // Unregister from queue manager
+                if (requestId != null) {
+                    translationQueueManager?.let { manager ->
+                        kotlinx.coroutines.runBlocking {
+                            manager.unregisterRequest(requestId)
+                        }
+                    }
+                }
             }
         }
     }
@@ -494,13 +538,17 @@ class TranslationServiceImpl(
         // Chunk content based on engine's max character limit
         val chunks = chunkContent(content, maxChars)
         val result = mutableListOf<String>()
-        var error: String? = null
         val totalChunks = chunks.size
         var translatedParagraphCount = 0
         
         Log.info { "Translating $totalParagraphs paragraphs in $totalChunks chunks (max $maxChars chars per chunk)" }
         
         for ((index, chunk) in chunks.withIndex()) {
+            // Check circuit breaker before each chunk
+            if (isCircuitBreakerOpen()) {
+                throw Exception("Translation service temporarily unavailable due to repeated failures. Please try again later.")
+            }
+            
             // Update progress with chunk info
             val progress = (index.toFloat() / totalChunks.toFloat()).coerceIn(0.3f, 0.9f)
             stateHolder.updateChapterProgress(
@@ -524,9 +572,55 @@ class TranslationServiceImpl(
                 delay(delayMs)
             }
             
-            var chunkResult: List<String>? = null
-            var chunkError: String? = null
+            // Use retry handler for robust translation
+            val retryResult = retryHandler.executeWithRetry(
+                config = TranslationRetryHandler.RetryConfig(
+                    maxRetries = if (engine.isOffline) 1 else 3,
+                    initialDelayMs = delayMs,
+                    maxDelayMs = 30000L
+                ),
+                onError = { error, attempt, category ->
+                    Log.warn { "Translation chunk ${index + 1} attempt $attempt failed (${category.name}): ${error.message}" }
+                }
+            ) {
+                translateChunkWithTimeout(chunk, task)
+            }
             
+            when (retryResult) {
+                is TranslationRetryHandler.RetryResult.Success -> {
+                    val chunkResult = retryResult.value
+                    result.addAll(chunkResult)
+                    translatedParagraphCount += chunk.size
+                    // Reset consecutive failures on success
+                    consecutiveFailures = 0
+                }
+                is TranslationRetryHandler.RetryResult.Failure -> {
+                    // Track failure for circuit breaker
+                    recordFailure()
+                    
+                    val userMessage = retryHandler.getUserFriendlyMessage(
+                        retryResult.error, 
+                        retryResult.errorCategory
+                    )
+                    throw Exception("Translation failed after ${retryResult.attempts} attempts: $userMessage")
+                }
+            }
+        }
+        
+        return result
+    }
+    
+    /**
+     * Translate a single chunk with timeout protection.
+     */
+    private suspend fun translateChunkWithTimeout(
+        chunk: List<String>,
+        task: TranslationTask
+    ): List<String> {
+        var chunkResult: List<String>? = null
+        var chunkError: Exception? = null
+        
+        try {
             translationEnginesManager.translateWithContext(
                 texts = chunk,
                 source = currentSourceLang,
@@ -536,68 +630,57 @@ class TranslationServiceImpl(
                     chunkResult = translations
                 },
                 onError = { uiText ->
-                    chunkError = uiText.asString(localizeHelper)
+                    chunkError = Exception(uiText.asString(localizeHelper))
                 }
             )
             
             if (chunkError != null) {
-                error = chunkError
-                break
+                throw chunkError!!
             }
             
-            chunkResult?.let { 
-                result.addAll(it)
-                translatedParagraphCount += chunk.size
-            }
+            return chunkResult ?: throw Exception("Translation returned no result")
+        } catch (e: Exception) {
+            throw e
         }
-        
-        if (error != null) {
-            throw Exception("Translation failed: $error")
-        }
-        
-        return result
     }
     
-    // Keep old method for backward compatibility
-    private suspend fun translateContent(content: List<String>): List<String> {
-        val engine = translationEnginesManager.get()
-        val maxChars = engine.maxCharsPerRequest
-        val delayMs = if (engine.isOffline) 0L else maxOf(engine.rateLimitDelayMs, 3000L)
-        
-        val chunks = chunkContent(content, maxChars)
-        val result = mutableListOf<String>()
-        var error: String? = null
-        
-        for ((index, chunk) in chunks.withIndex()) {
-            if (index > 0 && !engine.isOffline) {
-                delay(delayMs)
-            }
-            
-            var chunkResult: List<String>? = null
-            var chunkError: String? = null
-            
-            translationEnginesManager.translateWithContext(
-                texts = chunk,
-                source = currentSourceLang,
-                target = currentTargetLang,
-                onProgress = { },
-                onSuccess = { translations -> chunkResult = translations },
-                onError = { uiText -> chunkError = uiText.asString(localizeHelper) }
-            )
-            
-            if (chunkError != null) {
-                error = chunkError
-                break
-            }
-            
-            chunkResult?.let { result.addAll(it) }
+    /**
+     * Check if circuit breaker is open (too many recent failures).
+     */
+    @OptIn(ExperimentalTime::class)
+    private fun isCircuitBreakerOpen(): Boolean {
+        if (consecutiveFailures < circuitBreakerThreshold) {
+            return false
         }
         
-        if (error != null) {
-            throw Exception("Translation failed: $error")
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+        val timeSinceLastFailure = now - lastFailureTime
+        
+        // Reset circuit breaker after cooldown period
+        if (timeSinceLastFailure > circuitBreakerCooldownMs) {
+            consecutiveFailures = 0
+            return false
         }
         
-        return result
+        return true
+    }
+    
+    /**
+     * Record a failure for circuit breaker tracking.
+     */
+    @OptIn(ExperimentalTime::class)
+    private fun recordFailure() {
+        consecutiveFailures++
+        lastFailureTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
+        Log.warn { "Translation failure recorded. Consecutive failures: $consecutiveFailures" }
+    }
+    
+    /**
+     * Reset circuit breaker state.
+     */
+    private fun resetCircuitBreaker() {
+        consecutiveFailures = 0
+        lastFailureTime = 0L
     }
     
     /**

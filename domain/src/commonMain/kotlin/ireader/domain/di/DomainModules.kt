@@ -201,6 +201,12 @@ val DomainServices = module {
             pluginManager = get() // PluginManager is a singleton, safe to use get()
         )
     }
+    
+    // Translation queue manager - singleton to coordinate all translation requests
+    single<ireader.domain.usecases.translate.TranslationQueueManager> { 
+        ireader.domain.usecases.translate.TranslationQueueManager() 
+    }
+    
     factory  { ireader.domain.catalogs.interactor.GetInstalledCatalog(get()) }
 
     factory  { ireader.domain.usecases.updates.SubscribeUpdates(get()) }

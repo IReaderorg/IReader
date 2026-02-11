@@ -6,6 +6,7 @@ import ireader.core.source.model.MangasPageInfo
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.TranslationPreferences
 import ireader.i18n.UiText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.sync.Semaphore
@@ -17,11 +18,16 @@ import kotlin.time.ExperimentalTime
 /**
  * Use case for translating book metadata (title and description) when browsing.
  * This provides auto-translation of novel names and descriptions for better user experience.
+ * 
+ * Uses TranslationQueueManager to coordinate with content translation:
+ * - Metadata translations are cancelled when content translation starts
+ * - Metadata translations are skipped if content translation is active
  */
 class TranslateBookMetadataUseCase(
     private val translationEnginesManager: TranslationEnginesManager,
     private val translationPreferences: TranslationPreferences,
-    private val readerPreferences: ReaderPreferences
+    private val readerPreferences: ReaderPreferences,
+    private val translationQueueManager: TranslationQueueManager? = null
 ) {
     companion object {
         private const val TAG = "TranslateBookMetadata"
@@ -72,6 +78,8 @@ class TranslateBookMetadataUseCase(
     /**
      * Translate a single text string with caching
      * Returns the translated text or the original if translation fails
+     * 
+     * Will skip translation if content translation is active (reader content has priority)
      */
     @OptIn(ExperimentalTime::class)
     suspend fun translateText(
@@ -80,6 +88,12 @@ class TranslateBookMetadataUseCase(
         targetLanguage: String? = null
     ): String {
         if (text.isBlank()) return text
+        
+        // Check if content translation is active - skip metadata translation
+        if (translationQueueManager?.isContentTranslationActive() == true) {
+            Log.info { "$TAG: Skipping metadata translation - content translation is active" }
+            return text
+        }
 
         val sourceLang = sourceLanguage ?: getSourceLanguage()
         val targetLang = targetLanguage ?: getTargetLanguage()
@@ -91,6 +105,35 @@ class TranslateBookMetadataUseCase(
             return cached.translatedText
         }
 
+        // Variable to store translation result
+        var translatedResult: String? = null
+        
+        // Use queue manager for coordinated translation
+        val result = translationQueueManager?.executeTranslation(
+            priority = TranslationPriority.METADATA,
+            description = "Metadata: ${text.take(50)}..."
+        ) {
+            translatedResult = performTranslation(text, sourceLang, targetLang, cacheKey)
+        }
+        
+        return if (result?.isSuccess == true) {
+            translatedResult ?: text
+        } else {
+            text
+        }
+    }
+    
+    /**
+     * Internal method to perform the actual translation.
+     * Separated from translateText to work with queue manager.
+     */
+    @OptIn(ExperimentalTime::class)
+    private suspend fun performTranslation(
+        text: String,
+        sourceLang: String,
+        targetLang: String,
+        cacheKey: String
+    ): String {
         return try {
             translationSemaphore.withPermit {
                 var translatedText: String? = null
@@ -120,6 +163,9 @@ class TranslateBookMetadataUseCase(
                     text
                 }
             }
+        } catch (e: CancellationException) {
+            Log.info { "$TAG: Translation cancelled" }
+            text
         } catch (e: Exception) {
             Log.error { "$TAG: Exception during translation: ${e.message}" }
             text
@@ -129,6 +175,8 @@ class TranslateBookMetadataUseCase(
     /**
      * Translate a list of texts in batch with caching
      * Returns a list of translated texts (or originals if translation fails)
+     * 
+     * Will skip translation if content translation is active (reader content has priority)
      */
     @OptIn(ExperimentalTime::class)
     suspend fun translateTexts(
@@ -137,6 +185,12 @@ class TranslateBookMetadataUseCase(
         targetLanguage: String? = null
     ): List<String> {
         if (texts.isEmpty()) return texts
+        
+        // Check if content translation is active - skip metadata translation
+        if (translationQueueManager?.isContentTranslationActive() == true) {
+            Log.info { "$TAG: Skipping batch metadata translation - content translation is active" }
+            return texts
+        }
 
         val sourceLang = sourceLanguage ?: getSourceLanguage()
         val targetLang = targetLanguage ?: getTargetLanguage()
@@ -163,42 +217,70 @@ class TranslateBookMetadataUseCase(
 
         // Translate uncached texts in batch
         if (uncachedTexts.isNotEmpty()) {
-            try {
-                translationSemaphore.withPermit {
-                    var translatedTexts: List<String>? = null
-                    var error: UiText? = null
-
-                    translationEnginesManager.translateWithContext(
-                        texts = uncachedTexts,
-                        source = sourceLang,
-                        target = targetLang,
-                        onProgress = { /* No progress tracking */ },
-                        onSuccess = { translations ->
-                            translatedTexts = translations
-                        },
-                        onError = { uiText ->
-                            error = uiText
-                        }
-                    )
-
-                    if (translatedTexts != null && translatedTexts!!.size == uncachedTexts.size) {
-                        // Update results and cache
-                        uncachedIndices.forEachIndexed { i, originalIndex ->
-                            val translated = translatedTexts!![i]
-                            results[originalIndex] = translated
-                            val cacheKey = "${uncachedTexts[i]}_${sourceLang}_$targetLang"
-                            translationCache[cacheKey] = CachedTranslation(translated, Clock.System.now().toEpochMilliseconds())
-                        }
-                    } else if (error != null) {
-                        Log.error { "$TAG: Batch translation error: $error" }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.error { "$TAG: Exception during batch translation: ${e.message}" }
+            // Use queue manager for coordinated translation
+            val result = translationQueueManager?.executeTranslation(
+                priority = TranslationPriority.METADATA,
+                description = "Batch metadata: ${uncachedTexts.size} texts"
+            ) {
+                performBatchTranslation(uncachedTexts, uncachedIndices, results, sourceLang, targetLang)
+            }
+            
+            if (result == null) {
+                // Translation was skipped, return original texts
+                return texts
             }
         }
 
         return results
+    }
+    
+    /**
+     * Internal method to perform batch translation.
+     * Separated from translateTexts to work with queue manager.
+     */
+    @OptIn(ExperimentalTime::class)
+    private suspend fun performBatchTranslation(
+        uncachedTexts: List<String>,
+        uncachedIndices: List<Int>,
+        results: MutableList<String>,
+        sourceLang: String,
+        targetLang: String
+    ) {
+        try {
+            translationSemaphore.withPermit {
+                var translatedTexts: List<String>? = null
+                var error: UiText? = null
+
+                translationEnginesManager.translateWithContext(
+                    texts = uncachedTexts,
+                    source = sourceLang,
+                    target = targetLang,
+                    onProgress = { /* No progress tracking */ },
+                    onSuccess = { translations ->
+                        translatedTexts = translations
+                    },
+                    onError = { uiText ->
+                        error = uiText
+                    }
+                )
+
+                if (translatedTexts != null && translatedTexts!!.size == uncachedTexts.size) {
+                    // Update results and cache
+                    uncachedIndices.forEachIndexed { i, originalIndex ->
+                        val translated = translatedTexts!![i]
+                        results[originalIndex] = translated
+                        val cacheKey = "${uncachedTexts[i]}_${sourceLang}_$targetLang"
+                        translationCache[cacheKey] = CachedTranslation(translated, Clock.System.now().toEpochMilliseconds())
+                    }
+                } else if (error != null) {
+                    Log.error { "$TAG: Batch translation error: $error" }
+                }
+            }
+        } catch (e: CancellationException) {
+            Log.info { "$TAG: Batch translation cancelled" }
+        } catch (e: Exception) {
+            Log.error { "$TAG: Exception during batch translation: ${e.message}" }
+        }
     }
 
     /**

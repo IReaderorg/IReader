@@ -52,8 +52,9 @@ class NvidiaTranslateEngine(
     override val supportsStylePreservation: Boolean = true
     override val requiresApiKey: Boolean = true
     
-    // NVIDIA supports larger context windows
-    override val maxCharsPerRequest: Int = 8000
+    // NVIDIA - reduced chunk size for better reliability
+    // Many models have token limits, and 4000 chars is safer
+    override val maxCharsPerRequest: Int = 4000
     
     // Rate limit varies by model, 2 seconds is safe
     override val rateLimitDelayMs: Long = 2000L

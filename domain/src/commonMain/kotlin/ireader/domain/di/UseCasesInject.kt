@@ -252,7 +252,8 @@ val UseCasesInject = module {
         ireader.domain.usecases.translate.TranslateBookMetadataUseCase(
             translationEnginesManager = get(),
             translationPreferences = get(),
-            readerPreferences = get()
+            readerPreferences = get(),
+            translationQueueManager = get()
         ) 
     }
     

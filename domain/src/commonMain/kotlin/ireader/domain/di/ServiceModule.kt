@@ -81,7 +81,8 @@ val ServiceModule = module {
             stateHolder = get(),
             autoShareTranslationUseCase = getOrNull(),
             communityPreferences = getOrNull(),
-            localizeHelper = get()
+            localizeHelper = get(),
+            translationQueueManager = get()
         )
     }
     
