@@ -11,20 +11,24 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
-import ireader.domain.data.engines.ContentType as TranslationContentType
 import ireader.domain.data.engines.ToneType
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.api_rate_limit_exceeded
+import ireader.i18n.resources.empty_response
+import ireader.i18n.resources.no_text_to_translate
+import ireader.i18n.resources.openrouter_api_key_invalid
+import ireader.i18n.resources.openrouter_api_key_not_set
+import ireader.i18n.resources.openrouter_insufficient_credits
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import ireader.domain.data.engines.ContentType as TranslationContentType
 
 /**
  * OpenRouterTranslateEngine
@@ -54,7 +58,7 @@ class OpenRouterTranslateEngine(
     override val requiresApiKey: Boolean = true
     
     // OpenRouter supports larger context windows
-    override val maxCharsPerRequest: Int = 8000
+    override val maxCharsPerRequest: Int = 6000
     
     // Rate limit varies by model, 2 seconds is safe
     override val rateLimitDelayMs: Long = 2000L
