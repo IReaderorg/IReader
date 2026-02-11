@@ -1,18 +1,18 @@
 package ireader.domain.usecases.translate
 
 import ireader.core.log.Log
-import ireader.core.source.model.MangasPageInfo
 import ireader.core.source.model.MangaInfo
+import ireader.core.source.model.MangasPageInfo
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.TranslationPreferences
 import ireader.i18n.UiText
-import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Use case for translating book metadata (title and description) when browsing.
@@ -56,22 +56,38 @@ class TranslateBookMetadataUseCase(
     }
 
     /**
+     * Get the source language from ReaderPreferences (used in reader screen modal sheet)
+     */
+    fun getSourceLanguage(): String {
+        return readerPreferences.translatorOriginLanguage().get()
+    }
+
+    /**
+     * Get the target language from ReaderPreferences (used in reader screen modal sheet)
+     */
+    fun getTargetLanguage(): String {
+        return readerPreferences.translatorTargetLanguage().get()
+    }
+
+    /**
      * Translate a single text string with caching
      * Returns the translated text or the original if translation fails
      */
+    @OptIn(ExperimentalTime::class)
     suspend fun translateText(
         text: String,
-        sourceLanguage: String = "auto",
+        sourceLanguage: String? = null,
         targetLanguage: String? = null
     ): String {
         if (text.isBlank()) return text
 
-        val targetLang = targetLanguage ?: readerPreferences.translatorTargetLanguage().get()
+        val sourceLang = sourceLanguage ?: getSourceLanguage()
+        val targetLang = targetLanguage ?: getTargetLanguage()
         
         // Check cache first
-        val cacheKey = "${text}_${sourceLanguage}_$targetLang"
+        val cacheKey = "${text}_${sourceLang}_$targetLang"
         val cached = translationCache[cacheKey]
-        if (cached != null && (System.currentTimeMillis() - cached.timestamp) < CACHE_EXPIRATION_MS) {
+        if (cached != null && (Clock.System.now().toEpochMilliseconds() - cached.timestamp) < CACHE_EXPIRATION_MS) {
             return cached.translatedText
         }
 
@@ -82,7 +98,7 @@ class TranslateBookMetadataUseCase(
 
                 translationEnginesManager.translateWithContext(
                     texts = listOf(text),
-                    source = sourceLanguage,
+                    source = sourceLang,
                     target = targetLang,
                     onProgress = { /* No progress tracking for single text */ },
                     onSuccess = { translations ->
@@ -95,7 +111,7 @@ class TranslateBookMetadataUseCase(
 
                 if (translatedText != null && translatedText != text) {
                     // Cache the result
-                    translationCache[cacheKey] = CachedTranslation(translatedText!!, System.currentTimeMillis())
+                    translationCache[cacheKey] = CachedTranslation(translatedText!!, Clock.System.now().toEpochMilliseconds())
                     translatedText!!
                 } else {
                     if (error != null) {
@@ -114,14 +130,16 @@ class TranslateBookMetadataUseCase(
      * Translate a list of texts in batch with caching
      * Returns a list of translated texts (or originals if translation fails)
      */
+    @OptIn(ExperimentalTime::class)
     suspend fun translateTexts(
         texts: List<String>,
-        sourceLanguage: String = "auto",
+        sourceLanguage: String? = null,
         targetLanguage: String? = null
     ): List<String> {
         if (texts.isEmpty()) return texts
 
-        val targetLang = targetLanguage ?: readerPreferences.translatorTargetLanguage().get()
+        val sourceLang = sourceLanguage ?: getSourceLanguage()
+        val targetLang = targetLanguage ?: getTargetLanguage()
         val results = mutableListOf<String>()
         val uncachedTexts = mutableListOf<String>()
         val uncachedIndices = mutableListOf<Int>()
@@ -131,9 +149,9 @@ class TranslateBookMetadataUseCase(
             if (text.isBlank()) {
                 results.add(index, text)
             } else {
-                val cacheKey = "${text}_${sourceLanguage}_$targetLang"
+                val cacheKey = "${text}_${sourceLang}_$targetLang"
                 val cached = translationCache[cacheKey]
-                if (cached != null && (System.currentTimeMillis() - cached.timestamp) < CACHE_EXPIRATION_MS) {
+                if (cached != null && (Clock.System.now().toEpochMilliseconds() - cached.timestamp) < CACHE_EXPIRATION_MS) {
                     results.add(index, cached.translatedText)
                 } else {
                     results.add(index, text) // Placeholder
@@ -152,7 +170,7 @@ class TranslateBookMetadataUseCase(
 
                     translationEnginesManager.translateWithContext(
                         texts = uncachedTexts,
-                        source = sourceLanguage,
+                        source = sourceLang,
                         target = targetLang,
                         onProgress = { /* No progress tracking */ },
                         onSuccess = { translations ->
@@ -168,8 +186,8 @@ class TranslateBookMetadataUseCase(
                         uncachedIndices.forEachIndexed { i, originalIndex ->
                             val translated = translatedTexts!![i]
                             results[originalIndex] = translated
-                            val cacheKey = "${uncachedTexts[i]}_${sourceLanguage}_$targetLang"
-                            translationCache[cacheKey] = CachedTranslation(translated, System.currentTimeMillis())
+                            val cacheKey = "${uncachedTexts[i]}_${sourceLang}_$targetLang"
+                            translationCache[cacheKey] = CachedTranslation(translated, Clock.System.now().toEpochMilliseconds())
                         }
                     } else if (error != null) {
                         Log.error { "$TAG: Batch translation error: $error" }

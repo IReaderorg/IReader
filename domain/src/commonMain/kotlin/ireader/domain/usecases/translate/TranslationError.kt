@@ -329,9 +329,7 @@ sealed class TranslationError {
                 
                 // Network errors
                 message.contains("network") || message.contains("connection") ||
-                message.contains("socket") || message.contains("timeout") ||
-                exception is java.net.SocketTimeoutException ||
-                exception is java.net.UnknownHostException ->
+                message.contains("socket") || message.contains("timeout") ->
                     NetworkError(engineName, exception.message)
                 
                 // Server errors

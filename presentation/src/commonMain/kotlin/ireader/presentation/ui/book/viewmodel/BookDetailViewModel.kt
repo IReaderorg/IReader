@@ -44,6 +44,7 @@ import ireader.domain.usecases.prefetch.BookPrefetchService
 import ireader.domain.usecases.source.CheckSourceAvailabilityUseCase
 import ireader.domain.usecases.source.MigrateToSourceUseCase
 import ireader.domain.usecases.sync.SyncUseCases
+import ireader.domain.usecases.translate.TranslateBookMetadataUseCase
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.extensions.withIOContext
@@ -116,6 +117,7 @@ class BookDetailViewModel(
     private val bookDetailController: BookDetailController,
     private val localizeHelper: LocalizeHelper,
     private val trackingRepository: ireader.domain.data.repository.TrackingRepository? = null,
+    private val translateBookMetadataUseCase: TranslateBookMetadataUseCase? = null,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -403,6 +405,7 @@ class BookDetailViewModel(
                 if (prefetchedData != null) {
                     // Use prefetched data for instant display
                     ScreenProfiler.mark(screenTag, "prefetch_cache_hit")
+                    // Don't translate here - book should already have translated data from when it was saved
                     val book = prefetchedData.book
                     val chapters = prefetchedData.chapters
                     val lastReadChapterId = prefetchedData.lastReadChapterId
@@ -481,6 +484,7 @@ class BookDetailViewModel(
                 ScreenProfiler.mark(screenTag, "prefetch_cache_miss")
                 // First, try to get the book directly for immediate display
                 // Use withContext(IO) only for the actual DB call
+                // Don't translate here - book should already have translated data from when it was saved
                 val book = withIOContext { getBookUseCases.findBookById(bookId) }
                 ScreenProfiler.mark(screenTag, "book_loaded_from_db")
                 val sourceId = book?.sourceId
@@ -622,7 +626,9 @@ class BookDetailViewModel(
                     withUIContext {
                         updateSuccessState { it.copy(isRefreshingBook = false) }
                     }
-                    localInsertUseCases.updateBook.update(resultBook)
+                    // Translate book metadata before saving if auto-translate is enabled
+                    val translatedBook = translateBookMetadata(resultBook)
+                    localInsertUseCases.updateBook.update(translatedBook)
                 }
             )
         }
@@ -673,6 +679,8 @@ class BookDetailViewModel(
             if (book != null) {
                 hasReceivedBook = true
                 nullEmissionCount = 0 // Reset counter
+                
+                // Don't translate here - book should already have translated data from when it was saved
                 
                 // Safely get catalog and source - extension might not be installed
                 val (catalog, source) = try {
@@ -760,6 +768,40 @@ class BookDetailViewModel(
     
     private fun emitEvent(event: BookDetailEvent) {
         scope.launch { _events.emit(event) }
+    }
+
+    // ==================== Book Metadata Translation ====================
+
+    /**
+     * Translate book title and description if auto-translate is enabled.
+     * Returns a new Book with translated fields, or the original if translation is disabled/fails.
+     */
+    private suspend fun translateBookMetadata(book: Book): Book {
+        val useCase = translateBookMetadataUseCase ?: return book
+        
+        val translateNames = useCase.isAutoTranslateNamesEnabled()
+        val translateDescriptions = useCase.isAutoTranslateDescriptionsEnabled()
+        
+        if (!translateNames && !translateDescriptions) return book
+        
+        var translatedTitle = book.title
+        var translatedDescription = book.description
+        
+        try {
+            if (translateNames && book.title.isNotBlank()) {
+                translatedTitle = useCase.translateText(book.title)
+            }
+            if (translateDescriptions && !book.description.isNullOrBlank()) {
+                translatedDescription = useCase.translateText(book.description)
+            }
+        } catch (e: Exception) {
+            Log.error { "BookDetailViewModel: Failed to translate book metadata: ${e.message}" }
+        }
+        
+        return book.copy(
+            title = translatedTitle,
+            description = translatedDescription
+        )
     }
 
     // ==================== Scroll Position ====================
@@ -981,7 +1023,9 @@ class BookDetailViewModel(
                     withUIContext {
                         updateSuccessState { it.copy(isRefreshingBook = false) }
                     }
-                    localInsertUseCases.updateBook.update(resultBook)
+                    // Translate book metadata before saving if auto-translate is enabled
+                    val translatedBook = translateBookMetadata(resultBook)
+                    localInsertUseCases.updateBook.update(translatedBook)
                 }
             )
         }
