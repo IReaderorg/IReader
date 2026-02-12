@@ -1,6 +1,5 @@
 package ireader.domain.services.common
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -8,20 +7,24 @@ import org.koin.core.component.inject
 /**
  * Desktop implementation of TranslationService.
  * Uses coroutines for background translation tasks.
+ * 
+ * IMPORTANT: This class delegates all state flows to TranslationServiceImpl
+ * to ensure progress updates are properly propagated to observers.
  */
 class DesktopTranslationService : TranslationService, KoinComponent {
     
-    private val _state = MutableStateFlow(ServiceState.IDLE)
-    override val state: StateFlow<ServiceState> = _state
-    
-    private val _translationProgress = MutableStateFlow<Map<Long, TranslationProgress>>(emptyMap())
-    override val translationProgress: StateFlow<Map<Long, TranslationProgress>> = _translationProgress
-    
-    private val _currentBookId = MutableStateFlow<Long?>(null)
-    override val currentBookId: StateFlow<Long?> = _currentBookId
-    
     // Lazy inject dependencies to avoid circular dependency issues
     private val translationServiceImpl: ireader.domain.services.translationService.TranslationServiceImpl by inject()
+    
+    // Delegate state to the impl (same pattern as AndroidTranslationService)
+    override val state: StateFlow<ServiceState>
+        get() = translationServiceImpl.state
+    
+    override val translationProgress: StateFlow<Map<Long, TranslationProgress>>
+        get() = translationServiceImpl.translationProgress
+    
+    override val currentBookId: StateFlow<Long?>
+        get() = translationServiceImpl.currentBookId
     
     override suspend fun initialize() {
         translationServiceImpl.initialize()
@@ -53,12 +56,10 @@ class DesktopTranslationService : TranslationService, KoinComponent {
     
     override suspend fun pause() {
         translationServiceImpl.pause()
-        _state.value = ServiceState.PAUSED
     }
     
     override suspend fun resume() {
         translationServiceImpl.resume()
-        _state.value = ServiceState.RUNNING
     }
     
     override suspend fun cancelTranslation(chapterId: Long): ServiceResult<Unit> {
@@ -66,9 +67,7 @@ class DesktopTranslationService : TranslationService, KoinComponent {
     }
     
     override suspend fun cancelAll(): ServiceResult<Unit> {
-        val result = translationServiceImpl.cancelAll()
-        _state.value = ServiceState.IDLE
-        return result
+        return translationServiceImpl.cancelAll()
     }
     
     override suspend fun retryTranslation(chapterId: Long): ServiceResult<Unit> {
@@ -88,14 +87,14 @@ class DesktopTranslationService : TranslationService, KoinComponent {
     }
     
     override suspend fun start() {
-        _state.value = ServiceState.RUNNING
+        translationServiceImpl.start()
     }
     
     override suspend fun stop() {
-        _state.value = ServiceState.STOPPED
+        translationServiceImpl.stop()
     }
     
     override fun isRunning(): Boolean {
-        return _state.value == ServiceState.RUNNING
+        return translationServiceImpl.isRunning()
     }
 }
