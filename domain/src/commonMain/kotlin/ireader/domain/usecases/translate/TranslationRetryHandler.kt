@@ -240,16 +240,35 @@ class TranslationRetryHandler {
         val errorCategory = category ?: categorizeError(error)
         
         return when (errorCategory) {
-            ErrorCategory.NETWORK -> "Network connection error. Please check your internet connection."
+            ErrorCategory.NETWORK -> "Connection error. Please check if the translation service is running and accessible."
             ErrorCategory.RATE_LIMIT -> "Translation service is busy. Please try again in a moment."
             ErrorCategory.SERVER_ERROR -> "Translation service is temporarily unavailable. Please try again later."
             ErrorCategory.AUTHENTICATION -> "API key is invalid or missing. Please check your settings."
             ErrorCategory.CONTENT_FILTER -> "Content could not be translated due to policy restrictions."
             ErrorCategory.INVALID_REQUEST -> "Invalid translation request. Please check your settings."
             ErrorCategory.MODEL_ERROR -> "The selected translation model is not available."
-            ErrorCategory.TIMEOUT -> "Translation request timed out. Please try again."
+            ErrorCategory.TIMEOUT -> "Translation request timed out. The model may be loading, please wait and try again."
             ErrorCategory.UNKNOWN -> "Translation failed: ${error.message ?: "Unknown error"}"
         }
+    }
+    
+    /**
+     * Get a user-friendly error message, with special handling for offline engines.
+     */
+    fun getUserFriendlyMessage(error: Throwable, category: ErrorCategory?, isOfflineEngine: Boolean = false): String {
+        val errorCategory = category ?: categorizeError(error)
+        
+        // For offline engines (like Ollama), provide more specific messages
+        if (isOfflineEngine) {
+            return when (errorCategory) {
+                ErrorCategory.NETWORK -> "Cannot connect to local translation service. Please ensure Ollama or your local LLM server is running."
+                ErrorCategory.TIMEOUT -> "Local translation is taking longer than expected. The model may be loading into memory. Please wait..."
+                ErrorCategory.SERVER_ERROR -> "Local translation service error. The model may still be loading. Please wait and try again."
+                else -> getUserFriendlyMessage(error, category)
+            }
+        }
+        
+        return getUserFriendlyMessage(error, category)
     }
     
     /**

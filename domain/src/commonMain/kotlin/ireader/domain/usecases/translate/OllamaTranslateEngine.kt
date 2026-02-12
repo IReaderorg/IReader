@@ -1,12 +1,14 @@
 package ireader.domain.usecases.translate
 
 import io.ktor.client.plugins.timeout
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import ireader.core.http.HttpClients
+import ireader.core.log.Log
 import ireader.domain.data.engines.ToneType
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
@@ -190,6 +192,162 @@ class OllamaTranslateEngine(
         val done: Boolean = false,
         val error: String? = null
     )
+    
+    // Response models for /api/tags endpoint
+    @Serializable
+    private data class OllamaTagsResponse(
+        val models: List<OllamaModel> = emptyList()
+    )
+    
+    @Serializable
+    private data class OllamaModel(
+        val name: String,
+        val modified_at: String? = null,
+        val size: Long? = null,
+        val digest: String? = null,
+        val details: OllamaModelDetails? = null
+    )
+    
+    @Serializable
+    private data class OllamaModelDetails(
+        val format: String? = null,
+        val family: String? = null,
+        val parameter_size: String? = null,
+        val quantization_level: String? = null
+    )
+    
+    // Cached available models
+    private var cachedModels: List<OllamaModelInfo>? = null
+    private var lastModelFetchTime: Long = 0
+    private val modelCacheDurationMs = 60000L // 1 minute cache
+    
+    /**
+     * Information about an available Ollama model
+     */
+    data class OllamaModelInfo(
+        val name: String,
+        val displayName: String,
+        val size: String?,
+        val details: String?
+    )
+    
+    /**
+     * Fetch available models from the Ollama server.
+     * Uses caching to avoid repeated API calls.
+     * 
+     * @param forceRefresh Force refresh the cache
+     * @return List of available models, or empty list if unavailable
+     */
+    suspend fun fetchAvailableModels(forceRefresh: Boolean = false): List<OllamaModelInfo> {
+        val now = System.currentTimeMillis()
+        
+        // Return cached models if still valid
+        if (!forceRefresh && cachedModels != null && (now - lastModelFetchTime) < modelCacheDurationMs) {
+            return cachedModels!!
+        }
+        
+        return try {
+            val url = getOllamaUrl()
+            val tagsUrl = "$url/api/tags"
+            
+            Log.info { "OllamaTranslateEngine: Fetching available models from $tagsUrl" }
+            
+            val response = client.default.get(tagsUrl) {
+                timeout {
+                    requestTimeoutMillis = 10000 // 10 seconds for model list
+                    connectTimeoutMillis = 5000
+                }
+            }
+            
+            if (response.status.value !in 200..299) {
+                Log.warn { "OllamaTranslateEngine: Failed to fetch models, status: ${response.status}" }
+                return getCachedOrDefaultModels()
+            }
+            
+            val responseText = response.bodyAsText()
+            val tagsResponse = json.decodeFromString<OllamaTagsResponse>(responseText)
+            
+            val models = tagsResponse.models.map { model ->
+                OllamaModelInfo(
+                    name = model.name,
+                    displayName = formatModelDisplayName(model),
+                    size = model.size?.let { formatSize(it) },
+                    details = model.details?.let { "${it.family ?: ""} ${it.parameter_size ?: ""}".trim() }
+                )
+            }
+            
+            Log.info { "OllamaTranslateEngine: Found ${models.size} models" }
+            
+            // Update cache
+            cachedModels = models
+            lastModelFetchTime = now
+            
+            models
+        } catch (e: Exception) {
+            Log.error { "OllamaTranslateEngine: Failed to fetch models: ${e.message}" }
+            getCachedOrDefaultModels()
+        }
+    }
+    
+    /**
+     * Get cached models or default models if cache is empty
+     */
+    private fun getCachedOrDefaultModels(): List<OllamaModelInfo> {
+        return cachedModels ?: listOf(
+            OllamaModelInfo("mistral", "Mistral (Default)", null, null),
+            OllamaModelInfo("llama2", "Llama 2", null, null),
+            OllamaModelInfo("llama3", "Llama 3", null, null),
+            OllamaModelInfo("codellama", "Code Llama", null, null),
+            OllamaModelInfo("qwen", "Qwen", null, null)
+        )
+    }
+    
+    /**
+     * Format model name for display
+     */
+    private fun formatModelDisplayName(model: OllamaModel): String {
+        val name = model.name
+        // Remove trailing :latest if present
+        val cleanName = name.removeSuffix(":latest")
+        
+        // Build display name with details if available
+        return buildString {
+            append(cleanName)
+            model.details?.parameter_size?.let { size ->
+                append(" ($size)")
+            }
+        }
+    }
+    
+    /**
+     * Format file size in human-readable format
+     */
+    private fun formatSize(bytes: Long): String {
+        return when {
+            bytes >= 1_073_741_824 -> "%.1f GB".format(bytes / 1_073_741_824.0)
+            bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
+            bytes >= 1024 -> "%.1f KB".format(bytes / 1024.0)
+            else -> "$bytes B"
+        }
+    }
+    
+    /**
+     * Check if the Ollama server is reachable
+     */
+    suspend fun isServerAvailable(): Boolean {
+        return try {
+            val url = getOllamaUrl()
+            val response = client.default.get("$url/api/version") {
+                timeout {
+                    requestTimeoutMillis = 5000
+                    connectTimeoutMillis = 3000
+                }
+            }
+            response.status.value in 200..299
+        } catch (e: Exception) {
+            false
+        }
+    }
     
     override suspend fun translate(
         texts: List<String>,

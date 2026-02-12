@@ -75,6 +75,15 @@ interface TranslationPlugin : Plugin {
      */
     fun getConfigValue(key: String): Any? = null
     
+    /**
+     * Get dynamic options for a Select configuration field.
+     * Override to provide dynamically updated options (e.g., models from server).
+     * 
+     * @param key The config field key
+     * @return List of options for the select field, or null to use static options
+     */
+    fun getConfigOptions(key: String): List<String>? = null
+    
     // ==================== Core Translation Methods ====================
     
     /**

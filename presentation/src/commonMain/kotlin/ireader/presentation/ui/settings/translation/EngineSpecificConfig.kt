@@ -51,6 +51,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.PluginPreferences
 import ireader.domain.usecases.translate.TranslationEnginesManager
@@ -1843,7 +1846,9 @@ private fun DynamicPluginConfigRenderer(
     modifier: Modifier = Modifier
 ) {
     val plugin = pluginEngine.getPlugin()
-    val configFields = remember(plugin) { plugin.getConfigFields() }
+    // Use a refresh key to force recomposition when config changes
+    var refreshKey by remember { mutableStateOf(0) }
+    val configFields = remember(plugin, refreshKey) { plugin.getConfigFields() }
     
     if (configFields.isEmpty()) {
         // No config fields - show simple info card
@@ -1888,7 +1893,10 @@ private fun DynamicPluginConfigRenderer(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             configFields.forEach { config ->
-                RenderConfigField(config, plugin)
+                RenderConfigField(config, plugin, refreshKey) {
+                    // Trigger refresh when action is performed
+                    refreshKey++
+                }
             }
         }
     }
@@ -1898,14 +1906,16 @@ private fun DynamicPluginConfigRenderer(
 @Composable
 private fun RenderConfigField(
     config: ireader.plugin.api.PluginConfig<*>,
-    plugin: ireader.plugin.api.TranslationPlugin
+    plugin: ireader.plugin.api.TranslationPlugin,
+    refreshKey: Int = 0,
+    onRefresh: () -> Unit = {}
 ) {
-    // Force state reload after plugin initialization
+    // Force state reload after plugin initialization or refresh
     var reloadTrigger by remember { mutableStateOf(0) }
     
-    LaunchedEffect(plugin) {
+    LaunchedEffect(plugin, refreshKey) {
         // Give plugin time to initialize and load preferences
-        kotlinx.coroutines.delay(50)
+        delay(50)
         reloadTrigger++
     }
     
@@ -2005,8 +2015,28 @@ private fun RenderConfigField(
         
         is ireader.plugin.api.PluginConfig.Select -> {
             var expanded by remember { mutableStateOf(false) }
-            var selectedIndex by remember(plugin, config.key, reloadTrigger) { 
+            // Include refreshKey in the key to force recomposition when models are refreshed
+            var selectedIndex by remember(plugin, config.key, reloadTrigger, refreshKey) { 
                 mutableStateOf(plugin.getConfigValue(config.key) as? Int ?: config.defaultValue) 
+            }
+            
+            // For "model" key, try to get options from plugin preferences
+            // Use refreshKey to force reload when refresh button is clicked
+            val dynamicOptions = remember(plugin, config.key, refreshKey, reloadTrigger) {
+                if (config.key == "model") {
+                    // Get models list from a special config value
+                    (plugin.getConfigValue("cached_models_list") as? List<String>) ?: emptyList()
+                } else {
+                    config.options
+                }
+            }
+            
+            // Update selected index if it's out of bounds
+            LaunchedEffect(dynamicOptions.size, refreshKey) {
+                if (dynamicOptions.isNotEmpty() && selectedIndex >= dynamicOptions.size) {
+                    selectedIndex = 0
+                    plugin.onConfigChanged(config.key, 0)
+                }
             }
             
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -2015,35 +2045,46 @@ private fun RenderConfigField(
                     style = MaterialTheme.typography.labelMedium
                 )
                 
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it }
-                ) {
+                if (dynamicOptions.isEmpty()) {
+                    // Show placeholder when no models are available
                     OutlinedTextField(
-                        value = config.options.getOrNull(selectedIndex) ?: "",
+                        value = "Click 'Refresh Models' above",
                         onValueChange = {},
                         readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    
-                    ExposedDropdownMenu(
+                } else {
+                    ExposedDropdownMenuBox(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onExpandedChange = { expanded = it }
                     ) {
-                        config.options.forEachIndexed { index, option ->
-                            DropdownMenuItem(
-                                text = { Text(option) },
-                                onClick = {
-                                    selectedIndex = index
-                                    plugin.onConfigChanged(config.key, index)
-                                    expanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                            )
+                        OutlinedTextField(
+                            value = dynamicOptions.getOrNull(selectedIndex) ?: dynamicOptions.firstOrNull() ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                        )
+                        
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            dynamicOptions.forEachIndexed { index, option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = {
+                                        selectedIndex = index
+                                        plugin.onConfigChanged(config.key, index)
+                                        expanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                                )
+                            }
                         }
                     }
                 }
@@ -2230,24 +2271,43 @@ private fun RenderConfigField(
         }
         
         is ireader.plugin.api.PluginConfig.Action -> {
+            var isLoading by remember { mutableStateOf(false) }
+            val coroutineScope = rememberCoroutineScope()
+            
             Button(
                 onClick = {
                     // Trigger action callback
+                    isLoading = true
                     plugin.onConfigChanged(config.key, Unit)
+                    // Delay refresh to allow async operations to complete
+                    // Increased delay for model fetching operations
+                    coroutineScope.launch {
+                        delay(2000) // Increased from 1000ms to 2000ms for model fetching
+                        isLoading = false
+                        onRefresh()
+                    }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             ) {
-                Icon(
-                    imageVector = when (config.actionType) {
-                        ireader.plugin.api.ActionType.TEST_CONNECTION -> Icons.Default.NetworkCheck
-                        ireader.plugin.api.ActionType.DANGER -> Icons.Default.Error
-                        else -> Icons.Default.Check
-                    },
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = when (config.actionType) {
+                            ireader.plugin.api.ActionType.TEST_CONNECTION -> Icons.Default.NetworkCheck
+                            ireader.plugin.api.ActionType.DANGER -> Icons.Default.Error
+                            else -> Icons.Default.Refresh
+                        },
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(config.buttonText ?: config.name)
+                Text(if (isLoading) "Loading..." else (config.buttonText ?: config.name))
             }
             config.description?.let {
                 Text(

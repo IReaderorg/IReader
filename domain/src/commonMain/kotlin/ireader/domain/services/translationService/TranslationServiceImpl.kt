@@ -573,11 +573,14 @@ class TranslationServiceImpl(
             }
             
             // Use retry handler for robust translation
+            // For offline engines (like Ollama), use more retries with longer delays
+            // because local LLMs may need time to load models into memory
             val retryResult = retryHandler.executeWithRetry(
                 config = TranslationRetryHandler.RetryConfig(
-                    maxRetries = if (engine.isOffline) 1 else 3,
-                    initialDelayMs = delayMs,
-                    maxDelayMs = 30000L
+                    maxRetries = if (engine.isOffline) 5 else 3,
+                    initialDelayMs = if (engine.isOffline) 5000L else delayMs,
+                    maxDelayMs = if (engine.isOffline) 120000L else 30000L,
+                    backoffMultiplier = if (engine.isOffline) 1.5 else 2.0
                 ),
                 onError = { error, attempt, category ->
                     Log.warn { "Translation chunk ${index + 1} attempt $attempt failed (${category.name}): ${error.message}" }
@@ -600,7 +603,8 @@ class TranslationServiceImpl(
                     
                     val userMessage = retryHandler.getUserFriendlyMessage(
                         retryResult.error, 
-                        retryResult.errorCategory
+                        retryResult.errorCategory,
+                        engine.isOffline
                     )
                     throw Exception("Translation failed after ${retryResult.attempts} attempts: $userMessage")
                 }
