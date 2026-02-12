@@ -37,11 +37,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -193,32 +196,11 @@ private fun PluginEngineConfig(
     translationEnginesManager: TranslationEnginesManager?,
     modifier: Modifier = Modifier
 ) {
-    val pluginId = pluginEngine.pluginId
-    
-    // Determine plugin type and show appropriate config
-    when {
-        pluginId.contains("ollama") -> OllamaPluginConfig(
-            pluginEngine = pluginEngine,
-            modifier = modifier
-        )
-        pluginId.contains("libretranslate") -> LibreTranslatePluginInfo(modifier = modifier)
-        pluginId.contains("huggingface") -> HuggingFacePluginConfig(
-            pluginEngine = pluginEngine,
-            modifier = modifier
-        )
-        pluginId.contains("openai") -> OpenAIPluginConfig(
-            pluginEngine = pluginEngine,
-            modifier = modifier
-        )
-        pluginId.contains("deepseek") -> DeepSeekPluginConfig(
-            pluginEngine = pluginEngine,
-            modifier = modifier
-        )
-        else -> GenericPluginConfig(
-            pluginEngine = pluginEngine,
-            modifier = modifier
-        )
-    }
+    // Use dynamic config renderer for all plugins
+    DynamicPluginConfigRenderer(
+        pluginEngine = pluginEngine,
+        modifier = modifier
+    )
 }
 
 /**
@@ -1842,6 +1824,453 @@ private fun NvidiaConfig(
                 text = localizeHelper.localize(Res.string.nvidia_info),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+
+// ==================== Dynamic Plugin Config Renderer ====================
+
+/**
+ * Dynamic renderer that builds UI from plugin's getConfigFields()
+ * Supports all PluginConfig types defined in the API
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DynamicPluginConfigRenderer(
+    pluginEngine: PluginTranslateEngineWrapper,
+    modifier: Modifier = Modifier
+) {
+    val plugin = pluginEngine.getPlugin()
+    val configFields = remember(plugin) { plugin.getConfigFields() }
+    
+    if (configFields.isEmpty()) {
+        // No config fields - show simple info card
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Ready to use - no configuration needed",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+        return
+    }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            configFields.forEach { config ->
+                RenderConfigField(config, plugin)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RenderConfigField(
+    config: ireader.plugin.api.PluginConfig<*>,
+    plugin: ireader.plugin.api.TranslationPlugin
+) {
+    // Force state reload after plugin initialization
+    var reloadTrigger by remember { mutableStateOf(0) }
+    
+    LaunchedEffect(plugin) {
+        // Give plugin time to initialize and load preferences
+        kotlinx.coroutines.delay(50)
+        reloadTrigger++
+    }
+    
+    when (config) {
+        is ireader.plugin.api.PluginConfig.Header -> {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = config.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                config.description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        
+        is ireader.plugin.api.PluginConfig.Text -> {
+            var textValue by remember(plugin, config.key, reloadTrigger) { 
+                mutableStateOf(plugin.getConfigValue(config.key) as? String ?: config.defaultValue) 
+            }
+            
+            OutlinedTextField(
+                value = textValue,
+                onValueChange = { newValue ->
+                    textValue = newValue
+                    plugin.onConfigChanged(config.key, newValue)
+                },
+                label = { Text(config.name) },
+                placeholder = config.placeholder?.let { { Text(it) } },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                supportingText = config.description?.let { { Text(it, style = MaterialTheme.typography.bodySmall) } },
+                keyboardOptions = when (config.inputType) {
+                    ireader.plugin.api.TextInputType.URL -> KeyboardOptions(keyboardType = KeyboardType.Uri)
+                    ireader.plugin.api.TextInputType.EMAIL -> KeyboardOptions(keyboardType = KeyboardType.Email)
+                    ireader.plugin.api.TextInputType.NUMBER -> KeyboardOptions(keyboardType = KeyboardType.Number)
+                    ireader.plugin.api.TextInputType.PHONE -> KeyboardOptions(keyboardType = KeyboardType.Phone)
+                    else -> KeyboardOptions.Default
+                }
+            )
+        }
+        
+        is ireader.plugin.api.PluginConfig.Password -> {
+            var passwordValue by remember(plugin, config.key, reloadTrigger) { 
+                mutableStateOf(plugin.getConfigValue(config.key) as? String ?: config.defaultValue) 
+            }
+            var passwordVisible by remember { mutableStateOf(false) }
+            
+            OutlinedTextField(
+                value = passwordValue,
+                onValueChange = { newValue ->
+                    passwordValue = newValue
+                    plugin.onConfigChanged(config.key, newValue)
+                },
+                label = { Text(config.name) },
+                placeholder = config.placeholder?.let { { Text(it) } },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                supportingText = config.description?.let { { Text(it, style = MaterialTheme.typography.bodySmall) } },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                }
+            )
+        }
+        
+        is ireader.plugin.api.PluginConfig.TextArea -> {
+            var textValue by remember(plugin, config.key, reloadTrigger) { 
+                mutableStateOf(plugin.getConfigValue(config.key) as? String ?: config.defaultValue) 
+            }
+            
+            OutlinedTextField(
+                value = textValue,
+                onValueChange = { newValue ->
+                    textValue = newValue
+                    plugin.onConfigChanged(config.key, newValue)
+                },
+                label = { Text(config.name) },
+                placeholder = config.placeholder?.let { { Text(it) } },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = config.maxLines,
+                supportingText = config.description?.let { { Text(it, style = MaterialTheme.typography.bodySmall) } }
+            )
+        }
+        
+        is ireader.plugin.api.PluginConfig.Select -> {
+            var expanded by remember { mutableStateOf(false) }
+            var selectedIndex by remember(plugin, config.key, reloadTrigger) { 
+                mutableStateOf(plugin.getConfigValue(config.key) as? Int ?: config.defaultValue) 
+            }
+            
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = config.name,
+                    style = MaterialTheme.typography.labelMedium
+                )
+                
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = config.options.getOrNull(selectedIndex) ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                    )
+                    
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        config.options.forEachIndexed { index, option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedIndex = index
+                                    plugin.onConfigChanged(config.key, index)
+                                    expanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
+                }
+                
+                config.description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        
+        is ireader.plugin.api.PluginConfig.Toggle -> {
+            var toggleValue by remember(plugin, config.key, reloadTrigger) { 
+                mutableStateOf(plugin.getConfigValue(config.key) as? Boolean ?: config.defaultValue) 
+            }
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = config.name,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    config.description?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Switch(
+                    checked = toggleValue,
+                    onCheckedChange = { newValue ->
+                        toggleValue = newValue
+                        plugin.onConfigChanged(config.key, newValue)
+                    }
+                )
+            }
+        }
+        
+        is ireader.plugin.api.PluginConfig.Number -> {
+            var numberValue by remember(plugin, config.key, reloadTrigger) { 
+                mutableStateOf((plugin.getConfigValue(config.key) as? Int ?: config.defaultValue).toString()) 
+            }
+            
+            OutlinedTextField(
+                value = numberValue,
+                onValueChange = { newValue ->
+                    numberValue = newValue
+                    newValue.toIntOrNull()?.let { intValue ->
+                        val minValue = config.min
+                        val maxValue = config.max
+                        val clamped = when {
+                            minValue != null && intValue < minValue -> minValue
+                            maxValue != null && intValue > maxValue -> maxValue
+                            else -> intValue
+                        }
+                        plugin.onConfigChanged(config.key, clamped)
+                    }
+                },
+                label = { Text(config.name) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                supportingText = config.description?.let { { Text(it, style = MaterialTheme.typography.bodySmall) } },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+        }
+        
+        is ireader.plugin.api.PluginConfig.Slider -> {
+            var sliderValue by remember(plugin, config.key, reloadTrigger) { 
+                mutableStateOf(plugin.getConfigValue(config.key) as? Float ?: config.defaultValue) 
+            }
+            
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = config.name,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Text(
+                        text = config.valueFormat?.let { String.format(it, sliderValue) } ?: sliderValue.toString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                Slider(
+                    value = sliderValue,
+                    onValueChange = { newValue ->
+                        sliderValue = newValue
+                        plugin.onConfigChanged(config.key, newValue)
+                    },
+                    valueRange = config.min..config.max,
+                    steps = config.steps
+                )
+                
+                config.description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        
+        is ireader.plugin.api.PluginConfig.Note -> {
+            val icon = when (config.noteType) {
+                ireader.plugin.api.NoteType.INFO -> Icons.Default.CheckCircle
+                ireader.plugin.api.NoteType.WARNING -> Icons.Default.Error
+                ireader.plugin.api.NoteType.ERROR -> Icons.Default.Error
+                ireader.plugin.api.NoteType.SUCCESS -> Icons.Default.Check
+                ireader.plugin.api.NoteType.TIP -> Icons.Default.AutoAwesome
+            }
+            
+            val color = when (config.noteType) {
+                ireader.plugin.api.NoteType.INFO -> MaterialTheme.colorScheme.primary
+                ireader.plugin.api.NoteType.WARNING -> MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                ireader.plugin.api.NoteType.ERROR -> MaterialTheme.colorScheme.error
+                ireader.plugin.api.NoteType.SUCCESS -> MaterialTheme.colorScheme.primary
+                ireader.plugin.api.NoteType.TIP -> MaterialTheme.colorScheme.tertiary
+            }
+            
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(18.dp)
+                )
+                Column {
+                    Text(
+                        text = config.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = color
+                    )
+                    config.description?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+        
+        is ireader.plugin.api.PluginConfig.Link -> {
+            val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+            
+            FilledTonalButton(
+                onClick = { uriHandler.openUri(config.url) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(config.name)
+                    config.description?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+        }
+        
+        is ireader.plugin.api.PluginConfig.Action -> {
+            Button(
+                onClick = {
+                    // Trigger action callback
+                    plugin.onConfigChanged(config.key, Unit)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = when (config.actionType) {
+                        ireader.plugin.api.ActionType.TEST_CONNECTION -> Icons.Default.NetworkCheck
+                        ireader.plugin.api.ActionType.DANGER -> Icons.Default.Error
+                        else -> Icons.Default.Check
+                    },
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(config.buttonText ?: config.name)
+            }
+            config.description?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        
+        is ireader.plugin.api.PluginConfig.Divider -> {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+        }
+        
+        else -> {
+            // Unsupported config type - show placeholder
+            Text(
+                text = "Unsupported config type: ${config::class.simpleName}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
             )
         }
     }
