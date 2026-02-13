@@ -1679,6 +1679,15 @@
     <string name="novel_info">Roman-Info</string>
     <string name="now_try_creating_a_source">Versuchen Sie nun, eine Quelle für Ihre Lieblingswebsite zu erstellen.</string>
     <string name="number_of_sources_to_search">Anzahl der gleichzeitig zu durchsuchenden Quellen. Höhere Werte sind schneller, verbrauchen aber mehr Ressourcen.</string>
+    <string name="nvidia_api_key">NVIDIA API-Schlüssel</string>
+    <string name="nvidia_api_key_invalid">NVIDIA API-Schlüssel ist ungültig. Bitte überprüfen Sie Ihren Schlüssel unter build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">NVIDIA API-Schlüssel ist nicht festgelegt. Bitte konfigurieren Sie ihn in den Einstellungen.</string>
+    <string name="nvidia_fetch_models">Verfügbare Modelle abrufen</string>
+    <string name="nvidia_info">NVIDIA NIM bietet Zugriff auf optimierte KI-Modelle, einschließlich Llama, Mistral, Gemma und mehr. Holen Sie sich Ihren API-Schlüssel unter build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">NVIDIA API-Guthaben unzureichend. Bitte überprüfen Sie Ihr Konto unter build.nvidia.com</string>
+    <string name="nvidia_model">NVIDIA Modell</string>
+    <string name="nvidia_models_loaded">NVIDIA Modelle erfolgreich geladen</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">von</string>
     <string name="off">Aus</string>
     <string name="offline_mode">Offline-Modus</string>
@@ -1721,6 +1730,14 @@
     </string>
     <string name="openai_configuration">OpenAI-Konfiguration</string>
     <string name="openai_quota_exceeded">OpenAI-Kontingent überschritten</string>
+    <string name="openrouter_api_key">OpenRouter API-Schlüssel</string>
+    <string name="openrouter_api_key_invalid">OpenRouter API-Schlüssel ist ungültig. Bitte überprüfen Sie Ihren Schlüssel unter openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">OpenRouter API-Schlüssel ist nicht festgelegt. Bitte konfigurieren Sie ihn in den Einstellungen.</string>
+    <string name="openrouter_fetch_models">Verfügbare Modelle abrufen</string>
+    <string name="openrouter_info">OpenRouter bietet vereinheitlichten Zugriff auf mehrere KI-Modelle, einschließlich GPT-4, Claude, Llama und mehr. Holen Sie sich Ihren API-Schlüssel unter openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">OpenRouter Guthaben unzureichend. Bitte laden Sie Guthaben unter openrouter.ai/credits auf.</string>
+    <string name="openrouter_model">OpenRouter Modell</string>
+    <string name="openrouter_models_loaded">OpenRouter Modelle erfolgreich geladen</string>
     <string name="optimize">Optimieren</string>
     <string name="optimize_database">Datenbank optimieren</string>
     <string name="optimizes_translation_for_specific_content">Optimiert die Übersetzung für spezifische Inhalte</string>
@@ -1995,6 +2012,7 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="refresh_all">Alle aktualisieren</string>
     <string name="refresh_covers_too">Auch Cover aktualisieren</string>
     <string name="refresh_metrics">Metriken aktualisieren</string>
+    <string name="refresh_models">Modelle aktualisieren</string>
     <string name="refreshed">Aktualisiert</string>
     <string name="refreshing">Aktualisiere...</string>
     <string name="refreshing_1">Aktualisiere...</string>

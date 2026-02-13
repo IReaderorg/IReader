@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">Adaugă intrare în glosar</string>
     <string name="add_more_time">Adaugă mai mult timp:</string>
     <string name="add_new_book_glossary">Adaugă glosar carte nouă</string>
+    <string name="add_new_rule">Adaugă o regulă nouă</string>
     <string name="add_novels_to_library_only">Adaugă romane în bibliotecă numai când sunt găsite în rezultatele căutării</string>
     <string name="add_parameter">Adaugă parametru</string>
     <string name="add_plugin_repository">Adaugă depozit de pluginuri</string>
     <string name="add_repository">Adaugă depozit</string>
     <string name="add_repository_1">Adaugă depozit</string>
+    <string name="add_rule">Adaugă regulă</string>
     <string name="add_to_category">Adaugă la categorie</string>
     <string name="add_to_library">Adaugă în bibliotecă</string>
+    <string name="add_without_category">Adaugă fără categorie</string>
+    <string name="added_genre_rule">Regulă de gen adăugată: %1$s</string>
+    <string name="added_source_rule">Regulă de sursă adăugată: %1$s</string>
+    <string name="added_to_category">Adăugat la %s</string>
     <string name="added_to_library">Adăugat în bibliotecă</string>
     <string name="additional_details">Detalii suplimentare:</string>
     <string name="additional_details_optional">Detalii suplimentare (opțional)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">Tot timpul</string>
     <string name="all_types">Toate tipurile</string>
     <string name="allow_loading_lnreader_compatible_javascript">Permite încărcarea plugin-urilor JavaScript compatibile cu LNReader</string>
+    <string name="allow_mobile_data">Permite date mobile</string>
     <string name="alpha">alfa</string>
     <string name="alphaanimation">alphaAnimation</string>
+    <string name="always_ask">Întreabă întotdeauna</string>
     <string name="an_image">o imagine</string>
     <string name="analytics">Analize</string>
     <string name="analyze_page">Analizează pagina</string>
@@ -145,6 +153,9 @@
     <string name="auto">Automat</string>
     <string name="auto_approve_7_days_old">Aprobă automat cele mai vechi de 7 zile</string>
     <string name="auto_backup">Backup automat</string>
+    <string name="auto_categorization">Auto-categorizare</string>
+    <string name="auto_categorization_description">Romanele care corespund acestor reguli vor fi adăugate automat la această categorie.</string>
+    <string name="auto_categorization_rules">Reguli de auto-categorizare</string>
     <string name="auto_cleanup">Curățare automată</string>
     <string name="auto_delete">Ștergere automată</string>
     <string name="auto_delete_chapters">Șterge automat capitolele</string>
@@ -165,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">Sortează automat capitolele în DB</string>
     <string name="auto_sync">Sincronizare automată</string>
     <string name="auto_sync_1">Sincronizare automată</string>
+    <string name="auto_translate_descriptions">Traducere automată descrieri</string>
     <string name="auto_translate_next_chapter">Traduce automat următorul capitol</string>
     <string name="auto_translate_next_chapter_summary">Traduce automat următorul capitol la navigare folosind motorul de traducere selectat</string>
+    <string name="auto_translate_novel_names">Traducere automată nume romane</string>
     <string name="auto_update">Actualizare automată</string>
     <string name="auto_update_1">Actualizare automată</string>
     <string name="auto_update_2">Actualizare automată</string>
@@ -185,6 +198,8 @@
     <string name="automatically_share_your_translations_with">Partajați automat traducerile dvs. cu comunitatea</string>
     <string name="automatically_stop_playback_after_set_time">Oprește automat redarea după timpul setat</string>
     <string name="automatically_sync_reading_progress">Sincronizează automat progresul lecturii</string>
+    <string name="automatically_translate_novel_descriptions_when">Traduce automat descrierile romanelor la navigarea prin surse</string>
+    <string name="automatically_translate_novel_titles_when">Traduce automat titlurile romanelor la navigarea prin surse</string>
     <string name="autoscroll">Derulare automată</string>
     <string name="available">Disponibil</string>
     <string name="available_backups">Copii de rezervă disponibile</string>
@@ -192,6 +207,7 @@
     <string name="available_for_download">Disponibil pentru descărcare</string>
     <string name="available_kokoro_voices">Voci Kokoro disponibile:</string>
     <string name="available_languages">Limbi disponibile:</string>
+    <string name="available_voices">Voci disponibile</string>
     <string name="average_reading_speed">Viteză medie de citire</string>
     <string name="avg_cpu">CPU mediu</string>
     <string name="avg_response_time">Timp mediu de răspuns</string>
@@ -258,6 +274,7 @@
     <string name="book_name_selector">Selector nume carte *</string>
     <string name="book_name_selector_1">Selector nume carte</string>
     <string name="book_not_found">Cartea nu a fost găsită</string>
+    <string name="book_not_in_target_source">Carte negăsită în sursa țintă</string>
     <string name="book_queued_for_download">Cartea a fost adăugată în coada de descărcare</string>
     <string name="book_reviews">Recenzii de cărți</string>
     <string name="book_title">Titlu Carte</string>
@@ -360,6 +377,7 @@
     <string name="chapter_complete">CAPITOL COMPLET</string>
     <string name="chapter_completed">Capitol Finalizat</string>
     <string name="chapter_content_extracted">Conținutul capitolului a fost extras folosind %1$s</string>
+    <string name="chapter_fetch_failed">Preluare capitol eșuată</string>
     <string name="chapter_filters">Filtre capitol</string>
     <string name="chapter_heading_size">Dimensiune titlu capitol</string>
     <string name="chapter_list">Listă capitole</string>
@@ -390,6 +408,7 @@
     <string name="check_community_first">Verifică mai întâi comunitatea</string>
     <string name="check_for_app_updates">Verifică actualizări aplicație</string>
     <string name="check_for_updates">Verifică actualizări</string>
+    <string name="check_internet_connection">Vă rugăm să verificați conexiunea la internet și să încercați din nou.</string>
     <string name="check_permissions">Verifică permisiunile</string>
     <string name="check_the_update">Verifică actualizarea</string>
     <string name="checking_for_updates">Se verifică actualizări…</string>
@@ -424,6 +443,7 @@
     <string name="clear_completed">Șterge finalizate</string>
     <string name="clear_download_cache">Șterge memoria cache de descărcare</string>
     <string name="clear_download_cache_confirmation">Aceasta va elimina toate fișierele temporare de descărcare. Capitolele descărcate nu vor fi afectate.</string>
+    <string name="clear_failed">Șterge eșuate</string>
     <string name="clear_filters">Șterge filtrele</string>
     <string name="clear_not_in_library_books">Șterge toate cărțile care nu sunt în bibliotecă</string>
     <string name="clear_search">Șterge căutarea</string>
@@ -556,6 +576,7 @@
     <string name="current_engine">Motor curent</string>
     <string name="current_location">Locația curentă:</string>
     <string name="current_progress">Progresul curent</string>
+    <string name="current_rules">Reguli curente</string>
     <string name="currently_reading">Se citește în prezent</string>
     <string name="currently_viewing_a_plugin_screen">Vizualizați în prezent un ecran de plugin</string>
     <string name="custom">Personalizat</string>
@@ -605,6 +626,8 @@
     <string name="deepseek_configuration">Configurare DeepSeek</string>
     <string name="deepseek_login_required">Este necesară conectarea DeepSeek</string>
     <string name="deepseek_payment_required">Plata DeepSeek este necesară sau cota API a fost depășită</string>
+    <string name="default_category">Categorie implicită</string>
+    <string name="default_category_summary">Categoria de utilizat la adăugarea cărților în bibliotecă</string>
     <string name="default_chapter_sort">Sortare implicită a capitolelor</string>
     <string name="default_reading_mode">Mod de citire implicit</string>
     <string name="default_reading_mode_for_new_books">Mod de citire implicit pentru cărți noi</string>
@@ -624,11 +647,14 @@
     <string name="delete_art">Șterge Arta?</string>
     <string name="delete_backup">Ștergeți copia de rezervă?</string>
     <string name="delete_category">Șterge categoria?</string>
+    <string name="delete_chapter">Șterge capitolul</string>
+    <string name="delete_content">Șterge conținutul</string>
     <string name="delete_custom_theme">Șterge tema personalizată</string>
     <string name="delete_entry">Șterge intrarea</string>
     <string name="delete_failed">Ștergere eșuată: %1$s</string>
     <string name="delete_font">Șterge fontul</string>
     <string name="delete_font_1">Șterge fontul</string>
+    <string name="delete_rule">Șterge regula</string>
     <string name="delete_source">Șterge sursa</string>
     <string name="delete_update">Șterge actualizarea</string>
     <string name="delete_voice">Șterge vocea</string>
@@ -676,6 +702,7 @@
     <string name="discord">Discord</string>
     <string name="discover">Descoperă</string>
     <string name="discover_plugins_to_enhance_your_reading">Descoperă pluginuri pentru a-ți îmbunătăți experiența de lectură</string>
+    <string name="disk_space_warning">Descărcări întrerupte - Spațiu de stocare redus</string>
     <string name="dismiss">Renunță</string>
     <string name="display">Afișare</string>
     <string name="display_adult_content_in_search_results">Afișează conținut pentru adulți în rezultatele căutării</string>
@@ -719,6 +746,7 @@
     <string name="download_delay">Întârziere descărcare</string>
     <string name="download_failed">Descărcarea a eșuat: %1$s</string>
     <string name="download_failed_title">Descărcare eșuată</string>
+    <string name="download_from_last_read">Descarcă de la ultima citire</string>
     <string name="download_information">Informații despre descărcare</string>
     <string name="download_install">Descarcă și Instalează</string>
     <string name="download_language_models">Descarcă modele de limbă</string>
@@ -742,6 +770,7 @@
     <string name="download_settings">Setări descărcare</string>
     <string name="download_unread">Descarcă necitite</string>
     <string name="download_unread_1">Descarcă necitite</string>
+    <string name="download_unread_from_last_read_desc">Descarcă capitolele începând de după capitolul citit cel mai recent, în loc de la primul capitol necitit</string>
     <string name="download_update">Descarcă actualizarea</string>
     <string name="downloadarrow">săgeatăDescărcare</string>
     <string name="downloaded">Descărcat</string>
@@ -751,6 +780,7 @@
     <string name="downloading_1">Se descarcă...</string>
     <string name="downloading_chapter_audio">Se descarcă sunetul capitolului</string>
     <string name="downloading_chapters">Se descarcă %1$s capitole</string>
+    <string name="downloading_count">%d se descarcă</string>
     <string name="downloading_unread_chapters">Se descarcă %1$s capitole necitite</string>
     <string name="downloading_update">Se descarcă actualizarea</string>
     <string name="downloading_update_1">Se descarcă actualizarea...</string>
@@ -926,10 +956,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">Eșuat</string>
+    <string name="failed_count">%d eșuate</string>
     <string name="failed_files">Fișiere eșuate</string>
     <string name="failed_imports">Importuri eșuate</string>
     <string name="failed_to_add_entry">Nu s-a putut adăuga intrarea: %1$s</string>
     <string name="failed_to_add_repository">Nu s-a putut adăuga depozitul: %1$s</string>
+    <string name="failed_to_add_rule">Eșec la adăugarea regulii: %1$s</string>
     <string name="failed_to_apply_plugin_theme">Nu s-a putut aplica tema pluginului: %1$s. Se folosește tema implicită.</string>
     <string name="failed_to_check_updates">Nu s-a putut verifica dacă sunt actualizări</string>
     <string name="failed_to_copy">Nu s-a putut copia: %1$s</string>
@@ -1047,6 +1079,7 @@
     <string name="gb_total_storage_7_500mb">3.5GB spațiu total de stocare (7 × 500MB) - Configurează fiecare proiect sau folosește același URL pentru toate</string>
     <string name="gemini_api_information">Informații API Gemini</string>
     <string name="gemini_api_key">Cheie API Gemini</string>
+    <string name="gemini_api_key_invalid">Cheia API Gemini este invalidă sau a expirat. Vă rugăm să obțineți o nouă cheie de la Google AI Studio.</string>
     <string name="gemini_api_key_not_set">Cheia API Gemini nu este setată. Vă rugăm să o configurați în
         setări.
     </string>
@@ -1065,6 +1098,9 @@
     <string name="generating_audio_for_entire_chapter">Se generează audio pentru întregul capitol...</string>
     <string name="generating_prompt">Se generează prompt...</string>
     <string name="generation_failed">Generare eșuată</string>
+    <string name="genre_name">Numele genului</string>
+    <string name="genre_placeholder">ex., Fantezie, Romantic, Acțiune</string>
+    <string name="genre_rule">Gen</string>
     <string name="genre_selector">Selector gen</string>
     <string name="genrekind_selector">Selector Gen/Tip</string>
     <string name="genreprogress">genreProgress</string>
@@ -1181,6 +1217,8 @@
     <string name="import_from_url">Importă de la URL</string>
     <string name="import_glossary">Importă Glosar</string>
     <string name="import_legado_sources">Importă surse Legado</string>
+    <string name="import_pdf">Importă PDF</string>
+    <string name="import_pdf_files_into_your_library">Importați fișiere PDF în biblioteca dvs. pentru lectură și TTS</string>
     <string name="import_sources">Importă Surse</string>
     <string name="import_sources_from_legadoyuedu_json">Importă surse din formatul JSON Legado/Yuedu. Poți lipi direct JSON-ul, introduce un URL sau importa din clipboard.</string>
     <string name="import_theme">Importă tema</string>
@@ -1282,6 +1320,7 @@
     <string name="language_code">Cod limbă</string>
     <string name="language_filter">Filtru Limbă</string>
     <string name="language_preferences">Preferințe de Limbă</string>
+    <string name="language_preferences_saved">Preferințele de limbă au fost salvate pentru această carte</string>
     <string name="language_translation">Limbă &amp; Traducere</string>
     <string name="languages">Limbi</string>
     <string name="large">Mare</string>
@@ -1488,6 +1527,7 @@
     <string name="need_help">Ai nevoie de ajutor?</string>
     <string name="network">Rețea</string>
     <string name="network_cache">Cache Rețea</string>
+    <string name="network_error">Eroare de rețea</string>
     <string name="network_settings">Setări Rețea</string>
     <string name="neutral">Neutru</string>
     <string name="new_chapter_notifications">Notificări Capitole Noi</string>
@@ -1529,7 +1569,9 @@
     <string name="no_badges_yet_earn_badges">Încă nu există insigne. Câștigă insigne cumpărându-le sau deținând NFT-uri IReader!</string>
     <string name="no_book_found_error">Nu există nicio carte cu acest ID.</string>
     <string name="no_books_in_library">Nicio carte în bibliotecă</string>
+    <string name="no_categories_create_one">Nicio categorie găsită. Creați una mai întâi pentru a vă organiza biblioteca.</string>
     <string name="no_categories_found">Nu s-au găsit categorii</string>
+    <string name="no_category">Fără categorie</string>
     <string name="no_chapter_found_error">Nu există niciun capitol cu acest nume.</string>
     <string name="no_chapter_is_available">Niciun capitol nu este disponibil.</string>
     <string name="no_chapters_available">Nu sunt disponibile capitole</string>
@@ -1582,6 +1624,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">Încă nu există recenzii pentru acest capitol</string>
     <string name="no_reviews_yet">Încă nu există recenzii</string>
     <string name="no_reviews_yet_be_the_first_to_review">Încă nu există recenzii. Fii primul care scrie o recenzie!</string>
+    <string name="no_rules_configured">Nicio regulă configurată. Adăugați o regulă pentru a categoriza automat romanele.</string>
     <string name="no_settings_found">Nicio setare găsită</string>
     <string name="no_sources_available">Nu sunt disponibile surse</string>
     <string name="no_sources_available_for_migration">Nu sunt disponibile surse pentru migrare</string>
@@ -1593,8 +1636,10 @@
     <string name="no_usage_data_available_yet">Încă nu sunt disponibile date de utilizare</string>
     <string name="no_voice_models_available">Nu sunt disponibile modele de voce</string>
     <string name="no_voices_available">Nu sunt disponibile voci</string>
+    <string name="no_voices_available_for_this_language">Nicio voce disponibilă pentru această limbă</string>
     <string name="none">Niciunul</string>
     <string name="normal">Normal</string>
+    <string name="not_connected">Nu este conectat</string>
     <string name="not_implemented_yet">Nu este încă implementat</string>
     <string name="not_installed">Neinstalat</string>
     <string name="not_tested">Netestat</string>
@@ -1632,6 +1677,15 @@
     <string name="novel_info">Informații Roman</string>
     <string name="now_try_creating_a_source">Acum încearcă să creezi o sursă pentru site-ul tău preferat.</string>
     <string name="number_of_sources_to_search">Numărul de surse de căutat simultan. Valori mai mari sunt mai rapide, dar utilizează mai multe resurse.</string>
+    <string name="nvidia_api_key">Cheie API NVIDIA</string>
+    <string name="nvidia_api_key_invalid">Cheia API NVIDIA este invalidă. Vă rugăm să verificați cheia la build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">Cheia API NVIDIA nu este setată. Vă rugăm să o configurați în setări.</string>
+    <string name="nvidia_fetch_models">Preia modelele disponibile</string>
+    <string name="nvidia_info">NVIDIA NIM oferă acces la modele AI optimizate, inclusiv Llama, Mistral, Gemma și altele. Obțineți cheia API la build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">Credite API NVIDIA insuficiente. Vă rugăm să verificați contul la build.nvidia.com</string>
+    <string name="nvidia_model">Model NVIDIA</string>
+    <string name="nvidia_models_loaded">Modelele NVIDIA au fost încărcate cu succes</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">din</string>
     <string name="off">Oprit</string>
     <string name="offline_mode">Mod Offline</string>
@@ -1663,6 +1717,7 @@
     <string name="open_location">Deschide locația</string>
     <string name="open_random">Deschide aleatoriu</string>
     <string name="open_site">Deschide site-ul</string>
+    <string name="open_storage_settings">Deschide setările de stocare</string>
     <string name="open_tts_manager">Deschide managerul TTS</string>
     <string name="open_tts_screen">Vizualizare</string>
     <string name="open_tts_settings">Deschide Setările TTS</string>
@@ -1673,6 +1728,14 @@
     </string>
     <string name="openai_configuration">Configurație OpenAI</string>
     <string name="openai_quota_exceeded">Cota Openai a fost depășită</string>
+    <string name="openrouter_api_key">Cheie API OpenRouter</string>
+    <string name="openrouter_api_key_invalid">Cheia API OpenRouter este invalidă. Vă rugăm să verificați cheia la openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">Cheia API OpenRouter nu este setată. Vă rugăm să o configurați în setări.</string>
+    <string name="openrouter_fetch_models">Preia modelele disponibile</string>
+    <string name="openrouter_info">OpenRouter oferă acces unificat la multiple modele AI, inclusiv GPT-4, Claude, Llama și altele. Obțineți cheia API la openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">Credite OpenRouter insuficiente. Vă rugăm să adăugați credite la openrouter.ai/credits</string>
+    <string name="openrouter_model">Model OpenRouter</string>
+    <string name="openrouter_models_loaded">Modelele OpenRouter au fost încărcate cu succes</string>
     <string name="optimize">Optimizează</string>
     <string name="optimize_database">Optimizează baza de date</string>
     <string name="optimizes_translation_for_specific_content">Optimizează traducerea pentru conținut specific</string>
@@ -1725,6 +1788,7 @@
     <string name="paste_the_theme_json_below">Lipește JSON-ul temei mai jos:</string>
     <string name="pause">Pauză</string>
     <string name="pause_all">Întrerupe tot</string>
+    <string name="pause_downloads">Întrerupe descărcările</string>
     <string name="paused">Întrerupt</string>
     <string name="payment_method">Metoda de plată</string>
     <string name="pen">stilou</string>
@@ -1812,6 +1876,8 @@
     <string name="pref_relative_time_long">Lung (Scurt+, acum n zile)</string>
     <string name="pref_relative_time_short">Scurt (Azi, Ieri)</string>
     <string name="prefer_saf_storage">Preferă stocarea SAF</string>
+    <string name="preferred_source_language">Limba sursă preferată</string>
+    <string name="preferred_target_language">Limba țintă preferată</string>
     <string name="preload_next_chapter">Preîncarcă Capitolul Următor</string>
     <string name="preload_only_on_wifi">Preîncarcă doar prin WiFi</string>
     <string name="preload_only_on_wifi_summary">Restricționează preîncărcarea automată doar la conexiunile WiFi</string>
@@ -1878,6 +1944,7 @@
     <string name="query_must_not_be_empty">interogarea nu trebuie să fie goală.</string>
     <string name="queue_failed">Coada a eșuat</string>
     <string name="queued">La coadă</string>
+    <string name="queued_count">%d în așteptare</string>
     <string name="quick_add_popular_repositories">Adaugă rapid depozitele populare</string>
     <string name="quick_add_repository">Adăugare Rapidă Depozit</string>
     <string name="quick_fill_same_url_for_all_projects">Completare rapidă (același URL pentru toate proiectele)</string>
@@ -1941,6 +2008,7 @@
     <string name="refresh_all">Reîmprospătează tot</string>
     <string name="refresh_covers_too">Reîmprospătează și coperțile</string>
     <string name="refresh_metrics">Reîmprospătează metricile</string>
+    <string name="refresh_models">Reîmprospătează modelele</string>
     <string name="refreshed">Reîmprospătat</string>
     <string name="refreshing">Reîmprospătează</string>
     <string name="refreshing_1">Se reîmprospătează...</string>
@@ -1955,6 +2023,7 @@
     <string name="reload">Reîncarcă</string>
     <string name="reload_plugin_themes">Reîncarcă temele plugin-urilor</string>
     <string name="remaining">Rămas</string>
+    <string name="remember_my_languages">Memorează alegerile mele de limbă</string>
     <string name="remind_me_again_in">Reamintește-mi din nou în:</string>
     <string name="reminder_interval">Interval Memento</string>
     <string name="remove">Elimină</string>
@@ -2036,7 +2105,9 @@
     <string name="resume">Reia</string>
     <string name="resume_all">Reia tot</string>
     <string name="resume_download">Reia descărcarea</string>
+    <string name="resume_downloads">Reia descărcările</string>
     <string name="retry">Reîncearcă</string>
+    <string name="retry_all_failed">Reîncercați toate cele eșuate</string>
     <string name="retry_failed">Reîncearcă eșuate</string>
     <string name="retry_loading">Reîncearcă încărcarea</string>
     <string name="retrying_download">Se reîncearcă descărcarea</string>
@@ -2056,7 +2127,10 @@
     <string name="right">Dreapta</string>
     <string name="rotate_screen_automatically">Rotește ecranul automat</string>
     <string name="rotation">rotație</string>
+    <string name="rule_already_exists">O regulă pentru acest lucru există deja în această categorie</string>
+    <string name="rule_count">%1$d regulă</string>
     <string name="rule_syntax_help">Ajutor sintaxă regulă</string>
+    <string name="rules_count">%1$d reguli</string>
     <string name="run_health_check">Rulează verificarea stării</string>
     <string name="run_the_migration_community_sourcesql">Rulează fișierul migration_community_source.sql în editorul SQL Supabase pentru a crea aceste tabele.</string>
     <string name="sample_text">Text Exemplu</string>
@@ -2067,6 +2141,7 @@
     <string name="save_custom_theme">Salvează tema personalizată</string>
     <string name="save_epub">Salvează EPUB</string>
     <string name="save_js_sources_extensions_backups">Salvează sursele JS, extensiile, copiile de rezervă și epub-urile în folderul SAF când este disponibil. Revine la cache dacă nu este disponibil.</string>
+    <string name="save_language_preferences">Salvează preferințele de limbă</string>
     <string name="save_multi_endpoint_configuration">Salvează configurația multi-endpoint</string>
     <string name="save_patterns">Salvează modele</string>
     <string name="saved_local_source_location">Surse salvate în cache</string>
@@ -2085,6 +2160,7 @@
     <string name="search_across_all_sources">Caută în toate sursele</string>
     <string name="search_across_all_sources_1">Caută în toate sursele...</string>
     <string name="search_bar">bara de căutare</string>
+    <string name="search_book_manually">Încercați să căutați cartea manual în sursă pentru a verifica disponibilitatea.</string>
     <string name="search_characters_books">Căută personaje, cărți...</string>
     <string name="search_features">Căutați funcții...</string>
     <string name="search_fonts">Caută fonturi...</string>
@@ -2131,6 +2207,7 @@
     <string name="select_backup_file">Selectați fișierul de backup</string>
     <string name="select_between">Selectează între</string>
     <string name="select_books_to_migrate">Selectați cărțile pentru migrare</string>
+    <string name="select_categories">Selectează categorii</string>
     <string name="select_chapters">Selectează capitole</string>
     <string name="select_cloud_provider">Selectează furnizorul de cloud</string>
     <string name="select_engine">Selectează motorul</string>
@@ -2146,6 +2223,7 @@
     <string name="select_model">Selectați modelul</string>
     <string name="select_navigation_style">Selectați stilul de navigare</string>
     <string name="select_source_to_migrate_to">Selectează sursa către care să migrezi</string>
+    <string name="select_storage_folder">Selectează folderul de stocare</string>
     <string name="select_target_source">Selectați sursa țintă</string>
     <string name="select_the_languages_you_want">Selectați limbile pe care doriți să le vedeți când navigați și căutați conținut. Puteți selecta mai multe limbi.</string>
     <string name="select_the_languages_you_want_1">Selectați limbile pe care doriți să le vedeți când navigați prin surse. Sunt afișate doar limbile cu surse disponibile.</string>
@@ -2169,6 +2247,7 @@
     <string name="selectors_for_the_explorelatest_page">Selectoare pentru pagina de explorare/cele mai noi (opțional, utilizează regulile de căutare dacă este gol)</string>
     <string name="send_reset_email">Trimite email de resetare</string>
     <string name="sentence_highlighting">Evidențiere Propoziții</string>
+    <string name="set_categories">Setează categorii</string>
     <string name="set_eth_wallet_address">Setează adresa portofelului ETH</string>
     <string name="set_name">Setează numele</string>
     <string name="sets_the_tone_of_translated_text">Setează tonul textului tradus</string>
@@ -2271,10 +2350,14 @@
     <string name="source_browse_latest">Răsfoiește cele mai recente</string>
     <string name="source_extension_not_installed">Extensia sursei nu este instalată</string>
     <string name="source_id">ID Sursă</string>
+    <string name="source_id_or_name">ID sau nume sursă</string>
     <string name="source_json">JSON sursă</string>
     <string name="source_name">Nume sursă *</string>
     <string name="source_needs_update">Sursa Necesită Actualizare</string>
     <string name="source_not_available">Această sursă nu este disponibilă pe dispozitivul tău.</string>
+    <string name="source_not_found">Sursă negăsită</string>
+    <string name="source_placeholder">ex., 12345 sau NovelUpdates</string>
+    <string name="source_rule">Sursă</string>
     <string name="source_term">Termen sursă</string>
     <string name="source_title">Titlul sursei</string>
     <string name="source_unavailable">Sursă Indisponibilă</string>
@@ -2301,11 +2384,16 @@
     <string name="stop">Oprește</string>
     <string name="stop_playback_after">Oprește redarea după:</string>
     <string name="storage">Stocare</string>
+    <string name="storage_access_lost">Acces la stocare pierdut</string>
+    <string name="storage_access_lost_description">IReader nu mai are acces la folderul de stocare. Vă rugăm să selectați un folder pentru a continua să utilizați aplicația.</string>
+    <string name="storage_access_lost_reasons">Folderul ar fi putut fi șters, mutat sau permisiunea a fost revocată. Acest lucru se poate întâmpla după actualizări ale aplicației sau modificări de sistem.</string>
+    <string name="storage_is_needed_for">Stocarea este necesară pentru:</string>
     <string name="storage_permission_privacy_note">IReader accesează doar dosarul selectat de dvs. Celelalte fișiere rămân private și neatins.</string>
     <string name="storage_permission_required_explanation">Explicație despre permisiunea de stocare necesară
     </string>
     <string name="storage_permission_subtitle">Selectați un dosar unde IReader va stoca descărcările, extensiile și copiile de rezervă</string>
     <string name="storage_permission_title">Alegeți Dosarul de Stocare</string>
+    <string name="storage_required">Spațiu de stocare necesar</string>
     <string name="storage_settings">Setări Stocare</string>
     <string name="storage_setup">Configurare Stocare</string>
     <string name="storage_usage">Utilizare stocare</string>
@@ -2373,6 +2461,7 @@
     <string name="system_integration_multiple_engines_supported">✓ Integrare sistem • ✓ Motoare multiple acceptate • ✓ Nu sunt necesare descărcări</string>
     <string name="system_notifications">Sistem &amp; Notificări</string>
     <string name="system_notifications_1">Notificări sistem</string>
+    <string name="system_settings">Setări sistem</string>
     <string name="system_tts_settings">Setări TTS sistem</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">File</string>
@@ -2522,14 +2611,39 @@
     <string name="translated">Tradus</string>
     <string name="translating">Se traduce... Acest lucru poate dura un moment.</string>
     <string name="translation">Traducere</string>
+    <string name="translation_api_key_invalid">Cheia API pentru %1$s este invalidă sau a expirat. Vă rugăm să verificați cheia în Setări → Traducere.</string>
+    <string name="translation_api_key_not_set">%1$s necesită o cheie API. Vă rugăm să accesați Setări → Traducere și să configurați cheia API.</string>
+    <string name="translation_auth_required">Trebuie să vă conectați la %1$s pentru a utiliza această funcție de traducere.</string>
+    <string name="translation_captcha_required">%1$s necesită verificare. Vă rugăm să completați CAPTCHA pentru a continua.</string>
     <string name="translation_complete">Traducere finalizată.</string>
+    <string name="translation_empty_response">%1$s a returnat un răspuns gol. Aceasta poate fi o problemă temporară - vă rugăm să încercați din nou.</string>
     <string name="translation_engine">Motor de traducere</string>
+    <string name="translation_engine_not_available">%1$s nu este disponibil în această versiune a aplicației. Vă rugăm să utilizați un alt motor de traducere.</string>
     <string name="translation_engines_refreshed">Motoarele de traducere au fost reîmprospătate</string>
     <string name="translation_error">Eroare de traducere</string>
+    <string name="translation_language_model_not_available">Modelul de limbă pentru %1$s → %2$s nu este descărcat. Vă rugăm să accesați Setări → Traducere pentru a-l descărca.</string>
+    <string name="translation_language_pair_not_supported">%1$s nu acceptă traducerea din %2$s în %3$s. Vă rugăm să selectați alte limbi.</string>
+    <string name="translation_model_not_found">Modelul AI pentru %1$s nu a putut fi găsit. Vă rugăm să verificați setările.</string>
+    <string name="translation_model_not_found_with_name">Modelul '%2$s' nu a fost găsit în %1$s. Vă rugăm să selectați un alt model în setări.</string>
+    <string name="translation_network_error">Nu se poate conecta la %1$s. Vă rugăm să verificați conexiunea la internet și să încercați din nou.</string>
+    <string name="translation_parse_error">Nu s-a putut înțelege răspunsul de la %1$s. Serviciul ar putea întâmpina probleme.</string>
+    <string name="translation_plugin_error">Modulul de traducere '%1$s' a întâmpinat o eroare. Vă rugăm să verificați setările modulului sau să încercați un alt motor.</string>
     <string name="translation_plugins_extend_ireader_with">Pluginurile de traducere extind IReader cu servicii suplimentare de traducere</string>
     <string name="translation_progress">Progresul traducerii</string>
+    <string name="translation_quota_exceeded">Cota de traducere %1$s a fost depășită. Vă rugăm să verificați planul și facturarea, sau să încercați din nou mai târziu.</string>
+    <string name="translation_rate_limit">%1$s primește prea multe solicitări. Vă rugăm să așteptați un moment și să încercați din nou.</string>
     <string name="translation_rate_limit_delay">Întârziere limită rată traducere</string>
+    <string name="translation_rate_limit_with_retry">Limita de solicitări %1$s a fost atinsă. Vă rugăm să așteptați %2$d secunde și să încercați din nou.</string>
+    <string name="translation_same_as_original">%1$s a returnat textul neschimbat. Traducerea ar fi putut eșua sau textul ar putea fi deja în limba țintă.</string>
+    <string name="translation_server_error">Serverul %1$s întâmpină probleme. Vă rugăm să încercați din nou mai târziu.</string>
+    <string name="translation_server_error_with_code">Eroare de server %1$s (cod: %2$d). Vă rugăm să încercați din nou mai târziu.</string>
     <string name="translation_settings">Setări traducere</string>
+    <string name="translation_text_too_long">Textul este prea lung pentru ca %1$s să îl poată procesa. Încercați să traduceți secțiuni mai mici.</string>
+    <string name="translation_text_too_long_with_limit">Textul depășește limita de %2$d caractere a %1$s. Încercați să traduceți secțiuni mai mici.</string>
+    <string name="translation_timeout">%1$s a durat prea mult să răspundă. Vă rugăm să încercați din nou.</string>
+    <string name="translation_timeout_with_seconds">%1$s nu a răspuns în termen de %2$d secunde. Vă rugăm să încercați din nou.</string>
+    <string name="translation_unknown_error">%1$s a întâmpinat o eroare neașteptată. Vă rugăm să încercați din nou.</string>
+    <string name="translation_unknown_error_with_details">Eroare %1$s: %2$s</string>
     <string name="translation_warning">Avertisment Traducere</string>
     <string name="translations">traduceri</string>
     <string name="trending_now">Tendințe acum</string>
@@ -2539,9 +2653,11 @@
     <string name="trust_level_updated">Nivel de încredere actualizat</string>
     <string name="try_a_different_search_term">Încearcă un alt termen de căutare</string>
     <string name="try_again">Încearcă din nou</string>
+    <string name="try_again_later">Datele dvs. sunt păstrate. Vă rugăm să încercați din nou mai târziu.</string>
     <string name="try_alternative_url">Încearcă un URL alternativ</string>
     <string name="try_another_search">Încearcă o altă căutare</string>
     <string name="try_different_search">Încearcă un alt termen de căutare</string>
+    <string name="try_different_source">Sursa poate fi indisponibilă. Încercați o altă sursă.</string>
     <string name="try_these_fixes">Încercați aceste soluții:</string>
     <string name="trying_in_few_second">Încercați din nou în câteva secunde.</string>
     <string name="trying_to_fetch">Se încearcă preluarea...</string>
@@ -2604,6 +2720,7 @@
     <string name="upcoming_releases">Lansări viitoare</string>
     <string name="update">Actualizare</string>
     <string name="update_all">Actualizează tot</string>
+    <string name="update_all_books">Actualizează toate cărțile</string>
     <string name="update_available">Actualizare disponibilă</string>
     <string name="update_available_1">Actualizare disponibilă</string>
     <string name="update_category">Actualizare categorie</string>
@@ -2657,6 +2774,7 @@
     <string name="use_password">Utilizează parola</string>
     <string name="use_pin">Utilizează PIN</string>
     <string name="use_pinpassword_instead">Folosește PIN/Parolă în schimb</string>
+    <string name="use_saved_languages">Utilizează limbile salvate</string>
     <string name="use_separate_supabase_projects_for">Utilizează proiecte Supabase separate pentru o scalabilitate mai bună</string>
     <string name="use_static_indicators_instead_of_animated_ones">Utilizează indicatori statici în loc de indicatori animați</string>
     <string name="use_translated_text_for_text">Utilizează text tradus pentru text-to-speech când este disponibil</string>
@@ -2670,6 +2788,7 @@
     <string name="users">Utilizatori</string>
     <string name="uuid_of_your_d1_database">UUID-ul bazei de date D1</string>
     <string name="validate">Validează</string>
+    <string name="validation_error">Eroare de validare</string>
     <string name="verification_details">Detalii Verificare</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Verificarea este automată și durează câteva secunde</string>
     <string name="verification_is_cached_for_24">Verificarea este stocată în cache timp de 24 de ore. Insigna rămâne activă timp de 7 zile dacă reverificarea eșuează.</string>
@@ -2736,11 +2855,14 @@
     <string name="whats_new_1">Ce este nou</string>
     <string name="whats_new_2">Ce e nou:</string>
     <string name="while_charging">În timp ce se încarcă</string>
+    <string name="why_did_this_happen">De ce s-a întâmplat acest lucru?</string>
     <string name="why_donate">De ce să donezi?</string>
     <string name="why_is_this_needed">De ce este necesar acest lucru?</string>
     <string name="width">Lățime</string>
     <string name="width_1">lățime</string>
     <string name="wifi_only">Doar WiFi</string>
+    <string name="wifi_only_mode">Mod Doar WiFi</string>
+    <string name="wifi_only_warning">Descărcări întrerupte - modul Doar WiFi activat</string>
     <string name="with_trailing_content">Cu conținut suplimentar</string>
     <string name="wizard">Expert</string>
     <string name="wizard_step">Pas expert</string>

@@ -1664,6 +1664,15 @@
     <string name="novel_info">Infos sur le roman</string>
     <string name="now_try_creating_a_source">Essayez maintenant de créer une source pour votre site web préféré.</string>
     <string name="number_of_sources_to_search">Nombre de sources à rechercher simultanément. Des valeurs plus élevées sont plus rapides, mais utilisent plus de ressources.</string>
+    <string name="nvidia_api_key">Clé API NVIDIA</string>
+    <string name="nvidia_api_key_invalid">La clé API NVIDIA est invalide. Veuillez vérifier votre clé sur build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">La clé API NVIDIA n'est pas définie. Veuillez la configurer dans les paramètres.</string>
+    <string name="nvidia_fetch_models">Récupérer les modèles disponibles</string>
+    <string name="nvidia_info">NVIDIA NIM offre un accès à des modèles d'IA optimisés, y compris Llama, Mistral, Gemma, et plus encore. Obtenez votre clé API sur build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">Crédits API NVIDIA insuffisants. Veuillez vérifier votre compte sur build.nvidia.com</string>
+    <string name="nvidia_model">Modèle NVIDIA</string>
+    <string name="nvidia_models_loaded">Modèles NVIDIA chargés avec succès</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">sur</string>
     <string name="off">Désactivé</string>
     <string name="offline_mode">Mode hors ligne</string>
@@ -1706,6 +1715,14 @@
     </string>
     <string name="openai_configuration">Configuration OpenAI</string>
     <string name="openai_quota_exceeded">Quota Openai dépassé</string>
+    <string name="openrouter_api_key">Clé API OpenRouter</string>
+    <string name="openrouter_api_key_invalid">La clé API OpenRouter est invalide. Veuillez vérifier votre clé sur openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">La clé API OpenRouter n'est pas définie. Veuillez la configurer dans les paramètres.</string>
+    <string name="openrouter_fetch_models">Récupérer les modèles disponibles</string>
+    <string name="openrouter_info">OpenRouter offre un accès unifié à plusieurs modèles d'IA, y compris GPT-4, Claude, Llama, et plus encore. Obtenez votre clé API sur openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">Crédits OpenRouter insuffisants. Veuillez ajouter des crédits sur openrouter.ai/credits</string>
+    <string name="openrouter_model">Modèle OpenRouter</string>
+    <string name="openrouter_models_loaded">Modèles OpenRouter chargés avec succès</string>
     <string name="optimize">Optimiser</string>
     <string name="optimize_database">Optimiser la base de données</string>
     <string name="optimizes_translation_for_specific_content">Optimise la traduction pour un contenu spécifique</string>
@@ -1974,6 +1991,7 @@
     <string name="refresh_all">Tout rafraîchir</string>
     <string name="refresh_covers_too">Actualiser aussi les couvertures</string>
     <string name="refresh_metrics">Actualiser les métriques</string>
+    <string name="refresh_models">Actualiser les modèles</string>
     <string name="refreshed">Actualisé</string>
     <string name="refreshing">Actualisation</string>
     <string name="refreshing_1">Actualisation...</string>

@@ -1676,6 +1676,15 @@
     <string name="novel_info">Info Novel</string>
     <string name="now_try_creating_a_source">Sekarang coba buat sumber untuk situs web favorit Anda.</string>
     <string name="number_of_sources_to_search">Jumlah sumber untuk dicari secara bersamaan. Nilai yang lebih tinggi lebih cepat tetapi menggunakan lebih banyak sumber daya.</string>
+    <string name="nvidia_api_key">Kunci API NVIDIA</string>
+    <string name="nvidia_api_key_invalid">Kunci API NVIDIA tidak valid. Harap periksa kunci Anda di build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">Kunci API NVIDIA belum diatur. Harap konfigurasikan di pengaturan.</string>
+    <string name="nvidia_fetch_models">Ambil Model yang Tersedia</string>
+    <string name="nvidia_info">NVIDIA NIM menyediakan akses ke model AI yang dioptimalkan termasuk Llama, Mistral, Gemma, dan banyak lagi. Dapatkan kunci API Anda di build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">Kredit API NVIDIA tidak mencukupi. Harap periksa akun Anda di build.nvidia.com</string>
+    <string name="nvidia_model">Model NVIDIA</string>
+    <string name="nvidia_models_loaded">Model NVIDIA berhasil dimuat</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">dari</string>
     <string name="off">Mati</string>
     <string name="offline_mode">Mode Offline</string>
@@ -1718,6 +1727,14 @@
     </string>
     <string name="openai_configuration">Konfigurasi OpenAI</string>
     <string name="openai_quota_exceeded">Kuota Openai terlampaui</string>
+    <string name="openrouter_api_key">Kunci API OpenRouter</string>
+    <string name="openrouter_api_key_invalid">Kunci API OpenRouter tidak valid. Harap periksa kunci Anda di openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">Kunci API OpenRouter belum diatur. Harap konfigurasikan di pengaturan.</string>
+    <string name="openrouter_fetch_models">Ambil Model yang Tersedia</string>
+    <string name="openrouter_info">OpenRouter menyediakan akses terpadu ke berbagai model AI termasuk GPT-4, Claude, Llama, dan banyak lagi. Dapatkan kunci API Anda di openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">Kredit OpenRouter tidak mencukupi. Harap tambahkan kredit di openrouter.ai/credits</string>
+    <string name="openrouter_model">Model OpenRouter</string>
+    <string name="openrouter_models_loaded">Model OpenRouter berhasil dimuat</string>
     <string name="optimize">Optimalkan</string>
     <string name="optimize_database">Optimalkan Database</string>
     <string name="optimizes_translation_for_specific_content">Mengoptimalkan terjemahan untuk konten tertentu</string>
@@ -1990,6 +2007,7 @@
     <string name="refresh_all">Segarkan semua</string>
     <string name="refresh_covers_too">Segarkan Sampul Juga</string>
     <string name="refresh_metrics">Segarkan Metrik</string>
+    <string name="refresh_models">Segarkan Model</string>
     <string name="refreshed">Diperbarui</string>
     <string name="refreshing">Menyegarkan</string>
     <string name="refreshing_1">Menyegarkan...</string>

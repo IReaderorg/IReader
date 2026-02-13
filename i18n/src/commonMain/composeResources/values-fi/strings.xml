@@ -1679,6 +1679,15 @@
     <string name="novel_info">Romaanin tiedot</string>
     <string name="now_try_creating_a_source">Yritä nyt luoda lähde suosikkisivustollesi.</string>
     <string name="number_of_sources_to_search">Haettavien lähteiden määrä samanaikaisesti. Suuremmat arvot ovat nopeampia, mutta käyttävät enemmän resursseja.</string>
+    <string name="nvidia_api_key">NVIDIA API-avain</string>
+    <string name="nvidia_api_key_invalid">NVIDIA API-avain on virheellinen. Tarkista avaimesi osoitteesta build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">NVIDIA API-avainta ei ole asetettu. Määritä se asetuksista.</string>
+    <string name="nvidia_fetch_models">Hae saatavilla olevat mallit</string>
+    <string name="nvidia_info">NVIDIA NIM tarjoaa pääsyn optimoituihin tekoälymalleihin, mukaan lukien Llama, Mistral, Gemma ja monet muut. Hanki API-avaimesi osoitteesta build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">NVIDIA API -krediitit ovat riittämättömät. Tarkista tilisi osoitteesta build.nvidia.com</string>
+    <string name="nvidia_model">NVIDIA-malli</string>
+    <string name="nvidia_models_loaded">NVIDIA-mallit ladattu onnistuneesti</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">/</string>
     <string name="off">Pois</string>
     <string name="offline_mode">Offline-tila</string>
@@ -1721,6 +1730,14 @@
     </string>
     <string name="openai_configuration">OpenAI-määritykset</string>
     <string name="openai_quota_exceeded">Openai-kiintiö ylitetty</string>
+    <string name="openrouter_api_key">OpenRouter API-avain</string>
+    <string name="openrouter_api_key_invalid">OpenRouter API-avain on virheellinen. Tarkista avaimesi osoitteesta openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">OpenRouter API-avainta ei ole asetettu. Määritä se asetuksista.</string>
+    <string name="openrouter_fetch_models">Hae saatavilla olevat mallit</string>
+    <string name="openrouter_info">OpenRouter tarjoaa yhtenäisen pääsyn useisiin tekoälymalleihin, mukaan lukien GPT-4, Claude, Llama ja monet muut. Hanki API-avaimesi osoitteesta openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">OpenRouter-krediitit ovat riittämättömät. Lisää krediittejä osoitteessa openrouter.ai/credits</string>
+    <string name="openrouter_model">OpenRouter-malli</string>
+    <string name="openrouter_models_loaded">OpenRouter-mallit ladattu onnistuneesti</string>
     <string name="optimize">Optimoi</string>
     <string name="optimize_database">Optimoi tietokanta</string>
     <string name="optimizes_translation_for_specific_content">Optimoi käännöksen tiettyä sisältöä varten</string>
@@ -1994,6 +2011,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="refresh_all">Päivitä kaikki</string>
     <string name="refresh_covers_too">Päivitä myös kannet</string>
     <string name="refresh_metrics">Päivitä mittarit</string>
+    <string name="refresh_models">Päivitä mallit</string>
     <string name="refreshed">Päivitetty</string>
     <string name="refreshing">Päivitetään</string>
     <string name="refreshing_1">Päivitetään...</string>

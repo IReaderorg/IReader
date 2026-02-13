@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">用語集エントリを追加</string>
     <string name="add_more_time">時間を追加:</string>
     <string name="add_new_book_glossary">新しい本の用語集を追加</string>
+    <string name="add_new_rule">新しいルールを追加</string>
     <string name="add_novels_to_library_only">検索結果で見つかった場合のみ、小説をライブラリに追加する</string>
     <string name="add_parameter">パラメータを追加</string>
     <string name="add_plugin_repository">プラグインリポジトリを追加</string>
     <string name="add_repository">リポジトリを追加</string>
     <string name="add_repository_1">リポジトリを追加</string>
+    <string name="add_rule">ルールを追加</string>
     <string name="add_to_category">カテゴリに追加</string>
     <string name="add_to_library">ライブラリに追加</string>
+    <string name="add_without_category">カテゴリなしで追加</string>
+    <string name="added_genre_rule">ジャンルルールを追加しました: %1$s</string>
+    <string name="added_source_rule">ソースルールを追加しました: %1$s</string>
+    <string name="added_to_category">%sに追加しました</string>
     <string name="added_to_library">ライブラリに追加されました</string>
     <string name="additional_details">追加の詳細:</string>
     <string name="additional_details_optional">追加の詳細（オプション）</string>
@@ -87,8 +93,10 @@
     <string name="all_time">すべての時間</string>
     <string name="all_types">すべての種類</string>
     <string name="allow_loading_lnreader_compatible_javascript">LNReader互換JavaScriptプラグインのロードを許可する</string>
+    <string name="allow_mobile_data">モバイルデータ通信を許可</string>
     <string name="alpha">アルファ</string>
     <string name="alphaanimation">alphaAnimation</string>
+    <string name="always_ask">常に尋ねる</string>
     <string name="an_image">画像</string>
     <string name="analytics">分析</string>
     <string name="analyze_page">ページを分析</string>
@@ -145,6 +153,9 @@
     <string name="auto">自動</string>
     <string name="auto_approve_7_days_old">7日以上前のものを自動承認</string>
     <string name="auto_backup">自動バックアップ</string>
+    <string name="auto_categorization">自動カテゴリ分け</string>
+    <string name="auto_categorization_description">これらのルールに一致する小説は、このカテゴリに自動的に追加されます。</string>
+    <string name="auto_categorization_rules">自動カテゴリ分けルール</string>
     <string name="auto_cleanup">自動クリーンアップ</string>
     <string name="auto_delete">自動削除</string>
     <string name="auto_delete_chapters">章を自動削除</string>
@@ -165,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">DB内の章を自動ソート</string>
     <string name="auto_sync">自動同期</string>
     <string name="auto_sync_1">自動同期</string>
+    <string name="auto_translate_descriptions">説明を自動翻訳</string>
     <string name="auto_translate_next_chapter">次の章を自動翻訳</string>
     <string name="auto_translate_next_chapter_summary">選択した翻訳エンジンを使用して移動すると、次の章が自動的に翻訳されます</string>
+    <string name="auto_translate_novel_names">小説名を自動翻訳</string>
     <string name="auto_update">自動更新</string>
     <string name="auto_update_1">自動更新</string>
     <string name="auto_update_2">自動更新</string>
@@ -185,6 +198,8 @@
     <string name="automatically_share_your_translations_with">翻訳をコミュニティと自動的に共有する</string>
     <string name="automatically_stop_playback_after_set_time">設定された時間後に自動的に再生を停止する</string>
     <string name="automatically_sync_reading_progress">読書進捗を自動的に同期する</string>
+    <string name="automatically_translate_novel_descriptions_when">ソースを閲覧する際に小説の説明を自動的に翻訳します</string>
+    <string name="automatically_translate_novel_titles_when">ソースを閲覧する際に小説のタイトルを自動的に翻訳します</string>
     <string name="autoscroll">自動スクロール</string>
     <string name="available">利用可能</string>
     <string name="available_backups">利用可能なバックアップ</string>
@@ -192,6 +207,7 @@
     <string name="available_for_download">ダウンロード可能</string>
     <string name="available_kokoro_voices">利用可能なKokoro音声：</string>
     <string name="available_languages">利用可能な言語：</string>
+    <string name="available_voices">利用可能な音声</string>
     <string name="average_reading_speed">平均読書速度</string>
     <string name="avg_cpu">平均CPU</string>
     <string name="avg_response_time">平均応答時間</string>
@@ -258,6 +274,7 @@
     <string name="book_name_selector">ブック名セレクター *</string>
     <string name="book_name_selector_1">ブック名セレクター</string>
     <string name="book_not_found">本が見つかりません</string>
+    <string name="book_not_in_target_source">対象ソースで書籍が見つかりません</string>
     <string name="book_queued_for_download">書籍がダウンロード待ちになりました</string>
     <string name="book_reviews">本のレビュー</string>
     <string name="book_title">本のタイトル</string>
@@ -360,6 +377,7 @@
     <string name="chapter_complete">章の完了</string>
     <string name="chapter_completed">章を完了しました</string>
     <string name="chapter_content_extracted">章のコンテンツを %1$s を使用して抽出しました</string>
+    <string name="chapter_fetch_failed">チャプターの取得に失敗しました</string>
     <string name="chapter_filters">章のフィルタ</string>
     <string name="chapter_heading_size">章の見出しサイズ</string>
     <string name="chapter_list">章リスト</string>
@@ -390,6 +408,7 @@
     <string name="check_community_first">まずコミュニティを確認</string>
     <string name="check_for_app_updates">アプリのアップデートを確認</string>
     <string name="check_for_updates">アップデートを確認</string>
+    <string name="check_internet_connection">インターネット接続を確認して、もう一度お試しください。</string>
     <string name="check_permissions">権限を確認</string>
     <string name="check_the_update">アップデートを確認</string>
     <string name="checking_for_updates">アップデートを確認しています...</string>
@@ -424,6 +443,7 @@
     <string name="clear_completed">完了をクリア</string>
     <string name="clear_download_cache">ダウンロードキャッシュのクリア</string>
     <string name="clear_download_cache_confirmation">これにより、すべての一時ダウンロードファイルが削除されます。ダウンロード済みのチャプターには影響しません。</string>
+    <string name="clear_failed">失敗した項目をクリア</string>
     <string name="clear_filters">フィルターをクリア</string>
     <string name="clear_not_in_library_books">ライブラリにない本をすべてクリア</string>
     <string name="clear_search">検索をクリア</string>
@@ -555,6 +575,7 @@
     <string name="current_engine">現在のエンジン</string>
     <string name="current_location">現在の場所：</string>
     <string name="current_progress">現在の進捗状況</string>
+    <string name="current_rules">現在のルール</string>
     <string name="currently_reading">現在読書中</string>
     <string name="currently_viewing_a_plugin_screen">現在、プラグイン画面を表示しています</string>
     <string name="custom">カスタム</string>
@@ -603,6 +624,8 @@
     <string name="deepseek_configuration">DeepSeek設定</string>
     <string name="deepseek_login_required">DeepSeekのログインが必要です</string>
     <string name="deepseek_payment_required">DeepSeek payment required or API quota exceeded</string>
+    <string name="default_category">デフォルトカテゴリ</string>
+    <string name="default_category_summary">書籍をライブラリに追加する際に使用するカテゴリ</string>
     <string name="default_chapter_sort">デフォルトの章の並び順</string>
     <string name="default_reading_mode">デフォルトの読書モード</string>
     <string name="default_reading_mode_for_new_books">新しい本のデフォルトの読書モード</string>
@@ -622,11 +645,14 @@
     <string name="delete_art">アートを削除しますか？</string>
     <string name="delete_backup">バックアップを削除しますか？</string>
     <string name="delete_category">カテゴリを削除しますか？</string>
+    <string name="delete_chapter">チャプターを削除</string>
+    <string name="delete_content">コンテンツを削除</string>
     <string name="delete_custom_theme">カスタムテーマを削除</string>
     <string name="delete_entry">エントリを削除</string>
     <string name="delete_failed">削除に失敗しました：%1$s</string>
     <string name="delete_font">フォントを削除</string>
     <string name="delete_font_1">フォントを削除</string>
+    <string name="delete_rule">ルールを削除</string>
     <string name="delete_source">ソースを削除</string>
     <string name="delete_update">アップデートを削除</string>
     <string name="delete_voice">音声を削除</string>
@@ -674,6 +700,7 @@
     <string name="discord">Discord</string>
     <string name="discover">発見</string>
     <string name="discover_plugins_to_enhance_your_reading">読書体験を向上させるプラグインを見つける</string>
+    <string name="disk_space_warning">ダウンロード一時停止 - ディスク容量が不足しています</string>
     <string name="dismiss">閉じる</string>
     <string name="display">表示</string>
     <string name="display_adult_content_in_search_results">検索結果に成人向けコンテンツを表示する</string>
@@ -717,6 +744,7 @@
     <string name="download_delay">ダウンロード遅延</string>
     <string name="download_failed">ダウンロードに失敗しました: %1$s</string>
     <string name="download_failed_title">ダウンロード失敗</string>
+    <string name="download_from_last_read">最後に読んだ箇所からダウンロード</string>
     <string name="download_information">ダウンロード情報</string>
     <string name="download_install">ダウンロード＆インストール</string>
     <string name="download_language_models">言語モデルをダウンロード</string>
@@ -739,6 +767,7 @@
     <string name="download_settings">ダウンロード設定</string>
     <string name="download_unread">未読をダウンロード</string>
     <string name="download_unread_1">未読をダウンロード</string>
+    <string name="download_unread_from_last_read_desc">未読の最初のチャプターからではなく、最後に読んだチャプターの次からダウンロードします</string>
     <string name="download_update">アップデートをダウンロード</string>
     <string name="downloadarrow">ダウンロード矢印</string>
     <string name="downloaded">ダウンロード済み</string>
@@ -748,6 +777,7 @@
     <string name="downloading_1">ダウンロード中...</string>
     <string name="downloading_chapter_audio">章のオーディオをダウンロード中</string>
     <string name="downloading_chapters">%1$s 章をダウンロードしています</string>
+    <string name="downloading_count">%d件ダウンロード中</string>
     <string name="downloading_unread_chapters">未読の %1$s 章をダウンロードしています</string>
     <string name="downloading_update">アップデートをダウンロード中</string>
     <string name="downloading_update_1">アップデートをダウンロード中...</string>
@@ -923,10 +953,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">失敗</string>
+    <string name="failed_count">%d件失敗</string>
     <string name="failed_files">失敗したファイル</string>
     <string name="failed_imports">インポート失敗</string>
     <string name="failed_to_add_entry">エントリの追加に失敗しました：%1$s</string>
     <string name="failed_to_add_repository">リポジトリの追加に失敗しました：%1$s</string>
+    <string name="failed_to_add_rule">ルールの追加に失敗しました: %1$s</string>
     <string name="failed_to_apply_plugin_theme">プラグインテーマの適用に失敗しました：%1$s。デフォルトのテーマを使用します。</string>
     <string name="failed_to_check_updates">アップデートの確認に失敗しました</string>
     <string name="failed_to_copy">コピーに失敗しました: %1$s</string>
@@ -1044,6 +1076,7 @@
     <string name="gb_total_storage_7_500mb">合計3.5GBのストレージ(7×500MB) - 各プロジェクトを設定するか、すべてに同じURLを使用します</string>
     <string name="gemini_api_information">Gemini API 情報</string>
     <string name="gemini_api_key">Gemini APIキー</string>
+    <string name="gemini_api_key_invalid">Gemini APIキーが無効であるか、期限切れです。Google AI Studioから新しいキーを取得してください。</string>
     <string name="gemini_api_key_not_set">Gemini APIキーが設定されていません。設定で構成してください。
     </string>
     <string name="gemini_model">Geminiモデル</string>
@@ -1061,6 +1094,9 @@
     <string name="generating_audio_for_entire_chapter">章全体のオーディオを生成中...</string>
     <string name="generating_prompt">プロンプトを生成中...</string>
     <string name="generation_failed">生成に失敗しました</string>
+    <string name="genre_name">ジャンル名</string>
+    <string name="genre_placeholder">例：ファンタジー、ロマンス、アクション</string>
+    <string name="genre_rule">ジャンル</string>
     <string name="genre_selector">ジャンルセレクター</string>
     <string name="genrekind_selector">ジャンル/種類セレクター</string>
     <string name="genreprogress">ジャンルの進捗</string>
@@ -1177,6 +1213,8 @@
     <string name="import_from_url">URLからインポート</string>
     <string name="import_glossary">用語集をインポート</string>
     <string name="import_legado_sources">Legadoソースをインポート</string>
+    <string name="import_pdf">PDFをインポート</string>
+    <string name="import_pdf_files_into_your_library">PDFファイルをライブラリにインポートして、読書やTTSに利用します</string>
     <string name="import_sources">ソースをインポート</string>
     <string name="import_sources_from_legadoyuedu_json">Legado/Yuedu JSON形式からソースをインポートします。JSONを直接貼り付けるか、URLを入力するか、クリップボードからインポートできます。</string>
     <string name="import_theme">テーマをインポート</string>
@@ -1277,6 +1315,7 @@
     <string name="language_code">言語コード</string>
     <string name="language_filter">言語フィルター</string>
     <string name="language_preferences">言語設定</string>
+    <string name="language_preferences_saved">この書籍の言語設定を保存しました</string>
     <string name="language_translation">言語と翻訳</string>
     <string name="languages">言語</string>
     <string name="large">大きい</string>
@@ -1483,6 +1522,7 @@
     <string name="need_help">ヘルプが必要ですか？</string>
     <string name="network">ネットワーク</string>
     <string name="network_cache">ネットワークキャッシュ</string>
+    <string name="network_error">ネットワークエラー</string>
     <string name="network_settings">ネットワーク設定</string>
     <string name="neutral">ニュートラル</string>
     <string name="new_chapter_notifications">新しいチャプターの通知</string>
@@ -1523,7 +1563,9 @@
     <string name="no_badges_yet_earn_badges">バッジはまだありません。購入するか、IReader NFTを所有してバッジを獲得しましょう！</string>
     <string name="no_book_found_error">このIDの本はありません。</string>
     <string name="no_books_in_library">ライブラリに本がありません</string>
+    <string name="no_categories_create_one">カテゴリが見つかりません。ライブラリを整理するために最初に作成してください。</string>
     <string name="no_categories_found">カテゴリが見つかりません</string>
+    <string name="no_category">カテゴリなし</string>
     <string name="no_chapter_found_error">この名前の章はありません。</string>
     <string name="no_chapter_is_available">利用可能な章はありません。</string>
     <string name="no_chapters_available">利用可能なチャプターはありません</string>
@@ -1576,6 +1618,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">このチャプターのレビューはまだありません</string>
     <string name="no_reviews_yet">まだレビューはありません</string>
     <string name="no_reviews_yet_be_the_first_to_review">まだレビューはありません。最初のレビューを書きませんか？</string>
+    <string name="no_rules_configured">ルールが設定されていません。小説を自動的にカテゴリ分けするためのルールを追加してください。</string>
     <string name="no_settings_found">設定が見つかりません</string>
     <string name="no_sources_available">利用可能なソースはありません</string>
     <string name="no_sources_available_for_migration">移行に使用できるソースはありません</string>
@@ -1587,8 +1630,10 @@
     <string name="no_usage_data_available_yet">まだ利用状況データはありません</string>
     <string name="no_voice_models_available">音声モデルがありません</string>
     <string name="no_voices_available">音声がありません</string>
+    <string name="no_voices_available_for_this_language">この言語で利用可能な音声はありません</string>
     <string name="none">なし</string>
     <string name="normal">通常</string>
+    <string name="not_connected">未接続</string>
     <string name="not_implemented_yet">まだ実装されていません</string>
     <string name="not_installed">インストールされていません</string>
     <string name="not_tested">未テスト</string>
@@ -1626,6 +1671,15 @@
     <string name="novel_info">小説情報</string>
     <string name="now_try_creating_a_source">お気に入りのウェブサイトのソースを作成してみてください。</string>
     <string name="number_of_sources_to_search">同時に検索するソースの数。 値が高いほど高速ですが、より多くのリソースを使用します。</string>
+    <string name="nvidia_api_key">NVIDIA APIキー</string>
+    <string name="nvidia_api_key_invalid">NVIDIA APIキーが無効です。build.nvidia.com でキーを確認してください。</string>
+    <string name="nvidia_api_key_not_set">NVIDIA APIキーが設定されていません。設定で設定してください。</string>
+    <string name="nvidia_fetch_models">利用可能なモデルを取得</string>
+    <string name="nvidia_info">NVIDIA NIMは、Llama、Mistral、Gemmaなどを含む最適化されたAIモデルへのアクセスを提供します。APIキーはbuild.nvidia.comで取得してください。</string>
+    <string name="nvidia_insufficient_credits">NVIDIA APIのクレジットが不足しています。build.nvidia.com でアカウントを確認してください。</string>
+    <string name="nvidia_model">NVIDIAモデル</string>
+    <string name="nvidia_models_loaded">NVIDIAモデルが正常にロードされました</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of"> / </string>
     <string name="off">オフ</string>
     <string name="offline_mode">オフラインモード</string>
@@ -1657,6 +1711,7 @@
     <string name="open_location">場所を開く</string>
     <string name="open_random">ランダムに開く</string>
     <string name="open_site">サイトを開く</string>
+    <string name="open_storage_settings">ストレージ設定を開く</string>
     <string name="open_tts_manager">TTSマネージャーを開く</string>
     <string name="open_tts_screen">表示</string>
     <string name="open_tts_settings">TTS設定を開く</string>
@@ -1666,6 +1721,14 @@
     </string>
     <string name="openai_configuration">OpenAI設定</string>
     <string name="openai_quota_exceeded">Openai quota exceeded</string>
+    <string name="openrouter_api_key">OpenRouter APIキー</string>
+    <string name="openrouter_api_key_invalid">OpenRouter APIキーが無効です。openrouter.ai/keys でキーを確認してください。</string>
+    <string name="openrouter_api_key_not_set">OpenRouter APIキーが設定されていません。設定で設定してください。</string>
+    <string name="openrouter_fetch_models">利用可能なモデルを取得</string>
+    <string name="openrouter_info">OpenRouterは、GPT-4、Claude、Llamaなどを含む複数のAIモデルへの統合アクセスを提供します。APIキーはopenrouter.aiで取得してください。</string>
+    <string name="openrouter_insufficient_credits">OpenRouterのクレジットが不足しています。openrouter.ai/credits でクレジットを追加してください。</string>
+    <string name="openrouter_model">OpenRouterモデル</string>
+    <string name="openrouter_models_loaded">OpenRouterモデルが正常にロードされました</string>
     <string name="optimize">最適化</string>
     <string name="optimize_database">データベースの最適化</string>
     <string name="optimizes_translation_for_specific_content">特定のコンテンツに合わせて翻訳を最適化します</string>
@@ -1718,6 +1781,7 @@
     <string name="paste_the_theme_json_below">以下のテーマJSONを貼り付けてください:</string>
     <string name="pause">一時停止</string>
     <string name="pause_all">すべて一時停止</string>
+    <string name="pause_downloads">ダウンロードを一時停止</string>
     <string name="paused">一時停止</string>
     <string name="payment_method">支払い方法</string>
     <string name="pen">ペン</string>
@@ -1805,6 +1869,8 @@
     <string name="pref_relative_time_long">長い形式 (短い形式+, n日前)</string>
     <string name="pref_relative_time_short">短い形式 (今日、昨日)</string>
     <string name="prefer_saf_storage">SAFストレージを優先</string>
+    <string name="preferred_source_language">優先ソース言語</string>
+    <string name="preferred_target_language">優先ターゲット言語</string>
     <string name="preload_next_chapter">次のチャプターをプリロード</string>
     <string name="preload_only_on_wifi">WiFiでのみプリロード</string>
     <string name="preload_only_on_wifi_summary">自動プリロードをWiFi接続のみに制限します</string>
@@ -1871,6 +1937,7 @@
     <string name="query_must_not_be_empty">クエリは空にできません。</string>
     <string name="queue_failed">キューに失敗しました</string>
     <string name="queued">キュー</string>
+    <string name="queued_count">%d件待機中</string>
     <string name="quick_add_popular_repositories">人気のレポジトリを素早く追加</string>
     <string name="quick_add_repository">クイックリポジトリ追加</string>
     <string name="quick_fill_same_url_for_all_projects">クイックフィル（すべてのプロジェクトに同じURL）</string>
@@ -1934,6 +2001,7 @@
     <string name="refresh_all">すべて更新</string>
     <string name="refresh_covers_too">カバーも更新</string>
     <string name="refresh_metrics">メトリクスを更新</string>
+    <string name="refresh_models">モデルを更新</string>
     <string name="refreshed">更新済み</string>
     <string name="refreshing">更新中</string>
     <string name="refreshing_1">更新中...</string>
@@ -1948,6 +2016,7 @@
     <string name="reload">再読み込み</string>
     <string name="reload_plugin_themes">プラグインテーマを再読み込み</string>
     <string name="remaining">残り</string>
+    <string name="remember_my_languages">私の言語選択を記憶</string>
     <string name="remind_me_again_in">再度リマインド：</string>
     <string name="reminder_interval">リマインダー間隔</string>
     <string name="remove">削除</string>
@@ -2029,7 +2098,9 @@
     <string name="resume">再開</string>
     <string name="resume_all">すべて再開</string>
     <string name="resume_download">ダウンロードを再開</string>
+    <string name="resume_downloads">ダウンロードを再開</string>
     <string name="retry">再試行</string>
+    <string name="retry_all_failed">失敗した項目をすべて再試行</string>
     <string name="retry_failed">失敗を再試行</string>
     <string name="retry_loading">再読み込み</string>
     <string name="retrying_download">ダウンロードを再試行中</string>
@@ -2049,7 +2120,10 @@
     <string name="right">右</string>
     <string name="rotate_screen_automatically">画面を自動的に回転</string>
     <string name="rotation">回転</string>
+    <string name="rule_already_exists">このカテゴリには、このルールがすでに存在します</string>
+    <string name="rule_count">%1$d件のルール</string>
     <string name="rule_syntax_help">ルール構文ヘルプ</string>
+    <string name="rules_count">%1$d件のルール</string>
     <string name="run_health_check">ヘルスチェックを実行</string>
     <string name="run_the_migration_community_sourcesql">これらのテーブルを作成するには、Supabase SQLエディターで migration_community_source.sql ファイルを実行してください。</string>
     <string name="sample_text">サンプルテキスト</string>
@@ -2060,6 +2134,7 @@
     <string name="save_custom_theme">カスタムテーマを保存</string>
     <string name="save_epub">EPUBを保存</string>
     <string name="save_js_sources_extensions_backups">利用可能な場合はJSソース、拡張機能、バックアップ、EPUBをSAFフォルダに保存します。利用できない場合はキャッシュにフォールバックします。</string>
+    <string name="save_language_preferences">言語設定を保存</string>
     <string name="save_multi_endpoint_configuration">マルチエンドポイント設定を保存</string>
     <string name="save_patterns">パターンを保存</string>
     <string name="saved_local_source_location">キャッシュに保存されたソース</string>
@@ -2078,6 +2153,7 @@
     <string name="search_across_all_sources">すべてのソースを検索</string>
     <string name="search_across_all_sources_1">すべてのソースから検索...</string>
     <string name="search_bar">検索バー</string>
+    <string name="search_book_manually">手動でソース内で書籍を検索し、利用可能性を確認してください。</string>
     <string name="search_characters_books">キャラクター、本を検索...</string>
     <string name="search_features">機能検索...</string>
     <string name="search_fonts">フォントを検索...</string>
@@ -2124,6 +2200,7 @@
     <string name="select_backup_file">バックアップファイルを選択</string>
     <string name="select_between">範囲選択</string>
     <string name="select_books_to_migrate">移行する書籍を選択</string>
+    <string name="select_categories">カテゴリを選択</string>
     <string name="select_chapters">章を選択</string>
     <string name="select_cloud_provider">クラウドプロバイダーを選択</string>
     <string name="select_engine">エンジンを選択</string>
@@ -2139,6 +2216,7 @@
     <string name="select_model">モデルを選択</string>
     <string name="select_navigation_style">ナビゲーションスタイルを選択</string>
     <string name="select_source_to_migrate_to">移行先のソースを選択</string>
+    <string name="select_storage_folder">ストレージフォルダを選択</string>
     <string name="select_target_source">ターゲットソースを選択</string>
     <string name="select_the_languages_you_want">コンテンツの閲覧および検索時に表示したい言語を選択してください。複数の言語を選択できます。</string>
     <string name="select_the_languages_you_want_1">ソースの閲覧時に表示したい言語を選択してください。利用可能なソースがある言語のみが表示されます。</string>
@@ -2162,6 +2240,7 @@
     <string name="selectors_for_the_explorelatest_page">探索/最新ページ用のセレクター (任意、空の場合検索ルールを使用)</string>
     <string name="send_reset_email">リセットメールを送信</string>
     <string name="sentence_highlighting">文のハイライト</string>
+    <string name="set_categories">カテゴリを設定</string>
     <string name="set_eth_wallet_address">ETHウォレットアドレスを設定</string>
     <string name="set_name">名前を設定</string>
     <string name="sets_the_tone_of_translated_text">翻訳されたテキストのトーンを設定します</string>
@@ -2264,10 +2343,14 @@
     <string name="source_browse_latest">最新を閲覧</string>
     <string name="source_extension_not_installed">ソース拡張機能がインストールされていません</string>
     <string name="source_id">ソースID</string>
+    <string name="source_id_or_name">ソースIDまたは名前</string>
     <string name="source_json">ソースJSON</string>
     <string name="source_name">ソース名 *</string>
     <string name="source_needs_update">ソースの更新が必要</string>
     <string name="source_not_available">このソースはお使いのデバイスでは利用できません。</string>
+    <string name="source_not_found">ソースが見つかりません</string>
+    <string name="source_placeholder">例：12345 または NovelUpdates</string>
+    <string name="source_rule">ソース</string>
     <string name="source_term">ソース語句</string>
     <string name="source_title">ソースタイトル</string>
     <string name="source_unavailable">ソースが利用できません</string>
@@ -2294,11 +2377,16 @@
     <string name="stop">停止</string>
     <string name="stop_playback_after">再生を停止する期間:</string>
     <string name="storage">ストレージ</string>
+    <string name="storage_access_lost">ストレージアクセスが失われました</string>
+    <string name="storage_access_lost_description">IReaderはストレージフォルダへのアクセス権がありません。アプリを継続して使用するにはフォルダを選択してください。</string>
+    <string name="storage_access_lost_reasons">フォルダが削除された、移動された、または権限が取り消された可能性があります。これはアプリのアップデートやシステム変更後に発生することがあります。</string>
+    <string name="storage_is_needed_for">ストレージは以下の用途に必要です:</string>
     <string name="storage_permission_privacy_note">IReaderは、選択したフォルダーのみにアクセスします。その他のファイルはプライベートなままで、変更されることはありません。</string>
     <string name="storage_permission_required_explanation">ストレージの許可が必要です
     </string>
     <string name="storage_permission_subtitle">IReaderがダウンロード、拡張機能、バックアップを保存するフォルダーを選択してください</string>
     <string name="storage_permission_title">ストレージフォルダーを選択</string>
+    <string name="storage_required">ストレージが必要です</string>
     <string name="storage_settings">ストレージ設定</string>
     <string name="storage_setup">ストレージ設定</string>
     <string name="storage_usage">ストレージ使用量</string>
@@ -2366,6 +2454,7 @@
     <string name="system_integration_multiple_engines_supported">✓ システム統合 • ✓ 複数のエンジンをサポート • ✓ ダウンロード不要</string>
     <string name="system_notifications">システムと通知</string>
     <string name="system_notifications_1">システム通知</string>
+    <string name="system_settings">システム設定</string>
     <string name="system_tts_settings">システムTTS設定</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">タブ</string>
@@ -2514,14 +2603,39 @@
     <string name="translated">翻訳済み</string>
     <string name="translating">翻訳中... しばらく時間がかかる場合があります。</string>
     <string name="translation">翻訳</string>
+    <string name="translation_api_key_invalid">%1$sのAPIキーが無効であるか、期限切れです。設定 → 翻訳 でキーを確認してください。</string>
+    <string name="translation_api_key_not_set">%1$sにはAPIキーが必要です。設定 → 翻訳 に進み、APIキーを設定してください。</string>
+    <string name="translation_auth_required">この翻訳機能を使用するには、%1$sにサインインする必要があります。</string>
+    <string name="translation_captcha_required">%1$sは認証が必要です。続行するにはCAPTCHAを完了してください。</string>
     <string name="translation_complete">翻訳完了。</string>
+    <string name="translation_empty_response">%1$sが空の応答を返しました。一時的な問題の可能性があります。もう一度お試しください。</string>
     <string name="translation_engine">翻訳エンジン</string>
+    <string name="translation_engine_not_available">このアプリのバージョンでは%1$sは利用できません。別の翻訳エンジンを使用してください。</string>
     <string name="translation_engines_refreshed">翻訳エンジンが更新されました</string>
     <string name="translation_error">翻訳エラー</string>
+    <string name="translation_language_model_not_available">%1$s → %2$s の言語モデルがダウンロードされていません。設定 → 翻訳 に進んでダウンロードしてください。</string>
+    <string name="translation_language_pair_not_supported">%1$sは%2$sから%3$sへの翻訳をサポートしていません。別の言語を選択してください。</string>
+    <string name="translation_model_not_found">%1$sのAIモデルが見つかりませんでした。設定を確認してください。</string>
+    <string name="translation_model_not_found_with_name">%1$sでモデル「%2$s」が見つかりません。設定で別のモデルを選択してください。</string>
+    <string name="translation_network_error">%1$sに接続できません。インターネット接続を確認して、もう一度お試しください。</string>
+    <string name="translation_parse_error">%1$sからの応答を理解できませんでした。サービスに問題が発生している可能性があります。</string>
+    <string name="translation_plugin_error">翻訳プラグイン「%1$s」でエラーが発生しました。プラグイン設定を確認するか、別のエンジンを試してください。</string>
     <string name="translation_plugins_extend_ireader_with">翻訳プラグインは、追加の翻訳サービスでIReaderを拡張します</string>
     <string name="translation_progress">翻訳の進行状況</string>
+    <string name="translation_quota_exceeded">%1$sの翻訳クォータを超過しました。プランと請求を確認するか、後でもう一度お試しください。</string>
+    <string name="translation_rate_limit">%1$sが過剰なリクエストを受信しています。しばらく待ってからもう一度お試しください。</string>
     <string name="translation_rate_limit_delay">翻訳レート制限遅延</string>
+    <string name="translation_rate_limit_with_retry">%1$sのレート制限に達しました。%2$d秒待ってからもう一度お試しください。</string>
+    <string name="translation_same_as_original">%1$sがテキストを変更せずに返しました。翻訳に失敗したか、テキストがすでにターゲット言語である可能性があります。</string>
+    <string name="translation_server_error">%1$sサーバーで問題が発生しています。後でもう一度お試しください。</string>
+    <string name="translation_server_error_with_code">%1$sサーバーエラー（コード: %2$d）。後でもう一度お試しください。</string>
     <string name="translation_settings">翻訳設定</string>
+    <string name="translation_text_too_long">テキストが長すぎて%1$sで処理できません。より短いセクションで翻訳を試してください。</string>
+    <string name="translation_text_too_long_with_limit">テキストが%1$sの%2$d文字の制限を超過しています。より短いセクションで翻訳を試してください。</string>
+    <string name="translation_timeout">%1$sからの応答に時間がかかりすぎました。もう一度お試しください。</string>
+    <string name="translation_timeout_with_seconds">%1$sは%2$d秒以内に応答しませんでした。もう一度お試しください。</string>
+    <string name="translation_unknown_error">%1$sで予期せぬエラーが発生しました。もう一度お試しください。</string>
+    <string name="translation_unknown_error_with_details">%1$sエラー: %2$s</string>
     <string name="translation_warning">翻訳に関する警告</string>
     <string name="translations">翻訳</string>
     <string name="trending_now">トレンド</string>
@@ -2531,9 +2645,11 @@
     <string name="trust_level_updated">信頼レベルを更新しました</string>
     <string name="try_a_different_search_term">別の検索語句を試してください</string>
     <string name="try_again">再試行</string>
+    <string name="try_again_later">データは保存されています。後でもう一度お試しください。</string>
     <string name="try_alternative_url">代替URLを試す</string>
     <string name="try_another_search">別の検索を試す</string>
     <string name="try_different_search">別の検索語句を試してください</string>
+    <string name="try_different_source">ソースが利用できない可能性があります。別のソースを試してください。</string>
     <string name="try_these_fixes">これらの修正を試してください:</string>
     <string name="trying_in_few_second">数秒後にもう一度お試しください。</string>
     <string name="trying_to_fetch">取得しようとしています…</string>
@@ -2596,6 +2712,7 @@
     <string name="upcoming_releases">今後のリリース</string>
     <string name="update">アップデート</string>
     <string name="update_all">すべて更新</string>
+    <string name="update_all_books">すべての書籍を更新</string>
     <string name="update_available">アップデートがあります</string>
     <string name="update_available_1">アップデートあり</string>
     <string name="update_category">カテゴリを更新</string>
@@ -2649,6 +2766,7 @@
     <string name="use_password">パスワードを使用</string>
     <string name="use_pin">PINを使用</string>
     <string name="use_pinpassword_instead">PIN/パスワードを使用</string>
+    <string name="use_saved_languages">保存された言語を使用</string>
     <string name="use_separate_supabase_projects_for">スケーラビリティ向上のため、個別のSupabaseプロジェクトを使用</string>
     <string name="use_static_indicators_instead_of_animated_ones">アニメーションインジケーターの代わりに静的インジケーターを使用</string>
     <string name="use_translated_text_for_text">利用可能な場合は、テキスト読み上げに翻訳されたテキストを使用</string>
@@ -2662,6 +2780,7 @@
     <string name="users">ユーザー</string>
     <string name="uuid_of_your_d1_database">あなたのD1データベースのUUID</string>
     <string name="validate">検証</string>
+    <string name="validation_error">検証エラー</string>
     <string name="verification_details">認証の詳細</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• 認証は自動的に行われ、数秒かかります</string>
     <string name="verification_is_cached_for_24">認証は24時間キャッシュされます。再認証に失敗した場合、バッジは7日間有効です。</string>
@@ -2728,11 +2847,14 @@
     <string name="whats_new_1">新着情報</string>
     <string name="whats_new_2">新機能:</string>
     <string name="while_charging">充電中</string>
+    <string name="why_did_this_happen">なぜこれが発生しましたか？</string>
     <string name="why_donate">寄付をする理由</string>
     <string name="why_is_this_needed">なぜこれが必要なのですか？</string>
     <string name="width">幅</string>
     <string name="width_1">幅</string>
     <string name="wifi_only">Wi-Fiのみ</string>
+    <string name="wifi_only_mode">Wi-Fiのみモード</string>
+    <string name="wifi_only_warning">ダウンロード一時停止 - Wi-Fiのみモードが有効です</string>
     <string name="with_trailing_content">末尾にコンテンツ付き</string>
     <string name="wizard">ウィザード</string>
     <string name="wizard_step">wizard_step</string>

@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">Tambah Entri Glosari</string>
     <string name="add_more_time">အချိန်ထပ်ထည့်ရန်-</string>
     <string name="add_new_book_glossary">စာအုပ်ဝေါဟာရအသစ်ထည့်ရန်</string>
+    <string name="add_new_rule">စည်းမျဉ်းအသစ် ထည့်ပါ</string>
     <string name="add_novels_to_library_only">Tambah novel ke pustaka hanya apabila ditemui dalam hasil carian</string>
     <string name="add_parameter">Tambah Parameter</string>
     <string name="add_plugin_repository">ပလပ်အင် Repository ထည့်ရန်</string>
     <string name="add_repository">Tambah Repositori</string>
     <string name="add_repository_1">Repository ထည့်ရန်</string>
+    <string name="add_rule">စည်းမျဉ်း ထည့်ပါ</string>
     <string name="add_to_category">Tambah ke Kategori</string>
     <string name="add_to_library">Tambah ke Perpustakaan</string>
+    <string name="add_without_category">အမျိုးအစားမပါဘဲ ထည့်ပါ</string>
+    <string name="added_genre_rule">အမျိုးအစား စည်းမျဉ်း ထည့်သွင်းပြီးပြီ: %1$s</string>
+    <string name="added_source_rule">အရင်းအမြစ် စည်းမျဉ်း ထည့်သွင်းပြီးပြီ: %1$s</string>
+    <string name="added_to_category">%s ထဲသို့ ထည့်သွင်းပြီးပြီ</string>
     <string name="added_to_library">Ditambah ke Perpustakaan</string>
     <string name="additional_details">Butiran Tambahan:</string>
     <string name="additional_details_optional">Butiran tambahan (pilihan)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">Sepanjang Masa</string>
     <string name="all_types">အမျိုးအစားအားလုံး</string>
     <string name="allow_loading_lnreader_compatible_javascript">Benarkan memuatkan plugin JavaScript yang serasi dengan LNReader</string>
+    <string name="allow_mobile_data">မိုဘိုင်းဒေတာ ခွင့်ပြုပါ</string>
     <string name="alpha">alfa</string>
     <string name="alphaanimation">animasi alfa</string>
+    <string name="always_ask">အမြဲမေးပါ</string>
     <string name="an_image">imej</string>
     <string name="analytics">Analisis</string>
     <string name="analyze_page">စာမျက်နှာကို ခွဲခြမ်းစိတ်ဖြာရန်</string>
@@ -145,6 +153,9 @@
     <string name="auto">Auto</string>
     <string name="auto_approve_7_days_old">၇ ရက်အထက်ရှိပြီးသော အရာများကို အလိုအလျောက် အတည်ပြုရန်</string>
     <string name="auto_backup">Sandaran automatik</string>
+    <string name="auto_categorization">အလိုအလျောက် ခွဲခြားသတ်မှတ်ခြင်း</string>
+    <string name="auto_categorization_description">ဤစည်းမျဉ်းများနှင့် ကိုက်ညီသော ဝတ္ထုများကို ဤအမျိုးအစားထဲသို့ အလိုအလျောက် ထည့်သွင်းပါမည်။</string>
+    <string name="auto_categorization_rules">အလိုအလျောက် ခွဲခြားသတ်မှတ်ခြင်း စည်းမျဉ်းများ</string>
     <string name="auto_cleanup">Pembersihan Auto</string>
     <string name="auto_delete">Padam Auto</string>
     <string name="auto_delete_chapters">Padam Bab Auto</string>
@@ -165,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">Isih Bab Secara Automatik dalam DB</string>
     <string name="auto_sync">Segerak Auto</string>
     <string name="auto_sync_1">Auto-Segerak</string>
+    <string name="auto_translate_descriptions">ဖော်ပြချက်များကို အလိုအလျောက်ဘာသာပြန်ပါ</string>
     <string name="auto_translate_next_chapter">Terjemah automatik bab seterusnya</string>
     <string name="auto_translate_next_chapter_summary">Terjemahkan secara automatik bab seterusnya apabila menavigasi menggunakan enjin terjemahan yang dipilih</string>
+    <string name="auto_translate_novel_names">ဝတ္ထုအမည်များကို အလိုအလျောက်ဘာသာပြန်ပါ</string>
     <string name="auto_update">Kemaskini automatik</string>
     <string name="auto_update_1">Kemas Kini Auto</string>
     <string name="auto_update_2">Auto-Kemas Kini</string>
@@ -185,6 +198,8 @@
     <string name="automatically_share_your_translations_with">သင့်ဘာသာပြန်များကို အသိုင်းအဝိုင်းနှင့် အလိုအလျောက် မျှဝေပါ</string>
     <string name="automatically_stop_playback_after_set_time">Hentikan main balik secara automatik selepas masa yang ditetapkan</string>
     <string name="automatically_sync_reading_progress">Segerakkan kemajuan membaca secara automatik</string>
+    <string name="automatically_translate_novel_descriptions_when">အရင်းအမြစ်များကို ကြည့်ရှုသည့်အခါ ဝတ္ထုဖော်ပြချက်များကို အလိုအလျောက်ဘာသာပြန်ပါ</string>
+    <string name="automatically_translate_novel_titles_when">အရင်းအမြစ်များကို ကြည့်ရှုသည့်အခါ ဝတ္ထုအမည်များကို အလိုအလျောက်ဘာသာပြန်ပါ</string>
     <string name="autoscroll">Tatal Automatik</string>
     <string name="available">Tersedia</string>
     <string name="available_backups">Sandaran Tersedia</string>
@@ -192,6 +207,7 @@
     <string name="available_for_download">Tersedia untuk Muat Turun</string>
     <string name="available_kokoro_voices">Suara Kokoro yang tersedia:</string>
     <string name="available_languages">Bahasa yang tersedia:</string>
+    <string name="available_voices">ရရှိနိုင်သော အသံများ</string>
     <string name="average_reading_speed">Purata Kelajuan Membaca</string>
     <string name="avg_cpu">Purata CPU</string>
     <string name="avg_response_time">Purata Masa Respons</string>
@@ -258,6 +274,7 @@
     <string name="book_name_selector">စာအုပ်အမည် ရွေးချယ်သူ *</string>
     <string name="book_name_selector_1">စာအုပ်အမည် ရွေးချယ်သူ</string>
     <string name="book_not_found">Buku tidak ditemui</string>
+    <string name="book_not_in_target_source">ပစ်မှတ်အရင်းအမြစ်တွင် စာအုပ် ရှာမတွေ့ပါ</string>
     <string name="book_queued_for_download">Buku beratur untuk dimuat turun</string>
     <string name="book_reviews">Ulasan Buku</string>
     <string name="book_title">Tajuk Buku</string>
@@ -360,6 +377,7 @@
     <string name="chapter_complete">အခန်းပြီးပါပြီ</string>
     <string name="chapter_completed">Bab Selesai</string>
     <string name="chapter_content_extracted">Kandungan bab diekstrak menggunakan %1$s</string>
+    <string name="chapter_fetch_failed">အခန်း ဆွဲယူခြင်း ကျရှုံးခဲ့သည်</string>
     <string name="chapter_filters">Penapis Bab</string>
     <string name="chapter_heading_size">Saiz Tajuk Bab</string>
     <string name="chapter_list">အခန်းစာရင်း</string>
@@ -390,6 +408,7 @@
     <string name="check_community_first">အသိုင်းအဝိုင်းကို အရင်စစ်ဆေးပါ</string>
     <string name="check_for_app_updates">အက်ပ်အပ်ဒိတ်များ စစ်ဆေးရန်</string>
     <string name="check_for_updates">Semak Kemas Kini</string>
+    <string name="check_internet_connection">သင်၏အင်တာနက်ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ထပ်ကြိုးစားကြည့်ပါ။</string>
     <string name="check_permissions">Semak Kebenaran</string>
     <string name="check_the_update">Semak Kemas Kini</string>
     <string name="checking_for_updates">Menyemak kemas kini…</string>
@@ -424,6 +443,7 @@
     <string name="clear_completed">Kosongkan Selesai</string>
     <string name="clear_download_cache">Kosongkan Cache Muat Turun</string>
     <string name="clear_download_cache_confirmation">Ini akan membuang semua fail muat turun sementara. Bab yang dimuat turun tidak akan terjejas.</string>
+    <string name="clear_failed">ကျရှုံးခဲ့သောများကို ရှင်းလင်းပါ</string>
     <string name="clear_filters">Kosongkan Penapis</string>
     <string name="clear_not_in_library_books">Kosongkan Semua buku yang tidak ada dalam perpustakaan</string>
     <string name="clear_search">Kosongkan carian</string>
@@ -556,6 +576,7 @@
     <string name="current_engine">Enjin Semasa</string>
     <string name="current_location">Lokasi semasa:</string>
     <string name="current_progress">Kemajuan Semasa</string>
+    <string name="current_rules">လက်ရှိစည်းမျဉ်းများ</string>
     <string name="currently_reading">Sedang Dibaca</string>
     <string name="currently_viewing_a_plugin_screen">Sedang melihat skrin plugin</string>
     <string name="custom">Tersuai</string>
@@ -605,6 +626,8 @@
     <string name="deepseek_configuration">DeepSeek ပြင်ဆင်သတ်မှတ်မှု</string>
     <string name="deepseek_login_required">Log Masuk DeepSeek Diperlukan</string>
     <string name="deepseek_payment_required">Pembayaran DeepSeek diperlukan atau kuota API melebihi</string>
+    <string name="default_category">မူရင်းအမျိုးအစား</string>
+    <string name="default_category_summary">စာအုပ်များကို စာကြည့်တိုက်သို့ ထည့်သွင်းသည့်အခါ အသုံးပြုမည့် အမျိုးအစား</string>
     <string name="default_chapter_sort">Isihan Bab Lalai</string>
     <string name="default_reading_mode">Mod Membaca Lalai</string>
     <string name="default_reading_mode_for_new_books">Mod Membaca Lalai untuk Buku Baharu</string>
@@ -624,11 +647,14 @@
     <string name="delete_art">ပုံဖျက်မည်လား။</string>
     <string name="delete_backup">Padam Sandaran?</string>
     <string name="delete_category">Padamkan Kategori?</string>
+    <string name="delete_chapter">အခန်း ဖျက်ပါ</string>
+    <string name="delete_content">အကြောင်းအရာ ဖျက်ပါ</string>
     <string name="delete_custom_theme">Padam tema tersuai</string>
     <string name="delete_entry">Entry ဖျက်ရန်</string>
     <string name="delete_failed">Padam gagal: %1$s</string>
     <string name="delete_font">Padam Fon</string>
     <string name="delete_font_1">Padam fon</string>
+    <string name="delete_rule">စည်းမျဉ်း ဖျက်ပါ</string>
     <string name="delete_source">Source ဖျက်ရန်</string>
     <string name="delete_update">Padam Kemas Kini</string>
     <string name="delete_voice">Padam suara</string>
@@ -676,6 +702,7 @@
     <string name="discord">Discord</string>
     <string name="discover">ရှာဖွေရန်</string>
     <string name="discover_plugins_to_enhance_your_reading">သင့်စာဖတ်ခြင်းကို မြှင့်တင်ရန် ပလပ်အင်များကို ရှာဖွေပါ။</string>
+    <string name="disk_space_warning">ဒေါင်းလုဒ်များ ခဏရပ်ထားသည် - ဒစ်ခ်နေရာလွတ် နည်းပါးသည်</string>
     <string name="dismiss">Ketepikan</string>
     <string name="display">Paparan</string>
     <string name="display_adult_content_in_search_results">ရှာဖွေမှုရလဒ်များတွင် အရွယ်ရောက်ပြီးသူ အကြောင်းအရာများကို ပြသပါ။</string>
@@ -719,6 +746,7 @@
     <string name="download_delay">Kelewatan Muat Turun</string>
     <string name="download_failed">Muat turun gagal: %1$s</string>
     <string name="download_failed_title">Muat Turun Gagal</string>
+    <string name="download_from_last_read">နောက်ဆုံးဖတ်ပြီးသည့်နေရာမှ ဒေါင်းလုဒ်လုပ်ပါ</string>
     <string name="download_information">ဒေါင်းလုဒ် အချက်အလက်</string>
     <string name="download_install">ဒေါင်းလုဒ်လုပ်ပြီး ထည့်သွင်းရန်</string>
     <string name="download_language_models">ဘာသာစကားမော်ဒယ်များကို ဒေါင်းလုဒ်လုပ်ရန်</string>
@@ -742,6 +770,7 @@
     <string name="download_settings">Tetapan Muat Turun</string>
     <string name="download_unread">Muat turun yang belum dibaca</string>
     <string name="download_unread_1">Muat Turun Belum Dibaca</string>
+    <string name="download_unread_from_last_read_desc">ပထမဆုံး မဖတ်ရသေးသော အခန်းမှစ၍ ဒေါင်းလုဒ်လုပ်မည့်အစား သင်နောက်ဆုံးဖတ်ပြီးသော အခန်းနောက်မှစ၍ ဒေါင်းလုဒ်လုပ်ပါ</string>
     <string name="download_update">Muat Turun Kemas Kini</string>
     <string name="downloadarrow">downloadArrow</string>
     <string name="downloaded">Dimuat turun</string>
@@ -751,6 +780,7 @@
     <string name="downloading_1">Memuat turun...</string>
     <string name="downloading_chapter_audio">Memuat turun Audio Bab</string>
     <string name="downloading_chapters">Memuat turun %1$s bab</string>
+    <string name="downloading_count">%d ခု ဒေါင်းလုဒ်လုပ်နေသည်</string>
     <string name="downloading_unread_chapters">Memuat turun %1$s bab yang belum dibaca</string>
     <string name="downloading_update">Memuat turun Kemas Kini</string>
     <string name="downloading_update_1">အပ်ဒိတ် ဒေါင်းလုဒ်လုပ်နေသည်...</string>
@@ -926,10 +956,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">Gagal</string>
+    <string name="failed_count">%d ခု ကျရှုံးခဲ့သည်</string>
     <string name="failed_files">Fail Gagal</string>
     <string name="failed_imports">Import Gagal</string>
     <string name="failed_to_add_entry">Gagal menambah entri: %1$s</string>
     <string name="failed_to_add_repository">Gagal menambah repositori: %1$s</string>
+    <string name="failed_to_add_rule">စည်းမျဉ်းထည့်ရန် ကျရှုံးခဲ့သည်: %1$s</string>
     <string name="failed_to_apply_plugin_theme">Gagal menggunakan tema pemalam: %1$s. Menggunakan tema lalai.</string>
     <string name="failed_to_check_updates">Gagal menyemak kemas kini</string>
     <string name="failed_to_copy">Gagal menyalin: %1$s</string>
@@ -1047,6 +1079,7 @@
     <string name="gb_total_storage_7_500mb">Jumlah storan 3.5GB (7 × 500MB) - Konfigurasikan setiap projek atau gunakan URL yang sama untuk semua</string>
     <string name="gemini_api_information">Maklumat API Gemini</string>
     <string name="gemini_api_key">Kunci API Gemini</string>
+    <string name="gemini_api_key_invalid">Gemini API ကီးသည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်ဆုံးသွားပါပြီ။ Google AI Studio မှ ကီးအသစ်ရယူပါ။</string>
     <string name="gemini_api_key_not_set">Kunci API Gemini tidak ditetapkan. Sila konfigurasikannya dalam
         tetapan.
     </string>
@@ -1065,6 +1098,9 @@
     <string name="generating_audio_for_entire_chapter">Menjana audio untuk seluruh bab...</string>
     <string name="generating_prompt">စာသား ဖန်တီးနေသည်...</string>
     <string name="generation_failed">ဖန်တီးမှု မအောင်မြင်ပါ</string>
+    <string name="genre_name">အမျိုးအစားအမည်</string>
+    <string name="genre_placeholder">ဥပမာ- စိတ်ကူးယဉ်၊ အချစ်၊ အက်ရှင်</string>
+    <string name="genre_rule">အမျိုးအစား</string>
     <string name="genre_selector">အမျိုးအစား ရွေးချယ်သူ</string>
     <string name="genrekind_selector">အမျိုးအစား/အမျိုးအစားခွဲ ရွေးချယ်သူ</string>
     <string name="genreprogress">genreProgress</string>
@@ -1181,6 +1217,8 @@
     <string name="import_from_url">URL မှ ထည့်သွင်းပါ</string>
     <string name="import_glossary">ဝေါဟာရစာရင်း ထည့်သွင်းပါ</string>
     <string name="import_legado_sources">Legado Sources များ ထည့်သွင်းပါ</string>
+    <string name="import_pdf">PDF တင်သွင်းပါ</string>
+    <string name="import_pdf_files_into_your_library">စာဖတ်ရန်နှင့် TTS အတွက် PDF ဖိုင်များကို သင်၏စာကြည့်တိုက်ထဲသို့ တင်သွင်းပါ</string>
     <string name="import_sources">Sources များ ထည့်သွင်းပါ</string>
     <string name="import_sources_from_legadoyuedu_json">Legado/Yuedu JSON format မှ sources များကို ထည့်သွင်းပါ။ JSON ကို တိုက်ရိုက်ကူးထည့်နိုင်သည်၊ URL ထည့်နိုင်သည် သို့မဟုတ် clipboard မှ ထည့်သွင်းနိုင်သည်။</string>
     <string name="import_theme">Import Tema</string>
@@ -1281,6 +1319,7 @@
     <string name="language_code">ဘာသာစကားကုဒ်</string>
     <string name="language_filter">Penapis Bahasa</string>
     <string name="language_preferences">Keutamaan Bahasa</string>
+    <string name="language_preferences_saved">ဤစာအုပ်အတွက် ဘာသာစကား နှစ်သက်မှုများကို သိမ်းဆည်းပြီးပါပြီ</string>
     <string name="language_translation">Bahasa &amp; Terjemahan</string>
     <string name="languages">Bahasa</string>
     <string name="large">Besar</string>
@@ -1487,6 +1526,7 @@
     <string name="need_help">Perlukan Bantuan?</string>
     <string name="network">Rangkaian</string>
     <string name="network_cache">Cache Rangkaian</string>
+    <string name="network_error">ကွန်ရက်အမှား</string>
     <string name="network_settings">Tetapan Rangkaian</string>
     <string name="neutral">Neutral</string>
     <string name="new_chapter_notifications">Pemberitahuan Bab Baharu</string>
@@ -1528,7 +1568,9 @@
     <string name="no_badges_yet_earn_badges">Tiada lencana lagi. Dapatkan lencana dengan membelinya atau memiliki NFT IReader!</string>
     <string name="no_book_found_error">Tiada buku dengan id ini.</string>
     <string name="no_books_in_library">စာကြည့်တိုက်တွင် စာအုပ်များ မရှိပါ</string>
+    <string name="no_categories_create_one">အမျိုးအစားများ ရှာမတွေ့ပါ။ သင်၏စာကြည့်တိုက်ကို စနစ်တကျထားရန် ဦးစွာတစ်ခု ဖန်တီးပါ။</string>
     <string name="no_categories_found">Tiada kategori ditemui</string>
+    <string name="no_category">အမျိုးအစားမရှိပါ</string>
     <string name="no_chapter_found_error">Tiada bab dengan nama ini.</string>
     <string name="no_chapter_is_available">Tiada Bab Tersedia.</string>
     <string name="no_chapters_available">Tiada bab tersedia</string>
@@ -1581,6 +1623,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">Tiada ulasan untuk bab ini lagi</string>
     <string name="no_reviews_yet">Tiada ulasan lagi</string>
     <string name="no_reviews_yet_be_the_first_to_review">Tiada ulasan lagi. Jadilah orang pertama yang mengulas!</string>
+    <string name="no_rules_configured">စည်းမျဉ်းများ သတ်မှတ်ထားခြင်း မရှိသေးပါ။ ဝတ္ထုများကို အလိုအလျောက် ခွဲခြားသတ်မှတ်ရန် စည်းမျဉ်းတစ်ခု ထည့်ပါ။</string>
     <string name="no_settings_found">Tiada tetapan ditemui</string>
     <string name="no_sources_available">Tiada sumber tersedia</string>
     <string name="no_sources_available_for_migration">Tiada sumber tersedia untuk penghijrahan</string>
@@ -1592,8 +1635,10 @@
     <string name="no_usage_data_available_yet">Tiada data penggunaan tersedia lagi</string>
     <string name="no_voice_models_available">Tiada model suara tersedia</string>
     <string name="no_voices_available">Tiada suara tersedia</string>
+    <string name="no_voices_available_for_this_language">ဤဘာသာစကားအတွက် ရရှိနိုင်သော အသံများ မရှိပါ</string>
     <string name="none">Tiada</string>
     <string name="normal">သာမန်</string>
+    <string name="not_connected">ချိတ်ဆက်မထားပါ</string>
     <string name="not_implemented_yet">Belum Dilaksanakan</string>
     <string name="not_installed">Tidak dipasang</string>
     <string name="not_tested">စမ်းသပ်ထားခြင်း မရှိပါ</string>
@@ -1631,6 +1676,15 @@
     <string name="novel_info">Maklumat Novel</string>
     <string name="now_try_creating_a_source">သင်အကြိုက်ဆုံး ဝက်ဘ်ဆိုဒ်အတွက် source တစ်ခု ဖန်တီးကြည့်ပါ။</string>
     <string name="number_of_sources_to_search">Bilangan sumber untuk dicari serentak. Nilai yang lebih tinggi adalah lebih pantas tetapi menggunakan lebih banyak sumber.</string>
+    <string name="nvidia_api_key">NVIDIA API ကီး</string>
+    <string name="nvidia_api_key_invalid">NVIDIA API ကီး မမှန်ကန်ပါ။ build.nvidia.com တွင် သင်၏ကီးကို စစ်ဆေးပါ။</string>
+    <string name="nvidia_api_key_not_set">NVIDIA API ကီးကို သတ်မှတ်ထားခြင်း မရှိသေးပါ။ ဆက်တင်များတွင် သတ်မှတ်ပေးပါ။</string>
+    <string name="nvidia_fetch_models">ရရှိနိုင်သော မော်ဒယ်များ ဆွဲယူပါ</string>
+    <string name="nvidia_info">NVIDIA NIM သည် Llama, Mistral, Gemma နှင့် အခြားသော ပိုမိုကောင်းမွန်အောင် ပြုလုပ်ထားသည့် AI မော်ဒယ်များစွာကို ဝင်ရောက်အသုံးပြုခွင့် ပေးပါသည်။ သင်၏ API ကီးကို build.nvidia.com တွင် ရယူပါ။</string>
+    <string name="nvidia_insufficient_credits">NVIDIA API ခရက်ဒစ် မလုံလောက်ပါ။ build.nvidia.com တွင် သင်၏အကောင့်ကို စစ်ဆေးပါ။</string>
+    <string name="nvidia_model">NVIDIA မော်ဒယ်</string>
+    <string name="nvidia_models_loaded">NVIDIA မော်ဒယ်များ အောင်မြင်စွာ တင်ပြီးပါပြီ</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">dari</string>
     <string name="off">Mati</string>
     <string name="offline_mode">Mod Luar Talian</string>
@@ -1662,6 +1716,7 @@
     <string name="open_location">Buka Lokasi</string>
     <string name="open_random">Buka Rawak</string>
     <string name="open_site">Buka Laman</string>
+    <string name="open_storage_settings">သိုလှောင်မှု ဆက်တင်များ ဖွင့်ပါ</string>
     <string name="open_tts_manager">Buka Pengurus TTS</string>
     <string name="open_tts_screen">Lihat</string>
     <string name="open_tts_settings">Buka Tetapan TTS</string>
@@ -1672,6 +1727,14 @@
     </string>
     <string name="openai_configuration">OpenAI စနစ်တည်ဆောက်ပုံ</string>
     <string name="openai_quota_exceeded">Kuota Openai melebihi</string>
+    <string name="openrouter_api_key">OpenRouter API ကီး</string>
+    <string name="openrouter_api_key_invalid">OpenRouter API ကီး မမှန်ကန်ပါ။ openrouter.ai/keys တွင် သင်၏ကီးကို စစ်ဆေးပါ။</string>
+    <string name="openrouter_api_key_not_set">OpenRouter API ကီးကို သတ်မှတ်ထားခြင်း မရှိသေးပါ။ ဆက်တင်များတွင် သတ်မှတ်ပေးပါ။</string>
+    <string name="openrouter_fetch_models">ရရှိနိုင်သော မော်ဒယ်များ ဆွဲယူပါ</string>
+    <string name="openrouter_info">OpenRouter သည် GPT-4, Claude, Llama နှင့် အခြား AI မော်ဒယ်များစွာကို တစ်စုတစ်စည်းတည်း ဝင်ရောက်အသုံးပြုခွင့် ပေးပါသည်။ သင်၏ API ကီးကို openrouter.ai တွင် ရယူပါ။</string>
+    <string name="openrouter_insufficient_credits">OpenRouter ခရက်ဒစ် မလုံလောက်ပါ။ openrouter.ai/credits တွင် ခရက်ဒစ်ထပ်ထည့်ပါ။</string>
+    <string name="openrouter_model">OpenRouter မော်ဒယ်</string>
+    <string name="openrouter_models_loaded">OpenRouter မော်ဒယ်များ အောင်မြင်စွာ တင်ပြီးပါပြီ</string>
     <string name="optimize">Optimumkan</string>
     <string name="optimize_database">Optimumkan Pangkalan Data</string>
     <string name="optimizes_translation_for_specific_content">Mengoptimumkan terjemahan untuk kandungan tertentu</string>
@@ -1724,6 +1787,7 @@
     <string name="paste_the_theme_json_below">Tampal JSON tema di bawah:</string>
     <string name="pause">Jeda</string>
     <string name="pause_all">Jeda Semua</string>
+    <string name="pause_downloads">ဒေါင်းလုဒ်များ ခဏရပ်ပါ</string>
     <string name="paused">Dijeda</string>
     <string name="payment_method">Kaedah Pembayaran</string>
     <string name="pen">ဘောပင်</string>
@@ -1811,6 +1875,8 @@
     <string name="pref_relative_time_long">Panjang (Pendek+, n hari lalu)</string>
     <string name="pref_relative_time_short">Pendek (Hari Ini, Semalam)</string>
     <string name="prefer_saf_storage">SAF Storage ကို ဦးစားပေးပါ</string>
+    <string name="preferred_source_language">နှစ်သက်သော မူရင်းဘာသာစကား</string>
+    <string name="preferred_target_language">နှစ်သက်သော ပစ်မှတ်ဘာသာစကား</string>
     <string name="preload_next_chapter">Pramuat Bab Seterusnya</string>
     <string name="preload_only_on_wifi">Pramuat hanya pada WiFi</string>
     <string name="preload_only_on_wifi_summary">Hadkan pramuat automatik hanya kepada sambungan WiFi</string>
@@ -1877,6 +1943,7 @@
     <string name="query_must_not_be_empty">pertanyaan tidak boleh kosong.</string>
     <string name="queue_failed">Barisan Gagal</string>
     <string name="queued">Beratur</string>
+    <string name="queued_count">%d ခု တန်းစီနေသည်</string>
     <string name="quick_add_popular_repositories">Tambah Repositori Popular dengan Cepat</string>
     <string name="quick_add_repository">Tambah Repositori Pantas</string>
     <string name="quick_fill_same_url_for_all_projects">Isi Pantas (URL yang sama untuk semua projek)</string>
@@ -1940,6 +2007,7 @@
     <string name="refresh_all">အားလုံး ပြန်လည်စတင်ပါ</string>
     <string name="refresh_covers_too">Muat Semula Kulit Juga</string>
     <string name="refresh_metrics">Segar Semula Metrik</string>
+    <string name="refresh_models">မော်ဒယ်များ ပြန်လည်စတင်ပါ</string>
     <string name="refreshed">Segar semula</string>
     <string name="refreshing">Menyegar Semula</string>
     <string name="refreshing_1">Memuat semula...</string>
@@ -1954,6 +2022,7 @@
     <string name="reload">Muat Semula</string>
     <string name="reload_plugin_themes">Muat semula tema plugin</string>
     <string name="remaining">Baki</string>
+    <string name="remember_my_languages">ကျွန်ုပ်၏ဘာသာစကား ရွေးချယ်မှုများကို မှတ်ထားပါ</string>
     <string name="remind_me_again_in">Ingatkan saya lagi dalam:</string>
     <string name="reminder_interval">Selang Peringatan</string>
     <string name="remove">Alih keluar</string>
@@ -2035,7 +2104,9 @@
     <string name="resume">Sambung semula</string>
     <string name="resume_all">Sambung Semula Semua</string>
     <string name="resume_download">ဒေါင်းလုဒ် ဆက်လုပ်ပါ</string>
+    <string name="resume_downloads">ဒေါင်းလုဒ်များ ပြန်စပါ</string>
     <string name="retry">Cuba semula</string>
+    <string name="retry_all_failed">ကျရှုံးခဲ့သောအားလုံးကို ပြန်လည်စမ်းပါ</string>
     <string name="retry_failed">Cuba Semula Gagal</string>
     <string name="retry_loading">Cuba Muat Semula</string>
     <string name="retrying_download">Mencuba Muat Turun Semula</string>
@@ -2055,7 +2126,10 @@
     <string name="right">Kanan</string>
     <string name="rotate_screen_automatically">Putar skrin secara automatik</string>
     <string name="rotation">putaran</string>
+    <string name="rule_already_exists">ဤအမျိုးအစားတွင် ဤအတွက် စည်းမျဉ်းတစ်ခု ရှိနှင့်ပြီးဖြစ်သည်။</string>
+    <string name="rule_count">စည်းမျဉ်း %1$d ခု</string>
     <string name="rule_syntax_help">စည်းမျဉ်း syntax အကူအညီ</string>
+    <string name="rules_count">စည်းမျဉ်း %1$d ခု</string>
     <string name="run_health_check">Jalankan Pemeriksaan Kesihatan</string>
     <string name="run_the_migration_community_sourcesql">ဤဇယားများ ဖန်တီးရန် သင်၏ Supabase SQL Editor တွင် migration_community_source.sql ဖိုင်ကို run ပါ။</string>
     <string name="sample_text">Teks Contoh</string>
@@ -2066,6 +2140,7 @@
     <string name="save_custom_theme">Simpan tema tersuai</string>
     <string name="save_epub">Simpan EPUB</string>
     <string name="save_js_sources_extensions_backups">ရရှိနိုင်ပါက JS sources, extensions, backups, နှင့် epubs များကို SAF ဖိုင်တွဲသို့ သိမ်းဆည်းပါ။ မရရှိနိုင်ပါက cache ကို အသုံးပြုသည်။</string>
+    <string name="save_language_preferences">ဘာသာစကား နှစ်သက်မှုများ သိမ်းဆည်းပါ</string>
     <string name="save_multi_endpoint_configuration">Simpan Konfigurasi Pelbagai Titik Akhir</string>
     <string name="save_patterns">ပုံစံများ သိမ်းဆည်းပါ</string>
     <string name="saved_local_source_location">Sumber Disimpan ke Cache</string>
@@ -2084,6 +2159,7 @@
     <string name="search_across_all_sources">Cari merentas semua sumber</string>
     <string name="search_across_all_sources_1">Cari merentasi semua sumber...</string>
     <string name="search_bar">ရှာဖွေမှုဘား</string>
+    <string name="search_book_manually">ရရှိနိုင်မှုကို စစ်ဆေးရန် အရင်းအမြစ်တွင် စာအုပ်ကို ကိုယ်တိုင်ရှာဖွေကြည့်ပါ။</string>
     <string name="search_characters_books">ဇာတ်ကောင်များ၊ စာအုပ်များ ရှာဖွေပါ...</string>
     <string name="search_features">လုပ်ဆောင်ချက်များ ရှာဖွေပါ...</string>
     <string name="search_fonts">Cari fon...</string>
@@ -2130,6 +2206,7 @@
     <string name="select_backup_file">Pilih Fail Sandaran</string>
     <string name="select_between">Pilih Antara</string>
     <string name="select_books_to_migrate">Pilih Buku untuk Dipindahkan</string>
+    <string name="select_categories">အမျိုးအစားများ ရွေးချယ်ပါ</string>
     <string name="select_chapters">Pilih Bab</string>
     <string name="select_cloud_provider">Pilih Pembekal Awan</string>
     <string name="select_engine">Pilih Enjin</string>
@@ -2145,6 +2222,7 @@
     <string name="select_model">မော်ဒယ် ရွေးပါ</string>
     <string name="select_navigation_style">Pilih Gaya Navigasi</string>
     <string name="select_source_to_migrate_to">Pilih sumber untuk migrasi</string>
+    <string name="select_storage_folder">သိုလှောင်မှု ဖိုင်တွဲ ရွေးပါ</string>
     <string name="select_target_source">Pilih Sumber Sasaran</string>
     <string name="select_the_languages_you_want">Pilih bahasa yang ingin anda lihat semasa menyemak imbas dan mencari kandungan. Anda boleh memilih berbilang bahasa.</string>
     <string name="select_the_languages_you_want_1">Pilih bahasa yang ingin anda lihat semasa menyemak imbas sumber. Hanya bahasa dengan sumber yang tersedia ditunjukkan.</string>
@@ -2168,6 +2246,7 @@
     <string name="selectors_for_the_explorelatest_page">ရှာဖွေရန်/နောက်ဆုံးပေါ် စာမျက်နှာအတွက် ရွေးချယ်စရာများ (ရွေးချယ်နိုင်သည်၊ လွတ်နေပါက ရှာဖွေမှုစည်းမျဉ်းများကို အသုံးပြုသည်)</string>
     <string name="send_reset_email">ပြန်လည်သတ်မှတ်ရန် အီးမေးလ် ပေးပို့ပါ</string>
     <string name="sentence_highlighting">ဝါကျ မီးမောင်းထိုးပြခြင်း</string>
+    <string name="set_categories">အမျိုးအစားများ သတ်မှတ်ပါ</string>
     <string name="set_eth_wallet_address">Tetapkan Alamat Dompet ETH</string>
     <string name="set_name">Tetapkan Nama</string>
     <string name="sets_the_tone_of_translated_text">Menetapkan nada teks yang diterjemahkan</string>
@@ -2270,10 +2349,14 @@
     <string name="source_browse_latest">Semak Imbas Terkini</string>
     <string name="source_extension_not_installed">Sambungan Sumber Tidak Dipasang</string>
     <string name="source_id">ID Sumber</string>
+    <string name="source_id_or_name">အရင်းအမြစ် ID သို့မဟုတ် အမည်</string>
     <string name="source_json">ရင်းမြစ် JSON</string>
     <string name="source_name">ရင်းမြစ်အမည် *</string>
     <string name="source_needs_update">အရင်းအမြစ် အပ်ဒိတ်လုပ်ရန် လိုအပ်သည်</string>
     <string name="source_not_available">Sumber ini tidak tersedia dalam peranti anda.</string>
+    <string name="source_not_found">အရင်းအမြစ် ရှာမတွေ့ပါ</string>
+    <string name="source_placeholder">ဥပမာ- 12345 သို့မဟုတ် NovelUpdates</string>
+    <string name="source_rule">အရင်းအမြစ်</string>
     <string name="source_term">ရင်းမြစ်ဝေါဟာရ</string>
     <string name="source_title">Tajuk Sumber</string>
     <string name="source_unavailable">ရင်းမြစ် မရရှိနိုင်ပါ</string>
@@ -2300,11 +2383,16 @@
     <string name="stop">Berhenti</string>
     <string name="stop_playback_after">ဖွင့်ခြင်းကို ရပ်ပါ-</string>
     <string name="storage">Storan</string>
+    <string name="storage_access_lost">သိုလှောင်မှု ဝင်ရောက်ခွင့် ဆုံးရှုံး</string>
+    <string name="storage_access_lost_description">IReader သည် သိုလှောင်မှုဖိုင်တွဲကို ဝင်ရောက်ခွင့် မရှိတော့ပါ။ အက်ပ်ကို ဆက်လက်အသုံးပြုရန် ဖိုင်တွဲတစ်ခုကို ရွေးချယ်ပါ။</string>
+    <string name="storage_access_lost_reasons">ဖိုင်တွဲကို ဖျက်ပစ်ခြင်း၊ ရွှေ့ပြောင်းခြင်း သို့မဟုတ် ခွင့်ပြုချက်ကို ရုပ်သိမ်းခြင်း ဖြစ်နိုင်သည်။ ၎င်းသည် အက်ပ်အပ်ဒိတ်များ သို့မဟုတ် စနစ်ပြောင်းလဲမှုများပြီးနောက် ဖြစ်ပွားနိုင်သည်။</string>
+    <string name="storage_is_needed_for">သိုလှောင်မှု လိုအပ်သည်-</string>
     <string name="storage_permission_privacy_note">IReader သည် သင်ရွေးချယ်ထားသော ဖိုင်တွဲကိုသာ ဝင်ရောက်ကြည့်ရှုပါသည်။ သင်၏အခြားဖိုင်များသည် ကိုယ်ပိုင်ဖြစ်ပြီး မထိတွေ့ပါ။</string>
     <string name="storage_permission_required_explanation">Penjelasan Kebenaran Storan Diperlukan
     </string>
     <string name="storage_permission_subtitle">IReader က ဒေါင်းလုဒ်များ၊ အက်ပလီကေးရှင်းများ၊ နှင့် အရန်ကူးထားသည်များကို သိမ်းဆည်းရန် ဖိုင်တွဲတစ်ခုကို ရွေးပါ။</string>
     <string name="storage_permission_title">သိုလှောင်ဖိုင်တွဲ ရွေးပါ</string>
+    <string name="storage_required">သိုလှောင်မှု လိုအပ်သည်</string>
     <string name="storage_settings">သိုလှောင်မှု ဆက်တင်များ</string>
     <string name="storage_setup">သိုလှောင်မှု စနစ်ထည့်သွင်းခြင်း</string>
     <string name="storage_usage">Penggunaan Storan</string>
@@ -2372,6 +2460,7 @@
     <string name="system_integration_multiple_engines_supported">✓ Integrasi sistem • ✓ Berbilang enjin disokong • ✓ Tiada muat turun diperlukan</string>
     <string name="system_notifications">Sistem &amp; Pemberitahuan</string>
     <string name="system_notifications_1">Pemberitahuan Sistem</string>
+    <string name="system_settings">စနစ်ဆက်တင်များ</string>
     <string name="system_tts_settings">Tetapan TTS Sistem</string>
     <string name="tab_content">kandungan tab</string>
     <string name="tabs">Tab</string>
@@ -2521,14 +2610,39 @@
     <string name="translated">Diterjemahkan</string>
     <string name="translating">Menterjemah... Ini mungkin mengambil sedikit masa.</string>
     <string name="translation">Terjemahan</string>
+    <string name="translation_api_key_invalid">%1$s အတွက် API ကီးသည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်ဆုံးသွားပါပြီ။ ဆက်တင်များ → ဘာသာပြန်ခြင်း တွင် သင်၏ကီးကို စစ်ဆေးပါ။</string>
+    <string name="translation_api_key_not_set">%1$s အတွက် API ကီး လိုအပ်ပါသည်။ ဆက်တင်များ → ဘာသာပြန်ခြင်း သို့သွား၍ သင်၏ API ကီးကို သတ်မှတ်ပါ။</string>
+    <string name="translation_auth_required">ဤဘာသာပြန်ခြင်း လုပ်ဆောင်ချက်ကို အသုံးပြုရန် %1$s သို့ အကောင့်ဝင်ရန် လိုအပ်ပါသည်။</string>
+    <string name="translation_captcha_required">%1$s သည် စစ်ဆေးအတည်ပြုရန် လိုအပ်သည်။ ဆက်လက်လုပ်ဆောင်ရန် CAPTCHA ကို ဖြည့်သွင်းပါ။</string>
     <string name="translation_complete">Terjemahan selesai.</string>
+    <string name="translation_empty_response">%1$s မှ အဖြေလွတ် ပြန်လာသည်။ ၎င်းသည် ယာယီပြဿနာ ဖြစ်နိုင်သည် - ထပ်ကြိုးစားကြည့်ပါ။</string>
     <string name="translation_engine">Enjin Terjemahan</string>
+    <string name="translation_engine_not_available">ဤအက်ပ်ဗားရှင်းတွင် %1$s ကို အသုံးပြု၍ မရနိုင်ပါ။ အခြားဘာသာပြန်အင်ဂျင်တစ်ခုကို အသုံးပြုပါ။</string>
     <string name="translation_engines_refreshed">Enjin terjemahan disegar semula</string>
     <string name="translation_error">Ralat Terjemahan</string>
+    <string name="translation_language_model_not_available">%1$s → %2$s အတွက် ဘာသာစကားမော်ဒယ်ကို ဒေါင်းလုဒ်လုပ်မထားပါ။ ဆက်တင်များ → ဘာသာပြန်ခြင်း သို့သွား၍ ဒေါင်းလုဒ်လုပ်ပါ။</string>
+    <string name="translation_language_pair_not_supported">%1$s သည် %2$s မှ %3$s သို့ ဘာသာပြန်ခြင်းကို မပံ့ပိုးပါ။ မတူညီသော ဘာသာစကားများကို ရွေးချယ်ပါ။</string>
+    <string name="translation_model_not_found">%1$s အတွက် AI မော်ဒယ်ကို ရှာမတွေ့ပါ။ သင်၏ဆက်တင်များကို စစ်ဆေးပါ။</string>
+    <string name="translation_model_not_found_with_name">မော်ဒယ် '%2$s' ကို %1$s တွင် ရှာမတွေ့ပါ။ ဆက်တင်များတွင် မတူညီသောမော်ဒယ်တစ်ခုကို ရွေးချယ်ပါ။</string>
+    <string name="translation_network_error">%1$s သို့ ချိတ်ဆက်၍ မရပါ။ သင်၏အင်တာနက်ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ထပ်ကြိုးစားကြည့်ပါ။</string>
+    <string name="translation_parse_error">%1$s မှ ပြန်လာသည့်အဖြေကို နားမလည်နိုင်ပါ။ ဝန်ဆောင်မှုတွင် ပြဿနာများ ရှိနေနိုင်သည်။</string>
+    <string name="translation_plugin_error">ဘာသာပြန် ပလပ်အင် '%1$s' သည် အမှားတစ်ခု ကြုံတွေ့ရသည်။ ပလပ်အင်ဆက်တင်များကို စစ်ဆေးပါ သို့မဟုတ် အခြားအင်ဂျင်တစ်ခုကို စမ်းကြည့်ပါ။</string>
     <string name="translation_plugins_extend_ireader_with">Pemalam terjemahan meluaskan IReader dengan perkhidmatan terjemahan tambahan</string>
     <string name="translation_progress">Kemajuan Terjemahan</string>
+    <string name="translation_quota_exceeded">%1$s ဘာသာပြန်ခွင့် ကန့်သတ်ချက် ကျော်လွန်သွားပါပြီ။ သင်၏အစီအစဉ်နှင့် ငွေတောင်းခံလွှာကို စစ်ဆေးပါ သို့မဟုတ် နောက်မှ ထပ်ကြိုးစားကြည့်ပါ။</string>
+    <string name="translation_rate_limit">%1$s သည် တောင်းဆိုမှုများ အလွန်များပြားစွာ လက်ခံရရှိနေသည်။ ခဏစောင့်ပြီး ထပ်ကြိုးစားကြည့်ပါ။</string>
     <string name="translation_rate_limit_delay">ဘာသာပြန် အကန့်အသတ်နှုန်း နှောင့်နှေးမှု</string>
+    <string name="translation_rate_limit_with_retry">%1$s နှုန်း ကန့်သတ်ချက် ပြည့်မီသွားပါပြီ။ %2$d စက္ကန့် စောင့်ပြီး ထပ်ကြိုးစားကြည့်ပါ။</string>
+    <string name="translation_same_as_original">%1$s သည် စာသားကို မပြောင်းလဲဘဲ ပြန်ပို့သည်။ ဘာသာပြန်ခြင်း ကျရှုံးခဲ့ခြင်း သို့မဟုတ် စာသားသည် ပစ်မှတ်ဘာသာစကားဖြင့် ရှိနှင့်ပြီး ဖြစ်နိုင်သည်။</string>
+    <string name="translation_server_error">%1$s ဆာဗာတွင် ပြဿနာများ ရှိနေသည်။ နောက်မှ ထပ်ကြိုးစားကြည့်ပါ။</string>
+    <string name="translation_server_error_with_code">%1$s ဆာဗာအမှား (ကုဒ်: %2$d)။ နောက်မှ ထပ်ကြိုးစားကြည့်ပါ။</string>
     <string name="translation_settings">Tetapan Terjemahan</string>
+    <string name="translation_text_too_long">စာသားသည် %1$s လုပ်ဆောင်ရန်အတွက် အလွန်ရှည်လွန်းသည်။ ပိုမိုသေးငယ်သော အပိုင်းများကို ဘာသာပြန်ကြည့်ပါ။</string>
+    <string name="translation_text_too_long_with_limit">စာသားသည် %1$s ၏ %2$d စာလုံး ကန့်သတ်ချက်ကို ကျော်လွန်နေသည်။ ပိုမိုသေးငယ်သော အပိုင်းများကို ဘာသာပြန်ကြည့်ပါ။</string>
+    <string name="translation_timeout">%1$s မှ အဖြေပြန်ရန် အချိန်ကြာမြင့်လွန်းသည်။ ထပ်ကြိုးစားကြည့်ပါ။</string>
+    <string name="translation_timeout_with_seconds">%1$s သည် %2$d စက္ကန့်အတွင်း အဖြေမပြန်ပါ။ ထပ်ကြိုးစားကြည့်ပါ။</string>
+    <string name="translation_unknown_error">%1$s သည် မမျှော်လင့်ထားသော အမှားတစ်ခု ကြုံတွေ့ရသည်။ ထပ်ကြိုးစားကြည့်ပါ။</string>
+    <string name="translation_unknown_error_with_details">%1$s အမှား: %2$s</string>
     <string name="translation_warning">ဘာသာပြန် သတိပေးချက်</string>
     <string name="translations">terjemahan</string>
     <string name="trending_now">Sohor Kini</string>
@@ -2538,9 +2652,11 @@
     <string name="trust_level_updated">Tahap kepercayaan dikemas kini</string>
     <string name="try_a_different_search_term">Cuba istilah carian yang berbeza</string>
     <string name="try_again">Cuba Lagi</string>
+    <string name="try_again_later">သင်၏ဒေတာကို ထိန်းသိမ်းထားသည်။ နောက်မှ ထပ်ကြိုးစားကြည့်ပါ။</string>
     <string name="try_alternative_url">Cuba URL Alternatif</string>
     <string name="try_another_search">Cuba carian lain</string>
     <string name="try_different_search">Cuba istilah carian yang berbeza</string>
+    <string name="try_different_source">အရင်းအမြစ်ကို အသုံးပြု၍ မရနိုင်ပါ။ အခြားအရင်းအမြစ်တစ်ခုကို စမ်းကြည့်ပါ။</string>
     <string name="try_these_fixes">ဤပြုပြင်မှုများကို စမ်းကြည့်ပါ-</string>
     <string name="trying_in_few_second">Cuba lagi dalam beberapa saat.</string>
     <string name="trying_to_fetch">Cuba mendapatkan…</string>
@@ -2603,6 +2719,7 @@
     <string name="upcoming_releases">Siaran Akan Datang</string>
     <string name="update">Kemas kini</string>
     <string name="update_all">Kemas Kini Semua</string>
+    <string name="update_all_books">စာအုပ်အားလုံးကို အပ်ဒိတ်လုပ်ပါ</string>
     <string name="update_available">Kemas kini tersedia</string>
     <string name="update_available_1">Kemas Kini Tersedia</string>
     <string name="update_category">Kemas kini Kategori</string>
@@ -2656,6 +2773,7 @@
     <string name="use_password">Gunakan Kata Laluan</string>
     <string name="use_pin">Gunakan PIN</string>
     <string name="use_pinpassword_instead">Gunakan PIN/Kata Laluan Sebaliknya</string>
+    <string name="use_saved_languages">သိမ်းဆည်းထားသော ဘာသာစကားများ အသုံးပြုပါ</string>
     <string name="use_separate_supabase_projects_for">Gunakan projek Supabase berasingan untuk kebolehskalaan yang lebih baik</string>
     <string name="use_static_indicators_instead_of_animated_ones">Gunakan penunjuk statik dan bukannya yang animasi</string>
     <string name="use_translated_text_for_text">Gunakan teks terjemahan untuk teks ke pertuturan apabila tersedia</string>
@@ -2669,6 +2787,7 @@
     <string name="users">သုံးစွဲသူများ</string>
     <string name="uuid_of_your_d1_database">သင်၏ D1 ဒေတာဘေ့စ်၏ UUID</string>
     <string name="validate">စစ်ဆေးပါ</string>
+    <string name="validation_error">မှန်ကန်ကြောင်း စစ်ဆေးမှု အမှား</string>
     <string name="verification_details">Butiran Pengesahan</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Pengesahan adalah automatik dan mengambil masa beberapa saat</string>
     <string name="verification_is_cached_for_24">Pengesahan dicache selama 24 jam. Lencana kekal aktif selama 7 hari jika pengesahan semula gagal.</string>
@@ -2735,11 +2854,14 @@
     <string name="whats_new_1">Apa Yang Baru</string>
     <string name="whats_new_2">Apa Yang Baharu:</string>
     <string name="while_charging">Semasa Mengecas</string>
+    <string name="why_did_this_happen">ဘာလို့ဒီလိုဖြစ်တာလဲ။</string>
     <string name="why_donate">Kenapa Menderma?</string>
     <string name="why_is_this_needed">ဒါ ဘာကြောင့် လိုအပ်တာလဲ?</string>
     <string name="width">Lebar</string>
     <string name="width_1">lebar</string>
     <string name="wifi_only">WiFi Sahaja</string>
+    <string name="wifi_only_mode">WiFi သာမုဒ်</string>
+    <string name="wifi_only_warning">ဒေါင်းလုဒ်များ ခဏရပ်ထားသည် - WiFi သာမုဒ် ဖွင့်ထားသည်</string>
     <string name="with_trailing_content">Dengan Kandungan Mengekor</string>
     <string name="wizard">ဝီဇာဒ်</string>
     <string name="wizard_step">wizard_step</string>

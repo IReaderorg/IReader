@@ -1677,6 +1677,15 @@
     <string name="novel_info">Info Romanzo</string>
     <string name="now_try_creating_a_source">Ora prova a creare una fonte per il tuo sito web preferito.</string>
     <string name="number_of_sources_to_search">Numero di fonti da cercare contemporaneamente. Valori più alti sono più veloci ma utilizzano più risorse.</string>
+    <string name="nvidia_api_key">Chiave API NVIDIA</string>
+    <string name="nvidia_api_key_invalid">La chiave API NVIDIA non è valida. Controlla la tua chiave su build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">La chiave API NVIDIA non è impostata. Configurala nelle impostazioni.</string>
+    <string name="nvidia_fetch_models">Recupera Modelli Disponibili</string>
+    <string name="nvidia_info">NVIDIA NIM fornisce accesso a modelli AI ottimizzati tra cui Llama, Mistral, Gemma e altro ancora. Ottieni la tua chiave API su build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">Crediti API NVIDIA insufficienti. Controlla il tuo account su build.nvidia.com</string>
+    <string name="nvidia_model">Modello NVIDIA</string>
+    <string name="nvidia_models_loaded">Modelli NVIDIA caricati con successo</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">di</string>
     <string name="off">Disattivato</string>
     <string name="offline_mode">Modalità Offline</string>
@@ -1719,6 +1728,14 @@
     </string>
     <string name="openai_configuration">Configurazione OpenAI</string>
     <string name="openai_quota_exceeded">Quota OpenAI superata</string>
+    <string name="openrouter_api_key">Chiave API OpenRouter</string>
+    <string name="openrouter_api_key_invalid">La chiave API OpenRouter non è valida. Controlla la tua chiave su openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">La chiave API OpenRouter non è impostata. Configurala nelle impostazioni.</string>
+    <string name="openrouter_fetch_models">Recupera Modelli Disponibili</string>
+    <string name="openrouter_info">OpenRouter fornisce accesso unificato a diversi modelli AI tra cui GPT-4, Claude, Llama e altro ancora. Ottieni la tua chiave API su openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">Crediti OpenRouter insufficienti. Aggiungi crediti su openrouter.ai/credits</string>
+    <string name="openrouter_model">Modello OpenRouter</string>
+    <string name="openrouter_models_loaded">Modelli OpenRouter caricati con successo</string>
     <string name="optimize">Ottimizza</string>
     <string name="optimize_database">Ottimizza database</string>
     <string name="optimizes_translation_for_specific_content">Ottimizza la traduzione per contenuti specifici</string>
@@ -1989,6 +2006,7 @@
     <string name="refresh_all">Aggiorna tutto</string>
     <string name="refresh_covers_too">Aggiorna anche le copertine</string>
     <string name="refresh_metrics">Aggiorna metriche</string>
+    <string name="refresh_models">Aggiorna Modelli</string>
     <string name="refreshed">Aggiornato</string>
     <string name="refreshing">Aggiornamento...</string>
     <string name="refreshing_1">Aggiornamento in corso...</string>

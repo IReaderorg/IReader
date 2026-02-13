@@ -1666,6 +1666,15 @@
     <string name="novel_info">اطلاعات رمان</string>
     <string name="now_try_creating_a_source">حالا سعی کنید یک منبع برای وب‌سایت مورد علاقه خود ایجاد کنید.</string>
     <string name="number_of_sources_to_search">تعداد منابع برای جستجو به طور همزمان. مقادیر بالاتر سریعتر هستند اما از منابع بیشتری استفاده می کنند.</string>
+    <string name="nvidia_api_key">کلید API انویدیا</string>
+    <string name="nvidia_api_key_invalid">کلید API انویدیا نامعتبر است. لطفاً کلید خود را در build.nvidia.com بررسی کنید.</string>
+    <string name="nvidia_api_key_not_set">کلید API انویدیا تنظیم نشده است. لطفاً آن را در تنظیمات پیکربندی کنید.</string>
+    <string name="nvidia_fetch_models">واکشی مدل‌های موجود</string>
+    <string name="nvidia_info">NVIDIA NIM دسترسی به مدل‌های هوش مصنوعی بهینه‌سازی شده از جمله Llama، Mistral، Gemma و موارد دیگر را فراهم می‌کند. کلید API خود را در build.nvidia.com دریافت کنید.</string>
+    <string name="nvidia_insufficient_credits">اعتبار API انویدیا کافی نیست. لطفاً حساب خود را در build.nvidia.com بررسی کنید.</string>
+    <string name="nvidia_model">مدل انویدیا</string>
+    <string name="nvidia_models_loaded">مدل‌های انویدیا با موفقیت بارگذاری شدند.</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">از</string>
     <string name="off">خاموش</string>
     <string name="offline_mode">حالت آفلاین</string>
@@ -1708,6 +1717,14 @@
 </string>
     <string name="openai_configuration">پیکربندی OpenAI</string>
     <string name="openai_quota_exceeded">سهمیه Openai فراتر رفت</string>
+    <string name="openrouter_api_key">کلید API اوپن‌روتر</string>
+    <string name="openrouter_api_key_invalid">کلید API اوپن‌روتر نامعتبر است. لطفاً کلید خود را در openrouter.ai/keys بررسی کنید.</string>
+    <string name="openrouter_api_key_not_set">کلید API اوپن‌روتر تنظیم نشده است. لطفاً آن را در تنظیمات پیکربندی کنید.</string>
+    <string name="openrouter_fetch_models">واکشی مدل‌های موجود</string>
+    <string name="openrouter_info">اوپن‌روتر دسترسی یکپارچه به چندین مدل هوش مصنوعی از جمله GPT-4، Claude، Llama و موارد دیگر را فراهم می‌کند. کلید API خود را در openrouter.ai دریافت کنید.</string>
+    <string name="openrouter_insufficient_credits">اعتبار اوپن‌روتر کافی نیست. لطفاً در openrouter.ai/credits اعتبار اضافه کنید.</string>
+    <string name="openrouter_model">مدل اوپن‌روتر</string>
+    <string name="openrouter_models_loaded">مدل‌های اوپن‌روتر با موفقیت بارگذاری شدند.</string>
     <string name="optimize">بهینه سازی</string>
     <string name="optimize_database">بهینه سازی پایگاه داده</string>
     <string name="optimizes_translation_for_specific_content">ترجمه را برای محتوای خاص بهینه می کند</string>
@@ -1977,6 +1994,7 @@
     <string name="refresh_all">تازه‌سازی همه</string>
     <string name="refresh_covers_too">بازخوانی جلدها نیز</string>
     <string name="refresh_metrics">به‌روزرسانی معیارها</string>
+    <string name="refresh_models">بازخوانی مدل‌ها</string>
     <string name="refreshed">به روز شد</string>
     <string name="refreshing">در حال بروزرسانی</string>
     <string name="refreshing_1">در حال بازخوانی...</string>

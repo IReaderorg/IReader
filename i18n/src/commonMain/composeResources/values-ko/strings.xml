@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">용어집 항목 추가</string>
     <string name="add_more_time">시간 추가:</string>
     <string name="add_new_book_glossary">새 도서 용어집 추가</string>
+    <string name="add_new_rule">새 규칙 추가</string>
     <string name="add_novels_to_library_only">검색 결과에서 찾은 경우에만 소설을 라이브러리에 추가</string>
     <string name="add_parameter">매개변수 추가</string>
     <string name="add_plugin_repository">플러그인 저장소 추가</string>
     <string name="add_repository">저장소 추가</string>
     <string name="add_repository_1">저장소 추가</string>
+    <string name="add_rule">규칙 추가</string>
     <string name="add_to_category">카테고리에 추가</string>
     <string name="add_to_library">라이브러리에 추가</string>
+    <string name="add_without_category">카테고리 없이 추가</string>
+    <string name="added_genre_rule">장르 규칙 추가됨: %1$s</string>
+    <string name="added_source_rule">출처 규칙 추가됨: %1$s</string>
+    <string name="added_to_category">%s에 추가됨</string>
     <string name="added_to_library">라이브러리에 추가됨</string>
     <string name="additional_details">추가 정보:</string>
     <string name="additional_details_optional">추가 세부 정보 (선택 사항)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">전체 기간</string>
     <string name="all_types">모든 유형</string>
     <string name="allow_loading_lnreader_compatible_javascript">LNReader 호환 JavaScript 플러그인 로드 허용</string>
+    <string name="allow_mobile_data">모바일 데이터 허용</string>
     <string name="alpha">알파</string>
     <string name="alphaanimation">알파 애니메이션</string>
+    <string name="always_ask">항상 묻기</string>
     <string name="an_image">이미지</string>
     <string name="analytics">분석</string>
     <string name="analyze_page">페이지 분석</string>
@@ -145,6 +153,9 @@
     <string name="auto">자동</string>
     <string name="auto_approve_7_days_old">7일 이상 된 항목 자동 승인</string>
     <string name="auto_backup">자동 백업</string>
+    <string name="auto_categorization">자동 분류</string>
+    <string name="auto_categorization_description">이 규칙과 일치하는 소설은 자동으로 이 카테고리에 추가됩니다.</string>
+    <string name="auto_categorization_rules">자동 분류 규칙</string>
     <string name="auto_cleanup">자동 정리</string>
     <string name="auto_delete">자동 삭제</string>
     <string name="auto_delete_chapters">챕터 자동 삭제</string>
@@ -165,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">DB에서 챕터 자동 정렬</string>
     <string name="auto_sync">자동 동기화</string>
     <string name="auto_sync_1">자동 동기화</string>
+    <string name="auto_translate_descriptions">설명 자동 번역</string>
     <string name="auto_translate_next_chapter">다음 챕터 자동 번역</string>
     <string name="auto_translate_next_chapter_summary">선택된 번역 엔진을 사용하여 탐색할 때 다음 챕터를 자동으로 번역합니다.</string>
+    <string name="auto_translate_novel_names">소설 이름 자동 번역</string>
     <string name="auto_update">자동 업데이트</string>
     <string name="auto_update_1">자동 업데이트</string>
     <string name="auto_update_2">자동 업데이트</string>
@@ -185,6 +198,8 @@
     <string name="automatically_share_your_translations_with">번역을 커뮤니티와 자동으로 공유합니다</string>
     <string name="automatically_stop_playback_after_set_time">설정된 시간 후에 자동 재생 중지</string>
     <string name="automatically_sync_reading_progress">자동으로 읽기 진행 상황 동기화</string>
+    <string name="automatically_translate_novel_descriptions_when">출처를 탐색할 때 소설 설명 자동 번역</string>
+    <string name="automatically_translate_novel_titles_when">출처를 탐색할 때 소설 제목 자동 번역</string>
     <string name="autoscroll">자동 스크롤</string>
     <string name="available">사용 가능</string>
     <string name="available_backups">사용 가능한 백업</string>
@@ -192,6 +207,7 @@
     <string name="available_for_download">다운로드 가능</string>
     <string name="available_kokoro_voices">사용 가능한 Kokoro 음성:</string>
     <string name="available_languages">사용 가능한 언어:</string>
+    <string name="available_voices">사용 가능한 음성</string>
     <string name="average_reading_speed">평균 읽기 속도</string>
     <string name="avg_cpu">평균 CPU</string>
     <string name="avg_response_time">평균 응답 시간</string>
@@ -258,6 +274,7 @@
     <string name="book_name_selector">도서 이름 선택기 *</string>
     <string name="book_name_selector_1">도서 이름 선택기</string>
     <string name="book_not_found">책을 찾을 수 없습니다</string>
+    <string name="book_not_in_target_source">대상 출처에서 책을 찾을 수 없음</string>
     <string name="book_queued_for_download">책이 다운로드 대기열에 추가되었습니다.</string>
     <string name="book_reviews">책 리뷰</string>
     <string name="book_title">책 제목</string>
@@ -360,6 +377,7 @@
     <string name="chapter_complete">챕터 완료</string>
     <string name="chapter_completed">챕터 완료</string>
     <string name="chapter_content_extracted">%1$s을(를) 사용하여 챕터 내용 추출됨</string>
+    <string name="chapter_fetch_failed">챕터 가져오기 실패</string>
     <string name="chapter_filters">챕터 필터</string>
     <string name="chapter_heading_size">챕터 제목 크기</string>
     <string name="chapter_list">챕터 목록</string>
@@ -390,6 +408,7 @@
     <string name="check_community_first">커뮤니티 먼저 확인</string>
     <string name="check_for_app_updates">앱 업데이트 확인</string>
     <string name="check_for_updates">업데이트 확인</string>
+    <string name="check_internet_connection">인터넷 연결을 확인하고 다시 시도해 주세요.</string>
     <string name="check_permissions">권한 확인</string>
     <string name="check_the_update">업데이트 확인</string>
     <string name="checking_for_updates">업데이트 확인 중…</string>
@@ -424,6 +443,7 @@
     <string name="clear_completed">완료된 항목 지우기</string>
     <string name="clear_download_cache">다운로드 캐시 지우기</string>
     <string name="clear_download_cache_confirmation">모든 임시 다운로드 파일이 제거됩니다. 다운로드된 챕터에는 영향을 미치지 않습니다.</string>
+    <string name="clear_failed">실패 항목 지우기</string>
     <string name="clear_filters">필터 지우기</string>
     <string name="clear_not_in_library_books">라이브러리에 없는 모든 책 지우기</string>
     <string name="clear_search">검색 지우기</string>
@@ -556,6 +576,7 @@
     <string name="current_engine">현재 엔진</string>
     <string name="current_location">현재 위치:</string>
     <string name="current_progress">현재 진행률</string>
+    <string name="current_rules">현재 규칙</string>
     <string name="currently_reading">현재 읽는 중</string>
     <string name="currently_viewing_a_plugin_screen">현재 플러그인 화면을 보고 있습니다.</string>
     <string name="custom">사용자 정의</string>
@@ -604,6 +625,8 @@
     <string name="deepseek_configuration">DeepSeek 구성</string>
     <string name="deepseek_login_required">DeepSeek 로그인 필요</string>
     <string name="deepseek_payment_required">DeepSeek 결제가 필요하거나 API 할당량이 초과되었습니다.</string>
+    <string name="default_category">기본 카테고리</string>
+    <string name="default_category_summary">라이브러리에 책을 추가할 때 사용할 카테고리</string>
     <string name="default_chapter_sort">기본 챕터 정렬</string>
     <string name="default_reading_mode">기본 읽기 모드</string>
     <string name="default_reading_mode_for_new_books">새 책의 기본 읽기 모드</string>
@@ -623,11 +646,14 @@
     <string name="delete_art">아트 삭제?</string>
     <string name="delete_backup">백업 삭제?</string>
     <string name="delete_category">카테고리 삭제?</string>
+    <string name="delete_chapter">챕터 삭제</string>
+    <string name="delete_content">콘텐츠 삭제</string>
     <string name="delete_custom_theme">사용자 정의 테마 삭제</string>
     <string name="delete_entry">항목 삭제</string>
     <string name="delete_failed">삭제 실패: %1$s</string>
     <string name="delete_font">글꼴 삭제</string>
     <string name="delete_font_1">글꼴 삭제</string>
+    <string name="delete_rule">규칙 삭제</string>
     <string name="delete_source">소스 삭제</string>
     <string name="delete_update">업데이트 삭제</string>
     <string name="delete_voice">음성 삭제</string>
@@ -669,6 +695,7 @@
     <string name="discord">Discord</string>
     <string name="discover">탐색</string>
     <string name="discover_plugins_to_enhance_your_reading">독서 경험을 향상시킬 플러그인을 찾아보세요</string>
+    <string name="disk_space_warning">다운로드 일시 중지됨 - 저장 공간 부족</string>
     <string name="dismiss">닫기</string>
     <string name="display">표시</string>
     <string name="display_adult_content_in_search_results">검색 결과에 성인 콘텐츠 표시</string>
@@ -712,6 +739,7 @@
     <string name="download_delay">다운로드 지연</string>
     <string name="download_failed">다운로드 실패: %1$s</string>
     <string name="download_failed_title">다운로드 실패</string>
+    <string name="download_from_last_read">마지막으로 읽은 부분부터 다운로드</string>
     <string name="download_information">다운로드 정보</string>
     <string name="download_install">다운로드 및 설치</string>
     <string name="download_language_models">언어 모델 다운로드</string>
@@ -734,6 +762,7 @@
     <string name="download_settings">다운로드 설정</string>
     <string name="download_unread">읽지 않은 항목 다운로드</string>
     <string name="download_unread_1">읽지 않은 항목 다운로드</string>
+    <string name="download_unread_from_last_read_desc">읽지 않은 첫 챕터 대신 마지막으로 읽은 챕터 이후부터 챕터를 다운로드합니다.</string>
     <string name="download_update">업데이트 다운로드</string>
     <string name="downloadarrow">다운로드 화살표</string>
     <string name="downloaded">다운로드됨</string>
@@ -743,6 +772,7 @@
     <string name="downloading_1">다운로드 중...</string>
     <string name="downloading_chapter_audio">챕터 오디오 다운로드 중</string>
     <string name="downloading_chapters">챕터 %1$s개 다운로드 중</string>
+    <string name="downloading_count">%d개 다운로드 중</string>
     <string name="downloading_unread_chapters">읽지 않은 챕터 %1$s개 다운로드 중</string>
     <string name="downloading_update">업데이트 다운로드 중</string>
     <string name="downloading_update_1">업데이트 다운로드 중...</string>
@@ -919,10 +949,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">실패</string>
+    <string name="failed_count">%d개 실패함</string>
     <string name="failed_files">실패한 파일</string>
     <string name="failed_imports">실패한 가져오기</string>
     <string name="failed_to_add_entry">항목 추가 실패: %1$s</string>
     <string name="failed_to_add_repository">리포지토리 추가 실패: %1$s</string>
+    <string name="failed_to_add_rule">규칙 추가 실패: %1$s</string>
     <string name="failed_to_apply_plugin_theme">플러그인 테마 적용 실패: %1$s. 기본 테마를 사용합니다.</string>
     <string name="failed_to_check_updates">업데이트 확인 실패</string>
     <string name="failed_to_copy">복사 실패: %1$s</string>
@@ -1040,6 +1072,7 @@
     <string name="gb_total_storage_7_500mb">총 3.5GB 저장 공간 (7 × 500MB) - 각 프로젝트를 구성하거나 모든 프로젝트에 동일한 URL을 사용하세요</string>
     <string name="gemini_api_information">Gemini API 정보</string>
     <string name="gemini_api_key">Gemini API 키</string>
+    <string name="gemini_api_key_invalid">Gemini API 키가 유효하지 않거나 만료되었습니다. Google AI Studio에서 새 키를 받아주세요.</string>
     <string name="gemini_api_key_not_set">Gemini API 키가 설정되지 않았습니다. 설정에서 구성하십시오.
     </string>
     <string name="gemini_model">Gemini 모델</string>
@@ -1057,6 +1090,9 @@
     <string name="generating_audio_for_entire_chapter">전체 장에 대한 오디오 생성 중...</string>
     <string name="generating_prompt">프롬프트 생성 중...</string>
     <string name="generation_failed">생성 실패</string>
+    <string name="genre_name">장르 이름</string>
+    <string name="genre_placeholder">예: 판타지, 로맨스, 액션</string>
+    <string name="genre_rule">장르</string>
     <string name="genre_selector">장르 선택기</string>
     <string name="genrekind_selector">장르/종류 선택기</string>
     <string name="genreprogress">장르 진행률</string>
@@ -1173,6 +1209,8 @@
     <string name="import_from_url">URL에서 가져오기</string>
     <string name="import_glossary">용어집 가져오기</string>
     <string name="import_legado_sources">Legado 소스 가져오기</string>
+    <string name="import_pdf">PDF 가져오기</string>
+    <string name="import_pdf_files_into_your_library">읽기 및 TTS를 위해 PDF 파일을 라이브러리로 가져오기</string>
     <string name="import_sources">소스 가져오기</string>
     <string name="import_sources_from_legadoyuedu_json">Legado/Yuedu JSON 형식으로 소스를 가져옵니다. JSON을 직접 붙여넣거나, URL을 입력하거나, 클립보드에서 가져올 수 있습니다.</string>
     <string name="import_theme">테마 가져오기</string>
@@ -1274,6 +1312,7 @@
     <string name="language_code">언어 코드</string>
     <string name="language_filter">언어 필터</string>
     <string name="language_preferences">언어 설정</string>
+    <string name="language_preferences_saved">이 책에 대한 언어 기본 설정이 저장되었습니다.</string>
     <string name="language_translation">언어 &amp; 번역</string>
     <string name="languages">언어</string>
     <string name="large">큼</string>
@@ -1480,6 +1519,7 @@
     <string name="need_help">도움이 필요하신가요?</string>
     <string name="network">네트워크</string>
     <string name="network_cache">네트워크 캐시</string>
+    <string name="network_error">네트워크 오류</string>
     <string name="network_settings">네트워크 설정</string>
     <string name="neutral">중립적</string>
     <string name="new_chapter_notifications">새 챕터 알림</string>
@@ -1519,7 +1559,9 @@
     <string name="no_badges_yet_earn_badges">아직 배지가 없습니다. 배지를 구매하거나 IReader NFT를 소유하여 배지를 획득하세요!</string>
     <string name="no_book_found_error">해당 ID의 책이 없습니다.</string>
     <string name="no_books_in_library">라이브러리에 책 없음</string>
+    <string name="no_categories_create_one">카테고리를 찾을 수 없습니다. 라이브러리를 정리하려면 먼저 하나를 만드세요.</string>
     <string name="no_categories_found">카테고리를 찾을 수 없습니다</string>
+    <string name="no_category">카테고리 없음</string>
     <string name="no_chapter_found_error">해당 이름의 챕터가 없습니다.</string>
     <string name="no_chapter_is_available">사용 가능한 챕터가 없습니다.</string>
     <string name="no_chapters_available">사용 가능한 챕터가 없습니다</string>
@@ -1572,6 +1614,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">이 챕터에 대한 리뷰가 아직 없습니다</string>
     <string name="no_reviews_yet">아직 리뷰가 없습니다</string>
     <string name="no_reviews_yet_be_the_first_to_review">아직 리뷰가 없습니다. 첫 번째 리뷰어가 되어주세요!</string>
+    <string name="no_rules_configured">설정된 규칙이 없습니다. 소설을 자동으로 분류하려면 규칙을 추가하세요.</string>
     <string name="no_settings_found">설정을 찾을 수 없습니다</string>
     <string name="no_sources_available">사용 가능한 소스가 없습니다</string>
     <string name="no_sources_available_for_migration">마이그레이션할 수 있는 소스가 없습니다</string>
@@ -1583,8 +1626,10 @@
     <string name="no_usage_data_available_yet">아직 사용 가능한 사용 데이터가 없습니다</string>
     <string name="no_voice_models_available">사용 가능한 음성 모델이 없습니다</string>
     <string name="no_voices_available">사용 가능한 음성이 없습니다</string>
+    <string name="no_voices_available_for_this_language">이 언어에 사용 가능한 음성이 없습니다.</string>
     <string name="none">없음</string>
     <string name="normal">일반</string>
+    <string name="not_connected">연결되지 않음</string>
     <string name="not_implemented_yet">아직 구현되지 않았습니다</string>
     <string name="not_installed">설치되지 않음</string>
     <string name="not_tested">테스트되지 않음</string>
@@ -1622,6 +1667,15 @@
     <string name="novel_info">소설 정보</string>
     <string name="now_try_creating_a_source">이제 좋아하는 웹사이트를 위한 소스 만들기를 시도해 보세요.</string>
     <string name="number_of_sources_to_search">동시에 검색할 소스 수입니다. 값이 클수록 빠르지만 더 많은 리소스를 사용합니다.</string>
+    <string name="nvidia_api_key">NVIDIA API 키</string>
+    <string name="nvidia_api_key_invalid">NVIDIA API 키가 유효하지 않습니다. build.nvidia.com에서 키를 확인해 주세요.</string>
+    <string name="nvidia_api_key_not_set">NVIDIA API 키가 설정되지 않았습니다. 설정에서 구성해 주세요.</string>
+    <string name="nvidia_fetch_models">사용 가능한 모델 가져오기</string>
+    <string name="nvidia_info">NVIDIA NIM은 Llama, Mistral, Gemma 등 최적화된 AI 모델에 대한 액세스를 제공합니다. build.nvidia.com에서 API 키를 받으세요.</string>
+    <string name="nvidia_insufficient_credits">NVIDIA API 크레딧이 부족합니다. build.nvidia.com에서 계정을 확인해 주세요.</string>
+    <string name="nvidia_model">NVIDIA 모델</string>
+    <string name="nvidia_models_loaded">NVIDIA 모델이 성공적으로 로드되었습니다.</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">of</string>
     <string name="off">끄기</string>
     <string name="offline_mode">오프라인 모드</string>
@@ -1653,6 +1707,7 @@
     <string name="open_location">위치 열기</string>
     <string name="open_random">무작위로 열기</string>
     <string name="open_site">사이트 열기</string>
+    <string name="open_storage_settings">저장 공간 설정 열기</string>
     <string name="open_tts_manager">TTS 관리자 열기</string>
     <string name="open_tts_screen">보기</string>
     <string name="open_tts_settings">TTS 설정 열기</string>
@@ -1662,6 +1717,14 @@
     </string>
     <string name="openai_configuration">OpenAI 구성</string>
     <string name="openai_quota_exceeded">OpenAI 할당량 초과</string>
+    <string name="openrouter_api_key">OpenRouter API 키</string>
+    <string name="openrouter_api_key_invalid">OpenRouter API 키가 유효하지 않습니다. openrouter.ai/keys에서 키를 확인해 주세요.</string>
+    <string name="openrouter_api_key_not_set">OpenRouter API 키가 설정되지 않았습니다. 설정에서 구성해 주세요.</string>
+    <string name="openrouter_fetch_models">사용 가능한 모델 가져오기</string>
+    <string name="openrouter_info">OpenRouter는 GPT-4, Claude, Llama 등 여러 AI 모델에 대한 통합 액세스를 제공합니다. openrouter.ai에서 API 키를 받으세요.</string>
+    <string name="openrouter_insufficient_credits">OpenRouter 크레딧이 부족합니다. openrouter.ai/credits에서 크레딧을 충전해 주세요.</string>
+    <string name="openrouter_model">OpenRouter 모델</string>
+    <string name="openrouter_models_loaded">OpenRouter 모델이 성공적으로 로드되었습니다.</string>
     <string name="optimize">최적화</string>
     <string name="optimize_database">데이터베이스 최적화</string>
     <string name="optimizes_translation_for_specific_content">특정 콘텐츠에 대한 번역 최적화</string>
@@ -1714,6 +1777,7 @@
     <string name="paste_the_theme_json_below">테마 JSON을 아래에 붙여넣으세요:</string>
     <string name="pause">일시 중지</string>
     <string name="pause_all">모두 일시 중지</string>
+    <string name="pause_downloads">다운로드 일시 중지</string>
     <string name="paused">일시 중지됨</string>
     <string name="payment_method">결제 방법</string>
     <string name="pen">펜</string>
@@ -1799,6 +1863,8 @@
     <string name="pref_relative_time_long">길게 (짧게+, n일 전)</string>
     <string name="pref_relative_time_short">짧게 (오늘, 어제)</string>
     <string name="prefer_saf_storage">SAF 저장소 선호</string>
+    <string name="preferred_source_language">기본 원본 언어</string>
+    <string name="preferred_target_language">기본 대상 언어</string>
     <string name="preload_next_chapter">다음 챕터 미리 로드</string>
     <string name="preload_only_on_wifi">Wi-Fi에서만 미리 로딩</string>
     <string name="preload_only_on_wifi_summary">Wi-Fi 연결 시에만 자동 미리 로딩을 제한합니다.</string>
@@ -1865,6 +1931,7 @@
     <string name="query_must_not_be_empty">쿼리는 비어 있을 수 없습니다.</string>
     <string name="queue_failed">대기열 실패</string>
     <string name="queued">대기 중</string>
+    <string name="queued_count">%d개 대기 중</string>
     <string name="quick_add_popular_repositories">인기 있는 리포지토리 빠르게 추가</string>
     <string name="quick_add_repository">빠른 저장소 추가</string>
     <string name="quick_fill_same_url_for_all_projects">빠른 채우기 (모든 프로젝트에 동일한 URL)</string>
@@ -1928,6 +1995,7 @@
     <string name="refresh_all">모두 새로고침</string>
     <string name="refresh_covers_too">표지도 새로 고침</string>
     <string name="refresh_metrics">지표 새로 고침</string>
+    <string name="refresh_models">모델 새로 고침</string>
     <string name="refreshed">새로고침됨</string>
     <string name="refreshing">새로 고치는 중</string>
     <string name="refreshing_1">새로 고치는 중...</string>
@@ -1942,6 +2010,7 @@
     <string name="reload">재로드</string>
     <string name="reload_plugin_themes">플러그인 테마 재로드</string>
     <string name="remaining">남음</string>
+    <string name="remember_my_languages">내 언어 선택 기억</string>
     <string name="remind_me_again_in">다시 알림:</string>
     <string name="reminder_interval">알림 간격</string>
     <string name="remove">제거</string>
@@ -2023,7 +2092,9 @@
     <string name="resume">다시 시작</string>
     <string name="resume_all">모두 재개</string>
     <string name="resume_download">다운로드 다시 시작</string>
+    <string name="resume_downloads">다운로드 재개</string>
     <string name="retry">재시도</string>
+    <string name="retry_all_failed">실패 항목 모두 다시 시도</string>
     <string name="retry_failed">실패한 항목 재시도</string>
     <string name="retry_loading">로드 재시도</string>
     <string name="retrying_download">다운로드 재시도 중</string>
@@ -2043,7 +2114,10 @@
     <string name="right">오른쪽</string>
     <string name="rotate_screen_automatically">화면 자동 회전</string>
     <string name="rotation">회전</string>
+    <string name="rule_already_exists">이 카테고리에 이미 해당 규칙이 있습니다.</string>
+    <string name="rule_count">규칙 %1$d개</string>
     <string name="rule_syntax_help">규칙 구문 도움말</string>
+    <string name="rules_count">규칙 %1$d개</string>
     <string name="run_health_check">상태 점검 실행</string>
     <string name="run_the_migration_community_sourcesql">이 테이블들을 생성하려면 Supabase SQL 편집기에서 migration_community_source.sql 파일을 실행하세요.</string>
     <string name="sample_text">샘플 텍스트</string>
@@ -2054,6 +2128,7 @@
     <string name="save_custom_theme">사용자 정의 테마 저장</string>
     <string name="save_epub">EPUB로 저장</string>
     <string name="save_js_sources_extensions_backups">가능한 경우 JS 소스, 확장 기능, 백업 및 epub을 SAF 폴더에 저장합니다. 사용 불가능한 경우 캐시로 폴백합니다.</string>
+    <string name="save_language_preferences">언어 기본 설정 저장</string>
     <string name="save_multi_endpoint_configuration">다중 엔드포인트 구성 저장</string>
     <string name="save_patterns">패턴 저장</string>
     <string name="saved_local_source_location">캐시에 저장된 소스</string>
@@ -2072,6 +2147,7 @@
     <string name="search_across_all_sources">모든 소스에서 검색</string>
     <string name="search_across_all_sources_1">모든 소스에서 검색...</string>
     <string name="search_bar">검색창</string>
+    <string name="search_book_manually">해당 출처에서 책을 직접 검색하여 이용 가능 여부를 확인해 보세요.</string>
     <string name="search_characters_books">캐릭터, 책 검색...</string>
     <string name="search_features">기능 검색...</string>
     <string name="search_fonts">글꼴 검색...</string>
@@ -2118,6 +2194,7 @@
     <string name="select_backup_file">백업 파일 선택</string>
     <string name="select_between">사이 선택</string>
     <string name="select_books_to_migrate">마이그레이션할 책 선택</string>
+    <string name="select_categories">카테고리 선택</string>
     <string name="select_chapters">챕터 선택</string>
     <string name="select_cloud_provider">클라우드 공급자 선택</string>
     <string name="select_engine">엔진 선택</string>
@@ -2133,6 +2210,7 @@
     <string name="select_model">모델 선택</string>
     <string name="select_navigation_style">탐색 스타일 선택</string>
     <string name="select_source_to_migrate_to">마이그레이션할 소스 선택</string>
+    <string name="select_storage_folder">저장 폴더 선택</string>
     <string name="select_target_source">대상 소스 선택</string>
     <string name="select_the_languages_you_want">콘텐츠를 검색하고 탐색할 때 보고 싶은 언어를 선택하세요. 여러 언어를 선택할 수 있습니다.</string>
     <string name="select_the_languages_you_want_1">소스를 탐색할 때 보고 싶은 언어를 선택하세요. 사용 가능한 소스가 있는 언어만 표시됩니다.</string>
@@ -2156,6 +2234,7 @@
     <string name="selectors_for_the_explorelatest_page">탐색/최신 페이지를 위한 선택기 (선택 사항, 비어 있으면 검색 규칙 사용)</string>
     <string name="send_reset_email">초기화 이메일 전송</string>
     <string name="sentence_highlighting">문장 하이라이팅</string>
+    <string name="set_categories">카테고리 설정</string>
     <string name="set_eth_wallet_address">ETH 지갑 주소 설정</string>
     <string name="set_name">이름 설정</string>
     <string name="sets_the_tone_of_translated_text">번역된 텍스트의 어조를 설정합니다.</string>
@@ -2258,10 +2337,14 @@
     <string name="source_browse_latest">최신 항목 탐색</string>
     <string name="source_extension_not_installed">소스 확장 프로그램이 설치되지 않았습니다</string>
     <string name="source_id">소스 ID</string>
+    <string name="source_id_or_name">출처 ID 또는 이름</string>
     <string name="source_json">소스 JSON</string>
     <string name="source_name">소스 이름 *</string>
     <string name="source_needs_update">소스 업데이트 필요</string>
     <string name="source_not_available">이 소스는 장치에서 사용할 수 없습니다.</string>
+    <string name="source_not_found">출처를 찾을 수 없음</string>
+    <string name="source_placeholder">예: 12345 또는 NovelUpdates</string>
+    <string name="source_rule">출처</string>
     <string name="source_term">소스 용어</string>
     <string name="source_title">소스 제목</string>
     <string name="source_unavailable">소스 사용 불가</string>
@@ -2288,11 +2371,16 @@
     <string name="stop">중지</string>
     <string name="stop_playback_after">재생 중지 시간:</string>
     <string name="storage">저장 공간</string>
+    <string name="storage_access_lost">저장 공간 액세스 권한 상실</string>
+    <string name="storage_access_lost_description">IReader가 더 이상 저장 폴더에 액세스할 수 없습니다. 앱을 계속 사용하려면 폴더를 선택해 주세요.</string>
+    <string name="storage_access_lost_reasons">폴더가 삭제되거나 이동되었거나 권한이 취소되었을 수 있습니다. 이는 앱 업데이트 또는 시스템 변경 후에 발생할 수 있습니다.</string>
+    <string name="storage_is_needed_for">저장 공간이 필요한 이유:</string>
     <string name="storage_permission_privacy_note">IReader는 사용자가 선택한 폴더에만 접근합니다. 다른 파일은 비공개로 유지되며 수정되지 않습니다.</string>
     <string name="storage_permission_required_explanation">저장소 권한 필요 설명
     </string>
     <string name="storage_permission_subtitle">IReader가 다운로드, 확장 프로그램, 백업을 저장할 폴더를 선택하세요.</string>
     <string name="storage_permission_title">저장 폴더 선택</string>
+    <string name="storage_required">저장 공간 필요</string>
     <string name="storage_settings">저장 공간 설정</string>
     <string name="storage_setup">저장 공간 구성</string>
     <string name="storage_usage">저장 공간 사용량</string>
@@ -2360,6 +2448,7 @@
     <string name="system_integration_multiple_engines_supported">✓ 시스템 통합 • ✓ 여러 엔진 지원 • ✓ 다운로드 필요 없음</string>
     <string name="system_notifications">시스템 및 알림</string>
     <string name="system_notifications_1">시스템 알림</string>
+    <string name="system_settings">시스템 설정</string>
     <string name="system_tts_settings">시스템 TTS 설정</string>
     <string name="tab_content">탭 콘텐츠</string>
     <string name="tabs">탭</string>
@@ -2508,14 +2597,39 @@
     <string name="translated">번역됨</string>
     <string name="translating">번역 중... 시간이 걸릴 수 있습니다.</string>
     <string name="translation">번역</string>
+    <string name="translation_api_key_invalid">%1$s의 API 키가 유효하지 않거나 만료되었습니다. 설정 → 번역에서 키를 확인해 주세요.</string>
+    <string name="translation_api_key_not_set">%1$s에는 API 키가 필요합니다. 설정 → 번역으로 이동하여 API 키를 구성해 주세요.</string>
+    <string name="translation_auth_required">이 번역 기능을 사용하려면 %1$s에 로그인해야 합니다.</string>
+    <string name="translation_captcha_required">%1$s에는 인증이 필요합니다. 계속하려면 CAPTCHA를 완료해 주세요.</string>
     <string name="translation_complete">번역 완료.</string>
+    <string name="translation_empty_response">%1$s이(가) 빈 응답을 반환했습니다. 일시적인 문제일 수 있습니다. 다시 시도해 주세요.</string>
     <string name="translation_engine">번역 엔진</string>
+    <string name="translation_engine_not_available">이 앱 버전에서는 %1$s을(를) 사용할 수 없습니다. 다른 번역 엔진을 사용해 주세요.</string>
     <string name="translation_engines_refreshed">번역 엔진이 새로 고쳐졌습니다.</string>
     <string name="translation_error">번역 오류</string>
+    <string name="translation_language_model_not_available">%1$s → %2$s 언어 모델이 다운로드되지 않았습니다. 설정 → 번역으로 이동하여 다운로드해 주세요.</string>
+    <string name="translation_language_pair_not_supported">%1$s은(는) %2$s에서 %3$s(으)로의 번역을 지원하지 않습니다. 다른 언어를 선택해 주세요.</string>
+    <string name="translation_model_not_found">%1$s용 AI 모델을 찾을 수 없습니다. 설정을 확인해 주세요.</string>
+    <string name="translation_model_not_found_with_name">%1$s에서 모델 '%2$s'을(를) 찾을 수 없습니다. 설정에서 다른 모델을 선택해 주세요.</string>
+    <string name="translation_network_error">%1$s에 연결할 수 없습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.</string>
+    <string name="translation_parse_error">%1$s의 응답을 이해할 수 없습니다. 서비스에 문제가 발생했을 수 있습니다.</string>
+    <string name="translation_plugin_error">번역 플러그인 '%1$s'에서 오류가 발생했습니다. 플러그인 설정을 확인하거나 다른 엔진을 사용해 보세요.</string>
     <string name="translation_plugins_extend_ireader_with">번역 플러그인은 추가 번역 서비스로 IReader를 확장합니다.</string>
     <string name="translation_progress">번역 진행률</string>
+    <string name="translation_quota_exceeded">%1$s 번역 할당량이 초과되었습니다. 요금제 및 청구를 확인하거나 나중에 다시 시도해 주세요.</string>
+    <string name="translation_rate_limit">%1$s이(가) 너무 많은 요청을 받고 있습니다. 잠시 기다렸다가 다시 시도해 주세요.</string>
     <string name="translation_rate_limit_delay">번역 요금 제한 지연</string>
+    <string name="translation_rate_limit_with_retry">%1$s 호출 제한에 도달했습니다. %2$d초 후에 다시 시도해 주세요.</string>
+    <string name="translation_same_as_original">%1$s이(가) 텍스트를 변경하지 않고 반환했습니다. 번역에 실패했거나 텍스트가 이미 대상 언어일 수 있습니다.</string>
+    <string name="translation_server_error">%1$s 서버에 문제가 발생했습니다. 나중에 다시 시도해 주세요.</string>
+    <string name="translation_server_error_with_code">%1$s 서버 오류 (코드: %2$d). 나중에 다시 시도해 주세요.</string>
     <string name="translation_settings">번역 설정</string>
+    <string name="translation_text_too_long">텍스트가 너무 길어 %1$s에서 처리할 수 없습니다. 더 작은 섹션으로 번역해 보세요.</string>
+    <string name="translation_text_too_long_with_limit">텍스트가 %1$s의 %2$d자 제한을 초과합니다. 더 작은 섹션으로 번역해 보세요.</string>
+    <string name="translation_timeout">%1$s의 응답이 너무 오래 걸립니다. 다시 시도해 주세요.</string>
+    <string name="translation_timeout_with_seconds">%1$s이(가) %2$d초 내에 응답하지 않았습니다. 다시 시도해 주세요.</string>
+    <string name="translation_unknown_error">%1$s에서 예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.</string>
+    <string name="translation_unknown_error_with_details">%1$s 오류: %2$s</string>
     <string name="translation_warning">번역 경고</string>
     <string name="translations">번역</string>
     <string name="trending_now">현재 인기 급상승</string>
@@ -2525,9 +2639,11 @@
     <string name="trust_level_updated">신뢰 수준이 업데이트되었습니다</string>
     <string name="try_a_different_search_term">다른 검색어를 사용해 보세요.</string>
     <string name="try_again">다시 시도</string>
+    <string name="try_again_later">데이터는 보존됩니다. 나중에 다시 시도해 주세요.</string>
     <string name="try_alternative_url">대체 URL 시도</string>
     <string name="try_another_search">다른 검색 시도</string>
     <string name="try_different_search">다른 검색어 시도</string>
+    <string name="try_different_source">출처를 이용할 수 없을 수 있습니다. 다른 출처를 시도해 보세요.</string>
     <string name="try_these_fixes">다음 해결 방법을 시도해 보세요:</string>
     <string name="trying_in_few_second">잠시 후 다시 시도하세요.</string>
     <string name="trying_to_fetch">가져오는 중…</string>
@@ -2590,6 +2706,7 @@
     <string name="upcoming_releases">향후 릴리스</string>
     <string name="update">업데이트</string>
     <string name="update_all">모두 업데이트</string>
+    <string name="update_all_books">모든 책 업데이트</string>
     <string name="update_available">업데이트 사용 가능</string>
     <string name="update_available_1">업데이트 사용 가능</string>
     <string name="update_category">카테고리 업데이트</string>
@@ -2643,6 +2760,7 @@
     <string name="use_password">비밀번호 사용</string>
     <string name="use_pin">PIN 사용</string>
     <string name="use_pinpassword_instead">PIN/비밀번호 대신 사용</string>
+    <string name="use_saved_languages">저장된 언어 사용</string>
     <string name="use_separate_supabase_projects_for">더 나은 확장성을 위해 별도의 Supabase 프로젝트 사용</string>
     <string name="use_static_indicators_instead_of_animated_ones">애니메이션 표시기 대신 정적 표시기 사용</string>
     <string name="use_translated_text_for_text">사용 가능한 경우 텍스트 음성 변환에 번역된 텍스트 사용</string>
@@ -2656,6 +2774,7 @@
     <string name="users">사용자</string>
     <string name="uuid_of_your_d1_database">D1 데이터베이스의 UUID</string>
     <string name="validate">유효성 검사</string>
+    <string name="validation_error">유효성 검사 오류</string>
     <string name="verification_details">인증 정보</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• 인증은 자동으로 진행되며 몇 초가 소요됩니다.</string>
     <string name="verification_is_cached_for_24">인증은 24시간 동안 캐시됩니다. 재인증에 실패하면 배지는 7일 동안 활성 상태로 유지됩니다.</string>
@@ -2722,11 +2841,14 @@
     <string name="whats_new_1">새로운 기능</string>
     <string name="whats_new_2">새로운 기능:</string>
     <string name="while_charging">충전 중</string>
+    <string name="why_did_this_happen">왜 이런 일이 발생했나요?</string>
     <string name="why_donate">기부 이유?</string>
     <string name="why_is_this_needed">이것이 왜 필요한가요?</string>
     <string name="width">너비</string>
     <string name="width_1">너비</string>
     <string name="wifi_only">Wi-Fi 전용</string>
+    <string name="wifi_only_mode">Wi-Fi 전용 모드</string>
+    <string name="wifi_only_warning">다운로드 일시 중지됨 - Wi-Fi 전용 모드 활성화됨</string>
     <string name="with_trailing_content">꼬리 내용 포함</string>
     <string name="wizard">마법사</string>
     <string name="wizard_step">wizard_step</string>

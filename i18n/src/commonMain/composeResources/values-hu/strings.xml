@@ -1678,6 +1678,15 @@
     <string name="novel_info">Regény Információ</string>
     <string name="now_try_creating_a_source">Most próbáld meg létrehozni egy forrást kedvenc weboldaladhoz.</string>
     <string name="number_of_sources_to_search">Egyidejűleg keresendő források száma. A magasabb értékek gyorsabbak, de több erőforrást használnak.</string>
+    <string name="nvidia_api_key">NVIDIA API Kulcs</string>
+    <string name="nvidia_api_key_invalid">Az NVIDIA API kulcs érvénytelen. Kérjük, ellenőrizze kulcsát a build.nvidia.com oldalon.</string>
+    <string name="nvidia_api_key_not_set">Az NVIDIA API kulcs nincs beállítva. Kérjük, konfigurálja a beállításokban.</string>
+    <string name="nvidia_fetch_models">Elérhető modellek lekérése</string>
+    <string name="nvidia_info">Az NVIDIA NIM hozzáférést biztosít optimalizált AI modellekhez, beleértve a Llama, Mistral, Gemma és másokat. Szerezze be API kulcsát a build.nvidia.com oldalon.</string>
+    <string name="nvidia_insufficient_credits">NVIDIA API kreditek elégtelenek. Kérjük, ellenőrizze fiókját a build.nvidia.com oldalon.</string>
+    <string name="nvidia_model">NVIDIA Modell</string>
+    <string name="nvidia_models_loaded">NVIDIA modellek sikeresen betöltve</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">of</string>
     <string name="off">Ki</string>
     <string name="offline_mode">Offline mód</string>
@@ -1720,6 +1729,14 @@
     </string>
     <string name="openai_configuration">OpenAI konfiguráció</string>
     <string name="openai_quota_exceeded">Az Openai kvóta túllépve</string>
+    <string name="openrouter_api_key">OpenRouter API Kulcs</string>
+    <string name="openrouter_api_key_invalid">Az OpenRouter API kulcs érvénytelen. Kérjük, ellenőrizze kulcsát az openrouter.ai/keys oldalon.</string>
+    <string name="openrouter_api_key_not_set">Az OpenRouter API kulcs nincs beállítva. Kérjük, konfigurálja a beállításokban.</string>
+    <string name="openrouter_fetch_models">Elérhető modellek lekérése</string>
+    <string name="openrouter_info">Az OpenRouter egységes hozzáférést biztosít több AI modellhez, beleértve a GPT-4, Claude, Llama és másokat. Szerezze be API kulcsát az openrouter.ai oldalon.</string>
+    <string name="openrouter_insufficient_credits">OpenRouter kreditek elégtelenek. Kérjük, töltsön fel krediteket az openrouter.ai/credits oldalon.</string>
+    <string name="openrouter_model">OpenRouter Modell</string>
+    <string name="openrouter_models_loaded">OpenRouter modellek sikeresen betöltve</string>
     <string name="optimize">Optimalizálás</string>
     <string name="optimize_database">Adatbázis optimalizálása</string>
     <string name="optimizes_translation_for_specific_content">Optimalizálja a fordítást az adott tartalomhoz</string>
@@ -1992,6 +2009,7 @@
     <string name="refresh_all">Összes frissítése</string>
     <string name="refresh_covers_too">Borítókat is Frissítse</string>
     <string name="refresh_metrics">Mérések frissítése</string>
+    <string name="refresh_models">Modellek frissítése</string>
     <string name="refreshed">Frissítve</string>
     <string name="refreshing">Frissítés</string>
     <string name="refreshing_1">Frissítés...</string>

@@ -1669,6 +1669,15 @@
     <string name="novel_info">Informacije o romanu</string>
     <string name="now_try_creating_a_source">Sada pokušajte stvoriti izvor za svoju omiljenu web stranicu.</string>
     <string name="number_of_sources_to_search">Broj izvora za istovremeno pretraživanje. Više vrijednosti su brže, ali troše više resursa.</string>
+    <string name="nvidia_api_key">NVIDIA API ključ</string>
+    <string name="nvidia_api_key_invalid">NVIDIA API ključ je nevažeći. Molimo provjerite svoj ključ na build.nvidia.com</string>
+    <string name="nvidia_api_key_not_set">NVIDIA API ključ nije postavljen. Molimo konfigurirajte ga u postavkama.</string>
+    <string name="nvidia_fetch_models">Dohvati dostupne modele</string>
+    <string name="nvidia_info">NVIDIA NIM pruža pristup optimiziranim AI modelima, uključujući Llama, Mistral, Gemma i više. Nabavite svoj API ključ na build.nvidia.com</string>
+    <string name="nvidia_insufficient_credits">Nedovoljno NVIDIA API kredita. Molimo provjerite svoj račun na build.nvidia.com</string>
+    <string name="nvidia_model">NVIDIA Model</string>
+    <string name="nvidia_models_loaded">NVIDIA modeli uspješno učitani</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">od</string>
     <string name="off">Isključeno</string>
     <string name="offline_mode">Izvanmrežni način rada</string>
@@ -1711,6 +1720,14 @@
 	</string>
     <string name="openai_configuration">OpenAI konfiguracija</string>
     <string name="openai_quota_exceeded">Prekoračena je OpenAI kvota</string>
+    <string name="openrouter_api_key">OpenRouter API ključ</string>
+    <string name="openrouter_api_key_invalid">OpenRouter API ključ je nevažeći. Molimo provjerite svoj ključ na openrouter.ai/keys</string>
+    <string name="openrouter_api_key_not_set">OpenRouter API ključ nije postavljen. Molimo konfigurirajte ga u postavkama.</string>
+    <string name="openrouter_fetch_models">Dohvati dostupne modele</string>
+    <string name="openrouter_info">OpenRouter pruža jedinstven pristup višestrukim AI modelima, uključujući GPT-4, Claude, Llama i više. Nabavite svoj API ključ na openrouter.ai</string>
+    <string name="openrouter_insufficient_credits">Nedovoljno OpenRouter kredita. Molimo dodajte kredite na openrouter.ai/credits</string>
+    <string name="openrouter_model">OpenRouter Model</string>
+    <string name="openrouter_models_loaded">OpenRouter modeli uspješno učitani</string>
     <string name="optimize">Optimiziraj</string>
     <string name="optimize_database">Optimiziraj bazu podataka</string>
     <string name="optimizes_translation_for_specific_content">Optimizira prijevod za specifični sadržaj</string>
@@ -1981,6 +1998,7 @@
     <string name="refresh_all">Osvježi sve</string>
     <string name="refresh_covers_too">Osvježi i naslovnice</string>
     <string name="refresh_metrics">Osvježi metrike</string>
+    <string name="refresh_models">Osvježi modele</string>
     <string name="refreshed">Osvježeno</string>
     <string name="refreshing">Osvježavanje</string>
     <string name="refreshing_1">Osvježavanje...</string>

@@ -35,13 +35,19 @@
     <string name="add_glossary_entry">ഗ്ലോസ്സറി എൻട്രി ചേർക്കുക</string>
     <string name="add_more_time">കൂടുതൽ സമയം ചേർക്കുക:</string>
     <string name="add_new_book_glossary">പുതിയ പുസ്തക പദാവലി ചേർക്കുക</string>
+    <string name="add_new_rule">പുതിയ നിയമം ചേർക്കുക</string>
     <string name="add_novels_to_library_only">தேடல் முடிவுகளில் காணப்படும் போது நாவல்களை மட்டும் நூலகத்தில் சேர்க்கவும்</string>
     <string name="add_parameter">പാരാമീറ്റർ ചേർക്കുക</string>
     <string name="add_plugin_repository">പ്ലഗിൻ ശേഖരം ചേർക്കുക</string>
     <string name="add_repository">ശേഖരം ചേർക്കുക</string>
     <string name="add_repository_1">ശേഖരം ചേർക്കുക</string>
+    <string name="add_rule">നിയമം ചേർക്കുക</string>
     <string name="add_to_category">വിഭാഗത്തിലേക്ക് ചേർക്കുക</string>
     <string name="add_to_library">ലൈബ്രറിയിലേക്ക് ചേർക്കുക</string>
+    <string name="add_without_category">വിഭാഗമില്ലാതെ ചേർക്കുക</string>
+    <string name="added_genre_rule">ചേർത്ത വിഭാഗ നിയമം: %1$s</string>
+    <string name="added_source_rule">ചേർത്ത ഉറവിട നിയമം: %1$s</string>
+    <string name="added_to_category">%s-ൽ ചേർത്തു</string>
     <string name="added_to_library">ലൈബ്രറിയിലേക്ക് ചേർത്തു</string>
     <string name="additional_details">கூடுதல் விவரங்கள்:</string>
     <string name="additional_details_optional">അധിക വിശദാംശങ്ങൾ (ഓപ്ഷണൽ)</string>
@@ -87,8 +93,10 @@
     <string name="all_time">എല്ലാ കാലത്തും</string>
     <string name="all_types">എല്ലാ തരങ്ങളും</string>
     <string name="allow_loading_lnreader_compatible_javascript">LNReader-இணக்கமான ஜாவாஸ்கிரிப்ட் செருகுநிரல்களை ஏற்ற அனுமதிக்கவும்</string>
+    <string name="allow_mobile_data">മൊബൈൽ ഡാറ്റ അനുവദിക്കുക</string>
     <string name="alpha">ஆல்பா</string>
     <string name="alphaanimation">ஆல்பா அனிமேஷன்</string>
+    <string name="always_ask">എപ്പോഴും ചോദിക്കുക</string>
     <string name="an_image">ഒരു ചിത്രം</string>
     <string name="analytics">பகுப்பாய்வு</string>
     <string name="analyze_page">പേജ് വിശകലനം ചെയ്യുക</string>
@@ -145,6 +153,9 @@
     <string name="auto">സ്വയം</string>
     <string name="auto_approve_7_days_old">7+ ദിവസമായവ സ്വയം അംഗീകരിക്കുക</string>
     <string name="auto_backup">യാന്ത്രിക ബാക്കപ്പ്</string>
+    <string name="auto_categorization">സ്വയമേവയുള്ള വർഗ്ഗീകരണം</string>
+    <string name="auto_categorization_description">ഈ നിയമങ്ങളുമായി യോജിക്കുന്ന നോവലുകൾ ഈ വിഭാഗത്തിലേക്ക് സ്വയമേവ ചേർക്കപ്പെടും.</string>
+    <string name="auto_categorization_rules">സ്വയമേവയുള്ള വർഗ്ഗീകരണ നിയമങ്ങൾ</string>
     <string name="auto_cleanup">தானியங்கி சுத்தம்</string>
     <string name="auto_delete">தானியங்கி நீக்கு</string>
     <string name="auto_delete_chapters">தானியங்கி அத்தியாயங்கள் நீக்கு</string>
@@ -165,8 +176,10 @@
     <string name="auto_sort_chapters_in_db">DB-യിൽ അധ്യായങ്ങൾ സ്വയമേവ അടുക്കുക</string>
     <string name="auto_sync">தானியங்கி ஒத்திசைவு</string>
     <string name="auto_sync_1">தானியங்கி ஒத்திசைவு</string>
+    <string name="auto_translate_descriptions">വിവരണങ്ങൾ സ്വയമേവ വിവർത്തനം ചെയ്യുക</string>
     <string name="auto_translate_next_chapter">അടുത്ത അധ്യായം സ്വയം വിവർത്തനം ചെയ്യുക</string>
     <string name="auto_translate_next_chapter_summary">തിരഞ്ഞെടുത്ത വിവർത്തന എഞ്ചിൻ ഉപയോഗിച്ച് നാവിഗേറ്റ് ചെയ്യുമ്പോൾ അടുത്ത അധ്യായം സ്വയമേവ വിവർത്തനം ചെയ്യുക</string>
+    <string name="auto_translate_novel_names">നോവൽ പേരുകൾ സ്വയമേവ വിവർത്തനം ചെയ്യുക</string>
     <string name="auto_update">യാന്ത്രിക-അപ്‌ഡേറ്റ്</string>
     <string name="auto_update_1">தானியங்கி புதுப்பிப்பு</string>
     <string name="auto_update_2">தானியங்கி புதுப்பிப்பு</string>
@@ -185,6 +198,8 @@
     <string name="automatically_share_your_translations_with">നിങ്ങളുടെ വിവർത്തനങ്ങൾ കമ്മ്യൂണിറ്റിയുമായി സ്വയമേവ പങ്കിടുക</string>
     <string name="automatically_stop_playback_after_set_time">നിശ്ചിത സമയത്തിനു ശേഷം പ്ലേബാക്ക് സ്വയമേവ നിർത്തുക</string>
     <string name="automatically_sync_reading_progress">വായന പുരോഗതി സ്വയമേവ സമന്വയിപ്പിക്കുക</string>
+    <string name="automatically_translate_novel_descriptions_when">ഉറവിടങ്ങൾ ബ്രൗസ് ചെയ്യുമ്പോൾ നോവൽ വിവരണങ്ങൾ സ്വയമേവ വിവർത്തനം ചെയ്യുക.</string>
+    <string name="automatically_translate_novel_titles_when">ഉറവിടങ്ങൾ ബ്രൗസ് ചെയ്യുമ്പോൾ നോവൽ ശീർഷകങ്ങൾ സ്വയമേവ വിവർത്തനം ചെയ്യുക.</string>
     <string name="autoscroll">ഓട്ടോസ്ക്രോൾ</string>
     <string name="available">ലഭ്യമാണ്</string>
     <string name="available_backups">ലഭ്യമായ ബാക്കപ്പുകൾ</string>
@@ -192,6 +207,7 @@
     <string name="available_for_download">ഡൗൺലോഡ് ചെയ്യാൻ ലഭ്യമാണ്</string>
     <string name="available_kokoro_voices">ലഭ്യമായ കൊക്കോറോ ശബ്ദങ്ങൾ:</string>
     <string name="available_languages">ലഭ്യമായ ഭാഷകൾ:</string>
+    <string name="available_voices">ലഭ്യമായ ശബ്ദങ്ങൾ</string>
     <string name="average_reading_speed">ശരാശരി വായന വേഗത</string>
     <string name="avg_cpu">ശരാശരി CPU</string>
     <string name="avg_response_time">ശരാശരി പ്രതികരണ സമയം</string>
@@ -258,6 +274,7 @@
     <string name="book_name_selector">പുസ്തകത്തിൻ്റെ പേര് സെലക്ടർ *</string>
     <string name="book_name_selector_1">പുസ്തകത്തിൻ്റെ പേര് സെലക്ടർ</string>
     <string name="book_not_found">പുസ്തകം കണ്ടെത്തിയില്ല</string>
+    <string name="book_not_in_target_source">ലക്ഷ്യ ഉറവിടത്തിൽ പുസ്തകം കണ്ടെത്തിയില്ല</string>
     <string name="book_queued_for_download">പുസ്തകം ഡൗൺലോഡിനായി ക്യൂവിൽ ചേർത്തു</string>
     <string name="book_reviews">പുസ്തക അവലോകനങ്ങൾ</string>
     <string name="book_title">പുസ്തകത്തിന്റെ പേര്</string>
@@ -360,6 +377,7 @@
     <string name="chapter_complete">അധ്യായം പൂർത്തിയായി</string>
     <string name="chapter_completed">അദ്ധ്യായം പൂർത്തിയായി</string>
     <string name="chapter_content_extracted">%1$s ഉപയോഗിച്ച് അധ്യായത്തിലെ ഉള്ളടക്കം എടുത്തു</string>
+    <string name="chapter_fetch_failed">അധ്യായം എടുക്കുന്നതിൽ പരാജയപ്പെട്ടു</string>
     <string name="chapter_filters">അധ്യായ ഫിൽട്ടറുകൾ</string>
     <string name="chapter_heading_size">അധ്യായ തലക്കെട്ടിന്റെ വലുപ്പം</string>
     <string name="chapter_list">അധ്യായം ലിസ്റ്റ്</string>
@@ -390,6 +408,7 @@
     <string name="check_community_first">ആദ്യം കമ്മ്യൂണിറ്റി പരിശോധിക്കുക</string>
     <string name="check_for_app_updates">ആപ്പ് അപ്ഡേറ്റുകൾക്കായി പരിശോധിക്കുക</string>
     <string name="check_for_updates">അപ്‌ഡേറ്റുകൾക്കായി പരിശോധിക്കുക</string>
+    <string name="check_internet_connection">ദയവായി നിങ്ങളുടെ ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="check_permissions">അനുമതികൾ പരിശോധിക്കുക</string>
     <string name="check_the_update">അപ്‌ഡേറ്റ് പരിശോധിക്കുക</string>
     <string name="checking_for_updates">അപ്‌ഡേറ്റുകൾക്കായി പരിശോധിക്കുന്നു...</string>
@@ -424,6 +443,7 @@
     <string name="clear_completed">പൂർത്തിയായവ മായ്‌ക്കുക</string>
     <string name="clear_download_cache">ഡൗൺലോഡ് കാഷെ മായ്‌ക്കുക</string>
     <string name="clear_download_cache_confirmation">ഇത് താൽക്കാലിക ഡൗൺലോഡ് ഫയലുകൾ നീക്കംചെയ്യും. ഡൗൺലോഡ് ചെയ്ത അധ്യായങ്ങളെ ബാധിക്കില്ല.</string>
+    <string name="clear_failed">പരാജയപ്പെട്ടവ മായ്ക്കുക</string>
     <string name="clear_filters">ഫിൽട്ടറുകൾ മായ്‌ക്കുക</string>
     <string name="clear_not_in_library_books">ലൈബ്രറിയിലില്ലാത്ത എല്ലാ പുസ്തകങ്ങളും മായ്ക്കുക</string>
     <string name="clear_search">തിരയൽ മായ്ക്കുക</string>
@@ -556,6 +576,7 @@
     <string name="current_engine">നിലവിലെ എഞ്ചിൻ</string>
     <string name="current_location">നിലവിലെ സ്ഥാനം:</string>
     <string name="current_progress">നിലവിലെ പുരോഗതി</string>
+    <string name="current_rules">നിലവിലെ നിയമങ്ങൾ</string>
     <string name="currently_reading">നിലവിൽ വായിക്കുന്നു</string>
     <string name="currently_viewing_a_plugin_screen">നിലവിൽ ഒരു പ്ലഗിൻ സ്ക്രീൻ കാണുന്നു</string>
     <string name="custom">ഇഷ്‌ടാനുസൃതം</string>
@@ -604,6 +625,8 @@
     <string name="deepseek_configuration">ഡീപ്സീക്ക് കോൺഫിഗറേഷൻ</string>
     <string name="deepseek_login_required">DeepSeek ലോഗിൻ ആവശ്യമാണ്</string>
     <string name="deepseek_payment_required">DeepSeek പേയ്‌മെന്റ് ആവശ്യമാണ് അല്ലെങ്കിൽ API ക്വാട്ട കവിഞ്ഞു</string>
+    <string name="default_category">സ്ഥിരസ്ഥിതി വിഭാഗം</string>
+    <string name="default_category_summary">പുസ്തകങ്ങൾ ലൈബ്രറിയിലേക്ക് ചേർക്കുമ്പോൾ ഉപയോഗിക്കേണ്ട വിഭാഗം</string>
     <string name="default_chapter_sort">സ്ഥിര അധ്യായ ക്രമീകരണം</string>
     <string name="default_reading_mode">സ്ഥിര വായനാ രീതി</string>
     <string name="default_reading_mode_for_new_books">പുതിയ പുസ്തകങ്ങൾക്കായുള്ള സ്ഥിര വായനാ രീതി</string>
@@ -623,11 +646,14 @@
     <string name="delete_art">ആർട്ട് ഇല്ലാതാക്കണോ?</string>
     <string name="delete_backup">ബാക്കപ്പ് ഇല്ലാതാക്കണോ?</string>
     <string name="delete_category">വിഭാഗം ഇല്ലാതാക്കണോ?</string>
+    <string name="delete_chapter">അധ്യായം ഇല്ലാതാക്കുക</string>
+    <string name="delete_content">ഉള്ളടക്കം ഇല്ലാതാക്കുക</string>
     <string name="delete_custom_theme">ഇഷ്‌ടമുള്ള തീം ഇല്ലാതാക്കുക</string>
     <string name="delete_entry">എൻട്രി ഇല്ലാതാക്കുക</string>
     <string name="delete_failed">ഇല്ലാതാക്കാൻ കഴിഞ്ഞില്ല: %1$s</string>
     <string name="delete_font">ഫോണ്ട് ഇല്ലാതാക്കുക</string>
     <string name="delete_font_1">ഫോണ്ട് ഇല്ലാതാക്കുക</string>
+    <string name="delete_rule">നിയമം ഇല്ലാതാക്കുക</string>
     <string name="delete_source">ഉറവിടം ഇല്ലാതാക്കുക</string>
     <string name="delete_update">അപ്‌ഡേറ്റ് ഇല്ലാതാക്കുക</string>
     <string name="delete_voice">വോയിസ് ഇല്ലാതാക്കുക</string>
@@ -675,6 +701,7 @@
     <string name="discord">Discord</string>
     <string name="discover">കണ്ടെത്തുക</string>
     <string name="discover_plugins_to_enhance_your_reading">നിങ്ങളുടെ വായന മെച്ചപ്പെടുത്തുന്നതിനുള്ള പ്ലഗിനുകൾ കണ്ടെത്തുക</string>
+    <string name="disk_space_warning">ഡൗൺലോഡുകൾ താൽക്കാലികമായി നിർത്തിവച്ചു - ഡിസ്‌ക് സ്‌പേസ് കുറവാണ്</string>
     <string name="dismiss">ഒഴിവാക്കുക</string>
     <string name="display">പ്രദർശിപ്പിക്കുക</string>
     <string name="display_adult_content_in_search_results">തിരയൽ ഫലങ്ങളിൽ മുതിർന്നവർക്കുള്ള ഉള്ളടക്കം പ്രദർശിപ്പിക്കുക</string>
@@ -718,6 +745,7 @@
     <string name="download_delay">ഡൗൺലോഡ് കാലതാമസം</string>
     <string name="download_failed">ഡൗൺലോഡ് പരാജയപ്പെട്ടു: %1$s</string>
     <string name="download_failed_title">ഡൗൺലോഡ് പരാജയപ്പെട്ടു</string>
+    <string name="download_from_last_read">അവസാനം വായിച്ചതിൽ നിന്ന് ഡൗൺലോഡ് ചെയ്യുക</string>
     <string name="download_information">ഡൗൺലോഡ് വിവരങ്ങൾ</string>
     <string name="download_install">ഡൗൺലോഡ് ചെയ്ത് ഇൻസ്റ്റാൾ ചെയ്യുക</string>
     <string name="download_language_models">ഭാഷാ മോഡലുകൾ ഡൗൺലോഡ് ചെയ്യുക</string>
@@ -740,6 +768,7 @@
     <string name="download_settings">ഡൗൺലോഡ് ക്രമീകരണങ്ങൾ</string>
     <string name="download_unread">വായിക്കാത്തവ ഡൗൺലോഡ് ചെയ്യുക</string>
     <string name="download_unread_1">വായിക്കാത്തവ ഡൗൺലോഡ് ചെയ്യുക</string>
+    <string name="download_unread_from_last_read_desc">വായിക്കാത്ത ആദ്യ അധ്യായത്തിൽ നിന്ന് ഡൗൺലോഡ് ചെയ്യുന്നതിന് പകരം, നിങ്ങൾ ഏറ്റവും അവസാനം വായിച്ച അധ്യായത്തിന് ശേഷം തുടങ്ങുന്ന അധ്യായങ്ങൾ ഡൗൺലോഡ് ചെയ്യുക.</string>
     <string name="download_update">അപ്‌ഡേറ്റ് ഡൗൺലോഡ് ചെയ്യുക</string>
     <string name="downloadarrow">ഡൗൺലോഡ് ആരോ</string>
     <string name="downloaded">ഡൗൺലോഡ് ചെയ്തു</string>
@@ -749,6 +778,7 @@
     <string name="downloading_1">ഡൗൺലോഡ് ചെയ്യുന്നു...</string>
     <string name="downloading_chapter_audio">അധ്യായത്തിന്റെ ഓഡിയോ ഡൗൺലോഡ് ചെയ്യുന്നു</string>
     <string name="downloading_chapters">%1$s അധ്യായങ്ങൾ ഡൗൺലോഡ് ചെയ്യുന്നു</string>
+    <string name="downloading_count">%d ഡൗൺലോഡ് ചെയ്യുന്നു</string>
     <string name="downloading_unread_chapters">%1$s വായിക്കാത്ത അധ്യായങ്ങൾ ഡൗൺലോഡ് ചെയ്യുന്നു</string>
     <string name="downloading_update">അപ്‌ഡേറ്റ് ഡൗൺലോഡ് ചെയ്യുന്നു</string>
     <string name="downloading_update_1">അപ്ഡേറ്റ് ഡൗൺലോഡ് ചെയ്യുന്നു...</string>
@@ -924,10 +954,12 @@
     <string name="eyjhbgcioijiuzi1niis">eyJhbGciOiJIUzI1NiIs...</string>
     <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
     <string name="failed">പരാജയപ്പെട്ടു</string>
+    <string name="failed_count">%d പരാജയപ്പെട്ടു</string>
     <string name="failed_files">പരാജയപ്പെട്ട ഫയലുകൾ</string>
     <string name="failed_imports">പരാജയപ്പെട്ട ഇറക്കുമതികൾ</string>
     <string name="failed_to_add_entry">എൻട്രി ചേർക്കാൻ കഴിഞ്ഞില്ല: %1$s</string>
     <string name="failed_to_add_repository">സംഭരണം ചേർക്കാൻ കഴിഞ്ഞില്ല: %1$s</string>
+    <string name="failed_to_add_rule">നിയമം ചേർക്കുന്നതിൽ പരാജയപ്പെട്ടു: %1$s</string>
     <string name="failed_to_apply_plugin_theme">പ്ലഗിൻ തീം പ്രയോഗിക്കാൻ കഴിഞ്ഞില്ല: %1$s. സ്ഥിരസ്ഥിതി തീം ഉപയോഗിക്കുന്നു.</string>
     <string name="failed_to_check_updates">അപ്‌ഡേറ്റുകൾ പരിശോധിക്കാൻ കഴിഞ്ഞില്ല</string>
     <string name="failed_to_copy">പകർത്താൻ കഴിഞ്ഞില്ല: %1$s</string>
@@ -1045,6 +1077,7 @@
     <string name="gb_total_storage_7_500mb">3.5GB மொத்த சேமிப்பு (7 × 500MB) - ஒவ்வொரு திட்டத்தையும் உள்ளமைக்கவும் அல்லது அனைவருக்கும் ஒரே URL பயன்படுத்தவும்</string>
     <string name="gemini_api_information">ജെമിനി API വിവരം</string>
     <string name="gemini_api_key">ജെമിനി API കീ</string>
+    <string name="gemini_api_key_invalid">Gemini API കീ അസാധുവാണ് അല്ലെങ്കിൽ കാലഹരണപ്പെട്ടു. Google AI Studio-യിൽ നിന്ന് പുതിയ കീ നേടുക.</string>
     <string name="gemini_api_key_not_set">ജെമിനി API കീ സജ്ജമാക്കിയിട്ടില്ല. ക്രമീകരണങ്ങളിൽ ഇത് ക്രമീകരിക്കുക.
     </string>
     <string name="gemini_model">ജെമിനി മോഡൽ</string>
@@ -1062,6 +1095,9 @@
     <string name="generating_audio_for_entire_chapter">മുഴുവൻ അധ്യായത്തിനും ഓഡിയോ ഉണ്ടാക്കുന്നു...</string>
     <string name="generating_prompt">പ്രോംപ്റ്റ് സൃഷ്ടിക്കുന്നു...</string>
     <string name="generation_failed">സൃഷ്ടിക്കൽ പരാജയപ്പെട്ടു</string>
+    <string name="genre_name">വിഭാഗത്തിന്റെ പേര്</string>
+    <string name="genre_placeholder">ഉദാ: ഫാന്റസി, റൊമാൻസ്, ആക്ഷൻ</string>
+    <string name="genre_rule">വിഭാഗം</string>
     <string name="genre_selector">വിഭാഗം തിരഞ്ഞെടുക്കൽ</string>
     <string name="genrekind_selector">വിഭാഗം/തരം തിരഞ്ഞെടുക്കൽ</string>
     <string name="genreprogress">വിഭാഗ പുരോഗതി</string>
@@ -1178,6 +1214,8 @@
     <string name="import_from_url">URL-ൽ നിന്ന് ഇറക്കുമതി ചെയ്യുക</string>
     <string name="import_glossary">ഗ്ലോസറി ഇറക്കുമതി ചെയ്യുക</string>
     <string name="import_legado_sources">ലെഗാഡോ ഉറവിടങ്ങൾ ഇറക്കുമതി ചെയ്യുക</string>
+    <string name="import_pdf">PDF ഇറക്കുമതി ചെയ്യുക</string>
+    <string name="import_pdf_files_into_your_library">വായിക്കാനും TTS-നും വേണ്ടി PDF ഫയലുകൾ നിങ്ങളുടെ ലൈബ്രറിയിലേക്ക് ഇറക്കുമതി ചെയ്യുക.</string>
     <string name="import_sources">ഉറവിടങ്ങൾ ഇറക്കുമതി ചെയ്യുക</string>
     <string name="import_sources_from_legadoyuedu_json">Legado/Yuedu JSON ഫോർമാറ്റിൽ നിന്ന് ഉറവിടങ്ങൾ ഇറക്കുമതി ചെയ്യുക. നിങ്ങൾക്ക് JSON നേരിട്ട് പേസ്റ്റ് ചെയ്യാം, ഒരു URL നൽകാം, അല്ലെങ്കിൽ ക്ലിപ്പ്ബോർഡിൽ നിന്ന് ഇറക്കുമതി ചെയ്യാം.</string>
     <string name="import_theme">തീം ഇറക്കുമതി ചെയ്യുക</string>
@@ -1277,6 +1315,7 @@
     <string name="language_code">ഭാഷാ കോഡ്</string>
     <string name="language_filter">ഭാഷാ ഫിൽട്ടർ</string>
     <string name="language_preferences">ഭാഷാ മുൻഗണനകൾ</string>
+    <string name="language_preferences_saved">ഈ പുസ്തകത്തിനായി ഭാഷാ മുൻഗണനകൾ സംരക്ഷിച്ചു</string>
     <string name="language_translation">ഭാഷയും വിവർത്തനവും</string>
     <string name="languages">ഭാഷകൾ</string>
     <string name="large">വലുത്</string>
@@ -1483,6 +1522,7 @@
     <string name="need_help">സഹായം ആവശ്യമുണ്ടോ?</string>
     <string name="network">നെറ്റ്‌വർക്ക്</string>
     <string name="network_cache">നെറ്റ്‌വർക്ക് കാഷെ</string>
+    <string name="network_error">നെറ്റ്‌വർക്ക് പിശക്</string>
     <string name="network_settings">നെറ്റ്‌വർക്ക് ക്രമീകരണങ്ങൾ</string>
     <string name="neutral">നിഷ്പക്ഷമായ</string>
     <string name="new_chapter_notifications">പുതിയ അധ്യായ അറിയിപ്പുകൾ</string>
@@ -1524,7 +1564,9 @@
     <string name="no_badges_yet_earn_badges">ബാഡ്‌ജുകളൊന്നും ലഭ്യമല്ല. IReader NFT-കൾ സ്വന്തമാക്കുന്നതിലൂടെയോ വാങ്ങുന്നതിലൂടെയോ ബാഡ്‌ജുകൾ നേടൂ!</string>
     <string name="no_book_found_error">ഈ ഐഡിയുള്ള പുസ്തകമൊന്നുമില്ല.</string>
     <string name="no_books_in_library">ലൈബ്രറിയിൽ പുസ്തകങ്ങളൊന്നുമില്ല</string>
+    <string name="no_categories_create_one">വിഭാഗങ്ങളൊന്നും കണ്ടെത്തിയില്ല. നിങ്ങളുടെ ലൈബ്രറി ക്രമീകരിക്കാൻ ആദ്യം ഒരെണ്ണം സൃഷ്ടിക്കുക.</string>
     <string name="no_categories_found">വിഭാഗങ്ങളൊന്നും കണ്ടെത്തിയില്ല</string>
+    <string name="no_category">വിഭാഗമില്ല</string>
     <string name="no_chapter_found_error">ഈ പേരിലുള്ള അധ്യായമൊന്നുമില്ല.</string>
     <string name="no_chapter_is_available">അധ്യായമൊന്നും ലഭ്യമല്ല.</string>
     <string name="no_chapters_available">അധ്യായങ്ങളൊന്നും ലഭ്യമല്ല</string>
@@ -1577,6 +1619,7 @@
     <string name="no_reviews_for_this_chapter_yet_1">ഈ അധ്യായത്തിന് ഇതുവരെ റിവ്യൂകളൊന്നുമില്ല</string>
     <string name="no_reviews_yet">റിവ്യൂകളൊന്നും ഇതുവരെയില്ല</string>
     <string name="no_reviews_yet_be_the_first_to_review">റിവ്യൂകളൊന്നും ഇതുവരെയില്ല. ആദ്യം റിവ്യൂ ചെയ്യാൻ നിങ്ങൾക്കാകട്ടെ!</string>
+    <string name="no_rules_configured">നിയമങ്ങളൊന്നും സജ്ജീകരിച്ചിട്ടില്ല. നോവലുകൾ സ്വയമേവ വർഗ്ഗീകരിക്കാൻ ഒരു നിയമം ചേർക്കുക.</string>
     <string name="no_settings_found">ക്രമീകരണങ്ങളൊന്നും കണ്ടെത്തിയില്ല</string>
     <string name="no_sources_available">ലഭ്യമായ ഉറവിടങ്ങളില്ല</string>
     <string name="no_sources_available_for_migration">മൈഗ്രേഷനായി സോഴ്സുകളൊന്നും ലഭ്യമല്ല</string>
@@ -1588,8 +1631,10 @@
     <string name="no_usage_data_available_yet">ഉപയോഗ ഡാറ്റയൊന്നും ലഭ്യമല്ല</string>
     <string name="no_voice_models_available">വോയിസ് മോഡലുകളൊന്നും ലഭ്യമല്ല</string>
     <string name="no_voices_available">വോയിസുകളൊന്നും ലഭ്യമല്ല</string>
+    <string name="no_voices_available_for_this_language">ഈ ഭാഷയ്ക്ക് ശബ്ദങ്ങളൊന്നും ലഭ്യമല്ല.</string>
     <string name="none">ഒന്നുമില്ല</string>
     <string name="normal">സാധാരണം</string>
+    <string name="not_connected">ബന്ധിപ്പിച്ചിട്ടില്ല</string>
     <string name="not_implemented_yet">ഇതുവരെ നടപ്പിലാക്കിയിട്ടില്ല</string>
     <string name="not_installed">ഇൻസ്റ്റാൾ ചെയ്തിട്ടില്ല</string>
     <string name="not_tested">പരീക്ഷിച്ചിട്ടില്ല</string>
@@ -1627,6 +1672,15 @@
     <string name="novel_info">നോവൽ വിവരങ്ങൾ</string>
     <string name="now_try_creating_a_source">ഇപ്പോൾ നിങ്ങളുടെ പ്രിയപ്പെട്ട വെബ്സൈറ്റിനായി ഒരു ഉറവിടം സൃഷ്ടിക്കാൻ ശ്രമിക്കുക.</string>
     <string name="number_of_sources_to_search">ഒരേസമയം തിരയേണ്ട സോഴ്സുകളുടെ എണ്ണം. ഉയർന്ന മൂല്യങ്ങൾ വേഗത്തിലുള്ളതാണ്, പക്ഷേ കൂടുതൽ ഉറവിടങ്ങൾ ഉപയോഗിക്കുന്നു.</string>
+    <string name="nvidia_api_key">NVIDIA API കീ</string>
+    <string name="nvidia_api_key_invalid">NVIDIA API കീ അസാധുവാണ്. നിങ്ങളുടെ കീ build.nvidia.com എന്നതിൽ പരിശോധിക്കുക.</string>
+    <string name="nvidia_api_key_not_set">NVIDIA API കീ സജ്ജീകരിച്ചിട്ടില്ല. ക്രമീകരണങ്ങളിൽ ഇത് ക്രമീകരിക്കുക.</string>
+    <string name="nvidia_fetch_models">ലഭ്യമായ മോഡലുകൾ എടുക്കുക</string>
+    <string name="nvidia_info">Llama, Mistral, Gemma എന്നിവയുൾപ്പെടെ ഒപ്റ്റിമൈസ് ചെയ്ത AI മോഡലുകളിലേക്ക് NVIDIA NIM ആക്‌സസ് നൽകുന്നു. നിങ്ങളുടെ API കീ build.nvidia.com എന്നതിൽ നിന്ന് നേടുക.</string>
+    <string name="nvidia_insufficient_credits">NVIDIA API ക്രെഡിറ്റുകൾ അപര്യാപ്തമാണ്. build.nvidia.com എന്നതിൽ നിങ്ങളുടെ അക്കൗണ്ട് പരിശോധിക്കുക.</string>
+    <string name="nvidia_model">NVIDIA മോഡൽ</string>
+    <string name="nvidia_models_loaded">NVIDIA മോഡലുകൾ വിജയകരമായി ലോഡ് ചെയ്തു</string>
+    <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="of">ൽ</string>
     <string name="off">ഓഫ്</string>
     <string name="offline_mode">ഓഫ്‌ലൈൻ മോഡ്</string>
@@ -1658,6 +1712,7 @@
     <string name="open_location">സ്ഥലം തുറക്കുക</string>
     <string name="open_random">ക്രമരഹിതമായി തുറക്കുക</string>
     <string name="open_site">സൈറ്റ് തുറക്കുക</string>
+    <string name="open_storage_settings">സ്റ്റോറേജ് ക്രമീകരണങ്ങൾ തുറക്കുക</string>
     <string name="open_tts_manager">TTS മാനേജർ തുറക്കുക</string>
     <string name="open_tts_screen">കാണുക</string>
     <string name="open_tts_settings">TTS ക്രമീകരണങ്ങൾ തുറക്കുക</string>
@@ -1667,6 +1722,14 @@
     </string>
     <string name="openai_configuration">OpenAI കോൺഫിഗറേഷൻ</string>
     <string name="openai_quota_exceeded">Openai ക്വാട്ട കവിഞ്ഞു</string>
+    <string name="openrouter_api_key">OpenRouter API കീ</string>
+    <string name="openrouter_api_key_invalid">OpenRouter API കീ അസാധുവാണ്. നിങ്ങളുടെ കീ openrouter.ai/keys എന്നതിൽ പരിശോധിക്കുക.</string>
+    <string name="openrouter_api_key_not_set">OpenRouter API കീ സജ്ജീകരിച്ചിട്ടില്ല. ക്രമീകരണങ്ങളിൽ ഇത് ക്രമീകരിക്കുക.</string>
+    <string name="openrouter_fetch_models">ലഭ്യമായ മോഡലുകൾ എടുക്കുക</string>
+    <string name="openrouter_info">GPT-4, Claude, Llama എന്നിവയുൾപ്പെടെ നിരവധി AI മോഡലുകളിലേക്ക് OpenRouter ഏകീകൃത ആക്‌സസ് നൽകുന്നു. നിങ്ങളുടെ API കീ openrouter.ai എന്നതിൽ നിന്ന് നേടുക.</string>
+    <string name="openrouter_insufficient_credits">OpenRouter ക്രെഡിറ്റുകൾ അപര്യാപ്തമാണ്. openrouter.ai/credits എന്നതിൽ ക്രെഡിറ്റുകൾ ചേർക്കുക.</string>
+    <string name="openrouter_model">OpenRouter മോഡൽ</string>
+    <string name="openrouter_models_loaded">OpenRouter മോഡലുകൾ വിജയകരമായി ലോഡ് ചെയ്തു</string>
     <string name="optimize">ഒപ്റ്റിമൈസ് ചെയ്യുക</string>
     <string name="optimize_database">ഡാറ്റാബേസ് ഒപ്റ്റിമൈസ് ചെയ്യുക</string>
     <string name="optimizes_translation_for_specific_content">നിർദ്ദിഷ്ട ഉള്ളടക്കത്തിനായി വിവർത്തനം ഒപ്റ്റിമൈസ് ചെയ്യുന്നു</string>
@@ -1719,6 +1782,7 @@
     <string name="paste_the_theme_json_below">തീം JSON താഴെ ഒട്ടിക്കുക:</string>
     <string name="pause">താൽക്കാലികമായി നിർത്തുക</string>
     <string name="pause_all">എല്ലാം താൽക്കാലികമായി നിർത്തുക</string>
+    <string name="pause_downloads">ഡൗൺലോഡുകൾ താൽക്കാലികമായി നിർത്തുക</string>
     <string name="paused">താൽക്കാലികമായി നിർത്തിവച്ചു</string>
     <string name="payment_method">പേയ്‌മെന്റ് രീതി</string>
     <string name="pen">പേന</string>
@@ -1806,6 +1870,8 @@
     <string name="pref_relative_time_long">നീളമുള്ളത് (ചുരുക്കിയത്+, n ദിവസങ്ങൾക്ക് മുമ്പ്)</string>
     <string name="pref_relative_time_short">ചുരുക്കിയത് (ഇന്ന്, ഇന്നലെ)</string>
     <string name="prefer_saf_storage">SAF സ്റ്റോറേജ് തിരഞ്ഞെടുക്കുക</string>
+    <string name="preferred_source_language">ഇഷ്ടപ്പെട്ട ഉറവിട ഭാഷ</string>
+    <string name="preferred_target_language">ഇഷ്ടപ്പെട്ട ലക്ഷ്യ ഭാഷ</string>
     <string name="preload_next_chapter">അടുത്ത അധ്യായം മുൻകൂട്ടി ലോഡ് ചെയ്യുക</string>
     <string name="preload_only_on_wifi">വൈഫൈയിൽ മാത്രം മുൻകൂട്ടി ലോഡ് ചെയ്യുക</string>
     <string name="preload_only_on_wifi_summary">വൈഫൈ കണക്ഷനുകളിൽ മാത്രം സ്വയമേവയുള്ള പ്രീലോഡിംഗ് പരിമിതപ്പെടുത്തുക</string>
@@ -1872,6 +1938,7 @@
     <string name="query_must_not_be_empty">ചോദ്യം ശൂന്യമായിരിക്കരുത്.</string>
     <string name="queue_failed">ക്യൂ പരാജയപ്പെട്ടു</string>
     <string name="queued">ക്യൂവിൽ</string>
+    <string name="queued_count">%d ക്യൂവിലുണ്ട്</string>
     <string name="quick_add_popular_repositories">പ്രധാനപ്പെട്ട ശേഖരണശാലകൾ വേഗത്തിൽ ചേർക്കുക</string>
     <string name="quick_add_repository">ദ്രുത ശേഖരണ ശേഖരണം</string>
     <string name="quick_fill_same_url_for_all_projects">ക്വിക്ക് ഫിൽ (എല്ലാ പ്രോജക്റ്റുകൾക്കും ഒരേ URL)</string>
@@ -1935,6 +2002,7 @@
     <string name="refresh_all">എല്ലാം പുതുക്കുക</string>
     <string name="refresh_covers_too">കവറുകളും പുതുക്കുക</string>
     <string name="refresh_metrics">മെட்ரிக்സുകൾ പുതുക്കുക</string>
+    <string name="refresh_models">മോഡലുകൾ പുതുക്കുക</string>
     <string name="refreshed">പുതുക്കി</string>
     <string name="refreshing">പുതുക്കുന്നു</string>
     <string name="refreshing_1">പുതുക്കുന്നു...</string>
@@ -1949,6 +2017,7 @@
     <string name="reload">വീണ്ടും ലോഡ് ചെയ്യുക</string>
     <string name="reload_plugin_themes">പ്ലഗിൻ തീമുകൾ വീണ്ടും ലോഡ് ചെയ്യുക</string>
     <string name="remaining">ബാക്കിയുള്ളത്</string>
+    <string name="remember_my_languages">എന്റെ ഭാഷാ തിരഞ്ഞെടുപ്പുകൾ ഓർമ്മിക്കുക</string>
     <string name="remind_me_again_in">വീണ്ടും ഓർമ്മിപ്പിക്കുക:</string>
     <string name="reminder_interval">ഓർമ്മപ്പെടുത്തൽ ഇടവേള</string>
     <string name="remove">നീക്കം ചെയ്യുക</string>
@@ -2030,7 +2099,9 @@
     <string name="resume">പുനരാരംഭിക്കുക</string>
     <string name="resume_all">എല്ലാം പുനരാരംഭിക്കുക</string>
     <string name="resume_download">ഡൗൺലോഡ് പുനരാരംഭിക്കുക</string>
+    <string name="resume_downloads">ഡൗൺലോഡുകൾ പുനരാരംഭിക്കുക</string>
     <string name="retry">വീണ്ടും ശ്രമിക്കുക</string>
+    <string name="retry_all_failed">പരാജയപ്പെട്ടവയെല്ലാം വീണ്ടും ശ്രമിക്കുക</string>
     <string name="retry_failed">പരാജയപ്പെട്ടവ വീണ്ടും ശ്രമിക്കുക</string>
     <string name="retry_loading">വീണ്ടും ലോഡ് ചെയ്യാൻ ശ്രമിക്കുക</string>
     <string name="retrying_download">ഡൗൺലോഡ് വീണ്ടും ശ്രമിക്കുന്നു</string>
@@ -2050,7 +2121,10 @@
     <string name="right">വലത്</string>
     <string name="rotate_screen_automatically">സ്‌ക്രീൻ സ്വയമേവ തിരിക്കുക</string>
     <string name="rotation">റൊട്ടേഷൻ</string>
+    <string name="rule_already_exists">ഈ വിഭാഗത്തിൽ ഇതിനകം ഒരു നിയമം നിലവിലുണ്ട്.</string>
+    <string name="rule_count">%1$d നിയമം</string>
     <string name="rule_syntax_help">നിയമ വാക്യഘടന സഹായം</string>
+    <string name="rules_count">%1$d നിയമങ്ങൾ</string>
     <string name="run_health_check">ആരോഗ്യ പരിശോധന നടത്തുക</string>
     <string name="run_the_migration_community_sourcesql">ഈ ടേബിളുകൾ സൃഷ്ടിക്കാൻ നിങ്ങളുടെ Supabase SQL എഡിറ്ററിൽ migration_community_source.sql ഫയൽ പ്രവർത്തിപ്പിക്കുക.</string>
     <string name="sample_text">സാമ്പിൾ ടെക്സ്റ്റ്</string>
@@ -2061,6 +2135,7 @@
     <string name="save_custom_theme">ഇഷ്‌ടമുള്ള തീം സംരക്ഷിക്കുക</string>
     <string name="save_epub">EPUB ആയി സംരക്ഷിക്കുക</string>
     <string name="save_js_sources_extensions_backups">ലഭ്യമാണെങ്കിൽ JS ഉറവിടങ്ങൾ, വിപുലീകരണങ്ങൾ, ബാക്കപ്പുകൾ, epub-കൾ എന്നിവ SAF ഫോൾഡറിലേക്ക് സേവ് ചെയ്യുക. ലഭ്യമല്ലെങ്കിൽ കാഷെയിലേക്ക് മാറും.</string>
+    <string name="save_language_preferences">ഭാഷാ മുൻഗണനകൾ സംരക്ഷിക്കുക</string>
     <string name="save_multi_endpoint_configuration">மல்டி-எண்ட்பாயிண்ட் રૂપமைப்பு சேமிക്കുക</string>
     <string name="save_patterns">പാറ്റേണുകൾ സേവ് ചെയ്യുക</string>
     <string name="saved_local_source_location">കാഷെയിലേക്ക് ഉറവിടങ്ങൾ സംരക്ഷിച്ചു</string>
@@ -2079,6 +2154,7 @@
     <string name="search_across_all_sources">എല്ലാ ഉറവിടങ്ങളിലും തിരയുക</string>
     <string name="search_across_all_sources_1">എല്ലാ ഉറവിടങ്ങളിലും തിരയുക...</string>
     <string name="search_bar">തിരയൽ ബാർ</string>
+    <string name="search_book_manually">ലഭ്യത ഉറപ്പുവരുത്താൻ ഉറവിടത്തിൽ പുസ്തകം സ്വയം തിരഞ്ഞുനോക്കുക.</string>
     <string name="search_characters_books">കഥാപാത്രങ്ങൾ, പുസ്തകങ്ങൾ എന്നിവ തിരയുക...</string>
     <string name="search_features">സവിശേഷതകൾ തിരയുക...</string>
     <string name="search_fonts">ഫോണ്ടുകൾ തിരയുക...</string>
@@ -2125,6 +2201,7 @@
     <string name="select_backup_file">ബാക്കപ്പ് ഫയൽ തിരഞ്ഞെടുക്കുക</string>
     <string name="select_between">ഇടയിൽ തിരഞ്ഞെടുക്കുക</string>
     <string name="select_books_to_migrate">മാറ്റാനായി പുസ്തകങ്ങൾ തിരഞ്ഞെടുക്കുക</string>
+    <string name="select_categories">വിഭാഗങ്ങൾ തിരഞ്ഞെടുക്കുക</string>
     <string name="select_chapters">അധ്യായങ്ങൾ തിരഞ്ഞെടുക്കുക</string>
     <string name="select_cloud_provider">ക്ലൗഡ് ദാതാവിനെ തിരഞ്ഞെടുക്കുക</string>
     <string name="select_engine">എഞ്ചിൻ തിരഞ്ഞെടുക്കുക</string>
@@ -2140,6 +2217,7 @@
     <string name="select_model">മോഡൽ തിരഞ്ഞെടുക്കുക</string>
     <string name="select_navigation_style">നാവിഗേഷൻ രീതി തിരഞ്ഞെടുക്കുക</string>
     <string name="select_source_to_migrate_to">മാറ്റം വരുത്താനായി ഉറവിടം തിരഞ്ഞെടുക്കുക</string>
+    <string name="select_storage_folder">സ്റ്റോറേജ് ഫോൾഡർ തിരഞ്ഞെടുക്കുക</string>
     <string name="select_target_source">ലക്ഷ്യ സോഴ്സ് തിരഞ്ഞെടുക്കുക</string>
     <string name="select_the_languages_you_want">ഉള്ളടക്കം ബ്രൗസ് ചെയ്യുമ്പോഴും തിരയുമ്പോഴും കാണാൻ ആഗ്രഹിക്കുന്ന ഭാഷകൾ തിരഞ്ഞെടുക്കുക. നിങ്ങൾക്ക് ഒന്നിലധികം ഭാഷകൾ തിരഞ്ഞെടുക്കാം.</string>
     <string name="select_the_languages_you_want_1">നിങ്ങൾക്ക് സോഴ്സുകൾ ബ്രൗസ് ചെയ്യുമ്പോൾ കാണാൻ ആഗ്രഹിക്കുന്ന ഭാഷകൾ തിരഞ്ഞെടുക്കുക. ലഭ്യമായ സോഴ്സുകളുള്ള ഭാഷകൾ മാത്രമേ കാണിക്കൂ.</string>
@@ -2163,6 +2241,7 @@
     <string name="selectors_for_the_explorelatest_page">പുതിയത്/കണ്ടെത്തൽ പേജിനായുള്ള സെലക്‌ടറുകൾ (ഓപ്ഷണൽ, ഒഴിഞ്ഞുകിടക്കുകയാണെങ്കിൽ തിരയൽ നിയമങ്ങൾ ഉപയോഗിക്കുന്നു)</string>
     <string name="send_reset_email">റീസെറ്റ് ഇമെയിൽ അയയ്ക്കുക</string>
     <string name="sentence_highlighting">വാക്യങ്ങൾ ഹൈലൈറ്റ് ചെയ്യുക</string>
+    <string name="set_categories">വിഭാഗങ്ങൾ സജ്ജീകരിക്കുക</string>
     <string name="set_eth_wallet_address">ETH വാലറ്റ് വിലാസം സജ്ജമാക്കുക</string>
     <string name="set_name">പേര് നൽകുക</string>
     <string name="sets_the_tone_of_translated_text">വിവർത്തനം ചെയ്ത ടെക്സ്റ്റിന്റെ ടോൺ സജ്ജമാക്കുന്നു</string>
@@ -2265,10 +2344,14 @@
     <string name="source_browse_latest">പുതിയവ ബ്രൗസ് ചെയ്യുക</string>
     <string name="source_extension_not_installed">ഉറവിട വിപുലീകരണം ഇൻസ്റ്റാൾ ചെയ്തിട്ടില്ല</string>
     <string name="source_id">ഉറവിടം ID</string>
+    <string name="source_id_or_name">ഉറവിട ID അല്ലെങ്കിൽ പേര്</string>
     <string name="source_json">സോഴ്സ് JSON</string>
     <string name="source_name">ഉറവിടത്തിന്റെ പേര് *</string>
     <string name="source_needs_update">ഉറവിടത്തിന് അപ്ഡേറ്റ് ആവശ്യമാണ്</string>
     <string name="source_not_available">നിങ്ങളുടെ ഉപകരണത്തിൽ ഈ ഉറവിടം ലഭ്യമല്ല.</string>
+    <string name="source_not_found">ഉറവിടം കണ്ടെത്തിയില്ല</string>
+    <string name="source_placeholder">ഉദാ: 12345 അല്ലെങ്കിൽ NovelUpdates</string>
+    <string name="source_rule">ഉറവിടം</string>
     <string name="source_term">ഉറവിട പദം</string>
     <string name="source_title">ഉറവിട ശീർഷകം</string>
     <string name="source_unavailable">ഉറവിടം ലഭ്യമല്ല</string>
@@ -2295,11 +2378,16 @@
     <string name="stop">நிறுத்து</string>
     <string name="stop_playback_after">പ്ലേബാക്ക് നിർത്തുക:</string>
     <string name="storage">சேமிப்பு</string>
+    <string name="storage_access_lost">സ്റ്റോറേജ് ആക്‌സസ് നഷ്ടപ്പെട്ടു</string>
+    <string name="storage_access_lost_description">ഐറീഡറിന് സ്റ്റോറേജ് ഫോൾഡറിലേക്ക് ആക്‌സസ് ഇല്ല. ആപ്പ് ഉപയോഗിക്കുന്നത് തുടരാൻ ഒരു ഫോൾഡർ തിരഞ്ഞെടുക്കുക.</string>
+    <string name="storage_access_lost_reasons">ഫോൾഡർ ഇല്ലാതാക്കുകയോ, മാറ്റുകയോ, അല്ലെങ്കിൽ അനുമതി റദ്ദാക്കുകയോ ചെയ്തിരിക്കാം. ആപ്പ് അപ്ഡേറ്റുകൾക്ക് ശേഷമോ സിസ്റ്റം മാറ്റങ്ങൾക്ക് ശേഷമോ ഇത് സംഭവിക്കാം.</string>
+    <string name="storage_is_needed_for">ഇതിനായി സ്റ്റോറേജ് ആവശ്യമാണ്:</string>
     <string name="storage_permission_privacy_note">നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന ഫോൾഡർ മാത്രമേ IReader ആക്‌സസ് ചെയ്യുകയുള്ളൂ. നിങ്ങളുടെ മറ്റ് ഫയലുകൾ സ്വകാര്യമായും സ്പർശിക്കാതെയും നിലനിൽക്കും.</string>
     <string name="storage_permission_required_explanation">സംഭരണ അനുമതി ആവശ്യമായ വിശദീകരണം
     </string>
     <string name="storage_permission_subtitle">നിങ്ങളുടെ ഡൗൺലോഡുകൾ, എക്സ്റ്റൻഷനുകൾ, ബാക്കപ്പുകൾ എന്നിവ IReader സംഭരിക്കുന്ന ഒരു ഫോൾഡർ തിരഞ്ഞെടുക്കുക</string>
     <string name="storage_permission_title">സംഭരണ ഫോൾഡർ തിരഞ്ഞെടുക്കുക</string>
+    <string name="storage_required">സ്റ്റോറേജ് ആവശ്യമാണ്</string>
     <string name="storage_settings">സ്റ്റോറേജ് ക്രമീകരണങ്ങൾ</string>
     <string name="storage_setup">സ്റ്റോറേജ് സജ്ജീകരണം</string>
     <string name="storage_usage">സംഭരണ ഉപയോഗം</string>
@@ -2367,6 +2455,7 @@
     <string name="system_integration_multiple_engines_supported">✓ സിസ്റ്റം സംയോജനം • ✓ ഒന്നിലധികം എഞ്ചിനുകൾ പിന്തുണയ്ക്കുന്നു • ✓ ഡൗൺലോഡുകൾ ആവശ്യമില്ല</string>
     <string name="system_notifications">സിസ്റ്റവും അറിയിപ്പുകളും</string>
     <string name="system_notifications_1">സിസ്റ്റം അറിയിപ്പുകൾ</string>
+    <string name="system_settings">സിസ്റ്റം ക്രമീകരണങ്ങൾ</string>
     <string name="system_tts_settings">സിസ്റ്റം TTS ക്രമീകരണങ്ങൾ</string>
     <string name="tab_content">tab_content</string>
     <string name="tabs">ടാബുകൾ</string>
@@ -2515,14 +2604,39 @@
     <string name="translated">വിവർത്തനം ചെയ്തു</string>
     <string name="translating">വിവർത്തനം ചെയ്യുന്നു... ഇതിന് കുറച്ച് സമയമെടുത്തേക്കാം.</string>
     <string name="translation">மொழிபெயர்ப்பு</string>
+    <string name="translation_api_key_invalid">%1$s-ന്റെ API കീ അസാധുവാണ് അല്ലെങ്കിൽ കാലഹരണപ്പെട്ടു. ക്രമീകരണങ്ങൾ → വിവർത്തനം എന്നതിൽ നിങ്ങളുടെ കീ പരിശോധിക്കുക.</string>
+    <string name="translation_api_key_not_set">%1$s-ന് ഒരു API കീ ആവശ്യമാണ്. ക്രമീകരണങ്ങൾ → വിവർത്തനം എന്നതിലേക്ക് പോയി നിങ്ങളുടെ API കീ ക്രമീകരിക്കുക.</string>
+    <string name="translation_auth_required">ഈ വിവർത്തന ഫീച്ചർ ഉപയോഗിക്കുന്നതിന് നിങ്ങൾ %1$s-ലേക്ക് സൈൻ ഇൻ ചെയ്യേണ്ടതുണ്ട്.</string>
+    <string name="translation_captcha_required">%1$s-ന് സ്ഥിരീകരണം ആവശ്യമാണ്. തുടരുന്നതിന് CAPTCHA പൂർത്തിയാക്കുക.</string>
     <string name="translation_complete">വിവർത്തനം പൂർത്തിയായി.</string>
+    <string name="translation_empty_response">%1$s ഒരു ഒഴിഞ്ഞ പ്രതികരണം നൽകി. ഇത് താൽക്കാലിക പ്രശ്നമാകാം - ദയവായി വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="translation_engine">വിവർത്തന എഞ്ചിൻ</string>
+    <string name="translation_engine_not_available">%1$s ആപ്പിന്റെ ഈ പതിപ്പിൽ ലഭ്യമല്ല. മറ്റൊരു വിവർത്തന എഞ്ചിൻ ഉപയോഗിക്കുക.</string>
     <string name="translation_engines_refreshed">വിവർത്തന എഞ്ചിനുകൾ പുതുക്കി</string>
     <string name="translation_error">വിവർത്തന പിശക്</string>
+    <string name="translation_language_model_not_available">%1$s → %2$s-നായുള്ള ഭാഷാ മോഡൽ ഡൗൺലോഡ് ചെയ്തിട്ടില്ല. അത് ഡൗൺലോഡ് ചെയ്യാൻ ക്രമീകരണങ്ങൾ → വിവർത്തനം എന്നതിൽ പോകുക.</string>
+    <string name="translation_language_pair_not_supported">%1$s, %2$s-ൽ നിന്ന് %3$s-ലേക്ക് വിവർത്തനം ചെയ്യുന്നത് പിന്തുണയ്ക്കുന്നില്ല. ദയവായി വ്യത്യസ്ത ഭാഷകൾ തിരഞ്ഞെടുക്കുക.</string>
+    <string name="translation_model_not_found">%1$s-നായുള്ള AI മോഡൽ കണ്ടെത്തിയില്ല. ദയവായി നിങ്ങളുടെ ക്രമീകരണങ്ങൾ പരിശോധിക്കുക.</string>
+    <string name="translation_model_not_found_with_name">%1$s-ൽ '%2$s' മോഡൽ കണ്ടെത്തിയില്ല. ക്രമീകരണങ്ങളിൽ മറ്റൊരു മോഡൽ തിരഞ്ഞെടുക്കുക.</string>
+    <string name="translation_network_error">%1$s-ലേക്ക് കണക്ട് ചെയ്യാൻ കഴിയുന്നില്ല. ദയവായി നിങ്ങളുടെ ഇന്റർനെറ്റ് കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="translation_parse_error">%1$s-ൽ നിന്നുള്ള പ്രതികരണം മനസ്സിലാക്കാൻ കഴിഞ്ഞില്ല. സേവനത്തിന് പ്രശ്നങ്ങളുണ്ടാകാം.</string>
+    <string name="translation_plugin_error">വിവർത്തന പ്ലഗിൻ '%1$s'-ന് ഒരു പിശക് സംഭവിച്ചു. പ്ലഗിൻ ക്രമീകരണങ്ങൾ പരിശോധിക്കുക അല്ലെങ്കിൽ മറ്റൊരു എഞ്ചിൻ ശ്രമിക്കുക.</string>
     <string name="translation_plugins_extend_ireader_with">വിവർത്തന പ്ലഗിനുകൾ IReader-നെ കൂടുതൽ വിവർത്തന സേവനങ്ങളിലേക്ക് വ്യാപിപ്പിക്കുന്നു</string>
     <string name="translation_progress">വിവർത്തന പുരോഗതി</string>
+    <string name="translation_quota_exceeded">%1$s വിവർത്തന ക്വാട്ട കവിഞ്ഞു. നിങ്ങളുടെ പ്ലാനും ബില്ലിംഗും പരിശോധിക്കുക, അല്ലെങ്കിൽ പിന്നീട് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="translation_rate_limit">%1$s-ന് വളരെയധികം അഭ്യർത്ഥനകൾ ലഭിക്കുന്നുണ്ട്. ദയവായി അല്പനേരം കാത്തിരുന്ന് വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="translation_rate_limit_delay">വിവർത്തന റേറ്റ് പരിധി കാലതാമസം</string>
+    <string name="translation_rate_limit_with_retry">%1$s റേറ്റ് പരിധിയിലെത്തി. ദയവായി %2$d സെക്കൻഡ് കാത്തിരുന്ന് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="translation_same_as_original">%1$s മാറ്റങ്ങളില്ലാതെ വാചകം തിരികെ നൽകി. വിവർത്തനം പരാജയപ്പെട്ടതാകാം അല്ലെങ്കിൽ വാചകം ഇതിനകം ടാർഗെറ്റ് ഭാഷയിൽ ആയിരിക്കാം.</string>
+    <string name="translation_server_error">%1$s സെർവറിന് പ്രശ്നങ്ങളുണ്ട്. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="translation_server_error_with_code">%1$s സെർവർ പിശക് (കോഡ്: %2$d). ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="translation_settings">വിവർത്തന ക്രമീകരണങ്ങൾ</string>
+    <string name="translation_text_too_long">%1$s-ന് പ്രോസസ്സ് ചെയ്യാൻ കഴിയുന്നതിലും വലിയതാണ് ഈ വാചകം. ചെറിയ ഭാഗങ്ങൾ വിവർത്തനം ചെയ്യാൻ ശ്രമിക്കുക.</string>
+    <string name="translation_text_too_long_with_limit">%1$s-ന്റെ %2$d പ്രതീകങ്ങളുടെ പരിധി വാചകം കവിഞ്ഞു. ചെറിയ ഭാഗങ്ങൾ വിവർത്തനം ചെയ്യാൻ ശ്രമിക്കുക.</string>
+    <string name="translation_timeout">%1$s പ്രതികരിക്കാൻ കൂടുതൽ സമയമെടുത്തു. ദയവായി വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="translation_timeout_with_seconds">%1$s %2$d സെക്കൻഡിനുള്ളിൽ പ്രതികരിച്ചില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="translation_unknown_error">%1$s-ന് അപ്രതീക്ഷിതമായ ഒരു പിശക് സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="translation_unknown_error_with_details">%1$s പിശക്: %2$s</string>
     <string name="translation_warning">വിവർത്തന മുന്നറിയിപ്പ്</string>
     <string name="translations">വിവർത്തനങ്ങൾ</string>
     <string name="trending_now">ഇപ്പോൾ ട്രെൻഡിംഗ്</string>
@@ -2532,9 +2646,11 @@
     <string name="trust_level_updated">വിശ്വാസ നില അപ്‌ഡേറ്റ് ചെയ്തു</string>
     <string name="try_a_different_search_term">വ്യത്യസ്തമായ തിരയൽ പദം പരീക്ഷിക്കുക</string>
     <string name="try_again">மீண்டும் முயற்சி செய்யவும்</string>
+    <string name="try_again_later">നിങ്ങളുടെ ഡാറ്റ സംരക്ഷിക്കപ്പെട്ടിട്ടുണ്ട്. പിന്നീട് വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="try_alternative_url">மாற்று முகவரியை முயற்சிக்கவும்</string>
     <string name="try_another_search">മറ്റൊരു തിരയൽ ശ്രമിക്കുക</string>
     <string name="try_different_search">വ്യത്യസ്തമായ തിരയൽ പദം പരീക്ഷിക്കുക</string>
+    <string name="try_different_source">ഉറവിടം ലഭ്യമല്ലായിരിക്കാം. മറ്റൊരു ഉറവിടം ശ്രമിക്കുക.</string>
     <string name="try_these_fixes">ഈ തിരുത്തലുകൾ ശ്രമിക്കുക:</string>
     <string name="trying_in_few_second">കുറച്ച് നിമിഷങ്ങൾക്കുള്ളിൽ വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="trying_to_fetch">എടുക്കാൻ ശ്രമിക്കുന്നു…</string>
@@ -2597,6 +2713,7 @@
     <string name="upcoming_releases">വരാനിരിക്കുന്ന റിലീസുകൾ</string>
     <string name="update">അപ്ഡേറ്റ് ചെയ്യുക</string>
     <string name="update_all">എല്ലാം അപ്‌ഡേറ്റ് ചെയ്യുക</string>
+    <string name="update_all_books">എല്ലാ പുസ്തകങ്ങളും അപ്ഡേറ്റ് ചെയ്യുക</string>
     <string name="update_available">അപ്‌ഡേറ്റ് ലഭ്യമാണ്</string>
     <string name="update_available_1">അപ്ഡേറ്റ് ലഭ്യമാണ്</string>
     <string name="update_category">വിഭാഗം പുതുക്കുക</string>
@@ -2650,6 +2767,7 @@
     <string name="use_password">പാസ്‌വേഡ് ഉപയോഗിക്കുക</string>
     <string name="use_pin">പിൻ ഉപയോഗിക്കുക</string>
     <string name="use_pinpassword_instead">PIN/கடவுச்சொல்லுக்கு பதிலாக பயன்படுத்தவும்</string>
+    <string name="use_saved_languages">സംരക്ഷിച്ച ഭാഷകൾ ഉപയോഗിക്കുക</string>
     <string name="use_separate_supabase_projects_for">മെച്ചപ്പെട്ട അളവനുസരിച്ച് Supabase പ്രോജക്റ്റുകൾ ഉപയോഗിക്കുക</string>
     <string name="use_static_indicators_instead_of_animated_ones">ആനിമേറ്റുചെയ്‌തവയ്‌ക്ക് പകരം സ്റ്റാറ്റിക് ഇൻഡിക്കേറ്ററുകൾ ഉപയോഗിക്കുക</string>
     <string name="use_translated_text_for_text">ലഭ്യമാണെങ്കിൽ ടെക്സ്റ്റ്-ടു-സ്പീച്ചിനായി വിവർത്തനം ചെയ്ത ടെക്സ്റ്റ് ഉപയോഗിക്കുക</string>
@@ -2663,6 +2781,7 @@
     <string name="users">ഉപയോക്താക്കൾ</string>
     <string name="uuid_of_your_d1_database">നിങ്ങളുടെ D1 ഡാറ്റാബേസിന്റെ UUID</string>
     <string name="validate">സാധൂകരിക്കുക</string>
+    <string name="validation_error">സാധുതാ പിശക്</string>
     <string name="verification_details">പരിശോധന വിശദാംശങ്ങൾ</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• പരിശോധന സ്വയമേവയുള്ളതാണ്, കുറച്ച് നിമിഷങ്ങൾ എടുക്കും</string>
     <string name="verification_is_cached_for_24">പരിശോധന 24 മണിക്കൂറിനുള്ളിൽ കാഷെ ചെയ്യുന്നു. വീണ്ടും പരിശോധിക്കാൻ സാധിച്ചില്ലെങ്കിൽ ബാഡ്ജ് 7 ദിവസത്തേക്ക് സജീവമായിരിക്കും.</string>
@@ -2729,11 +2848,14 @@
     <string name="whats_new_1">പുതിയതെന്താണ്</string>
     <string name="whats_new_2">പുതിയതെന്താണ്:</string>
     <string name="while_charging">ചാർജ് ചെയ്യുമ്പോൾ</string>
+    <string name="why_did_this_happen">ഇതെന്തുകൊണ്ട് സംഭവിച്ചു?</string>
     <string name="why_donate">എന്തിനാണ് സംഭാവന ചെയ്യുന്നത്?</string>
     <string name="why_is_this_needed">ഇത് എന്തിനാണ് വേണ്ടത്?</string>
     <string name="width">വീതി</string>
     <string name="width_1">വീതി</string>
     <string name="wifi_only">വൈഫൈ മാത്രം</string>
+    <string name="wifi_only_mode">വൈഫൈ മാത്രം മോഡ്</string>
+    <string name="wifi_only_warning">ഡൗൺലോഡുകൾ താൽക്കാലികമായി നിർത്തിവച്ചു - വൈഫൈ മാത്രം മോഡ് പ്രവർത്തിപ്പിച്ചു</string>
     <string name="with_trailing_content">ട്രെയിലിംഗ് ഉള്ളടക്കത്തോടൊപ്പം</string>
     <string name="wizard">വിസാർഡ്</string>
     <string name="wizard_step">wizard_step</string>
