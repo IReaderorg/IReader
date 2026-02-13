@@ -2175,7 +2175,7 @@ private fun RenderConfigField(
                         style = MaterialTheme.typography.labelMedium
                     )
                     Text(
-                        text = config.valueFormat?.let { String.format(it, sliderValue) } ?: sliderValue.toString(),
+                        text = config.valueFormat?.let { formatValue(it, sliderValue) } ?: sliderValue.toString(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -2334,4 +2334,49 @@ private fun RenderConfigField(
             )
         }
     }
+}
+
+/**
+ * KMP-compatible value formatting function
+ * Replaces String.format() which is JVM-only
+ * 
+ * Supports common format patterns:
+ * - "%.1f" -> 1 decimal place
+ * - "%.2f" -> 2 decimal places
+ * - "%d%%" -> integer with % suffix
+ */
+private fun formatValue(format: String, value: Float): String {
+    return when {
+        // Float with decimal places: %.1f, %.2f, etc.
+        format.matches(Regex("%\\.(\\d+)f")) -> {
+            val decimals = format.substringAfter(".").substringBefore("f").toIntOrNull() ?: 1
+            val multiplier = pow(10.0, decimals)
+            val rounded = kotlin.math.round(value * multiplier) / multiplier
+            
+            // Manual decimal formatting
+            val intPart = rounded.toInt()
+            val fracPart = ((rounded - intPart) * multiplier).toInt()
+            
+            if (decimals == 0) {
+                intPart.toString()
+            } else {
+                val fracStr = fracPart.toString().padStart(decimals, '0')
+                "$intPart.$fracStr"
+            }
+        }
+        // Integer with percentage: %d%%
+        format == "%d%%" -> "${value.toInt()}%"
+        // Integer: %d
+        format == "%d" -> value.toInt().toString()
+        // Default: just show the value
+        else -> value.toString()
+    }
+}
+
+private fun pow(base: Double, exponent: Int): Double {
+    var result = 1.0
+    repeat(exponent) {
+        result *= base
+    }
+    return result
 }
