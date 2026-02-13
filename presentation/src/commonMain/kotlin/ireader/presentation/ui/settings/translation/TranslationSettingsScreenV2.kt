@@ -243,9 +243,11 @@ fun TranslationSettingsScreenV2(
                         contentType = viewModel.translatorContentType.value,
                         toneType = viewModel.translatorToneType.value,
                         preserveStyle = viewModel.translatorPreserveStyle.value,
+                        customPrompt = viewModel.translationCustomPrompt.value,
                         onContentTypeChange = { viewModel.updateTranslatorContentType(it) },
                         onToneTypeChange = { viewModel.updateTranslatorToneType(it) },
                         onPreserveStyleChange = { viewModel.updateTranslatorPreserveStyle(it) },
+                        onCustomPromptChange = { viewModel.updateTranslationCustomPrompt(it) },
                         isAiEngine = isAiEngine
                     )
                 }

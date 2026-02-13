@@ -306,13 +306,21 @@ class OpenAITranslateEngine(
             "You may adjust formatting for readability in the target language."
         }
         
+        // Get custom prompt from preferences
+        val customPrompt = readerPreferences.translationCustomPrompt().get()
+        val customInstruction = if (customPrompt.isNotBlank()) {
+            "\n\nAdditional instructions: $customPrompt"
+        } else {
+            ""
+        }
+        
         return """
             Translate the following text from $sourceLanguage to $targetLanguage:
             
             $contentTypeInstruction
             $toneInstruction
             $stylePreservation
-            $formattingPreservation
+            $formattingPreservation$customInstruction
             
             Please translate only the content and do not add any explanations or notes.
             

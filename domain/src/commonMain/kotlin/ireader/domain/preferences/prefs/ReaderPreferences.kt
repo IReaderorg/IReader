@@ -319,6 +319,11 @@ Visit.*for more chapters"""
     fun geminiModel(): Preference<String> {
         return preferenceStore.getString("gemini_model", "")
     }
+    
+    // Custom prompt to append to translation prompts for user customization
+    fun translationCustomPrompt(): Preference<String> {
+        return preferenceStore.getString("translation_custom_prompt", "")
+    }
 
     fun chapterSortType(): Preference<String> {
         return preferenceStore.getString("chapter_sort_type", "Default")

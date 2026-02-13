@@ -424,12 +424,20 @@ Do not add any explanations, notes, or commentary - only provide the translation
             "Focus on accuracy of meaning rather than preserving the exact style."
         }
         
+        // Get custom prompt from preferences
+        val customPrompt = readerPreferences.translationCustomPrompt().get()
+        val customInstruction = if (customPrompt.isNotBlank()) {
+            "\n\nAdditional instructions: $customPrompt"
+        } else {
+            ""
+        }
+        
         return """
             Translate the following text from $sourceLanguage to $targetLanguage:
             
             $contentTypeInstruction
             $toneInstruction
-            $stylePreservation
+            $stylePreservation$customInstruction
             
             IMPORTANT: Keep the ---PARAGRAPH_BREAK--- markers between paragraphs exactly as they appear.
             Do not add any explanations or notes - only provide the translation.

@@ -24,9 +24,11 @@ fun AdvancedSettingsSection(
     contentType: Int,
     toneType: Int,
     preserveStyle: Boolean,
+    customPrompt: String,
     onContentTypeChange: (Int) -> Unit,
     onToneTypeChange: (Int) -> Unit,
     onPreserveStyleChange: (Boolean) -> Unit,
+    onCustomPromptChange: (String) -> Unit,
     isAiEngine: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -129,6 +131,36 @@ fun AdvancedSettingsSection(
                 Switch(
                     checked = preserveStyle,
                     onCheckedChange = onPreserveStyleChange
+                )
+            }
+            
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+            
+            // Custom Prompt Text Field
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Custom Prompt",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Add custom instructions to append to translation prompts",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                OutlinedTextField(
+                    value = customPrompt,
+                    onValueChange = onCustomPromptChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { 
+                        Text(
+                            "e.g., Use British English spelling, Keep honorifics in Japanese",
+                            style = MaterialTheme.typography.bodySmall
+                        ) 
+                    },
+                    minLines = 2,
+                    maxLines = 4,
+                    textStyle = MaterialTheme.typography.bodyMedium
                 )
             }
         }

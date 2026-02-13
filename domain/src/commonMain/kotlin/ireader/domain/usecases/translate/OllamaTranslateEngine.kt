@@ -18,6 +18,8 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.no_text_to_translate
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import ireader.domain.data.engines.ContentType as TranslationContentType
 
 /**
@@ -238,8 +240,9 @@ class OllamaTranslateEngine(
      * @param forceRefresh Force refresh the cache
      * @return List of available models, or empty list if unavailable
      */
+    @OptIn(ExperimentalTime::class)
     suspend fun fetchAvailableModels(forceRefresh: Boolean = false): List<OllamaModelInfo> {
-        val now = System.currentTimeMillis()
+        val now = Clock.System.now().toEpochMilliseconds()
         
         // Return cached models if still valid
         if (!forceRefresh && cachedModels != null && (now - lastModelFetchTime) < modelCacheDurationMs) {
@@ -324,9 +327,18 @@ class OllamaTranslateEngine(
      */
     private fun formatSize(bytes: Long): String {
         return when {
-            bytes >= 1_073_741_824 -> "%.1f GB".format(bytes / 1_073_741_824.0)
-            bytes >= 1_048_576 -> "%.1f MB".format(bytes / 1_048_576.0)
-            bytes >= 1024 -> "%.1f KB".format(bytes / 1024.0)
+            bytes >= 1_073_741_824 -> {
+                val gb = bytes / 1_073_741_824.0
+                "${(gb * 10).toLong() / 10.0} GB"
+            }
+            bytes >= 1_048_576 -> {
+                val mb = bytes / 1_048_576.0
+                "${(mb * 10).toLong() / 10.0} MB"
+            }
+            bytes >= 1024 -> {
+                val kb = bytes / 1024.0
+                "${(kb * 10).toLong() / 10.0} KB"
+            }
             else -> "$bytes B"
         }
     }

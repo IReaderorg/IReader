@@ -279,9 +279,17 @@ class DeepSeekTranslateEngine(
         targetLanguage: String,
         context: TranslationContext
     ): String {
+        // Get custom prompt from preferences
+        val customPrompt = readerPreferences.translationCustomPrompt().get()
+        val customInstruction = if (customPrompt.isNotBlank()) {
+            " $customPrompt"
+        } else {
+            ""
+        }
+        
         // OPTIMIZED: Minimal prompt to reduce token usage and costs
         // Each token costs money, so we use the shortest effective prompt
-        return "Translate $sourceLanguage to $targetLanguage. Keep ---PARAGRAPH_BREAK--- markers. Output only translation:\n\n$text"
+        return "Translate $sourceLanguage to $targetLanguage. Keep ---PARAGRAPH_BREAK--- markers.$customInstruction Output only translation:\n\n$text"
     }
     
     /**

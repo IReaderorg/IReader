@@ -50,6 +50,7 @@ class TranslationSettingsViewModel(
     val translatorPreserveStyle = readerPreferences.translatorPreserveStyle().asState()
     val ollamaUrl = readerPreferences.ollamaServerUrl().asState()
     val ollamaModel = readerPreferences.ollamaModel().asState()
+    val translationCustomPrompt = readerPreferences.translationCustomPrompt().asState()
     
     // Community sharing preferences
     val autoShareTranslations = communityPreferences?.autoShareTranslations()?.asState() 
@@ -152,6 +153,10 @@ class TranslationSettingsViewModel(
     
     fun updateOllamaModel(value: String) {
         ollamaModel.value = value
+    }
+    
+    fun updateTranslationCustomPrompt(value: String) {
+        translationCustomPrompt.value = value
     }
     
     /**

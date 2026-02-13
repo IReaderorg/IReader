@@ -481,16 +481,25 @@ open class WebscrapingTranslateEngine(
         else 
             ""
         
+        // Get custom prompt from preferences
+        val customPrompt = readerPreferences.translationCustomPrompt().get()
+        val customInstruction = if (customPrompt.isNotBlank()) {
+            "\n$customPrompt"
+        } else {
+            ""
+        }
+        
         // OPTIMIZED: Ultra-minimal prompt for Gemini to reduce token usage
         // System instruction handles the translation context, so we only send the text
         return if (currentService == AI_SERVICE.GEMINI) {
             // Format: "SRC→TGT:\n<text>" - minimal tokens, system instruction does the rest
-            "$sourceLang→$targetLang:\n$text"
+            val customSuffix = if (customPrompt.isNotBlank()) "\n$customPrompt" else ""
+            "$sourceLang→$targetLang:$customSuffix\n$text"
         } else {
             """
             Translate the following $contentTypeStr from $sourceLang to $targetLang.
             Use a $toneStr tone.
-            $stylePreservation
+            $stylePreservation$customInstruction
             
             IMPORTANT: Return ONLY the translated text. 
             Do not include any explanations, notes, or additional text.
