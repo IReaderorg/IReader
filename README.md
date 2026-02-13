@@ -1,41 +1,70 @@
-# 📖 IReader
+# 📖 IReader - Open Source Reader App for Android & Desktop
 
 <div align="center">
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/IReaderorg/IReader)](https://github.com/IReaderorg/IReader/releases)
+[![GitHub stars](https://img.shields.io/github/stars/IReaderorg/IReader)](https://github.com/IReaderorg/IReader/stargazers)
+[![GitHub downloads](https://img.shields.io/github/downloads/IReaderorg/IReader/total)](https://github.com/IReaderorg/IReader/releases)
 
-**A free and open-source novel reader for Android and Desktop**
+**The best free and open-source reader app for novels, light novels, and web novels**
 
-[Download](https://github.com/IReaderorg/IReader/releases) • [Documentation](docs/README.md) • [Wiki](https://codewiki.google/github.com/ireaderorg/ireader) • [中文](README_zh.md)
+[Download APK](https://github.com/IReaderorg/IReader/releases) • [Website](https://ireaderorg.netlify.app) • [Documentation](docs/README.md) • [中文](README_zh.md)
 
 </div>
 
-A cross-platform novel reader with support for multiple sources through extensions and JavaScript plugins. Read your favorite web novels offline with a customizable reading experience.
+IReader is a powerful open-source reader app for Android and Desktop. Read light novels, web novels, and ebooks offline with the most customizable reading experience. No ads, no tracking, completely free forever.
 
-## ✨ Features
+**Perfect for:** Light novel readers • Web novel enthusiasts • Ebook lovers • Anyone who wants a privacy-focused reader app
 
-- 📱 Android and Desktop support
-- 📚 Multiple sources via extensions and JavaScript plugins
-- 📥 Offline reading with chapter downloads
-- 🔍 Search across multiple sources
-- 📖 Library management with categories and filters
-- 🌙 Dark mode and customizable themes
-- 🔊 AI Text-to-Speech (Desktop)
-- 📦 Import Legado/阅读 book sources
-- 🚫 No ads or tracking
+## ✨ Why IReader is the Best Reader App
 
-## 📲 Installation
+IReader is the ultimate open-source reader app for novel enthusiasts. Unlike other reader apps, IReader offers:
 
-### Android
+- 📱 **Cross-Platform** - Android and Desktop (Windows, macOS, Linux) support
+- 📚 **Multi-Source Support** - Access novels from multiple sources via extensions and JavaScript plugins
+- 📥 **Offline Reading** - Download chapters and read without internet connection
+- 🔍 **Smart Search** - Search across multiple sources simultaneously
+- 📖 **Library Management** - Organize with categories, filters, and custom collections
+- 🌙 **Customizable Themes** - Dark mode, custom themes, and full UI customization
+- 🔊 **AI Text-to-Speech** - High-quality TTS powered by Piper (Desktop)
+- 📦 **Legado Import** - Import book sources from Legado/阅读
+- 🔓 **Privacy-Focused** - No ads, no tracking, no data collection
+- ⚡ **Fast & Lightweight** - Optimized performance and battery efficiency
+
+### What Makes This Reader App Different?
+
+**100% Free & Open Source:** No hidden costs, no premium features, no subscriptions. The entire codebase is open for inspection and contribution.
+
+**Privacy First:** Unlike commercial reader apps, IReader doesn't collect your data, show ads, or track your reading habits.
+
+**Highly Customizable:** Every aspect of the reading experience can be adjusted - fonts, spacing, colors, themes, gestures, and more.
+
+**Active Development:** Regular updates, bug fixes, and new features driven by community feedback.
+
+## 📲 Download IReader
+
+### Android Reader App
 Download the latest APK from [GitHub Releases](https://github.com/IReaderorg/IReader/releases)
 
 **Requirements:** Android 7.0 or higher
 
-### Desktop
+**Why download this reader app?**
+- No Google Play restrictions
+- Always get the latest features first
+- Direct APK installation
+- No region locks
+
+### Desktop Reader App
 Download the latest release from [GitHub Releases](https://github.com/IReaderorg/IReader/releases)
 
-**Supported:** Windows, macOS, Linux
+**Supported Platforms:** Windows, macOS, Linux
+
+**Desktop Features:**
+- AI-powered Text-to-Speech
+- Larger screen optimization
+- Keyboard shortcuts
+- Multi-window support
 
 ## 🚀 Quick Start
 
@@ -105,6 +134,14 @@ Licensed under [Apache 2.0 License](LICENSE)
 - [Tachiyomi](https://github.com/tachiyomiorg/tachiyomi) – Architecture inspiration
 - [Piper TTS](https://github.com/rhasspy/piper) – Text-to-speech engine
 - All our [contributors](https://github.com/IReaderorg/IReader/graphs/contributors)
+
+---
+
+## 🔍 Keywords
+
+reader app, android reader app, open source reader app, novel reader app, light novel reader, web novel reader, ebook reader app, free reader app, offline reader app, cross-platform reader, desktop reader app, privacy reader app, customizable reader app, tachiyomi alternative, legado alternative, best reader app, novel app, book reader, reading app, android novel reader, ios reader app alternative
+
+**IReader** - The open-source reader app that respects your privacy and gives you complete control over your reading experience.
 
 ## Screenshots
 
