@@ -1196,14 +1196,15 @@ class ReaderScreenViewModel(
             Log.debug { "preloadChapter: [START] Preloading chapter ${chapter.id} '${chapter.name}' from remote" }
             updateSuccessState { it.copy(isPreloading = true) }
 
-            preloadChapterUseCase(chapter, currentState.catalog,
+            // Use FetchAndSaveChapterContentUseCase for thread-safe preloading
+            // This prevents race conditions with concurrent fetch operations
+            remoteUseCases.fetchAndSaveChapterContent(
+                chapter = chapter,
+                catalog = currentState.catalog,
                 onSuccess = { preloadedChapter ->
                     preloadedChapters[chapter.id] = preloadedChapter
-                    scope.launch { 
-                        insertUseCases.insertChapter(preloadedChapter)
-                        // Enhanced logging: confirm preloaded chapter saved to DB (Req 3.3)
-                        Log.debug { "preloadChapter: [SAVED] Preloaded chapter ${chapter.id} '${chapter.name}' saved to DB with ${preloadedChapter.content.size} pages" }
-                    }
+                    // Enhanced logging: confirm preloaded chapter saved to DB (Req 3.3)
+                    Log.debug { "preloadChapter: [SAVED] Preloaded chapter ${chapter.id} '${chapter.name}' saved to DB with ${preloadedChapter.content.size} pages" }
                     updateSuccessState { it.copy(isPreloading = false) }
                 },
                 onError = { error ->

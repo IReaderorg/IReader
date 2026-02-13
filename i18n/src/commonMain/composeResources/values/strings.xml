@@ -2915,4 +2915,8 @@
     <string name="always_ask">Always ask</string>
     <string name="no_category">No category</string>
     <string name="added_to_category">Added to %s</string>
+    
+    <!-- Color Customization Strings (Additional) -->
+    <string name="custom_background_color">Customize background color for reader</string>
+    <string name="custom_text_color">Customize text color for reader</string>
 </resources>

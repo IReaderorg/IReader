@@ -40,6 +40,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.models.prefs.PreferenceValues
@@ -48,12 +50,15 @@ import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.component.components.ColorPickerDialog
 import ireader.i18n.localize
 import ireader.i18n.resources.*
 import ireader.i18n.resources.alignment
 import ireader.i18n.resources.auto_translate_next_chapter
 import ireader.i18n.resources.auto_translate_next_chapter_summary
 import ireader.i18n.resources.autoscroll
+import ireader.i18n.resources.background_color
 import ireader.i18n.resources.background_webview_mode
 import ireader.i18n.resources.bilingual_layout
 import ireader.i18n.resources.bionic_reading
@@ -62,7 +67,10 @@ import ireader.i18n.resources.bypass_bot_detection_invisibly_without
 import ireader.i18n.resources.colors
 import ireader.i18n.resources.content_padding
 import ireader.i18n.resources.continues
+import ireader.i18n.resources.custom
+import ireader.i18n.resources.custom_background_color
 import ireader.i18n.resources.custom_brightness
+import ireader.i18n.resources.custom_text_color
 import ireader.i18n.resources.default_reading_mode_for_new_books
 import ireader.i18n.resources.delete_custom_theme
 import ireader.i18n.resources.disable
@@ -90,6 +98,8 @@ import ireader.i18n.resources.paragraph_distance
 import ireader.i18n.resources.paragraph_indent
 import ireader.i18n.resources.paragraph_translation_menu
 import ireader.i18n.resources.partial
+import ireader.i18n.resources.presents
+import ireader.i18n.resources.preview
 import ireader.i18n.resources.reader
 import ireader.i18n.resources.reading_mode
 import ireader.i18n.resources.right
@@ -98,6 +108,7 @@ import ireader.i18n.resources.screen_always_on
 import ireader.i18n.resources.scrollIndicator
 import ireader.i18n.resources.scroll_mode
 import ireader.i18n.resources.scrollbar_mode
+import ireader.i18n.resources.select
 import ireader.i18n.resources.selectable_mode
 import ireader.i18n.resources.show_reading_time
 import ireader.i18n.resources.show_scrollbar
@@ -108,6 +119,7 @@ import ireader.i18n.resources.text_align_center
 import ireader.i18n.resources.text_align_justify
 import ireader.i18n.resources.text_align_left
 import ireader.i18n.resources.text_align_right
+import ireader.i18n.resources.text_color_1
 import ireader.i18n.resources.theme_was_deleted
 import ireader.i18n.resources.theme_was_saved
 import ireader.i18n.resources.top
@@ -810,6 +822,9 @@ fun ColorScreenTab(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
+    var showBackgroundColorPicker by remember { mutableStateOf(false) }
+    var showTextColorPicker by remember { mutableStateOf(false) }
+    
     LazyColumn(
         modifier = androidx.compose.ui.Modifier
             .fillMaxSize()
@@ -845,8 +860,38 @@ fun ColorScreenTab(
                 )
             }.Build()
         }
-        // Note: Background and text color preferences removed as they don't exist in the current ViewModel
-        // These would need to be added to ReaderPreferences if color customization is needed
+        
+        // Custom Background Color Picker
+        item {
+            Components.Dynamic {
+                Spacer(modifier = Modifier.height(8.dp))
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                PreferenceRow(
+                    title = localizeHelper.localize(Res.string.background_color),
+                    subtitle = localizeHelper.localize(Res.string.custom_background_color),
+                    onClick = {
+                        showBackgroundColorPicker = true
+                    }
+                )
+            }.Build()
+        }
+        
+        // Custom Text Color Picker
+        item {
+            Components.Dynamic {
+                PreferenceRow(
+                    title = localizeHelper.localize(Res.string.text_color_1),
+                    subtitle = localizeHelper.localize(Res.string.custom_text_color),
+                    onClick = {
+                        showTextColorPicker = true
+                    }
+                )
+            }.Build()
+        }
+        
         item {
             Components.Dynamic {
                 Row(
@@ -883,12 +928,37 @@ fun ColorScreenTab(
                 }
             }.Build()
         }
-        // Note: Scrollbar color preferences removed as they don't exist in the current ViewModel
-        // These would need to be added to ReaderPreferences if scrollbar color customization is needed
         item {
             Components.Space.Build()
         }
-
+    }
+    
+    // Background Color Picker Dialog
+    if (showBackgroundColorPicker) {
+        ColorPickerDialog(
+            title = { Text(localizeHelper.localize(Res.string.background_color)) },
+            onDismissRequest = { showBackgroundColorPicker = false },
+            onSelected = { color ->
+                vm.settingsViewModel.setReaderBackgroundColor(color)
+                vm.readerThemeSavable = true
+                showBackgroundColorPicker = false
+            },
+            initialColor = vm.backgroundColor.value.toComposeColor(),
+        )
+    }
+    
+    // Text Color Picker Dialog
+    if (showTextColorPicker) {
+        ColorPickerDialog(
+            title = { Text(localizeHelper.localize(Res.string.text_color_1)) },
+            onDismissRequest = { showTextColorPicker = false },
+            onSelected = { color ->
+                vm.settingsViewModel.setReaderTextColor(color)
+                vm.readerThemeSavable = true
+                showTextColorPicker = false
+            },
+            initialColor = vm.textColor.value.toComposeColor(),
+        )
     }
 }
 
