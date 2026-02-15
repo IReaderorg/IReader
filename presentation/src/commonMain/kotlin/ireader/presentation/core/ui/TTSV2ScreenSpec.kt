@@ -613,9 +613,10 @@ class TTSV2ScreenSpec(
             }
         }
         
-        // Auto-scroll to current paragraph
-        LaunchedEffect(currentParagraph, isPlaying) {
-            if (isPlaying && state.paragraphs.isNotEmpty() && currentParagraph < state.paragraphs.size) {
+        // Auto-scroll to current paragraph (top of screen)
+        // Triggers on both playback progression AND paragraph tap
+        LaunchedEffect(currentParagraph) {
+            if (state.paragraphs.isNotEmpty() && currentParagraph < state.paragraphs.size) {
                 delay(100)
                 try {
                     lazyListState.animateScrollToItem(currentParagraph)
