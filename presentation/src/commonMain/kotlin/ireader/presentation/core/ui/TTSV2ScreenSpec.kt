@@ -1309,6 +1309,7 @@ class TTSV2ScreenSpec(
                             sleepModeEnabled = sleepModeEnabled,
                             sleepTimeMinutes = sleepTimeMinutes,
                             speechSpeed = state.speed,
+                            speechPitch = state.pitch,
                             autoNextChapter = state.autoNextChapter,
                             useGradioTTS = useGradioTTS,
                             currentEngineName = when (state.engineType) {
@@ -1361,6 +1362,7 @@ class TTSV2ScreenSpec(
                                 }
                             },
                             onSpeedChange = { viewModel.adapter.setSpeed(it) },
+                            onPitchChange = { viewModel.adapter.setPitch(it) },
                             onAutoNextChange = { enabled -> viewModel.adapter.setAutoNextChapter(enabled) },
                             onCoquiTTSChange = { enabled ->
                                 if (enabled && !isGradioConfigured) {

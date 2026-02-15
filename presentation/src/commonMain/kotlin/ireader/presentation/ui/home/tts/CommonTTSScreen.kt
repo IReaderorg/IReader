@@ -1723,6 +1723,7 @@ fun TTSSettingsPanelCommon(
     sleepModeEnabled: Boolean,
     sleepTimeMinutes: Int,
     speechSpeed: Float,
+    speechPitch: Float = 1.0f,
     autoNextChapter: Boolean,
     useGradioTTS: Boolean = false,
     currentEngineName: String = "System TTS",
@@ -1742,6 +1743,7 @@ fun TTSSettingsPanelCommon(
     onSleepModeChange: (Boolean) -> Unit,
     onSleepTimeChange: (Int) -> Unit,
     onSpeedChange: (Float) -> Unit,
+    onPitchChange: (Float) -> Unit = {},
     onAutoNextChange: (Boolean) -> Unit,
     onCoquiTTSChange: (Boolean) -> Unit = {},
     onReadTranslatedTextChange: (Boolean) -> Unit = {},
@@ -1876,6 +1878,17 @@ fun TTSSettingsPanelCommon(
                     Slider(
                         value = speechSpeed,
                         onValueChange = onSpeedChange,
+                        valueRange = 0.5f..2.0f,
+                        steps = 14,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                
+                // Pitch Control
+                SettingSectionCommon(title = "Speech Pitch: ${ireader.presentation.ui.core.utils.formatMultiplier(speechPitch)}") {
+                    Slider(
+                        value = speechPitch,
+                        onValueChange = onPitchChange,
                         valueRange = 0.5f..2.0f,
                         steps = 14,
                         modifier = Modifier.fillMaxWidth()
