@@ -162,6 +162,56 @@ abstract class TranslateEngine {
         const val GEMINI = 8L
         const val OPENROUTER = 9L
         
+        /** The paragraph break marker used in translation prompts */
+        const val PARAGRAPH_BREAK_MARKER = "---PARAGRAPH_BREAK---"
+        
+        /**
+         * Sanitize translated text by removing any leftover PARAGRAPH_BREAK markers.
+         * 
+         * When AI models aren't smart enough, they may output the literal marker text
+         * instead of using it as a proper separator. This method cleans up any
+         * remaining markers from individual translated paragraphs.
+         * 
+         * This handles variations like:
+         * - "---PARAGRAPH_BREAK---" (exact marker)
+         * - "--- PARAGRAPH_BREAK ---" (with spaces)
+         * - "---paragraph_break---" (case variations)
+         * - Lines that are just the marker with surrounding whitespace/newlines
+         */
+        fun sanitizeParagraphBreakMarkers(text: String): String {
+            if (!text.contains("PARAGRAPH_BREAK", ignoreCase = true)) return text
+            
+            // Remove the marker pattern (case-insensitive, with optional surrounding dashes/spaces)
+            val sanitized = text
+                .replace(Regex("""\n?-{2,}\s*PARAGRAPH_BREAK\s*-{2,}\n?""", RegexOption.IGNORE_CASE), "\n")
+                .replace(Regex("""\r?\n?-{2,}\s*PARAGRAPH_BREAK\s*-{2,}\r?\n?""", RegexOption.IGNORE_CASE), "\n")
+                .trim()
+            
+            return sanitized
+        }
+        
+        /**
+         * Sanitize a list of translated paragraphs by removing any leftover PARAGRAPH_BREAK markers
+         * from each paragraph, and splitting any paragraph that still contains markers into
+         * separate paragraphs.
+         * 
+         * @param paragraphs The translated paragraphs to sanitize
+         * @return Sanitized list of paragraphs with no marker text remaining
+         */
+        fun sanitizeTranslatedParagraphs(paragraphs: List<String>): List<String> {
+            return paragraphs.flatMap { paragraph ->
+                if (paragraph.contains("PARAGRAPH_BREAK", ignoreCase = true)) {
+                    // The paragraph still contains markers - split by them first, then clean
+                    paragraph
+                        .split(Regex("""-{2,}\s*PARAGRAPH_BREAK\s*-{2,}""", RegexOption.IGNORE_CASE))
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                } else {
+                    listOf(paragraph)
+                }
+            }
+        }
+        
         // Add new engines to the values() method
         fun values(): Array<Long> {
             return arrayOf(BUILT_IN, GOOGLE, BING, OPENAI, DEEPSEEK, OLLAMA, WEBSCRAPING, DEEPSEEK_WEBVIEW, GEMINI, OPENROUTER)

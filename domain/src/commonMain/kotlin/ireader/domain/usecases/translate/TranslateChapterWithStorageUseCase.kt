@@ -6,6 +6,7 @@ import ireader.core.source.model.Text
 import ireader.domain.community.cloudflare.AutoShareTranslationUseCase
 import ireader.domain.data.engines.ContentType
 import ireader.domain.data.engines.ToneType
+import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.TranslatedChapter
@@ -129,11 +130,13 @@ class TranslateChapterWithStorageUseCase(
                     onProgress(progress.coerceIn(0, 100))
                 },
                 onSuccess = { translatedTexts ->
+                    // Sanitize: remove leftover PARAGRAPH_BREAK markers from dumb AI models
+                    val sanitizedTexts = TranslateEngine.sanitizeTranslatedParagraphs(translatedTexts)
                     // Handle success in the same coroutine scope
                     scope.launch {
                         handleTranslationSuccess(
                             chapter = chapter,
-                            translatedTexts = translatedTexts,
+                            translatedTexts = sanitizedTexts,
                             sourceLanguage = sourceLanguage,
                             targetLanguage = targetLanguage,
                             engineId = engineId,
@@ -164,6 +167,8 @@ class TranslateChapterWithStorageUseCase(
             Log.info { "TranslateChapterWithStorageUseCase: handleTranslationSuccess called for chapter ${chapter.id}" }
             Log.info { "TranslateChapterWithStorageUseCase: translatedTexts size: ${translatedTexts.size}" }
             
+            // Sanitize: ensure no PARAGRAPH_BREAK markers leaked into the final text
+            val cleanedTexts = translatedTexts.map { TranslateEngine.sanitizeParagraphBreakMarkers(it) }
             // Glossary was already applied before translation
             // Reconstruct pages with translated text
             val translatedPages = mutableListOf<Page>()
@@ -172,8 +177,8 @@ class TranslateChapterWithStorageUseCase(
             chapter.content.forEach { page ->
                 when (page) {
                     is Text -> {
-                        if (textIndex < translatedTexts.size) {
-                            translatedPages.add(Text(translatedTexts[textIndex]))
+                        if (textIndex < cleanedTexts.size) {
+                            translatedPages.add(Text(cleanedTexts[textIndex]))
                             textIndex++
                         } else {
                             translatedPages.add(page)

@@ -6,6 +6,7 @@ import ireader.core.source.LocalSource
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
 import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.toChapterInfo
@@ -591,7 +592,9 @@ class TranslationServiceImpl(
             
             when (retryResult) {
                 is TranslationRetryHandler.RetryResult.Success -> {
-                    val chunkResult = retryResult.value
+                    // Sanitize: remove leftover PARAGRAPH_BREAK markers from dumb AI models
+                    val chunkResult = TranslateEngine.sanitizeTranslatedParagraphs(retryResult.value)
+                        .map { TranslateEngine.sanitizeParagraphBreakMarkers(it) }
                     result.addAll(chunkResult)
                     translatedParagraphCount += chunk.size
                     // Reset consecutive failures on success
