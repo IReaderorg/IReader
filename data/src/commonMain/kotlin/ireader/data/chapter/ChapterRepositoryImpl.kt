@@ -97,7 +97,8 @@ class ChapterRepositoryImpl(
     override suspend fun insertChapter(chapter: Chapter): Long {
         // Invalidate cache BEFORE the insert to prevent stale reads during insert
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
-        
+        // I have do this because somehow somewhere is race conditional and cause empty chapter be replaced
+        if (chapter.content.isEmpty()) return -1
         val result = handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),

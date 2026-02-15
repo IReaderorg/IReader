@@ -105,6 +105,19 @@ class ReaderScreenViewModel(
     val statisticsViewModel: ReaderStatisticsViewModel,
 ) : BaseViewModel() {
     
+    companion object {
+        /** Delay (ms) after a remote fetch completes before notifying ChapterController.
+         *  This ensures the DB insert is fully committed so ChapterController's loadChapter
+         *  finds content and doesn't try to re-fetch from remote. */
+        private const val FETCH_TO_CONTROLLER_DELAY_MS = 300L
+        
+        /** Delay (ms) before starting preload of the next chapter after the current
+         *  chapter's remote fetch completes. This prevents two remote fetches from
+         *  hitting the source server simultaneously. */
+        private const val PRELOAD_AFTER_FETCH_DELAY_MS = 500L
+    }
+
+    
     // Convenience accessors for aggregate use cases (backward compatibility)
     val getBookUseCases get() = readerUseCasesAggregate.getBookUseCases
     val getChapterUseCase get() = readerUseCasesAggregate.getChapterUseCase
@@ -925,27 +938,37 @@ class ReaderScreenViewModel(
         // Fetch remote content if needed
         val needsRemoteFetch = chapter.isEmpty() && catalog?.source != null
         if (needsRemoteFetch && !force) {
-            // Fetch content asynchronously
-            // The FetchAndSaveChapterContentUseCase already saves to DB before calling onSuccess
+            // Fetch content asynchronously via the Reader's own fetch path.
+            // IMPORTANT: Do NOT also dispatch ChapterCommand.LoadChapter before this completes,
+            // because ChapterController.loadChapter() would also try to fetch from remote
+            // and call insertChapter(), causing a race condition.
             fetchRemoteChapter(book, catalog, chapter)
         } else if (!needsRemoteFetch) {
+            // Chapter already has content - safe to notify ChapterController immediately
+            // since it won't try to fetch from remote when content is present.
+            chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
             // Check chapter health
             checkChapterHealth(chapter)
         }
 
         // Update last read time
         getChapterUseCase.updateLastReadTime(chapter)
-        
-        // Notify ChapterController about the chapter load (this triggers ChapterNotifier)
-        chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
 
         // Track chapter open (pass isLast to track book completion when last chapter is finished)
         val isLastChapter = effectiveIndex != -1 && effectiveIndex == effectiveChapters.lastIndex
         statisticsViewModel.onChapterOpened(chapter, isLastChapter)
 
-        // Trigger preload - the current chapter save happens inside FetchAndSaveChapterContentUseCase
-        // which saves to DB before calling onSuccess, so preload timing is less critical now
-        triggerPreloadNextChapter()
+        // Trigger preload with a delay to ensure the current chapter's DB insert
+        // (from fetchRemoteChapter) completes first, avoiding insert conflicts.
+        // NOTE: We only use the Reader's own preload path (preloadChapter via fetchAndSaveChapterContent),
+        // NOT ChapterController.PreloadNextChapter, to avoid duplicate remote fetches.
+        if (!needsRemoteFetch) {
+            // Chapter already loaded from DB, safe to preload immediately
+            triggerPreloadNextChapter()
+        } else {
+            // Chapter is being fetched from remote - preload will be triggered
+            // after fetchRemoteChapter completes (in the onSuccess callback)
+        }
 
         // Load translation if available
         loadTranslationForChapter(chapterId)
@@ -968,6 +991,10 @@ class ReaderScreenViewModel(
      * Fetch chapter content from remote (async).
      * The FetchAndSaveChapterContentUseCase saves to DB before calling onSuccess,
      * ensuring the chapter is persisted.
+     * 
+     * After fetch completes successfully:
+     * 1. Notifies ChapterController (safe now since content is present, no re-fetch)
+     * 2. Triggers preload of next chapter (with delay to avoid DB conflicts)
      */
     private suspend fun fetchRemoteChapter(book: Book, catalog: CatalogLocal?, chapter: Chapter) {
         remoteUseCases.fetchAndSaveChapterContent(
@@ -995,10 +1022,20 @@ class ReaderScreenViewModel(
                     )
                 )
                 
+                // NOW it's safe to notify ChapterController - the chapter has content,
+                // so ChapterController.loadChapter() will skip remote fetch.
+                // Add a small delay to ensure the DB insert has fully committed.
+                delay(FETCH_TO_CONTROLLER_DELAY_MS)
+                chapterController.dispatch(ChapterCommand.LoadChapter(filteredChapter.id))
+                
                 // Check chapter health after content loads
                 if (filteredChapter.content.isNotEmpty()) {
                     checkChapterHealth(filteredChapter)
                 }
+                
+                // Trigger preload of next chapter now that current fetch is done.
+                // This staggering prevents the preload from racing with the current fetch.
+                triggerPreloadNextChapter()
             },
             onError = { message ->
                 updateSuccessState { it.copy(isLoadingContent = false) }
@@ -1131,8 +1168,8 @@ class ReaderScreenViewModel(
 
     /**
      * Load chapter (public API for backward compatibility).
-     * Also dispatches to ChapterController for state synchronization.
-     * Requirements: 9.2, 9.4, 9.5
+     * ChapterController is notified by loadChapter() at the right time
+     * (after remote fetch completes, if needed) to avoid race conditions.
      */
     suspend fun getLocalChapter(
         chapterId: Long?,
@@ -1143,13 +1180,15 @@ class ReaderScreenViewModel(
 
         val currentState = _state.value
         return if (currentState is ReaderState.Success) {
-            // Dispatch to ChapterController for state sync (Requirements: 9.2, 9.4, 9.5)
-            chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
+            // NOTE: Do NOT dispatch to ChapterController here.
+            // loadChapter() handles ChapterController notification at the right time
+            // (after content is available) to prevent race conditions.
             loadChapter(currentState.book, currentState.catalog, chapterId, next, force)
         } else {
             null
         }
     }
+
 
     // ==================== Chapter Shell Management ====================
 
@@ -1171,10 +1210,16 @@ class ReaderScreenViewModel(
         preloadJob?.cancel()
         preloadJob = scope.launch {
             try {
-                // Use ChapterController for preloading (Requirements: 9.2, 9.4, 9.5)
-                chapterController.dispatch(ChapterCommand.PreloadNextChapter)
+                // Add a small delay to avoid racing with any in-progress DB operations
+                // from the current chapter's fetch/insert cycle
+                delay(PRELOAD_AFTER_FETCH_DELAY_MS)
                 
-                // Also preload locally for faster access
+                // NOTE: We intentionally do NOT dispatch ChapterCommand.PreloadNextChapter here.
+                // ChapterController.preloadNextChapter() uses loadChapterContentUseCase which
+                // calls chapterRepository.insertChapter() independently. This would race with
+                // our own preloadChapter() which uses fetchAndSaveChapterContent() (also inserts).
+                // Using only one path prevents duplicate remote fetches and DB insert conflicts.
+                
                 val next = getNextChapter()
                 if (next != null && !preloadedChapters.containsKey(next.id)) {
                     preloadChapter(next)
@@ -1184,6 +1229,7 @@ class ReaderScreenViewModel(
             }
         }
     }
+
 
     private suspend fun preloadChapter(chapter: Chapter) {
         val currentState = _state.value

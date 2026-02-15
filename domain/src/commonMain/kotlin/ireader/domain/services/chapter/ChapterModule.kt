@@ -68,6 +68,17 @@ val chapterModule = module {
         )
     }
     
+    // ========== ChapterOperationQueue ==========
+    
+    /**
+     * ChapterOperationQueue - Global queue that serializes chapter remote fetch
+     * and DB insert operations to prevent race conditions.
+     * 
+     * Registered as SINGLETON so all screens (Reader, TTS, etc.) share the same
+     * queue, preventing cross-screen race conditions.
+     */
+    single { ChapterOperationQueue() }
+    
     // ========== ChapterController ==========
     
     /**
@@ -91,4 +102,5 @@ val chapterModule = module {
             chapterNotifier = get()
         )
     }
+
 }
