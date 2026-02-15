@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
@@ -343,6 +344,21 @@ class TTSV2ScreenSpec(
         
         val lazyListState = rememberLazyListState()
         
+        // Page mode state
+        var pageMode by remember { mutableStateOf(false) }
+        
+        // Compute page count for pager: use chunk count when chunk mode is active, else paragraph count
+        val chunkModeActive = state.chunkModeEnabled && state.totalChunks > 0
+        val pageCount = if (chunkModeActive) state.totalChunks else state.paragraphs.size
+        val currentPageIndex = if (chunkModeActive) state.currentChunkIndex else currentParagraph
+        
+        val pagerState = if (pageMode && pageCount > 0) {
+            rememberPagerState(
+                initialPage = currentPageIndex.coerceIn(0, pageCount - 1),
+                pageCount = { pageCount }
+            )
+        } else null
+        
         // Collect sleep timer state
         val sleepTimerState by viewModel.sleepTimerState?.collectAsState()
             ?: remember { mutableStateOf(null) }
@@ -613,15 +629,30 @@ class TTSV2ScreenSpec(
             }
         }
         
-        // Auto-scroll to current paragraph (top of screen)
+        // Auto-scroll to current paragraph/chunk (top of screen)
         // Triggers on both playback progression AND paragraph tap
-        LaunchedEffect(currentParagraph) {
+        LaunchedEffect(currentParagraph, state.currentChunkIndex) {
             if (state.paragraphs.isNotEmpty() && currentParagraph < state.paragraphs.size) {
                 delay(100)
-                try {
-                    lazyListState.animateScrollToItem(currentParagraph)
-                } catch (e: Exception) {
-                    lazyListState.scrollToItem(currentParagraph)
+                if (pageMode && pagerState != null) {
+                    // Page mode: animate pager to current page
+                    val targetPage = if (chunkModeActive) {
+                        state.currentChunkIndex.coerceIn(0, pagerState.pageCount - 1)
+                    } else {
+                        currentParagraph.coerceIn(0, pagerState.pageCount - 1)
+                    }
+                    try {
+                        pagerState.animateScrollToPage(targetPage)
+                    } catch (e: Exception) {
+                        try { pagerState.scrollToPage(targetPage) } catch (_: Exception) {}
+                    }
+                } else {
+                    // Scroll mode: scroll list to current paragraph
+                    try {
+                        lazyListState.animateScrollToItem(currentParagraph)
+                    } catch (e: Exception) {
+                        lazyListState.scrollToItem(currentParagraph)
+                    }
                 }
             }
         }
@@ -882,6 +913,7 @@ class TTSV2ScreenSpec(
                     isMergingEnabled = state.chunkModeEnabled,
                     currentMergedChunkIndex = state.currentChunkIndex,
                     totalMergedChunks = state.totalChunks,
+                    allChunksParagraphIndices = state.allChunksParagraphIndices,
                     usingCachedAudio = state.isUsingCachedAudio
                 )
             }
@@ -1262,6 +1294,8 @@ class TTSV2ScreenSpec(
                             fontSize = fontSize,
                             textAlignment = textAlignment,
                             isTabletOrDesktop = isTabletOrDesktop,
+                            pageMode = pageMode,
+                            pagerState = pagerState,
                             modifier = Modifier.fillMaxSize()
                         )
                         
@@ -1409,6 +1443,8 @@ class TTSV2ScreenSpec(
                                 viewModel.adapter.setSentenceHighlight(enabled)
                                 scope.launch { readerPreferences.ttsSentenceHighlight().set(enabled) }
                             },
+                            pageMode = pageMode,
+                            onPageModeChange = { enabled -> pageMode = enabled },
                             // Content filter settings
                             contentFilterEnabled = contentFilterEnabled,
                             contentFilterPatterns = contentFilterPatterns,

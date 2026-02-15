@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -71,6 +74,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -423,6 +428,8 @@ data class CommonTTSScreenState(
     val isMergingEnabled: Boolean = false,
     val currentMergedChunkIndex: Int = 0,  // Current chunk index (0-based)
     val totalMergedChunks: Int = 0,  // Total number of merged chunks
+    // All chunks' paragraph indices - used by page mode to show one page per chunk
+    val allChunksParagraphIndices: List<List<Int>> = emptyList(),
     // Chunk generation progress (for showing progress when generating audio in chunk mode)
     val isGeneratingChunkAudio: Boolean = false,
     val chunkGenerationCurrentChunk: Int = 0,
@@ -497,6 +504,8 @@ fun TTSContentDisplay(
     paragraphDistance: Int = 8,
     fontWeight: Int = 400,
     isTabletOrDesktop: Boolean = false,
+    pageMode: Boolean = false,
+    pagerState: PagerState? = null,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -674,6 +683,126 @@ fun TTSContentDisplay(
                         color = textColor.copy(alpha = 0.6f),
                         style = MaterialTheme.typography.bodyLarge
                     )
+                }
+            }
+        } else if (pageMode && pagerState != null) {
+            // Page mode - one page per chunk (or per paragraph if chunk mode disabled)
+            // When chunk mode is enabled, each page shows all paragraphs in that chunk
+            val useChunkPages = state.isMergingEnabled && state.allChunksParagraphIndices.isNotEmpty()
+            
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                beyondViewportPageCount = 1
+            ) { pageIndex ->
+                if (useChunkPages) {
+                    // Chunk-based page mode: show all paragraphs of this chunk on one page
+                    val chunkParagraphIndices = state.allChunksParagraphIndices.getOrElse(pageIndex) { emptyList() }
+                    val isCurrentChunk = pageIndex == state.currentMergedChunkIndex
+                    
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                        verticalArrangement = Arrangement.spacedBy(paragraphDistanceDp)
+                    ) {
+                        items(
+                            count = chunkParagraphIndices.size,
+                            key = { chunkParagraphIndices[it] }
+                        ) { localIndex ->
+                            val paragraphIndex = chunkParagraphIndices[localIndex]
+                            val isCurrentParagraph = paragraphIndex == state.currentReadingParagraph
+                            val shouldHighlight = isCurrentChunk
+                            
+                            TTSParagraphItemWithSentenceHighlight(
+                                index = paragraphIndex,
+                                text = displayContent.getOrElse(paragraphIndex) { "" },
+                                originalText = state.content.getOrNull(paragraphIndex) ?: "",
+                                translatedText = state.translatedContent?.getOrNull(paragraphIndex),
+                                isCurrentParagraph = shouldHighlight,
+                                isPlaying = state.isPlaying,
+                                currentSentenceIndex = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
+                                    currentSentenceIndex.coerceAtLeast(0) else 0,
+                                sentences = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
+                                    currentSentences else emptyList(),
+                                isBilingualMode = state.bilingualMode,
+                                hasTranslation = hasTranslation,
+                                showCacheIndicator = false,
+                                isCached = false,
+                                isLoadingCache = false,
+                                isInPlayingChunk = false,
+                                textColor = textColor,
+                                highlightColor = highlightColor,
+                                fontSize = fontSizeSp,
+                                smallerFontSize = smallerFontSizeSp,
+                                lineHeight = lineHeightSp,
+                                textAlignment = textAlignment,
+                                paragraphIndent = paragraphIndentDp,
+                                fontWeight = fontWeight,
+                                onParagraphClick = onParagraphClick
+                            )
+                        }
+                    }
+                } else {
+                    // Non-chunk page mode: one paragraph per page
+                    val index = pageIndex
+                    val isCurrentParagraph = index == state.currentReadingParagraph
+                    val isInMergedChunk = state.isParagraphInCurrentMergedChunk(index)
+                    val shouldHighlight = if (state.isMergingEnabled) isInMergedChunk else isCurrentParagraph
+                    
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        TTSParagraphItemWithSentenceHighlight(
+                            index = index,
+                            text = displayContent[index],
+                            originalText = state.content.getOrNull(index) ?: "",
+                            translatedText = state.translatedContent?.getOrNull(index),
+                            isCurrentParagraph = shouldHighlight,
+                            isPlaying = state.isPlaying,
+                            currentSentenceIndex = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
+                                currentSentenceIndex.coerceAtLeast(0) else 0,
+                            sentences = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
+                                currentSentences else emptyList(),
+                            isBilingualMode = state.bilingualMode,
+                            hasTranslation = hasTranslation,
+                            showCacheIndicator = false,
+                            isCached = false,
+                            isLoadingCache = false,
+                            isInPlayingChunk = false,
+                            textColor = textColor,
+                            highlightColor = highlightColor,
+                            fontSize = fontSizeSp,
+                            smallerFontSize = smallerFontSizeSp,
+                            lineHeight = lineHeightSp,
+                            textAlignment = textAlignment,
+                            paragraphIndent = paragraphIndentDp,
+                            fontWeight = fontWeight,
+                            onParagraphClick = onParagraphClick
+                        )
+                    }
+                }
+            }
+            
+            // Sync pager swipes back to TTS controller
+            LaunchedEffect(pagerState, useChunkPages) {
+                snapshotFlow { pagerState.currentPage }.collect { page ->
+                    if (useChunkPages) {
+                        // In chunk mode, page index = chunk index
+                        // Convert to start paragraph of that chunk so jumpToParagraph maps correctly
+                        if (page != state.currentMergedChunkIndex) {
+                            val startParagraph = state.allChunksParagraphIndices
+                                .getOrNull(page)?.firstOrNull() ?: 0
+                            actions.onParagraphClick(startParagraph)
+                        }
+                    } else {
+                        if (page != state.currentReadingParagraph) {
+                            actions.onParagraphClick(page)
+                        }
+                    }
                 }
             }
         } else {
@@ -1725,6 +1854,7 @@ fun TTSSettingsPanelCommon(
     speechSpeed: Float,
     speechPitch: Float = 1.0f,
     autoNextChapter: Boolean,
+    pageMode: Boolean = false,
     useGradioTTS: Boolean = false,
     currentEngineName: String = "System TTS",
     readTranslatedText: Boolean = false,
@@ -1748,6 +1878,7 @@ fun TTSSettingsPanelCommon(
     onCoquiTTSChange: (Boolean) -> Unit = {},
     onReadTranslatedTextChange: (Boolean) -> Unit = {},
     onSentenceHighlightChange: (Boolean) -> Unit = {},
+    onPageModeChange: (Boolean) -> Unit = {},
     onOpenEngineSettings: () -> Unit = {},
     onDismiss: () -> Unit,
     isTabletOrDesktop: Boolean = false,
@@ -1971,6 +2102,34 @@ fun TTSSettingsPanelCommon(
                                 Switch(
                                     checked = sentenceHighlightEnabled,
                                     onCheckedChange = onSentenceHighlightChange
+                                )
+                            }
+                            
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            
+                            // Page mode toggle
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Page Mode",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        text = if (pageMode) 
+                                            "Swipe left/right to turn pages" 
+                                        else 
+                                            "Scroll through paragraphs",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Switch(
+                                    checked = pageMode,
+                                    onCheckedChange = onPageModeChange
                                 )
                             }
 

@@ -652,6 +652,7 @@ class TTSController(
                     currentChunkIndex = 0,
                     totalChunks = 0,
                     currentChunkParagraphs = emptyList(),
+                    allChunksParagraphIndices = emptyList(),
                     cachedChunks = cachedChunks,
                     isUsingCachedAudio = false
                 )
@@ -855,6 +856,7 @@ class TTSController(
                 currentChunkIndex = currentChunkIndex,
                 totalChunks = result.chunks.size,
                 currentChunkParagraphs = currentChunk?.paragraphIndices ?: emptyList(),
+                allChunksParagraphIndices = result.chunks.map { chunk -> chunk.paragraphIndices },
                 cachedChunks = cachedChunks
             )
         }
@@ -875,6 +877,7 @@ class TTSController(
                 currentChunkIndex = 0,
                 totalChunks = 0,
                 currentChunkParagraphs = emptyList(),
+                allChunksParagraphIndices = emptyList(),
                 cachedChunks = emptySet(),
                 isUsingCachedAudio = false
             )

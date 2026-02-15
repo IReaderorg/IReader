@@ -47,6 +47,8 @@ data class TTSState(
     val currentChunkIndex: Int = 0,
     val totalChunks: Int = 0,
     val currentChunkParagraphs: List<Int> = emptyList(),
+    // All chunks' paragraph indices - used by page mode to show one page per chunk
+    val allChunksParagraphIndices: List<List<Int>> = emptyList(),
     val cachedChunks: Set<Int> = emptySet(),
     val isUsingCachedAudio: Boolean = false,
     
