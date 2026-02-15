@@ -59,10 +59,7 @@ import org.koin.android.ext.android.inject
 class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
     
     companion object {
-        private const val TAG = "TTSV2Service"
         private const val NOTIFICATION_ID = 2001
-        private const val CHANNEL_ID = "tts_v2_playback"
-        private const val CHANNEL_NAME = "TTS V2 Playback"
         
         // Actions
         const val ACTION_PLAY_PAUSE = "ireader.tts.v2.PLAY_PAUSE"
@@ -194,7 +191,6 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             try {
                 MediaButtonReceiver.handleIntent(mediaSession, intent)
             } catch (e: Exception) {
-                Log.error { "$TAG: Error handling media button: ${e.message}" }
             }
             return START_STICKY
         }
@@ -694,7 +690,6 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
 
                 }
             } catch (e: Exception) {
-                Log.error { "$TAG: Failed to load book cover: ${e.message}" }
             }
         }
     }
@@ -757,7 +752,6 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             }
 
         } catch (e: Exception) {
-            Log.error { "$TAG: Failed to start silent MediaPlayer: ${e.message}" }
         }
     }
     
