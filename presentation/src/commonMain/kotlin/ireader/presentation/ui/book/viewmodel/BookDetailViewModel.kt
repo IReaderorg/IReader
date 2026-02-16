@@ -118,6 +118,7 @@ class BookDetailViewModel(
     private val localizeHelper: LocalizeHelper,
     private val trackingRepository: ireader.domain.data.repository.TrackingRepository? = null,
     private val translateBookMetadataUseCase: TranslateBookMetadataUseCase? = null,
+    private val chapterRepository: ireader.domain.data.repository.ChapterRepository,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -1376,8 +1377,9 @@ class BookDetailViewModel(
     fun deleteChapterContent(chapters: List<Chapter>) {
         scope.launch(Dispatchers.IO) {
             try {
-                val clearedChapters = chapters.map { it.copy(content = emptyList()) }
-                insertUseCases.insertChapters(clearedChapters)
+                // Use the dedicated clearChapterContent method which explicitly clears content
+                // This is different from insertChapter with empty content, which now preserves existing content
+                chapterRepository.clearChapterContent(chapters.map { it.id })
                 selection.clear()
                 emitEvent(BookDetailEvent.ShowSnackbar("Chapter content deleted"))
             } catch (e: Exception) {

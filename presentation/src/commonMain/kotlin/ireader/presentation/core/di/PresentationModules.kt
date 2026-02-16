@@ -156,7 +156,8 @@ val PresentationModules = module {
             bookDetailController = get(),      // BookDetailController for SSOT pattern
             localizeHelper = get(),            // For UiText localization
             trackingRepository = getOrNull(),  // For AniList tracking
-            translateBookMetadataUseCase = getOrNull()  // For auto-translating novel names
+            translateBookMetadataUseCase = getOrNull(),  // For auto-translating novel names
+            chapterRepository = get()          // For clearChapterContent operation
         )
     }
     // Changed from single to factory - settings screen is not always needed

@@ -157,4 +157,14 @@ interface ChapterRepository : ChapterReadRepository, ChapterWriteRepository {
      * @return List of chapters with their full content
      */
     override suspend fun findChaptersByBookIdWithContent(bookId: Long): List<Chapter>
+    
+    /**
+     * Clears the content for specific chapters.
+     * This is used for the "delete downloaded content" feature.
+     * Unlike insertChapter with empty content (which preserves existing content via upsert),
+     * this method explicitly clears the content in the database.
+     * 
+     * @param chapterIds List of chapter IDs to clear content for
+     */
+    suspend fun clearChapterContent(chapterIds: List<Long>)
 }

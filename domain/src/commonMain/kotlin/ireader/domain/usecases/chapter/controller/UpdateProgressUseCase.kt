@@ -1,5 +1,6 @@
 package ireader.domain.usecases.chapter.controller
 
+import ireader.core.log.Log
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
@@ -49,6 +50,10 @@ class UpdateProgressUseCaseImpl(
     private val uiPreferences: UiPreferences
 ) : UpdateProgressUseCase {
 
+    companion object {
+        private const val TAG = "UpdateProgressUseCase"
+    }
+
     override suspend fun updateLastRead(bookId: Long, chapterId: Long) {
         // Respect incognito mode
         if (uiPreferences.incognitoMode().get()) {
@@ -58,7 +63,12 @@ class UpdateProgressUseCaseImpl(
         val chapter = chapterRepository.findChapterById(chapterId) ?: return
         val existingHistory = historyRepository.findHistoryByChapterId(chapterId)
 
-        // Mark chapter as read
+        Log.debug { 
+            "$TAG: updateLastRead - chapterId=$chapterId, hasContent=${chapter.content.isNotEmpty()}, " +
+            "contentSize=${chapter.content.size}"
+        }
+
+        // Mark chapter as read - this preserves content since we fetched with findChapterById
         chapterRepository.insertChapter(
             chapter.copy(read = true)
         )
@@ -82,7 +92,13 @@ class UpdateProgressUseCaseImpl(
 
         val chapter = chapterRepository.findChapterById(chapterId) ?: return
         
+        Log.debug { 
+            "$TAG: updateParagraphIndex - chapterId=$chapterId, paragraphIndex=$paragraphIndex, " +
+            "hasContent=${chapter.content.isNotEmpty()}"
+        }
+        
         // Update the lastPageRead field which stores paragraph index
+        // This preserves content since we fetched with findChapterById
         chapterRepository.insertChapter(
             chapter.copy(lastPageRead = paragraphIndex.toLong())
         )

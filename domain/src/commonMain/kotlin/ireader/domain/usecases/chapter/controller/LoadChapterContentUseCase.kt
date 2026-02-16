@@ -1,5 +1,6 @@
 package ireader.domain.usecases.chapter.controller
 
+import ireader.core.log.Log
 import ireader.core.source.model.CommandList
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.CatalogLocal
@@ -54,29 +55,41 @@ class LoadChapterContentUseCaseImpl(
     private val chapterRepository: ChapterRepository
 ) : LoadChapterContentUseCase {
 
+    companion object {
+        private const val TAG = "LoadChapterContentUseCase"
+    }
+
     override suspend fun loadContent(
         chapter: Chapter,
         catalog: CatalogLocal?,
         commands: CommandList
     ): Result<Chapter> = withContext(ioDispatcher) {
         runCatching {
+            Log.debug { "$TAG: loadContent called for chapter id=${chapter.id}, key=${chapter.key}, bookId=${chapter.bookId}, hasContent=${chapter.content.isNotEmpty()}" }
+            
             // If chapter already has content, return it
             if (chapter.content.isNotEmpty()) {
+                Log.debug { "$TAG: Chapter already has content, returning without fetch" }
                 return@runCatching chapter
             }
 
             // Try to get from database first (might have been downloaded)
             val dbChapter = chapterRepository.findChapterById(chapter.id)
             if (dbChapter != null && dbChapter.content.isNotEmpty()) {
+                Log.debug { "$TAG: Found content in DB for chapter id=${chapter.id}, contentSize=${dbChapter.content.size}" }
                 return@runCatching dbChapter
             }
 
             // Fetch from remote source
             val source = catalog?.source ?: throw SourceNotFoundException()
             
+            Log.debug { "$TAG: Fetching from remote for chapter id=${chapter.id}" }
             val pages = source.getPageList(chapter.toChapterInfo(), commands)
             
+            Log.debug { "$TAG: Remote fetch returned ${pages.size} pages for chapter id=${chapter.id}" }
+            
             if (pages.isEmpty()) {
+                Log.warn { "$TAG: Remote fetch returned EMPTY content for chapter id=${chapter.id}" }
                 throw ContentLoadException("Failed to load content: empty response")
             }
 
@@ -85,8 +98,12 @@ class LoadChapterContentUseCaseImpl(
                 dateFetch = currentTimeToLong()
             )
 
+            Log.debug { "$TAG: Inserting chapter id=${chapter.id} with contentSize=${pages.size} to database" }
+            
             // Persist to database
-            chapterRepository.insertChapter(updatedChapter)
+            val insertedId = chapterRepository.insertChapter(updatedChapter)
+            
+            Log.debug { "$TAG: Insert returned id=$insertedId for chapter id=${chapter.id}" }
 
             updatedChapter
         }

@@ -134,6 +134,19 @@ UPDATE chapter
 SET last_page_read = :lastPageRead
 WHERE _id = :chapterId;
 
+-- Clear content for specific chapters (for delete downloaded content feature)
+-- This intentionally sets content to empty, unlike upsert which preserves content
+clearChapterContent:
+UPDATE chapter
+SET content = '[]'
+WHERE _id IN :chapterIds;
+
+-- Clear content for all chapters of a book
+clearBookChapterContent:
+UPDATE chapter
+SET content = '[]'
+WHERE book_id = :bookId;
+
 
 delelteAllChapters:
 DELETE FROM chapter;
@@ -157,6 +170,8 @@ SELECT chapter._id,book_id,url,name,scanlator,read,bookmark, last_page_read,chap
 -- Uses INSERT ... ON CONFLICT DO UPDATE (SQLite 3.24+, Android 10+)
 -- For older devices, the repository implementation handles the fallback
 -- Uses (book_id, url) unique constraint to properly handle remote chapters with id=0
+-- IMPORTANT: content uses COALESCE to preserve existing content when new content is empty
+-- This prevents accidental content loss when updating metadata (read status, bookmark, etc.)
 upsert:
 INSERT INTO chapter(_id, book_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, content, type) 
 VALUES (:id, :bookId, :key, :name, :translator, :read, :bookmark, :last_page_read, :chapter_number, :source_order, :date_fetch, :date_upload, :content, :type)
@@ -170,7 +185,10 @@ ON CONFLICT(book_id, url) DO UPDATE SET
     source_order = excluded.source_order,
     date_fetch = excluded.date_fetch,
     date_upload = excluded.date_upload,
-    content = excluded.content,
+    content = CASE 
+        WHEN excluded.content IS NULL OR excluded.content = '' OR excluded.content = '[]' THEN chapter.content
+        ELSE excluded.content
+    END,
     type = excluded.type;
 
 selectLastInsertedRowId:

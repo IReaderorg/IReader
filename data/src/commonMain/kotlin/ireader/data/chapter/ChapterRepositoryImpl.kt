@@ -1,5 +1,6 @@
 package ireader.data.chapter
 
+import ireader.core.log.Log
 import ireader.data.core.DatabaseHandler
 import ireader.data.core.DatabaseOptimizations
 import ireader.data.util.toDB
@@ -95,10 +96,36 @@ class ChapterRepositoryImpl(
 
 
     override suspend fun insertChapter(chapter: Chapter): Long {
+        val tag = "ChapterRepositoryImpl"
+        
+        // Log all insert attempts with caller info
+        val callerStackTrace = Thread.currentThread().stackTrace
+            .dropWhile { it.className.startsWith("ireader.data.chapter.ChapterRepositoryImpl") }
+            .take(5)
+            .joinToString("\n  ") { "${it.className.substringAfterLast('.')}.${it.methodName}(${it.fileName}:${it.lineNumber})" }
+        
+        Log.debug { 
+            "$tag: insertChapter called - id=${chapter.id}, bookId=${chapter.bookId}, key=${chapter.key}, " +
+            "name=${chapter.name}, contentSize=${chapter.content.size}, hasContent=${chapter.content.isNotEmpty()}"
+        }
+        
         // Invalidate cache BEFORE the insert to prevent stale reads during insert
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
-        // I have do this because somehow somewhere is race conditional and cause empty chapter be replaced
-        if (chapter.content.isEmpty()) return -1
+        
+        // SAFEGUARD: Log warning when empty chapters are being inserted
+        // The SQL upsert now uses CASE WHEN to preserve existing content when new content is empty,
+        // so this is just for debugging/logging purposes, not a hard block.
+        // This helps identify callers that might be unintentionally passing empty content.
+        if (chapter.content.isEmpty()) {
+            Log.warn { 
+                "$tag: Inserting EMPTY chapter - id=${chapter.id}, bookId=${chapter.bookId}, " +
+                "key=${chapter.key}, name=${chapter.name}. SQL upsert will preserve existing content. " +
+                "Caller stack trace:\n  $callerStackTrace"
+            }
+        }
+        
+        Log.debug { "$tag: Proceeding with insert for chapter id=${chapter.id}, contentSize=${chapter.content.size}" }
+        
         val result = handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
@@ -119,6 +146,8 @@ class ChapterRepositoryImpl(
              chapterQueries.selectLastInsertedRowId()
         }
         
+        Log.debug { "$tag: Successfully inserted chapter id=${chapter.id}, returnedId=$result" }
+        
         // Invalidate cache AFTER the insert to ensure fresh data is read
         // This double invalidation prevents race conditions where another thread
         // might read and cache stale data between the insert and invalidation
@@ -133,7 +162,24 @@ class ChapterRepositoryImpl(
     }
 
     override suspend fun insertChapters(chapters: List<Chapter>): List<Long> {
+        val tag = "ChapterRepositoryImpl"
+        
         if (chapters.isEmpty()) return emptyList()
+        
+        // Log batch insert
+        Log.debug { 
+            "$tag: insertChapters called with ${chapters.size} chapters. " +
+            "Empty content chapters: ${chapters.count { it.content.isEmpty() }}"
+        }
+        
+        // Check for chapters with empty content that might overwrite existing content
+        val chaptersWithEmptyContent = chapters.filter { it.content.isEmpty() }
+        if (chaptersWithEmptyContent.isNotEmpty()) {
+            Log.warn { 
+                "$tag: WARNING - ${chaptersWithEmptyContent.size} chapters have empty content and may overwrite existing data. " +
+                "Chapter IDs: ${chaptersWithEmptyContent.take(5).map { it.id }}"
+            }
+        }
         
         val bookIds = chapters.map { it.bookId }.distinct()
         
@@ -241,6 +287,16 @@ class ChapterRepositoryImpl(
         // WARNING: This can cause OOM for books with many large chapters
         return handler.awaitList {
             chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
+        }
+    }
+    
+    override suspend fun clearChapterContent(chapterIds: List<Long>) {
+        if (chapterIds.isEmpty()) return
+        
+        Log.debug { "ChapterRepositoryImpl: clearChapterContent called for ${chapterIds.size} chapters" }
+        
+        handler.await {
+            chapterQueries.clearChapterContent(chapterIds)
         }
     }
 }
