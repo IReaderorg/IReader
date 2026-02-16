@@ -88,16 +88,23 @@ class GradioTTSPlayerTest {
     }
     
     @Test
-    fun `setContent clears previous cache`() = runTest(testDispatcher) {
+    fun `setContent clears previous cache and prefetches new content`() = runTest(testDispatcher) {
         // Set initial content and cache some audio
-        player.setContent(listOf("First content"))
+        player.setContent(listOf("First content", "Second paragraph"))
         advanceUntilIdle()
+        
+        // Verify initial content is cached
+        val initialCacheSize = player.cachedParagraphs.value.size
+        assertTrue(initialCacheSize > 0, "Initial content should be cached")
         
         // Set new content
         player.setContent(listOf("New content"))
         advanceUntilIdle()
         
-        assertTrue(player.cachedParagraphs.value.isEmpty())
+        // The cache should now contain the new content (prefetched), not the old content
+        // Since we set new single-paragraph content, cache should have 1 item (the new content)
+        assertEquals(1, player.cachedParagraphs.value.size)
+        assertEquals(0, player.currentParagraph.value) // Reset to first paragraph
     }
     
     @Test

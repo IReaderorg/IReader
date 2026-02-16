@@ -20,11 +20,26 @@ class PluginInfoTest {
     fun `PluginType has all expected values`() {
         val types = PluginType.values()
         
-        assertEquals(4, types.size)
+        // PluginType has 16 values as of the latest version
+        assertEquals(16, types.size)
+        // Core types
         assertTrue(types.contains(PluginType.THEME))
         assertTrue(types.contains(PluginType.TRANSLATION))
         assertTrue(types.contains(PluginType.TTS))
         assertTrue(types.contains(PluginType.FEATURE))
+        // Extended types
+        assertTrue(types.contains(PluginType.AI))
+        assertTrue(types.contains(PluginType.CATALOG))
+        assertTrue(types.contains(PluginType.IMAGE_PROCESSING))
+        assertTrue(types.contains(PluginType.SYNC))
+        assertTrue(types.contains(PluginType.COMMUNITY_SCREEN))
+        assertTrue(types.contains(PluginType.GLOSSARY))
+        assertTrue(types.contains(PluginType.GRADIO_TTS))
+        assertTrue(types.contains(PluginType.JS_ENGINE))
+        assertTrue(types.contains(PluginType.TACHI_SOURCE_LOADER))
+        assertTrue(types.contains(PluginType.READER_SCREEN))
+        assertTrue(types.contains(PluginType.SOURCE_LOADER))
+        assertTrue(types.contains(PluginType.CLOUDFLARE_BYPASS))
     }
 
     @Test
@@ -33,6 +48,8 @@ class PluginInfoTest {
         assertEquals(PluginType.TRANSLATION, PluginType.valueOf("TRANSLATION"))
         assertEquals(PluginType.TTS, PluginType.valueOf("TTS"))
         assertEquals(PluginType.FEATURE, PluginType.valueOf("FEATURE"))
+        assertEquals(PluginType.AI, PluginType.valueOf("AI"))
+        assertEquals(PluginType.CATALOG, PluginType.valueOf("CATALOG"))
     }
 
     @Test
@@ -41,6 +58,8 @@ class PluginInfoTest {
         assertEquals(1, PluginType.TRANSLATION.ordinal)
         assertEquals(2, PluginType.TTS.ordinal)
         assertEquals(3, PluginType.FEATURE.ordinal)
+        assertEquals(4, PluginType.AI.ordinal)
+        assertEquals(5, PluginType.CATALOG.ordinal)
     }
 
     // ==================== PluginStatus Tests ====================
@@ -49,7 +68,9 @@ class PluginInfoTest {
     fun `PluginStatus has all expected values`() {
         val statuses = PluginStatus.values()
         
-        assertEquals(4, statuses.size)
+        // PluginStatus has 5 values (including NOT_INSTALLED)
+        assertEquals(5, statuses.size)
+        assertTrue(statuses.contains(PluginStatus.NOT_INSTALLED))
         assertTrue(statuses.contains(PluginStatus.ENABLED))
         assertTrue(statuses.contains(PluginStatus.DISABLED))
         assertTrue(statuses.contains(PluginStatus.ERROR))
@@ -58,6 +79,7 @@ class PluginInfoTest {
 
     @Test
     fun `PluginStatus valueOf works correctly`() {
+        assertEquals(PluginStatus.NOT_INSTALLED, PluginStatus.valueOf("NOT_INSTALLED"))
         assertEquals(PluginStatus.ENABLED, PluginStatus.valueOf("ENABLED"))
         assertEquals(PluginStatus.DISABLED, PluginStatus.valueOf("DISABLED"))
         assertEquals(PluginStatus.ERROR, PluginStatus.valueOf("ERROR"))

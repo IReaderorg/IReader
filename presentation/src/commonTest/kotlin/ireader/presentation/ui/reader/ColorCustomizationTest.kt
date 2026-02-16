@@ -1,10 +1,11 @@
 package ireader.presentation.ui.reader
 
 import androidx.compose.ui.graphics.Color
-import ireader.presentation.core.toDomainColor
+import ireader.presentation.core.ui.util.toDomainColor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 /**
  * TDD Tests for background and text color customization feature.
@@ -19,6 +20,17 @@ import kotlin.test.assertNotEquals
  */
 class ColorCustomizationTest {
     
+    /**
+     * Helper function to compare colors by their components
+     * since toArgb() is not available in common test sources.
+     */
+    private fun assertColorsEqual(expected: Color, actual: Color) {
+        assertEquals(expected.red, actual.red, 0.001f, "Red component mismatch")
+        assertEquals(expected.green, actual.green, 0.001f, "Green component mismatch")
+        assertEquals(expected.blue, actual.blue, 0.001f, "Blue component mismatch")
+        assertEquals(expected.alpha, actual.alpha, 0.001f, "Alpha component mismatch")
+    }
+    
     @Test
     fun `setReaderBackgroundColor should update background color`() {
         // Arrange
@@ -27,8 +39,11 @@ class ColorCustomizationTest {
         // Act
         val domainColor = expectedColor.toDomainColor()
         
-        // Assert
-        assertEquals(expectedColor.value.toLong(), domainColor.color)
+        // Assert - Compare color components
+        assertEquals(expectedColor.red, domainColor.red, 0.001f, "Red mismatch")
+        assertEquals(expectedColor.green, domainColor.green, 0.001f, "Green mismatch")
+        assertEquals(expectedColor.blue, domainColor.blue, 0.001f, "Blue mismatch")
+        assertEquals(expectedColor.alpha, domainColor.alpha, 0.001f, "Alpha mismatch")
     }
     
     @Test
@@ -39,8 +54,11 @@ class ColorCustomizationTest {
         // Act
         val domainColor = expectedColor.toDomainColor()
         
-        // Assert
-        assertEquals(expectedColor.value.toLong(), domainColor.color)
+        // Assert - Compare color components
+        assertEquals(expectedColor.red, domainColor.red, 0.001f, "Red mismatch")
+        assertEquals(expectedColor.green, domainColor.green, 0.001f, "Green mismatch")
+        assertEquals(expectedColor.blue, domainColor.blue, 0.001f, "Blue mismatch")
+        assertEquals(expectedColor.alpha, domainColor.alpha, 0.001f, "Alpha mismatch")
     }
     
     @Test
@@ -63,10 +81,12 @@ class ColorCustomizationTest {
         
         // Act
         val domainColor = originalColor.toDomainColor()
-        val reconstructedValue = domainColor.color
         
-        // Assert
-        assertEquals(originalColor.value.toLong(), reconstructedValue)
+        // Assert - Compare color components
+        assertEquals(originalColor.red, domainColor.red, 0.001f, "Red mismatch")
+        assertEquals(originalColor.green, domainColor.green, 0.001f, "Green mismatch")
+        assertEquals(originalColor.blue, domainColor.blue, 0.001f, "Blue mismatch")
+        assertEquals(originalColor.alpha, domainColor.alpha, 0.001f, "Alpha mismatch")
     }
     
     @Test
@@ -83,7 +103,10 @@ class ColorCustomizationTest {
         // Act & Assert
         presetColors.forEach { color ->
             val domainColor = color.toDomainColor()
-            assertEquals(color.value.toLong(), domainColor.color)
+            assertEquals(color.red, domainColor.red, 0.001f, "Red mismatch for $color")
+            assertEquals(color.green, domainColor.green, 0.001f, "Green mismatch for $color")
+            assertEquals(color.blue, domainColor.blue, 0.001f, "Blue mismatch for $color")
+            assertEquals(color.alpha, domainColor.alpha, 0.001f, "Alpha mismatch for $color")
         }
     }
 }

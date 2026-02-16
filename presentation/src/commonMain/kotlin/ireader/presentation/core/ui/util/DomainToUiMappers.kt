@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import ireader.domain.models.common.AlignmentModel
 import ireader.domain.models.common.ColorModel
+import ireader.domain.models.common.DomainColor
 import ireader.domain.models.common.FontFamilyModel
 import ireader.domain.models.common.TextAlignmentModel
 
@@ -21,6 +22,20 @@ fun ColorModel.toComposeColor(): Color {
 
 fun Color.toColorModel(): ColorModel {
     return ColorModel(red, green, blue, alpha)
+}
+
+/**
+ * Convert Compose Color to DomainColor
+ */
+fun Color.toDomainColor(): DomainColor {
+    return DomainColor(red, green, blue, alpha)
+}
+
+/**
+ * Convert DomainColor to Compose Color
+ */
+fun DomainColor.toComposeColor(): Color {
+    return Color(red, green, blue, alpha)
 }
 
 // Alignment conversions

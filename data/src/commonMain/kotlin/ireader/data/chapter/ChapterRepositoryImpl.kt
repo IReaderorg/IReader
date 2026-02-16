@@ -96,36 +96,7 @@ class ChapterRepositoryImpl(
 
 
     override suspend fun insertChapter(chapter: Chapter): Long {
-        val tag = "ChapterRepositoryImpl"
-        
-        // Log all insert attempts with caller info
-        val callerStackTrace = Thread.currentThread().stackTrace
-            .dropWhile { it.className.startsWith("ireader.data.chapter.ChapterRepositoryImpl") }
-            .take(5)
-            .joinToString("\n  ") { "${it.className.substringAfterLast('.')}.${it.methodName}(${it.fileName}:${it.lineNumber})" }
-        
-        Log.debug { 
-            "$tag: insertChapter called - id=${chapter.id}, bookId=${chapter.bookId}, key=${chapter.key}, " +
-            "name=${chapter.name}, contentSize=${chapter.content.size}, hasContent=${chapter.content.isNotEmpty()}"
-        }
-        
-        // Invalidate cache BEFORE the insert to prevent stale reads during insert
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
-        
-        // SAFEGUARD: Log warning when empty chapters are being inserted
-        // The SQL upsert now uses CASE WHEN to preserve existing content when new content is empty,
-        // so this is just for debugging/logging purposes, not a hard block.
-        // This helps identify callers that might be unintentionally passing empty content.
-        if (chapter.content.isEmpty()) {
-            Log.warn { 
-                "$tag: Inserting EMPTY chapter - id=${chapter.id}, bookId=${chapter.bookId}, " +
-                "key=${chapter.key}, name=${chapter.name}. SQL upsert will preserve existing content. " +
-                "Caller stack trace:\n  $callerStackTrace"
-            }
-        }
-        
-        Log.debug { "$tag: Proceeding with insert for chapter id=${chapter.id}, contentSize=${chapter.content.size}" }
-        
         val result = handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
@@ -145,8 +116,6 @@ class ChapterRepositoryImpl(
                 )
              chapterQueries.selectLastInsertedRowId()
         }
-        
-        Log.debug { "$tag: Successfully inserted chapter id=${chapter.id}, returnedId=$result" }
         
         // Invalidate cache AFTER the insert to ensure fresh data is read
         // This double invalidation prevents race conditions where another thread
