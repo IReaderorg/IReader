@@ -33,7 +33,7 @@ import okio.use
  */
 class EpubBuilder(
     private val httpClient: HttpClient,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem
 ) {
     
     /**

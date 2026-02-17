@@ -66,7 +66,8 @@ class AndroidCatalogLoader(
         JSPluginLoader(
             pluginsDirectoryProvider = { getJSPluginsDirectory().absolutePath.toPath() },
             httpClient = httpClients.default,
-            preferenceStoreFactory = preferenceStore
+            preferenceStoreFactory = preferenceStore,
+            fileSystem = okio.FileSystem.SYSTEM
         )
     }
     

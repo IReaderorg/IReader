@@ -57,7 +57,7 @@ class JSPluginLoader(
     private val pluginsDirectoryProvider: () -> Path,
     private val httpClient: HttpClient,
     private val preferenceStoreFactory: PreferenceStoreFactory,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem
 ) {
     
     // Get the current plugins directory (may change if user selects new storage folder)

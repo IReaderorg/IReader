@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.currentTimeToLong
+import okio.FileSystem
 
 /**
  * Manages plugin updates including checking, downloading, and installing.
@@ -15,7 +16,8 @@ class JSPluginUpdateManager(
     private val updateChecker: JSPluginUpdateChecker,
     private val scheduler: JSPluginUpdateScheduler,
     private val notifier: JSPluginUpdateNotifier,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val fileSystem: FileSystem
 ) {
     
     private var lastCheckTime: Long = 0
@@ -97,7 +99,7 @@ class JSPluginUpdateManager(
         val success = updateChecker.installUpdate(update, file)
         
         // Clean up temp file
-        okio.FileSystem.SYSTEM.delete(file)
+        fileSystem.delete(file)
         
         if (success) {
             // Remove from available updates

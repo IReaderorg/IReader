@@ -131,10 +131,12 @@ sealed class LNReaderImportException(
             return when (e) {
                 is LNReaderImportException -> e
                 is okio.FileNotFoundException -> FileNotFoundException(cause = e)
-                is OutOfMemoryError -> OutOfMemoryException(cause = e)
                 else -> {
                     // Check exception class name for platform-specific exceptions
                     val exceptionName = e::class.simpleName ?: ""
+                    if (exceptionName == "OutOfMemoryError" || exceptionName == "OutOfMemoryException") {
+                        return OutOfMemoryException(cause = e)
+                    }
                     if (exceptionName == "SecurityException") {
                         return PermissionDeniedException(cause = e)
                     }

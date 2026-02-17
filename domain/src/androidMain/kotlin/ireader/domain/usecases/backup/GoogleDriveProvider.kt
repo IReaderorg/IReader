@@ -13,7 +13,7 @@ import org.koin.core.component.inject
  * Delegates to GoogleDriveBackupService which handles the actual
  * Google Drive API operations and authentication.
  */
-actual class GoogleDriveProvider : CloudStorageProvider, KoinComponent {
+class GoogleDriveProvider : CloudStorageProvider, KoinComponent {
     override val providerName: String = "Google Drive"
     
     // Use the service from data module via DI
@@ -107,3 +107,8 @@ actual class GoogleDriveProvider : CloudStorageProvider, KoinComponent {
         }
     }
 }
+
+/**
+ * Creates a GoogleDriveProvider instance for Android
+ */
+actual fun createGoogleDriveProvider(): CloudStorageProvider = GoogleDriveProvider()

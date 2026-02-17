@@ -15,7 +15,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
  */
 class VoiceStorage(
     private val storageDirectory: Path,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem
 ) {
     
     init {

@@ -108,27 +108,12 @@ class DownloaderViewModel(
     val isPausedDueToDiskSpace: StateFlow<Boolean> = _isPausedDueToDiskSpace.asStateFlow()
     
     // ═══════════════════════════════════════════════════════════════
-    // Statistics
+    // Statistics (Optimized: single pass through progressMap)
     // ═══════════════════════════════════════════════════════════════
-    
-    val downloadingCount: StateFlow<Int> = progressMap
-        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.DOWNLOADING } }
-        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
-    
-    val queuedCount: StateFlow<Int> = progressMap
-        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.QUEUED } }
-        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
-    
-    val completedCount: StateFlow<Int> = progressMap
-        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.COMPLETED } }
-        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
-    
-    val failedCount: StateFlow<Int> = progressMap
-        .map { map -> map.count { it.value.status == ireader.domain.services.common.DownloadStatus.FAILED } }
-        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
     
     /**
      * Combined stats for header display.
+     * Computed in a single pass through progressMap for better performance.
      */
     data class DownloadStats(
         val downloading: Int = 0,
@@ -140,14 +125,45 @@ class DownloaderViewModel(
         val hasActiveDownloads: Boolean get() = downloading > 0 || queued > 0
     }
     
-    val stats: StateFlow<DownloadStats> = combine(
-        downloadingCount,
-        queuedCount,
-        completedCount,
-        failedCount
-    ) { downloading, queued, completed, failed ->
-        DownloadStats(downloading, queued, completed, failed)
-    }.stateIn(scope, SharingStarted.WhileSubscribed(5000), DownloadStats())
+    /**
+     * Optimized: Compute all stats in a single pass through the progress map.
+     * This replaces 4 separate StateFlows that each iterated the entire map.
+     */
+    val stats: StateFlow<DownloadStats> = progressMap
+        .map { map ->
+            var downloading = 0
+            var queued = 0
+            var completed = 0
+            var failed = 0
+            map.forEach { (_, progress) ->
+                when (progress.status) {
+                    ireader.domain.services.common.DownloadStatus.DOWNLOADING -> downloading++
+                    ireader.domain.services.common.DownloadStatus.QUEUED -> queued++
+                    ireader.domain.services.common.DownloadStatus.COMPLETED -> completed++
+                    ireader.domain.services.common.DownloadStatus.FAILED -> failed++
+                    else -> {}
+                }
+            }
+            DownloadStats(downloading, queued, completed, failed)
+        }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), DownloadStats())
+    
+    // Derived from stats for backward compatibility
+    val downloadingCount: StateFlow<Int> = stats
+        .map { it.downloading }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    val queuedCount: StateFlow<Int> = stats
+        .map { it.queued }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    val completedCount: StateFlow<Int> = stats
+        .map { it.completed }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
+    
+    val failedCount: StateFlow<Int> = stats
+        .map { it.failed }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), 0)
     
     // ═══════════════════════════════════════════════════════════════
     // Network State

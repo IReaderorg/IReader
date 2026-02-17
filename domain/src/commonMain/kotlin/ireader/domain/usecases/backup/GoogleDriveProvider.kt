@@ -5,8 +5,9 @@ import ireader.domain.models.BackupResult
 /**
  * Google Drive cloud storage provider
  * Platform-specific implementation required
+ * Use createGoogleDriveProvider() to get a platform-specific implementation
  */
-expect class GoogleDriveProvider() : CloudStorageProvider
+expect fun createGoogleDriveProvider(): CloudStorageProvider
 
 /**
  * Default implementation for platforms without Google Drive support

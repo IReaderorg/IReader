@@ -15,7 +15,7 @@ object DiskUtil {
     /**
      * Calculate directory size recursively using Okio FileSystem.
      */
-    fun getDirectorySize(path: Path, fileSystem: FileSystem = FileSystem.SYSTEM): Long {
+    fun getDirectorySize(path: Path, fileSystem: FileSystem): Long {
         var size: Long = 0
         if (fileSystem.exists(path)) {
             val metadata = fileSystem.metadata(path)

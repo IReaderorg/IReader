@@ -37,7 +37,7 @@ import okio.use
  * - `https://www.googleapis.com/auth/drive.appdata` - Access to app-specific folder
  */
 @OptIn(ExperimentalForeignApi::class)
-actual class GoogleDriveProvider actual constructor() : CloudStorageProvider {
+class GoogleDriveProvider : CloudStorageProvider {
     
     override val providerName: String = "Google Drive"
     
@@ -520,3 +520,8 @@ actual class GoogleDriveProvider actual constructor() : CloudStorageProvider {
     
     private fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
 }
+
+/**
+ * Creates a GoogleDriveProvider instance for iOS
+ */
+actual fun createGoogleDriveProvider(): CloudStorageProvider = GoogleDriveProvider()

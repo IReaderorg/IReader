@@ -25,7 +25,7 @@ plugins {
     alias(libs.plugins.buildkonfig) apply false
     alias(libs.plugins.detekt)
     // Maven Central Portal Publisher
-    id("com.gradleup.nmcp") version "0.0.8" apply false
+    id("com.gradleup.nmcp") version "1.4.4" apply false
    // id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 

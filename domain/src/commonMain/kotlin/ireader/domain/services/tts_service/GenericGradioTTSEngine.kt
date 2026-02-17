@@ -847,8 +847,8 @@ class GenericGradioTTSEngine(
             }
         }
         
-        // Try to find audio in data array at the configured output index
-        val dataArrayRegex = """"data":\s*\[(.*?)\]""".toRegex(RegexOption.DOT_MATCHES_ALL)
+        // Try to find audio in data array at the configured output index (using (?s) inline flag for DOT_MATCHES_ALL)
+        val dataArrayRegex = """(?s)"data":\s*\[(.*?)\]""".toRegex()
         val dataMatch = dataArrayRegex.find(responseJson)
         if (dataMatch != null) {
             val dataContent = dataMatch.groupValues[1]

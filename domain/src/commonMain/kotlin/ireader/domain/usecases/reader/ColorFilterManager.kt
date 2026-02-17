@@ -31,8 +31,9 @@ class ColorFilterManager(
     /**
      * Observe color filter changes
      */
+    @Suppress("UNCHECKED_CAST")
     fun observeColorFilter(): Flow<ColorFilter> {
-        return combine(
+        return combine<Any, ColorFilter>(
             readerPreferences.colorFilter().changes(),
             readerPreferences.colorFilterValue().changes(),
             readerPreferences.colorFilterMode().changes(),

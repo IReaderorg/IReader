@@ -349,7 +349,8 @@ class TTSAudioCache(
     
     private fun parseIndexJson(json: String) {
         try {
-            val entriesMatch = Regex(""""entries"\s*:\s*\[(.*?)\]""", RegexOption.DOT_MATCHES_ALL)
+            // Using (?s) inline flag for DOT_MATCHES_ALL
+            val entriesMatch = Regex("""(?s)"entries"\s*:\s*\[(.*?)\]""")
                 .find(json) ?: return
             
             val entriesContent = entriesMatch.groupValues[1]

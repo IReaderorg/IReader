@@ -68,8 +68,9 @@ class ViewerConfigManager(
     /**
      * Observe viewer configuration changes
      */
+    @Suppress("UNCHECKED_CAST")
     fun observeViewerConfig(): Flow<ViewerConfig> {
-        return combine(
+        return combine<Any, ViewerConfig>(
             readerPreferences.defaultReaderMode().changes(),
             readerPreferences.defaultOrientationType().changes(),
             readerPreferences.imageScaleType().changes(),

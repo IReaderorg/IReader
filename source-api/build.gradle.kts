@@ -304,22 +304,11 @@ afterEvaluate {
     }
 }
 
-// Configure Maven Central Portal Publisher
-nmcp {
-    // Publish to Maven Central using the new portal API
-    publishAllPublications {
-        username = System.getenv("MAVEN_USERNAME")
-            ?: findProperty("mavenCentralUsername") as String?
-            ?: findProperty("mavenUsername") as String?
-            ?: ""
-        password = System.getenv("MAVEN_PASSWORD")
-            ?: findProperty("mavenCentralPassword") as String?
-            ?: findProperty("mavenPassword") as String?
-            ?: ""
-        // Automatically publish after upload (or set to false to manually publish in portal)
-        publicationType = "AUTOMATIC"
-    }
-}
+// NMCP publishing configuration for Maven Central Portal
+// The publishAllPublications task is provided by the nmcp plugin automatically
+// Credentials are configured via environment variables or gradle.properties:
+// - MAVEN_USERNAME / mavenCentralUsername / mavenUsername
+// - MAVEN_PASSWORD / mavenCentralPassword / mavenPassword
 
 // Fix task dependencies: signing must happen before publishing
 tasks.withType<PublishToMavenRepository>().configureEach {

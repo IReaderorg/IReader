@@ -27,7 +27,7 @@ import okio.use
 class VoiceDownloader(
     private val downloadDirectory: Path,
     private val httpClient: HttpClient,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem
 ) {
     
     init {

@@ -30,7 +30,7 @@ class JSPluginUpdateChecker(
     private val httpClient: HttpClient,
     private val pluginLoader: JSPluginLoader,
     private val repositories: List<JSPluginRepository>,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem
 ) {
     
     private val json = Json { 

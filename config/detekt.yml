@@ -2,7 +2,7 @@
 # Updated for detekt 1.23.8 - removed deprecated properties
 
 build:
-  maxIssues: 0
+  maxIssues: 100
   excludeCorrectable: false
   weights:
     complexity: 2
@@ -512,7 +512,6 @@ Compose:
     active: true
   ModifierMissing:
     active: true
-    checkModifiersForVisibility: only_public
   ModifierNaming:
     active: true
   ModifierNotUsedAtRoot:

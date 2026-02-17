@@ -96,9 +96,9 @@ sealed class TranslationError {
         val retryAfterSeconds: Int? = null
     ) : TranslationError() {
         override fun toUiText(): UiText = if (retryAfterSeconds != null) {
-            UiText.MStringResource(Res.string.translation_rate_limit_with_retry, arrayOf(engineName, retryAfterSeconds))
+            UiText.MStringResource(Res.string.translation_rate_limit_with_retry, arrayOf(engineName, retryAfterSeconds as Any))
         } else {
-            UiText.MStringResource(Res.string.translation_rate_limit, arrayOf(engineName))
+            UiText.MStringResource(Res.string.translation_rate_limit, arrayOf(engineName as Any))
         }
     }
     
@@ -123,9 +123,9 @@ sealed class TranslationError {
         val statusCode: Int? = null
     ) : TranslationError() {
         override fun toUiText(): UiText = if (statusCode != null) {
-            UiText.MStringResource(Res.string.translation_server_error_with_code, arrayOf(engineName, statusCode))
+            UiText.MStringResource(Res.string.translation_server_error_with_code, arrayOf(engineName, statusCode as Any))
         } else {
-            UiText.MStringResource(Res.string.translation_server_error, arrayOf(engineName))
+            UiText.MStringResource(Res.string.translation_server_error, arrayOf(engineName as Any))
         }
     }
     
@@ -218,9 +218,9 @@ sealed class TranslationError {
         val timeoutSeconds: Int? = null
     ) : TranslationError() {
         override fun toUiText(): UiText = if (timeoutSeconds != null) {
-            UiText.MStringResource(Res.string.translation_timeout_with_seconds, arrayOf(engineName, timeoutSeconds))
+            UiText.MStringResource(Res.string.translation_timeout_with_seconds, arrayOf(engineName, timeoutSeconds as Any))
         } else {
-            UiText.MStringResource(Res.string.translation_timeout, arrayOf(engineName))
+            UiText.MStringResource(Res.string.translation_timeout, arrayOf(engineName as Any))
         }
     }
     
@@ -232,9 +232,9 @@ sealed class TranslationError {
         val maxChars: Int? = null
     ) : TranslationError() {
         override fun toUiText(): UiText = if (maxChars != null) {
-            UiText.MStringResource(Res.string.translation_text_too_long_with_limit, arrayOf(engineName, maxChars))
+            UiText.MStringResource(Res.string.translation_text_too_long_with_limit, arrayOf(engineName, maxChars as Any))
         } else {
-            UiText.MStringResource(Res.string.translation_text_too_long, arrayOf(engineName))
+            UiText.MStringResource(Res.string.translation_text_too_long, arrayOf(engineName as Any))
         }
     }
     

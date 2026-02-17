@@ -20,7 +20,7 @@ import okio.use
 class JSPluginIconLoader(
     private val httpClient: HttpClient,
     private val cacheManager: CacheManager,
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem
 ) {
     
     companion object {

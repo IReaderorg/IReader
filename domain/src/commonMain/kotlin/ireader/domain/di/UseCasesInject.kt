@@ -368,7 +368,7 @@ val UseCasesInject = module {
     
     // ePub export use cases - factory
     factory { ireader.domain.usecases.epub.ExportNovelAsEpubUseCase(get()) }
-    factory { ireader.domain.epub.EpubBuilder(httpClient = get()) }
+    factory { ireader.domain.epub.EpubBuilder(httpClient = get(), fileSystem = get()) }
     factory { ireader.domain.usecases.epub.ExportBookAsEpubUseCase(
         findBookById = get<ireader.domain.usecases.local.LocalGetBookUseCases>().findBookById,
         chapterRepository = get(),

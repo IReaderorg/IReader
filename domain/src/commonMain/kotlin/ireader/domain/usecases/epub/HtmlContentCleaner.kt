@@ -17,28 +17,28 @@ object HtmlContentCleaner {
     fun clean(html: String): String {
         var cleaned = html
         
-        // Remove script tags and their content
-        cleaned = cleaned.replace(Regex("<script[^>]*>.*?</script>", RegexOption.DOT_MATCHES_ALL), "")
+        // Remove script tags and their content (using (?s) inline flag for DOT_MATCHES_ALL)
+        cleaned = cleaned.replace(Regex("(?s)<script[^>]*>.*?</script>"), "")
         
         // Remove style tags and their content
-        cleaned = cleaned.replace(Regex("<style[^>]*>.*?</style>", RegexOption.DOT_MATCHES_ALL), "")
+        cleaned = cleaned.replace(Regex("(?s)<style[^>]*>.*?</style>"), "")
         
         // Remove HTML comments (often used for ads)
-        cleaned = cleaned.replace(Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL), "")
+        cleaned = cleaned.replace(Regex("(?s)<!--.*?-->"), "")
         
         // Remove common ad containers
-        cleaned = cleaned.replace(Regex("<div[^>]*class=[\"'][^\"']*ad[^\"']*[\"'][^>]*>.*?</div>", RegexOption.DOT_MATCHES_ALL), "")
-        cleaned = cleaned.replace(Regex("<div[^>]*id=[\"'][^\"']*ad[^\"']*[\"'][^>]*>.*?</div>", RegexOption.DOT_MATCHES_ALL), "")
+        cleaned = cleaned.replace(Regex("(?s)<div[^>]*class=[\"'][^\"']*ad[^\"']*[\"'][^>]*>.*?</div>"), "")
+        cleaned = cleaned.replace(Regex("(?s)<div[^>]*id=[\"'][^\"']*ad[^\"']*[\"'][^>]*>.*?</div>"), "")
         
         // Remove common watermark patterns
-        cleaned = cleaned.replace(Regex("<div[^>]*class=[\"'][^\"']*watermark[^\"']*[\"'][^>]*>.*?</div>", RegexOption.DOT_MATCHES_ALL), "")
-        cleaned = cleaned.replace(Regex("<span[^>]*class=[\"'][^\"']*watermark[^\"']*[\"'][^>]*>.*?</span>", RegexOption.DOT_MATCHES_ALL), "")
+        cleaned = cleaned.replace(Regex("(?s)<div[^>]*class=[\"'][^\"']*watermark[^\"']*[\"'][^>]*>.*?</div>"), "")
+        cleaned = cleaned.replace(Regex("(?s)<span[^>]*class=[\"'][^\"']*watermark[^\"']*[\"'][^>]*>.*?</span>"), "")
         
         // Remove iframe tags (often used for ads)
-        cleaned = cleaned.replace(Regex("<iframe[^>]*>.*?</iframe>", RegexOption.DOT_MATCHES_ALL), "")
+        cleaned = cleaned.replace(Regex("(?s)<iframe[^>]*>.*?</iframe>"), "")
         
         // Remove noscript tags
-        cleaned = cleaned.replace(Regex("<noscript[^>]*>.*?</noscript>", RegexOption.DOT_MATCHES_ALL), "")
+        cleaned = cleaned.replace(Regex("(?s)<noscript[^>]*>.*?</noscript>"), "")
         
         // Remove inline event handlers (onclick, onload, etc.)
         cleaned = cleaned.replace(Regex("\\s+on\\w+=[\"'][^\"']*[\"']", RegexOption.IGNORE_CASE), "")

@@ -16,8 +16,9 @@ import ireader.domain.services.library.libraryModule
 import ireader.domain.services.preferences.preferencesModule
 import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
+import ireader.domain.usecases.backup.CloudStorageProvider
 import ireader.domain.usecases.backup.CreateBackup
-import ireader.domain.usecases.backup.GoogleDriveProvider
+import ireader.domain.usecases.backup.createGoogleDriveProvider
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.category.CreateCategoryWithName
@@ -93,13 +94,13 @@ val DomainServices = module {
     }
     
     // Cloud Backup Providers - lazy loaded when user accesses backup
-    factory { GoogleDriveProvider() }
+    factory<CloudStorageProvider> { createGoogleDriveProvider() }
     
     // CloudBackupManager - lazy loaded
     factory {
         CloudBackupManager(
             providers = mapOf(
-                CloudProvider.GOOGLE_DRIVE to get<GoogleDriveProvider>()
+                CloudProvider.GOOGLE_DRIVE to get<CloudStorageProvider>()
             )
         )
     }

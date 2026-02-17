@@ -340,7 +340,8 @@ class TTSChapterCache(
         // Simple JSON parsing for cache entries
         // Format: {"entries":[{...},{...}]}
         try {
-            val entriesMatch = Regex(""""entries"\s*:\s*\[(.*?)\]""", RegexOption.DOT_MATCHES_ALL)
+            // Using (?s) inline flag for DOT_MATCHES_ALL
+            val entriesMatch = Regex("""(?s)"entries"\s*:\s*\[(.*?)\]""")
                 .find(json) ?: return
             
             val entriesContent = entriesMatch.groupValues[1]
@@ -633,7 +634,8 @@ class TTSChapterCache(
     
     private fun parseChunkIndexJson(json: String) {
         try {
-            val entriesMatch = Regex(""""chunks"\s*:\s*\[(.*?)\]""", RegexOption.DOT_MATCHES_ALL)
+            // Using (?s) inline flag for DOT_MATCHES_ALL
+            val entriesMatch = Regex("""(?s)"chunks"\s*:\s*\[(.*?)\]""")
                 .find(json) ?: return
             
             val entriesContent = entriesMatch.groupValues[1]

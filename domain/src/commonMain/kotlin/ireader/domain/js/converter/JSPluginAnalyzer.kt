@@ -130,10 +130,10 @@ class JSPluginAnalyzer {
             """this\.name\s*=\s*['"]([^'"]+)['"]""".toRegex(),
             // Class property: get name() { return "value" }
             """get\s+name\s*\(\s*\)\s*\{\s*return\s*['"]([^'"]+)['"]""".toRegex(),
-            // Direct property in class
-            """class\s+\w+.*?name\s*=\s*['"]([^'"]+)['"]""".toRegex(RegexOption.DOT_MATCHES_ALL),
+            // Direct property in class (using (?s) inline flag for DOT_MATCHES_ALL)
+            """(?s)class\s+\w+.*?name\s*=\s*['"]([^'"]+)['"]""".toRegex(),
             // In metadata object
-            """metadata\s*:\s*\{[^}]*name\s*:\s*['"]([^'"]+)['"]""".toRegex(RegexOption.DOT_MATCHES_ALL),
+            """(?s)metadata\s*:\s*\{[^}]*name\s*:\s*['"]([^'"]+)['"]""".toRegex(),
             // Minified with id before name: id:"x",name:"y"
             """id\s*:\s*['"][^'"]+['"],\s*name\s*:\s*['"]([^'"]+)['"]""".toRegex(),
             // Any occurrence of name:"value" (last resort)
