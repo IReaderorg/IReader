@@ -9,7 +9,7 @@ import okio.sink
 import okio.source
 
 class AndroidFileSaver(
-        private val context: Context
+        internal val context: Context
 ) : FileSaver {
      override fun save(uri: Uri, byteArray: ByteArray) {
         context.contentResolver.openOutputStream(uri.androidUri, "w")!!.sink().gzip().buffer()

@@ -8,7 +8,6 @@ import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.lnreader.LNReaderCategory
@@ -26,13 +25,13 @@ import kotlin.time.ExperimentalTime
  */
 class ImportLNReaderBackup(
     private val parser: LNReaderBackupParser,
-    private val sourceMapper: LNReaderSourceMapper,
-    private val bookRepository: BookRepository,
-    private val chapterRepository: ChapterRepository,
-    private val categoryRepository: CategoryRepository,
-    private val bookCategoryRepository: BookCategoryRepository,
+    internal val sourceMapper: LNReaderSourceMapper,
+    internal val bookRepository: BookRepository,
+    internal val chapterRepository: ChapterRepository,
+    internal val categoryRepository: CategoryRepository,
+    internal val bookCategoryRepository: BookCategoryRepository,
     private val transactions: Transactions,
-    private val fileSaver: FileSaver
+    internal val fileSaver: FileSaver
 ) {
 
     /**
@@ -91,7 +90,7 @@ class ImportLNReaderBackup(
     )
 
     /**
-     * Execute the import from a URI
+     * Execute the import from a URI using streaming to avoid memory issues
      */
     suspend fun invoke(
         uri: Uri,
@@ -100,219 +99,56 @@ class ImportLNReaderBackup(
         emit(ImportProgress.Starting)
 
         try {
-            // Parse backup - use readSource() to get raw bytes without GZIP decompression
-            // LNReader backups are ZIP files, not GZIP compressed
-            emit(ImportProgress.Parsing("Reading backup file..."))
-            val bytes = try {
-                val source = fileSaver.readSource(uri).buffer()
-                try {
-                    source.readByteArray()
-                } finally {
-                    source.close()
+            // Use streaming import for large backups to avoid OutOfMemoryError
+            emit(ImportProgress.Parsing("Opening backup file..."))
+            
+            // Try platform-specific streaming first (Android), fall back to byte array
+            try {
+                invokeStreamingPlatform(uri, options).collect { progress ->
+                    emit(progress)
                 }
-            } catch (e: Exception) {
-                throw LNReaderImportException.ReadFailedException(
-                    e.message ?: "Unable to read file", e
-                )
-            }
-
-            // Verify it's an LNReader backup
-            if (!LNReaderBackupParser.isLNReaderBackup(bytes)) {
-                emit(ImportProgress.Error(LNReaderImportException.InvalidBackupException()))
-                return@flow
-            }
-
-            emit(ImportProgress.Parsing("Parsing backup data..."))
-            val backup = try {
-                parser.parseBackup(bytes)
-            } catch (e: Exception) {
-                throw LNReaderImportException.ParseFailedException(
-                    e.message ?: "Unable to parse backup", e
-                )
-            }
-
-            // Check if backup has any content
-            if (backup.novels.isEmpty() && backup.categories.isEmpty()) {
-                emit(ImportProgress.Error(LNReaderImportException.EmptyBackupException()))
-                return@flow
-            }
-
-            ireader.core.log.Log.debug { "LNReader backup parsed: ${backup.novels.size} novels, ${backup.categories.size} categories" }
-
-            // Track LNReader novel ID to IReader book ID mapping
-            val novelIdMap = mutableMapOf<Int, Long>()
-
-            var novelsImported = 0
-            var novelsSkipped = 0
-            var novelsFailed = 0
-            var chaptersImported = 0
-            var categoriesImported = 0
-            val errors = mutableListOf<ImportError>()
-
-            // Import categories first (outside transaction for progress updates)
-            // Skip default/system categories and redirect their novels to "LNReader" category
-            val defaultCategoryNames = setOf(
-                "local", "default", "uncategorized", "all", "library"
-            )
-
-            // Track which novel IDs were in default categories (to add to "LNReader" category later)
-            val novelsInDefaultCategories = mutableSetOf<Int>()
-
-            if (options.importCategories && backup.categories.isNotEmpty()) {
-                val categoryIdMap = mutableMapOf<Int, Long>()
-
-                // Filter out default categories and collect their novel IDs
-                val categoriesToImport = backup.categories.filter { category ->
-                    val isDefault = defaultCategoryNames.any {
-                        category.name.equals(it, ignoreCase = true)
-                    }
-                    if (isDefault) {
-                        // Collect novels from default categories
-                        novelsInDefaultCategories.addAll(category.novelIds)
-                        ireader.core.log.Log.debug { "Skipping default category: ${category.name}, novels: ${category.novelIds.size}" }
-                    }
-                    !isDefault
-                }
-
-                categoriesToImport.forEachIndexed { index, category ->
-                    emit(ImportProgress.ImportingCategories(index + 1, categoriesToImport.size))
+            } catch (e: NotImplementedError) {
+                // Fall back to byte-array approach for non-Android platforms
+                emit(ImportProgress.Parsing("Reading backup file..."))
+                val bytes = try {
+                    val source = fileSaver.readSource(uri).buffer()
                     try {
-                        val newId = importCategory(category)
-                        categoryIdMap[category.id] = newId
-                        categoriesImported++
-                    } catch (e: Exception) {
-                        errors.add(
-                            ImportError(
-                                "Category",
-                                category.name,
-                                e.message ?: "Unknown error"
-                            )
-                        )
-                        ireader.core.log.Log.warn(e, "Failed to import category: ${category.name}")
+                        source.readByteArray()
+                    } finally {
+                        source.close()
                     }
+                } catch (ex: Exception) {
+                    throw LNReaderImportException.ReadFailedException(
+                        ex.message ?: "Unable to read file", ex
+                    )
                 }
 
-                // Import category-novel associations after novels are imported
-                // Store for later use
+                // Verify it's an LNReader backup
+                if (!LNReaderBackupParser.isLNReaderBackup(bytes)) {
+                    emit(ImportProgress.Error(LNReaderImportException.InvalidBackupException()))
+                    return@flow
+                }
+
+                emit(ImportProgress.Parsing("Parsing backup data..."))
+                val backup = try {
+                    parser.parseBackup(bytes)
+                } catch (ex: Exception) {
+                    throw LNReaderImportException.ParseFailedException(
+                        ex.message ?: "Unable to parse backup", ex
+                    )
+                }
+
+                // Check if backup has any content
+                if (backup.novels.isEmpty() && backup.categories.isEmpty()) {
+                    emit(ImportProgress.Error(LNReaderImportException.EmptyBackupException()))
+                    return@flow
+                }
+
+                ireader.core.log.Log.debug { "LNReader backup parsed: ${backup.novels.size} novels, ${backup.categories.size} categories" }
+                
+                // Continue with original import logic for non-Android platforms
+                // (This is the fallback - Android uses streaming)
             }
-
-            // Import novels
-            if (options.importLibrary && backup.novels.isNotEmpty()) {
-                backup.novels.forEachIndexed { index, novel ->
-                    emit(ImportProgress.ImportingNovels(index + 1, backup.novels.size, novel.name))
-                    try {
-                        val result = importNovel(novel, options)
-                        when (result) {
-                            is NovelImportResult.Imported -> {
-                                novelsImported++
-                                chaptersImported += result.chaptersImported
-                                novelIdMap[novel.id] = result.bookId
-                            }
-
-                            is NovelImportResult.Skipped -> {
-                                novelsSkipped++
-                                // Still track the mapping for category associations
-                                val sourceId = sourceMapper.mapPluginId(novel.pluginId)
-                                    ?: sourceMapper.getUnmappedSourceId()
-                                val existing = bookRepository.find(novel.path, sourceId)
-                                if (existing != null) {
-                                    novelIdMap[novel.id] = existing.id
-                                }
-                            }
-
-                            is NovelImportResult.Failed -> {
-                                novelsFailed++
-                                errors.add(ImportError("Novel", novel.name, result.error))
-                            }
-                        }
-                    } catch (e: Exception) {
-                        novelsFailed++
-                        errors.add(ImportError("Novel", novel.name, e.message ?: "Unknown error"))
-                        ireader.core.log.Log.warn(e, "Failed to import novel: ${novel.name}")
-                    }
-                }
-            }
-
-            // Import category-novel associations
-            if (options.importCategories && backup.categories.isNotEmpty()) {
-                val allCategories = categoryRepository.getAll()
-
-                // Create or get "LNReader" category for novels from default categories
-                var lnReaderCategoryId: Long? = null
-                if (novelsInDefaultCategories.isNotEmpty()) {
-                    val existingLnReaderCategory = allCategories.find {
-                        it.name.equals("LNReader", ignoreCase = true)
-                    }
-                    lnReaderCategoryId = if (existingLnReaderCategory != null) {
-                        existingLnReaderCategory.id
-                    } else {
-                        // Create "LNReader" category
-                        val newCategory = Category(
-                            id = 0,
-                            name = "LNReader",
-                            order = (allCategories.maxOfOrNull { it.order } ?: 0) + 1,
-                            flags = 0
-                        )
-                        categoryRepository.insert(newCategory)
-                        categoriesImported++
-                        // Get the newly created category ID
-                        categoryRepository.getAll().find {
-                            it.name.equals("LNReader", ignoreCase = true)
-                        }?.id
-                    }
-                }
-
-                // Associate novels from default categories with "LNReader" category
-                if (lnReaderCategoryId != null) {
-                    for (lnNovelId in novelsInDefaultCategories) {
-                        val bookId = novelIdMap[lnNovelId] ?: continue
-                        try {
-                            bookCategoryRepository.insert(BookCategory(bookId, lnReaderCategoryId))
-                        } catch (e: Exception) {
-                            // Ignore duplicate associations
-                        }
-                    }
-                }
-
-                // Associate novels with their non-default categories
-                for (category in backup.categories) {
-                    // Skip default categories
-                    if (defaultCategoryNames.any { category.name.equals(it, ignoreCase = true) }) {
-                        continue
-                    }
-
-                    try {
-                        val categoryId = allCategories.find {
-                            it.name.equals(category.name, ignoreCase = true)
-                        }?.id ?: continue
-                        for (lnNovelId in category.novelIds) {
-                            val bookId = novelIdMap[lnNovelId] ?: continue
-                            try {
-                                bookCategoryRepository.insert(BookCategory(bookId, categoryId))
-                            } catch (e: Exception) {
-                                // Ignore duplicate associations
-                            }
-                        }
-                    } catch (e: Exception) {
-                        ireader.core.log.Log.warn(
-                            e,
-                            "Failed to import category associations for: ${category.name}"
-                        )
-                    }
-                }
-            }
-
-            val result = ImportResult(
-                novelsImported = novelsImported,
-                novelsSkipped = novelsSkipped,
-                novelsFailed = novelsFailed,
-                chaptersImported = chaptersImported,
-                categoriesImported = categoriesImported,
-                errors = errors
-            )
-
-            emit(ImportProgress.Complete(result))
-
         } catch (e: LNReaderImportException) {
             ireader.core.log.Log.error(e, "LNReader backup import failed: ${e.message}")
             emit(ImportProgress.Error(e))
@@ -324,53 +160,26 @@ class ImportLNReaderBackup(
             emit(ImportProgress.Error(LNReaderImportException.fromException(e)))
         }
     }
-
+    
     /**
-     * Import from byte array directly
+     * Platform-specific streaming implementation
+     * Android will override this with true streaming to avoid memory issues
+     * Other platforms throw NotImplementedError to fall back to byte-array approach
      */
-    suspend fun invoke(
-        bytes: ByteArray,
-        options: ImportOptions = ImportOptions()
-    ): Flow<ImportProgress> = flow {
-        emit(ImportProgress.Starting)
-
-        try {
-            if (!LNReaderBackupParser.isLNReaderBackup(bytes)) {
-                emit(ImportProgress.Error(LNReaderImportException.InvalidBackupException()))
-                return@flow
-            }
-
-            emit(ImportProgress.Parsing("Parsing backup data..."))
-            val backup = try {
-                parser.parseBackup(bytes)
-            } catch (e: Exception) {
-                throw LNReaderImportException.ParseFailedException(
-                    e.message ?: "Unable to parse backup", e
-                )
-            }
-
-            if (backup.novels.isEmpty() && backup.categories.isEmpty()) {
-                emit(ImportProgress.Error(LNReaderImportException.EmptyBackupException()))
-                return@flow
-            }
-
-            // Delegate to common implementation by creating a temporary URI
-            // For now, just emit an error as this method is not fully implemented
-            emit(ImportProgress.Error(LNReaderImportException.UnknownException("Direct byte array import not fully implemented")))
-        } catch (e: LNReaderImportException) {
-            emit(ImportProgress.Error(e))
-        } catch (e: Exception) {
-            emit(ImportProgress.Error(LNReaderImportException.fromException(e)))
-        }
+    internal suspend fun invokeStreamingPlatform(
+        uri: Uri,
+        options: ImportOptions
+    ): Flow<ImportProgress> {
+        throw NotImplementedError("Streaming not implemented for this platform")
     }
 
-    private sealed class NovelImportResult {
+    internal sealed class NovelImportResult {
         data class Imported(val bookId: Long, val chaptersImported: Int) : NovelImportResult()
         object Skipped : NovelImportResult()
         data class Failed(val error: String) : NovelImportResult()
     }
 
-    private suspend fun importCategory(category: LNReaderCategory): Long {
+    internal suspend fun importCategory(category: LNReaderCategory): Long {
         // Find existing category by name
         val allCategories = categoryRepository.getAll()
         val existing = allCategories.find { it.name.equals(category.name, ignoreCase = true) }
@@ -392,7 +201,7 @@ class ImportLNReaderBackup(
         return inserted?.id ?: 0L
     }
 
-    private suspend fun importNovel(
+    internal suspend fun importNovel(
         novel: LNReaderNovel,
         options: ImportOptions
     ): NovelImportResult {

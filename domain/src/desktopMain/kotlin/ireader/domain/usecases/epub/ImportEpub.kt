@@ -208,15 +208,45 @@ actual class ImportEpub(
     private fun extractTextContent(doc: Document): List<Text> {
         val textList = mutableListOf<Text>()
         
-        doc.select("h1, h2, h3, h4, h5, h6, p, blockquote, pre, li").forEach { element ->
-            val text = element.text().trim()
-            if (text.isNotBlank()) {
-                textList.add(Text(text))
+        // Get the body element
+        val body = doc.body() ?: return emptyList()
+        
+        // Traverse all child nodes (including text nodes)
+        fun traverseNodes(node: com.fleeksoft.ksoup.nodes.Node) {
+            when (node) {
+                is com.fleeksoft.ksoup.nodes.TextNode -> {
+                    // Extract text from text nodes
+                    val text = node.text().trim()
+                    if (text.isNotBlank()) {
+                        textList.add(Text(text))
+                    }
+                }
+                is com.fleeksoft.ksoup.nodes.Element -> {
+                    // For block-level elements, process their children
+                    if (node.tagName() in listOf("h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "blockquote", "pre", "li", "body")) {
+                        node.childNodes().forEach { traverseNodes(it) }
+                    } else {
+                        // For inline elements, get their text content
+                        val text = node.text().trim()
+                        if (text.isNotBlank()) {
+                            textList.add(Text(text))
+                        }
+                    }
+                }
             }
         }
         
+        // Start traversal from body
+        body.childNodes().forEach { traverseNodes(it) }
+        
         return textList.ifEmpty {
-            listOf(Text(doc.body().text()))
+            // Fallback: get all text from body
+            val bodyText = body.text().trim()
+            if (bodyText.isNotBlank()) {
+                listOf(Text(bodyText))
+            } else {
+                emptyList()
+            }
         }
     }
     
