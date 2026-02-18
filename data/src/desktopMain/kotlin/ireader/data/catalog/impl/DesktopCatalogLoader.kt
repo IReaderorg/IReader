@@ -22,6 +22,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.ApkMeta
+import okio.FileSystem
 import okio.Path.Companion.toPath
 import java.io.File
 import java.net.URLClassLoader
@@ -42,7 +43,8 @@ class DesktopCatalogLoader(
                 File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }.absolutePath.toPath()
             },
             httpClient = httpClients.default,
-            preferenceStoreFactory = preferences
+            preferenceStoreFactory = preferences,
+            fileSystem = FileSystem.SYSTEM
         )
     }
     
