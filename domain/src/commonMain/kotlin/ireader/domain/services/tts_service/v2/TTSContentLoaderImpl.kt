@@ -11,6 +11,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.reader.ContentFilterUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.usecases.tts.TTSTextSanitizer
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ import kotlin.coroutines.resume
  * - Parses chapter content (List<Page>) into paragraphs
  * - Fetches content from remote if not available locally
  * - Applies content filter to remove unwanted text patterns
+ * - Sanitizes text for TTS (removes brackets, special characters)
  */
 class TTSContentLoaderImpl(
     private val bookRepository: BookRepository,
@@ -32,7 +34,8 @@ class TTSContentLoaderImpl(
     private val chapterUseCase: LocalGetChapterUseCase,
     private val remoteUseCases: RemoteUseCases,
     private val catalogStore: CatalogStore,
-    private val contentFilterUseCase: ContentFilterUseCase? = null
+    private val contentFilterUseCase: ContentFilterUseCase? = null,
+    private val ttsSanitizer: TTSTextSanitizer = TTSTextSanitizer()
 ) : TTSContentLoader {
     
     companion object {
@@ -158,7 +161,10 @@ class TTSContentLoaderImpl(
             }
             
             // Apply content filter again after HTML cleaning (catches any remaining patterns)
-            return contentFilterUseCase?.filterStrings(paragraphs) ?: paragraphs
+            val filtered = contentFilterUseCase?.filterStrings(paragraphs) ?: paragraphs
+            
+            // Sanitize for TTS - remove brackets and special characters that shouldn't be read aloud
+            return ttsSanitizer.sanitizeList(filtered)
         }
         
         return emptyList()

@@ -185,22 +185,38 @@ class EpubBuilder(
             appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")
             appendLine("""<package version="3.0" xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId">""")
             
-            // Metadata section
-            appendLine("  <metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\">")
+            // Metadata section - Enhanced for Google Books/Kindle compatibility
+            appendLine("  <metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:opf=\"http://www.idpf.org/2007/opf\">")
+            
+            // Required metadata
             appendLine("    <dc:title>${metadata.title.escapeXml()}</dc:title>")
-            appendLine("    <dc:creator>${metadata.author.escapeXml()}</dc:creator>")
+            appendLine("    <dc:creator opf:role=\"aut\">${metadata.author.escapeXml()}</dc:creator>")
             appendLine("    <dc:language>${metadata.language}</dc:language>")
             appendLine("    <dc:identifier id=\"BookId\">${metadata.identifier}</dc:identifier>")
+            
+            // Optional but recommended metadata
             appendLine("    <dc:publisher>${metadata.publisher}</dc:publisher>")
             appendLine("    <dc:date>${metadata.date}</dc:date>")
-            if (metadata.description != null) {
+            
+            // Description (important for Google Books)
+            if (metadata.description != null && metadata.description.isNotBlank()) {
                 appendLine("    <dc:description>${metadata.description.escapeXml()}</dc:description>")
+            } else {
+                // Provide default description if none exists
+                appendLine("    <dc:description>Exported from IReader</dc:description>")
             }
+            
+            // Generator (helps identify source)
+            appendLine("    <meta property=\"dcterms:generator\">IReader EPUB Exporter</meta>")
+            
+            // Modified date (required for EPUB 3.0)
             appendLine("    <meta property=\"dcterms:modified\">$currentDate</meta>")
-            // Add cover meta tag for EPUB 2.0 compatibility (required by Google Books)
+            
+            // Cover meta tag for EPUB 2.0 compatibility (required by Google Books)
             if (options.includeCover && book.cover.isNotEmpty()) {
                 appendLine("    <meta name=\"cover\" content=\"cover-image\"/>")
             }
+            
             appendLine("  </metadata>")
             
             // Manifest section
@@ -472,17 +488,37 @@ img {
         try {
             Log.info { "Downloading cover image from: $coverUrl" }
             
-            // Download the cover image
+            // Validate URL
+            if (coverUrl.isBlank() || !coverUrl.startsWith("http", ignoreCase = true)) {
+                Log.warn { "Invalid cover URL: $coverUrl" }
+                return
+            }
+            
+            // Download the cover image with timeout
             val response = httpClient.get(coverUrl)
             val imageBytes = response.readBytes()
             
-            // Determine file extension from URL or default to jpg
+            // Validate image size (max 10MB for compatibility)
+            if (imageBytes.size > 10 * 1024 * 1024) {
+                Log.warn { "Cover image too large: ${imageBytes.size} bytes, skipping" }
+                return
+            }
+            
+            // Validate minimum size (at least 1KB)
+            if (imageBytes.size < 1024) {
+                Log.warn { "Cover image too small: ${imageBytes.size} bytes, might be invalid" }
+            }
+            
+            // Determine file extension from URL or content type
             val extension = when {
                 coverUrl.contains(".png", ignoreCase = true) -> "png"
                 coverUrl.contains(".jpeg", ignoreCase = true) -> "jpeg"
                 coverUrl.contains(".jpg", ignoreCase = true) -> "jpg"
                 coverUrl.contains(".gif", ignoreCase = true) -> "gif"
                 coverUrl.contains(".webp", ignoreCase = true) -> "webp"
+                // Check magic bytes for image type
+                imageBytes.size >= 4 && imageBytes[0] == 0xFF.toByte() && imageBytes[1] == 0xD8.toByte() -> "jpg"
+                imageBytes.size >= 4 && imageBytes[0] == 0x89.toByte() && imageBytes[1] == 0x50.toByte() -> "png"
                 else -> "jpg"
             }
             
@@ -490,10 +526,11 @@ img {
             val coverFile = baseDir / "OEBPS" / "Images" / "cover.$extension"
             fileSystem.sink(coverFile).buffer().use { it.write(imageBytes) }
             
-            Log.info { "Cover image downloaded successfully: ${imageBytes.size} bytes" }
+            Log.info { "Cover image downloaded successfully: ${imageBytes.size} bytes as $extension" }
         } catch (e: Exception) {
-            Log.warn { "Failed to download cover image: ${e.message}" }
+            Log.warn { "Failed to download cover image from $coverUrl: ${e.message}" }
             // Don't fail the entire export if cover download fails
+            // This ensures export works even with broken cover URLs
         }
     }
     

@@ -1,6 +1,6 @@
 package ireader.domain.usecases.backup
 
 /**
- * Desktop implementation uses stub (Google Drive not typically used on desktop)
+ * iOS implementation uses stub (Google Drive not yet implemented for iOS)
  */
 actual fun createGoogleDriveProvider(): CloudStorageProvider = GoogleDriveProviderStub()

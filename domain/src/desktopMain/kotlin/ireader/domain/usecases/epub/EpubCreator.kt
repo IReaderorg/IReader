@@ -9,15 +9,17 @@ import ireader.domain.models.epub.ExportOptions
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okio.FileSystem
 
 /**
  * Desktop implementation of EPUB creator using EpubBuilder
  */
 actual class EpubCreator(
     private val chapterRepository: ChapterRepository,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
-    private val epubBuilder = EpubBuilder(httpClient)
+    private val epubBuilder = EpubBuilder(httpClient, fileSystem)
     
     actual suspend operator fun invoke(book: Book, uri: Uri, currentEvent: (String) -> Unit) {
         withContext(Dispatchers.IO) {
