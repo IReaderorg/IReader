@@ -380,6 +380,9 @@ tasks.register<Exec>("buildAppImage") {
     val updateInfo = "gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync"
     
     doFirst {
+        // Create output directory
+        outputAppImage.parentFile.mkdirs()
+        
         // Create AppDir structure
         appDir.mkdirs()
         appDir.resolve("usr/bin").mkdirs()
@@ -414,7 +417,7 @@ tasks.register<Exec>("buildAppImage") {
             Exec=ireader
             Icon=ireader
             Type=Application
-            Categories=Office;Education;Literature;
+            Categories=Office;
             MimeType=application/epub+zip;application/x-mobipocket-ebook;application/pdf;text/plain;
             Terminal=false
             X-AppImage-Version=${versionName}
@@ -441,8 +444,10 @@ tasks.register<Exec>("buildAppImage") {
     }
     
     // Build AppImage with update information
+    environment("ARCH", "x86_64")
     commandLine(
         "appimagetool",
+        "--no-appstream",
         "--updateinformation", updateInfo,
         appDir.absolutePath,
         outputAppImage.absolutePath
@@ -491,15 +496,13 @@ tasks.register<Exec>("buildAppImageWithZsync") {
     val outputAppImage = buildDir.map { it.asFile.resolve("compose/binaries/main/IReader-x86_64.AppImage") }
     val zsyncFile = outputAppImage.map { File("${it.absolutePath}.zsync") }
     
-    doFirst {
-        // Generate zsync file
-        commandLine(
-            "zsyncmake",
-            "-u", outputAppImage.get().name,
-            "-o", zsyncFile.get().absolutePath,
-            outputAppImage.get().absolutePath
-        )
-    }
+    // Generate zsync file
+    commandLine(
+        "zsyncmake",
+        "-u", outputAppImage.get().name,
+        "-o", zsyncFile.get().absolutePath,
+        outputAppImage.get().absolutePath
+    )
     
     doLast {
         println("")
