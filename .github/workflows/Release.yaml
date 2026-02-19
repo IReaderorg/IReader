@@ -153,10 +153,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y zsync
           
-          # Download appimagetool
-          wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool
-          sudo mv appimagetool /usr/local/bin/appimagetool
+          # Download and extract appimagetool (extract to avoid FUSE requirement)
+          wget -O appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool.AppImage
+          ./appimagetool.AppImage --appimage-extract
+          sudo mv squashfs-root /opt/appimagetool
+          sudo ln -s /opt/appimagetool/AppRun /usr/local/bin/appimagetool
           
           # Build AppImage with embedded update information and generate .zsync file
           ./gradlew buildAppImageWithZsync
@@ -173,6 +175,7 @@ jobs:
           
           echo "✅ AppImage with delta updates created successfully!"
           echo "Files:"
+          ls -lh
           ls -lh
 
       - name: Sign APK
