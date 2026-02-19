@@ -167,6 +167,7 @@ jobs:
           rm -rf desktop/build/compose/binaries/main/*.AppImage*
           
           # Build AppImage with embedded update information and generate .zsync file
+          # Use 'latest' channel for stable releases (default)
           ./gradlew buildAppImageWithZsync --no-configuration-cache
           
           # Move files to expected location

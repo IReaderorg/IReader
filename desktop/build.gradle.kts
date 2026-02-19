@@ -377,7 +377,15 @@ tasks.register<Exec>("buildAppImage") {
     
     // AppImage update information
     // Format: gh-releases-zsync|owner|repo|tag|filename
-    val updateInfo = "gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync"
+    // 
+    // Update channels:
+    // - 'latest': Points to the latest stable release (default for Release workflow)
+    // - 'continuous': Points to the latest pre-release (for Preview workflow)
+    // - Specific tag: e.g., 'v1.2.0' for a specific version
+    //
+    // Set via: ./gradlew buildAppImage -Pappimage.update.channel=continuous
+    val updateChannel = project.findProperty("appimage.update.channel")?.toString() ?: "latest"
+    val updateInfo = "gh-releases-zsync|ireaderorg|ireader|$updateChannel|IReader-*-x86_64.AppImage.zsync"
     
     doFirst {
         // Create output directory
@@ -458,7 +466,8 @@ tasks.register<Exec>("buildAppImage") {
         println("✓ AppImage created: ${outputAppImage.absolutePath}")
         println("")
         println("Update information embedded:")
-        println("  $updateInfo")
+        println("  Channel: $updateChannel")
+        println("  Update info: $updateInfo")
         println("")
         println("To generate zsync file, run:")
         println("  ./gradlew buildAppImageWithZsync")
