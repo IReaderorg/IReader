@@ -151,8 +151,12 @@ jobs:
           sudo mv squashfs-root /opt/appimagetool
           sudo ln -s /opt/appimagetool/AppRun /usr/local/bin/appimagetool
           
+          # Clean previous AppImage build artifacts
+          rm -rf desktop/build/appimage
+          rm -rf desktop/build/compose/binaries/main/*.AppImage*
+          
           # Build AppImage with embedded update information and generate .zsync file
-          ./gradlew buildAppImageWithZsync
+          ./gradlew buildAppImageWithZsync --no-configuration-cache
           
           # Move files to expected location
           mkdir -p desktop/build/compose/binaries/main/appimage
