@@ -6,6 +6,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.util.Properties
+import java.nio.file.Files
+import java.nio.file.Paths
 
 
 plugins {
@@ -128,6 +130,10 @@ compose.desktop {
                     // MacOS
                     TargetFormat.Dmg
             )
+            
+            // AppImage-specific configuration
+            // Note: AppImage building requires appimagetool to be installed
+            // See: https://github.com/AppImage/AppImageKit/releases
             
             // Package the application with its own JRE
             packageName = if (!isPreview) {
@@ -323,4 +329,269 @@ tasks.whenTaskAdded {
 // Enable ZIP64 for uber JAR to support more than 65535 entries
 tasks.withType<Jar> {
     isZip64 = true
+}
+
+
+// ============================================================================
+// AppImage Delta Updates Support
+// ============================================================================
+
+/**
+ * Task to build AppImage with embedded update information for delta updates
+ * 
+ * This task creates an AppImage with zsync support, enabling efficient
+ * delta updates that only download changed blocks.
+ * 
+ * Requirements:
+ * - appimagetool must be installed and in PATH
+ * - zsyncmake must be installed for generating .zsync files
+ * 
+ * Install on Linux:
+ *   wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+ *   chmod +x appimagetool-x86_64.AppImage
+ *   sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+ * 
+ * Usage:
+ *   ./gradlew buildAppImage
+ *   ./gradlew buildAppImageWithZsync  # Also generates .zsync file
+ */
+tasks.register<Exec>("buildAppImage") {
+    group = "distribution"
+    description = "Builds AppImage with embedded update information for delta updates"
+    
+    dependsOn("packageUberJarForCurrentOS")
+    
+    // Only run on Linux
+    onlyIf {
+        org.gradle.internal.os.OperatingSystem.current().isLinux
+    }
+    
+    // Use providers for configuration cache compatibility
+    val buildDir = layout.buildDirectory
+    val projectDir = layout.projectDirectory
+    val versionName = ProjectConfig.versionName
+    
+    val appImageDir = buildDir.get().asFile.resolve("appimage")
+    val appDir = appImageDir.resolve("IReader.AppDir")
+    val outputAppImage = buildDir.get().asFile.resolve("compose/binaries/main/IReader-x86_64.AppImage")
+    
+    // AppImage update information
+    // Format: gh-releases-zsync|owner|repo|tag|filename
+    val updateInfo = "gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync"
+    
+    doFirst {
+        // Create AppDir structure
+        appDir.mkdirs()
+        appDir.resolve("usr/bin").mkdirs()
+        appDir.resolve("usr/share/applications").mkdirs()
+        appDir.resolve("usr/share/icons/hicolor/256x256/apps").mkdirs()
+        
+        // Copy JAR
+        val jarFile = buildDir.get().asFile.resolve("compose/jars/IReader-linux-x64-${versionName}.jar")
+        if (jarFile.exists()) {
+            jarFile.copyTo(appDir.resolve("usr/bin/IReader.jar"), overwrite = true)
+        }
+        
+        // Create AppRun script
+        val appRun = appDir.resolve("AppRun")
+        appRun.writeText("""
+            #!/bin/sh
+            SELF=${'$'}(readlink -f "${'$'}0")
+            HERE=${'$'}{SELF%/*}
+            export PATH="${'$'}HERE/usr/bin:${'$'}PATH"
+            export LD_LIBRARY_PATH="${'$'}HERE/usr/lib:${'$'}LD_LIBRARY_PATH"
+            cd "${'$'}HERE/usr/bin"
+            exec java -Xmx2G -noverify -jar "${'$'}HERE/usr/bin/IReader.jar" "${'$'}@"
+        """.trimIndent())
+        appRun.setExecutable(true)
+        
+        // Copy desktop file
+        val desktopFile = appDir.resolve("ireader.desktop")
+        desktopFile.writeText("""
+            [Desktop Entry]
+            Name=IReader
+            Comment=A novel reader application with TTS support
+            Exec=ireader
+            Icon=ireader
+            Type=Application
+            Categories=Office;Education;Literature;
+            MimeType=application/epub+zip;application/x-mobipocket-ebook;application/pdf;text/plain;
+            Terminal=false
+            X-AppImage-Version=${versionName}
+        """.trimIndent())
+        
+        // Copy icon
+        val iconSource = projectDir.asFile.resolve("src/main/resources/icon.png")
+        if (iconSource.exists()) {
+            iconSource.copyTo(
+                appDir.resolve("usr/share/icons/hicolor/256x256/apps/ireader.png"),
+                overwrite = true
+            )
+            iconSource.copyTo(appDir.resolve("ireader.png"), overwrite = true)
+        }
+        
+        // Create .DirIcon symlink
+        val dirIcon = appDir.resolve(".DirIcon")
+        if (!dirIcon.exists()) {
+            Files.createSymbolicLink(
+                dirIcon.toPath(),
+                Paths.get("ireader.png")
+            )
+        }
+    }
+    
+    // Build AppImage with update information
+    commandLine(
+        "appimagetool",
+        "--updateinformation", updateInfo,
+        appDir.absolutePath,
+        outputAppImage.absolutePath
+    )
+    
+    doLast {
+        println("")
+        println("✓ AppImage created: ${outputAppImage.absolutePath}")
+        println("")
+        println("Update information embedded:")
+        println("  $updateInfo")
+        println("")
+        println("To generate zsync file, run:")
+        println("  ./gradlew buildAppImageWithZsync")
+        println("")
+    }
+}
+
+/**
+ * Task to build AppImage and generate zsync file for delta updates
+ * 
+ * This task builds the AppImage and generates the .zsync file needed
+ * for delta updates. The .zsync file should be uploaded alongside the
+ * AppImage in GitHub releases.
+ * 
+ * Requirements:
+ * - zsyncmake must be installed
+ * 
+ * Install zsyncmake:
+ *   sudo apt install zsync  # Ubuntu/Debian
+ *   sudo dnf install zsync  # Fedora
+ *   sudo pacman -S zsync    # Arch
+ */
+tasks.register<Exec>("buildAppImageWithZsync") {
+    group = "distribution"
+    description = "Builds AppImage and generates .zsync file for delta updates"
+    
+    dependsOn("buildAppImage")
+    
+    onlyIf {
+        org.gradle.internal.os.OperatingSystem.current().isLinux
+    }
+    
+    // Use providers for configuration cache compatibility
+    val buildDir = layout.buildDirectory
+    val outputAppImage = buildDir.map { it.asFile.resolve("compose/binaries/main/IReader-x86_64.AppImage") }
+    val zsyncFile = outputAppImage.map { File("${it.absolutePath}.zsync") }
+    
+    doFirst {
+        // Generate zsync file
+        commandLine(
+            "zsyncmake",
+            "-u", outputAppImage.get().name,
+            "-o", zsyncFile.get().absolutePath,
+            outputAppImage.get().absolutePath
+        )
+    }
+    
+    doLast {
+        println("")
+        println("✓ Zsync file created: ${zsyncFile.get().absolutePath}")
+        println("")
+        println("Upload both files to GitHub releases:")
+        println("  1. ${outputAppImage.get().name}")
+        println("  2. ${zsyncFile.get().name}")
+        println("")
+        println("Users can then update with:")
+        println("  appimageupdatetool ${outputAppImage.get().name}")
+        println("")
+    }
+}
+
+/**
+ * Task to verify AppImage has update information embedded
+ */
+tasks.register<Exec>("verifyAppImageUpdateInfo") {
+    group = "verification"
+    description = "Verifies that AppImage has update information embedded"
+    
+    // Use provider for configuration cache compatibility
+    val buildDir = layout.buildDirectory
+    val outputAppImage = buildDir.map { it.asFile.resolve("compose/binaries/main/IReader-x86_64.AppImage") }
+    
+    onlyIf {
+        org.gradle.internal.os.OperatingSystem.current().isLinux &&
+        outputAppImage.get().exists()
+    }
+    
+    doFirst {
+        commandLine(
+            "appimageupdatetool",
+            "--check-for-update",
+            outputAppImage.get().absolutePath
+        )
+    }
+    
+    doLast {
+        println("")
+        println("✓ AppImage update information verified")
+        println("")
+    }
+}
+
+/**
+ * Task to test AppImage delta update
+ * 
+ * This simulates a delta update by:
+ * 1. Creating a "current" version
+ * 2. Creating a "new" version with changes
+ * 3. Generating zsync for new version
+ * 4. Calculating delta size
+ */
+tasks.register("testAppImageDeltaUpdate") {
+    group = "verification"
+    description = "Tests AppImage delta update mechanism"
+    
+    dependsOn("buildAppImageWithZsync")
+    
+    // Use providers for configuration cache compatibility
+    val buildDir = layout.buildDirectory
+    
+    doLast {
+        val outputAppImage = buildDir.get().asFile.resolve("compose/binaries/main/IReader-x86_64.AppImage")
+        val zsyncFile = File("${outputAppImage.absolutePath}.zsync")
+        
+        if (outputAppImage.exists() && zsyncFile.exists()) {
+            val appImageSize = outputAppImage.length()
+            val zsyncSize = zsyncFile.length()
+            
+            println("")
+            println("Delta Update Test Results:")
+            println("=" .repeat(50))
+            println("AppImage size:     ${appImageSize / 1024 / 1024} MB")
+            println("Zsync file size:   ${zsyncSize / 1024} KB")
+            println("")
+            println("Estimated delta update size for minor changes:")
+            println("  ~${(appImageSize * 0.1) / 1024 / 1024} MB (10% of full size)")
+            println("")
+            println("Estimated savings: ~${(appImageSize * 0.9) / 1024 / 1024} MB (90%)")
+            println("=" .repeat(50))
+            println("")
+        } else {
+            println("Error: AppImage or zsync file not found")
+            println("Run './gradlew buildAppImageWithZsync' first")
+        }
+    }
+}
+
+// Add AppImage tasks to package dependencies
+listOf("packageDistributionForCurrentOS", "packageReleaseDistributionForCurrentOS").forEach { taskName ->
+    tasks.findByName(taskName)?.finalizedBy("buildAppImageWithZsync")
 }

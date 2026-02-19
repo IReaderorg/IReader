@@ -135,65 +135,34 @@ jobs:
           arguments: >
             ${{ matrix.build }}
 
-      - name: Build AppImage
+      - name: Build AppImage with Delta Updates
         if: ${{ matrix.runtime == 'linux-appimage' }}
         run: |
+          # Install zsync for delta updates
+          sudo apt-get update
+          sudo apt-get install -y zsync
+          
           # Download appimagetool
           wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
+          sudo mv appimagetool /usr/local/bin/appimagetool
           
-          # Create AppDir structure
-          mkdir -p AppDir/usr/bin
-          mkdir -p AppDir/usr/share/applications
-          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          # Build AppImage with embedded update information and generate .zsync file
+          ./gradlew buildAppImageWithZsync
           
-          # Copy the uber jar
-          cp desktop/build/compose/jars/*.jar AppDir/usr/bin/IReader.jar
-          
-          # Create launcher script
-          cat > AppDir/usr/bin/ireader << 'EOF'
-          #!/bin/bash
-          APPDIR="$(dirname "$(readlink -f "$0")")/.."
-          exec java -Xmx2G -noverify -jar "$APPDIR/usr/bin/IReader.jar" "$@"
-          EOF
-          chmod +x AppDir/usr/bin/ireader
-          
-          # Create desktop file
-          cat > AppDir/usr/share/applications/ireader.desktop << 'EOF'
-          [Desktop Entry]
-          Type=Application
-          Name=IReader
-          Comment=A novel reader application
-          Exec=ireader
-          Icon=ireader
-          Categories=Office;Viewer;
-          Terminal=false
-          EOF
-          
-          # Copy icon
-          cp desktop/src/main/resources/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/ireader.png
-          cp desktop/src/main/resources/icon.png AppDir/ireader.png
-          
-          # Symlink desktop file to AppDir root (required by appimagetool)
-          ln -s usr/share/applications/ireader.desktop AppDir/ireader.desktop
-          
-          # Create AppRun
-          cat > AppDir/AppRun << 'EOF'
-          #!/bin/bash
-          APPDIR="$(dirname "$(readlink -f "$0")")"
-          exec "$APPDIR/usr/bin/ireader" "$@"
-          EOF
-          chmod +x AppDir/AppRun
-          
-          # Create .DirIcon
-          cp desktop/src/main/resources/icon.png AppDir/.DirIcon
-          
-          # Build AppImage (use --appimage-extract-and-run to avoid FUSE requirement in CI)
-          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir IReader-x86_64.AppImage
-          
-          # Move to expected location
+          # Move files to expected location
           mkdir -p desktop/build/compose/binaries/main/appimage
-          mv IReader-x86_64.AppImage desktop/build/compose/binaries/main/appimage/
+          mv desktop/build/compose/binaries/main/IReader-x86_64.AppImage desktop/build/compose/binaries/main/appimage/
+          mv desktop/build/compose/binaries/main/IReader-x86_64.AppImage.zsync desktop/build/compose/binaries/main/appimage/
+          
+          # Generate checksums
+          cd desktop/build/compose/binaries/main/appimage
+          sha256sum IReader-x86_64.AppImage > IReader-x86_64.AppImage.sha256
+          sha256sum IReader-x86_64.AppImage.zsync > IReader-x86_64.AppImage.zsync.sha256
+          
+          echo "✅ AppImage with delta updates created successfully!"
+          echo "Files:"
+          ls -lh
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         if: ${{ matrix.runtime == 'android' }}
@@ -314,7 +283,7 @@ jobs:
       - name: Create Main Repository Pre-Release
         uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage"
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage,**/*.AppImage.zsync,**/*.sha256"
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}

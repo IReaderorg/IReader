@@ -1,0 +1,103 @@
+#!/bin/sh
+
+# AM install script for IReader
+# This script follows the AM package manager template
+# See: https://github.com/ivan-hc/AM/blob/main/docs/guides-and-tutorials/template.md
+
+set -e
+
+APP=ireader
+SITE="IReader-org/IReader"
+VERSION="latest"
+
+# Determine architecture
+ARCH=$(uname -m)
+case "$ARCH" in
+    x86_64) APPIMAGE_ARCH="x86_64" ;;
+    aarch64|arm64) APPIMAGE_ARCH="aarch64" ;;
+    *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+esac
+
+# Create installation directories
+mkdir -p "$HOME/.local/share/applications"
+mkdir -p "$HOME/.local/bin"
+mkdir -p "$HOME/.local/share/icons/hicolor/256x256/apps"
+
+echo "Installing IReader..."
+
+# Download latest AppImage
+cd "$HOME/.local/bin" || exit 1
+
+# Get the latest release URL
+APPIMAGE_URL="https://github.com/$SITE/releases/latest/download/IReader-${APPIMAGE_ARCH}.AppImage"
+
+echo "Downloading from: $APPIMAGE_URL"
+wget -q --show-progress "$APPIMAGE_URL" -O "$APP" || {
+    echo "Failed to download AppImage"
+    exit 1
+}
+
+chmod +x "$APP"
+
+# Verify the AppImage has update information embedded
+if command -v appimageupdatetool >/dev/null 2>&1; then
+    echo "Checking for update information..."
+    appimageupdatetool --check-for-update "$APP" || {
+        echo "Warning: AppImage may not have update information embedded"
+        echo "Delta updates may not be available"
+    }
+fi
+
+# Create desktop entry
+cat > "$HOME/.local/share/applications/$APP.desktop" << 'EOF'
+[Desktop Entry]
+Name=IReader
+Comment=A novel reader application with TTS support
+Exec=ireader %U
+Icon=ireader
+Type=Application
+Categories=Office;Education;Literature;
+MimeType=application/epub+zip;application/x-mobipocket-ebook;application/pdf;text/plain;
+Terminal=false
+StartupNotify=true
+X-AppImage-Version=latest
+X-AppImage-UpdateInformation=gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync
+EOF
+
+# Download icon
+echo "Downloading icon..."
+wget -q "https://raw.githubusercontent.com/$SITE/main/desktop/src/main/resources/icon.png" \
+  -O "$HOME/.local/share/icons/hicolor/256x256/apps/$APP.png" || {
+    echo "Warning: Failed to download icon"
+}
+
+# Update desktop database
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+fi
+
+# Update icon cache
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+fi
+
+echo ""
+echo "✓ IReader installed successfully!"
+echo ""
+echo "Run with: $APP"
+echo "Or find it in your application menu"
+echo ""
+
+# Check if AppImageUpdate is available
+if ! command -v appimageupdatetool >/dev/null 2>&1; then
+    echo "Tip: Install AppImageUpdate for delta updates:"
+    echo "  https://github.com/AppImageCommunity/AppImageUpdate"
+    echo ""
+fi
+
+# Check if AppImageLauncher is available
+if ! command -v AppImageLauncher >/dev/null 2>&1; then
+    echo "Tip: Install AppImageLauncher for better AppImage integration:"
+    echo "  https://github.com/TheAssassin/AppImageLauncher"
+    echo ""
+fi
