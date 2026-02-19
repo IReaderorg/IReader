@@ -148,6 +148,8 @@ jobs:
 
       - name: Build AppImage with Delta Updates
         if: ${{ matrix.runtime == 'linux-appimage' }}
+        env:
+          ARCH: x86_64
         run: |
           # Install zsync for delta updates
           sudo apt-get update
