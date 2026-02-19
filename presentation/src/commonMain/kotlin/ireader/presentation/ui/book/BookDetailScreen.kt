@@ -455,6 +455,11 @@ fun BookDetailScreen(
                             // Use pre-computed selection set for O(1) lookup
                             val isSelected = chapter.id in selectionSet
                             
+                            // Check if chapter has translation
+                            val hasTranslation = remember(chapter.id, vm.chapterTranslationsMap) {
+                                vm.chapterTranslationsMap[chapter.id] == true
+                            }
+                            
                             ChapterRow(
                                 modifier = Modifier.animateItem(),
                                 chapter = chapter,
@@ -462,7 +467,8 @@ fun BookDetailScreen(
                                 isLastRead = chapter.id == displayConfig.lastReadId,
                                 isSelected = isSelected,
                                 onLongClick = longClickHandler,
-                                showNumber = displayConfig.showNumber
+                                showNumber = displayConfig.showNumber,
+                                hasTranslation = hasTranslation
                             )
                             HorizontalDivider(
                                 modifier = dividerModifier,

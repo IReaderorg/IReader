@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -50,6 +51,7 @@ fun ChapterRow(
         isSelected: Boolean = false,
         isLoading: Boolean = false,
         showNumber: Boolean = true,
+        hasTranslation: Boolean = false,
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Use remember to cache computed values and minimize recomposition
@@ -155,7 +157,7 @@ fun ChapterRow(
         }
         
         // Status indicators - only render if needed
-        if (isLoading || isCached) {
+        if (isLoading || isCached || hasTranslation) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -179,6 +181,22 @@ fun ChapterRow(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = localizeHelper.localize(Res.string.cached),
                             tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+                if (hasTranslation) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Translate,
+                            contentDescription = "Has translation",
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(16.dp)
                         )
                     }

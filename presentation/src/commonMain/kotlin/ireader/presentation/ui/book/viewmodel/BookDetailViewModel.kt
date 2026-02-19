@@ -193,6 +193,10 @@ class BookDetailViewModel(
     var translationExportTargetLanguage by mutableStateOf("en")
         private set
     
+    // Chapter translations map - maps chapter ID to whether it has translation
+    var chapterTranslationsMap by mutableStateOf<Map<Long, Boolean>>(emptyMap())
+        private set
+    
     // EPUB export progress state
     private val _epubExportProgress = MutableStateFlow<EpubExportProgress>(EpubExportProgress.Idle)
     val epubExportProgress: StateFlow<EpubExportProgress> = _epubExportProgress.asStateFlow()
@@ -240,6 +244,9 @@ class BookDetailViewModel(
             // OPTIMIZATION: Show Success state immediately with empty book - no shimmer needed
             _state.value = BookDetailState.Success.empty(bookId = bookId)
             initializeBook(bookId)
+            
+            // Load chapter translations in background
+            loadChapterTranslations(bookId)
             
             // Subscribe to ChapterController state for selection sync (Requirements: 9.1, 9.4, 9.5)
             subscribeToChapterControllerState()
@@ -803,6 +810,27 @@ class BookDetailViewModel(
             title = translatedTitle,
             description = translatedDescription
         )
+    }
+
+    // ==================== Chapter Translations ====================
+    
+    /**
+     * Load chapter translations map to show translation indicators in chapter list.
+     * Maps chapter ID to whether it has translation content (translatedContent.size > 0).
+     */
+    private fun loadChapterTranslations(bookId: Long) {
+        scope.launch(ioDispatcher) {
+            try {
+                val translationsMap = getTranslatedChaptersByBookIdUseCase.getTranslationsMap(bookId)
+                // Create a map of chapter ID to whether it has translation content
+                chapterTranslationsMap = translationsMap.mapValues { (_, translatedChapter) ->
+                    translatedChapter.translatedContent.size > 0
+                }
+            } catch (e: Exception) {
+                Log.error("Failed to load chapter translations", e)
+                chapterTranslationsMap = emptyMap()
+            }
+        }
     }
 
     // ==================== Scroll Position ====================
