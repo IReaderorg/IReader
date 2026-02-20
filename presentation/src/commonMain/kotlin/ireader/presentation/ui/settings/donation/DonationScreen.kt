@@ -47,8 +47,7 @@ import ireader.i18n.resources.thank_you_for_your_support
 import ireader.i18n.resources.why_donate
 import ireader.i18n.resources.your_contribution_helps_keep_ireader
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-
-private const val REYMIT_URL = "https://reymit.ir/kazemcodes"
+import ireader.presentation.core.constants.DonationConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +95,7 @@ fun DonationScreen(
             item {
                 ReymitPaymentCard(
                     onDonateClick = {
-                        uriHandler.openUri(REYMIT_URL)
+                        uriHandler.openUri(DonationConstants.DONATION_URL)
                     }
                 )
             }

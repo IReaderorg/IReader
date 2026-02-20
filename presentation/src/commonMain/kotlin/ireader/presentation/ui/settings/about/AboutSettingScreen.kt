@@ -48,6 +48,7 @@ import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.PreferenceRow
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.core.constants.DonationConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -326,7 +327,7 @@ fun AboutSettingScreen(
                     title = localizeHelper.localize(Res.string.donate_via_card),
                     subtitle = localizeHelper.localize(Res.string.support_the_project_with_a_donation),
                     onClick = {
-                        uriHandler.openUri("https://reymit.ir/kazemcodes")
+                        uriHandler.openUri(DonationConstants.DONATION_URL)
                     }
                 )
             }

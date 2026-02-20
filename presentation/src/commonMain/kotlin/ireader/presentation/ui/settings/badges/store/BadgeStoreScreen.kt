@@ -119,8 +119,7 @@ import ireader.i18n.resources.verified_supporter
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.AsyncImage
-
-private const val DONATION_URL = "https://reymit.ir/kazemcodes"
+import ireader.presentation.core.constants.DonationConstants
 
 // Rarity color schemes
 private val commonColors = listOf(Color(0xFF607D8B), Color(0xFF78909C))
@@ -358,7 +357,7 @@ fun BadgeStoreScreen(
                 onDismiss = { viewModel.onDismissPurchaseDialog() },
                 onSubmitProof = { proof -> viewModel.onSubmitPaymentProof(proof) },
                 isSubmitting = state.isSubmitting,
-                onOpenDonationLink = { onOpenDonationLink(DONATION_URL) }
+                onOpenDonationLink = { onOpenDonationLink(DonationConstants.DONATION_URL) }
             )
         }
     }
@@ -1177,7 +1176,7 @@ private fun ModernPurchaseDialog(
                         }
 
                         Text(
-                            text = DONATION_URL,
+                            text = DonationConstants.DONATION_URL,
                             modifier = Modifier.fillMaxWidth().padding(top = if (isCompactDialog) 4.dp else 8.dp),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
