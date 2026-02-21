@@ -42,6 +42,7 @@ import ireader.presentation.core.ui.RepositoryScreenSpec
 import ireader.presentation.core.ui.SecuritySettingSpec
 import ireader.presentation.core.ui.SettingScreenSpec
 import ireader.presentation.core.ui.SourceMigrationScreenSpec
+import ireader.presentation.core.ui.SyncScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import ireader.presentation.core.ui.TTSV2ScreenSpec
 import ireader.presentation.core.ui.TrackingSettingsScreenSpec
@@ -430,6 +431,11 @@ fun CommonNavHost(
         
         composable(NavigationRoutes.trackingSettings) {
             TrackingSettingsScreenSpec().Content()
+        }
+        
+        // WiFi Sync Settings
+        composable(NavigationRoutes.wifiSync) {
+            SyncScreenSpec().Content()
         }
         
         // Cloudflare Bypass Settings

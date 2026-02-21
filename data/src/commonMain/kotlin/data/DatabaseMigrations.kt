@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 36
+    const val CURRENT_VERSION = 37
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -101,6 +101,7 @@ object DatabaseMigrations {
             33 -> migrateV33toV34(driver)
             34 -> migrateV34toV35(driver)
             35 -> migrateV35toV36(driver)
+            36 -> migrateV36toV37(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2638,6 +2639,79 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(36, e)
+            // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+
+    /**
+     * Migration from version 36 to version 37
+     * Adds sync-related tables for Local WiFi Book Sync feature:
+     * - sync_metadata: Device sync metadata
+     * - trusted_devices: Paired/trusted devices
+     * - sync_log: Sync operation history
+     */
+    private fun migrateV36toV37(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(36, 37)
+            
+            // Create sync_metadata table
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS sync_metadata(
+                    device_id TEXT NOT NULL PRIMARY KEY,
+                    device_name TEXT NOT NULL,
+                    device_type TEXT NOT NULL,
+                    last_sync_time INTEGER NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("sync_metadata")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_metadata_device_id ON sync_metadata(device_id);", 0)
+            Logger.logIndexCreated("idx_sync_metadata_device_id")
+            
+            // Create trusted_devices table
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS trusted_devices(
+                    device_id TEXT NOT NULL PRIMARY KEY,
+                    device_name TEXT NOT NULL,
+                    paired_at INTEGER NOT NULL,
+                    expires_at INTEGER NOT NULL,
+                    is_active INTEGER NOT NULL DEFAULT 1
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("trusted_devices")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_trusted_devices_device_id ON trusted_devices(device_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_trusted_devices_expires_at ON trusted_devices(expires_at);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_trusted_devices_is_active ON trusted_devices(is_active) WHERE is_active = 1;", 0)
+            Logger.logIndexCreated("trusted_devices indexes")
+            
+            // Create sync_log table
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS sync_log(
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    sync_id TEXT NOT NULL,
+                    device_id TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    items_synced INTEGER NOT NULL,
+                    duration INTEGER NOT NULL,
+                    error_message TEXT,
+                    timestamp INTEGER NOT NULL
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("sync_log")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_log_device_id ON sync_log(device_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_log_timestamp ON sync_log(timestamp DESC);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_log_sync_id ON sync_log(sync_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_log_status ON sync_log(status);", 0)
+            Logger.logIndexCreated("sync_log indexes")
+            
+            Logger.logMigrationSuccess(37)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(37, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }

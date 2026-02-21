@@ -4,6 +4,7 @@ package ireader.presentation.core.di
 import ireader.presentation.core.ScreenContentViewModel
 import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.presentation.di.screenModelModule
+import ireader.presentation.di.syncPresentationModule
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
@@ -362,6 +363,9 @@ val PresentationModules = module {
 
     // New StateScreenModel implementations following Mihon's pattern
     includes(screenModelModule)
+    
+    // Sync presentation module for Local WiFi Book Sync feature
+    includes(syncPresentationModule)
     
     // Plugin integration module for feature plugins
     includes(pluginIntegrationModule)

@@ -51,6 +51,7 @@ fun SettingsMainScreen(
     onLibrarySettings: () -> Unit,
     onDownloadSettings: () -> Unit,
     onTrackingSettings: () -> Unit,
+    onWifiSyncSettings: () -> Unit,
     onBackupSettings: () -> Unit,
     onSecuritySettings: () -> Unit,
     onAdvancedSettings: () -> Unit,
@@ -77,6 +78,7 @@ fun SettingsMainScreen(
             "library" to onLibrarySettings,
             "downloads" to onDownloadSettings,
             "tracking" to onTrackingSettings,
+            "wifiSync" to onWifiSyncSettings,
             "backup" to onBackupSettings,
             "data" to onDataSettings,
             "extensions" to onExtensionSettings,
@@ -171,6 +173,15 @@ fun SettingsMainScreen(
                     description = "External service integration (MyAnimeList, AniList, etc.)",
                     icon = Icons.Outlined.Sync,
                     onClick = clickHandlers["tracking"]!!
+                )
+            }
+            
+            item(key = "item_wifi_sync") {
+                SettingsItem(
+                    title = "WiFi Sync",
+                    description = "Sync books and progress between devices on local network",
+                    icon = Icons.Outlined.Wifi,
+                    onClick = clickHandlers["wifiSync"]!!
                 )
             }
             

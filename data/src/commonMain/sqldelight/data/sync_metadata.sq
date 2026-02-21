@@ -1,0 +1,49 @@
+-- sync_metadata.sq
+-- Table for storing device sync metadata
+
+CREATE TABLE IF NOT EXISTS sync_metadata(
+    device_id TEXT NOT NULL PRIMARY KEY,
+    device_name TEXT NOT NULL,
+    device_type TEXT NOT NULL,
+    last_sync_time INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+-- Index for faster lookups by device_id
+CREATE INDEX IF NOT EXISTS idx_sync_metadata_device_id ON sync_metadata(device_id);
+
+-- Queries
+
+-- Get sync metadata for current device
+getSyncMetadata:
+SELECT * FROM sync_metadata WHERE device_id = ?;
+
+-- Get all sync metadata
+getAllSyncMetadata:
+SELECT * FROM sync_metadata;
+
+-- Insert or replace sync metadata
+upsertSyncMetadata:
+INSERT OR REPLACE INTO sync_metadata(device_id, device_name, device_type, last_sync_time, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- Update last sync time
+updateLastSyncTime:
+UPDATE sync_metadata 
+SET last_sync_time = ?, updated_at = ?
+WHERE device_id = ?;
+
+-- Update device name
+updateDeviceName:
+UPDATE sync_metadata
+SET device_name = ?, updated_at = ?
+WHERE device_id = ?;
+
+-- Delete sync metadata
+deleteSyncMetadata:
+DELETE FROM sync_metadata WHERE device_id = ?;
+
+-- Delete all sync metadata
+deleteAllSyncMetadata:
+DELETE FROM sync_metadata;

@@ -1,0 +1,72 @@
+-- trusted_devices.sq
+-- Table for storing trusted/paired devices
+
+import kotlin.Boolean;
+
+CREATE TABLE IF NOT EXISTS trusted_devices(
+    device_id TEXT NOT NULL PRIMARY KEY,
+    device_name TEXT NOT NULL,
+    paired_at INTEGER NOT NULL,
+    expires_at INTEGER NOT NULL,
+    is_active INTEGER AS Boolean NOT NULL DEFAULT 1
+);
+
+-- Index for faster lookups by device_id
+CREATE INDEX IF NOT EXISTS idx_trusted_devices_device_id ON trusted_devices(device_id);
+
+-- Index for faster lookups by expiration time (for cleanup queries)
+CREATE INDEX IF NOT EXISTS idx_trusted_devices_expires_at ON trusted_devices(expires_at);
+
+-- Index for faster lookups by active status
+CREATE INDEX IF NOT EXISTS idx_trusted_devices_is_active ON trusted_devices(is_active) WHERE is_active = 1;
+
+-- Queries
+
+-- Get trusted device by ID
+getTrustedDevice:
+SELECT * FROM trusted_devices WHERE device_id = ?;
+
+-- Get all trusted devices
+getAllTrustedDevices:
+SELECT * FROM trusted_devices;
+
+-- Get active trusted devices
+getActiveTrustedDevices:
+SELECT * FROM trusted_devices WHERE is_active = 1;
+
+-- Get non-expired trusted devices
+getNonExpiredTrustedDevices:
+SELECT * FROM trusted_devices WHERE expires_at > ? AND is_active = 1;
+
+-- Insert or replace trusted device
+upsertTrustedDevice:
+INSERT OR REPLACE INTO trusted_devices(device_id, device_name, paired_at, expires_at, is_active)
+VALUES (?, ?, ?, ?, ?);
+
+-- Update device active status
+updateDeviceActiveStatus:
+UPDATE trusted_devices
+SET is_active = ?
+WHERE device_id = ?;
+
+-- Update device expiration
+updateDeviceExpiration:
+UPDATE trusted_devices
+SET expires_at = ?
+WHERE device_id = ?;
+
+-- Delete trusted device
+deleteTrustedDevice:
+DELETE FROM trusted_devices WHERE device_id = ?;
+
+-- Delete expired devices
+deleteExpiredDevices:
+DELETE FROM trusted_devices WHERE expires_at < ?;
+
+-- Delete all trusted devices
+deleteAllTrustedDevices:
+DELETE FROM trusted_devices;
+
+-- Count active trusted devices
+countActiveTrustedDevices:
+SELECT COUNT(*) FROM trusted_devices WHERE is_active = 1;

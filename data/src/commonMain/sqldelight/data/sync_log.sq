@@ -1,0 +1,125 @@
+-- sync_log.sq
+-- Table for storing sync operation history/logs
+
+CREATE TABLE IF NOT EXISTS sync_log(
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    sync_id TEXT NOT NULL,
+    device_id TEXT NOT NULL,
+    status TEXT NOT NULL,
+    items_synced INTEGER NOT NULL,
+    duration INTEGER NOT NULL,
+    error_message TEXT,
+    timestamp INTEGER NOT NULL
+);
+
+-- Index for faster lookups by device_id
+CREATE INDEX IF NOT EXISTS idx_sync_log_device_id ON sync_log(device_id);
+
+-- Index for faster lookups by timestamp (for recent logs)
+CREATE INDEX IF NOT EXISTS idx_sync_log_timestamp ON sync_log(timestamp DESC);
+
+-- Index for faster lookups by sync_id
+CREATE INDEX IF NOT EXISTS idx_sync_log_sync_id ON sync_log(sync_id);
+
+-- Index for faster lookups by status
+CREATE INDEX IF NOT EXISTS idx_sync_log_status ON sync_log(status);
+
+-- Queries
+
+-- Get sync log by ID
+getSyncLogById:
+SELECT * FROM sync_log WHERE id = ?;
+
+-- Get sync log by sync_id
+getSyncLogBySyncId:
+SELECT * FROM sync_log WHERE sync_id = ?;
+
+-- Get all sync logs
+getAllSyncLogs:
+SELECT * FROM sync_log ORDER BY timestamp DESC;
+
+-- Get sync logs by device
+getSyncLogsByDevice:
+SELECT * FROM sync_log WHERE device_id = ? ORDER BY timestamp DESC;
+
+-- Get recent sync logs (limit)
+getRecentSyncLogs:
+SELECT * FROM sync_log ORDER BY timestamp DESC LIMIT ?;
+
+-- Get sync logs by status
+getSyncLogsByStatus:
+SELECT * FROM sync_log WHERE status = ? ORDER BY timestamp DESC;
+
+-- Get failed sync logs
+getFailedSyncLogs:
+SELECT * FROM sync_log WHERE status = 'FAILED' ORDER BY timestamp DESC;
+
+-- Get successful sync logs
+getSuccessfulSyncLogs:
+SELECT * FROM sync_log WHERE status = 'COMPLETED' ORDER BY timestamp DESC;
+
+-- Get sync logs in date range
+getSyncLogsInDateRange:
+SELECT * FROM sync_log 
+WHERE timestamp >= ? AND timestamp <= ?
+ORDER BY timestamp DESC;
+
+-- Insert sync log
+insertSyncLog:
+INSERT INTO sync_log(sync_id, device_id, status, items_synced, duration, error_message, timestamp)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- Update sync log status
+updateSyncLogStatus:
+UPDATE sync_log
+SET status = ?, error_message = ?
+WHERE sync_id = ?;
+
+-- Delete sync log
+deleteSyncLog:
+DELETE FROM sync_log WHERE id = ?;
+
+-- Delete sync logs by device
+deleteSyncLogsByDevice:
+DELETE FROM sync_log WHERE device_id = ?;
+
+-- Delete old sync logs (older than timestamp)
+deleteOldSyncLogs:
+DELETE FROM sync_log WHERE timestamp < ?;
+
+-- Delete all sync logs
+deleteAllSyncLogs:
+DELETE FROM sync_log;
+
+-- Get sync statistics by device
+getSyncStatsByDevice:
+SELECT 
+    device_id,
+    COUNT(*) AS total_syncs,
+    SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) AS successful_syncs,
+    SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) AS failed_syncs,
+    SUM(items_synced) AS total_items_synced,
+    AVG(duration) AS avg_duration,
+    MAX(timestamp) AS last_sync_time
+FROM sync_log
+WHERE device_id = ?
+GROUP BY device_id;
+
+-- Get overall sync statistics
+getOverallSyncStats:
+SELECT 
+    COUNT(*) AS total_syncs,
+    SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) AS successful_syncs,
+    SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) AS failed_syncs,
+    SUM(items_synced) AS total_items_synced,
+    AVG(duration) AS avg_duration,
+    MAX(timestamp) AS last_sync_time
+FROM sync_log;
+
+-- Count sync logs
+countSyncLogs:
+SELECT COUNT(*) FROM sync_log;
+
+-- Count sync logs by device
+countSyncLogsByDevice:
+SELECT COUNT(*) FROM sync_log WHERE device_id = ?;

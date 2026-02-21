@@ -279,6 +279,16 @@ class SettingScreenSpec {
                     section = localizeHelper.localize(Res.string.tracking),
                     onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
                 ))
+                
+                // WiFi Sync
+                add(SearchableSettingItem(
+                    id = "wifi_sync",
+                    title = "WiFi Sync",
+                    description = "Sync books and progress between devices on local network",
+                    icon = Icons.Default.Wifi,
+                    section = "Sync",
+                    onClick = { navController.navigate(NavigationRoutes.wifiSync) }
+                ))
             }
         }
         
@@ -569,6 +579,15 @@ class SettingScreenSpec {
                             description = "Sync reading progress with AniList, MAL, and more",
                             icon = Icons.Default.Sync,
                             onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
+                        )
+                    }
+                    
+                    item {
+                        SettingsItem(
+                            title = "WiFi Sync",
+                            description = "Sync books and progress between devices on local network",
+                            icon = Icons.Default.Wifi,
+                            onClick = { navController.navigate(NavigationRoutes.wifiSync) }
                         )
                     }
                     

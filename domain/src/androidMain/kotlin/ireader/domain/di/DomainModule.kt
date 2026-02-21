@@ -53,7 +53,7 @@ import java.io.File
 @OptIn(ExperimentalTextApi::class)
 actual val DomainModule = module {
     // Include sync module for sync functionality
-    includes(syncModule)
+    includes(syncDomainModule)
     // Include ServiceModule for platform services (DownloadService, NotificationService, etc.)
     includes(ServiceModule)
     // Include TTS v2 module for new clean TTS architecture

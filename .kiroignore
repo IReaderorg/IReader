@@ -4,7 +4,6 @@ gradle/
 build/
 buildSrc/
 .idea/
-.kiro/
 .run/
 node_modules/
 fastlane/

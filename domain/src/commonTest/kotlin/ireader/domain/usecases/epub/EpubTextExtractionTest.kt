@@ -1,4 +1,4 @@
-package ireader.domain.usecases.epub
+﻿package ireader.domain.usecases.epub
 
 import com.fleeksoft.ksoup.Ksoup
 import ireader.core.source.model.Text
@@ -30,8 +30,8 @@ class EpubTextExtractionTest {
         
         // Assert
         assertEquals(2, result.size)
-        assertEquals("This is paragraph 1", result[0].value)
-        assertEquals("This is paragraph 2", result[1].value)
+        assertEquals("This is paragraph 1", result[0].text)
+        assertEquals("This is paragraph 2", result[1].text)
     }
     
     @Test
@@ -41,9 +41,9 @@ class EpubTextExtractionTest {
             <html>
             <body>
                 <p class="calibre2"> </p>
-                花式要抱抱？
+                èŠ±å¼è¦æŠ±æŠ±ï¼Ÿ
                 <p class="calibre3"> </p>
-                傅清泽不好意思当着黎雨彤的面无视白芊芊，可是白芊芊的话又让他不知作何反应……
+                å‚…æ¸…æ³½ä¸å¥½æ„æ€å½“ç€é»Žé›¨å½¤çš„é¢æ— è§†ç™½èŠŠèŠŠï¼Œå¯æ˜¯ç™½èŠŠèŠŠçš„è¯åˆè®©ä»–ä¸çŸ¥ä½œä½•ååº”â€¦â€¦
                 <p class="calibre3"> </p>
             </body>
             </html>
@@ -55,8 +55,8 @@ class EpubTextExtractionTest {
         
         // Assert
         assertTrue(result.size >= 2, "Should extract at least 2 text nodes")
-        assertTrue(result.any { it.value.contains("花式要抱抱") }, "Should contain first text")
-        assertTrue(result.any { it.value.contains("傅清泽不好意思") }, "Should contain second text")
+        assertTrue(result.any { it.text.contains("èŠ±å¼è¦æŠ±æŠ±") }, "Should contain first text")
+        assertTrue(result.any { it.text.contains("å‚…æ¸…æ³½ä¸å¥½æ„æ€") }, "Should contain second text")
     }
     
     @Test
@@ -82,12 +82,12 @@ class EpubTextExtractionTest {
         
         // Assert
         assertTrue(result.size >= 5, "Should extract all text content")
-        assertTrue(result.any { it.value.contains("Chapter Title") })
-        assertTrue(result.any { it.value.contains("First paragraph") })
-        assertTrue(result.any { it.value.contains("Text between paragraphs") })
-        assertTrue(result.any { it.value.contains("Second paragraph") })
-        assertTrue(result.any { it.value.contains("More text") })
-        assertTrue(result.any { it.value.contains("Final text") })
+        assertTrue(result.any { it.text.contains("Chapter Title") })
+        assertTrue(result.any { it.text.contains("First paragraph") })
+        assertTrue(result.any { it.text.contains("Text between paragraphs") })
+        assertTrue(result.any { it.text.contains("Second paragraph") })
+        assertTrue(result.any { it.text.contains("More text") })
+        assertTrue(result.any { it.text.contains("Final text") })
     }
     
     @Test
@@ -111,7 +111,7 @@ class EpubTextExtractionTest {
         
         // Assert
         assertEquals(2, result.size)
-        assertTrue(result.all { it.value.isNotBlank() })
+        assertTrue(result.all { it.text.isNotBlank() })
     }
     
     @Test
@@ -134,10 +134,10 @@ class EpubTextExtractionTest {
         
         // Assert
         assertEquals(4, result.size)
-        assertTrue(result[0].value.contains("First"))
-        assertTrue(result[1].value.contains("Second"))
-        assertTrue(result[2].value.contains("Third"))
-        assertTrue(result[3].value.contains("Fourth"))
+        assertTrue(result[0].text.contains("First"))
+        assertTrue(result[1].text.contains("Second"))
+        assertTrue(result[2].text.contains("Third"))
+        assertTrue(result[3].text.contains("Fourth"))
     }
     
     @Test
@@ -161,9 +161,9 @@ class EpubTextExtractionTest {
         
         // Assert
         assertTrue(result.isNotEmpty())
-        assertTrue(result.any { it.value.contains("Paragraph in div") })
-        assertTrue(result.any { it.value.contains("Text in div") })
-        assertTrue(result.any { it.value.contains("Text in span") })
+        assertTrue(result.any { it.text.contains("Paragraph in div") })
+        assertTrue(result.any { it.text.contains("Text in div") })
+        assertTrue(result.any { it.text.contains("Text in span") })
     }
     
     // Helper function that mirrors the actual implementation
@@ -212,3 +212,4 @@ class EpubTextExtractionTest {
         }
     }
 }
+

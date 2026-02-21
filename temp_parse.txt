@@ -1,0 +1,36 @@
+﻿    private fun parseServiceInfo(serviceInfo: NsdServiceInfo): DiscoveredDevice? {
+        return try {
+            val deviceId = serviceInfo.attributes?.get("deviceId")?.decodeToString() ?: return null
+            val deviceName = serviceInfo.attributes?.get("deviceName")?.decodeToString() ?: return null
+            val deviceTypeStr = serviceInfo.attributes?.get("deviceType")?.decodeToString() ?: return null
+            val appVersion = serviceInfo.attributes?.get("appVersion")?.decodeToString() ?: return null
+
+            val deviceType = try {
+                DeviceType.valueOf(deviceTypeStr)
+            } catch (e: Exception) {
+                DeviceType.ANDROID
+            }
+
+            val ipAddress = serviceInfo.host?.hostAddress ?: return null
+            val port = serviceInfo.port
+
+            val deviceInfo = DeviceInfo(
+                deviceId = deviceId,
+                deviceName = deviceName,
+                deviceType = deviceType,
+                appVersion = appVersion,
+                ipAddress = ipAddress,
+                port = port,
+                lastSeen = System.currentTimeMillis()
+            )
+
+            DiscoveredDevice(
+                deviceInfo = deviceInfo,
+                isReachable = true,
+                discoveredAt = System.currentTimeMillis()
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+}

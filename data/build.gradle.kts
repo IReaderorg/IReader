@@ -63,6 +63,13 @@ kotlin {
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 
+                // Ktor WebSocket for sync data transfer
+                implementation("io.ktor:ktor-client-websockets:3.3.2")
+                implementation("io.ktor:ktor-server-core:3.3.2")
+                implementation("io.ktor:ktor-server-cio:3.3.2")
+                implementation("io.ktor:ktor-server-websockets:3.3.2")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.2")
+                
                 // Kotlin Reflection - Required for Supabase inline reified functions
                 implementation(kotlinx.reflect)
                 
@@ -126,6 +133,9 @@ kotlin {
 
                 implementation(libs.dex2jar.translator)
                 implementation(libs.dex2jar.tools)
+                
+                // JmDNS for mDNS service discovery on Desktop
+                implementation("org.jmdns:jmdns:3.5.8")
             }
         }
         
