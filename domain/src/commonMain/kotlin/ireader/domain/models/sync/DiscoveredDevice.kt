@@ -9,6 +9,8 @@ import kotlin.time.Clock
  * @property deviceInfo Information about the discovered device
  * @property isReachable Whether the device is currently reachable on the network
  * @property discoveredAt Timestamp (milliseconds since epoch) when the device was discovered
+ *
+ * @throws IllegalArgumentException if validation fails
  */
 @Serializable
 data class DiscoveredDevice(
@@ -16,6 +18,10 @@ data class DiscoveredDevice(
     val isReachable: Boolean,
     val discoveredAt: Long
 ) {
+    init {
+        require(discoveredAt >= 0) { "Discovered timestamp cannot be negative, got: $discoveredAt" }
+    }
+    
     /**
      * Determines if the device should be considered stale and removed from the list.
      * A device is stale if it hasn't been seen for more than 5 minutes.

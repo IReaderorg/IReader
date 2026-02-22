@@ -20,16 +20,20 @@ import javax.crypto.spec.SecretKeySpec
  * Task 9.2.5: Secure key storage (Desktop)
  * 
  * Features:
- * - Password-protected Java Keystore (JCEKS)
+ * - Password-protected Java Keystore (JCEKS) with randomly generated password
+ * - Password stored in separate secure file with restricted permissions
  * - Stored in user's home directory with restricted permissions
  * - AES-256-GCM for key wrapping
  * - Master key for encrypting sync keys
+ * 
+ * Security: Uses randomly generated password per keystore instead of hardcoded password.
  */
 class DesktopKeyStorageService : KeyStorageService {
     
     private val keystoreDir = File(System.getProperty("user.home"), ".ireader/keystore")
     private val keystoreFile = File(keystoreDir, "sync_keys.jceks")
-    private val keystorePassword = "ireader_sync_keystore_password".toCharArray()
+    private val passwordFile = File(keystoreDir, ".keystore_password")
+    private val keystorePassword: CharArray by lazy { loadOrGeneratePassword() }
     
     companion object {
         private const val KEYSTORE_TYPE = "JCEKS"
@@ -148,6 +152,49 @@ class DesktopKeyStorageService : KeyStorageService {
                 .map { it.removePrefix(KEY_ALIAS_PREFIX) }
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+    
+    /**
+     * Load existing password from file or generate new random password.
+     * 
+     * Security: Password is randomly generated and stored in a separate file
+     * with restricted permissions (readable only by owner).
+     */
+    private fun loadOrGeneratePassword(): CharArray {
+        return if (passwordFile.exists()) {
+            try {
+                // Read existing password
+                passwordFile.readText(Charsets.UTF_8).toCharArray()
+            } catch (e: Exception) {
+                throw SecurityException("Failed to read keystore password file: ${e.message}", e)
+            }
+        } else {
+            // Generate new random password (64 characters, base64-encoded)
+            val random = java.security.SecureRandom()
+            val passwordBytes = ByteArray(48) // 48 bytes = 64 base64 characters
+            random.nextBytes(passwordBytes)
+            val password = java.util.Base64.getEncoder().encodeToString(passwordBytes)
+            
+            try {
+                // Write password to file
+                passwordFile.writeText(password, Charsets.UTF_8)
+                
+                // Set file permissions (Unix-like systems only)
+                try {
+                    passwordFile.setReadable(false, false)
+                    passwordFile.setReadable(true, true)
+                    passwordFile.setWritable(false, false)
+                    passwordFile.setWritable(true, true)
+                    passwordFile.setExecutable(false, false)
+                } catch (e: Exception) {
+                    // Ignore on Windows - file permissions work differently
+                }
+            } catch (e: Exception) {
+                throw SecurityException("Failed to write keystore password file: ${e.message}", e)
+            }
+            
+            password.toCharArray()
         }
     }
     

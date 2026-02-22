@@ -30,7 +30,8 @@ class DesktopCertificateService : CertificateService {
     
     private val certificateDir = File(System.getProperty("user.home"), ".ireader/certificates")
     private val keystoreFile = File(certificateDir, "sync_keystore.jks")
-    private val keystorePassword = "ireader_sync_keystore".toCharArray()
+    // Security: Use random password per session for ephemeral keystore
+    private val keystorePassword: CharArray by lazy { generateRandomPassword() }
     
     companion object {
         private const val KEYSTORE_TYPE = "JKS"
@@ -42,6 +43,18 @@ class DesktopCertificateService : CertificateService {
     init {
         if (!certificateDir.exists()) {
             certificateDir.mkdirs()
+        }
+        
+        // Verify BouncyCastle is available
+        try {
+            Class.forName("org.bouncycastle.cert.X509v3CertificateBuilder")
+            Class.forName("org.bouncycastle.operator.jcajce.JcaContentSignerBuilder")
+        } catch (e: ClassNotFoundException) {
+            throw IllegalStateException(
+                "BouncyCastle library not found. Please add BouncyCastle dependency to your project. " +
+                "Required: org.bouncycastle:bcprov-jdk15on and org.bouncycastle:bcpkix-jdk15on",
+                e
+            )
         }
     }
     
@@ -219,6 +232,19 @@ class DesktopCertificateService : CertificateService {
         } catch (e: Exception) {
             false
         }
+    }
+    
+    /**
+     * Generate a random password for keystore.
+     * 
+     * Security: Each session uses a different random password for the keystore.
+     * This is acceptable for certificate storage as certificates are not secret.
+     */
+    private fun generateRandomPassword(): CharArray {
+        val random = java.security.SecureRandom()
+        val passwordBytes = ByteArray(32)
+        random.nextBytes(passwordBytes)
+        return java.util.Base64.getEncoder().encodeToString(passwordBytes).toCharArray()
     }
     
     /**

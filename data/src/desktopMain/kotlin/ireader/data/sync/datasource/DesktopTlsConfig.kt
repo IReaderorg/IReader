@@ -33,13 +33,16 @@ object DesktopTlsConfig {
     
     private const val KEYSTORE_TYPE = "PKCS12"
     private const val KEY_ALIAS = "sync-key"
-    private const val KEYSTORE_PASSWORD = "changeit"
+    // Security: Generate random password per KeyStore creation (ephemeral)
+    // PKCS12 keystores are created on-the-fly and don't need persistent passwords
     
     /**
      * Create KeyStore from certificate data.
      * 
      * Converts PEM-encoded certificate and private key into a KeyStore
      * that can be used for TLS configuration.
+     * 
+     * Security: Uses randomly generated ephemeral password for in-memory keystore.
      * 
      * @param certificateData Certificate and private key data
      * @return KeyStore containing the certificate and private key
@@ -48,6 +51,9 @@ object DesktopTlsConfig {
     fun createKeyStore(certificateData: CertificateService.CertificateData): KeyStore {
         require(certificateData.certificate.isNotEmpty()) { "Certificate cannot be empty" }
         require(certificateData.privateKey.isNotEmpty()) { "Private key cannot be empty" }
+        
+        // Generate random ephemeral password for this keystore
+        val keystorePassword = generateEphemeralPassword()
         
         try {
             // Parse X.509 certificate
@@ -69,7 +75,7 @@ object DesktopTlsConfig {
             keyStore.setKeyEntry(
                 KEY_ALIAS,
                 privateKey,
-                KEYSTORE_PASSWORD.toCharArray(),
+                keystorePassword.toCharArray(),
                 arrayOf(certificate)
             )
             
@@ -82,14 +88,19 @@ object DesktopTlsConfig {
     /**
      * Create SSLContext configured for TLS 1.2+ with custom KeyStore.
      * 
+     * Security: Uses randomly generated ephemeral password for in-memory keystore.
+     * 
      * @param keyStore KeyStore containing certificate and private key
      * @return Configured SSLContext
      */
     fun createSslContext(keyStore: KeyStore): SSLContext {
+        // Generate random ephemeral password for this operation
+        val keystorePassword = generateEphemeralPassword()
+        
         try {
             // Initialize KeyManagerFactory with KeyStore
             val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
-            keyManagerFactory.init(keyStore, KEYSTORE_PASSWORD.toCharArray())
+            keyManagerFactory.init(keyStore, keystorePassword.toCharArray())
             
             // Initialize TrustManagerFactory with KeyStore
             val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
@@ -204,5 +215,18 @@ object DesktopTlsConfig {
      */
     fun getSupportedTlsProtocols(): Array<String> {
         return arrayOf("TLSv1.2", "TLSv1.3")
+    }
+    
+    /**
+     * Generate ephemeral random password for in-memory keystore.
+     * 
+     * Security: Password is only used for the lifetime of the KeyStore object
+     * and is not persisted anywhere.
+     */
+    private fun generateEphemeralPassword(): String {
+        val random = java.security.SecureRandom()
+        val passwordBytes = ByteArray(32)
+        random.nextBytes(passwordBytes)
+        return java.util.Base64.getEncoder().encodeToString(passwordBytes)
     }
 }

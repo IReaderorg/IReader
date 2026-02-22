@@ -1,6 +1,9 @@
 package ireader.domain.usecases.sync
 
+import ireader.domain.models.sync.BookSyncData
+import ireader.domain.models.sync.BookmarkData
 import ireader.domain.models.sync.ConflictResolutionStrategy
+import ireader.domain.models.sync.ReadingProgressData
 import ireader.domain.models.sync.SyncData
 import ireader.domain.repositories.SyncRepository
 import ireader.domain.repositories.SyncResult

@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
  * @property pairedAt Timestamp when the device was first paired (milliseconds since epoch)
  * @property expiresAt Timestamp when the trust expires (milliseconds since epoch)
  * @property isActive Whether the device is currently active (not revoked)
+ *
+ * @throws IllegalArgumentException if validation fails
  */
 @Serializable
 data class TrustedDevice(
@@ -21,4 +23,12 @@ data class TrustedDevice(
     val pairedAt: Long,
     val expiresAt: Long,
     val isActive: Boolean = true
-)
+) {
+    init {
+        require(deviceId.isNotBlank()) { "Device ID cannot be empty or blank" }
+        require(deviceName.isNotBlank()) { "Device name cannot be empty or blank" }
+        require(pairedAt >= 0) { "Paired timestamp cannot be negative, got: $pairedAt" }
+        require(expiresAt >= 0) { "Expires timestamp cannot be negative, got: $expiresAt" }
+        require(expiresAt >= pairedAt) { "Expiration time ($expiresAt) must be after paired time ($pairedAt)" }
+    }
+}

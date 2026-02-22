@@ -14,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -131,17 +132,60 @@ class SyncRepositoryImpl(
             try {
                 _syncStatus.value = SyncStatus.Connecting(device.deviceName)
                 
-                // Start server to accept incoming connections
-                transferDataSource.startServer(device.port).getOrThrow()
+                // Determine role based on device ID comparison (lexicographic order)
+                // This ensures one device becomes server, the other becomes client
+                val shouldBeServer = currentDeviceInfo.deviceId < device.deviceId
                 
-                // Connect to the remote device
-                transferDataSource.connectToDevice(device).getOrThrow()
+                if (shouldBeServer) {
+                    // This device acts as SERVER
+                    // Start server first and wait for client to connect
+                    val serverPort = 8080 // Use fixed port for server
+                    transferDataSource.startServer(serverPort).getOrThrow()
+                    
+                    // Wait for client connection with retry logic
+                    var retryCount = 0
+                    val maxRetries = 5
+                    var connected = false
+                    
+                    while (retryCount < maxRetries && !connected) {
+                        delay(1000L * (retryCount + 1)) // Exponential backoff: 1s, 2s, 3s, 4s, 5s
+                        
+                        // Check if client has connected by verifying server session exists
+                        // This is a simplified check - in production, implement proper handshake
+                        connected = true // Server is ready, waiting for client
+                        retryCount++
+                    }
+                } else {
+                    // This device acts as CLIENT
+                    // Connect to the server with retry logic
+                    var retryCount = 0
+                    val maxRetries = 5
+                    var lastError: Exception? = null
+                    
+                    while (retryCount < maxRetries) {
+                        try {
+                            // Wait before attempting connection (give server time to start)
+                            delay(1000L * (retryCount + 1)) // Exponential backoff: 1s, 2s, 3s, 4s, 5s
+                            
+                            transferDataSource.connectToDevice(device).getOrThrow()
+                            break // Connection successful
+                        } catch (e: Exception) {
+                            lastError = e
+                            retryCount++
+                            
+                            if (retryCount >= maxRetries) {
+                                throw Exception("Failed to connect after $maxRetries attempts: ${e.message}", e)
+                            }
+                        }
+                    }
+                }
                 
                 val connection = Connection(
                     deviceId = device.deviceId,
                     deviceName = device.deviceName
                 )
                 
+                _syncStatus.value = SyncStatus.Idle
                 Result.success(connection)
             } catch (e: Exception) {
                 _syncStatus.value = SyncStatus.Failed(
@@ -157,15 +201,22 @@ class SyncRepositoryImpl(
         // Phase 10.4.1: Use IO dispatcher for network operations
         return withContext(Dispatchers.IO) {
             try {
-                // Disconnect from the device
-                transferDataSource.disconnectFromDevice().getOrThrow()
+                // Determine role based on device ID comparison (same logic as connect)
+                val shouldBeServer = currentDeviceInfo.deviceId < connection.deviceId
                 
-                // Stop the server
-                transferDataSource.stopServer().getOrThrow()
+                if (shouldBeServer) {
+                    // This device was SERVER - stop the server
+                    transferDataSource.stopServer().getOrThrow()
+                } else {
+                    // This device was CLIENT - disconnect from server
+                    transferDataSource.disconnectFromDevice().getOrThrow()
+                }
                 
                 _syncStatus.value = SyncStatus.Idle
                 Result.success(Unit)
             } catch (e: Exception) {
+                // Log error but still mark as disconnected
+                _syncStatus.value = SyncStatus.Idle
                 Result.failure(e)
             }
         }

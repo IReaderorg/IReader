@@ -18,6 +18,7 @@ import ireader.domain.models.sync.DeviceInfo
 import ireader.domain.models.sync.SyncData
 import ireader.domain.services.sync.CertificateService
 import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
@@ -83,7 +84,16 @@ class KtorTransferDataSource(
             // Phase 10.4.3: Thread-safe state check
             stateMutex.withLock {
                 if (server != null) {
-                    return Result.failure(Exception("Server already running"))
+                    // Server already running - stop it first to allow restart
+                    try {
+                        serverSession?.close()
+                        serverSession = null
+                        server?.stop(1000, 2000)
+                        server = null
+                        delay(200) // Give time for port to be released
+                    } catch (e: Exception) {
+                        // Log but continue - we'll try to start anyway
+                    }
                 }
             }
             
@@ -172,7 +182,18 @@ class KtorTransferDataSource(
             // Phase 10.4.3: Thread-safe state check
             stateMutex.withLock {
                 if (client != null) {
-                    return Result.failure(Exception("Already connected"))
+                    // Already connected - clean up first
+                    try {
+                        clientSession?.close()
+                        clientSession = null
+                        connectionJob?.cancel()
+                        connectionJob = null
+                        client?.close()
+                        client = null
+                        delay(100) // Give time for cleanup
+                    } catch (e: Exception) {
+                        // Log but continue
+                    }
                 }
             }
             
@@ -181,6 +202,8 @@ class KtorTransferDataSource(
                 // Enable connection pooling
                 engine {
                     maxConnectionsCount = 10
+                    // Note: CIO engine doesn't support endpoint timeout configuration
+                    // Timeouts are handled at the request level
                 }
                 
                 // Task 10.2.1: Enable compression on client
@@ -208,6 +231,7 @@ class KtorTransferDataSource(
             
             // Use CompletableDeferred to wait for connection establishment
             val connectionEstablished = CompletableDeferred<Boolean>()
+            val connectionError = CompletableDeferred<String?>()
             
             // Launch WebSocket connection in background
             connectionJob = scope.launch {
@@ -223,6 +247,7 @@ class KtorTransferDataSource(
                             clientSession = this
                         }
                         connectionEstablished.complete(true)
+                        connectionError.complete(null)
                         
                         // Keep connection alive
                         try {
@@ -243,15 +268,17 @@ class KtorTransferDataSource(
                         clientSession = null
                     }
                     connectionEstablished.complete(false)
+                    connectionError.complete(e.message ?: "Unknown connection error")
                 }
             }
             
             // Wait for connection to establish with timeout
-            val connected = withTimeoutOrNull(2.seconds) {
+            val connected = withTimeoutOrNull(5.seconds) {
                 connectionEstablished.await()
             } ?: false
             
             if (!connected) {
+                val error = connectionError.await()
                 // Phase 10.4.3: Thread-safe cleanup
                 stateMutex.withLock {
                     client?.close()
@@ -259,7 +286,7 @@ class KtorTransferDataSource(
                     connectionJob?.cancel()
                     connectionJob = null
                 }
-                return Result.failure(Exception("Failed to establish connection"))
+                return Result.failure(Exception("Failed to establish connection: ${error ?: "Timeout"}"))
             }
             
             Result.success(Unit)
@@ -300,7 +327,7 @@ class KtorTransferDataSource(
             // Phase 10.4.3: Thread-safe session access
             val session = stateMutex.withLock {
                 clientSession ?: serverSession
-            } ?: return Result.failure(Exception("No active connection"))
+            } ?: return Result.failure(Exception("No active connection - cannot send data"))
             
             transferProgressFlow.value = 0f
             
@@ -308,6 +335,10 @@ class KtorTransferDataSource(
             val jsonData = json.encodeToString(data)
             val compressedData = compressData(jsonData)
             val totalBytes = compressedData.size.toLong()
+            
+            if (totalBytes == 0L) {
+                return Result.failure(Exception("Cannot send empty data"))
+            }
             
             // Task 10.2.2: Determine optimal chunk size based on data size
             val chunkSize = determineChunkSize(totalBytes)
@@ -318,20 +349,31 @@ class KtorTransferDataSource(
                 val end = minOf(i + chunkSize, compressedData.size)
                 val chunk = compressedData.sliceArray(i until end)
                 
-                session.send(Frame.Binary(true, chunk))
+                try {
+                    session.send(Frame.Binary(true, chunk))
+                } catch (e: Exception) {
+                    transferProgressFlow.value = 0f
+                    return Result.failure(Exception("Failed to send data chunk at byte $bytesSent: ${e.message}", e))
+                }
                 
                 bytesSent += chunk.size
                 transferProgressFlow.value = bytesSent.toFloat() / totalBytes
             }
             
             // Send end marker
-            session.send(Frame.Text("__END__"))
+            try {
+                session.send(Frame.Text("__END__"))
+            } catch (e: Exception) {
+                transferProgressFlow.value = 0f
+                return Result.failure(Exception("Failed to send end marker: ${e.message}", e))
+            }
+            
             transferProgressFlow.value = 1f
             
             Result.success(Unit)
         } catch (e: Exception) {
             transferProgressFlow.value = 0f
-            Result.failure(e)
+            Result.failure(Exception("Failed to send data: ${e.message}", e))
         }
     }
     
@@ -340,15 +382,24 @@ class KtorTransferDataSource(
             // Phase 10.4.3: Thread-safe session access
             val session = stateMutex.withLock {
                 clientSession ?: serverSession
-            } ?: return Result.failure(Exception("No active connection"))
+            } ?: return Result.failure(Exception("No active connection - cannot receive data"))
             
             transferProgressFlow.value = 0f
             
             val receivedBytes = Buffer()
             var totalBytesReceived = 0L
+            var endMarkerReceived = false
             
-            // Receive compressed data in chunks
+            // Receive compressed data in chunks with timeout
+            val receiveTimeout = 30.seconds
+            val startTime = System.currentTimeMillis()
+            
             for (frame in session.incoming) {
+                // Check for timeout
+                if (System.currentTimeMillis() - startTime > receiveTimeout.inWholeMilliseconds) {
+                    return Result.failure(Exception("Receive timeout after ${receiveTimeout.inWholeSeconds} seconds"))
+                }
+                
                 when (frame) {
                     is Frame.Binary -> {
                         val bytes = frame.readBytes()
@@ -361,6 +412,7 @@ class KtorTransferDataSource(
                     is Frame.Text -> {
                         val text = frame.readText()
                         if (text == "__END__") {
+                            endMarkerReceived = true
                             break
                         }
                     }
@@ -370,17 +422,34 @@ class KtorTransferDataSource(
                 }
             }
             
+            if (!endMarkerReceived) {
+                return Result.failure(Exception("Connection closed before receiving end marker"))
+            }
+            
+            if (totalBytesReceived == 0L) {
+                return Result.failure(Exception("No data received"))
+            }
+            
             // Task 10.2.1: Decompress received data
             val compressedData = receivedBytes.readByteArray()
-            val jsonData = decompressData(compressedData)
-            val syncData = json.decodeFromString<SyncData>(jsonData)
+            val jsonData = try {
+                decompressData(compressedData)
+            } catch (e: Exception) {
+                return Result.failure(Exception("Failed to decompress data: ${e.message}", e))
+            }
+            
+            val syncData = try {
+                json.decodeFromString<SyncData>(jsonData)
+            } catch (e: Exception) {
+                return Result.failure(Exception("Failed to parse sync data: ${e.message}", e))
+            }
             
             transferProgressFlow.value = 1f
             
             Result.success(syncData)
         } catch (e: Exception) {
             transferProgressFlow.value = 0f
-            Result.failure(e)
+            Result.failure(Exception("Failed to receive data: ${e.message}", e))
         }
     }
     
