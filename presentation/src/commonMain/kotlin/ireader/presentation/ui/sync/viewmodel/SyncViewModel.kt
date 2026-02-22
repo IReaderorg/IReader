@@ -3,6 +3,7 @@ package ireader.presentation.ui.sync.viewmodel
 import ireader.domain.models.sync.*
 import ireader.domain.usecases.sync.*
 import ireader.presentation.core.viewmodel.IReaderStateScreenModel
+import ireader.presentation.ui.sync.SyncErrorMapper
 import ireader.presentation.ui.sync.SyncServiceController
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -43,6 +44,11 @@ class SyncViewModel(
     )
 
     init {
+        // Set up cancel callback for notification action
+        serviceController?.setCancelCallback {
+            cancelSync()
+        }
+        
         observeDiscoveredDevices()
         observeSyncStatus()
     }
@@ -203,13 +209,13 @@ class SyncViewModel(
     /**
      * Initiate sync with the specified device.
      */
-    fun syncWithDevice(deviceId: String) {
+    fun syncWithDevice(deviceId: String, conflictStrategy: ConflictResolutionStrategy = ConflictResolutionStrategy.LATEST_TIMESTAMP) {
         screenModelScope.launch {
             try {
-                logInfo("Starting sync with device: $deviceId")
+                logInfo("Starting sync with device: $deviceId with strategy: $conflictStrategy")
                 updateState { it.copy(error = null) }
                 
-                syncWithDeviceUseCase(deviceId)
+                syncWithDeviceUseCase(deviceId, conflictStrategy)
                     .onSuccess {
                         logInfo("Sync initiated successfully with device: $deviceId")
                     }

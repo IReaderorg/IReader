@@ -140,3 +140,16 @@ VALUES (:chapterId, :readAt, :time_read, :reading_progress);
 
 deleteByBookId:
 DELETE FROM history WHERE chapter_id IN (SELECT chapter._id FROM chapter WHERE chapter.book_id = :bookId);
+
+-- Optimized query for sync: Get progress with chapter info in single query (Task 10.1.2)
+getProgressWithChapters:
+SELECT 
+    h.chapter_id,
+    h.progress,
+    h.last_read,
+    c.book_id,
+    c.source_order,
+    c.last_page_read
+FROM history h
+JOIN chapter c ON h.chapter_id = c._id
+ORDER BY h.last_read DESC;

@@ -7,6 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.sync.SyncStatus
+import ireader.presentation.ui.sync.SyncErrorMapper
 
 /**
  * Composable that displays the current sync status.
@@ -172,6 +173,8 @@ private fun SyncStatusCompleted(status: SyncStatus.Completed) {
 
 @Composable
 private fun SyncStatusFailed(status: SyncStatus.Failed) {
+    val errorInfo = SyncErrorMapper.mapError(status.error, status.deviceName)
+    
     Column {
         Text(
             text = "Sync failed",
@@ -183,13 +186,23 @@ private fun SyncStatusFailed(status: SyncStatus.Failed) {
         
         Text(
             text = if (status.deviceName != null) {
-                "Failed to sync with ${status.deviceName}: ${status.error.message}"
+                "Failed to sync with ${status.deviceName}: ${errorInfo.message}"
             } else {
-                "Sync failed: ${status.error.message}"
+                "Sync failed: ${errorInfo.message}"
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onErrorContainer
         )
+        
+        if (errorInfo.suggestion != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                text = errorInfo.suggestion,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+            )
+        }
     }
 }
 

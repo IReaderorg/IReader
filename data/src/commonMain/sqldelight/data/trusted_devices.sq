@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS trusted_devices(
     device_name TEXT NOT NULL,
     paired_at INTEGER NOT NULL,
     expires_at INTEGER NOT NULL,
-    is_active INTEGER AS Boolean NOT NULL DEFAULT 1
+    is_active INTEGER AS Boolean NOT NULL DEFAULT 1,
+    certificate_fingerprint TEXT
 );
 
 -- Index for faster lookups by device_id
@@ -19,6 +20,9 @@ CREATE INDEX IF NOT EXISTS idx_trusted_devices_expires_at ON trusted_devices(exp
 
 -- Index for faster lookups by active status
 CREATE INDEX IF NOT EXISTS idx_trusted_devices_is_active ON trusted_devices(is_active) WHERE is_active = 1;
+
+-- Index for faster fingerprint lookups
+CREATE INDEX IF NOT EXISTS idx_trusted_devices_fingerprint ON trusted_devices(certificate_fingerprint) WHERE certificate_fingerprint IS NOT NULL;
 
 -- Queries
 
@@ -40,8 +44,18 @@ SELECT * FROM trusted_devices WHERE expires_at > ? AND is_active = 1;
 
 -- Insert or replace trusted device
 upsertTrustedDevice:
-INSERT OR REPLACE INTO trusted_devices(device_id, device_name, paired_at, expires_at, is_active)
-VALUES (?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO trusted_devices(device_id, device_name, paired_at, expires_at, is_active, certificate_fingerprint)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- Update certificate fingerprint
+updateCertificateFingerprint:
+UPDATE trusted_devices
+SET certificate_fingerprint = ?
+WHERE device_id = ?;
+
+-- Get certificate fingerprint
+getCertificateFingerprint:
+SELECT certificate_fingerprint FROM trusted_devices WHERE device_id = ?;
 
 -- Update device active status
 updateDeviceActiveStatus:

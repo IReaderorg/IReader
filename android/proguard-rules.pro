@@ -846,3 +846,39 @@
     public static *** i(...);
 }
 ##---------------End: Startup Performance Optimizations  ----------
+
+
+##---------------Begin: proguard configuration for Ktor Server (Local Sync)  ----------
+# Ktor Server - Keep server classes for local WiFi sync feature
+# Note: Ktor server uses JDK-specific classes that may not be available on Android
+# These rules prevent R8 from failing on missing JDK internal classes
+
+# Keep Ktor server classes
+-keep class io.ktor.server.** { *; }
+-keepclassmembers class io.ktor.server.** {
+    <fields>;
+    <methods>;
+}
+
+# Ignore missing JDK internal classes used by Ktor server
+# These classes are JDK-specific and not available on Android
+-dontwarn com.sun.nio.file.SensitivityWatchEventModifier
+-dontwarn com.sun.nio.file.ExtendedWatchEventModifier
+-dontwarn sun.nio.ch.**
+-dontwarn sun.misc.**
+
+# Ignore Ktor server content classes that reference JDK internals
+-dontwarn io.ktor.server.http.content.ReloadingZipFileSystem
+-dontwarn io.ktor.server.http.content.**
+
+# Keep WebSocket classes for sync
+-keep class io.ktor.server.websocket.** { *; }
+-keep class io.ktor.websocket.** { *; }
+
+# Keep CIO engine for server
+-keep class io.ktor.server.cio.** { *; }
+-keep class io.ktor.server.engine.** { *; }
+
+# Keep compression plugin
+-keep class io.ktor.server.plugins.compression.** { *; }
+##---------------End: proguard configuration for Ktor Server (Local Sync)  ----------

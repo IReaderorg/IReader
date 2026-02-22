@@ -26,6 +26,10 @@ actual class SyncServiceController {
         // No-op on Desktop
     }
     
+    actual fun setCancelCallback(callback: () -> Unit) {
+        // No-op on Desktop
+    }
+    
     actual fun showCompletionNotification(deviceName: String, syncedItems: Int, durationMs: Long) {
         // No-op on Desktop - could show system notification in future
     }

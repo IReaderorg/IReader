@@ -25,6 +25,10 @@ actual class SyncServiceController(private val context: Context) {
         SyncForegroundService.cancelSync(context)
     }
     
+    actual fun setCancelCallback(callback: () -> Unit) {
+        SyncForegroundService.onCancelCallback = callback
+    }
+    
     actual fun showCompletionNotification(deviceName: String, syncedItems: Int, durationMs: Long) {
         SyncForegroundService.showCompletionNotification(context, deviceName, syncedItems, durationMs)
     }

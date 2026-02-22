@@ -56,6 +56,16 @@ interface SyncLocalDataSource {
     suspend fun getTrustedDevice(deviceId: String): TrustedDeviceEntity?
     
     /**
+     * Insert or update a trusted device.
+     * 
+     * If a device with the same deviceId already exists, it will be updated.
+     * Otherwise, a new record will be created.
+     * 
+     * @param device Trusted device entity to upsert
+     */
+    suspend fun upsertTrustedDevice(device: TrustedDeviceEntity)
+    
+    /**
      * Observe all active trusted devices.
      * 
      * Returns a Flow that emits the current list of active (non-expired, isActive=true)
@@ -74,6 +84,46 @@ interface SyncLocalDataSource {
      * @param deviceId Unique identifier of the device
      */
     suspend fun deactivateTrustedDevice(deviceId: String)
+    
+    /**
+     * Update the expiration timestamp of a trusted device.
+     * 
+     * This is used when re-authenticating a device to extend its trust period.
+     * 
+     * @param deviceId Unique identifier of the device
+     * @param expiresAt New expiration timestamp (milliseconds since epoch)
+     */
+    suspend fun updateDeviceExpiration(deviceId: String, expiresAt: Long)
+    
+    /**
+     * Delete a trusted device.
+     * 
+     * Permanently removes the device from the trusted devices list.
+     * 
+     * @param deviceId Unique identifier of the device
+     */
+    suspend fun deleteTrustedDevice(deviceId: String)
+    
+    /**
+     * Update the certificate fingerprint for a trusted device.
+     * 
+     * This is used for certificate pinning to store the SHA-256 fingerprint
+     * of the device's certificate.
+     * 
+     * @param deviceId Unique identifier of the device
+     * @param fingerprint SHA-256 fingerprint of the certificate, or null to remove
+     */
+    suspend fun updateCertificateFingerprint(deviceId: String, fingerprint: String?)
+    
+    /**
+     * Get the certificate fingerprint for a trusted device.
+     * 
+     * Returns the stored SHA-256 fingerprint for certificate pinning validation.
+     * 
+     * @param deviceId Unique identifier of the device
+     * @return Certificate fingerprint or null if not set
+     */
+    suspend fun getCertificateFingerprint(deviceId: String): String?
     
     // ========== Sync Log Operations ==========
     
@@ -151,7 +201,8 @@ data class TrustedDeviceEntity(
     val deviceName: String,
     val pairedAt: Long,
     val expiresAt: Long,
-    val isActive: Boolean
+    val isActive: Boolean,
+    val certificateFingerprint: String? = null
 )
 
 /**

@@ -222,4 +222,10 @@ val useCaseModule = module {
             chapterRepository = get()
         )
     }
+    
+    // Sync use cases - for device pairing and trust management
+    single { ireader.domain.usecases.sync.GeneratePairingPinUseCase() }
+    single { ireader.domain.usecases.sync.VerifyPairingPinUseCase() }
+    single { ireader.domain.usecases.sync.CheckDeviceTrustUseCase(trustedDeviceRepository = get()) }
+    single { ireader.domain.usecases.sync.ReauthenticateDeviceUseCase(trustedDeviceRepository = get()) }
 }

@@ -153,12 +153,20 @@ kotlin {
                 implementation(libs.coroutines.test)
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation(libs.ktor.client.mock)
+                // Data module for testing certificate service implementations
+                implementation(project(Modules.data))
             }
         }
 
         val androidUnitTest by getting {
             dependencies {
+                implementation(kotlin("test"))
                 implementation(libs.mock)
+                // AndroidX Test dependencies for certificate service tests
+                implementation("androidx.test:core:1.5.0")
+                implementation("androidx.test.ext:junit:1.1.5")
+                // Data module for testing certificate service implementations
+                implementation(project(Modules.data))
             }
         }
 

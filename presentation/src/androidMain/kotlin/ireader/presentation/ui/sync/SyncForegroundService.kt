@@ -53,11 +53,15 @@ import androidx.core.app.NotificationCompat
 class SyncForegroundService : Service() {
 
     private lateinit var notificationManager: NotificationManager
+    private lateinit var batteryOptimizationManager: ireader.domain.services.sync.BatteryOptimizationManager
     private var deviceName: String = ""
     private var progress: Int = 0
     private var currentItem: String = ""
     private var currentIndex: Int = 0
     private var totalItems: Int = 0
+    private var startBatteryLevel: Int = 100
+    private var syncStartTime: Long = 0L
+    private var bytesTransferred: Long = 0L
 
     companion object {
         const val CHANNEL_ID = "sync_service_channel"
@@ -83,6 +87,12 @@ class SyncForegroundService : Service() {
         const val EXTRA_DURATION = "duration"
         const val EXTRA_ERROR_MESSAGE = "error_message"
         const val EXTRA_ERROR_SUGGESTION = "error_suggestion"
+
+        /**
+         * Callback for handling sync cancellation.
+         * This is set by the SyncViewModel to receive cancel events from the notification.
+         */
+        var onCancelCallback: (() -> Unit)? = null
 
         /**
          * Helper method to start the sync service.
@@ -168,6 +178,7 @@ class SyncForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        batteryOptimizationManager = ireader.domain.services.sync.BatteryOptimizationManager(this)
         createNotificationChannel()
     }
 
@@ -179,6 +190,13 @@ class SyncForegroundService : Service() {
                 currentItem = ""
                 currentIndex = 0
                 totalItems = 0
+                
+                // Battery optimization: acquire wake lock and record start state
+                batteryOptimizationManager.acquireWakeLock()
+                startBatteryLevel = batteryOptimizationManager.getBatteryLevel()
+                syncStartTime = System.currentTimeMillis()
+                bytesTransferred = 0L
+                
                 startForeground(NOTIFICATION_ID, createNotification())
             }
             ACTION_UPDATE_PROGRESS -> {
@@ -186,12 +204,28 @@ class SyncForegroundService : Service() {
                 currentItem = intent.getStringExtra(EXTRA_CURRENT_ITEM) ?: ""
                 currentIndex = intent.getIntExtra(EXTRA_CURRENT_INDEX, 0)
                 totalItems = intent.getIntExtra(EXTRA_TOTAL_ITEMS, 0)
+                
+                // Update battery state periodically
+                batteryOptimizationManager.updateBatteryLevel()
+                batteryOptimizationManager.updateBatterySaverState()
+                
                 updateNotification()
             }
             ACTION_SYNC_COMPLETED -> {
                 val completedDeviceName = intent.getStringExtra(EXTRA_DEVICE_NAME) ?: deviceName
                 val syncedItems = intent.getIntExtra(EXTRA_SYNCED_ITEMS, 0)
                 val durationMs = intent.getLongExtra(EXTRA_DURATION, 0L)
+                
+                // Battery optimization: log usage and release wake lock
+                val endBatteryLevel = batteryOptimizationManager.getBatteryLevel()
+                batteryOptimizationManager.logBatteryUsage(
+                    startBatteryLevel,
+                    endBatteryLevel,
+                    durationMs,
+                    bytesTransferred
+                )
+                batteryOptimizationManager.releaseWakeLock()
+                
                 showCompletionNotification(completedDeviceName, syncedItems, durationMs)
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
@@ -200,16 +234,28 @@ class SyncForegroundService : Service() {
                 val failedDeviceName = intent.getStringExtra(EXTRA_DEVICE_NAME)
                 val errorMessage = intent.getStringExtra(EXTRA_ERROR_MESSAGE) ?: "Unknown error"
                 val suggestion = intent.getStringExtra(EXTRA_ERROR_SUGGESTION)
+                
+                // Battery optimization: release wake lock on error
+                batteryOptimizationManager.releaseWakeLock()
+                
                 showErrorNotification(failedDeviceName, errorMessage, suggestion)
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
             ACTION_STOP_SYNC -> {
+                // Battery optimization: release wake lock
+                batteryOptimizationManager.releaseWakeLock()
+                
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
             ACTION_CANCEL_SYNC -> {
-                // TODO: Trigger cancel callback to SyncViewModel
+                // Invoke the cancel callback to notify the ViewModel
+                onCancelCallback?.invoke()
+                
+                // Battery optimization: release wake lock
+                batteryOptimizationManager.releaseWakeLock()
+                
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
@@ -246,6 +292,17 @@ class SyncForegroundService : Service() {
         // Build content text with detailed progress information
         val contentText = buildContentText()
 
+        // Create cancel action PendingIntent
+        val cancelIntent = Intent(this, SyncForegroundService::class.java).apply {
+            action = ACTION_CANCEL_SYNC
+        }
+        val cancelPendingIntent = PendingIntent.getService(
+            this,
+            0,
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("WiFi Sync in Progress")
             .setContentText(contentText)
@@ -255,6 +312,11 @@ class SyncForegroundService : Service() {
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setOnlyAlertOnce(true) // Prevent notification sound/vibration on updates
+            .addAction(
+                android.R.drawable.ic_delete, // Cancel icon
+                "Cancel",
+                cancelPendingIntent
+            )
             .build()
     }
 
@@ -422,5 +484,11 @@ class SyncForegroundService : Service() {
             }
             else -> "${seconds}s"
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Ensure wake lock is released when service is destroyed
+        batteryOptimizationManager.cleanup()
     }
 }

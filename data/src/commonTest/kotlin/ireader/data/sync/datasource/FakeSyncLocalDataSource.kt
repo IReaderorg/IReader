@@ -38,6 +38,11 @@ class FakeSyncLocalDataSource : SyncLocalDataSource {
         return trustedDevices[deviceId]
     }
     
+    override suspend fun upsertTrustedDevice(device: TrustedDeviceEntity) {
+        trustedDevices[device.deviceId] = device
+        updateActiveTrustedDevices()
+    }
+    
     override fun getActiveTrustedDevices(): Flow<List<TrustedDeviceEntity>> {
         return _activeTrustedDevices.asStateFlow()
     }
@@ -47,6 +52,27 @@ class FakeSyncLocalDataSource : SyncLocalDataSource {
             trustedDevices[deviceId] = it.copy(isActive = false)
             updateActiveTrustedDevices()
         }
+    }
+    
+    override suspend fun updateDeviceExpiration(deviceId: String, expiresAt: Long) {
+        trustedDevices[deviceId]?.let {
+            trustedDevices[deviceId] = it.copy(expiresAt = expiresAt)
+        }
+    }
+    
+    override suspend fun deleteTrustedDevice(deviceId: String) {
+        trustedDevices.remove(deviceId)
+        updateActiveTrustedDevices()
+    }
+    
+    override suspend fun updateCertificateFingerprint(deviceId: String, fingerprint: String?) {
+        trustedDevices[deviceId]?.let {
+            trustedDevices[deviceId] = it.copy(certificateFingerprint = fingerprint)
+        }
+    }
+    
+    override suspend fun getCertificateFingerprint(deviceId: String): String? {
+        return trustedDevices[deviceId]?.certificateFingerprint
     }
     
     override suspend fun insertSyncLog(log: SyncLogEntity) {

@@ -26,6 +26,10 @@ actual class SyncServiceController {
         // No-op on iOS
     }
     
+    actual fun setCancelCallback(callback: () -> Unit) {
+        // No-op on iOS
+    }
+    
     actual fun showCompletionNotification(deviceName: String, syncedItems: Int, durationMs: Long) {
         // No-op on iOS - could show local notification in future
     }

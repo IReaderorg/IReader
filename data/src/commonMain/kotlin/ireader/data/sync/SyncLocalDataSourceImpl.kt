@@ -9,6 +9,7 @@ import ireader.domain.models.sync.BookSyncData
 import ireader.domain.models.sync.BookmarkData
 import ireader.domain.models.sync.ReadingProgressData
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 
 /**
@@ -69,9 +70,23 @@ class SyncLocalDataSourceImpl(
                     deviceName = it.device_name,
                     pairedAt = it.paired_at,
                     expiresAt = it.expires_at,
-                    isActive = it.is_active
+                    isActive = it.is_active,
+                    certificateFingerprint = it.certificate_fingerprint
                 )
             }
+        }
+    }
+    
+    override suspend fun upsertTrustedDevice(device: TrustedDeviceEntity) {
+        handler.await {
+            trusted_devicesQueries.upsertTrustedDevice(
+                device_id = device.deviceId,
+                device_name = device.deviceName,
+                paired_at = device.pairedAt,
+                expires_at = device.expiresAt,
+                is_active = device.isActive,
+                certificate_fingerprint = device.certificateFingerprint
+            )
         }
     }
 
@@ -85,10 +100,11 @@ class SyncLocalDataSourceImpl(
                     deviceName = it.device_name,
                     pairedAt = it.paired_at,
                     expiresAt = it.expires_at,
-                    isActive = it.is_active
+                    isActive = it.is_active,
+                    certificateFingerprint = it.certificate_fingerprint
                 )
             }
-        }
+        }.conflate() // Drop intermediate values if collector is slow (Task 10.1.3)
     }
 
     override suspend fun deactivateTrustedDevice(deviceId: String) {
@@ -97,6 +113,36 @@ class SyncLocalDataSourceImpl(
                 is_active = false,
                 device_id = deviceId
             )
+        }
+    }
+    
+    override suspend fun updateDeviceExpiration(deviceId: String, expiresAt: Long) {
+        handler.await {
+            trusted_devicesQueries.updateDeviceExpiration(
+                expires_at = expiresAt,
+                device_id = deviceId
+            )
+        }
+    }
+    
+    override suspend fun deleteTrustedDevice(deviceId: String) {
+        handler.await {
+            trusted_devicesQueries.deleteTrustedDevice(deviceId)
+        }
+    }
+    
+    override suspend fun updateCertificateFingerprint(deviceId: String, fingerprint: String?) {
+        handler.await {
+            trusted_devicesQueries.updateCertificateFingerprint(
+                certificate_fingerprint = fingerprint,
+                device_id = deviceId
+            )
+        }
+    }
+    
+    override suspend fun getCertificateFingerprint(deviceId: String): String? {
+        return handler.await {
+            trusted_devicesQueries.getCertificateFingerprint(deviceId).executeAsOneOrNull()?.certificate_fingerprint
         }
     }
 
@@ -149,7 +195,7 @@ class SyncLocalDataSourceImpl(
                     timestamp = it.timestamp
                 )
             }
-        }
+        }.conflate() // Drop intermediate values if collector is slow (Task 10.1.3)
     }
 
     // ========== Sync Data Operations ==========
@@ -174,18 +220,15 @@ class SyncLocalDataSourceImpl(
 
     override suspend fun getProgress(): List<ReadingProgressData> {
         return handler.await {
-            historyQueries.findHistories().executeAsList().mapNotNull { history ->
-                // Get the chapter for this history entry
-                val chapter = chapterQueries.getChapterById(history.chapter_id).executeAsOneOrNull()
-                    ?: return@mapNotNull null
-                
+            // Optimized: Single JOIN query instead of N+1 queries (Task 10.1.2)
+            historyQueries.getProgressWithChapters().executeAsList().map { row ->
                 ReadingProgressData(
-                    bookId = chapter.book_id,
-                    chapterId = history.chapter_id,
-                    chapterIndex = chapter.source_order.toInt(),
-                    offset = chapter.last_page_read.toInt(),
-                    progress = history.progress?.toFloat() ?: 0f,
-                    lastReadAt = history.last_read ?: 0L
+                    bookId = row.book_id,
+                    chapterId = row.chapter_id,
+                    chapterIndex = row.source_order.toInt(),
+                    offset = row.last_page_read.toInt(),
+                    progress = row.progress?.toFloat() ?: 0f,
+                    lastReadAt = row.last_read ?: 0L
                 )
             }
         }
@@ -193,7 +236,8 @@ class SyncLocalDataSourceImpl(
 
     override suspend fun getBookmarks(): List<BookmarkData> {
         return handler.await {
-            chapterQueries.findAll().executeAsList().filter { it.bookmark }.map { chapter ->
+            // Optimized: SQL WHERE clause instead of fetching all + filtering (Task 10.1.2)
+            chapterQueries.getBookmarkedChapters().executeAsList().map { chapter ->
                 BookmarkData(
                     bookmarkId = chapter._id,
                     bookId = chapter.book_id,

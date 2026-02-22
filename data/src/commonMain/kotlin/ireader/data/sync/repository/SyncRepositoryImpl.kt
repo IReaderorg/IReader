@@ -1,5 +1,6 @@
 package ireader.data.sync.repository
 
+import ireader.data.sync.ConcurrencyManager
 import ireader.data.sync.datasource.DiscoveryDataSource
 import ireader.data.sync.datasource.SyncLocalDataSource
 import ireader.data.sync.datasource.TransferDataSource
@@ -7,10 +8,19 @@ import ireader.domain.models.sync.*
 import ireader.domain.repositories.Connection
 import ireader.domain.repositories.SyncRepository
 import ireader.domain.repositories.SyncResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.withContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -31,8 +41,23 @@ class SyncRepositoryImpl(
     private val localDataSource: SyncLocalDataSource
 ) : SyncRepository {
     
+    // Repository scope for Flow lifecycle management (Task 10.1.3)
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    
+    // Phase 10.4: Concurrency manager for parallel operations
+    private val concurrencyManager = ConcurrencyManager(maxConcurrentTransfers = 3)
+    
     private val _syncStatus = MutableStateFlow<SyncStatus>(SyncStatus.Idle)
     private var isCancelled = false
+    
+    // Shared Flow for discovered devices to prevent duplicate subscriptions (Task 10.1.3)
+    private val _discoveredDevices = discoveryDataSource
+        .observeDiscoveredDevices()
+        .shareIn(
+            scope = repositoryScope,
+            started = SharingStarted.WhileSubscribed(5000), // Keep alive 5s after last subscriber
+            replay = 1 // Replay last value to new subscribers
+        )
     
     // Generate device info for this device
     private val currentDeviceInfo = DeviceInfo(
@@ -78,7 +103,8 @@ class SyncRepositoryImpl(
     }
     
     override fun observeDiscoveredDevices(): Flow<List<DiscoveredDevice>> {
-        return discoveryDataSource.observeDiscoveredDevices()
+        // Return shared Flow to prevent duplicate subscriptions (Task 10.1.3)
+        return _discoveredDevices
     }
     
     override suspend fun getDeviceInfo(deviceId: String): Result<DeviceInfo> {
@@ -100,42 +126,48 @@ class SyncRepositoryImpl(
     // ========== Connection Operations ==========
     
     override suspend fun connectToDevice(device: DeviceInfo): Result<Connection> {
-        return try {
-            _syncStatus.value = SyncStatus.Connecting(device.deviceName)
-            
-            // Start server to accept incoming connections
-            transferDataSource.startServer(device.port).getOrThrow()
-            
-            // Connect to the remote device
-            transferDataSource.connectToDevice(device).getOrThrow()
-            
-            val connection = Connection(
-                deviceId = device.deviceId,
-                deviceName = device.deviceName
-            )
-            
-            Result.success(connection)
-        } catch (e: Exception) {
-            _syncStatus.value = SyncStatus.Failed(
-                device.deviceName,
-                SyncError.ConnectionFailed(e.message ?: "Unknown error")
-            )
-            Result.failure(e)
+        // Phase 10.4.1: Use IO dispatcher for network operations
+        return withContext(Dispatchers.IO) {
+            try {
+                _syncStatus.value = SyncStatus.Connecting(device.deviceName)
+                
+                // Start server to accept incoming connections
+                transferDataSource.startServer(device.port).getOrThrow()
+                
+                // Connect to the remote device
+                transferDataSource.connectToDevice(device).getOrThrow()
+                
+                val connection = Connection(
+                    deviceId = device.deviceId,
+                    deviceName = device.deviceName
+                )
+                
+                Result.success(connection)
+            } catch (e: Exception) {
+                _syncStatus.value = SyncStatus.Failed(
+                    device.deviceName,
+                    SyncError.ConnectionFailed(e.message ?: "Unknown error")
+                )
+                Result.failure(e)
+            }
         }
     }
     
     override suspend fun disconnectFromDevice(connection: Connection): Result<Unit> {
-        return try {
-            // Disconnect from the device
-            transferDataSource.disconnectFromDevice().getOrThrow()
-            
-            // Stop the server
-            transferDataSource.stopServer().getOrThrow()
-            
-            _syncStatus.value = SyncStatus.Idle
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+        // Phase 10.4.1: Use IO dispatcher for network operations
+        return withContext(Dispatchers.IO) {
+            try {
+                // Disconnect from the device
+                transferDataSource.disconnectFromDevice().getOrThrow()
+                
+                // Stop the server
+                transferDataSource.stopServer().getOrThrow()
+                
+                _syncStatus.value = SyncStatus.Idle
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
     
@@ -172,38 +204,68 @@ class SyncRepositoryImpl(
                 return Result.failure(Exception("Sync cancelled"))
             }
             
-            _syncStatus.value = SyncStatus.Syncing(
-                deviceName = connection.deviceName,
-                progress = 0.0f,
-                currentItem = "Starting sync"
-            )
+            // Phase 10.4.3: Use mutex for thread-safe status updates
+            concurrencyManager.withMutex {
+                _syncStatus.value = SyncStatus.Syncing(
+                    deviceName = connection.deviceName,
+                    progress = 0.0f,
+                    currentItem = "Starting sync"
+                )
+            }
             
             val startTime = System.currentTimeMillis()
             
-            // Calculate items to sync
-            val itemsToSend = calculateItemsToSend(localManifest, remoteManifest)
-            val itemsToReceive = calculateItemsToReceive(localManifest, remoteManifest)
+            // Phase 10.4.1: Use Default dispatcher for CPU-intensive manifest comparison
+            val (itemsToSend, itemsToReceive) = withContext(Dispatchers.Default) {
+                // Phase 10.4.2: Calculate items in parallel
+                val itemsToSendDeferred = async {
+                    calculateItemsToSend(localManifest, remoteManifest)
+                }
+                val itemsToReceiveDeferred = async {
+                    calculateItemsToReceive(localManifest, remoteManifest)
+                }
+                
+                Pair(itemsToSendDeferred.await(), itemsToReceiveDeferred.await())
+            }
             
             var itemsSynced = 0
             
-            // Send items
-            if (itemsToSend.isNotEmpty()) {
-                val dataToSend = buildSyncData(itemsToSend)
-                transferDataSource.sendData(dataToSend).getOrThrow()
-                itemsSynced += itemsToSend.size
-            }
-            
-            // Receive items
-            if (itemsToReceive.isNotEmpty()) {
-                val receivedData = transferDataSource.receiveData().getOrThrow()
-                applySync(receivedData).getOrThrow()
-                itemsSynced += itemsToReceive.size
+            // Phase 10.4.2: Send and receive in parallel using coroutineScope
+            itemsSynced = coroutineScope {
+                val sendJob = async(Dispatchers.IO) {
+                    if (itemsToSend.isNotEmpty()) {
+                        concurrencyManager.withConcurrencyControl {
+                            val dataToSend = buildSyncData(itemsToSend)
+                            transferDataSource.sendData(dataToSend).getOrThrow()
+                            itemsToSend.size
+                        }
+                    } else {
+                        0
+                    }
+                }
+                
+                val receiveJob = async(Dispatchers.IO) {
+                    if (itemsToReceive.isNotEmpty()) {
+                        concurrencyManager.withConcurrencyControl {
+                            val receivedData = transferDataSource.receiveData().getOrThrow()
+                            applySync(receivedData).getOrThrow()
+                            itemsToReceive.size
+                        }
+                    } else {
+                        0
+                    }
+                }
+                
+                // Wait for both operations to complete
+                sendJob.await() + receiveJob.await()
             }
             
             val duration = System.currentTimeMillis() - startTime
             
-            // Update last sync time
-            updateLastSyncTime(connection.deviceId, System.currentTimeMillis()).getOrThrow()
+            // Phase 10.4.1: Use IO dispatcher for database update
+            withContext(Dispatchers.IO) {
+                updateLastSyncTime(connection.deviceId, System.currentTimeMillis()).getOrThrow()
+            }
             
             val syncResult = SyncResult(
                 deviceId = connection.deviceId,
@@ -211,18 +273,24 @@ class SyncRepositoryImpl(
                 duration = duration
             )
             
-            _syncStatus.value = SyncStatus.Completed(
-                deviceName = connection.deviceName,
-                syncedItems = itemsSynced,
-                duration = duration
-            )
+            // Phase 10.4.3: Thread-safe status update
+            concurrencyManager.withMutex {
+                _syncStatus.value = SyncStatus.Completed(
+                    deviceName = connection.deviceName,
+                    syncedItems = itemsSynced,
+                    duration = duration
+                )
+            }
             
             Result.success(syncResult)
         } catch (e: Exception) {
-            _syncStatus.value = SyncStatus.Failed(
-                connection.deviceName,
-                SyncError.TransferFailed(e.message ?: "Unknown error")
-            )
+            // Phase 10.4.3: Thread-safe status update
+            concurrencyManager.withMutex {
+                _syncStatus.value = SyncStatus.Failed(
+                    connection.deviceName,
+                    SyncError.TransferFailed(e.message ?: "Unknown error")
+                )
+            }
             Result.failure(e)
         }
     }
@@ -234,37 +302,49 @@ class SyncRepositoryImpl(
     }
     
     override suspend fun cancelSync(): Result<Unit> {
-        isCancelled = true
-        _syncStatus.value = SyncStatus.Idle
+        // Phase 10.4.3: Thread-safe cancellation
+        concurrencyManager.withMutex {
+            isCancelled = true
+            _syncStatus.value = SyncStatus.Idle
+        }
         return Result.success(Unit)
     }
     
     // ========== Local Data Operations ==========
     
     override suspend fun getBooksToSync(): Result<List<BookSyncData>> {
-        return try {
-            val books = localDataSource.getBooks()
-            Result.success(books)
-        } catch (e: Exception) {
-            Result.failure(e)
+        // Phase 10.4.1: Use IO dispatcher for database operations
+        return withContext(Dispatchers.IO) {
+            try {
+                val books = localDataSource.getBooks()
+                Result.success(books)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
     
     override suspend fun getReadingProgress(): Result<List<ReadingProgressData>> {
-        return try {
-            val progress = localDataSource.getProgress()
-            Result.success(progress)
-        } catch (e: Exception) {
-            Result.failure(e)
+        // Phase 10.4.1: Use IO dispatcher for database operations
+        return withContext(Dispatchers.IO) {
+            try {
+                val progress = localDataSource.getProgress()
+                Result.success(progress)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
     
     override suspend fun getBookmarks(): Result<List<BookmarkData>> {
-        return try {
-            val bookmarks = localDataSource.getBookmarks()
-            Result.success(bookmarks)
-        } catch (e: Exception) {
-            Result.failure(e)
+        // Phase 10.4.1: Use IO dispatcher for database operations
+        return withContext(Dispatchers.IO) {
+            try {
+                val bookmarks = localDataSource.getBookmarks()
+                Result.success(bookmarks)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
     
@@ -288,38 +368,44 @@ class SyncRepositoryImpl(
     // ========== Metadata Operations ==========
     
     override suspend fun getLastSyncTime(deviceId: String): Result<Long?> {
-        return try {
-            val metadata = localDataSource.getSyncMetadata(deviceId)
-            Result.success(metadata?.lastSyncTime)
-        } catch (e: Exception) {
-            Result.failure(e)
+        // Phase 10.4.1: Use IO dispatcher for database operations
+        return withContext(Dispatchers.IO) {
+            try {
+                val metadata = localDataSource.getSyncMetadata(deviceId)
+                Result.success(metadata?.lastSyncTime)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
     
     override suspend fun updateLastSyncTime(deviceId: String, timestamp: Long): Result<Unit> {
-        return try {
-            val existingMetadata = localDataSource.getSyncMetadata(deviceId)
-            
-            val metadata = if (existingMetadata != null) {
-                existingMetadata.copy(
-                    lastSyncTime = timestamp,
-                    updatedAt = System.currentTimeMillis()
-                )
-            } else {
-                ireader.data.sync.datasource.SyncMetadataEntity(
-                    deviceId = deviceId,
-                    deviceName = "Unknown Device",
-                    deviceType = "UNKNOWN",
-                    lastSyncTime = timestamp,
-                    createdAt = System.currentTimeMillis(),
-                    updatedAt = System.currentTimeMillis()
-                )
+        // Phase 10.4.1: Use IO dispatcher for database operations
+        return withContext(Dispatchers.IO) {
+            try {
+                val existingMetadata = localDataSource.getSyncMetadata(deviceId)
+                
+                val metadata = if (existingMetadata != null) {
+                    existingMetadata.copy(
+                        lastSyncTime = timestamp,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                } else {
+                    ireader.data.sync.datasource.SyncMetadataEntity(
+                        deviceId = deviceId,
+                        deviceName = "Unknown Device",
+                        deviceType = "UNKNOWN",
+                        lastSyncTime = timestamp,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis()
+                    )
+                }
+                
+                localDataSource.upsertSyncMetadata(metadata)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
             }
-            
-            localDataSource.upsertSyncMetadata(metadata)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
     

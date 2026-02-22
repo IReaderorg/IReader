@@ -39,6 +39,13 @@ expect class SyncServiceController {
     fun cancelSync()
     
     /**
+     * Set the callback to be invoked when the user cancels sync from the notification.
+     * 
+     * @param callback Function to be called when cancel is triggered
+     */
+    fun setCancelCallback(callback: () -> Unit)
+    
+    /**
      * Show a completion notification when sync finishes successfully.
      * 
      * @param deviceName Name of the device that was synced with

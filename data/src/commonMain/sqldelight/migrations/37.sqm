@@ -1,0 +1,7 @@
+-- Migration 37: Add certificate_fingerprint column to trusted_devices table
+
+-- Add certificate_fingerprint column for certificate pinning
+ALTER TABLE trusted_devices ADD COLUMN certificate_fingerprint TEXT;
+
+-- Create index for faster fingerprint lookups
+CREATE INDEX IF NOT EXISTS idx_trusted_devices_fingerprint ON trusted_devices(certificate_fingerprint) WHERE certificate_fingerprint IS NOT NULL;

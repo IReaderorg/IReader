@@ -47,8 +47,6 @@ import org.koin.dsl.module
 
 
 actual val DomainModule: Module = module {
-    // Include sync module for sync functionality
-    includes(syncModule)
     // Include ServiceModule for platform services (DownloadService, NotificationService, etc.)
     includes(ServiceModule)
     // Include TTS v2 module for new clean TTS architecture

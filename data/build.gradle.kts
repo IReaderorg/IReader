@@ -63,18 +63,21 @@ kotlin {
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 
-                // Ktor WebSocket for sync data transfer
+                // Ktor WebSocket for sync data transfer (client-side only in common)
                 implementation("io.ktor:ktor-client-websockets:3.3.2")
-                implementation("io.ktor:ktor-server-core:3.3.2")
-                implementation("io.ktor:ktor-server-cio:3.3.2")
-                implementation("io.ktor:ktor-server-websockets:3.3.2")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.2")
+                
+                // Ktor compression for network optimization (Phase 10.2.1)
+                implementation("io.ktor:ktor-client-encoding:3.3.2")
+                // Note: ktor-server-* dependencies moved to platform-specific source sets (JVM-only)
                 
                 // Kotlin Reflection - Required for Supabase inline reified functions
                 implementation(kotlinx.reflect)
                 
                 // Supabase
                 implementation(libs.bundles.supabase)
+                
+                // Note: BouncyCastle moved to platform-specific source sets (JVM-only)
             }
         }
         
@@ -94,6 +97,12 @@ kotlin {
                 implementation(libs.ktor.okhttp)
                 implementation(libs.ktor.core.android)
                 
+                // Ktor server dependencies (JVM-only, not available on iOS)
+                implementation("io.ktor:ktor-server-core:3.3.2")
+                implementation("io.ktor:ktor-server-cio:3.3.2")
+                implementation("io.ktor:ktor-server-websockets:3.3.2")
+                implementation("io.ktor:ktor-server-compression:3.3.2")
+                
                 implementation(androidx.core)
                 implementation(libs.requerySqlite)
                 implementation(libs.sqldelight.android)
@@ -111,6 +120,10 @@ kotlin {
                 implementation("com.google.apis:google-api-services-drive:v3-rev20231128-2.0.0") {
                     exclude(group = "org.apache.httpcomponents")
                 }
+                
+                // BouncyCastle for X.509 certificate generation (Task 9.2.2) - Android
+                implementation("org.bouncycastle:bcprov-jdk18on:1.78")
+                implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
             }
         }
         
@@ -119,6 +132,10 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.sqldelight.jvm)
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+                // AndroidX Test dependencies for certificate service tests
+                implementation("androidx.test:core:1.5.0")
+                implementation("androidx.test.ext:junit:1.1.5")
+                implementation("org.robolectric:robolectric:4.11.1")
             }
         }
 
@@ -128,6 +145,12 @@ kotlin {
                 // Platform-specific Ktor engine
                 implementation(libs.ktor.okhttp)
                 
+                // Ktor server dependencies (JVM-only, not available on iOS)
+                implementation("io.ktor:ktor-server-core:3.3.2")
+                implementation("io.ktor:ktor-server-cio:3.3.2")
+                implementation("io.ktor:ktor-server-websockets:3.3.2")
+                implementation("io.ktor:ktor-server-compression:3.3.2")
+                
                 implementation(libs.sqldelight.jvm)
                 implementation(libs.apk.parser)
 
@@ -136,6 +159,10 @@ kotlin {
                 
                 // JmDNS for mDNS service discovery on Desktop
                 implementation("org.jmdns:jmdns:3.5.8")
+                
+                // BouncyCastle for X.509 certificate generation (Task 9.2.2) - Desktop
+                implementation("org.bouncycastle:bcprov-jdk18on:1.78")
+                implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
             }
         }
         

@@ -208,3 +208,9 @@ UPDATE book SET
     cached_unread_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = :bookId AND read = 0), 0),
     cached_read_count = COALESCE((SELECT COUNT(*) FROM chapter WHERE book_id = :bookId AND read = 1), 0)
 WHERE _id = :bookId;
+
+-- Optimized query for sync: Get only bookmarked chapters (Task 10.1.2)
+getBookmarkedChapters:
+SELECT * FROM chapter 
+WHERE bookmark = 1
+ORDER BY book_id, source_order ASC;
