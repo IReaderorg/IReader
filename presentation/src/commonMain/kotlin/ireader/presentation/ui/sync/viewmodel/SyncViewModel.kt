@@ -203,7 +203,7 @@ class SyncViewModel(
      */
     fun selectDevice(device: DiscoveredDevice) {
         logInfo("Selected device: ${device.deviceInfo.deviceName}")
-        updateState { it.copy(selectedDevice = device) }
+        updateState { it.copy(selectedDevice = device, showPairingDialog = true) }
     }
 
     /**

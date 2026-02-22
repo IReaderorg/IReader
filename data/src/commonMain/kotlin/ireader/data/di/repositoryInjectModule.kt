@@ -31,6 +31,9 @@ val repositoryInjectModule = module {
     includes(translationRepositoryModule)
     includes(trackingModule)
     
+    // Include sync module for Local WiFi Book Sync feature
+    includes(syncDataModule)
+    
     // Include remote module for 7-project Supabase setup
     // Supports both default config (from local.properties) and user override
     includes(remoteModule)

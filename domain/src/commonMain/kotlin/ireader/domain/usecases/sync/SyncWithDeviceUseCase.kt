@@ -66,7 +66,7 @@ class SyncWithDeviceUseCase(
                         deviceId = it.deviceId,
                         timestamp = it.timestamp,
                         version = 1,
-                        checksum = ""
+                        checksum = calculateChecksum(localBooks, localProgress, localBookmarks)
                     )
                 }
             )
@@ -79,7 +79,7 @@ class SyncWithDeviceUseCase(
                         deviceId = it.deviceId,
                         timestamp = it.timestamp,
                         version = 1,
-                        checksum = ""
+                        checksum = calculateChecksum(localBooks, localProgress, localBookmarks)
                     )
                 }
             )
@@ -109,5 +109,18 @@ class SyncWithDeviceUseCase(
             syncRepository.disconnectFromDevice(connection)
             return Result.failure(e)
         }
+    }
+    
+    /**
+     * Calculate a simple checksum for sync data.
+     * Uses a hash of the data counts and timestamps.
+     */
+    private fun calculateChecksum(
+        books: List<BookSyncData>,
+        progress: List<ReadingProgressData>,
+        bookmarks: List<BookmarkData>
+    ): String {
+        val data = "${books.size}-${progress.size}-${bookmarks.size}-${System.currentTimeMillis()}"
+        return data.hashCode().toString(16)
     }
 }
