@@ -7,6 +7,7 @@ import ireader.domain.models.sync.ReadingProgressData
 import ireader.domain.models.sync.SyncData
 import ireader.domain.repositories.SyncRepository
 import ireader.domain.repositories.SyncResult
+import kotlin.time.ExperimentalTime
 
 /**
  * Use case for syncing with a specific device.
@@ -118,12 +119,13 @@ class SyncWithDeviceUseCase(
      * Calculate a simple checksum for sync data.
      * Uses a hash of the data counts and timestamps.
      */
+    @OptIn(ExperimentalTime::class)
     private fun calculateChecksum(
         books: List<BookSyncData>,
         progress: List<ReadingProgressData>,
         bookmarks: List<BookmarkData>
     ): String {
-        val data = "${books.size}-${progress.size}-${bookmarks.size}-${System.currentTimeMillis()}"
+        val data = "${books.size}-${progress.size}-${bookmarks.size}-${kotlin.time.Clock.System.now().toEpochMilliseconds()}"
         return data.hashCode().toString(16)
     }
 }

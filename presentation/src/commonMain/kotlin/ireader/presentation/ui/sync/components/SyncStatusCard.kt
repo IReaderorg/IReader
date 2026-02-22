@@ -41,7 +41,7 @@ fun SyncStatusCard(
         ) {
             when (syncStatus) {
                 is SyncStatus.Idle -> {
-                    // Should not be displayed
+                    SyncStatusIdle()
                 }
                 
                 is SyncStatus.Discovering -> {
@@ -65,6 +65,25 @@ fun SyncStatusCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SyncStatusIdle() {
+    Column {
+        Text(
+            text = "Ready to sync",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Start discovery to find nearby devices and begin syncing your books",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

@@ -175,6 +175,27 @@ interface SyncLocalDataSource {
      * @return List of bookmark data
      */
     suspend fun getBookmarks(): List<ireader.domain.models.sync.BookmarkData>
+    
+    /**
+     * Apply synced books to the local database.
+     * 
+     * @param books List of books to apply
+     */
+    suspend fun applyBooks(books: List<ireader.domain.models.sync.BookSyncData>)
+    
+    /**
+     * Apply synced reading progress to the local database.
+     * 
+     * @param progress List of reading progress to apply
+     */
+    suspend fun applyProgress(progress: List<ireader.domain.models.sync.ReadingProgressData>)
+    
+    /**
+     * Apply synced bookmarks to the local database.
+     * 
+     * @param bookmarks List of bookmarks to apply
+     */
+    suspend fun applyBookmarks(bookmarks: List<ireader.domain.models.sync.BookmarkData>)
 }
 
 /**

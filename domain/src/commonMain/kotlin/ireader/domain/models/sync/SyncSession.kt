@@ -1,6 +1,7 @@
 package ireader.domain.models.sync
 
 import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
 
 /**
  * Represents an active or completed sync session.
@@ -23,7 +24,7 @@ import kotlinx.serialization.Serializable
  * @throws IllegalArgumentException if validation fails
  */
 @Serializable
-data class SyncSession(
+data class SyncSession @OptIn(ExperimentalTime::class) constructor(
     val id: String,
     val deviceId: String,
     val status: SessionStatus,
@@ -36,8 +37,8 @@ data class SyncSession(
     val retryCount: Int = 0,
     val wasResumed: Boolean = false,
     val resumedFromItem: Int = 0,
-    val startTime: Long = System.currentTimeMillis(),
-    val completionTime: Long = System.currentTimeMillis()
+    val startTime: Long = kotlin.time.Clock.System.now().toEpochMilliseconds(),
+    val completionTime: Long = kotlin.time.Clock.System.now().toEpochMilliseconds()
 ) {
     init {
         require(id.isNotBlank()) { "Session ID cannot be empty or blank" }

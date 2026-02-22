@@ -5,6 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.*
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -75,7 +78,7 @@ fun SyncScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("WiFi Sync") },
+                title = { Text("WiFi Sync (Experimental)") },
                 navigationIcon = {
                     IconButton(
                         onClick = onNavigateBack,
@@ -88,6 +91,13 @@ fun SyncScreen(
                             contentDescription = "Navigate back"
                         )
                     }
+                },
+                actions = {
+                    // Sync status indicator in TopAppBar
+                    SyncStatusIndicator(
+                        syncStatus = state.syncStatus,
+                        isDiscovering = state.isDiscovering
+                    )
                 }
             )
         },
@@ -112,15 +122,13 @@ fun SyncScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Sync status card
-            if (state.syncStatus !is SyncStatus.Idle) {
-                SyncStatusCard(
-                    syncStatus = state.syncStatus,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            // Sync status card - always show to provide feedback
+            SyncStatusCard(
+                syncStatus = state.syncStatus,
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
             
             // Cancel sync button (only shown when sync is in progress)
             if (state.syncStatus is SyncStatus.Syncing) {
@@ -213,3 +221,113 @@ fun SyncScreen(
         modifier = modifier
     )
 }
+
+/**
+ * Sync status indicator for the TopAppBar.
+ * Shows a visual indicator of the current sync state.
+ * 
+ * @param syncStatus Current sync status
+ * @param isDiscovering Whether device discovery is active
+ * @param modifier Optional modifier
+ */
+@Composable
+private fun SyncStatusIndicator(
+    syncStatus: SyncStatus,
+    isDiscovering: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.padding(end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        when (syncStatus) {
+            is SyncStatus.Idle -> {
+                if (isDiscovering) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Text(
+                        text = "Discovering",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Sync,
+                        contentDescription = "Sync ready",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
+            is SyncStatus.Discovering -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+                Text(
+                    text = "Discovering",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            is SyncStatus.Connecting -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+                Text(
+                    text = "Connecting",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            is SyncStatus.Syncing -> {
+                CircularProgressIndicator(
+                    progress = { syncStatus.progress },
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+                Text(
+                    text = "${(syncStatus.progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            is SyncStatus.Completed -> {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Sync completed",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Completed",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            is SyncStatus.Failed -> {
+                Icon(
+                    imageVector = Icons.Default.SyncProblem,
+                    contentDescription = "Sync failed",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = "Failed",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+

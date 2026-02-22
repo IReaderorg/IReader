@@ -97,4 +97,14 @@ interface TransferDataSource {
      * @return Result indicating success or failure
      */
     suspend fun closeConnection(): Result<Unit>
+    
+    /**
+     * Check if there is an active connection (client or server).
+     * 
+     * Returns true if either a client session or server session is active
+     * and ready to send/receive data.
+     * 
+     * @return true if there is an active connection, false otherwise
+     */
+    suspend fun hasActiveConnection(): Boolean
 }

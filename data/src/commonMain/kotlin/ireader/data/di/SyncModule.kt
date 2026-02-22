@@ -64,7 +64,8 @@ val syncDataModule = module {
         SyncRepositoryImpl(
             discoveryDataSource = get(),
             transferDataSource = get(),
-            localDataSource = get()
+            localDataSource = get(),
+            platformConfig = ireader.domain.config.PlatformConfig
         )
     }
     

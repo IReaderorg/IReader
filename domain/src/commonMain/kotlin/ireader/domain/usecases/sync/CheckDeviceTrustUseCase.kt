@@ -1,6 +1,7 @@
 package ireader.domain.usecases.sync
 
 import ireader.domain.repositories.TrustedDeviceRepository
+import kotlin.time.ExperimentalTime
 
 /**
  * Use case for checking if a device is still trusted.
@@ -25,6 +26,7 @@ class CheckDeviceTrustUseCase(
      * @param deviceId Unique identifier of the device to check
      * @return true if the device is trusted and not expired, false otherwise
      */
+    @OptIn(ExperimentalTime::class)
     suspend operator fun invoke(deviceId: String): Boolean {
         // Get the device from storage
         val device = trustedDeviceRepository.getTrustedDevice(deviceId)
@@ -36,7 +38,7 @@ class CheckDeviceTrustUseCase(
         }
         
         // Check if trust has expired
-        val now = System.currentTimeMillis()
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
         if (device.expiresAt <= now) {
             return false
         }

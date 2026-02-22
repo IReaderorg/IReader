@@ -18,6 +18,7 @@ import ireader.domain.models.sync.DeviceInfo
 import ireader.domain.models.sync.SyncData
 import ireader.domain.services.sync.CertificateService
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -125,17 +126,43 @@ class KtorTransferDataSource(
                 
                 routing {
                     webSocket(WEBSOCKET_PATH) {
-                        serverSession = this
+                        println("[KtorTransferDataSource] Server: Client connected, setting up session...")
+                        stateMutex.withLock {
+                            serverSession = this
+                        }
+                        println("[KtorTransferDataSource] Server: Session established successfully")
+                        println("[KtorTransferDataSource] Server: Session details - outgoing.isClosedForSend=${outgoing.isClosedForSend}")
                         
-                        // Keep connection alive until closed
+                        // Keep connection alive by actively processing incoming frames
+                        // We must process the incoming channel to keep the outgoing channel open
                         try {
+                            println("[KtorTransferDataSource] Server: WebSocket session active, processing incoming frames...")
+                            
+                            // Process all incoming frames to keep connection alive
+                            // This is required by Ktor - if we don't consume incoming, outgoing closes
                             for (frame in incoming) {
-                                // Messages are handled via receiveData()
+                                when (frame) {
+                                    is Frame.Close -> {
+                                        println("[KtorTransferDataSource] Server: Received close frame")
+                                        break
+                                    }
+                                    else -> {
+                                        // All frames (including Binary/Text) must be consumed here
+                                        // This means sendData/receiveData cannot use the session directly
+                                        println("[KtorTransferDataSource] Server: Received frame: ${frame::class.simpleName}")
+                                    }
+                                }
                             }
-                        } catch (e: Exception) {
-                            // Connection closed
+                        } catch (e: CancellationException) {
+                            println("[KtorTransferDataSource] Server: WebSocket connection cancelled")
+                            throw e
+                        } catch (e: ClosedReceiveChannelException) {
+                            println("[KtorTransferDataSource] Server: WebSocket incoming channel closed")
                         } finally {
-                            serverSession = null
+                            println("[KtorTransferDataSource] Server: Cleaning up server session")
+                            stateMutex.withLock {
+                                serverSession = null
+                            }
                         }
                     }
                 }
@@ -236,34 +263,59 @@ class KtorTransferDataSource(
             // Launch WebSocket connection in background
             connectionJob = scope.launch {
                 try {
+                    println("[KtorTransferDataSource] Initiating WebSocket connection to ${deviceInfo.ipAddress}:${deviceInfo.port}")
                     httpClient.webSocket(
                         method = HttpMethod.Get,
                         host = deviceInfo.ipAddress,
                         port = deviceInfo.port,
                         path = WEBSOCKET_PATH
                     ) {
+                        println("[KtorTransferDataSource] WebSocket connected, setting up session...")
                         // Phase 10.4.3: Thread-safe session update
                         stateMutex.withLock {
                             clientSession = this
                         }
                         connectionEstablished.complete(true)
                         connectionError.complete(null)
+                        println("[KtorTransferDataSource] Client session established successfully")
+                        println("[KtorTransferDataSource] Client: Session details - outgoing.isClosedForSend=${outgoing.isClosedForSend}")
                         
-                        // Keep connection alive
+                        // Keep connection alive by actively processing incoming frames
+                        // We must process the incoming channel to keep the outgoing channel open
                         try {
+                            println("[KtorTransferDataSource] WebSocket session active, processing incoming frames...")
+                            
+                            // Process all incoming frames to keep connection alive
+                            // This is required by Ktor - if we don't consume incoming, outgoing closes
                             for (frame in incoming) {
-                                // Messages are handled via receiveData()
+                                when (frame) {
+                                    is Frame.Close -> {
+                                        println("[KtorTransferDataSource] Client: Received close frame")
+                                        break
+                                    }
+                                    else -> {
+                                        // All frames (including Binary/Text) must be consumed here
+                                        // This means sendData/receiveData cannot use the session directly
+                                        println("[KtorTransferDataSource] Client: Received frame: ${frame::class.simpleName}")
+                                    }
+                                }
                             }
-                        } catch (e: Exception) {
-                            // Connection closed
+                        } catch (e: CancellationException) {
+                            println("[KtorTransferDataSource] WebSocket connection cancelled")
+                            throw e
+                        } catch (e: ClosedReceiveChannelException) {
+                            println("[KtorTransferDataSource] WebSocket incoming channel closed")
                         } finally {
                             // Phase 10.4.3: Thread-safe session cleanup
+                            println("[KtorTransferDataSource] Cleaning up client session")
                             stateMutex.withLock {
                                 clientSession = null
                             }
                         }
                     }
                 } catch (e: Exception) {
+                    println("[KtorTransferDataSource] Failed to establish WebSocket: ${e.message}")
+                    e.printStackTrace()
                     stateMutex.withLock {
                         clientSession = null
                     }
@@ -324,10 +376,24 @@ class KtorTransferDataSource(
     
     override suspend fun sendData(data: SyncData): Result<Unit> {
         return try {
+            println("[KtorTransferDataSource] sendData() called")
+            
             // Phase 10.4.3: Thread-safe session access
             val session = stateMutex.withLock {
-                clientSession ?: serverSession
+                val s = clientSession ?: serverSession
+                println("[KtorTransferDataSource] Retrieved session: clientSession=${clientSession != null}, serverSession=${serverSession != null}, session=${s != null}")
+                s
             } ?: return Result.failure(Exception("No active connection - cannot send data"))
+            
+            println("[KtorTransferDataSource] Session retrieved successfully, checking if session is active...")
+            
+            // Check if session is still active
+            if (session.outgoing.isClosedForSend) {
+                println("[KtorTransferDataSource] ERROR: Session outgoing channel is closed for send!")
+                return Result.failure(Exception("WebSocket outgoing channel is closed"))
+            }
+            
+            println("[KtorTransferDataSource] Session outgoing channel is open, proceeding with send...")
             
             transferProgressFlow.value = 0f
             
@@ -335,6 +401,8 @@ class KtorTransferDataSource(
             val jsonData = json.encodeToString(data)
             val compressedData = compressData(jsonData)
             val totalBytes = compressedData.size.toLong()
+            
+            println("[KtorTransferDataSource] Data prepared: ${totalBytes} bytes compressed")
             
             if (totalBytes == 0L) {
                 return Result.failure(Exception("Cannot send empty data"))
@@ -344,14 +412,20 @@ class KtorTransferDataSource(
             val chunkSize = determineChunkSize(totalBytes)
             var bytesSent = 0L
             
+            println("[KtorTransferDataSource] Starting to send data in chunks of $chunkSize bytes...")
+            
             // Send compressed data in adaptive chunks for progress tracking
             for (i in compressedData.indices step chunkSize) {
                 val end = minOf(i + chunkSize, compressedData.size)
                 val chunk = compressedData.sliceArray(i until end)
                 
                 try {
+                    println("[KtorTransferDataSource] Sending chunk: bytes $i-$end (${chunk.size} bytes)")
                     session.send(Frame.Binary(true, chunk))
+                    println("[KtorTransferDataSource] Chunk sent successfully")
                 } catch (e: Exception) {
+                    println("[KtorTransferDataSource] ERROR sending chunk: ${e.message}")
+                    e.printStackTrace()
                     transferProgressFlow.value = 0f
                     return Result.failure(Exception("Failed to send data chunk at byte $bytesSent: ${e.message}", e))
                 }
@@ -362,16 +436,23 @@ class KtorTransferDataSource(
             
             // Send end marker
             try {
+                println("[KtorTransferDataSource] Sending end marker...")
                 session.send(Frame.Text("__END__"))
+                println("[KtorTransferDataSource] End marker sent successfully")
             } catch (e: Exception) {
+                println("[KtorTransferDataSource] ERROR sending end marker: ${e.message}")
+                e.printStackTrace()
                 transferProgressFlow.value = 0f
                 return Result.failure(Exception("Failed to send end marker: ${e.message}", e))
             }
             
             transferProgressFlow.value = 1f
+            println("[KtorTransferDataSource] Data sent successfully!")
             
             Result.success(Unit)
         } catch (e: Exception) {
+            println("[KtorTransferDataSource] ERROR in sendData(): ${e.message}")
+            e.printStackTrace()
             transferProgressFlow.value = 0f
             Result.failure(Exception("Failed to send data: ${e.message}", e))
         }
@@ -481,6 +562,12 @@ class KtorTransferDataSource(
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+    
+    override suspend fun hasActiveConnection(): Boolean {
+        return stateMutex.withLock {
+            clientSession != null || serverSession != null
         }
     }
     
@@ -601,17 +688,26 @@ class KtorTransferDataSource(
                 
                 routing {
                     webSocket(WEBSOCKET_PATH) {
-                        serverSession = this
+                        println("[KtorTransferDataSource] TLS Server: Client connected, setting up session...")
+                        stateMutex.withLock {
+                            serverSession = this
+                        }
+                        println("[KtorTransferDataSource] TLS Server: Session established successfully")
+                        println("[KtorTransferDataSource] TLS Server: Session details - outgoing.isClosedForSend=${outgoing.isClosedForSend}")
                         
-                        // Keep connection alive until closed
+                        // Keep connection alive without consuming frames
+                        // This allows sendData() and receiveData() to use the session concurrently
                         try {
-                            for (frame in incoming) {
-                                // Messages are handled via receiveData()
-                            }
-                        } catch (e: Exception) {
-                            // Connection closed
+                            println("[KtorTransferDataSource] TLS Server: WebSocket session active, waiting for cancellation...")
+                            awaitCancellation()
+                        } catch (e: CancellationException) {
+                            println("[KtorTransferDataSource] TLS Server: WebSocket connection cancelled")
+                            throw e
                         } finally {
-                            serverSession = null
+                            println("[KtorTransferDataSource] TLS Server: Cleaning up server session")
+                            stateMutex.withLock {
+                                serverSession = null
+                            }
                         }
                     }
                 }

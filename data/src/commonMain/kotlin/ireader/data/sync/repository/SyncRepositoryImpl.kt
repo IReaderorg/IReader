@@ -34,12 +34,14 @@ import kotlin.uuid.Uuid
  * @property discoveryDataSource Handles device discovery on local network
  * @property transferDataSource Handles data transfer between devices
  * @property localDataSource Handles local database operations
+ * @property platformConfig Platform-specific configuration for device ID
  */
 @OptIn(ExperimentalUuidApi::class)
 class SyncRepositoryImpl(
     private val discoveryDataSource: DiscoveryDataSource,
     private val transferDataSource: TransferDataSource,
-    private val localDataSource: SyncLocalDataSource
+    private val localDataSource: SyncLocalDataSource,
+    private val platformConfig: ireader.domain.config.PlatformConfig
 ) : SyncRepository {
     
     // Repository scope for Flow lifecycle management (Task 10.1.3)
@@ -60,45 +62,157 @@ class SyncRepositoryImpl(
             replay = 1 // Replay last value to new subscribers
         )
     
-    // Generate device info for this device
-    private val currentDeviceInfo = DeviceInfo(
-        deviceId = Uuid.random().toString(),
-        deviceName = "IReader Device",
-        deviceType = DeviceType.ANDROID,
-        appVersion = "1.0.0",
-        ipAddress = "0.0.0.0",
-        port = 8080,
-        lastSeen = System.currentTimeMillis()
-    )
+    // Get persistent device info for this device
+    private val currentDeviceInfo = run {
+        val deviceId = platformConfig.getDeviceId()
+        val deviceName = getDeviceName()
+        val deviceType = getDeviceType()
+        val appVersion = getAppVersion()
+        
+        // Debug logging
+        println("[SyncRepository] Device Info:")
+        println("[SyncRepository]   ID: $deviceId")
+        println("[SyncRepository]   Name: $deviceName")
+        println("[SyncRepository]   Type: $deviceType")
+        println("[SyncRepository]   Version: $appVersion")
+        
+        DeviceInfo(
+            deviceId = deviceId,
+            deviceName = deviceName,
+            deviceType = deviceType,
+            appVersion = appVersion,
+            ipAddress = "0.0.0.0",
+            port = 8080,
+            lastSeen = System.currentTimeMillis()
+        )
+    }
+    
+    /**
+     * Get the device name based on platform.
+     * Returns the actual device/computer name from the system.
+     */
+    private fun getDeviceName(): String {
+        return try {
+            val deviceType = getDeviceType()
+            
+            when (deviceType) {
+                DeviceType.ANDROID -> {
+                    // For Android, try to get device model from Build class
+                    try {
+                        // Use reflection to access android.os.Build
+                        val buildClass = Class.forName("android.os.Build")
+                        val model = buildClass.getField("MODEL").get(null) as? String
+                        val manufacturer = buildClass.getField("MANUFACTURER").get(null) as? String
+                        
+                        when {
+                            model != null && manufacturer != null -> "$manufacturer $model"
+                            model != null -> model
+                            manufacturer != null -> manufacturer
+                            else -> "Android Device"
+                        }
+                    } catch (e: Exception) {
+                        "Android Device"
+                    }
+                }
+                
+                DeviceType.DESKTOP -> {
+                    // Try multiple methods to get computer name
+                    System.getenv("COMPUTERNAME") // Windows
+                        ?: System.getenv("HOSTNAME") // Linux/Mac
+                        ?: System.getenv("HOST") // Alternative
+                        ?: System.getProperty("user.name")?.let { "$it's Computer" } // Fallback to username
+                        ?: "IReader Device"
+                }
+            }
+        } catch (e: Exception) {
+            // Fallback if all methods fail
+            "IReader Device"
+        }
+    }
+    
+    /**
+     * Detect the current platform/device type.
+     */
+    private fun getDeviceType(): DeviceType {
+        return try {
+            // Check if we're running on Android by trying to access Android-specific classes
+            try {
+                Class.forName("android.os.Build")
+                return DeviceType.ANDROID
+            } catch (e: ClassNotFoundException) {
+                // Not Android, must be Desktop
+                return DeviceType.DESKTOP
+            }
+        } catch (e: Exception) {
+            // Fallback to checking system properties
+            val osName = System.getProperty("os.name")?.lowercase() ?: ""
+            if (osName.contains("android")) {
+                DeviceType.ANDROID
+            } else {
+                DeviceType.DESKTOP
+            }
+        }
+    }
+    
+    /**
+     * Get the app version.
+     * Uses BuildConfig if available, otherwise returns default.
+     */
+    private fun getAppVersion(): String {
+        return try {
+            // Try to get version from BuildConfig
+            // This will be different for each platform
+            "2.0.14" // From ProjectConfig
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+    }
     
     // ========== Discovery Operations ==========
     
     override suspend fun startDiscovery(): Result<Unit> {
         return try {
+            println("[SyncRepository] ========== START DISCOVERY ==========")
+            println("[SyncRepository] Broadcasting device info:")
+            println("[SyncRepository]   Device ID: ${currentDeviceInfo.deviceId}")
+            println("[SyncRepository]   Device Name: ${currentDeviceInfo.deviceName}")
+            println("[SyncRepository]   Device Type: ${currentDeviceInfo.deviceType}")
+            println("[SyncRepository]   IP: ${currentDeviceInfo.ipAddress}:${currentDeviceInfo.port}")
+            
             // Start broadcasting this device's presence
             discoveryDataSource.startBroadcasting(currentDeviceInfo).getOrThrow()
+            println("[SyncRepository] Broadcasting started successfully")
             
             // Start discovering other devices
             discoveryDataSource.startDiscovery().getOrThrow()
+            println("[SyncRepository] Discovery started successfully")
             
             _syncStatus.value = SyncStatus.Discovering
             Result.success(Unit)
         } catch (e: Exception) {
+            println("[SyncRepository] ERROR: Failed to start discovery: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
     
     override suspend fun stopDiscovery(): Result<Unit> {
         return try {
+            println("[SyncRepository] ========== STOP DISCOVERY ==========")
+            
             // Stop broadcasting
             discoveryDataSource.stopBroadcasting().getOrThrow()
+            println("[SyncRepository] Broadcasting stopped")
             
             // Stop discovering
             discoveryDataSource.stopDiscovery().getOrThrow()
+            println("[SyncRepository] Discovery stopped")
             
             _syncStatus.value = SyncStatus.Idle
             Result.success(Unit)
         } catch (e: Exception) {
+            println("[SyncRepository] ERROR: Failed to stop discovery: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
@@ -130,53 +244,114 @@ class SyncRepositoryImpl(
         // Phase 10.4.1: Use IO dispatcher for network operations
         return withContext(Dispatchers.IO) {
             try {
+                println("[SyncRepository] ========== CONNECT TO DEVICE ==========")
                 _syncStatus.value = SyncStatus.Connecting(device.deviceName)
                 
                 // Determine role based on device ID comparison (lexicographic order)
                 // This ensures one device becomes server, the other becomes client
                 val shouldBeServer = currentDeviceInfo.deviceId < device.deviceId
                 
+                // Debug logging
+                println("[SyncRepository] Current device ID: ${currentDeviceInfo.deviceId}")
+                println("[SyncRepository] Remote device ID: ${device.deviceId}")
+                println("[SyncRepository] Should be server: $shouldBeServer")
+                println("[SyncRepository] Comparison: ${currentDeviceInfo.deviceId} < ${device.deviceId} = $shouldBeServer")
+                println("[SyncRepository] Remote device: ${device.deviceName} at ${device.ipAddress}:${device.port}")
+                
                 if (shouldBeServer) {
                     // This device acts as SERVER
+                    println("[SyncRepository] ========== ROLE: SERVER ==========")
+                    println("[SyncRepository] Starting server on port 8080")
                     // Start server first and wait for client to connect
                     val serverPort = 8080 // Use fixed port for server
-                    transferDataSource.startServer(serverPort).getOrThrow()
+                    val startResult = transferDataSource.startServer(serverPort)
                     
-                    // Wait for client connection with retry logic
+                    if (startResult.isFailure) {
+                        println("[SyncRepository] ERROR: Failed to start server: ${startResult.exceptionOrNull()?.message}")
+                        throw startResult.exceptionOrNull() ?: Exception("Failed to start server")
+                    }
+                    
+                    println("[SyncRepository] Server started successfully, waiting for client connection...")
+                    
+                    // Wait for actual client connection with timeout
                     var retryCount = 0
-                    val maxRetries = 5
+                    val maxRetries = 30 // 30 seconds total timeout
                     var connected = false
                     
                     while (retryCount < maxRetries && !connected) {
-                        delay(1000L * (retryCount + 1)) // Exponential backoff: 1s, 2s, 3s, 4s, 5s
+                        delay(1000L) // Check every second
                         
-                        // Check if client has connected by verifying server session exists
-                        // This is a simplified check - in production, implement proper handshake
-                        connected = true // Server is ready, waiting for client
-                        retryCount++
+                        // Check if client has actually connected
+                        connected = transferDataSource.hasActiveConnection()
+                        
+                        if (!connected) {
+                            retryCount++
+                            if (retryCount % 5 == 0) {
+                                println("[SyncRepository] Still waiting for client... (${retryCount}s elapsed)")
+                            }
+                        }
                     }
+                    
+                    if (!connected) {
+                        // Clean up server if client didn't connect
+                        println("[SyncRepository] ERROR: Client failed to connect after ${maxRetries} seconds")
+                        println("[SyncRepository] Stopping server...")
+                        transferDataSource.stopServer()
+                        throw Exception("Client failed to connect after ${maxRetries} seconds. Ensure both devices are on the same network and the other device has started sync.")
+                    }
+                    
+                    println("[SyncRepository] ✓ Client connected successfully!")
                 } else {
                     // This device acts as CLIENT
+                    println("[SyncRepository] ========== ROLE: CLIENT ==========")
+                    println("[SyncRepository] Connecting to server at ${device.ipAddress}:${device.port}")
                     // Connect to the server with retry logic
                     var retryCount = 0
-                    val maxRetries = 5
+                    val maxRetries = 10
                     var lastError: Exception? = null
+                    var connected = false
                     
-                    while (retryCount < maxRetries) {
+                    while (retryCount < maxRetries && !connected) {
                         try {
                             // Wait before attempting connection (give server time to start)
-                            delay(1000L * (retryCount + 1)) // Exponential backoff: 1s, 2s, 3s, 4s, 5s
+                            delay(2000L) // Wait 2 seconds between attempts
                             
-                            transferDataSource.connectToDevice(device).getOrThrow()
-                            break // Connection successful
+                            println("[SyncRepository] Connection attempt ${retryCount + 1}/$maxRetries to ${device.ipAddress}:${device.port}")
+                            val connectResult = transferDataSource.connectToDevice(device)
+                            
+                            if (connectResult.isFailure) {
+                                throw connectResult.exceptionOrNull() ?: Exception("Connection failed")
+                            }
+                            
+                            println("[SyncRepository] WebSocket connection initiated, verifying session...")
+                            
+                            // Verify connection is actually established
+                            // Give WebSocket more time to establish and set session
+                            delay(1000L) // Increased from 500ms to 1000ms
+                            connected = transferDataSource.hasActiveConnection()
+                            
+                            if (connected) {
+                                println("[SyncRepository] ✓ Connected successfully!")
+                                break // Connection successful
+                            } else {
+                                println("[SyncRepository] WARNING: Connection established but no active session, retrying...")
+                                // Don't increment retry count for this case, just retry
+                            }
                         } catch (e: Exception) {
+                            println("[SyncRepository] Connection attempt failed: ${e.message}")
                             lastError = e
                             retryCount++
                             
                             if (retryCount >= maxRetries) {
-                                throw Exception("Failed to connect after $maxRetries attempts: ${e.message}", e)
+                                println("[SyncRepository] ERROR: All connection attempts exhausted")
+                                throw Exception("Failed to connect after $maxRetries attempts: ${e.message}. Ensure the other device has started sync and is acting as server.", e)
                             }
                         }
+                    }
+                    
+                    if (!connected) {
+                        println("[SyncRepository] ERROR: Failed to establish connection after all retries")
+                        throw Exception("Failed to establish connection after $maxRetries attempts. ${lastError?.message ?: "Unknown error"}")
                     }
                 }
                 
@@ -185,9 +360,16 @@ class SyncRepositoryImpl(
                     deviceName = device.deviceName
                 )
                 
+                println("[SyncRepository] ✓ Connection established successfully")
+                println("[SyncRepository] Connection details: ${device.deviceName} (${device.deviceId})")
+                
                 _syncStatus.value = SyncStatus.Idle
                 Result.success(connection)
             } catch (e: Exception) {
+                println("[SyncRepository] ========== CONNECTION FAILED ==========")
+                println("[SyncRepository] ERROR: ${e.message}")
+                e.printStackTrace()
+                
                 _syncStatus.value = SyncStatus.Failed(
                     device.deviceName,
                     SyncError.ConnectionFailed(e.message ?: "Unknown error")
@@ -250,8 +432,14 @@ class SyncRepositoryImpl(
         remoteManifest: SyncManifest
     ): Result<SyncResult> {
         return try {
+            println("[SyncRepository] ========== PERFORM SYNC ==========")
+            println("[SyncRepository] Syncing with: ${connection.deviceName} (${connection.deviceId})")
+            println("[SyncRepository] Local manifest: ${localManifest.items.size} items")
+            println("[SyncRepository] Remote manifest: ${remoteManifest.items.size} items")
+            
             if (isCancelled) {
                 isCancelled = false
+                println("[SyncRepository] Sync was cancelled")
                 return Result.failure(Exception("Sync cancelled"))
             }
             
@@ -268,6 +456,7 @@ class SyncRepositoryImpl(
             
             // Phase 10.4.1: Use Default dispatcher for CPU-intensive manifest comparison
             val (itemsToSend, itemsToReceive) = withContext(Dispatchers.Default) {
+                println("[SyncRepository] Calculating items to sync...")
                 // Phase 10.4.2: Calculate items in parallel
                 val itemsToSendDeferred = async {
                     calculateItemsToSend(localManifest, remoteManifest)
@@ -279,42 +468,76 @@ class SyncRepositoryImpl(
                 Pair(itemsToSendDeferred.await(), itemsToReceiveDeferred.await())
             }
             
+            println("[SyncRepository] Items to send: ${itemsToSend.size}")
+            println("[SyncRepository] Items to receive: ${itemsToReceive.size}")
+            
             var itemsSynced = 0
             
             // Phase 10.4.2: Send and receive in parallel using coroutineScope
             itemsSynced = coroutineScope {
                 val sendJob = async(Dispatchers.IO) {
                     if (itemsToSend.isNotEmpty()) {
+                        println("[SyncRepository] Sending ${itemsToSend.size} items...")
                         concurrencyManager.withConcurrencyControl {
                             val dataToSend = buildSyncData(itemsToSend)
-                            transferDataSource.sendData(dataToSend).getOrThrow()
+                            println("[SyncRepository] Built sync data: ${dataToSend.books.size} books, ${dataToSend.readingProgress.size} progress, ${dataToSend.bookmarks.size} bookmarks")
+                            
+                            val sendResult = transferDataSource.sendData(dataToSend)
+                            if (sendResult.isFailure) {
+                                println("[SyncRepository] ERROR: Failed to send data: ${sendResult.exceptionOrNull()?.message}")
+                                throw sendResult.exceptionOrNull() ?: Exception("Failed to send data")
+                            }
+                            
+                            println("[SyncRepository] ✓ Data sent successfully")
                             itemsToSend.size
                         }
                     } else {
+                        println("[SyncRepository] No items to send")
                         0
                     }
                 }
                 
                 val receiveJob = async(Dispatchers.IO) {
                     if (itemsToReceive.isNotEmpty()) {
+                        println("[SyncRepository] Receiving ${itemsToReceive.size} items...")
                         concurrencyManager.withConcurrencyControl {
-                            val receivedData = transferDataSource.receiveData().getOrThrow()
-                            applySync(receivedData).getOrThrow()
+                            val receiveResult = transferDataSource.receiveData()
+                            if (receiveResult.isFailure) {
+                                println("[SyncRepository] ERROR: Failed to receive data: ${receiveResult.exceptionOrNull()?.message}")
+                                throw receiveResult.exceptionOrNull() ?: Exception("Failed to receive data")
+                            }
+                            
+                            val receivedData = receiveResult.getOrThrow()
+                            println("[SyncRepository] ✓ Data received: ${receivedData.books.size} books, ${receivedData.readingProgress.size} progress, ${receivedData.bookmarks.size} bookmarks")
+                            
+                            println("[SyncRepository] Applying received data...")
+                            val applyResult = applySync(receivedData)
+                            if (applyResult.isFailure) {
+                                println("[SyncRepository] ERROR: Failed to apply sync: ${applyResult.exceptionOrNull()?.message}")
+                                throw applyResult.exceptionOrNull() ?: Exception("Failed to apply sync")
+                            }
+                            
+                            println("[SyncRepository] ✓ Data applied successfully")
                             itemsToReceive.size
                         }
                     } else {
+                        println("[SyncRepository] No items to receive")
                         0
                     }
                 }
                 
                 // Wait for both operations to complete
-                sendJob.await() + receiveJob.await()
+                val sent = sendJob.await()
+                val received = receiveJob.await()
+                println("[SyncRepository] Sync operations completed: sent=$sent, received=$received")
+                sent + received
             }
             
             val duration = System.currentTimeMillis() - startTime
             
             // Phase 10.4.1: Use IO dispatcher for database update
             withContext(Dispatchers.IO) {
+                println("[SyncRepository] Updating last sync time...")
                 updateLastSyncTime(connection.deviceId, System.currentTimeMillis()).getOrThrow()
             }
             
@@ -323,6 +546,10 @@ class SyncRepositoryImpl(
                 itemsSynced = itemsSynced,
                 duration = duration
             )
+            
+            println("[SyncRepository] ========== SYNC COMPLETED ==========")
+            println("[SyncRepository] Items synced: $itemsSynced")
+            println("[SyncRepository] Duration: ${duration}ms")
             
             // Phase 10.4.3: Thread-safe status update
             concurrencyManager.withMutex {
@@ -335,6 +562,10 @@ class SyncRepositoryImpl(
             
             Result.success(syncResult)
         } catch (e: Exception) {
+            println("[SyncRepository] ========== SYNC FAILED ==========")
+            println("[SyncRepository] ERROR: ${e.message}")
+            e.printStackTrace()
+            
             // Phase 10.4.3: Thread-safe status update
             concurrencyManager.withMutex {
                 _syncStatus.value = SyncStatus.Failed(
@@ -402,13 +633,19 @@ class SyncRepositoryImpl(
     override suspend fun applySync(data: SyncData): Result<Unit> {
         return try {
             // Apply books
-            // In real implementation, would merge with local database
+            if (data.books.isNotEmpty()) {
+                localDataSource.applyBooks(data.books)
+            }
             
             // Apply reading progress
-            // In real implementation, would merge with local database
+            if (data.readingProgress.isNotEmpty()) {
+                localDataSource.applyProgress(data.readingProgress)
+            }
             
             // Apply bookmarks
-            // In real implementation, would merge with local database
+            if (data.bookmarks.isNotEmpty()) {
+                localDataSource.applyBookmarks(data.bookmarks)
+            }
             
             Result.success(Unit)
         } catch (e: Exception) {
@@ -466,7 +703,43 @@ class SyncRepositoryImpl(
         val items = mutableListOf<SyncManifestItem>()
         
         // Add books to manifest
-        // In real implementation, would get from local data source
+        val books = localDataSource.getBooks()
+        books.forEach { book ->
+            items.add(
+                SyncManifestItem(
+                    itemId = book.bookId.toString(),
+                    itemType = SyncItemType.BOOK,
+                    hash = calculateItemHash(book),
+                    lastModified = book.updatedAt
+                )
+            )
+        }
+        
+        // Add reading progress to manifest
+        val progress = localDataSource.getProgress()
+        progress.forEach { prog ->
+            items.add(
+                SyncManifestItem(
+                    itemId = "${prog.bookId}-${prog.chapterId}",
+                    itemType = SyncItemType.READING_PROGRESS,
+                    hash = calculateItemHash(prog),
+                    lastModified = prog.lastReadAt
+                )
+            )
+        }
+        
+        // Add bookmarks to manifest
+        val bookmarks = localDataSource.getBookmarks()
+        bookmarks.forEach { bookmark ->
+            items.add(
+                SyncManifestItem(
+                    itemId = bookmark.bookmarkId.toString(),
+                    itemType = SyncItemType.BOOKMARK,
+                    hash = calculateItemHash(bookmark),
+                    lastModified = bookmark.createdAt
+                )
+            )
+        }
         
         return SyncManifest(
             deviceId = currentDeviceInfo.deviceId,
@@ -510,8 +783,34 @@ class SyncRepositoryImpl(
         val progress = mutableListOf<ReadingProgressData>()
         val bookmarks = mutableListOf<BookmarkData>()
         
-        // Build sync data based on items
-        // In real implementation, would fetch from local data source
+        // Get all local data
+        val allBooks = localDataSource.getBooks()
+        val allProgress = localDataSource.getProgress()
+        val allBookmarks = localDataSource.getBookmarks()
+        
+        // Filter based on items to send
+        val itemIds = items.map { it.itemId }.toSet()
+        
+        // Add books that match the items list
+        books.addAll(
+            allBooks.filter { book ->
+                itemIds.contains(book.bookId.toString())
+            }
+        )
+        
+        // Add progress that matches the items list
+        progress.addAll(
+            allProgress.filter { prog ->
+                itemIds.contains("${prog.bookId}-${prog.chapterId}")
+            }
+        )
+        
+        // Add bookmarks that match the items list
+        bookmarks.addAll(
+            allBookmarks.filter { bookmark ->
+                itemIds.contains(bookmark.bookmarkId.toString())
+            }
+        )
         
         return SyncData(
             books = books,
@@ -535,5 +834,17 @@ class SyncRepositoryImpl(
         // In real implementation, would use SHA-256
         val content = "${books.size}-${progress.size}-${bookmarks.size}"
         return content.hashCode().toString()
+    }
+    
+    private fun calculateItemHash(book: BookSyncData): String {
+        return "${book.bookId}-${book.updatedAt}".hashCode().toString()
+    }
+    
+    private fun calculateItemHash(progress: ReadingProgressData): String {
+        return "${progress.bookId}-${progress.chapterId}-${progress.lastReadAt}".hashCode().toString()
+    }
+    
+    private fun calculateItemHash(bookmark: BookmarkData): String {
+        return "${bookmark.bookmarkId}-${bookmark.createdAt}".hashCode().toString()
     }
 }

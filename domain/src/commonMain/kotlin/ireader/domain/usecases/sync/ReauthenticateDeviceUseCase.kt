@@ -1,6 +1,7 @@
 package ireader.domain.usecases.sync
 
 import ireader.domain.repositories.TrustedDeviceRepository
+import kotlin.time.ExperimentalTime
 
 /**
  * Use case for re-authenticating a device when its trust has expired.
@@ -33,13 +34,14 @@ class ReauthenticateDeviceUseCase(
      * @param deviceId Unique identifier of the device to re-authenticate
      * @return true if re-authentication succeeded, false if device not found
      */
+    @OptIn(ExperimentalTime::class)
     suspend operator fun invoke(deviceId: String): Boolean {
         // Get the device from storage
         val device = trustedDeviceRepository.getTrustedDevice(deviceId)
             ?: return false // Device not found
         
         // Calculate new expiration (30 days from now)
-        val now = System.currentTimeMillis()
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
         val newExpiration = now + TRUST_DURATION_MS
         
         // Update the device with new expiration and ensure it's active
