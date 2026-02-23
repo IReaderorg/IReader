@@ -82,7 +82,7 @@ class SyncRepositoryImpl(
             deviceType = deviceType,
             appVersion = appVersion,
             ipAddress = "0.0.0.0",
-            port = 8080,
+            port = 10880,
             lastSeen = System.currentTimeMillis()
         )
     }
@@ -261,9 +261,9 @@ class SyncRepositoryImpl(
                 if (shouldBeServer) {
                     // This device acts as SERVER
                     println("[SyncRepository] ========== ROLE: SERVER ==========")
-                    println("[SyncRepository] Starting server on port 8080")
+                    println("[SyncRepository] Starting server on port 10880")
                     // Start server first and wait for client to connect
-                    val serverPort = 8080 // Use fixed port for server
+                    val serverPort = 10880 // Use fixed port for server
                     val startResult = transferDataSource.startServer(serverPort)
                     
                     if (startResult.isFailure) {
