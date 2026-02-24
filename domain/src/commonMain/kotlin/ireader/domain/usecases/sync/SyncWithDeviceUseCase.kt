@@ -1,9 +1,9 @@
 package ireader.domain.usecases.sync
 
 import ireader.domain.models.sync.BookSyncData
-import ireader.domain.models.sync.BookmarkData
+import ireader.domain.models.sync.ChapterSyncData
+import ireader.domain.models.sync.HistorySyncData
 import ireader.domain.models.sync.ConflictResolutionStrategy
-import ireader.domain.models.sync.ReadingProgressData
 import ireader.domain.models.sync.SyncData
 import ireader.domain.repositories.SyncRepository
 import ireader.domain.repositories.SyncResult
@@ -56,21 +56,21 @@ class SyncWithDeviceUseCase(
                 return Result.failure(it)
             }
 
-            // Step 4: Get local and remote data for conflict detection
+            // Step 4: Get local data for conflict detection
             val localBooks = syncRepository.getBooksToSync().getOrElse { emptyList() }
-            val localProgress = syncRepository.getReadingProgress().getOrElse { emptyList() }
-            val localBookmarks = syncRepository.getBookmarks().getOrElse { emptyList() }
+            val localChapters = syncRepository.getChaptersToSync().getOrElse { emptyList() }
+            val localHistory = syncRepository.getHistoryToSync().getOrElse { emptyList() }
 
             val localData = SyncData(
                 books = localBooks,
-                readingProgress = localProgress,
-                bookmarks = localBookmarks,
+                chapters = localChapters,
+                history = localHistory,
                 metadata = localManifest.let {
                     ireader.domain.models.sync.SyncMetadata(
                         deviceId = it.deviceId,
                         timestamp = it.timestamp,
                         version = 1,
-                        checksum = calculateChecksum(localBooks, localProgress, localBookmarks)
+                        checksum = calculateChecksum(localBooks, localChapters, localHistory)
                     )
                 }
             )
@@ -83,7 +83,7 @@ class SyncWithDeviceUseCase(
                         deviceId = it.deviceId,
                         timestamp = it.timestamp,
                         version = 1,
-                        checksum = calculateChecksum(localBooks, localProgress, localBookmarks)
+                        checksum = calculateChecksum(localBooks, localChapters, localHistory)
                     )
                 }
             )
@@ -122,10 +122,10 @@ class SyncWithDeviceUseCase(
     @OptIn(ExperimentalTime::class)
     private fun calculateChecksum(
         books: List<BookSyncData>,
-        progress: List<ReadingProgressData>,
-        bookmarks: List<BookmarkData>
+        chapters: List<ChapterSyncData>,
+        history: List<HistorySyncData>
     ): String {
-        val data = "${books.size}-${progress.size}-${bookmarks.size}-${kotlin.time.Clock.System.now().toEpochMilliseconds()}"
+        val data = "${books.size}-${chapters.size}-${history.size}-${kotlin.time.Clock.System.now().toEpochMilliseconds()}"
         return data.hashCode().toString(16)
     }
 }

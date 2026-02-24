@@ -41,7 +41,8 @@ class SyncRepositoryImpl(
     private val discoveryDataSource: DiscoveryDataSource,
     private val transferDataSource: TransferDataSource,
     private val localDataSource: SyncLocalDataSource,
-    private val platformConfig: ireader.domain.config.PlatformConfig
+    private val platformConfig: ireader.domain.config.PlatformConfig,
+    private val syncPreferences: ireader.domain.preferences.prefs.SyncPreferences
 ) : SyncRepository {
     
     // Repository scope for Flow lifecycle management (Task 10.1.3)
@@ -247,15 +248,14 @@ class SyncRepositoryImpl(
                 println("[SyncRepository] ========== CONNECT TO DEVICE ==========")
                 _syncStatus.value = SyncStatus.Connecting(device.deviceName)
                 
-                // Determine role based on device ID comparison (lexicographic order)
-                // This ensures one device becomes server, the other becomes client
-                val shouldBeServer = currentDeviceInfo.deviceId < device.deviceId  // Desktop will be server, Android will be client
+                // Determine role based on user manual selection
+                val shouldBeServer = syncPreferences.isServer()
                 
                 // Debug logging
+                println("[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode")
                 println("[SyncRepository] Current device ID: ${currentDeviceInfo.deviceId}")
                 println("[SyncRepository] Remote device ID: ${device.deviceId}")
                 println("[SyncRepository] Should be server: $shouldBeServer")
-                println("[SyncRepository] Comparison: ${currentDeviceInfo.deviceId} > ${device.deviceId} = $shouldBeServer")
                 println("[SyncRepository] Remote device: ${device.deviceName} at ${device.ipAddress}:${device.port}")
                 
                 if (shouldBeServer) {
@@ -408,20 +408,49 @@ class SyncRepositoryImpl(
     
     override suspend fun exchangeManifests(connection: Connection): Result<Pair<SyncManifest, SyncManifest>> {
         return try {
+            println("[SyncRepository] ========== EXCHANGE MANIFESTS ==========")
+            
             // Build local manifest from local data
             val localManifest = buildLocalManifest()
+            println("[SyncRepository] Local manifest built: ${localManifest.items.size} items")
             
-            // Get remote manifest via transfer protocol
-            // In real implementation, this would be sent/received via the transfer protocol
-            // For now, return an empty remote manifest
-            val remoteManifest = SyncManifest(
-                deviceId = connection.deviceId,
-                timestamp = System.currentTimeMillis(),
-                items = emptyList()
-            )
+            // Determine role based on user manual selection
+            val shouldBeServer = syncPreferences.isServer()
+            println("[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode")
+            println("[SyncRepository] Role determination: currentDeviceId=${currentDeviceInfo.deviceId}, remoteDeviceId=${connection.deviceId}, shouldBeServer=$shouldBeServer")
+            
+            val remoteManifest = if (shouldBeServer) {
+                // SERVER: Receive client manifest first, then send ours
+                println("[SyncRepository] Server: Waiting for client manifest...")
+                val clientManifest = transferDataSource.receiveManifest().getOrThrow()
+                println("[SyncRepository] Server: Received client manifest with ${clientManifest.items.size} items")
+                
+                println("[SyncRepository] Server: Sending our manifest...")
+                transferDataSource.sendManifest(localManifest).getOrThrow()
+                println("[SyncRepository] Server: Manifest sent")
+                
+                clientManifest
+            } else {
+                // CLIENT: Send our manifest first, then receive server's
+                println("[SyncRepository] Client: Sending our manifest...")
+                transferDataSource.sendManifest(localManifest).getOrThrow()
+                println("[SyncRepository] Client: Manifest sent")
+                
+                println("[SyncRepository] Client: Waiting for server manifest...")
+                val serverManifest = transferDataSource.receiveManifest().getOrThrow()
+                println("[SyncRepository] Client: Received server manifest with ${serverManifest.items.size} items")
+                
+                serverManifest
+            }
+            
+            println("[SyncRepository] ========== MANIFESTS EXCHANGED ==========")
+            println("[SyncRepository] Local: ${localManifest.items.size} items")
+            println("[SyncRepository] Remote: ${remoteManifest.items.size} items")
             
             Result.success(Pair(localManifest, remoteManifest))
         } catch (e: Exception) {
+            println("[SyncRepository] ERROR: Failed to exchange manifests: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
@@ -480,7 +509,7 @@ class SyncRepositoryImpl(
                         println("[SyncRepository] Sending ${itemsToSend.size} items...")
                         concurrencyManager.withConcurrencyControl {
                             val dataToSend = buildSyncData(itemsToSend)
-                            println("[SyncRepository] Built sync data: ${dataToSend.books.size} books, ${dataToSend.readingProgress.size} progress, ${dataToSend.bookmarks.size} bookmarks")
+                            println("[SyncRepository] Built sync data: ${dataToSend.books.size} books, ${dataToSend.chapters.size} chapters, ${dataToSend.history.size} history")
                             
                             val sendResult = transferDataSource.sendData(dataToSend)
                             if (sendResult.isFailure) {
@@ -508,7 +537,7 @@ class SyncRepositoryImpl(
                             }
                             
                             val receivedData = receiveResult.getOrThrow()
-                            println("[SyncRepository] ✓ Data received: ${receivedData.books.size} books, ${receivedData.readingProgress.size} progress, ${receivedData.bookmarks.size} bookmarks")
+                            println("[SyncRepository] ✓ Data received: ${receivedData.books.size} books, ${receivedData.chapters.size} chapters, ${receivedData.history.size} history")
                             
                             println("[SyncRepository] Applying received data...")
                             val applyResult = applySync(receivedData)
@@ -606,24 +635,24 @@ class SyncRepositoryImpl(
         }
     }
     
-    override suspend fun getReadingProgress(): Result<List<ReadingProgressData>> {
+    override suspend fun getChaptersToSync(): Result<List<ChapterSyncData>> {
         // Phase 10.4.1: Use IO dispatcher for database operations
         return withContext(Dispatchers.IO) {
             try {
-                val progress = localDataSource.getProgress()
-                Result.success(progress)
+                val chapters = localDataSource.getChapters()
+                Result.success(chapters)
             } catch (e: Exception) {
                 Result.failure(e)
             }
         }
     }
     
-    override suspend fun getBookmarks(): Result<List<BookmarkData>> {
+    override suspend fun getHistoryToSync(): Result<List<HistorySyncData>> {
         // Phase 10.4.1: Use IO dispatcher for database operations
         return withContext(Dispatchers.IO) {
             try {
-                val bookmarks = localDataSource.getBookmarks()
-                Result.success(bookmarks)
+                val history = localDataSource.getHistory()
+                Result.success(history)
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -632,23 +661,49 @@ class SyncRepositoryImpl(
     
     override suspend fun applySync(data: SyncData): Result<Unit> {
         return try {
-            // Apply books
+            println("[SyncRepository] Applying sync data: ${data.books.size} books, ${data.chapters.size} chapters, ${data.history.size} history")
+            
+            // Apply books first
             if (data.books.isNotEmpty()) {
-                localDataSource.applyBooks(data.books)
+                try {
+                    localDataSource.applyBooks(data.books)
+                    println("[SyncRepository] ✓ Books applied successfully")
+                } catch (e: Exception) {
+                    println("[SyncRepository] ERROR applying books: ${e.message}")
+                    e.printStackTrace()
+                    throw e
+                }
             }
             
-            // Apply reading progress
-            if (data.readingProgress.isNotEmpty()) {
-                localDataSource.applyProgress(data.readingProgress)
+            // Apply chapters second (after books exist)
+            if (data.chapters.isNotEmpty()) {
+                try {
+                    localDataSource.applyChapters(data.chapters)
+                    println("[SyncRepository] ✓ Chapters applied successfully")
+                } catch (e: Exception) {
+                    println("[SyncRepository] ERROR applying chapters: ${e.message}")
+                    e.printStackTrace()
+                    throw e
+                }
             }
             
-            // Apply bookmarks
-            if (data.bookmarks.isNotEmpty()) {
-                localDataSource.applyBookmarks(data.bookmarks)
+            // Apply history last (after chapters exist)
+            if (data.history.isNotEmpty()) {
+                try {
+                    localDataSource.applyHistory(data.history)
+                    println("[SyncRepository] ✓ History applied successfully")
+                } catch (e: Exception) {
+                    println("[SyncRepository] ERROR applying history: ${e.message}")
+                    e.printStackTrace()
+                    throw e
+                }
             }
             
+            println("[SyncRepository] ✓ All sync data applied successfully")
             Result.success(Unit)
         } catch (e: Exception) {
+            println("[SyncRepository] ERROR in applySync: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
@@ -707,7 +762,7 @@ class SyncRepositoryImpl(
         books.forEach { book ->
             items.add(
                 SyncManifestItem(
-                    itemId = book.bookId.toString(),
+                    itemId = book.globalId,
                     itemType = SyncItemType.BOOK,
                     hash = calculateItemHash(book),
                     lastModified = book.updatedAt
@@ -715,28 +770,28 @@ class SyncRepositoryImpl(
             )
         }
         
-        // Add reading progress to manifest
-        val progress = localDataSource.getProgress()
-        progress.forEach { prog ->
+        // Add chapters to manifest
+        val chapters = localDataSource.getChapters()
+        chapters.forEach { chapter ->
             items.add(
                 SyncManifestItem(
-                    itemId = "${prog.bookId}-${prog.chapterId}",
-                    itemType = SyncItemType.READING_PROGRESS,
-                    hash = calculateItemHash(prog),
-                    lastModified = prog.lastReadAt
+                    itemId = chapter.globalId,
+                    itemType = SyncItemType.CHAPTER,
+                    hash = calculateItemHash(chapter),
+                    lastModified = chapter.dateFetch
                 )
             )
         }
         
-        // Add bookmarks to manifest
-        val bookmarks = localDataSource.getBookmarks()
-        bookmarks.forEach { bookmark ->
+        // Add history to manifest
+        val history = localDataSource.getHistory()
+        history.forEach { hist ->
             items.add(
                 SyncManifestItem(
-                    itemId = bookmark.bookmarkId.toString(),
-                    itemType = SyncItemType.BOOKMARK,
-                    hash = calculateItemHash(bookmark),
-                    lastModified = bookmark.createdAt
+                    itemId = hist.chapterGlobalId,
+                    itemType = SyncItemType.HISTORY,
+                    hash = calculateItemHash(hist),
+                    lastModified = hist.lastRead
                 )
             )
         }
@@ -780,13 +835,13 @@ class SyncRepositoryImpl(
     
     private suspend fun buildSyncData(items: List<SyncManifestItem>): SyncData {
         val books = mutableListOf<BookSyncData>()
-        val progress = mutableListOf<ReadingProgressData>()
-        val bookmarks = mutableListOf<BookmarkData>()
+        val chapters = mutableListOf<ChapterSyncData>()
+        val history = mutableListOf<HistorySyncData>()
         
         // Get all local data
         val allBooks = localDataSource.getBooks()
-        val allProgress = localDataSource.getProgress()
-        val allBookmarks = localDataSource.getBookmarks()
+        val allChapters = localDataSource.getChapters()
+        val allHistory = localDataSource.getHistory()
         
         // Filter based on items to send
         val itemIds = items.map { it.itemId }.toSet()
@@ -794,57 +849,57 @@ class SyncRepositoryImpl(
         // Add books that match the items list
         books.addAll(
             allBooks.filter { book ->
-                itemIds.contains(book.bookId.toString())
+                itemIds.contains(book.globalId)
             }
         )
         
-        // Add progress that matches the items list
-        progress.addAll(
-            allProgress.filter { prog ->
-                itemIds.contains("${prog.bookId}-${prog.chapterId}")
+        // Add chapters that match the items list
+        chapters.addAll(
+            allChapters.filter { chapter ->
+                itemIds.contains(chapter.globalId)
             }
         )
         
-        // Add bookmarks that match the items list
-        bookmarks.addAll(
-            allBookmarks.filter { bookmark ->
-                itemIds.contains(bookmark.bookmarkId.toString())
+        // Add history that matches the items list
+        history.addAll(
+            allHistory.filter { hist ->
+                itemIds.contains(hist.chapterGlobalId)
             }
         )
         
         return SyncData(
             books = books,
-            readingProgress = progress,
-            bookmarks = bookmarks,
+            chapters = chapters,
+            history = history,
             metadata = SyncMetadata(
                 deviceId = currentDeviceInfo.deviceId,
                 timestamp = System.currentTimeMillis(),
                 version = 1,
-                checksum = calculateChecksum(books, progress, bookmarks)
+                checksum = calculateChecksum(books, chapters, history)
             )
         )
     }
     
     private fun calculateChecksum(
         books: List<BookSyncData>,
-        progress: List<ReadingProgressData>,
-        bookmarks: List<BookmarkData>
+        chapters: List<ChapterSyncData>,
+        history: List<HistorySyncData>
     ): String {
         // Simple checksum calculation
         // In real implementation, would use SHA-256
-        val content = "${books.size}-${progress.size}-${bookmarks.size}"
+        val content = "${books.size}-${chapters.size}-${history.size}"
         return content.hashCode().toString()
     }
     
     private fun calculateItemHash(book: BookSyncData): String {
-        return "${book.bookId}-${book.updatedAt}".hashCode().toString()
+        return "${book.globalId}-${book.updatedAt}".hashCode().toString()
     }
     
-    private fun calculateItemHash(progress: ReadingProgressData): String {
-        return "${progress.bookId}-${progress.chapterId}-${progress.lastReadAt}".hashCode().toString()
+    private fun calculateItemHash(chapter: ChapterSyncData): String {
+        return "${chapter.globalId}-${chapter.dateFetch}".hashCode().toString()
     }
     
-    private fun calculateItemHash(bookmark: BookmarkData): String {
-        return "${bookmark.bookmarkId}-${bookmark.createdAt}".hashCode().toString()
+    private fun calculateItemHash(history: HistorySyncData): String {
+        return "${history.chapterGlobalId}-${history.lastRead}".hashCode().toString()
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.*
@@ -61,6 +62,10 @@ fun SyncScreen(
     onResolveConflicts: (ConflictResolutionStrategy) -> Unit,
     onDismissConflicts: () -> Unit,
     onCancelSync: () -> Unit,
+    onRefreshDiscovery: () -> Unit,
+    onUpdateManualIp: (String) -> Unit,
+    onConnectManualIp: (String) -> Unit,
+    onSetServerMode: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -78,7 +83,7 @@ fun SyncScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("WiFi Sync (Experimental)") },
+                title = { Text("WiFi Sync") },
                 navigationIcon = {
                     IconButton(
                         onClick = onNavigateBack,
@@ -98,7 +103,11 @@ fun SyncScreen(
                         syncStatus = state.syncStatus,
                         isDiscovering = state.isDiscovering
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         },
         snackbarHost = {
@@ -106,66 +115,199 @@ fun SyncScreen(
         },
         modifier = modifier
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
+                .padding(paddingValues),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Discovery control button
-            Button(
-                onClick = if (state.isDiscovering) onStopDiscovery else onStartDiscovery,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(if (state.isDiscovering) "Stop Discovery" else "Start Discovery")
+            // Discovery controls
+            item {
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Device Discovery",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = if (state.isDiscovering) onStopDiscovery else onStartDiscovery,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = if (state.isDiscovering) Icons.Default.SyncProblem else Icons.Default.Sync,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(if (state.isDiscovering) "Stop" else "Start")
+                            }
+                            
+                            OutlinedButton(
+                                onClick = onRefreshDiscovery,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Refresh")
+                            }
+                        }
+                    }
+                }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            // Server/Client mode selection
+            item {
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Connection Role",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Select this device's role",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            FilterChip(
+                                selected = state.serverMode == "server",
+                                onClick = { onSetServerMode("server") },
+                                label = { Text("Server") },
+                                modifier = Modifier.weight(1f)
+                            )
+                            FilterChip(
+                                selected = state.serverMode == "client",
+                                onClick = { onSetServerMode("client") },
+                                label = { Text("Client") },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
             
-            // Sync status card - always show to provide feedback
-            SyncStatusCard(
-                syncStatus = state.syncStatus,
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Manual IP connection
+            item {
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Manual Connection",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Connect directly using IP address",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = state.manualIp,
+                                onValueChange = onUpdateManualIp,
+                                label = { Text("IP Address") },
+                                placeholder = { Text("192.168.1.100") },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Button(
+                                onClick = { onConnectManualIp(state.manualIp) },
+                                enabled = state.manualIp.isNotEmpty()
+                            ) {
+                                Text("Connect")
+                            }
+                        }
+                    }
+                }
+            }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            // Sync status card
+            item {
+                SyncStatusCard(
+                    syncStatus = state.syncStatus,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             
             // Cancel sync button (only shown when sync is in progress)
             if (state.syncStatus is SyncStatus.Syncing) {
-                Button(
-                    onClick = onCancelSync,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Cancel Sync")
+                item {
+                    FilledTonalButton(
+                        onClick = onCancelSync,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    ) {
+                        Text("Cancel Sync")
+                    }
                 }
-                
-                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
+            // Device list header
+            item {
+                Text(
+                    text = "Discovered Devices",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
             
             // Device list
             if (state.discoveredDevices.isEmpty()) {
-                EmptyDeviceList(
-                    isDiscovering = state.isDiscovering,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                item {
+                    EmptyDeviceList(
+                        isDiscovering = state.isDiscovering,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(
-                        items = state.discoveredDevices,
-                        key = { device -> device.deviceInfo.deviceId }
-                    ) { device ->
-                        DeviceListItem(
-                            device = device,
-                            onClick = { onDeviceClick(device) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                items(
+                    items = state.discoveredDevices,
+                    key = { device -> device.deviceInfo.deviceId }
+                ) { device ->
+                    DeviceListItem(
+                        device = device,
+                        onClick = { onDeviceClick(device) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -218,6 +360,10 @@ fun SyncScreen(
         onResolveConflicts = viewModel::resolveConflicts,
         onDismissConflicts = viewModel::dismissConflictDialog,
         onCancelSync = viewModel::cancelSync,
+        onRefreshDiscovery = viewModel::refreshDiscovery,
+        onUpdateManualIp = viewModel::updateManualIp,
+        onConnectManualIp = viewModel::connectToManualIp,
+        onSetServerMode = viewModel::setServerMode,
         modifier = modifier
     )
 }

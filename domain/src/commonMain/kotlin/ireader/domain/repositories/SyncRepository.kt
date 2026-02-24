@@ -111,18 +111,18 @@ interface SyncRepository {
     suspend fun getBooksToSync(): Result<List<BookSyncData>>
     
     /**
-     * Get all reading progress records.
+     * Get all chapters that should be included in sync.
      *
-     * @return Result containing list of ReadingProgressData or error
+     * @return Result containing list of ChapterSyncData or error
      */
-    suspend fun getReadingProgress(): Result<List<ReadingProgressData>>
+    suspend fun getChaptersToSync(): Result<List<ChapterSyncData>>
     
     /**
-     * Get all bookmarks.
+     * Get all history records.
      *
-     * @return Result containing list of BookmarkData or error
+     * @return Result containing list of HistorySyncData or error
      */
-    suspend fun getBookmarks(): Result<List<BookmarkData>>
+    suspend fun getHistoryToSync(): Result<List<HistorySyncData>>
     
     /**
      * Apply synced data to the local database.

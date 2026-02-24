@@ -147,6 +147,7 @@ SELECT
     h.chapter_id,
     h.progress,
     h.last_read,
+    h.time_read,
     c.book_id,
     c.source_order,
     c.last_page_read

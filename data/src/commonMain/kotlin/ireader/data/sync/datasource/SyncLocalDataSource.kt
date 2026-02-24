@@ -156,46 +156,49 @@ interface SyncLocalDataSource {
     // ========== Sync Data Operations ==========
     
     /**
-     * Get all books for synchronization.
+     * Get all books for synchronization (all books, not just favorites).
      * 
      * @return List of book sync data
      */
     suspend fun getBooks(): List<ireader.domain.models.sync.BookSyncData>
     
     /**
-     * Get all reading progress for synchronization.
+     * Get all chapters for synchronization.
      * 
-     * @return List of reading progress data
+     * @return List of chapter sync data
      */
-    suspend fun getProgress(): List<ireader.domain.models.sync.ReadingProgressData>
+    suspend fun getChapters(): List<ireader.domain.models.sync.ChapterSyncData>
     
     /**
-     * Get all bookmarks for synchronization.
+     * Get all history records for synchronization.
      * 
-     * @return List of bookmark data
+     * @return List of history sync data
      */
-    suspend fun getBookmarks(): List<ireader.domain.models.sync.BookmarkData>
+    suspend fun getHistory(): List<ireader.domain.models.sync.HistorySyncData>
     
     /**
      * Apply synced books to the local database.
+     * Uses global ID (sourceId + key) to match books.
      * 
      * @param books List of books to apply
      */
     suspend fun applyBooks(books: List<ireader.domain.models.sync.BookSyncData>)
     
     /**
-     * Apply synced reading progress to the local database.
+     * Apply synced chapters to the local database.
+     * Uses global ID (sourceId + key) to match chapters.
      * 
-     * @param progress List of reading progress to apply
+     * @param chapters List of chapters to apply
      */
-    suspend fun applyProgress(progress: List<ireader.domain.models.sync.ReadingProgressData>)
+    suspend fun applyChapters(chapters: List<ireader.domain.models.sync.ChapterSyncData>)
     
     /**
-     * Apply synced bookmarks to the local database.
+     * Apply synced history to the local database.
+     * Uses chapter global ID to match history records.
      * 
-     * @param bookmarks List of bookmarks to apply
+     * @param history List of history records to apply
      */
-    suspend fun applyBookmarks(bookmarks: List<ireader.domain.models.sync.BookmarkData>)
+    suspend fun applyHistory(history: List<ireader.domain.models.sync.HistorySyncData>)
 }
 
 /**

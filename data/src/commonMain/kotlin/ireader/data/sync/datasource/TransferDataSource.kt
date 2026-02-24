@@ -107,4 +107,25 @@ interface TransferDataSource {
      * @return true if there is an active connection, false otherwise
      */
     suspend fun hasActiveConnection(): Boolean
+    
+    /**
+     * Send a sync manifest to the connected device.
+     * 
+     * Used during the manifest exchange phase to share what data this device has.
+     * The manifest is sent as a SyncMessage over the WebSocket connection.
+     * 
+     * @param manifest The sync manifest to send
+     * @return Result indicating success or failure
+     */
+    suspend fun sendManifest(manifest: ireader.domain.models.sync.SyncManifest): Result<Unit>
+    
+    /**
+     * Receive a sync manifest from the connected device.
+     * 
+     * Waits for the remote device to send its manifest during the exchange phase.
+     * This is a suspending function that will wait until manifest arrives or timeout occurs.
+     * 
+     * @return Result containing the received manifest or error
+     */
+    suspend fun receiveManifest(): Result<ireader.domain.models.sync.SyncManifest>
 }

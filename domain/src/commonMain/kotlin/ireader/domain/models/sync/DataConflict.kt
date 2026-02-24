@@ -30,11 +30,11 @@ data class DataConflict(
  */
 @Serializable
 enum class ConflictType {
-    /** Conflict in reading progress (chapter, offset, etc.) */
-    READING_PROGRESS,
+    /** Conflict in reading history/progress */
+    HISTORY,
     
-    /** Conflict in bookmark data */
-    BOOKMARK,
+    /** Conflict in chapter data (read status, bookmark, etc.) */
+    CHAPTER,
     
     /** Conflict in book metadata */
     BOOK_METADATA

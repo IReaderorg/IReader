@@ -65,7 +65,8 @@ val syncDataModule = module {
             discoveryDataSource = get(),
             transferDataSource = get(),
             localDataSource = get(),
-            platformConfig = ireader.domain.config.PlatformConfig
+            platformConfig = ireader.domain.config.PlatformConfig,
+            syncPreferences = get()
         )
     }
     
@@ -78,21 +79,19 @@ val syncDataModule = module {
     // ========== Data Sources ==========
     
     /**
-     * Ktor-based WebSocket transfer data source with TLS support.
+     * TCP-based transfer data source for better firewall compatibility.
      * 
-     * Handles secure data transfer between devices using WebSocket connections.
-     * Supports both plain and TLS-encrypted connections with certificate pinning.
+     * Handles data transfer between devices using plain TCP sockets.
+     * No HTTP upgrade needed - direct TCP connection for better firewall compatibility.
      * 
      * Dependencies:
-     * - CertificateService: For TLS certificate operations (optional)
-     * - CertificatePinningManager: For certificate validation (optional)
+     * - CertificateService: For TLS certificate operations (optional, future use)
      * 
-     * Task 9.2.1: TLS/SSL WebSocket support
+     * Uses raw TCP sockets instead of WebSockets to avoid firewall issues.
      */
     single<TransferDataSource> { 
-        KtorTransferDataSource(
-            certificateService = get(),
-            certificatePinningManager = get()
+        ireader.data.sync.datasource.TcpTransferDataSource(
+            certificateService = get()
         )
     }
     

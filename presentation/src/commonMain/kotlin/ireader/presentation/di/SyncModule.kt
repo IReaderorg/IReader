@@ -19,7 +19,8 @@ val syncPresentationModule = module {
             getDiscoveredDevicesUseCase = get(),
             getSyncStatusUseCase = get(),
             cancelSyncUseCase = get(),
-            resolveConflictsUseCase = get()
+            resolveConflictsUseCase = get(),
+            syncPreferences = get()
         )
     }
 }

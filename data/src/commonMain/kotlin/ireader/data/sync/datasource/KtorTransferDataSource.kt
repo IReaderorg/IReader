@@ -10,6 +10,7 @@ import io.ktor.server.application.*
 import io.ktor.server.netty.Netty as ServerNetty
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.compression.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.server.websocket.WebSockets
@@ -77,6 +78,16 @@ class KtorTransferDataSource(
     private var sendChannel = Channel<SendRequest>(Channel.UNLIMITED)
     private var receiveChannel = Channel<SyncData>(Channel.UNLIMITED)
     
+    // Channels for manifest exchange
+    private var manifestSendChannel = Channel<ManifestSendRequest>(Channel.UNLIMITED)
+    private var manifestReceiveChannel = Channel<ireader.domain.models.sync.SyncManifest>(Channel.UNLIMITED)
+    
+    // Data class for manifest send requests
+    private data class ManifestSendRequest(
+        val manifest: ireader.domain.models.sync.SyncManifest,
+        val completion: CompletableDeferred<Result<Unit>>
+    )
+    
     // Data class for send requests with completion tracking
     private data class SendRequest(
         val data: SyncData,
@@ -87,6 +98,8 @@ class KtorTransferDataSource(
     private fun recreateChannels() {
         sendChannel = Channel(Channel.UNLIMITED)
         receiveChannel = Channel(Channel.UNLIMITED)
+        manifestSendChannel = Channel(Channel.UNLIMITED)
+        manifestReceiveChannel = Channel(Channel.UNLIMITED)
     }
     
     companion object {
@@ -159,6 +172,12 @@ class KtorTransferDataSource(
                 }
                 
                 routing {
+                    // Health check endpoint for testing connectivity
+                    get("/health") {
+                        println("[KtorTransferDataSource] Server: Health check requested")
+                        call.respondText("OK")
+                    }
+                    
                     webSocket(WEBSOCKET_PATH) {
                         println("[KtorTransferDataSource] Server: Client connected, setting up session...")
                         stateMutex.withLock {
@@ -209,32 +228,99 @@ class KtorTransferDataSource(
                                 }
                             }
                             
+                            // Launch coroutine to handle outgoing manifest send requests
+                            val manifestSenderJob = launch {
+                                try {
+                                    for (request in manifestSendChannel) {
+                                        try {
+                                            println("[KtorTransferDataSource] Server: Processing manifest send request...")
+                                            
+                                            // Serialize manifest
+                                            val manifestJson = json.encodeToString(request.manifest)
+                                            val manifestBytes = manifestJson.encodeToByteArray()
+                                            
+                                            println("[KtorTransferDataSource] Server: Sending manifest (${manifestBytes.size} bytes)")
+                                            
+                                            // Send manifest marker
+                                            send(Frame.Text("__MANIFEST__"))
+                                            
+                                            // Send manifest data
+                                            send(Frame.Binary(true, manifestBytes))
+                                            
+                                            // Send end marker
+                                            send(Frame.Text("__MANIFEST_END__"))
+                                            
+                                            println("[KtorTransferDataSource] Server: Manifest sent successfully")
+                                            request.completion.complete(Result.success(Unit))
+                                        } catch (e: Exception) {
+                                            println("[KtorTransferDataSource] Server: Manifest send failed: ${e.message}")
+                                            e.printStackTrace()
+                                            request.completion.complete(Result.failure(e))
+                                        }
+                                    }
+                                } catch (e: CancellationException) {
+                                    println("[KtorTransferDataSource] Server: Manifest sender cancelled")
+                                    throw e
+                                }
+                            }
+                            
                             // Launch coroutine to handle incoming frames
                             val receiverJob = launch {
                                 try {
+                                    var receivingManifest = false
+                                    val manifestBuffer = Buffer()
+                                    
                                     for (frame in incoming) {
                                         when (frame) {
                                             is Frame.Binary -> {
-                                                val bytes = frame.readBytes()
-                                                buffer.write(bytes)
-                                                println("[KtorTransferDataSource] Server: Received ${bytes.size} bytes")
+                                                if (receivingManifest) {
+                                                    // Collecting manifest data
+                                                    val bytes = frame.readBytes()
+                                                    manifestBuffer.write(bytes)
+                                                    println("[KtorTransferDataSource] Server: Received ${bytes.size} bytes of manifest data")
+                                                } else {
+                                                    // Regular data
+                                                    val bytes = frame.readBytes()
+                                                    buffer.write(bytes)
+                                                    println("[KtorTransferDataSource] Server: Received ${bytes.size} bytes")
+                                                }
                                             }
                                             is Frame.Text -> {
                                                 val text = frame.readText()
-                                                if (text == "__END__") {
-                                                    println("[KtorTransferDataSource] Server: Received end marker, processing data...")
-                                                    
-                                                    // Decompress and deserialize
-                                                    val compressedData = buffer.readByteArray()
-                                                    val jsonData = decompressData(compressedData)
-                                                    val syncData = json.decodeFromString<SyncData>(jsonData)
-                                                    
-                                                    // Send to receiveChannel
-                                                    receiveChannel.send(syncData)
-                                                    println("[KtorTransferDataSource] Server: Data processed and queued")
-                                                    
-                                                    // Clear buffer
-                                                    buffer.clear()
+                                                when (text) {
+                                                    "__MANIFEST__" -> {
+                                                        println("[KtorTransferDataSource] Server: Manifest start marker received")
+                                                        receivingManifest = true
+                                                        manifestBuffer.clear()
+                                                    }
+                                                    "__MANIFEST_END__" -> {
+                                                        println("[KtorTransferDataSource] Server: Manifest end marker received")
+                                                        if (receivingManifest) {
+                                                            // Deserialize and send to channel
+                                                            val manifestBytes = manifestBuffer.readByteArray()
+                                                            val manifestJson = manifestBytes.decodeToString()
+                                                            val manifest = json.decodeFromString<ireader.domain.models.sync.SyncManifest>(manifestJson)
+                                                            println("[KtorTransferDataSource] Server: Manifest received: ${manifest.items.size} items")
+                                                            manifestReceiveChannel.send(manifest)
+                                                            receivingManifest = false
+                                                            manifestBuffer.clear()
+                                                        }
+                                                    }
+                                                    "__END__" -> {
+                                                        println("[KtorTransferDataSource] Server: Received end marker, processing data...")
+                                                        
+                                                        // Decompress and deserialize
+                                                        val compressedData = buffer.readByteArray()
+                                                        val jsonData = decompressData(compressedData)
+                                                        val syncData = json.decodeFromString<SyncData>(jsonData)
+                                                        
+                                                        // Send to receiveChannel
+                                                        receiveChannel.send(syncData)
+                                                        println("[KtorTransferDataSource] Server: Data processed and queued")
+                                                        
+                                                        // Clear buffer
+                                                        buffer.clear()
+                                                    }
                                                 }
                                             }
                                             is Frame.Close -> {
@@ -319,6 +405,8 @@ class KtorTransferDataSource(
                 try {
                     sendChannel.close()
                     receiveChannel.close()
+                    manifestSendChannel.close()
+                    manifestReceiveChannel.close()
                 } catch (e: Exception) {
                     // Channels might already be closed
                 }
@@ -477,36 +565,103 @@ class KtorTransferDataSource(
                                 }
                             }
                             
+                            // Launch coroutine to handle outgoing manifest send requests
+                            val manifestSenderJob = launch {
+                                try {
+                                    for (request in manifestSendChannel) {
+                                        try {
+                                            println("[KtorTransferDataSource] Client: Processing manifest send request...")
+                                            
+                                            // Serialize manifest
+                                            val manifestJson = json.encodeToString(request.manifest)
+                                            val manifestBytes = manifestJson.encodeToByteArray()
+                                            
+                                            println("[KtorTransferDataSource] Client: Sending manifest (${manifestBytes.size} bytes)")
+                                            
+                                            // Send manifest marker
+                                            send(Frame.Text("__MANIFEST__"))
+                                            
+                                            // Send manifest data
+                                            send(Frame.Binary(true, manifestBytes))
+                                            
+                                            // Send end marker
+                                            send(Frame.Text("__MANIFEST_END__"))
+                                            
+                                            println("[KtorTransferDataSource] Client: Manifest sent successfully")
+                                            request.completion.complete(Result.success(Unit))
+                                        } catch (e: Exception) {
+                                            println("[KtorTransferDataSource] Client: Manifest send failed: ${e.message}")
+                                            e.printStackTrace()
+                                            request.completion.complete(Result.failure(e))
+                                        }
+                                    }
+                                } catch (e: CancellationException) {
+                                    println("[KtorTransferDataSource] Client: Manifest sender cancelled")
+                                    throw e
+                                }
+                            }
+                            
                             // Launch coroutine to handle incoming frames
                             val receiverJob = launch {
                                 try {
+                                    var receivingManifest = false
+                                    val manifestBuffer = Buffer()
+                                    
                                     for (frame in incoming) {
                                         when (frame) {
                                             is Frame.Binary -> {
-                                                val bytes = frame.readBytes()
-                                                buffer.write(bytes)
-                                                totalBytesReceived += bytes.size
-                                                println("[KtorTransferDataSource] Client: Received ${bytes.size} bytes (total: $totalBytesReceived)")
-                                                transferProgressFlow.value = minOf(0.99f, totalBytesReceived / 1_000_000f)
+                                                if (receivingManifest) {
+                                                    // Collecting manifest data
+                                                    val bytes = frame.readBytes()
+                                                    manifestBuffer.write(bytes)
+                                                    println("[KtorTransferDataSource] Client: Received ${bytes.size} bytes of manifest data")
+                                                } else {
+                                                    // Regular data
+                                                    val bytes = frame.readBytes()
+                                                    buffer.write(bytes)
+                                                    totalBytesReceived += bytes.size
+                                                    println("[KtorTransferDataSource] Client: Received ${bytes.size} bytes (total: $totalBytesReceived)")
+                                                    transferProgressFlow.value = minOf(0.99f, totalBytesReceived / 1_000_000f)
+                                                }
                                             }
                                             is Frame.Text -> {
                                                 val text = frame.readText()
-                                                if (text == "__END__") {
-                                                    println("[KtorTransferDataSource] Client: Received end marker, processing data...")
-                                                    
-                                                    // Decompress and deserialize
-                                                    val compressedData = buffer.readByteArray()
-                                                    val jsonData = decompressData(compressedData)
-                                                    val syncData = json.decodeFromString<SyncData>(jsonData)
-                                                    
-                                                    // Send to receiveChannel
-                                                    receiveChannel.send(syncData)
-                                                    println("[KtorTransferDataSource] Client: Data sent to receiveChannel")
-                                                    
-                                                    // Reset buffer
-                                                    buffer.clear()
-                                                    totalBytesReceived = 0L
-                                                    transferProgressFlow.value = 1f
+                                                when (text) {
+                                                    "__MANIFEST__" -> {
+                                                        println("[KtorTransferDataSource] Client: Manifest start marker received")
+                                                        receivingManifest = true
+                                                        manifestBuffer.clear()
+                                                    }
+                                                    "__MANIFEST_END__" -> {
+                                                        println("[KtorTransferDataSource] Client: Manifest end marker received")
+                                                        if (receivingManifest) {
+                                                            // Deserialize and send to channel
+                                                            val manifestBytes = manifestBuffer.readByteArray()
+                                                            val manifestJson = manifestBytes.decodeToString()
+                                                            val manifest = json.decodeFromString<ireader.domain.models.sync.SyncManifest>(manifestJson)
+                                                            println("[KtorTransferDataSource] Client: Manifest received: ${manifest.items.size} items")
+                                                            manifestReceiveChannel.send(manifest)
+                                                            receivingManifest = false
+                                                            manifestBuffer.clear()
+                                                        }
+                                                    }
+                                                    "__END__" -> {
+                                                        println("[KtorTransferDataSource] Client: Received end marker, processing data...")
+                                                        
+                                                        // Decompress and deserialize
+                                                        val compressedData = buffer.readByteArray()
+                                                        val jsonData = decompressData(compressedData)
+                                                        val syncData = json.decodeFromString<SyncData>(jsonData)
+                                                        
+                                                        // Send to receiveChannel
+                                                        receiveChannel.send(syncData)
+                                                        println("[KtorTransferDataSource] Client: Data sent to receiveChannel")
+                                                        
+                                                        // Reset buffer
+                                                        buffer.clear()
+                                                        totalBytesReceived = 0L
+                                                        transferProgressFlow.value = 1f
+                                                    }
                                                 }
                                             }
                                             is Frame.Close -> {
@@ -593,6 +748,8 @@ class KtorTransferDataSource(
                 try {
                     sendChannel.close()
                     receiveChannel.close()
+                    manifestSendChannel.close()
+                    manifestReceiveChannel.close()
                 } catch (e: Exception) {
                     // Channels might already be closed
                 }
@@ -666,6 +823,8 @@ class KtorTransferDataSource(
                 try {
                     sendChannel.close()
                     receiveChannel.close()
+                    manifestSendChannel.close()
+                    manifestReceiveChannel.close()
                 } catch (e: Exception) {
                     // Channels might already be closed
                 }
@@ -1199,6 +1358,66 @@ class KtorTransferDataSource(
                 connectionJob = null
             }
             Result.failure(Exception("Failed to connect with TLS: ${e.message}", e))
+        }
+    }
+    
+    // ========== Manifest Exchange Methods ==========
+    
+    override suspend fun sendManifest(manifest: ireader.domain.models.sync.SyncManifest): Result<Unit> {
+        return try {
+            println("[KtorTransferDataSource] sendManifest() called with ${manifest.items.size} items")
+            
+            // Check if connection exists
+            if (!hasActiveConnection()) {
+                println("[KtorTransferDataSource] ERROR: No active connection")
+                return Result.failure(Exception("No active connection"))
+            }
+            
+            println("[KtorTransferDataSource] Active connection confirmed, creating send request")
+            
+            // Create completion deferred
+            val completion = CompletableDeferred<Result<Unit>>()
+            
+            // Send request to WebSocket block via channel
+            val request = ManifestSendRequest(manifest, completion)
+            println("[KtorTransferDataSource] Sending request to manifestSendChannel...")
+            manifestSendChannel.send(request)
+            println("[KtorTransferDataSource] Request sent to channel, waiting for completion...")
+            
+            // Wait for completion
+            val result = completion.await()
+            println("[KtorTransferDataSource] Manifest send completed with result: ${result.isSuccess}")
+            result
+        } catch (e: Exception) {
+            println("[KtorTransferDataSource] Failed to send manifest: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun receiveManifest(): Result<ireader.domain.models.sync.SyncManifest> {
+        return try {
+            println("[KtorTransferDataSource] Waiting to receive manifest...")
+            
+            // Check if connection exists
+            if (!hasActiveConnection()) {
+                return Result.failure(Exception("No active connection"))
+            }
+            
+            // Wait for manifest from WebSocket block with timeout
+            val manifest = withTimeout(30.seconds) {
+                manifestReceiveChannel.receive()
+            }
+            
+            println("[KtorTransferDataSource] Manifest received: ${manifest.items.size} items")
+            Result.success(manifest)
+        } catch (e: TimeoutCancellationException) {
+            println("[KtorTransferDataSource] Manifest receive timeout")
+            Result.failure(Exception("Manifest receive timeout"))
+        } catch (e: Exception) {
+            println("[KtorTransferDataSource] Failed to receive manifest: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
         }
     }
 }

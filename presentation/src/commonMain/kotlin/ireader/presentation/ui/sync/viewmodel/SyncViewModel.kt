@@ -5,6 +5,7 @@ import ireader.domain.usecases.sync.*
 import ireader.presentation.core.viewmodel.IReaderStateScreenModel
 import ireader.presentation.ui.sync.SyncErrorMapper
 import ireader.presentation.ui.sync.SyncServiceController
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -26,6 +27,7 @@ class SyncViewModel(
     private val getSyncStatusUseCase: GetSyncStatusUseCase,
     private val cancelSyncUseCase: CancelSyncUseCase,
     private val resolveConflictsUseCase: ResolveConflictsUseCase,
+    private val syncPreferences: ireader.domain.preferences.prefs.SyncPreferences,
     private val serviceController: SyncServiceController? = null
 ) : IReaderStateScreenModel<SyncViewModel.State>(State()) {
 
@@ -40,7 +42,9 @@ class SyncViewModel(
         val error: String? = null,
         val showPairingDialog: Boolean = false,
         val showConflictDialog: Boolean = false,
-        val conflicts: List<DataConflict> = emptyList()
+        val conflicts: List<DataConflict> = emptyList(),
+        val manualIp: String = "",
+        val serverMode: String = "server" // "server" or "client", default to server for desktop
     )
 
     init {
@@ -48,6 +52,9 @@ class SyncViewModel(
         serviceController?.setCancelCallback {
             cancelSync()
         }
+        
+        // Load server mode preference
+        updateState { it.copy(serverMode = syncPreferences.actAsServer().get()) }
         
         observeDiscoveredDevices()
         observeSyncStatus()
@@ -433,5 +440,126 @@ class SyncViewModel(
     override fun handleError(error: Throwable) {
         super.handleError(error)
         updateState { it.copy(error = formatError(error)) }
+    }
+    
+    // ========== Manual Control Methods ==========
+    
+    /**
+     * Refresh device discovery.
+     * Useful when network changes or devices don't appear.
+     */
+    fun refreshDiscovery() {
+        screenModelScope.launch {
+            try {
+                logInfo("Refreshing device discovery")
+                
+                // Stop current discovery
+                stopDiscovery()
+                
+                // Wait a moment for cleanup
+                delay(500)
+                
+                // Restart discovery
+                startDiscovery()
+                
+                logInfo("Discovery refreshed successfully")
+            } catch (e: Exception) {
+                logError("Failed to refresh discovery", e)
+                updateState { it.copy(error = formatError(e)) }
+            }
+        }
+    }
+    
+    /**
+     * Update manual IP address input.
+     */
+    fun updateManualIp(ip: String) {
+        updateState { it.copy(manualIp = ip) }
+    }
+    
+    /**
+     * Connect to a device using manual IP address.
+     * Creates a temporary DeviceInfo and initiates sync.
+     */
+    fun connectToManualIp(ip: String, port: Int = 8963) {
+        screenModelScope.launch {
+            try {
+                logInfo("Connecting to manual IP: $ip:$port")
+                
+                // Validate IP address
+                if (!isValidIp(ip)) {
+                    updateState { it.copy(error = "Invalid IP address format") }
+                    return@launch
+                }
+                
+                // Create temporary DeviceInfo for manual connection
+                val deviceInfo = DeviceInfo(
+                    deviceId = "manual-$ip",
+                    deviceName = "Manual Device ($ip)",
+                    deviceType = DeviceType.DESKTOP, // Default to DESKTOP for manual connections
+                    appVersion = "unknown",
+                    ipAddress = ip,
+                    port = port,
+                    lastSeen = System.currentTimeMillis()
+                )
+                
+                // Create DiscoveredDevice
+                val discoveredDevice = DiscoveredDevice(
+                    deviceInfo = deviceInfo,
+                    isReachable = true,
+                    discoveredAt = System.currentTimeMillis()
+                )
+                
+                // Select and sync with device
+                selectDevice(discoveredDevice)
+                syncWithDevice(deviceInfo.deviceId)
+                
+                logInfo("Manual connection initiated")
+            } catch (e: Exception) {
+                logError("Failed to connect to manual IP", e)
+                updateState { it.copy(error = formatError(e)) }
+            }
+        }
+    }
+    
+    /**
+     * Validate IP address format.
+     */
+    private fun isValidIp(ip: String): Boolean {
+        val parts = ip.split(".")
+        if (parts.size != 4) return false
+        return parts.all { part ->
+            part.toIntOrNull()?.let { num -> num in 0..255 } ?: false
+        }
+    }
+    
+    /**
+     * Set server/client mode preference.
+     * 
+     * @param mode "auto" for automatic, "server" to force server, "client" to force client
+     */
+    fun setServerMode(mode: String) {
+        screenModelScope.launch {
+            try {
+                logInfo("Setting server mode to: $mode")
+                
+                // Validate mode
+                if (mode !in listOf("auto", "server", "client")) {
+                    logError("Invalid server mode: $mode", null)
+                    return@launch
+                }
+                
+                // Update preference
+                syncPreferences.actAsServer().set(mode)
+                
+                // Update state
+                updateState { it.copy(serverMode = mode) }
+                
+                logInfo("Server mode updated successfully")
+            } catch (e: Exception) {
+                logError("Failed to set server mode", e)
+                updateState { it.copy(error = formatError(e)) }
+            }
+        }
     }
 }

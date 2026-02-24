@@ -1237,3 +1237,8 @@ UPDATE book SET
         last_read_at
     )
 WHERE book.favorite = 1;
+
+
+-- Sync-specific queries
+findBookBySourceAndUrl:
+SELECT * FROM book WHERE source = :source AND url = :url LIMIT 1;

@@ -53,12 +53,12 @@ data class SyncManifestItem(
  */
 @Serializable
 enum class SyncItemType {
-    /** Book file and metadata */
+    /** Book metadata */
     BOOK,
     
-    /** Reading progress for a book */
-    READING_PROGRESS,
+    /** Chapter metadata and read status */
+    CHAPTER,
     
-    /** Bookmark in a book */
-    BOOKMARK
+    /** Reading history/progress */
+    HISTORY
 }

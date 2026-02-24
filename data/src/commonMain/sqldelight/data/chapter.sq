@@ -214,3 +214,44 @@ getBookmarkedChapters:
 SELECT * FROM chapter 
 WHERE bookmark = 1
 ORDER BY book_id, source_order ASC;
+
+
+-- Sync-specific queries
+getAllChapters:
+SELECT * FROM chapter
+ORDER BY book_id, source_order ASC;
+
+findChapterByBookAndUrl:
+SELECT * FROM chapter
+WHERE book_id = :bookId AND url = :url
+LIMIT 1;
+
+findChapterByUrl:
+SELECT * FROM chapter
+WHERE url = :url;
+
+insertForSync:
+INSERT INTO chapter(_id, book_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, content, type)
+VALUES (:id, :bookId, :url, :name, :scanlator, :read, :bookmark, :lastPageRead, :chapterNumber, :sourceOrder, :dateFetch, :dateUpload, '', :type);
+
+-- Upsert for sync that auto-generates _id for new chapters
+-- Uses (book_id, url) unique constraint to detect conflicts
+-- Preserves existing content when synced content is empty
+upsertForSync:
+INSERT INTO chapter(book_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, content, type) 
+VALUES (:bookId, :key, :name, :translator, :read, :bookmark, :last_page_read, :chapter_number, :source_order, :date_fetch, :date_upload, :content, :type)
+ON CONFLICT(book_id, url) DO UPDATE SET
+    name = excluded.name,
+    scanlator = excluded.scanlator,
+    read = excluded.read,
+    bookmark = excluded.bookmark,
+    last_page_read = excluded.last_page_read,
+    chapter_number = excluded.chapter_number,
+    source_order = excluded.source_order,
+    date_fetch = excluded.date_fetch,
+    date_upload = excluded.date_upload,
+    content = CASE 
+        WHEN excluded.content IS NULL OR excluded.content = '' OR excluded.content = '[]' THEN chapter.content
+        ELSE excluded.content
+    END,
+    type = excluded.type;

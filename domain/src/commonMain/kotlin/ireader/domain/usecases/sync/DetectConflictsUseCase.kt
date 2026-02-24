@@ -21,11 +21,11 @@ class DetectConflictsUseCase {
     ): List<DataConflict> {
         val conflicts = mutableListOf<DataConflict>()
 
-        // Detect reading progress conflicts
-        conflicts.addAll(detectReadingProgressConflicts(localData.readingProgress, remoteData.readingProgress))
+        // Detect history conflicts
+        conflicts.addAll(detectHistoryConflicts(localData.history, remoteData.history))
 
-        // Detect bookmark conflicts
-        conflicts.addAll(detectBookmarkConflicts(localData.bookmarks, remoteData.bookmarks))
+        // Detect chapter conflicts
+        conflicts.addAll(detectChapterConflicts(localData.chapters, remoteData.chapters))
 
         // Detect book metadata conflicts
         conflicts.addAll(detectBookMetadataConflicts(localData.books, remoteData.books))
@@ -33,29 +33,27 @@ class DetectConflictsUseCase {
         return conflicts
     }
 
-    private fun detectReadingProgressConflicts(
-        local: List<ReadingProgressData>,
-        remote: List<ReadingProgressData>
+    private fun detectHistoryConflicts(
+        local: List<HistorySyncData>,
+        remote: List<HistorySyncData>
     ): List<DataConflict> {
         val conflicts = mutableListOf<DataConflict>()
-        val localMap = local.associateBy { it.bookId }
-        val remoteMap = remote.associateBy { it.bookId }
+        val localMap = local.associateBy { it.chapterGlobalId }
+        val remoteMap = remote.associateBy { it.chapterGlobalId }
 
-        for ((bookId, localProgress) in localMap) {
-            val remoteProgress = remoteMap[bookId] ?: continue
+        for ((chapterId, localHistory) in localMap) {
+            val remoteHistory = remoteMap[chapterId] ?: continue
 
             // Conflict if timestamps differ AND data differs
-            if (localProgress.lastReadAt != remoteProgress.lastReadAt &&
-                (localProgress.chapterIndex != remoteProgress.chapterIndex ||
-                 localProgress.offset != remoteProgress.offset ||
-                 localProgress.progress != remoteProgress.progress)
+            if (localHistory.lastRead != remoteHistory.lastRead &&
+                localHistory.readingProgress != remoteHistory.readingProgress
             ) {
                 conflicts.add(
                     DataConflict(
-                        conflictType = ConflictType.READING_PROGRESS,
-                        localData = localProgress,
-                        remoteData = remoteProgress,
-                        conflictField = "chapterIndex"
+                        conflictType = ConflictType.HISTORY,
+                        localData = localHistory,
+                        remoteData = remoteHistory,
+                        conflictField = "readingProgress"
                     )
                 )
             }
@@ -64,28 +62,29 @@ class DetectConflictsUseCase {
         return conflicts
     }
 
-    private fun detectBookmarkConflicts(
-        local: List<BookmarkData>,
-        remote: List<BookmarkData>
+    private fun detectChapterConflicts(
+        local: List<ChapterSyncData>,
+        remote: List<ChapterSyncData>
     ): List<DataConflict> {
         val conflicts = mutableListOf<DataConflict>()
-        val localMap = local.associateBy { it.bookmarkId }
-        val remoteMap = remote.associateBy { it.bookmarkId }
+        val localMap = local.associateBy { it.globalId }
+        val remoteMap = remote.associateBy { it.globalId }
 
-        for ((bookmarkId, localBookmark) in localMap) {
-            val remoteBookmark = remoteMap[bookmarkId] ?: continue
+        for ((chapterId, localChapter) in localMap) {
+            val remoteChapter = remoteMap[chapterId] ?: continue
 
-            // Conflict if created times differ AND data differs
-            if (localBookmark.createdAt != remoteBookmark.createdAt &&
-                (localBookmark.position != remoteBookmark.position ||
-                 localBookmark.note != remoteBookmark.note)
+            // Conflict if fetch times differ AND data differs
+            if (localChapter.dateFetch != remoteChapter.dateFetch &&
+                (localChapter.read != remoteChapter.read ||
+                 localChapter.bookmark != remoteChapter.bookmark ||
+                 localChapter.lastPageRead != remoteChapter.lastPageRead)
             ) {
                 conflicts.add(
                     DataConflict(
-                        conflictType = ConflictType.BOOKMARK,
-                        localData = localBookmark,
-                        remoteData = remoteBookmark,
-                        conflictField = "position"
+                        conflictType = ConflictType.CHAPTER,
+                        localData = localChapter,
+                        remoteData = remoteChapter,
+                        conflictField = "read"
                     )
                 )
             }
@@ -99,8 +98,8 @@ class DetectConflictsUseCase {
         remote: List<BookSyncData>
     ): List<DataConflict> {
         val conflicts = mutableListOf<DataConflict>()
-        val localMap = local.associateBy { it.bookId }
-        val remoteMap = remote.associateBy { it.bookId }
+        val localMap = local.associateBy { it.globalId }
+        val remoteMap = remote.associateBy { it.globalId }
 
         for ((bookId, localBook) in localMap) {
             val remoteBook = remoteMap[bookId] ?: continue
@@ -109,7 +108,7 @@ class DetectConflictsUseCase {
             if (localBook.updatedAt != remoteBook.updatedAt &&
                 (localBook.title != remoteBook.title ||
                  localBook.author != remoteBook.author ||
-                 localBook.fileHash != remoteBook.fileHash)
+                 localBook.favorite != remoteBook.favorite)
             ) {
                 conflicts.add(
                     DataConflict(

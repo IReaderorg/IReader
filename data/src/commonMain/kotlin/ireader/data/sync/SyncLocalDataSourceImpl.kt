@@ -1,13 +1,16 @@
 package ireader.data.sync
 
+import ireader.core.source.model.Page
+import ireader.core.source.model.decode
+import ireader.core.source.model.encode
 import ireader.data.core.DatabaseHandler
 import ireader.data.sync.datasource.SyncLocalDataSource
 import ireader.data.sync.datasource.SyncLogEntity
 import ireader.data.sync.datasource.SyncMetadataEntity
 import ireader.data.sync.datasource.TrustedDeviceEntity
 import ireader.domain.models.sync.BookSyncData
-import ireader.domain.models.sync.BookmarkData
-import ireader.domain.models.sync.ReadingProgressData
+import ireader.domain.models.sync.ChapterSyncData
+import ireader.domain.models.sync.HistorySyncData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
@@ -202,50 +205,81 @@ class SyncLocalDataSourceImpl(
 
     override suspend fun getBooks(): List<BookSyncData> {
         return handler.await {
-            bookQueries.findInLibraryBooks().executeAsList().map { book ->
+            // Get ALL books (not just favorites)
+            bookQueries.findAllBooks().executeAsList().map { book ->
+                val globalId = "${book.source}|${book.url}"
                 BookSyncData(
-                    bookId = book._id,
+                    globalId = globalId,
                     title = book.title,
                     author = book.author ?: "",
                     coverUrl = book.thumbnail_url,
                     sourceId = book.source.toString(),
-                    sourceUrl = book.url,
+                    key = book.url,
+                    favorite = book.favorite,
                     addedAt = book.date_added,
                     updatedAt = book.last_update ?: book.date_added,
-                    fileHash = null
+                    description = book.description ?: "",
+                    genres = book.genre ?: emptyList(),
+                    status = book.status
                 )
             }
         }
     }
 
-    override suspend fun getProgress(): List<ReadingProgressData> {
+    override suspend fun getChapters(): List<ChapterSyncData> {
         return handler.await {
-            // Optimized: Single JOIN query instead of N+1 queries (Task 10.1.2)
-            historyQueries.getProgressWithChapters().executeAsList().map { row ->
-                ReadingProgressData(
-                    bookId = row.book_id,
-                    chapterId = row.chapter_id,
-                    chapterIndex = row.source_order.toInt(),
-                    offset = row.last_page_read.toInt(),
-                    progress = row.progress?.toFloat() ?: 0f,
-                    lastReadAt = row.last_read ?: 0L
+            // Get all chapters for all books
+            chapterQueries.getAllChapters().executeAsList().map { chapter ->
+                // Get book to construct book global ID
+                val book = bookQueries.findBookById(chapter.book_id).executeAsOneOrNull()
+                val bookGlobalId = if (book != null) "${book.source}|${book.url}" else ""
+                val chapterGlobalId = if (book != null) "${book.source}|${chapter.url}" else ""
+                
+                // Encode content to JSON string using extension function
+                val contentJson = try {
+                    chapter.content.encode()
+                } catch (e: Exception) {
+                    "[]" // Empty content if encoding fails
+                }
+                
+                ChapterSyncData(
+                    globalId = chapterGlobalId,
+                    bookGlobalId = bookGlobalId,
+                    key = chapter.url,
+                    name = chapter.name,
+                    read = chapter.read,
+                    bookmark = chapter.bookmark,
+                    lastPageRead = chapter.last_page_read,
+                    sourceOrder = chapter.source_order,
+                    number = chapter.chapter_number,
+                    dateUpload = chapter.date_upload,
+                    dateFetch = chapter.date_fetch,
+                    translator = chapter.scanlator ?: "",
+                    content = contentJson
                 )
             }
         }
     }
 
-    override suspend fun getBookmarks(): List<BookmarkData> {
+    override suspend fun getHistory(): List<HistorySyncData> {
         return handler.await {
-            // Optimized: SQL WHERE clause instead of fetching all + filtering (Task 10.1.2)
-            chapterQueries.getBookmarkedChapters().executeAsList().map { chapter ->
-                BookmarkData(
-                    bookmarkId = chapter._id,
-                    bookId = chapter.book_id,
-                    chapterId = chapter._id,
-                    position = chapter.last_page_read.toInt(),
-                    note = null, // Chapter table doesn't have a note field
-                    createdAt = chapter.date_fetch
-                )
+            // Get all history records with chapter info
+            historyQueries.getProgressWithChapters().executeAsList().mapNotNull { row ->
+                // Get chapter to construct global ID
+                val chapter = chapterQueries.getChapterById(row.chapter_id).executeAsOneOrNull()
+                val book = chapter?.let { bookQueries.findBookById(it.book_id).executeAsOneOrNull() }
+                
+                if (chapter != null && book != null) {
+                    val chapterGlobalId = "${book.source}|${chapter.url}"
+                    HistorySyncData(
+                        chapterGlobalId = chapterGlobalId,
+                        lastRead = row.last_read ?: 0L,
+                        timeRead = row.time_read,
+                        readingProgress = row.progress ?: 0.0
+                    )
+                } else {
+                    null // Skip if chapter or book not found
+                }
             }
         }
     }
@@ -253,25 +287,28 @@ class SyncLocalDataSourceImpl(
     override suspend fun applyBooks(books: List<BookSyncData>) {
         handler.await {
             books.forEach { book ->
-                // Check if book exists
-                val existingBook = bookQueries.findBookById(book.bookId).executeAsOneOrNull()
+                // Find book by sourceId + key (global ID)
+                val existingBook = bookQueries.findBookBySourceAndUrl(
+                    source = book.sourceId.toLongOrNull() ?: 0L,
+                    url = book.key
+                ).executeAsOneOrNull()
                 
                 if (existingBook == null) {
                     // Book doesn't exist - insert it
-                    println("[SyncLocalDataSource] Inserting new book: ${book.title} (${book.bookId})")
+                    println("[SyncLocalDataSource] Inserting new book: ${book.title} (${book.globalId})")
                     bookQueries.upsert(
-                        id = book.bookId,
+                        id = 0L, // Let database auto-generate ID
                         source = book.sourceId.toLongOrNull() ?: 0L,
-                        url = book.sourceUrl,
+                        url = book.key,
                         artist = null,
                         author = book.author.ifEmpty { null },
-                        description = null,
-                        genre = emptyList(),
+                        description = book.description.ifEmpty { null },
+                        genre = book.genres,
                         title = book.title,
-                        status = 0L, // Unknown status
+                        status = book.status,
                         thumbnailUrl = book.coverUrl ?: "",
                         customCover = "",
-                        favorite = true, // Mark as favorite since it's being synced
+                        favorite = book.favorite,
                         lastUpdate = book.updatedAt,
                         nextUpdate = 0L,
                         initialized = true,
@@ -289,19 +326,19 @@ class SyncLocalDataSourceImpl(
                     val localUpdatedAt = existingBook.last_update ?: existingBook.date_added
                     
                     if (remoteUpdatedAt > localUpdatedAt) {
-                        println("[SyncLocalDataSource] Updating book: ${book.title} (${book.bookId}) - remote is newer")
+                        println("[SyncLocalDataSource] Updating book: ${book.title} (${book.globalId}) - remote is newer")
                         bookQueries.update(
-                            id = book.bookId,
+                            id = existingBook._id,
                             source = book.sourceId.toLongOrNull(),
-                            url = book.sourceUrl,
+                            url = book.key,
                             author = book.author.ifEmpty { null },
-                            description = null,
-                            genre = null,
+                            description = book.description.ifEmpty { null },
+                            genre = null, // Keep existing genre
                             title = book.title,
-                            status = null,
+                            status = book.status,
                             thumbnailUrl = book.coverUrl,
                             customCover = null,
-                            favorite = true,
+                            favorite = book.favorite,
                             lastUpdate = book.updatedAt,
                             initialized = true,
                             viewer = null,
@@ -313,106 +350,127 @@ class SyncLocalDataSourceImpl(
                             isArchived = null
                         )
                     } else {
-                        println("[SyncLocalDataSource] Skipping book: ${book.title} (${book.bookId}) - local is newer or same")
+                        println("[SyncLocalDataSource] Skipping book: ${book.title} (${book.globalId}) - local is newer or same")
                     }
                 }
             }
         }
     }
     
-    override suspend fun applyProgress(progress: List<ReadingProgressData>) {
+    override suspend fun applyChapters(chapters: List<ChapterSyncData>) {
         handler.await {
-            progress.forEach { progressData ->
-                // Check if progress exists
-                val existingProgress = historyQueries.findHistoryByChapterId(progressData.chapterId).executeAsOneOrNull()
+            chapters.forEach { chapter ->
+                // Extract sourceId from bookGlobalId
+                val sourceId = chapter.bookGlobalId.substringBefore("|").toLongOrNull() ?: 0L
+                val bookKey = chapter.bookGlobalId.substringAfter("|")
                 
-                if (existingProgress == null) {
-                    // Progress doesn't exist - insert it
-                    println("[SyncLocalDataSource] Inserting new progress for chapter: ${progressData.chapterId}")
-                    historyQueries.upsert(
-                        chapterId = progressData.chapterId,
-                        readAt = progressData.lastReadAt,
-                        time_read = 0L, // We don't track time_read in sync data
-                        reading_progress = progressData.progress.toDouble()
-                    )
+                // Find the local book by sourceId + key
+                val book = bookQueries.findBookBySourceAndUrl(
+                    source = sourceId,
+                    url = bookKey
+                ).executeAsOneOrNull()
+                
+                if (book == null) {
+                    println("[SyncLocalDataSource] WARNING: Book not found for chapter: ${chapter.name} (${chapter.bookGlobalId})")
+                    return@forEach
+                }
+                
+                // Find existing chapter by bookId + key
+                val existingChapter = chapterQueries.findChapterByBookAndUrl(
+                    bookId = book._id,
+                    url = chapter.key
+                ).executeAsOneOrNull()
+                
+                // Use upsertForSync to handle both insert and update cases
+                // This query doesn't include _id in INSERT, letting database auto-generate it
+                // The query uses (book_id, url) unique constraint to detect conflicts
+                val shouldUpdate = existingChapter == null || chapter.dateFetch > existingChapter.date_fetch
+                
+                if (shouldUpdate) {
+                    if (existingChapter == null) {
+                        println("[SyncLocalDataSource] Inserting new chapter: ${chapter.name} (${chapter.globalId})")
+                    } else {
+                        println("[SyncLocalDataSource] Updating chapter: ${chapter.name} (${chapter.globalId}) - remote is newer")
+                    }
                     
-                    // Update chapter's last_page_read
-                    chapterQueries.update(
-                        chapterId = progressData.chapterId,
-                        mangaId = null,
-                        url = null,
-                        name = null,
-                        scanlator = null,
-                        read = null,
-                        bookmark = null,
-                        lastPageRead = progressData.offset.toLong(),
-                        chapterNumber = null,
-                        sourceOrder = null,
-                        dateFetch = null,
-                        dateUpload = null
+                    // Decode content from JSON string to List<Page> using extension function
+                    val contentPages: List<Page> = try {
+                        chapter.content.decode()
+                    } catch (e: Exception) {
+                        emptyList() // Empty content if decoding fails
+                    }
+                    
+                    chapterQueries.upsertForSync(
+                        bookId = book._id,
+                        key = chapter.key,
+                        name = chapter.name,
+                        translator = chapter.translator.ifEmpty { null },
+                        read = chapter.read,
+                        bookmark = chapter.bookmark,
+                        last_page_read = chapter.lastPageRead,
+                        chapter_number = chapter.number,
+                        source_order = chapter.sourceOrder,
+                        date_fetch = chapter.dateFetch,
+                        date_upload = chapter.dateUpload,
+                        content = contentPages, // Decoded content from remote device
+                        type = 0L // Default type
                     )
                 } else {
-                    // Progress exists - update only if remote is newer
-                    val remoteLastReadAt = progressData.lastReadAt
-                    val localLastReadAt = existingProgress.last_read ?: 0L
+                    println("[SyncLocalDataSource] Skipping chapter: ${chapter.name} (${chapter.globalId}) - local is newer or same")
+                }
+            }
+        }
+    }
+    
+    override suspend fun applyHistory(history: List<HistorySyncData>) {
+        handler.await {
+            history.forEach { historyData ->
+                // Extract sourceId and chapterKey from chapterGlobalId
+                val sourceId = historyData.chapterGlobalId.substringBefore("|").toLongOrNull() ?: 0L
+                val chapterKey = historyData.chapterGlobalId.substringAfter("|")
+                
+                // Find the chapter by sourceId + key
+                // First find all chapters with this key
+                val matchingChapter = chapterQueries.findChapterByUrl(chapterKey).executeAsList()
+                    .firstOrNull { chapter ->
+                        // Verify the book's source matches
+                        val book = bookQueries.findBookById(chapter.book_id).executeAsOneOrNull()
+                        book?.source == sourceId
+                    }
+                
+                if (matchingChapter == null) {
+                    println("[SyncLocalDataSource] WARNING: Chapter not found for history: ${historyData.chapterGlobalId}")
+                    return@forEach
+                }
+                
+                // Check if history exists
+                val existingHistory = historyQueries.findHistoryByChapterId(matchingChapter._id).executeAsOneOrNull()
+                
+                if (existingHistory == null) {
+                    // History doesn't exist - insert it
+                    println("[SyncLocalDataSource] Inserting new history for chapter: ${matchingChapter._id}")
+                    historyQueries.upsert(
+                        chapterId = matchingChapter._id,
+                        readAt = historyData.lastRead,
+                        time_read = historyData.timeRead,
+                        reading_progress = historyData.readingProgress
+                    )
+                } else {
+                    // History exists - update only if remote is newer
+                    val remoteLastRead = historyData.lastRead
+                    val localLastRead = existingHistory.last_read ?: 0L
                     
-                    if (remoteLastReadAt > localLastReadAt) {
-                        println("[SyncLocalDataSource] Updating progress for chapter: ${progressData.chapterId} - remote is newer")
+                    if (remoteLastRead > localLastRead) {
+                        println("[SyncLocalDataSource] Updating history for chapter: ${matchingChapter._id} - remote is newer")
                         historyQueries.upsert(
-                            chapterId = progressData.chapterId,
-                            readAt = progressData.lastReadAt,
-                            time_read = existingProgress.time_read, // Preserve existing time_read
-                            reading_progress = progressData.progress.toDouble()
-                        )
-                        
-                        // Update chapter's last_page_read
-                        chapterQueries.update(
-                            chapterId = progressData.chapterId,
-                            mangaId = null,
-                            url = null,
-                            name = null,
-                            scanlator = null,
-                            read = null,
-                            bookmark = null,
-                            lastPageRead = progressData.offset.toLong(),
-                            chapterNumber = null,
-                            sourceOrder = null,
-                            dateFetch = null,
-                            dateUpload = null
+                            chapterId = matchingChapter._id,
+                            readAt = historyData.lastRead,
+                            time_read = historyData.timeRead,
+                            reading_progress = historyData.readingProgress
                         )
                     } else {
-                        println("[SyncLocalDataSource] Skipping progress for chapter: ${progressData.chapterId} - local is newer or same")
+                        println("[SyncLocalDataSource] Skipping history for chapter: ${matchingChapter._id} - local is newer or same")
                     }
-                }
-            }
-        }
-    }
-    
-    override suspend fun applyBookmarks(bookmarks: List<BookmarkData>) {
-        handler.await {
-            bookmarks.forEach { bookmark ->
-                // Check if chapter exists
-                val existingChapter = chapterQueries.getChapterById(bookmark.chapterId).executeAsOneOrNull()
-                
-                if (existingChapter != null) {
-                    // Chapter exists - update bookmark flag using the update query
-                    println("[SyncLocalDataSource] Setting bookmark for chapter: ${bookmark.chapterId}")
-                    chapterQueries.update(
-                        chapterId = bookmark.chapterId,
-                        mangaId = null,
-                        url = null,
-                        name = null,
-                        scanlator = null,
-                        read = null,
-                        bookmark = true,
-                        lastPageRead = if (bookmark.position > 0) bookmark.position.toLong() else null,
-                        chapterNumber = null,
-                        sourceOrder = null,
-                        dateFetch = null,
-                        dateUpload = null
-                    )
-                } else {
-                    println("[SyncLocalDataSource] WARNING: Chapter ${bookmark.chapterId} not found for bookmark")
                 }
             }
         }

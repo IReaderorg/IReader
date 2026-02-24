@@ -44,15 +44,15 @@ class ResolveConflictsUseCase {
 
     private fun resolveByLatestTimestamp(conflict: DataConflict): Any {
         return when (conflict.conflictType) {
-            ConflictType.READING_PROGRESS -> {
-                val local = conflict.localData as ReadingProgressData
-                val remote = conflict.remoteData as ReadingProgressData
-                if (local.lastReadAt >= remote.lastReadAt) local else remote
+            ConflictType.HISTORY -> {
+                val local = conflict.localData as HistorySyncData
+                val remote = conflict.remoteData as HistorySyncData
+                if (local.lastRead >= remote.lastRead) local else remote
             }
-            ConflictType.BOOKMARK -> {
-                val local = conflict.localData as BookmarkData
-                val remote = conflict.remoteData as BookmarkData
-                if (local.createdAt >= remote.createdAt) local else remote
+            ConflictType.CHAPTER -> {
+                val local = conflict.localData as ChapterSyncData
+                val remote = conflict.remoteData as ChapterSyncData
+                if (local.dateFetch >= remote.dateFetch) local else remote
             }
             ConflictType.BOOK_METADATA -> {
                 val local = conflict.localData as BookSyncData
@@ -64,21 +64,14 @@ class ResolveConflictsUseCase {
 
     private fun mergeConflict(conflict: DataConflict): Any {
         return when (conflict.conflictType) {
-            ConflictType.READING_PROGRESS -> {
-                val local = conflict.localData as ReadingProgressData
-                val remote = conflict.remoteData as ReadingProgressData
+            ConflictType.HISTORY -> {
+                val local = conflict.localData as HistorySyncData
+                val remote = conflict.remoteData as HistorySyncData
                 // Merge by choosing furthest progress
-                if (local.chapterIndex > remote.chapterIndex) {
-                    local
-                } else if (remote.chapterIndex > local.chapterIndex) {
-                    remote
-                } else {
-                    // Same chapter, choose higher offset
-                    if (local.offset >= remote.offset) local else remote
-                }
+                if (local.readingProgress >= remote.readingProgress) local else remote
             }
-            ConflictType.BOOKMARK -> {
-                // Bookmarks can't be meaningfully merged, fall back to latest timestamp
+            ConflictType.CHAPTER -> {
+                // Chapters can't be meaningfully merged, fall back to latest timestamp
                 resolveByLatestTimestamp(conflict)
             }
             ConflictType.BOOK_METADATA -> {
