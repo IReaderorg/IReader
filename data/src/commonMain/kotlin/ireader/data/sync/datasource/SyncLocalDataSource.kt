@@ -8,12 +8,10 @@ import kotlinx.coroutines.flow.Flow
  * This interface defines the contract for accessing and manipulating sync-related
  * data in the local SQLDelight database. It provides methods for managing:
  * - Sync metadata (device sync history)
- * - Trusted devices (paired devices)
  * - Sync logs (operation history)
  * 
  * Implementation will use SQLDelight queries defined in:
  * - data/sync_metadata.sq
- * - data/trusted_devices.sq
  * - data/sync_log.sq
  */
 interface SyncLocalDataSource {
@@ -44,86 +42,6 @@ interface SyncLocalDataSource {
      * @param deviceId Unique identifier of the device
      */
     suspend fun deleteSyncMetadata(deviceId: String)
-    
-    // ========== Trusted Devices Operations ==========
-    
-    /**
-     * Get a trusted device by its ID.
-     * 
-     * @param deviceId Unique identifier of the device
-     * @return Trusted device entity or null if not found
-     */
-    suspend fun getTrustedDevice(deviceId: String): TrustedDeviceEntity?
-    
-    /**
-     * Insert or update a trusted device.
-     * 
-     * If a device with the same deviceId already exists, it will be updated.
-     * Otherwise, a new record will be created.
-     * 
-     * @param device Trusted device entity to upsert
-     */
-    suspend fun upsertTrustedDevice(device: TrustedDeviceEntity)
-    
-    /**
-     * Observe all active trusted devices.
-     * 
-     * Returns a Flow that emits the current list of active (non-expired, isActive=true)
-     * trusted devices whenever the list changes.
-     * 
-     * @return Flow emitting list of active trusted devices
-     */
-    fun getActiveTrustedDevices(): Flow<List<TrustedDeviceEntity>>
-    
-    /**
-     * Deactivate a trusted device.
-     * 
-     * Sets the isActive flag to false, effectively removing the device from
-     * the trusted list without deleting the record.
-     * 
-     * @param deviceId Unique identifier of the device
-     */
-    suspend fun deactivateTrustedDevice(deviceId: String)
-    
-    /**
-     * Update the expiration timestamp of a trusted device.
-     * 
-     * This is used when re-authenticating a device to extend its trust period.
-     * 
-     * @param deviceId Unique identifier of the device
-     * @param expiresAt New expiration timestamp (milliseconds since epoch)
-     */
-    suspend fun updateDeviceExpiration(deviceId: String, expiresAt: Long)
-    
-    /**
-     * Delete a trusted device.
-     * 
-     * Permanently removes the device from the trusted devices list.
-     * 
-     * @param deviceId Unique identifier of the device
-     */
-    suspend fun deleteTrustedDevice(deviceId: String)
-    
-    /**
-     * Update the certificate fingerprint for a trusted device.
-     * 
-     * This is used for certificate pinning to store the SHA-256 fingerprint
-     * of the device's certificate.
-     * 
-     * @param deviceId Unique identifier of the device
-     * @param fingerprint SHA-256 fingerprint of the certificate, or null to remove
-     */
-    suspend fun updateCertificateFingerprint(deviceId: String, fingerprint: String?)
-    
-    /**
-     * Get the certificate fingerprint for a trusted device.
-     * 
-     * Returns the stored SHA-256 fingerprint for certificate pinning validation.
-     * 
-     * @param deviceId Unique identifier of the device
-     * @return Certificate fingerprint or null if not set
-     */
-    suspend fun getCertificateFingerprint(deviceId: String): String?
     
     // ========== Sync Log Operations ==========
     
@@ -213,20 +131,6 @@ data class SyncMetadataEntity(
     val lastSyncTime: Long,
     val createdAt: Long,
     val updatedAt: Long
-)
-
-/**
- * Entity representing a trusted device in the database.
- * 
- * Maps to the trusted_devices table.
- */
-data class TrustedDeviceEntity(
-    val deviceId: String,
-    val deviceName: String,
-    val pairedAt: Long,
-    val expiresAt: Long,
-    val isActive: Boolean,
-    val certificateFingerprint: String? = null
 )
 
 /**

@@ -7,7 +7,6 @@ import ireader.data.core.DatabaseHandler
 import ireader.data.sync.datasource.SyncLocalDataSource
 import ireader.data.sync.datasource.SyncLogEntity
 import ireader.data.sync.datasource.SyncMetadataEntity
-import ireader.data.sync.datasource.TrustedDeviceEntity
 import ireader.domain.models.sync.BookSyncData
 import ireader.domain.models.sync.ChapterSyncData
 import ireader.domain.models.sync.HistorySyncData
@@ -60,92 +59,6 @@ class SyncLocalDataSourceImpl(
     override suspend fun deleteSyncMetadata(deviceId: String) {
         handler.await {
             sync_metadataQueries.deleteSyncMetadata(deviceId)
-        }
-    }
-
-    // ========== Trusted Devices Operations ==========
-
-    override suspend fun getTrustedDevice(deviceId: String): TrustedDeviceEntity? {
-        return handler.await {
-            trusted_devicesQueries.getTrustedDevice(deviceId).executeAsOneOrNull()?.let {
-                TrustedDeviceEntity(
-                    deviceId = it.device_id,
-                    deviceName = it.device_name,
-                    pairedAt = it.paired_at,
-                    expiresAt = it.expires_at,
-                    isActive = it.is_active,
-                    certificateFingerprint = it.certificate_fingerprint
-                )
-            }
-        }
-    }
-    
-    override suspend fun upsertTrustedDevice(device: TrustedDeviceEntity) {
-        handler.await {
-            trusted_devicesQueries.upsertTrustedDevice(
-                device_id = device.deviceId,
-                device_name = device.deviceName,
-                paired_at = device.pairedAt,
-                expires_at = device.expiresAt,
-                is_active = device.isActive,
-                certificate_fingerprint = device.certificateFingerprint
-            )
-        }
-    }
-
-    override fun getActiveTrustedDevices(): Flow<List<TrustedDeviceEntity>> {
-        return handler.subscribeToList {
-            trusted_devicesQueries.getActiveTrustedDevices()
-        }.map { list ->
-            list.map {
-                TrustedDeviceEntity(
-                    deviceId = it.device_id,
-                    deviceName = it.device_name,
-                    pairedAt = it.paired_at,
-                    expiresAt = it.expires_at,
-                    isActive = it.is_active,
-                    certificateFingerprint = it.certificate_fingerprint
-                )
-            }
-        }.conflate() // Drop intermediate values if collector is slow (Task 10.1.3)
-    }
-
-    override suspend fun deactivateTrustedDevice(deviceId: String) {
-        handler.await {
-            trusted_devicesQueries.updateDeviceActiveStatus(
-                is_active = false,
-                device_id = deviceId
-            )
-        }
-    }
-    
-    override suspend fun updateDeviceExpiration(deviceId: String, expiresAt: Long) {
-        handler.await {
-            trusted_devicesQueries.updateDeviceExpiration(
-                expires_at = expiresAt,
-                device_id = deviceId
-            )
-        }
-    }
-    
-    override suspend fun deleteTrustedDevice(deviceId: String) {
-        handler.await {
-            trusted_devicesQueries.deleteTrustedDevice(deviceId)
-        }
-    }
-    
-    override suspend fun updateCertificateFingerprint(deviceId: String, fingerprint: String?) {
-        handler.await {
-            trusted_devicesQueries.updateCertificateFingerprint(
-                certificate_fingerprint = fingerprint,
-                device_id = deviceId
-            )
-        }
-    }
-    
-    override suspend fun getCertificateFingerprint(deviceId: String): String? {
-        return handler.await {
-            trusted_devicesQueries.getCertificateFingerprint(deviceId).executeAsOneOrNull()?.certificate_fingerprint
         }
     }
 
