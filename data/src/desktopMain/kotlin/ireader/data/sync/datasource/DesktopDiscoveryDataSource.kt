@@ -85,6 +85,21 @@ class DesktopDiscoveryDataSource : DiscoveryDataSource {
     
     override suspend fun startDiscovery(): Result<Unit> {
         return try {
+            // Stop any existing discovery first to clear cache
+            serviceListener?.let { listener ->
+                try {
+                    jmdns?.removeServiceListener(SERVICE_TYPE, listener)
+                } catch (e: Exception) {
+                    // Ignore - might not be running
+                }
+            }
+            
+            // Clear old discovered devices when starting new discovery
+            synchronized(discoveredDevicesMap) {
+                discoveredDevicesMap.clear()
+                discoveredDevicesFlow.value = emptyList()
+            }
+            
             // Create JmDNS instance if not exists
             if (jmdns == null) {
                 jmdns = JmDNS.create(InetAddress.getLocalHost())

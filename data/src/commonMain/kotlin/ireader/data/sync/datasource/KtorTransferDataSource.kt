@@ -1,13 +1,13 @@
 package ireader.data.sync.datasource
 
 import io.ktor.client.*
-import io.ktor.client.engine.cio.CIO as ClientCIO
+import io.ktor.client.engine.okhttp.OkHttp as ClientOkHttp
 import io.ktor.client.plugins.compression.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
-import io.ktor.server.cio.CIO as ServerCIO
+import io.ktor.server.netty.Netty as ServerNetty
 import io.ktor.server.engine.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.routing.*
@@ -39,7 +39,7 @@ import okio.use
  * Ktor-based implementation of TransferDataSource using WebSockets.
  * 
  * This implementation works on both Android and Desktop platforms.
- * Uses Ktor CIO engine for WebSocket connections.
+ * Uses Ktor Netty engine for server and OkHttp engine for client WebSocket connections.
  * 
  * @property certificateService Service for certificate operations (optional, for TLS)
  * @property certificatePinningManager Manager for certificate pinning (optional, for TLS)
@@ -58,7 +58,11 @@ class KtorTransferDataSource(
     private val transferProgressFlow = MutableStateFlow(0f)
     
     // Phase 10.4.1: Use IO dispatcher for network operations
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    // IMPORTANT: Use Default dispatcher for server to avoid it being killed
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    
+    // Separate scope for server to keep it alive
+    private var serverScope: CoroutineScope? = null
     
     // Phase 10.4.3: Mutex for thread-safe state access
     private val stateMutex = Mutex()
@@ -100,9 +104,12 @@ class KtorTransferDataSource(
     
     override suspend fun startServer(port: Int): Result<Int> {
         return try {
+            println("[KtorTransferDataSource] startServer called with port: $port")
+            
             // Phase 10.4.3: Thread-safe state check
             stateMutex.withLock {
                 if (server != null) {
+                    println("[KtorTransferDataSource] Server already running, stopping it first")
                     // Server already running - stop it first to allow restart
                     try {
                         serverSession?.close()
@@ -111,6 +118,7 @@ class KtorTransferDataSource(
                         server = null
                         delay(200) // Give time for port to be released
                     } catch (e: Exception) {
+                        println("[KtorTransferDataSource] Error stopping existing server: ${e.message}")
                         // Log but continue - we'll try to start anyway
                     }
                 }
@@ -119,7 +127,12 @@ class KtorTransferDataSource(
                 recreateChannels()
             }
             
-            val serverEngine = embeddedServer(ServerCIO, host = "0.0.0.0", port = port) {
+            println("[KtorTransferDataSource] Creating embedded server on 0.0.0.0:$port")
+            
+            // Create a dedicated scope for the server to keep it alive
+            serverScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            
+            val serverEngine = embeddedServer(ServerNetty, host = "0.0.0.0", port = port) {
                 // Task 10.2.1: Enable compression on server
                 install(Compression) {
                     gzip {
@@ -261,7 +274,9 @@ class KtorTransferDataSource(
                 }
             }
             
+            println("[KtorTransferDataSource] Starting server engine...")
             serverEngine.start(wait = false)
+            println("[KtorTransferDataSource] Server engine started successfully")
             
             // Phase 10.4.3: Thread-safe state update
             stateMutex.withLock {
@@ -271,17 +286,33 @@ class KtorTransferDataSource(
             // Give server more time to bind to port and be ready to accept connections
             println("[KtorTransferDataSource] Server started, waiting for port to be ready...")
             delay(500) // Increased from 100ms to 500ms
+            
+            // Verify server is actually listening
+            try {
+                val connectors = serverEngine.engine.resolvedConnectors()
+                println("[KtorTransferDataSource] Server connectors: ${connectors.size}")
+                connectors.forEach { connector ->
+                    println("[KtorTransferDataSource] Connector: ${connector.type} on ${connector.host}:${connector.port}")
+                }
+            } catch (e: Exception) {
+                println("[KtorTransferDataSource] Could not verify connectors: ${e.message}")
+            }
+            
             println("[KtorTransferDataSource] Server ready and listening on 0.0.0.0:$port")
             println("[KtorTransferDataSource] Server accessible from network at <device-ip>:$port")
             
             Result.success(port)
         } catch (e: Exception) {
+            println("[KtorTransferDataSource] ERROR starting server: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
     
     override suspend fun stopServer(): Result<Unit> {
         return try {
+            println("[KtorTransferDataSource] Stopping server...")
+            
             // Phase 10.4.3: Thread-safe state access
             stateMutex.withLock {
                 // Close channels (they'll be recreated on next connection)
@@ -297,13 +328,20 @@ class KtorTransferDataSource(
                 
                 server?.stop(1000, 2000)
                 server = null
+                
+                // Cancel server scope
+                serverScope?.cancel()
+                serverScope = null
             }
             
             // Give server time to fully stop
             delay(100)
             
+            println("[KtorTransferDataSource] Server stopped successfully")
             Result.success(Unit)
         } catch (e: Exception) {
+            println("[KtorTransferDataSource] Error stopping server: ${e.message}")
+            e.printStackTrace()
             Result.failure(e)
         }
     }
@@ -332,12 +370,14 @@ class KtorTransferDataSource(
             }
             
             // Task 10.2.3: Configure HTTP client with connection pooling
-            val httpClient = HttpClient(ClientCIO) {
+            val httpClient = HttpClient(ClientOkHttp) {
                 // Enable connection pooling
                 engine {
-                    maxConnectionsCount = 10
-                    // Note: CIO engine doesn't support endpoint timeout configuration
-                    // Timeouts are handled at the request level
+                    config {
+                        connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                        readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                        writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    }
                 }
                 
                 // Task 10.2.1: Enable compression on client
@@ -348,7 +388,8 @@ class KtorTransferDataSource(
                 
                 install(io.ktor.client.plugins.websocket.WebSockets) {
                     pingInterval = PING_INTERVAL_MS.milliseconds
-                    maxFrameSize = Long.MAX_VALUE
+                    // Note: OkHttp doesn't support maxFrameSize configuration
+                    // It uses a default of 16MB which is sufficient for our use case
                     contentConverter = KotlinxWebsocketSerializationConverter(Json)
                     
                     // Task 10.2.1: Enable WebSocket compression extension
@@ -747,7 +788,7 @@ class KtorTransferDataSource(
             
             // For now, we'll start a regular server and store the certificate data for future use
             // The platform-specific implementations will override this method to provide actual TLS
-            val serverEngine = embeddedServer(ServerCIO, host = "0.0.0.0", port = port) {
+            val serverEngine = embeddedServer(ServerNetty, host = "0.0.0.0", port = port) {
                 // Task 10.2.1: Enable compression on server
                 install(Compression) {
                     gzip {
@@ -972,10 +1013,14 @@ class KtorTransferDataSource(
             // Platform-specific implementations will provide actual certificate validation.
             
             // Task 10.2.3: Configure HTTP client with TLS and certificate pinning
-            val httpClient = HttpClient(ClientCIO) {
+            val httpClient = HttpClient(ClientOkHttp) {
                 // Enable connection pooling
                 engine {
-                    maxConnectionsCount = 10
+                    config {
+                        connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                        readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                        writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    }
                     
                     // TODO: Platform-specific TLS configuration
                     // Android: Configure OkHttp CertificatePinner
@@ -997,7 +1042,8 @@ class KtorTransferDataSource(
                 
                 install(io.ktor.client.plugins.websocket.WebSockets) {
                     pingInterval = PING_INTERVAL_MS.milliseconds
-                    maxFrameSize = Long.MAX_VALUE
+                    // Note: OkHttp doesn't support maxFrameSize configuration
+                    // It uses a default of 16MB which is sufficient for our use case
                     contentConverter = KotlinxWebsocketSerializationConverter(Json)
                     
                     // Task 10.2.1: Enable WebSocket compression extension

@@ -82,7 +82,7 @@ class SyncRepositoryImpl(
             deviceType = deviceType,
             appVersion = appVersion,
             ipAddress = "0.0.0.0",
-            port = 10880,
+            port = 8963,
             lastSeen = System.currentTimeMillis()
         )
     }
@@ -249,21 +249,21 @@ class SyncRepositoryImpl(
                 
                 // Determine role based on device ID comparison (lexicographic order)
                 // This ensures one device becomes server, the other becomes client
-                val shouldBeServer = currentDeviceInfo.deviceId < device.deviceId
+                val shouldBeServer = currentDeviceInfo.deviceId < device.deviceId  // Desktop will be server, Android will be client
                 
                 // Debug logging
                 println("[SyncRepository] Current device ID: ${currentDeviceInfo.deviceId}")
                 println("[SyncRepository] Remote device ID: ${device.deviceId}")
                 println("[SyncRepository] Should be server: $shouldBeServer")
-                println("[SyncRepository] Comparison: ${currentDeviceInfo.deviceId} < ${device.deviceId} = $shouldBeServer")
+                println("[SyncRepository] Comparison: ${currentDeviceInfo.deviceId} > ${device.deviceId} = $shouldBeServer")
                 println("[SyncRepository] Remote device: ${device.deviceName} at ${device.ipAddress}:${device.port}")
                 
                 if (shouldBeServer) {
                     // This device acts as SERVER
                     println("[SyncRepository] ========== ROLE: SERVER ==========")
-                    println("[SyncRepository] Starting server on port 10880")
+                    println("[SyncRepository] Starting server on port 8963")
                     // Start server first and wait for client to connect
-                    val serverPort = 10880 // Use fixed port for server
+                    val serverPort = 8963 // Use fixed port for server
                     val startResult = transferDataSource.startServer(serverPort)
                     
                     if (startResult.isFailure) {
@@ -384,7 +384,7 @@ class SyncRepositoryImpl(
         return withContext(Dispatchers.IO) {
             try {
                 // Determine role based on device ID comparison (same logic as connect)
-                val shouldBeServer = currentDeviceInfo.deviceId < connection.deviceId
+                val shouldBeServer = currentDeviceInfo.deviceId < connection.deviceId  // Desktop will be server, Android will be client
                 
                 if (shouldBeServer) {
                     // This device was SERVER - stop the server

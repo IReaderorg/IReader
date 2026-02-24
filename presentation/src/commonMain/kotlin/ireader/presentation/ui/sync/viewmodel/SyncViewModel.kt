@@ -83,20 +83,21 @@ class SyncViewModel(
                 
                 // Manage service lifecycle based on sync status
                 when (status) {
+                    is SyncStatus.Connecting -> {
+                        // Start foreground service when connecting (important for server mode)
+                        // Server needs to stay alive while waiting for client connection
+                        serviceController?.startService(status.deviceName)
+                    }
                     is SyncStatus.Syncing -> {
-                        // Start or update foreground service
+                        // Update foreground service with progress
                         serviceController?.let {
-                            if (status.progress == 0f) {
-                                it.startService(status.deviceName)
-                            } else {
-                                val progressPercent = (status.progress * 100).toInt()
-                                it.updateProgress(
-                                    progressPercent, 
-                                    status.currentItem,
-                                    status.currentIndex,
-                                    status.totalItems
-                                )
-                            }
+                            val progressPercent = (status.progress * 100).toInt()
+                            it.updateProgress(
+                                progressPercent, 
+                                status.currentItem,
+                                status.currentIndex,
+                                status.totalItems
+                            )
                         }
                     }
                     is SyncStatus.Completed -> {

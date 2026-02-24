@@ -99,7 +99,7 @@ kotlin {
                 
                 // Ktor server dependencies (JVM-only, not available on iOS)
                 implementation("io.ktor:ktor-server-core:3.3.2")
-                implementation("io.ktor:ktor-server-cio:3.3.2")
+                implementation("io.ktor:ktor-server-netty:3.3.2") // Changed from CIO to Netty
                 implementation("io.ktor:ktor-server-websockets:3.3.2")
                 implementation("io.ktor:ktor-server-compression:3.3.2")
                 
@@ -147,7 +147,7 @@ kotlin {
                 
                 // Ktor server dependencies (JVM-only, not available on iOS)
                 implementation("io.ktor:ktor-server-core:3.3.2")
-                implementation("io.ktor:ktor-server-cio:3.3.2")
+                implementation("io.ktor:ktor-server-netty:3.3.2") // Changed from CIO to Netty
                 implementation("io.ktor:ktor-server-websockets:3.3.2")
                 implementation("io.ktor:ktor-server-compression:3.3.2")
                 

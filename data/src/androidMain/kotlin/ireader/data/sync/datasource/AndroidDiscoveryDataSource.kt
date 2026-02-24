@@ -116,6 +116,21 @@ class AndroidDiscoveryDataSource(
     override suspend fun startDiscovery(): Result<Unit> {
         return suspendCancellableCoroutine { continuation ->
             try {
+                // Stop any existing discovery first to clear cache
+                discoveryListener?.let { listener ->
+                    try {
+                        nsdManager.stopServiceDiscovery(listener)
+                    } catch (e: Exception) {
+                        // Ignore - might not be running
+                    }
+                }
+                
+                // Clear old discovered devices when starting new discovery
+                synchronized(discoveredDevicesMap) {
+                    discoveredDevicesMap.clear()
+                    discoveredDevicesFlow.value = emptyList()
+                }
+                
                 val listener = object : NsdManager.DiscoveryListener {
                     override fun onStartDiscoveryFailed(serviceType: String?, errorCode: Int) {
                         if (continuation.isActive) {
