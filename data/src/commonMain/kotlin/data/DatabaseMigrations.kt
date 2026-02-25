@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 37
+    const val CURRENT_VERSION = 38
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -102,6 +102,7 @@ object DatabaseMigrations {
             34 -> migrateV34toV35(driver)
             35 -> migrateV35toV36(driver)
             36 -> migrateV36toV37(driver)
+            37 -> migrateV37toV38(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2712,6 +2713,45 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(37, e)
+            // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+
+    /**
+     * Migration from version 37 to version 38
+     * Adds text_replacement table for find-and-replace functionality
+     */
+    private fun migrateV37toV38(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(37, 38)
+            
+            // Create text_replacement table
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS text_replacement(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    book_id INTEGER,
+                    name TEXT NOT NULL,
+                    find_text TEXT NOT NULL,
+                    replace_text TEXT NOT NULL,
+                    description TEXT,
+                    enabled INTEGER NOT NULL DEFAULT 1,
+                    case_sensitive INTEGER NOT NULL DEFAULT 0,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("text_replacement")
+            
+            // Create indexes for better performance
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS text_replacement_book_id_index ON text_replacement(book_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS text_replacement_enabled_index ON text_replacement(enabled);", 0)
+            Logger.logIndexCreated("text_replacement indexes")
+            
+            Logger.logMigrationSuccess(38)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(38, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }

@@ -433,6 +433,12 @@ fun CommonNavHost(
             TrackingSettingsScreenSpec().Content()
         }
         
+        // Text Replacement Settings
+        composable(NavigationRoutes.textReplacement) {
+            val viewModel: ireader.presentation.ui.settings.textreplacement.TextReplacementViewModel = getIViewModel()
+            ireader.presentation.ui.settings.textreplacement.TextReplacementScreen(vm = viewModel)
+        }
+        
         // WiFi Sync Settings
         composable(NavigationRoutes.wifiSync) {
             SyncScreenSpec().Content()

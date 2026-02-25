@@ -143,6 +143,7 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.ReaderTheme
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import ireader.presentation.core.NavigationRoutes
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -154,7 +155,8 @@ fun ReaderSettingMainLayout(
         onToggleAutoBrightness: () -> Unit,
         onChangeBrightness: (Float) -> Unit,
         onBackgroundChange: (themeId: Long) -> Unit,
-        onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
+        onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit,
+        onNavigate: (String) -> Unit = {}
 ) {
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -171,11 +173,11 @@ fun ReaderSettingMainLayout(
             ReaderScreenTab(vm, onTextAlign)
         }
     }
-    val generalTab: TabItem = remember {
+    val generalTab: TabItem = remember(onNavigate) {
         TabItem(
             localizeHelper.localize(Res.string.general)
         ) {
-            GeneralScreenTab(vm)
+            GeneralScreenTab(vm, onNavigate = onNavigate)
         }
     }
 
@@ -502,6 +504,7 @@ fun ReaderScreenTab(
 @Composable
 fun GeneralScreenTab(
         vm: ReaderScreenViewModel,
+        onNavigate: (String) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -739,24 +742,17 @@ fun GeneralScreenTab(
         }
         item {
             Components.Header(
-                "Content Filter"
+                "Text Replacement"
             ).Build()
         }
         item {
-            SwitchPreference(
-                preference = vm.contentFilterEnabled,
-                title = localizeHelper.localize(Res.string.enable_content_filter),
-                subtitle = localizeHelper.localize(Res.string.remove_unwanted_text_patterns_from)
+            PreferenceRow(
+                title = "Manage Text Replacements",
+                subtitle = "Replace text patterns (e.g., 'khan' → 'khaaan')",
+                onClick = {
+                    onNavigate(ireader.presentation.core.NavigationRoutes.textReplacement)
+                }
             )
-        }
-        if (vm.contentFilterEnabled.value) {
-            item {
-                ContentFilterPatternsEditor(
-                    patterns = vm.contentFilterPatterns.value,
-                    onPatternsChange = { vm.contentFilterPatterns.value = it },
-                    contentFilterUseCase = vm.contentFilterUseCase
-                )
-            }
         }
         item {
             Components.Header(

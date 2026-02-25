@@ -3,6 +3,7 @@ package ireader.domain.usecases.local.chapter_usecases
 import ireader.domain.models.entities.Chapter
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.usecases.reader.ContentFilterUseCase
+import ireader.domain.usecases.reader.TextReplacementUseCase
 import ireader.i18n.LAST_CHAPTER
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
@@ -10,7 +11,8 @@ import kotlinx.coroutines.flow.map
 
 class FindChapterById(
     private val chapterRepository: ChapterRepository,
-    private val contentFilterUseCase: ContentFilterUseCase? = null
+    private val contentFilterUseCase: ContentFilterUseCase? = null,
+    private val textReplacementUseCase: TextReplacementUseCase? = null
 ) {
     suspend operator fun invoke(
         chapterId: Long?,
@@ -25,17 +27,29 @@ class FindChapterById(
             chapterRepository.findChapterById(chapterId)
         }
         
-        // Apply content filter to chapter content
-        return chapter?.let { applyContentFilter(it) }
+        // Apply text replacements and content filter to chapter content
+        return chapter?.let { applyContentProcessing(it) }
     }
     
-    private fun applyContentFilter(chapter: Chapter): Chapter {
-        if (contentFilterUseCase == null || chapter.content.isEmpty()) {
+    private fun applyContentProcessing(chapter: Chapter): Chapter {
+        if (chapter.content.isEmpty()) {
             return chapter
         }
-        val filteredContent = contentFilterUseCase.filterPages(chapter.content, chapter.bookId)
-        return if (filteredContent != chapter.content) {
-            chapter.copy(content = filteredContent)
+        
+        var processedContent = chapter.content
+        
+        // Step 1: Apply text replacements first
+        if (textReplacementUseCase != null) {
+            processedContent = textReplacementUseCase.applyReplacementsToPages(processedContent, chapter.bookId)
+        }
+        
+        // Step 2: Apply content filtering
+        if (contentFilterUseCase != null) {
+            processedContent = contentFilterUseCase.filterPages(processedContent, chapter.bookId)
+        }
+        
+        return if (processedContent != chapter.content) {
+            chapter.copy(content = processedContent)
         } else {
             chapter
         }
@@ -44,7 +58,8 @@ class FindChapterById(
 
 class SubscribeChapterById(
     private val chapterRepository: ChapterRepository,
-    private val contentFilterUseCase: ContentFilterUseCase? = null
+    private val contentFilterUseCase: ContentFilterUseCase? = null,
+    private val textReplacementUseCase: TextReplacementUseCase? = null
 ) {
     suspend operator fun invoke(
             chapterId: Long?,
@@ -59,17 +74,29 @@ class SubscribeChapterById(
             chapterRepository.subscribeChapterById(chapterId)
         }
         
-        // Apply content filter to chapter content
-        return flow.map { chapter -> chapter?.let { applyContentFilter(it) } }
+        // Apply text replacements and content filter to chapter content
+        return flow.map { chapter -> chapter?.let { applyContentProcessing(it) } }
     }
     
-    private fun applyContentFilter(chapter: Chapter): Chapter {
-        if (contentFilterUseCase == null || chapter.content.isEmpty()) {
+    private fun applyContentProcessing(chapter: Chapter): Chapter {
+        if (chapter.content.isEmpty()) {
             return chapter
         }
-        val filteredContent = contentFilterUseCase.filterPages(chapter.content, chapter.bookId)
-        return if (filteredContent != chapter.content) {
-            chapter.copy(content = filteredContent)
+        
+        var processedContent = chapter.content
+        
+        // Step 1: Apply text replacements first
+        if (textReplacementUseCase != null) {
+            processedContent = textReplacementUseCase.applyReplacementsToPages(processedContent, chapter.bookId)
+        }
+        
+        // Step 2: Apply content filtering
+        if (contentFilterUseCase != null) {
+            processedContent = contentFilterUseCase.filterPages(processedContent, chapter.bookId)
+        }
+        
+        return if (processedContent != chapter.content) {
+            chapter.copy(content = processedContent)
         } else {
             chapter
         }

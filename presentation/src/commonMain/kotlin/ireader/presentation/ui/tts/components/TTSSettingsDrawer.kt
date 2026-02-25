@@ -92,6 +92,7 @@ fun TTSSettingsDrawer(
     onContentFilterPatternsChange: (String) -> Unit,
     onOpenEngineSettings: () -> Unit,
     onSelectVoice: () -> Unit,
+    onNavigateToTextReplacement: () -> Unit,
     onClose: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -250,30 +251,19 @@ fun TTSSettingsDrawer(
                             }
                         }
                         
-                        // Content Filter
-                        SettingSection(title = "Content Filter") {
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                SettingRow(
-                                    title = "Enable Filter",
-                                    subtitle = "Remove unwanted text patterns",
-                                    checked = contentFilterEnabled,
-                                    onCheckedChange = onContentFilterEnabledChange
-                                )
-                                
-                                if (contentFilterEnabled) {
-                                    OutlinedTextField(
-                                        value = contentFilterPatterns,
-                                        onValueChange = onContentFilterPatternsChange,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(120.dp),
-                                        placeholder = { Text("Regex patterns (one per line)", style = MaterialTheme.typography.bodySmall) },
-                                        textStyle = MaterialTheme.typography.bodySmall,
-                                        minLines = 3,
-                                        maxLines = 6
-                                    )
-                                }
+                        // Text Replacement
+                        SettingSection(title = "Text Replacement") {
+                            OutlinedButton(
+                                onClick = onNavigateToTextReplacement,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Manage Text Replacements")
                             }
+                            Text(
+                                text = "Replace text patterns (e.g., 'khan' → 'khaaan')",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                         
                         // Colors

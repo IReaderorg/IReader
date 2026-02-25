@@ -10,6 +10,7 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.reader.ContentFilterUseCase
+import ireader.domain.usecases.reader.TextReplacementUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.tts.TTSTextSanitizer
 import ireader.domain.utils.extensions.ioDispatcher
@@ -25,6 +26,7 @@ import kotlin.coroutines.resume
  * - Loads book and chapter from repositories
  * - Parses chapter content (List<Page>) into paragraphs
  * - Fetches content from remote if not available locally
+ * - Applies text replacements first
  * - Applies content filter to remove unwanted text patterns
  * - Sanitizes text for TTS (removes brackets, special characters)
  */
@@ -35,6 +37,7 @@ class TTSContentLoaderImpl(
     private val remoteUseCases: RemoteUseCases,
     private val catalogStore: CatalogStore,
     private val contentFilterUseCase: ContentFilterUseCase? = null,
+    private val textReplacementUseCase: TextReplacementUseCase? = null,
     private val ttsSanitizer: TTSTextSanitizer = TTSTextSanitizer()
 ) : TTSContentLoader {
     
@@ -141,7 +144,7 @@ class TTSContentLoaderImpl(
      * 
      * Extracts text from Text pages and cleans HTML if present.
      * Note: Content is already filtered at the Page level by FindChapterById use case.
-     * This method applies additional string-level filtering after HTML cleaning/splitting.
+     * This method applies additional string-level processing after HTML cleaning/splitting.
      */
     private fun parseContent(content: List<Page>): List<String> {
         if (content.isEmpty()) {
@@ -160,10 +163,13 @@ class TTSContentLoaderImpl(
                 cleanAndSplitText(text)
             }
             
-            // Apply content filter again after HTML cleaning (catches any remaining patterns)
-            val filtered = contentFilterUseCase?.filterStrings(paragraphs) ?: paragraphs
+            // Step 1: Apply text replacements first
+            val replaced = textReplacementUseCase?.applyReplacementsToStrings(paragraphs) ?: paragraphs
             
-            // Sanitize for TTS - remove brackets and special characters that shouldn't be read aloud
+            // Step 2: Apply content filter to remove unwanted patterns
+            val filtered = contentFilterUseCase?.filterStrings(replaced) ?: replaced
+            
+            // Step 3: Sanitize for TTS - remove brackets and special characters that shouldn't be read aloud
             return ttsSanitizer.sanitizeList(filtered)
         }
         

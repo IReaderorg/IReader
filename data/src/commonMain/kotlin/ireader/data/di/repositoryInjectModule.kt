@@ -233,6 +233,11 @@ val repositoryInjectModule = module {
         ireader.data.contentfilter.ContentFilterRepositoryImpl(get())
     }
     
+    // Text replacement repository - for find-and-replace rules
+    single<ireader.domain.data.repository.TextReplacementRepository> {
+        ireader.data.textreplacement.TextReplacementRepositoryImpl(get())
+    }
+    
     // User Source repository - for user-defined sources
     single<ireader.domain.usersource.repository.UserSourceRepository> {
         ireader.data.usersource.UserSourceRepositoryImpl(get())

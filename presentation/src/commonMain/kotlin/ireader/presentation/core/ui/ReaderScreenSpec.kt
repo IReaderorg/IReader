@@ -713,6 +713,9 @@ data class ReaderScreenSpec(
                                         },
                                         onToggleAutoBrightness = {
                                             vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
+                                        },
+                                        onNavigate = { route ->
+                                            navController.navigate(route)
                                         }
                                     )
                                 }

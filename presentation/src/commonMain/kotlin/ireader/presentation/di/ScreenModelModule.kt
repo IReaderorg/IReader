@@ -280,4 +280,13 @@ val screenModelModule = module {
             uiPreferences = get()
         )
     }
+    
+    // ==================== Text Replacement ====================
+    
+    // Text Replacement ViewModel - Manage text replacement rules
+    factory {
+        ireader.presentation.ui.settings.textreplacement.TextReplacementViewModel(
+            textReplacementUseCase = get()
+        )
+    }
 }

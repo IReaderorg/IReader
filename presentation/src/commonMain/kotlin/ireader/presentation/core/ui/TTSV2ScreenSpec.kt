@@ -1103,6 +1103,12 @@ class TTSV2ScreenSpec(
                 showVoiceSelection = true
                 scope.launch { settingsDrawerState.close() }
             },
+            onNavigateToTextReplacement = {
+                scope.launch { 
+                    settingsDrawerState.close()
+                    navController.navigate(NavigationRoutes.textReplacement)
+                }
+            },
             onClose = {
                 scope.launch { settingsDrawerState.close() }
             }

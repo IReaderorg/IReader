@@ -20,7 +20,8 @@ val ttsV2Module = module {
             chapterUseCase = get(),
             remoteUseCases = get(),
             catalogStore = get(),
-            contentFilterUseCase = getOrNull() // Optional - applies regex content filtering
+            contentFilterUseCase = getOrNull(), // Optional - applies regex content filtering
+            textReplacementUseCase = getOrNull() // Optional - applies text replacements
         )
     }
     

@@ -37,6 +37,7 @@ import data.Reading_goal
 import data.Reading_milestone
 import data.Reading_session
 import data.SourceComparison
+import data.Text_replacement
 import data.Theme
 import data.Track
 import data.Translated_chapter
@@ -230,6 +231,11 @@ fun createDatabase(driver: SqlDriver): Database {
         ),
         // Content filter table
         content_filterAdapter = Content_filter.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
+        ),
+        // Text replacement table
+        text_replacementAdapter = Text_replacement.Adapter(
             created_atAdapter = longConverter,
             updated_atAdapter = longConverter
         ),

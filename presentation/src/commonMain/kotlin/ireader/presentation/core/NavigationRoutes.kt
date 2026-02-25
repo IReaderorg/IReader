@@ -86,6 +86,8 @@ object NavigationRoutes {
     const val pluginManagement = "pluginManagement"
     const val quoteCreation = "quoteCreation"
     const val myQuotes = "myQuotes"
+    const val contentFilter = "contentFilter"
+    const val textReplacement = "textReplacement"
     
     fun quoteCreation(params: ireader.domain.models.quote.QuoteCreationParams): String {
         val encodedBookTitle = params.bookTitle.encodeForNav()

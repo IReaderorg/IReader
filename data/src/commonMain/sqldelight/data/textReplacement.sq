@@ -1,0 +1,107 @@
+import kotlin.Long;
+import kotlin.String;
+import kotlin.Boolean;
+
+-- Text replacement rules table
+-- Stores find-and-replace rules to automatically replace text in chapter content
+-- Example: Replace "khan" with "khaaan"
+-- Can be global (bookId = null) or book-specific
+CREATE TABLE IF NOT EXISTS text_replacement(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER, -- NULL for global replacements, book ID for book-specific
+    name TEXT NOT NULL, -- User-friendly name for the replacement
+    find_text TEXT NOT NULL, -- Text to find
+    replace_text TEXT NOT NULL, -- Text to replace with
+    description TEXT, -- Optional description
+    enabled INTEGER AS Boolean NOT NULL DEFAULT 1, -- Whether this replacement is active
+    case_sensitive INTEGER AS Boolean NOT NULL DEFAULT 0, -- Whether matching is case-sensitive
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS text_replacement_book_id_index ON text_replacement(book_id);
+CREATE INDEX IF NOT EXISTS text_replacement_enabled_index ON text_replacement(enabled);
+
+-- Get all global replacements (not book-specific)
+getGlobalReplacements:
+SELECT * FROM text_replacement WHERE book_id IS NULL ORDER BY name ASC;
+
+-- Get all enabled global replacements
+getEnabledGlobalReplacements:
+SELECT * FROM text_replacement WHERE book_id IS NULL AND enabled = 1 ORDER BY name ASC;
+
+-- Get replacements for a specific book (includes global replacements)
+-- Global replacements (book_id IS NULL) come first, then book-specific
+getReplacementsForBook:
+SELECT * FROM text_replacement 
+WHERE book_id IS NULL OR book_id = :bookId 
+ORDER BY CASE WHEN book_id IS NULL THEN 0 ELSE 1 END, name ASC;
+
+-- Get enabled replacements for a specific book (includes global replacements)
+getEnabledReplacementsForBook:
+SELECT * FROM text_replacement 
+WHERE (book_id IS NULL OR book_id = :bookId) AND enabled = 1 
+ORDER BY CASE WHEN book_id IS NULL THEN 0 ELSE 1 END, name ASC;
+
+-- Get book-specific replacements only
+getBookSpecificReplacements:
+SELECT * FROM text_replacement WHERE book_id = :bookId ORDER BY name ASC;
+
+-- Get replacement by ID
+getReplacementById:
+SELECT * FROM text_replacement WHERE _id = :id;
+
+-- Insert a new replacement
+insert:
+INSERT INTO text_replacement(
+    book_id, name, find_text, replace_text, description, enabled, case_sensitive, created_at, updated_at
+)
+VALUES (
+    :bookId, :name, :findText, :replaceText, :description, :enabled, :caseSensitive, :createdAt, :updatedAt
+);
+
+-- Insert a new replacement with specific ID (for default replacements)
+insertWithId:
+INSERT OR IGNORE INTO text_replacement(
+    _id, book_id, name, find_text, replace_text, description, enabled, case_sensitive, created_at, updated_at
+)
+VALUES (
+    :id, :bookId, :name, :findText, :replaceText, :description, :enabled, :caseSensitive, :createdAt, :updatedAt
+);
+
+-- Update a replacement
+update:
+UPDATE text_replacement
+SET name = :name,
+    find_text = :findText,
+    replace_text = :replaceText,
+    description = :description,
+    enabled = :enabled,
+    case_sensitive = :caseSensitive,
+    updated_at = :updatedAt
+WHERE _id = :id;
+
+-- Toggle replacement enabled state
+toggleEnabled:
+UPDATE text_replacement SET enabled = CASE WHEN enabled = 1 THEN 0 ELSE 1 END, updated_at = :updatedAt WHERE _id = :id;
+
+-- Delete a replacement
+deleteReplacement:
+DELETE FROM text_replacement WHERE _id = :id;
+
+-- Delete all replacements for a book
+deleteBookReplacements:
+DELETE FROM text_replacement WHERE book_id = :bookId;
+
+-- Get last inserted row ID
+selectLastInsertedRowId:
+SELECT LAST_INSERT_ROWID() AS Long;
+
+-- Count replacements
+countReplacements:
+SELECT COUNT(*) FROM text_replacement;
+
+-- Count enabled replacements
+countEnabledReplacements:
+SELECT COUNT(*) FROM text_replacement WHERE enabled = 1;

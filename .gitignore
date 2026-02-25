@@ -23,7 +23,7 @@ IReader-extensions
 # Gradle files
 .gradle/
 build/
-
+CONTINUITY.md
 
 # Log/OS Files
 *.log

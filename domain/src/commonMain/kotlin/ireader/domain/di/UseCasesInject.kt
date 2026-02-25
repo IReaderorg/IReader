@@ -89,7 +89,8 @@ val UseCasesInject = module {
     // Remote use cases - factory for on-demand creation
     factory<RemoteUseCases> {
         val contentFilterUseCase: ireader.domain.usecases.reader.ContentFilterUseCase? = getOrNull()
-        val findChapterById = FindChapterById(get(), contentFilterUseCase)
+        val textReplacementUseCase: ireader.domain.usecases.reader.TextReplacementUseCase? = getOrNull()
+        val findChapterById = FindChapterById(get(), contentFilterUseCase, textReplacementUseCase)
         RemoteUseCases(
             getBookDetail = GetBookDetail(),
             getRemoteBooks = GetRemoteBooksUseCase(),
@@ -126,9 +127,10 @@ val UseCasesInject = module {
     }
     factory<ireader.domain.usecases.local.LocalGetChapterUseCase> {
         val contentFilterUseCase: ireader.domain.usecases.reader.ContentFilterUseCase? = getOrNull()
+        val textReplacementUseCase: ireader.domain.usecases.reader.TextReplacementUseCase? = getOrNull()
         ireader.domain.usecases.local.LocalGetChapterUseCase(
             findAllInLibraryChapters = FindAllInLibraryChapters(get()),
-            findChapterById = FindChapterById(get(), contentFilterUseCase),
+            findChapterById = FindChapterById(get(), contentFilterUseCase, textReplacementUseCase),
             findChaptersByBookId = FindChaptersByBookId(get()),
             subscribeChaptersByBookId = SubscribeChaptersByBookId(get()),
             updateLastReadTime = UpdateLastReadTime(
@@ -137,7 +139,7 @@ val UseCasesInject = module {
                 uiPreferences = get(),
                 changeNotifier = getOrNull() // LibraryChangeNotifier - optional
             ),
-            subscribeChapterById = SubscribeChapterById(get(), contentFilterUseCase)
+            subscribeChapterById = SubscribeChapterById(get(), contentFilterUseCase, textReplacementUseCase)
         )
     }
     factory<ireader.domain.usecases.local.DeleteUseCase> {

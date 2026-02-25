@@ -136,6 +136,14 @@ val useCaseAggregateModule = module {
         )
     }
     
+    // Text replacement use case - used by Reader and TTS screens
+    factory {
+        ireader.domain.usecases.reader.TextReplacementUseCase(
+            readerPreferences = get(),
+            repository = getOrNull() // Optional
+        )
+    }
+    
     // Extension aggregate - used by ExtensionViewModel
     // Reduces constructor params from 17 to ~10
     // Requirements: 1.3, 1.4, 1.5
