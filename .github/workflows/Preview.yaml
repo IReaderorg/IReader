@@ -131,6 +131,8 @@ jobs:
           COMMUNITY_R2_PUBLIC_URL: ${{ secrets.COMMUNITY_R2_PUBLIC_URL }}
           # Google Drive Backup
           GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
+          # Discord Character Art Webhook
+          DISCORD_CHARACTER_ART_WEBHOOK_URL: ${{ secrets.DISCORD_CHARACTER_ART_WEBHOOK_URL }}
         with:
           arguments: >
             ${{ matrix.build }}

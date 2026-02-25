@@ -5,6 +5,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Represents AI-generated character art for a book character
+ * Posted directly to Discord - no approval workflow needed
  */
 @Serializable
 data class CharacterArt(
@@ -22,22 +23,12 @@ data class CharacterArt(
     val prompt: String = "",
     val likesCount: Int = 0,
     val isLikedByUser: Boolean = false,
-    val status: CharacterArtStatus = CharacterArtStatus.PENDING,
     val submittedAt: Long = currentTimeToLong(),
     val isFeatured: Boolean = false,
     val tags: List<String> = emptyList(),
     val width: Int = 0,
     val height: Int = 0
 )
-
-/**
- * Character art approval status
- */
-enum class CharacterArtStatus {
-    PENDING,
-    APPROVED,
-    REJECTED
-}
 
 /**
  * Request to submit new character art

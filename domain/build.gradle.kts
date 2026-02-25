@@ -48,19 +48,15 @@ android {
         buildConfigField("String", "SUPABASE_ANALYTICS_URL", "\"${getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url")}\"")
         buildConfigField("String", "SUPABASE_ANALYTICS_KEY", "\"${getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key")}\"")
         
-        // Cloudflare R2 Storage Configuration
-        buildConfigField("String", "R2_ACCOUNT_ID", "\"${getConfigProperty("R2_ACCOUNT_ID", "r2.accountId")}\"")
-        buildConfigField("String", "R2_ACCESS_KEY_ID", "\"${getConfigProperty("R2_ACCESS_KEY_ID", "r2.accessKeyId")}\"")
-        buildConfigField("String", "R2_SECRET_ACCESS_KEY", "\"${getConfigProperty("R2_SECRET_ACCESS_KEY", "r2.secretAccessKey")}\"")
-        buildConfigField("String", "R2_BUCKET_NAME", "\"${getConfigProperty("R2_BUCKET_NAME", "r2.bucketName")}\"")
-        buildConfigField("String", "R2_PUBLIC_URL", "\"${getConfigProperty("R2_PUBLIC_URL", "r2.publicUrl")}\"")
-        
         // Cloudflare D1 + R2 Community Translations Configuration
         buildConfigField("String", "COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "community.cloudflare.accountId")}\"")
         buildConfigField("String", "COMMUNITY_CLOUDFLARE_API_TOKEN", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_API_TOKEN", "community.cloudflare.apiToken")}\"")
         buildConfigField("String", "COMMUNITY_D1_DATABASE_ID", "\"${getConfigProperty("COMMUNITY_D1_DATABASE_ID", "community.d1.databaseId")}\"")
         buildConfigField("String", "COMMUNITY_R2_BUCKET_NAME", "\"${getConfigProperty("COMMUNITY_R2_BUCKET_NAME", "community.r2.bucketName")}\"")
         buildConfigField("String", "COMMUNITY_R2_PUBLIC_URL", "\"${getConfigProperty("COMMUNITY_R2_PUBLIC_URL", "community.r2.publicUrl")}\"")
+        
+        // Discord Webhooks Configuration
+        buildConfigField("String", "DISCORD_CHARACTER_ART_WEBHOOK_URL", "\"${getConfigProperty("DISCORD_CHARACTER_ART_WEBHOOK_URL", "discord.characterArt.webhookUrl")}\"")
 
         // Use standard flavor by default when consumed by modules with flavors
         missingDimensionStrategy("default", "standard")

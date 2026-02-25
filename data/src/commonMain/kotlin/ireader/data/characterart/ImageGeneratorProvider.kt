@@ -40,23 +40,11 @@ enum class ImageProvider(
         requiresApiKey = true,
         description = "High quality, requires API key"
     ),
-    HUGGING_FACE(
-        displayName = "Hugging Face",
-        emoji = "🤗",
-        requiresApiKey = true,
-        description = "Many models, free tier available"
-    ),
     POLLINATIONS(
         displayName = "Pollinations.ai",
         emoji = "🌸",
-        requiresApiKey = false,
-        description = "FREE - No API key needed!"
-    ),
-    STABILITY_AI(
-        displayName = "Stability AI",
-        emoji = "🎨",
         requiresApiKey = true,
-        description = "Stable Diffusion (coming soon)"
+        description = "Paid - API key required (free tier available)"
     )
 }
 

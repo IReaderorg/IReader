@@ -66,9 +66,7 @@ class CharacterArtUploadScreenSpec(
         val selectedProvider = remember(state.selectedProvider) {
             when (state.selectedProvider) {
                 ImageProvider.GEMINI -> AIProviderOption.GEMINI
-                ImageProvider.HUGGING_FACE -> AIProviderOption.HUGGING_FACE
                 ImageProvider.POLLINATIONS -> AIProviderOption.POLLINATIONS
-                ImageProvider.STABILITY_AI -> AIProviderOption.STABILITY_AI
             }
         }
         
@@ -120,9 +118,7 @@ class CharacterArtUploadScreenSpec(
             onProviderSelect = { uiProvider ->
                 val domainProvider = when (uiProvider) {
                     AIProviderOption.GEMINI -> ImageProvider.GEMINI
-                    AIProviderOption.HUGGING_FACE -> ImageProvider.HUGGING_FACE
                     AIProviderOption.POLLINATIONS -> ImageProvider.POLLINATIONS
-                    AIProviderOption.STABILITY_AI -> ImageProvider.STABILITY_AI
                 }
                 vm.setProvider(domainProvider)
             },
@@ -139,9 +135,7 @@ class CharacterArtUploadScreenSpec(
             onFetchModels = { provider, apiKey ->
                 val domainProvider = when (provider) {
                     AIProviderOption.GEMINI -> ImageProvider.GEMINI
-                    AIProviderOption.HUGGING_FACE -> ImageProvider.HUGGING_FACE
                     AIProviderOption.POLLINATIONS -> ImageProvider.POLLINATIONS
-                    AIProviderOption.STABILITY_AI -> ImageProvider.STABILITY_AI
                 }
                 vm.setProvider(domainProvider)
             },
@@ -149,15 +143,11 @@ class CharacterArtUploadScreenSpec(
             onGeminiApiKeyChanged = { apiKey ->
                 vm.setGeminiApiKey(apiKey)
             },
-            onHuggingFaceApiKeyChanged = { apiKey ->
-                vm.setHuggingFaceApiKey(apiKey)
-            },
-            onStabilityAiApiKeyChanged = { apiKey ->
-                vm.setStabilityAiApiKey(apiKey)
+            onPollinationsApiKeyChanged = { apiKey ->
+                vm.setPollinationsApiKey(apiKey)
             },
             initialGeminiApiKey = state.geminiApiKey,
-            initialHuggingFaceApiKey = state.huggingFaceApiKey,
-            initialStabilityAiApiKey = state.stabilityAiApiKey,
+            initialPollinationsApiKey = state.pollinationsApiKey,
             // Prefilled values from chapter art generation
             prefilledBookTitle = prefilledBookTitle,
             prefilledChapterTitle = prefilledChapterTitle,

@@ -82,9 +82,6 @@ class CommunityHubScreenSpec {
             onAdminBadgeVerification = {
                 navController.navigate(NavigationRoutes.adminBadgeVerification)
             },
-            onAdminCharacterArtVerification = {
-                navController.navigate(NavigationRoutes.adminCharacterArtVerification)
-            },
             onAdminUserPanel = {
                 navController.navigate(NavigationRoutes.adminUserPanel)
             }

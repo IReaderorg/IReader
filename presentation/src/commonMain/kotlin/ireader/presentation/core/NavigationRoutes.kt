@@ -46,7 +46,6 @@ object NavigationRoutes {
     const val characterArtGallery = "characterArtGallery"
     const val characterArtUpload = "characterArtUpload"
     const val characterArtDetail = "characterArtDetail"
-    const val adminCharacterArtVerification = "adminCharacterArtVerification"
     
     /**
      * Navigate to character art upload with pre-filled data from chapter.

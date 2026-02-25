@@ -141,11 +141,9 @@ fun UploadCharacterArtScreen(
     onFetchModels: (AIProviderOption, String) -> Unit = { _, _ -> },
     // API keys for different providers
     onGeminiApiKeyChanged: (String) -> Unit = {},
-    onHuggingFaceApiKeyChanged: (String) -> Unit = {},
-    onStabilityAiApiKeyChanged: (String) -> Unit = {},
+    onPollinationsApiKeyChanged: (String) -> Unit = {},
     initialGeminiApiKey: String = "",
-    initialHuggingFaceApiKey: String = "",
-    initialStabilityAiApiKey: String = "",
+    initialPollinationsApiKey: String = "",
     // Prefilled values from chapter art generation
     prefilledBookTitle: String = "",
     prefilledChapterTitle: String = "",
@@ -170,8 +168,7 @@ fun UploadCharacterArtScreen(
     var imageSourceMode by remember { mutableStateOf(ImageSourceMode.PICK_FILE) }
     var currentProvider by remember(selectedProvider) { mutableStateOf(selectedProvider) }
     var geminiApiKey by remember(initialGeminiApiKey) { mutableStateOf(initialGeminiApiKey) }
-    var huggingFaceApiKey by remember(initialHuggingFaceApiKey) { mutableStateOf(initialHuggingFaceApiKey) }
-    var stabilityAiApiKey by remember(initialStabilityAiApiKey) { mutableStateOf(initialStabilityAiApiKey) }
+    var pollinationsApiKey by remember(initialPollinationsApiKey) { mutableStateOf(initialPollinationsApiKey) }
     var generationPrompt by remember { mutableStateOf("") }
     var selectedStyle by remember { mutableStateOf("digital art") }
     var showApiKeyDialog by remember { mutableStateOf(false) }
@@ -185,9 +182,7 @@ fun UploadCharacterArtScreen(
     // Get current API key based on provider
     val currentApiKey = when (currentProvider) {
         AIProviderOption.GEMINI -> geminiApiKey
-        AIProviderOption.HUGGING_FACE -> huggingFaceApiKey
-        AIProviderOption.STABILITY_AI -> stabilityAiApiKey
-        AIProviderOption.POLLINATIONS -> "" // No key needed
+        AIProviderOption.POLLINATIONS -> pollinationsApiKey
     }
     
     // API Key dialog - supports multiple providers
@@ -202,18 +197,13 @@ fun UploadCharacterArtScreen(
                         geminiApiKey = key
                         onGeminiApiKeyChanged(key)
                     }
-                    AIProviderOption.HUGGING_FACE -> {
-                        huggingFaceApiKey = key
-                        onHuggingFaceApiKeyChanged(key)
+                    AIProviderOption.POLLINATIONS -> {
+                        pollinationsApiKey = key
+                        onPollinationsApiKeyChanged(key)
                     }
-                    AIProviderOption.STABILITY_AI -> {
-                        stabilityAiApiKey = key
-                        onStabilityAiApiKeyChanged(key)
-                    }
-                    AIProviderOption.POLLINATIONS -> { /* No key needed */ }
                 }
                 // Fetch models when API key is set
-                if (key.isNotBlank() || !currentProvider.requiresApiKey) {
+                if (key.isNotBlank()) {
                     onFetchModels(currentProvider, key)
                 }
                 showApiKeyDialog = false
@@ -306,9 +296,7 @@ fun UploadCharacterArtScreen(
                                         onProviderSelect(provider)
                                         onFetchModels(provider, when (provider) {
                                             AIProviderOption.GEMINI -> geminiApiKey
-                                            AIProviderOption.HUGGING_FACE -> huggingFaceApiKey
-                                            AIProviderOption.STABILITY_AI -> stabilityAiApiKey
-                                            AIProviderOption.POLLINATIONS -> ""
+                                            AIProviderOption.POLLINATIONS -> pollinationsApiKey
                                         })
                                         showProviderSelector = false
                                     },
@@ -830,35 +818,23 @@ enum class AIProviderOption(
     val emoji: String,
     val requiresApiKey: Boolean,
     val description: String,
-    val apiKeyUrl: String
+    val apiKeyUrl: String,
+    val isVisible: Boolean = true // Hide from UI but keep logic
 ) {
     POLLINATIONS(
         displayName = "Pollinations.ai",
         emoji = "🌸",
-        requiresApiKey = false,
-        description = "FREE - No API key needed!",
-        apiKeyUrl = ""
+        requiresApiKey = true,
+        description = "Paid - API key required (free tier available)",
+        apiKeyUrl = "https://enter.pollinations.ai/"
     ),
     GEMINI(
         displayName = "Google Gemini",
         emoji = "✨",
         requiresApiKey = true,
         description = "High quality image generation",
-        apiKeyUrl = "aistudio.google.com/apikey"
-    ),
-    HUGGING_FACE(
-        displayName = "Hugging Face",
-        emoji = "🤗",
-        requiresApiKey = true,
-        description = "Many models, free tier",
-        apiKeyUrl = "huggingface.co/settings/tokens"
-    ),
-    STABILITY_AI(
-        displayName = "Stability AI",
-        emoji = "🎨",
-        requiresApiKey = true,
-        description = "Stable Diffusion, pay-per-use",
-        apiKeyUrl = "platform.stability.ai/account/keys"
+        apiKeyUrl = "https://aistudio.google.com/apikey",
+        isVisible = false // Hidden from UI for now
     )
 }
 
@@ -1421,6 +1397,7 @@ private fun MultiProviderApiKeyDialog(
     onSave: (String) -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     var apiKey by remember { mutableStateOf(currentKey) }
     var showKey by remember { mutableStateOf(false) }
     
@@ -1436,21 +1413,23 @@ private fun MultiProviderApiKeyDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "Enter your ${provider.displayName} API key to generate images. Get one free at:",
+                    text = "Enter your ${provider.displayName} API key to generate images.",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
+                // Get API Key button
                 if (provider.apiKeyUrl.isNotBlank()) {
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                    ) {
-                        Text(
-                            text = provider.apiKeyUrl,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.padding(8.dp)
+                    Button(
+                        onClick = { uriHandler.openUri(provider.apiKeyUrl) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
+                    ) {
+                        Icon(Icons.Default.Key, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Get Free API Key")
                     }
                 }
                 
@@ -1461,9 +1440,7 @@ private fun MultiProviderApiKeyDialog(
                     placeholder = { 
                         Text(when (provider) {
                             AIProviderOption.GEMINI -> "AIza..."
-                            AIProviderOption.HUGGING_FACE -> "hf_..."
-                            AIProviderOption.STABILITY_AI -> "sk-..."
-                            AIProviderOption.POLLINATIONS -> ""
+                            AIProviderOption.POLLINATIONS -> "pk_..."
                         })
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -1527,7 +1504,7 @@ private fun ProviderSelectorDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AIProviderOption.entries.forEach { provider ->
+                AIProviderOption.entries.filter { it.isVisible }.forEach { provider ->
                     val isSelected = provider == currentProvider
                     
                     Surface(
@@ -1630,7 +1607,7 @@ fun UploadCharacterArtScreen(
         isGenerating = false,
         uploadProgress = uploadProgress,
         generationError = null,
-        selectedProvider = AIProviderOption.POLLINATIONS,
+        selectedProvider = AIProviderOption.QWEN,
         onProviderSelect = {},
         availableModels = defaultModels,
         selectedModel = defaultModels.firstOrNull(),
@@ -1638,11 +1615,9 @@ fun UploadCharacterArtScreen(
         onModelSelect = {},
         onFetchModels = { _, _ -> },
         onGeminiApiKeyChanged = {},
-        onHuggingFaceApiKeyChanged = {},
-        onStabilityAiApiKeyChanged = {},
+        onPollinationsApiKeyChanged = {},
         initialGeminiApiKey = "",
-        initialHuggingFaceApiKey = "",
-        initialStabilityAiApiKey = "",
+        initialPollinationsApiKey = "",
         modifier = modifier,
         paddingValues = paddingValues
     )

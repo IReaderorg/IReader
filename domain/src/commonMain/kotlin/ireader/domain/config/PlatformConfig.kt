@@ -37,19 +37,15 @@ expect object PlatformConfig {
     fun getSupabaseAnalyticsUrl(): String
     fun getSupabaseAnalyticsKey(): String
     
-    // Cloudflare R2 Storage (Character Art)
-    fun getR2AccountId(): String
-    fun getR2AccessKeyId(): String
-    fun getR2SecretAccessKey(): String
-    fun getR2BucketName(): String
-    fun getR2PublicUrl(): String
-    
     // Cloudflare D1 + R2 (Community Translations)
     fun getCommunityCloudflareAccountId(): String
     fun getCommunityCloudflareApiToken(): String
     fun getCommunityD1DatabaseId(): String
     fun getCommunityR2BucketName(): String
     fun getCommunityR2PublicUrl(): String
+    
+    // Discord Webhooks
+    fun getDiscordCharacterArtWebhookUrl(): String
     
     // Device identification for license binding
     fun getDeviceId(): String

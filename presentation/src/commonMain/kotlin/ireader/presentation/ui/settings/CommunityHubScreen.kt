@@ -53,7 +53,6 @@ fun CommunityHubScreen(
     onBadgeManagement: () -> Unit,
     isAdmin: Boolean = false,
     onAdminBadgeVerification: () -> Unit = {},
-    onAdminCharacterArtVerification: () -> Unit = {},
     onAdminUserPanel: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -309,15 +308,6 @@ fun CommunityHubScreen(
                         description = "Review and approve badge purchase requests",
                         icon = Icons.Outlined.VerifiedUser,
                         onClick = onAdminBadgeVerification
-                    )
-                }
-                
-                item {
-                    SettingsItem(
-                        title = localizeHelper.localize(Res.string.character_art_verification),
-                        description = "Review and approve character art submissions",
-                        icon = Icons.Outlined.Image,
-                        onClick = onAdminCharacterArtVerification
                     )
                 }
                 

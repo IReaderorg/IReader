@@ -213,10 +213,6 @@ fun CommonNavHost(
             ).Content()
         }
         
-        composable(NavigationRoutes.adminCharacterArtVerification) {
-            ireader.presentation.core.ui.AdminCharacterArtVerificationScreenSpec().Content()
-        }
-        
         // Character Art Detail - with artId parameter
         composable(
             route = "${NavigationRoutes.characterArtDetail}/{artId}",

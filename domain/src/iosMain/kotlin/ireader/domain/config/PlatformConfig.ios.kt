@@ -49,6 +49,9 @@ actual object PlatformConfig {
     actual fun getCommunityR2BucketName(): String = getInfoPlistValue("COMMUNITY_R2_BUCKET_NAME", "ireader-community-translations")
     actual fun getCommunityR2PublicUrl(): String = getInfoPlistValue("COMMUNITY_R2_PUBLIC_URL")
     
+    // Discord Webhooks
+    actual fun getDiscordCharacterArtWebhookUrl(): String = getInfoPlistValue("DISCORD_CHARACTER_ART_WEBHOOK_URL")
+    
     // Device identification for license binding
     actual fun getDeviceId(): String {
         // iOS: Use identifierForVendor or generate UUID

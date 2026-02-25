@@ -39,7 +39,7 @@ data class CharacterArtScreenState(
     val hasMorePages: Boolean = true,
     val currentPage: Int = 0,
     // AI generation state - supports multiple providers
-    val selectedProvider: ImageProvider = ImageProvider.POLLINATIONS, // Default to free provider
+    val selectedProvider: ImageProvider = ImageProvider.POLLINATIONS, // Default to Pollinations (more reliable)
     val availableProviders: List<ImageProvider> = ImageProvider.entries,
     val availableModels: List<ImageModel> = emptyList(),
     val selectedModel: ImageModel? = null,
@@ -49,8 +49,7 @@ data class CharacterArtScreenState(
     val generationError: String? = null,
     // API keys for different providers
     val geminiApiKey: String = "",
-    val huggingFaceApiKey: String = "",
-    val stabilityAiApiKey: String = ""
+    val pollinationsApiKey: String = ""
 )
 
 /**
@@ -81,13 +80,11 @@ class CharacterArtViewModel(
      */
     private fun loadSavedApiKeys() {
         val savedGeminiKey = readerPreferences?.geminiApiKey()?.get() ?: ""
-        val savedHuggingFaceKey = readerPreferences?.huggingFaceApiKey()?.get() ?: ""
-        val savedStabilityAiKey = readerPreferences?.stabilityAiApiKey()?.get() ?: ""
+        val savedPollinationsKey = readerPreferences?.pollinationsApiKey()?.get() ?: ""
         _state.update { 
             it.copy(
                 geminiApiKey = savedGeminiKey,
-                huggingFaceApiKey = savedHuggingFaceKey,
-                stabilityAiApiKey = savedStabilityAiKey
+                pollinationsApiKey = savedPollinationsKey
             ) 
         }
     }
@@ -494,25 +491,13 @@ class CharacterArtViewModel(
     }
     
     /**
-     * Set the Hugging Face API key, save to preferences
+     * Set the Pollinations API key, save to preferences
      */
-    fun setHuggingFaceApiKey(apiKey: String) {
-        _state.update { it.copy(huggingFaceApiKey = apiKey) }
+    fun setPollinationsApiKey(apiKey: String) {
+        _state.update { it.copy(pollinationsApiKey = apiKey) }
         // Save to preferences for persistence
-        readerPreferences?.huggingFaceApiKey()?.set(apiKey)
-        if (apiKey.isNotBlank() && _state.value.selectedProvider == ImageProvider.HUGGING_FACE) {
-            loadModelsForCurrentProvider()
-        }
-    }
-    
-    /**
-     * Set the Stability AI API key, save to preferences
-     */
-    fun setStabilityAiApiKey(apiKey: String) {
-        _state.update { it.copy(stabilityAiApiKey = apiKey) }
-        // Save to preferences for persistence
-        readerPreferences?.stabilityAiApiKey()?.set(apiKey)
-        if (apiKey.isNotBlank() && _state.value.selectedProvider == ImageProvider.STABILITY_AI) {
+        readerPreferences?.pollinationsApiKey()?.set(apiKey)
+        if (apiKey.isNotBlank() && _state.value.selectedProvider == ImageProvider.POLLINATIONS) {
             loadModelsForCurrentProvider()
         }
     }
@@ -574,9 +559,7 @@ class CharacterArtViewModel(
             
             val apiKey = when (currentState.selectedProvider) {
                 ImageProvider.GEMINI -> currentState.geminiApiKey
-                ImageProvider.HUGGING_FACE -> currentState.huggingFaceApiKey
-                ImageProvider.STABILITY_AI -> currentState.stabilityAiApiKey
-                ImageProvider.POLLINATIONS -> ""
+                ImageProvider.POLLINATIONS -> currentState.pollinationsApiKey
             }
             
             generator.getModelsForProvider(currentState.selectedProvider, apiKey)
@@ -624,12 +607,10 @@ class CharacterArtViewModel(
         // Check if API key is required and provided
         val apiKey = when (provider) {
             ImageProvider.GEMINI -> currentState.geminiApiKey
-            ImageProvider.HUGGING_FACE -> currentState.huggingFaceApiKey
-            ImageProvider.STABILITY_AI -> currentState.stabilityAiApiKey
-            ImageProvider.POLLINATIONS -> "" // No key needed
+            ImageProvider.POLLINATIONS -> currentState.pollinationsApiKey
         }
         
-        if (provider != ImageProvider.POLLINATIONS && apiKey.isBlank()) {
+        if (provider.requiresApiKey && apiKey.isBlank()) {
             _state.update { it.copy(generationError = "Please set your ${provider.displayName} API key first") }
             return
         }

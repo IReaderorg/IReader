@@ -281,78 +281,20 @@ val repositoryInjectModule = module {
         ireader.data.quote.LocalQuoteRepositoryImpl(get())
     }
     
-    // Character Art Gallery repository
+    // Character Art Gallery repository - Discord only
     single<ireader.domain.data.repository.CharacterArtRepository> {
-        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
-        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            // No Supabase configured, use in-memory implementation
-            ireader.data.repository.CharacterArtRepositoryImpl()
+        val discordWebhookUrl = ireader.domain.config.PlatformConfig.getDiscordCharacterArtWebhookUrl()
+        
+        if (discordWebhookUrl.isNotBlank()) {
+            // Use Discord webhook integration
+            val discordService = ireader.domain.services.discord.DiscordWebhookService(
+                httpClient = get<ireader.core.http.HttpClients>().default,
+                webhookUrl = discordWebhookUrl
+            )
+            ireader.data.repository.DiscordCharacterArtRepository(discordService)
         } else {
-            try {
-                // Get library client from multi-project provider for character art
-                val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).libraryClient
-                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
-                val backendService: ireader.data.backend.BackendService = get()
-                
-                // Create Supabase metadata storage using BackendService (pure HTTP, no reflection)
-                val multiProvider = provider as ireader.data.remote.MultiSupabaseClientProvider
-                val metadataStorage = ireader.data.characterart.SupabaseCharacterArtMetadata(
-                    supabaseClient = supabaseClient,
-                    backendService = backendService,
-                    getCurrentUserId = { getCurrentUserUseCase().getOrNull()?.id },
-                    getCurrentUsername = { 
-                        getCurrentUserUseCase().getOrNull()?.username 
-                            ?: multiProvider.getCurrentUsername()
-                    }
-                )
-                
-                // Create image storage using Cloudflare R2
-                val r2AccountId = ireader.domain.config.PlatformConfig.getR2AccountId()
-                val r2AccessKeyId = ireader.domain.config.PlatformConfig.getR2AccessKeyId()
-                val r2SecretAccessKey = ireader.domain.config.PlatformConfig.getR2SecretAccessKey()
-                val r2BucketName = ireader.domain.config.PlatformConfig.getR2BucketName()
-                val r2PublicUrl = ireader.domain.config.PlatformConfig.getR2PublicUrl()
-                
-                val imageStorage: ireader.data.characterart.ImageStorageProvider = 
-                    if (r2AccountId.isNotEmpty() && r2AccessKeyId.isNotEmpty() && r2SecretAccessKey.isNotEmpty()) {
-                        // Use Cloudflare R2 if configured
-                        val r2Config = ireader.data.characterart.R2Config(
-                            accountId = r2AccountId,
-                            accessKeyId = r2AccessKeyId,
-                            secretAccessKey = r2SecretAccessKey,
-                            bucketName = r2BucketName,
-                            publicUrl = r2PublicUrl
-                        )
-                        val r2DataSource = ireader.data.characterart.CloudflareR2DataSource(
-                            httpClient = get<ireader.core.http.HttpClients>().default,
-                            config = r2Config
-                        )
-                        ireader.data.characterart.CloudflareR2ImageStorage(r2DataSource)
-                    } else {
-                        // Fallback to Supabase Storage
-                        ireader.data.characterart.SupabaseImageStorage(
-                            httpClient = get<ireader.core.http.HttpClients>().default,
-                            supabaseUrl = supabaseClient.supabaseUrl,
-                            supabaseKey = supabaseClient.supabaseKey,
-                            bucketName = "character-art"
-                        )
-                    }
-                
-                // Create the combined data source
-                val dataSource = ireader.data.characterart.CharacterArtDataSource(
-                    imageStorage = imageStorage,
-                    metadataStorage = metadataStorage
-                )
-                
-                // Create repository with remote data source
-                ireader.data.repository.CharacterArtRepositoryImpl(
-                    remoteDataSource = dataSource
-                )
-            } catch (e: Exception) {
-                // Fallback to in-memory if something goes wrong
-                println("CharacterArt: Failed to initialize Supabase, using in-memory: ${e.message}")
-                ireader.data.repository.CharacterArtRepositoryImpl()
-            }
+            // No Discord configured, use no-op implementation
+            ireader.data.repository.NoOpCharacterArtRepository
         }
     }
 }

@@ -7,19 +7,14 @@ import kotlinx.serialization.json.Json
  * Unified image generator that supports multiple providers.
  * 
  * Providers:
- * - Gemini (Google) - Requires API key, has rate limits
- * - Hugging Face - Requires API key, generous free tier
- * - Pollinations.ai - FREE, no API key needed!
- * - Stability AI - Pay-per-use, high quality Stable Diffusion models
+ * - Gemini (Google) - Requires API key, high quality
+ * - Pollinations.ai - Requires API key (free tier available)
  */
 class UnifiedImageGenerator(
-    private val httpClient: HttpClient,
-    private val json: Json = Json { ignoreUnknownKeys = true }
+    private val httpClient: HttpClient
 ) {
-    private val geminiGenerator by lazy { GeminiImageGenerator(httpClient, json) }
-    private val huggingFaceGenerator by lazy { HuggingFaceImageGenerator(httpClient, json) }
+    private val geminiGenerator by lazy { GeminiImageGenerator(httpClient) }
     private val pollinationsGenerator by lazy { PollinationsImageGenerator(httpClient) }
-    private val stabilityAiGenerator by lazy { StabilityAiImageGenerator(httpClient, json) }
     
     /**
      * Get all available providers
@@ -32,8 +27,6 @@ class UnifiedImageGenerator(
     suspend fun getModelsForProvider(provider: ImageProvider, apiKey: String = ""): Result<List<ImageModel>> {
         return when (provider) {
             ImageProvider.GEMINI -> geminiGenerator.fetchAvailableModels(apiKey)
-            ImageProvider.HUGGING_FACE -> huggingFaceGenerator.getAvailableModels(apiKey)
-            ImageProvider.STABILITY_AI -> stabilityAiGenerator.getAvailableModels(apiKey)
             ImageProvider.POLLINATIONS -> pollinationsGenerator.getAvailableModels(apiKey)
         }
     }
@@ -55,17 +48,9 @@ class UnifiedImageGenerator(
                 val model = modelId ?: "gemini-2.5-flash-image"
                 geminiGenerator.generateImage(apiKey, prompt, characterName, bookTitle, style, model)
             }
-            ImageProvider.HUGGING_FACE -> {
-                val model = modelId ?: HuggingFaceImageGenerator.AVAILABLE_MODELS.first().id
-                huggingFaceGenerator.generateWithModel(apiKey, prompt, characterName, bookTitle, style, model)
-            }
-            ImageProvider.STABILITY_AI -> {
-                val model = modelId ?: StabilityAiImageGenerator.AVAILABLE_MODELS.first().id
-                stabilityAiGenerator.generateWithModel(apiKey, prompt, characterName, bookTitle, style, model)
-            }
             ImageProvider.POLLINATIONS -> {
                 val model = modelId ?: "flux"
-                pollinationsGenerator.generateWithModel(prompt, characterName, bookTitle, style, model)
+                pollinationsGenerator.generateWithModel(apiKey, prompt, characterName, bookTitle, style, model)
             }
         }
     }
@@ -95,9 +80,11 @@ class UnifiedImageGenerator(
                           error?.message?.contains("rate limit", ignoreCase = true) == true
         
         if (isRateLimit) {
-            // Fallback to Pollinations (free, no rate limits)
-            println("Primary provider rate limited, falling back to Pollinations.ai")
-            return generateImage(ImageProvider.POLLINATIONS, "", prompt, characterName, bookTitle, style, "flux")
+            // Fallback to Pollinations if not already using it
+            if (primaryProvider != ImageProvider.POLLINATIONS) {
+                println("Primary provider rate limited, falling back to Pollinations.ai")
+                return generateImage(ImageProvider.POLLINATIONS, "", prompt, characterName, bookTitle, style, "flux")
+            }
         }
         
         return primaryResult

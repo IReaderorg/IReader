@@ -36,19 +36,15 @@ actual object PlatformConfig {
     actual fun getSupabaseAnalyticsUrl(): String = BuildConfig.SUPABASE_ANALYTICS_URL
     actual fun getSupabaseAnalyticsKey(): String = BuildConfig.SUPABASE_ANALYTICS_KEY
     
-    // Cloudflare R2 Storage (Character Art)
-    actual fun getR2AccountId(): String = BuildConfig.R2_ACCOUNT_ID
-    actual fun getR2AccessKeyId(): String = BuildConfig.R2_ACCESS_KEY_ID
-    actual fun getR2SecretAccessKey(): String = BuildConfig.R2_SECRET_ACCESS_KEY
-    actual fun getR2BucketName(): String = BuildConfig.R2_BUCKET_NAME
-    actual fun getR2PublicUrl(): String = BuildConfig.R2_PUBLIC_URL
-    
     // Cloudflare D1 + R2 (Community Translations)
     actual fun getCommunityCloudflareAccountId(): String = BuildConfig.COMMUNITY_CLOUDFLARE_ACCOUNT_ID
     actual fun getCommunityCloudflareApiToken(): String = BuildConfig.COMMUNITY_CLOUDFLARE_API_TOKEN
     actual fun getCommunityD1DatabaseId(): String = BuildConfig.COMMUNITY_D1_DATABASE_ID
     actual fun getCommunityR2BucketName(): String = BuildConfig.COMMUNITY_R2_BUCKET_NAME
     actual fun getCommunityR2PublicUrl(): String = BuildConfig.COMMUNITY_R2_PUBLIC_URL
+    
+    // Discord Webhooks
+    actual fun getDiscordCharacterArtWebhookUrl(): String = BuildConfig.DISCORD_CHARACTER_ART_WEBHOOK_URL
     
     // Device identification for license binding
     // Note: This requires context, so we use a fallback approach

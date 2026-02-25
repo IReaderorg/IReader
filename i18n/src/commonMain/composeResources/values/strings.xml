@@ -2411,9 +2411,17 @@
     <string name="character">Character</string>
     <string name="character_art">Character Art</string>
     <string name="character_art_gallery">Character Art Gallery</string>
+    <string name="character_art_on_discord">Character Art on Discord</string>
     <string name="character_art_verification">Character Art Verification</string>
     <string name="character_gallery">Character Gallery</string>
     <string name="character_info">Character Info</string>
+    <string name="community_powered">Community Powered</string>
+    <string name="discord_art_description">All character art is posted directly to our Discord community channel. Generate art here and it will be shared with everyone!</string>
+    <string name="view_in_discord">View in Discord</string>
+    <string name="recently_posted">Recently Posted</string>
+    <string name="no_art_yet">No art yet</string>
+    <string name="generate_first_art">Generate your first character art to get started</string>
+    <string name="generate_art">Generate Art</string>
     <string name="character_name">Character Name *</string>
     <string name="check_community_first">Check Community First</string>
     <string name="check_for_app_updates">Check for App Updates</string>

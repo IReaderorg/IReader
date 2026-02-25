@@ -118,3 +118,10 @@ supabase.analytics.key=your-anon-key-here
 
 # R2 Public URL (optional, for CDN access)
 # community.r2.publicUrl=https://your-bucket.r2.dev
+
+# ============================================
+# Discord Webhooks Configuration
+# ============================================
+# Character Art Webhook - Posts generated art directly to Discord
+# Setup: Discord Server → Channel Settings → Integrations → Webhooks → Create Webhook
+# DISCORD_CHARACTER_ART_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN
