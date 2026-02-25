@@ -149,13 +149,14 @@ class CloudflareR2DataSource(
     suspend fun approveImage(pendingKey: String, approvedKey: String): Result<String> {
         return try {
             // R2 doesn't have native move - copy then delete
+            val copySource = "/${config.bucketName}/$pendingKey"
             val copyResponse = httpClient.put("$endpoint/${config.bucketName}/$approvedKey") {
                 headers {
                     appendAwsHeaders(
                         method = "PUT",
-                        path = "/${config.bucketName}/$approvedKey"
+                        path = "/${config.bucketName}/$approvedKey",
+                        copySource = copySource
                     )
-                    append("x-amz-copy-source", "/${config.bucketName}/$pendingKey")
                 }
             }
             
@@ -198,7 +199,8 @@ class CloudflareR2DataSource(
         method: String,
         path: String,
         contentType: String = "",
-        payloadHash: String = EMPTY_PAYLOAD_HASH
+        payloadHash: String = EMPTY_PAYLOAD_HASH,
+        copySource: String = ""
     ) {
         val now = Clock.System.now()
         val instant = now.toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
@@ -211,25 +213,52 @@ class CloudflareR2DataSource(
         append("x-amz-content-sha256", payloadHash)
         append("Host", "${config.accountId}.r2.cloudflarestorage.com")
         
+        // Add copy source header if provided
+        if (copySource.isNotEmpty()) {
+            append("x-amz-copy-source", copySource)
+        }
+        
         // Build canonical headers (must be sorted alphabetically by header name)
         val canonicalHeaders: String
         val signedHeaders: String
         
-        if (contentType.isNotEmpty()) {
-            canonicalHeaders = buildString {
-                append("content-type:$contentType\n")
-                append("host:${config.accountId}.r2.cloudflarestorage.com\n")
-                append("x-amz-content-sha256:$payloadHash\n")
-                append("x-amz-date:$amzDate\n")
+        when {
+            copySource.isNotEmpty() && contentType.isNotEmpty() -> {
+                canonicalHeaders = buildString {
+                    append("content-type:$contentType\n")
+                    append("host:${config.accountId}.r2.cloudflarestorage.com\n")
+                    append("x-amz-content-sha256:$payloadHash\n")
+                    append("x-amz-copy-source:$copySource\n")
+                    append("x-amz-date:$amzDate\n")
+                }
+                signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-copy-source;x-amz-date"
             }
-            signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date"
-        } else {
-            canonicalHeaders = buildString {
-                append("host:${config.accountId}.r2.cloudflarestorage.com\n")
-                append("x-amz-content-sha256:$payloadHash\n")
-                append("x-amz-date:$amzDate\n")
+            copySource.isNotEmpty() -> {
+                canonicalHeaders = buildString {
+                    append("host:${config.accountId}.r2.cloudflarestorage.com\n")
+                    append("x-amz-content-sha256:$payloadHash\n")
+                    append("x-amz-copy-source:$copySource\n")
+                    append("x-amz-date:$amzDate\n")
+                }
+                signedHeaders = "host;x-amz-content-sha256;x-amz-copy-source;x-amz-date"
             }
-            signedHeaders = "host;x-amz-content-sha256;x-amz-date"
+            contentType.isNotEmpty() -> {
+                canonicalHeaders = buildString {
+                    append("content-type:$contentType\n")
+                    append("host:${config.accountId}.r2.cloudflarestorage.com\n")
+                    append("x-amz-content-sha256:$payloadHash\n")
+                    append("x-amz-date:$amzDate\n")
+                }
+                signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date"
+            }
+            else -> {
+                canonicalHeaders = buildString {
+                    append("host:${config.accountId}.r2.cloudflarestorage.com\n")
+                    append("x-amz-content-sha256:$payloadHash\n")
+                    append("x-amz-date:$amzDate\n")
+                }
+                signedHeaders = "host;x-amz-content-sha256;x-amz-date"
+            }
         }
         
         // Canonical request format (per AWS Sig V4 spec):

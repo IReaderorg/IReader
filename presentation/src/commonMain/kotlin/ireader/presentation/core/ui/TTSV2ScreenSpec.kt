@@ -117,11 +117,11 @@ import ireader.presentation.ui.home.tts.CommonTTSScreenState
 import ireader.presentation.ui.home.tts.SentenceHighlighter
 import ireader.presentation.ui.home.tts.TTSContentDisplay
 import ireader.presentation.ui.home.tts.TTSEngineSettingsScreen
-import ireader.presentation.ui.home.tts.TTSMediaControls
-import ireader.presentation.ui.home.tts.TTSSettingsPanelCommon
 import ireader.presentation.ui.home.tts.TTSVoiceSelectionScreen
 import ireader.presentation.ui.home.tts.v2.SleepTimerDialog
 import ireader.presentation.ui.home.tts.v2.TTSV2ViewModelFactory
+import ireader.presentation.ui.tts.components.SpotifyLikeTTSPlayer
+import ireader.presentation.ui.tts.components.TTSSettingsDrawer
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
@@ -214,9 +214,11 @@ class TTSV2ScreenSpec(
         var chapters by remember { mutableStateOf<List<Chapter>>(emptyList()) }
         var chaptersAscending by remember { mutableStateOf(true) }
         
+        // Settings drawer state
+        val settingsDrawerState = rememberDrawerState(DrawerValue.Closed)
+        
         // Local UI state
         var fullScreenMode by remember { mutableStateOf(false) }
-        var showSettings by remember { mutableStateOf(false) }
         var showEngineSettings by remember { mutableStateOf(false) }
         var showVoiceSelection by remember { mutableStateOf(false) }
         var showSleepTimerDialog by remember { mutableStateOf(false) }
@@ -950,7 +952,7 @@ class TTSV2ScreenSpec(
             override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
             override fun onSpeedChange(speed: Float) { viewModel.adapter.setSpeed(speed) }
             override fun onAutoNextChange(enabled: Boolean) { viewModel.adapter.setAutoNextChapter(enabled) }
-            override fun onOpenSettings() { showSettings = true }
+            override fun onOpenSettings() { scope.launch { settingsDrawerState.open() } }
             override fun onSelectVoice() { showVoiceSelection = true }
             override fun onSelectEngine(engine: String) { showEngineSettings = true }
         }
@@ -977,6 +979,134 @@ class TTSV2ScreenSpec(
             }
         }
         
+        // Main UI with Settings Drawer (right-side) and Chapter Drawer (left-side)
+        TTSSettingsDrawer(
+            drawerState = settingsDrawerState,
+            useCustomColors = useCustomColors,
+            customBackgroundColor = customBackgroundColor,
+            customTextColor = customTextColor,
+            fontSize = fontSize,
+            textAlignment = textAlignment,
+            sleepModeEnabled = sleepModeEnabled,
+            sleepTimeMinutes = sleepTimeMinutes,
+            speechSpeed = state.speed,
+            speechPitch = state.pitch,
+            autoNextChapter = state.autoNextChapter,
+            pageMode = pageMode,
+            useGradioTTS = useGradioTTS,
+            currentEngineName = when (state.engineType) {
+                EngineType.NATIVE -> "Native TTS"
+                EngineType.GRADIO -> "Gradio TTS"
+            },
+            readTranslatedText = readTranslatedText,
+            hasTranslation = state.hasTranslation,
+            sentenceHighlightEnabled = sentenceHighlightEnabled,
+            contentFilterEnabled = contentFilterEnabled,
+            contentFilterPatterns = contentFilterPatterns,
+            onUseCustomColorsChange = { 
+                useCustomColors = it
+                scope.launch { readerPreferences.ttsUseCustomColors().set(it) }
+            },
+            onBackgroundColorChange = { color ->
+                customBackgroundColor = color
+                scope.launch { readerPreferences.ttsBackgroundColor().set(color.toArgb().toLong()) }
+            },
+            onTextColorChange = { color ->
+                customTextColor = color
+                scope.launch { readerPreferences.ttsTextColor().set(color.toArgb().toLong()) }
+            },
+            onFontSizeChange = { 
+                fontSize = it
+                scope.launch { readerPreferences.ttsFontSize().set(it) }
+            },
+            onTextAlignmentChange = { alignment ->
+                textAlignment = alignment
+                val prefAlignment = when (alignment) {
+                    TextAlign.Start -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
+                    TextAlign.Center -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Center
+                    TextAlign.End -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Right
+                    TextAlign.Justify -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Justify
+                    else -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
+                }
+                scope.launch { readerPreferences.ttsTextAlignment().set(prefAlignment) }
+            },
+            onSleepModeChange = { enabled ->
+                sleepModeEnabled = enabled
+                scope.launch { readerPreferences.sleepMode().set(enabled) }
+                if (enabled) {
+                    viewModel.startSleepTimer(sleepTimeMinutes)
+                } else {
+                    viewModel.cancelSleepTimer()
+                }
+            },
+            onSleepTimeChange = { minutes ->
+                sleepTimeMinutes = minutes
+                scope.launch { readerPreferences.sleepTime().set(minutes.toLong()) }
+                if (sleepModeEnabled) {
+                    viewModel.startSleepTimer(minutes)
+                }
+            },
+            onSpeedChange = { viewModel.adapter.setSpeed(it) },
+            onPitchChange = { viewModel.adapter.setPitch(it) },
+            onAutoNextChange = { enabled -> viewModel.adapter.setAutoNextChapter(enabled) },
+            onCoquiTTSChange = { enabled ->
+                if (enabled && !isGradioConfigured) {
+                    showEngineSettings = true
+                    scope.launch { settingsDrawerState.close() }
+                } else if (isGradioConfigured) {
+                    scope.launch { appPreferences.useGradioTTS().set(enabled) }
+                    if (enabled) {
+                        val gradioTTSConfig = gradioTTSManager.getConfigByIdOrPreset(activeGradioConfigId)
+                        if (gradioTTSConfig != null) {
+                            val v2Config = GradioConfig(
+                                id = gradioTTSConfig.id,
+                                name = gradioTTSConfig.name,
+                                spaceUrl = gradioTTSConfig.spaceUrl,
+                                apiName = gradioTTSConfig.apiName,
+                                enabled = gradioTTSConfig.enabled,
+                                originalConfig = gradioTTSConfig
+                            )
+                            viewModel.adapter.useGradioTTS(v2Config)
+                            val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                            if (mergeWordCount > 0) {
+                                viewModel.adapter.enableChunkMode(mergeWordCount)
+                            }
+                        }
+                    } else {
+                        viewModel.adapter.useNativeTTS()
+                    }
+                }
+            },
+            onReadTranslatedTextChange = { enabled ->
+                viewModel.adapter.setShowTranslation(enabled)
+                scope.launch { readerPreferences.useTTSWithTranslatedText().set(enabled) }
+            },
+            onSentenceHighlightChange = { enabled ->
+                sentenceHighlightEnabled = enabled
+                viewModel.adapter.setSentenceHighlight(enabled)
+                scope.launch { readerPreferences.ttsSentenceHighlight().set(enabled) }
+            },
+            onPageModeChange = { enabled -> pageMode = enabled },
+            onContentFilterEnabledChange = { enabled ->
+                contentFilterEnabled = enabled
+                scope.launch { readerPreferences.contentFilterEnabled().set(enabled) }
+            },
+            onContentFilterPatternsChange = { patterns ->
+                contentFilterPatterns = patterns
+                scope.launch { readerPreferences.contentFilterPatterns().set(patterns) }
+            },
+            onOpenEngineSettings = {
+                showEngineSettings = true
+                scope.launch { settingsDrawerState.close() }
+            },
+            onSelectVoice = {
+                showVoiceSelection = true
+                scope.launch { settingsDrawerState.close() }
+            },
+            onClose = {
+                scope.launch { settingsDrawerState.close() }
+            }
+        ) {
         // Main UI with Chapter Drawer
         IModalDrawer(
             state = drawerState,
@@ -1059,18 +1189,12 @@ class TTSV2ScreenSpec(
                 if (!fullScreenMode) {
                     TopAppBar(
                         title = {
-                            Column {
+                            if (state.chapter != null) {
                                 Text(
-                                    text = localizeHelper.localize(Res.string.text_to_speech),
-                                    style = MaterialTheme.typography.titleMedium
+                                    text = state.chapter?.name ?: "",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 1
                                 )
-                                if (state.chapter != null) {
-                                    Text(
-                                        text = state.chapter?.name ?: "",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
                         },
                         navigationIcon = {
@@ -1259,11 +1383,6 @@ class TTSV2ScreenSpec(
                                     )
                                 }
                             }
-                            
-                            // Settings button
-                            IconButton(onClick = { showSettings = true }) {
-                                Icon(Icons.Default.Settings, "Settings")
-                            }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = MaterialTheme.colorScheme.surface
@@ -1311,19 +1430,49 @@ class TTSV2ScreenSpec(
                         }
                     }
                     
-                    // Media controls at bottom (hidden in fullscreen)
+                    // Compact Spotify-like player at bottom (hidden in fullscreen)
                     if (!fullScreenMode) {
-                        TTSMediaControls(
-                            state = screenState,
-                            actions = actions,
-                            isTabletOrDesktop = isTabletOrDesktop,
+                        SpotifyLikeTTSPlayer(
+                            isPlaying = isPlaying,
+                            onPreviousChapter = {
+                                viewModel.adapter.previousChapter()
+                            },
+                            onPrevious = {
+                                if (state.chunkModeEnabled) {
+                                    viewModel.adapter.previousChunk()
+                                } else {
+                                    viewModel.adapter.previousParagraph()
+                                }
+                            },
+                            onPlayPause = {
+                                if (isPlaying) {
+                                    viewModel.adapter.pause()
+                                } else {
+                                    val chId = state.chapter?.id ?: chapterId
+                                    serviceStarter.startService(bookId, chId, state.currentParagraphIndex)
+                                    viewModel.adapter.play()
+                                }
+                            },
+                            onNext = {
+                                if (state.chunkModeEnabled) {
+                                    viewModel.adapter.nextChunk()
+                                } else {
+                                    viewModel.adapter.nextParagraph()
+                                }
+                            },
+                            onNextChapter = {
+                                viewModel.adapter.nextChapter()
+                            },
+                            onSettings = {
+                                scope.launch { settingsDrawerState.open() }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
                 
-                // Settings Panel (overlay)
-                if (showSettings) {
+                // Engine Settings Screen (overlay)
+                if (showEngineSettings) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -1331,167 +1480,40 @@ class TTSV2ScreenSpec(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) { showSettings = false }
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
+                            ) { showEngineSettings = false }
                     ) {
-                        TTSSettingsPanelCommon(
-                            useCustomColors = useCustomColors,
-                            customBackgroundColor = customBackgroundColor,
-                            customTextColor = customTextColor,
-                            fontSize = fontSize,
-                            textAlignment = textAlignment,
-                            sleepModeEnabled = sleepModeEnabled,
-                            sleepTimeMinutes = sleepTimeMinutes,
-                            speechSpeed = state.speed,
-                            speechPitch = state.pitch,
-                            autoNextChapter = state.autoNextChapter,
-                            useGradioTTS = useGradioTTS,
-                            currentEngineName = when (state.engineType) {
-                                EngineType.NATIVE -> "Native TTS"
-                                EngineType.GRADIO -> "Gradio TTS"
-                            },
-                            readTranslatedText = readTranslatedText,
-                            hasTranslation = state.hasTranslation,
-                            onUseCustomColorsChange = { 
-                                useCustomColors = it
-                                scope.launch { readerPreferences.ttsUseCustomColors().set(it) }
-                            },
-                            onBackgroundColorChange = { color ->
-                                customBackgroundColor = color
-                                scope.launch { readerPreferences.ttsBackgroundColor().set(color.toArgb().toLong()) }
-                            },
-                            onTextColorChange = { color ->
-                                customTextColor = color
-                                scope.launch { readerPreferences.ttsTextColor().set(color.toArgb().toLong()) }
-                            },
-                            onFontSizeChange = { 
-                                fontSize = it
-                                scope.launch { readerPreferences.ttsFontSize().set(it) }
-                            },
-                            onTextAlignmentChange = { alignment ->
-                                textAlignment = alignment
-                                val prefAlignment = when (alignment) {
-                                    TextAlign.Start -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
-                                    TextAlign.Center -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Center
-                                    TextAlign.End -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Right
-                                    TextAlign.Justify -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Justify
-                                    else -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
-                                }
-                                scope.launch { readerPreferences.ttsTextAlignment().set(prefAlignment) }
-                            },
-                            onSleepModeChange = { enabled ->
-                                sleepModeEnabled = enabled
-                                scope.launch { readerPreferences.sleepMode().set(enabled) }
-                                if (enabled) {
-                                    viewModel.startSleepTimer(sleepTimeMinutes)
-                                } else {
-                                    viewModel.cancelSleepTimer()
-                                }
-                            },
-                            onSleepTimeChange = { minutes ->
-                                sleepTimeMinutes = minutes
-                                scope.launch { readerPreferences.sleepTime().set(minutes.toLong()) }
-                                if (sleepModeEnabled) {
-                                    viewModel.startSleepTimer(minutes)
-                                }
-                            },
-                            onSpeedChange = { viewModel.adapter.setSpeed(it) },
-                            onPitchChange = { viewModel.adapter.setPitch(it) },
-                            onAutoNextChange = { enabled -> viewModel.adapter.setAutoNextChapter(enabled) },
-                            onCoquiTTSChange = { enabled ->
-                                if (enabled && !isGradioConfigured) {
-                                    // No Gradio config set up - open engine settings
-                                    showEngineSettings = true
-                                    showSettings = false
-                                } else if (isGradioConfigured) {
-                                    // Save to preferences - the flow will update useGradioTTS automatically
-                                    scope.launch { appPreferences.useGradioTTS().set(enabled) }
-                                    if (enabled) {
-                                        // Set Gradio config before switching engine
-                                        val gradioTTSConfig = gradioTTSManager.getConfigByIdOrPreset(activeGradioConfigId)
-                                        if (gradioTTSConfig != null) {
-                                            val v2Config = GradioConfig(
-                                                id = gradioTTSConfig.id,
-                                                name = gradioTTSConfig.name,
-                                                spaceUrl = gradioTTSConfig.spaceUrl,
-                                                apiName = gradioTTSConfig.apiName,
-                                                enabled = gradioTTSConfig.enabled,
-                                                originalConfig = gradioTTSConfig
-                                            )
-                                            viewModel.adapter.useGradioTTS(v2Config)
-                                            
-                                            // Enable chunk mode for Gradio TTS
-                                            val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
-                                            if (mergeWordCount > 0) {
-                                                viewModel.adapter.enableChunkMode(mergeWordCount)
-                                            }
-                                        }
-                                    } else {
-                                        viewModel.adapter.useNativeTTS()
-                                    }
-                                }
-                            },
-                            onReadTranslatedTextChange = { enabled ->
-                                // Save to preferences - the flow will update readTranslatedText automatically
-                                viewModel.adapter.setShowTranslation(enabled)
-                                scope.launch { readerPreferences.useTTSWithTranslatedText().set(enabled) }
-                            },
-                            sentenceHighlightEnabled = sentenceHighlightEnabled,
-                            onSentenceHighlightChange = { enabled ->
-                                sentenceHighlightEnabled = enabled
-                                viewModel.adapter.setSentenceHighlight(enabled)
-                                scope.launch { readerPreferences.ttsSentenceHighlight().set(enabled) }
-                            },
-                            pageMode = pageMode,
-                            onPageModeChange = { enabled -> pageMode = enabled },
-                            // Content filter settings
-                            contentFilterEnabled = contentFilterEnabled,
-                            contentFilterPatterns = contentFilterPatterns,
-                            onContentFilterEnabledChange = { enabled ->
-                                contentFilterEnabled = enabled
-                                scope.launch { readerPreferences.contentFilterEnabled().set(enabled) }
-                            },
-                            onContentFilterPatternsChange = { patterns ->
-                                contentFilterPatterns = patterns
-                                scope.launch { readerPreferences.contentFilterPatterns().set(patterns) }
-                            },
-                            onOpenEngineSettings = {
-                                showEngineSettings = true
-                                showSettings = false
-                            },
-                            onDismiss = { showSettings = false },
-                            isTabletOrDesktop = isTabletOrDesktop,
-                            modifier = Modifier.clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { /* Prevent click through */ }
+                        TTSEngineSettingsScreen(
+                            isDesktop = isTabletOrDesktop,
+                            onDismiss = { showEngineSettings = false },
+                            onNavigateToTTSManager = {
+                                showEngineSettings = false
+                                navController.navigate(NavigationRoutes.ttsEngineManager)
+                            }
                         )
                     }
                 }
                 
-                // Engine Settings Screen
-                if (showEngineSettings) {
-                    TTSEngineSettingsScreen(
-                        isDesktop = isTabletOrDesktop,
-                        onDismiss = { showEngineSettings = false },
-                        onNavigateToTTSManager = {
-                            showEngineSettings = false
-                            navController.navigate(NavigationRoutes.ttsEngineManager)
-                        }
-                    )
-                }
-                
-                // Voice Selection Screen
+                // Voice Selection Screen (overlay)
                 if (showVoiceSelection) {
-                    TTSVoiceSelectionScreen(
-                        isDesktop = isTabletOrDesktop,
-                        onDismiss = { showVoiceSelection = false }
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { showVoiceSelection = false }
+                    ) {
+                        TTSVoiceSelectionScreen(
+                            isDesktop = isTabletOrDesktop,
+                            onDismiss = { showVoiceSelection = false }
+                        )
+                    }
                 }
             }
         }
         } // Close IModalDrawer
+        } // Close TTSSettingsDrawer
         
         // Sleep timer dialog
         if (showSleepTimerDialog) {

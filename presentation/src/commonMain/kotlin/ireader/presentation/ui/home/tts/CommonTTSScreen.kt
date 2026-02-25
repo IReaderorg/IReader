@@ -542,128 +542,6 @@ fun TTSContentDisplay(
     val paragraphIndentDp = remember(paragraphIndent) { paragraphIndent.dp }
     val paragraphDistanceDp = remember(paragraphDistance) { paragraphDistance.dp }
     
-    // Only compute sentence highlighting when enabled - skip all processing when disabled
-    val highlightEnabled = state.sentenceHighlightEnabled
-    
-    // Sentence highlighting state - only active for current paragraph when playing AND enabled
-    val currentParagraphText by remember(displayContent, state.currentReadingParagraph, highlightEnabled) {
-        derivedStateOf { 
-            if (highlightEnabled) displayContent.getOrNull(state.currentReadingParagraph) ?: "" 
-            else "" 
-        }
-    }
-    
-    // Memoize sentences for current paragraph - empty when disabled
-    val currentSentences = remember(currentParagraphText, highlightEnabled) {
-        if (highlightEnabled && currentParagraphText.isNotEmpty()) {
-            SentenceHighlighter.splitIntoSentences(currentParagraphText)
-        } else emptyList()
-    }
-    
-    // Calculate total words only when highlighting is enabled
-    val totalWords = remember(currentSentences) {
-        if (currentSentences.isEmpty()) 1
-        else currentSentences.sumOf { SentenceHighlighter.countTotalWords(it) }.coerceAtLeast(1)
-    }
-    
-    // Time-based sentence index
-    var currentSentenceIndex by remember { mutableStateOf(0) }
-    
-    // Use paragraphStartTime from state for synchronization with TTS service
-    // This ensures the highlighter stays in sync with actual TTS playback
-    val paragraphStartTime = state.paragraphStartTime
-    
-    // Store refs for coroutine - only update when highlighting is enabled
-    val isPlayingRef = rememberUpdatedState(state.isPlaying && highlightEnabled)
-    val sentencesRef = rememberUpdatedState(currentSentences)
-    val totalWordsRef = rememberUpdatedState(totalWords)
-    val calibratedWPMRef = rememberUpdatedState(state.calibratedWPM)
-    val speechSpeedRef = rememberUpdatedState(state.speechSpeed)
-    val paragraphStartTimeRef = rememberUpdatedState(paragraphStartTime)
-    
-    // BRILLIANT SYNC STRATEGY: Paragraph-boundary correction
-    // When it changes, we know TTS has started speaking - capture local time at that moment
-    var localStartTime by remember { mutableStateOf(0L) }
-    var lastSignal by remember { mutableStateOf(0L) }
-    // Track the last paragraph we were on to detect paragraph completion
-    var lastParagraphIndex by remember { mutableStateOf(-1) }
-    // Dynamic speed multiplier - increases when we detect we're falling behind
-    var dynamicSpeedBoost by remember { mutableStateOf(1.0f) }
-    
-    // This is the KEY: Reset local timer when paragraphStartTime changes (TTS.onStart fired)
-    // paragraphStartTime is updated in TTSService.onStart() - the exact moment TTS begins speaking
-    LaunchedEffect(paragraphStartTime) {
-        if (paragraphStartTime > 0 && paragraphStartTime != lastSignal) {
-            currentSentenceIndex = 0
-            localStartTime = currentTimeToLong()  // Capture LOCAL time NOW
-            lastSignal = paragraphStartTime
-            dynamicSpeedBoost = 1.0f  // Reset speed boost for new paragraph
-        }
-    }
-    
-    // BRILLIANT: Detect when paragraph changes and use it to correct our timing
-    // If we weren't at the last sentence when paragraph changed, we were too slow
-    LaunchedEffect(state.currentReadingParagraph) {
-        if (highlightEnabled && lastParagraphIndex >= 0 && lastParagraphIndex != state.currentReadingParagraph) {
-            val sentences = sentencesRef.value
-            // If we weren't at the last sentence, increase speed boost for next paragraph
-            if (sentences.isNotEmpty() && currentSentenceIndex < sentences.lastIndex) {
-                // We were behind! Increase speed boost (up to 1.3x)
-                dynamicSpeedBoost = (dynamicSpeedBoost * 1.1f).coerceAtMost(1.3f)
-            } else if (currentSentenceIndex >= sentences.lastIndex) {
-                // We were on track or ahead, slightly reduce boost
-                dynamicSpeedBoost = (dynamicSpeedBoost * 0.95f).coerceAtLeast(1.0f)
-            }
-            currentSentenceIndex = 0
-        }
-        lastParagraphIndex = state.currentReadingParagraph
-    }
-    
-    // Main highlighting loop with ADAPTIVE SPEED
-    // Key innovations:
-    // 1. LEAD_FACTOR keeps us slightly ahead
-    // 2. dynamicSpeedBoost corrects based on actual paragraph completion timing
-    // 3. Accelerated catch-up when approaching paragraph end
-    LaunchedEffect(highlightEnabled) {
-        if (!highlightEnabled) return@LaunchedEffect
-        
-        while (true) {
-            if (isPlayingRef.value && localStartTime > 0) {
-                val sentences = sentencesRef.value
-                if (sentences.isNotEmpty()) {
-                    val words = totalWordsRef.value
-                    // Use calibrated WPM if available, otherwise use default (200 WPM)
-                    // Apply LEAD_FACTOR + dynamicSpeedBoost for adaptive timing
-                    val baseWpm = calibratedWPMRef.value ?: 200f
-                    val effectiveLeadFactor = SentenceHighlighter.LEAD_FACTOR * dynamicSpeedBoost
-                    val wpm = (baseWpm * speechSpeedRef.value * effectiveLeadFactor).coerceAtLeast(100f)
-                    
-                    // Calculate expected duration with reduced minimum for short paragraphs
-                    val minDuration = if (words < 10) 400L else 600L
-                    val durationMs = ((words.toFloat() / wpm) * 60000).toLong().coerceIn(minDuration, 120000)
-                    
-                    val elapsed = currentTimeToLong() - localStartTime
-                    var progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 0.999f)
-                    
-                    // CATCH-UP ACCELERATION: If we're past 70% of estimated time but not past 70% of sentences,
-                    // accelerate to catch up (this handles cases where TTS is faster than expected)
-                    val sentenceProgress = currentSentenceIndex.toFloat() / sentences.size.coerceAtLeast(1)
-                    if (progress > 0.7f && sentenceProgress < 0.6f) {
-                        // We're behind! Boost progress to catch up
-                        progress = (progress * 1.15f).coerceAtMost(0.999f)
-                    }
-                    
-                    val newIndex = (progress * sentences.size).toInt().coerceIn(0, sentences.lastIndex)
-                    
-                    if (newIndex != currentSentenceIndex) {
-                        currentSentenceIndex = newIndex
-                    }
-                }
-            }
-            delay(60)  // Faster polling (60ms) for smoother, more responsive highlighting
-        }
-    }
-    
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -721,10 +599,8 @@ fun TTSContentDisplay(
                                 translatedText = state.translatedContent?.getOrNull(paragraphIndex),
                                 isCurrentParagraph = shouldHighlight,
                                 isPlaying = state.isPlaying,
-                                currentSentenceIndex = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
-                                    currentSentenceIndex.coerceAtLeast(0) else 0,
-                                sentences = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
-                                    currentSentences else emptyList(),
+                                currentSentenceIndex = 0,
+                                sentences = emptyList(),
                                 isBilingualMode = state.bilingualMode,
                                 hasTranslation = hasTranslation,
                                 showCacheIndicator = false,
@@ -763,10 +639,8 @@ fun TTSContentDisplay(
                             translatedText = state.translatedContent?.getOrNull(index),
                             isCurrentParagraph = shouldHighlight,
                             isPlaying = state.isPlaying,
-                            currentSentenceIndex = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
-                                currentSentenceIndex.coerceAtLeast(0) else 0,
-                            sentences = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
-                                currentSentences else emptyList(),
+                            currentSentenceIndex = 0,
+                            sentences = emptyList(),
                             isBilingualMode = state.bilingualMode,
                             hasTranslation = hasTranslation,
                             showCacheIndicator = false,
@@ -866,10 +740,8 @@ fun TTSContentDisplay(
                         translatedText = state.translatedContent?.getOrNull(index),
                         isCurrentParagraph = shouldHighlight,
                         isPlaying = state.isPlaying,
-                        currentSentenceIndex = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
-                            currentSentenceIndex.coerceAtLeast(0) else 0,
-                        sentences = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
-                            currentSentences else emptyList(),
+                        currentSentenceIndex = 0,
+                        sentences = emptyList(),
                         isBilingualMode = state.bilingualMode,
                         hasTranslation = hasTranslation,
                         showCacheIndicator = showStatusIcon,
