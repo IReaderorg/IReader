@@ -35,13 +35,6 @@ actual object PlatformConfig {
     actual fun getSupabaseAnalyticsUrl(): String = getInfoPlistValue("SUPABASE_ANALYTICS_URL")
     actual fun getSupabaseAnalyticsKey(): String = getInfoPlistValue("SUPABASE_ANALYTICS_KEY")
     
-    // Cloudflare R2 Storage (Character Art)
-    actual fun getR2AccountId(): String = getInfoPlistValue("R2_ACCOUNT_ID")
-    actual fun getR2AccessKeyId(): String = getInfoPlistValue("R2_ACCESS_KEY_ID")
-    actual fun getR2SecretAccessKey(): String = getInfoPlistValue("R2_SECRET_ACCESS_KEY")
-    actual fun getR2BucketName(): String = getInfoPlistValue("R2_BUCKET_NAME", "ireader-character-art")
-    actual fun getR2PublicUrl(): String = getInfoPlistValue("R2_PUBLIC_URL")
-    
     // Cloudflare D1 + R2 (Community Translations)
     actual fun getCommunityCloudflareAccountId(): String = getInfoPlistValue("COMMUNITY_CLOUDFLARE_ACCOUNT_ID")
     actual fun getCommunityCloudflareApiToken(): String = getInfoPlistValue("COMMUNITY_CLOUDFLARE_API_TOKEN")
