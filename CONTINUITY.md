@@ -103,18 +103,23 @@
   * Added detailed logging for debugging (attempt number, response length, event data keys, image URL)
   * Support multiple response formats (nested array or direct object)
   * Better error handling and reporting
+- ✅ Updated Community Hub navigation:
+  * Changed "Character Art Gallery" to "Upload Character Art" (navigates to upload screen)
+  * Added "Character Art Discord" button to open Discord channel
+  * Qwen Fast is already first in AIProviderOption enum (confirmed)
+- ✅ Set Qwen Fast as default provider:
+  * Changed CharacterArtViewModel default from POLLINATIONS to QWEN_FAST
+  * UploadCharacterArtScreen already defaults to QWEN_FAST
+  * Both ImageProvider and AIProviderOption enums have QWEN_FAST first
 
 ### Now
-- Waiting for user to test Qwen Fast with enhanced logging to diagnose timeout issue
+- All changes complete
 
 ### Next
-- User should test Qwen Fast image generation with new 60-second timeout
-- User should test brush icon with different translation engines (Gemini, OpenAI, DeepSeek, OpenRouter, NVIDIA)
-- User should verify chapter art prompt generation works with their configured engine
-- User needs to configure Discord channel URL in CharacterArtGalleryScreen.kt (line 48)
+- User should test Qwen Fast image generation with enhanced logging
+- User needs to replace Discord URL in CommunityHubScreen.kt (line with "https://discord.gg/your-channel-here")
+- User should test brush icon with different translation engines
 - User needs to add DISCORD_CHARACTER_ART_WEBHOOK_URL secret to GitHub repository settings
-- User should test Pollinations API key flow
-- User should test image generation and Discord upload
 
 ## Open Questions
 - None
