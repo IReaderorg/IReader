@@ -27,7 +27,7 @@ actual class CommonEncryptionService actual constructor() : EncryptionService {
     actual override fun generateKey(): ByteArray {
         val key = ByteArray(KEY_SIZE_BYTES)
         key.usePinned { pinned ->
-            val status = SecRandomCopyBytes(kSecRandomDefault, KEY_SIZE_BYTES.convert(), pinned.addressOf(0))
+            val status = SecRandomCopyBytes(kSecRandomDefault, KEY_SIZE_BYTES.toULong(), pinned.addressOf(0))
             if (status != errSecSuccess) {
                 throw IllegalStateException("Failed to generate secure random key: $status")
             }
@@ -85,7 +85,7 @@ actual class CommonEncryptionService actual constructor() : EncryptionService {
         // Generate random IV
         val iv = ByteArray(IV_SIZE_BYTES)
         iv.usePinned { pinned ->
-            val status = SecRandomCopyBytes(kSecRandomDefault, IV_SIZE_BYTES.convert(), pinned.addressOf(0))
+            val status = SecRandomCopyBytes(kSecRandomDefault, IV_SIZE_BYTES.toULong(), pinned.addressOf(0))
             if (status != errSecSuccess) {
                 throw IllegalStateException("Failed to generate IV: $status")
             }
@@ -151,14 +151,14 @@ actual class CommonEncryptionService actual constructor() : EncryptionService {
     // Helper extension functions
     private fun ByteArray.toNSData(): NSData {
         return this.usePinned { pinned ->
-            NSData.create(bytes = pinned.addressOf(0), length = this.size.convert())
+            NSData.create(bytes = pinned.addressOf(0), length = this.size.toULong())
         }
     }
     
     private fun NSData.toByteArray(): ByteArray {
         return ByteArray(this.length.toInt()).apply {
             usePinned { pinned ->
-                platform.posix.memcpy(pinned.addressOf(0), this@toByteArray.bytes, this@toByteArray.length.convert())
+                platform.posix.memcpy(pinned.addressOf(0), this@toByteArray.bytes, this@toByteArray.length.toULong())
             }
         }
     }

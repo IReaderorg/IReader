@@ -43,7 +43,7 @@ actual class SyncWakeLock(private val context: Context) {
             
             Log.debug { "[SyncWakeLock] Locks acquired - WiFi will stay active during sync" }
         } catch (e: Exception) {
-            Log.error(e) { "[SyncWakeLock] Failed to acquire locks: ${e.message}" }
+            Log.error(e, "[SyncWakeLock] Failed to acquire locks: ${e.message}")
         }
     }
     
@@ -69,7 +69,7 @@ actual class SyncWakeLock(private val context: Context) {
             
             Log.debug { "[SyncWakeLock] Locks released - normal power management resumed" }
         } catch (e: Exception) {
-            Log.error(e) { "[SyncWakeLock] Failed to release locks: ${e.message}" }
+            Log.error(e, "[SyncWakeLock] Failed to release locks: ${e.message}")
         }
     }
 }
