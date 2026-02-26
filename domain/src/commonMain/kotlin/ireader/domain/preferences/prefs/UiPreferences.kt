@@ -514,4 +514,8 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun preferSafStorage(): Preference<Boolean> {
         return preferenceStore.getBoolean("prefer_saf_storage", false)
     }
+    
+    fun preferredQuoteStyle(): Preference<String> {
+        return preferenceStore.getString("preferred_quote_style", "GRADIENT_SUNSET")
+    }
 }

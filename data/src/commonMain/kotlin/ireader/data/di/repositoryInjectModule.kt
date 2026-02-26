@@ -287,7 +287,7 @@ val repositoryInjectModule = module {
         ireader.data.quote.DiscordQuoteRepositoryImpl(
             webhookUrl = discordWebhookUrl,
             httpClient = get<ireader.core.http.HttpClients>().default,
-            quoteCardGenerator = ireader.data.quote.QuoteCardGenerator()
+            quoteCardGenerator = ireader.data.quote.createQuoteCardGenerator()
         )
     }
     

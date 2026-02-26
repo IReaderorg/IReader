@@ -192,7 +192,8 @@ val screenModelModule = module {
             getCurrentUser = {
                 val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
                 getCurrentUserUseCase().getOrNull()
-            }
+            },
+            uiPreferences = get()
         )
     }
     

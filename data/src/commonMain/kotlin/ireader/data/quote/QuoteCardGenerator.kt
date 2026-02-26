@@ -7,7 +7,7 @@ import ireader.domain.models.quote.QuoteCardStyle
  * Platform-specific quote card image generator.
  * Renders quote text with styled background as PNG image.
  */
-expect class QuoteCardGenerator() {
+interface QuoteCardGenerator {
     /**
      * Generate a quote card image as PNG bytes.
      * 

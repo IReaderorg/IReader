@@ -2,6 +2,7 @@
 # Compose
 apkParser = "2.6.10"
 composeGradle = "1.10.1"
+composeHotReload = "1.0.0"
 # Static Analysis
 detekt = "1.23.8"
 composeRules = "0.5.6"
@@ -195,6 +196,7 @@ supabase = ["supabase-postgrest", "supabase-auth", "supabase-realtime", "supabas
 [plugins]
 # Compose
 jetbrainCompose = { id = "org.jetbrains.compose", version.ref = "composeGradle" }
+composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }
 # Static Analysis
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 # BuildConfigs

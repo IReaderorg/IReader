@@ -1,72 +1,26 @@
 package ireader.presentation.ui.community
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,172 +28,364 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.quote.LocalQuote
-import ireader.domain.models.quote.ShareValidation
+import ireader.domain.models.quote.QuoteCardStyle
+import ireader.i18n.Images
 import ireader.presentation.ui.quote.MyQuotesViewModel
+import ireader.presentation.ui.quote.QuoteStoryEditorScreen
 
+/**
+ * Instagram-style quote cards gallery with masonry layout
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuotesScreen(vm: MyQuotesViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun QuotesScreen(vm: MyQuotesViewModel, onBack: () -> Unit, onCreateQuote: () -> Unit = {}, modifier: Modifier = Modifier) {
     val quotes by vm.quotes.collectAsState()
-    val clip = LocalClipboardManager.current
-    Scaffold(modifier = modifier) { pv ->
-        LazyColumn(Modifier.fillMaxSize().padding(pv), contentPadding = PaddingValues(bottom = 24.dp)) {
-            item { QHeader(quotes.size, onBack) }
-            item { QStats(quotes) }
-            item { QSearch(vm.searchQuery, { vm.updateSearchQuery(it) }, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
-            if (quotes.isNotEmpty()) { item { QFilters(vm.selectedFilter, { vm.setFilter(it) }, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) } }
+    val preferredStyle by vm.preferredQuoteStyle.collectAsState()
+    
+    // Show story editor in full screen
+    if (vm.showCreateDialog) {
+        QuoteStoryEditorScreen(
+            onDismiss = { vm.dismissCreateDialog() },
+            onSave = { text, bookTitle, author, style ->
+                vm.createQuote(text, bookTitle, author)
+            },
+            onShare = { text, bookTitle, author, style ->
+                vm.showShareConfirmation(text, bookTitle, author, style)
+            },
+            preferredStyle = preferredStyle,
+            onStyleChanged = { vm.savePreferredStyle(it) },
+            showShareConfirmDialog = vm.showShareConfirmDialog,
+            onDismissShareConfirm = { vm.dismissShareConfirmation() },
+            onConfirmShare = { vm.confirmShare() },
+            isSharing = vm.isSharing
+        )
+        return
+    }
+    
+    // Show edit dialog for existing quote
+    if (vm.selectedQuote != null) {
+        QuoteStoryEditorScreen(
+            initialQuote = vm.selectedQuote,
+            onDismiss = { vm.clearSelectedQuote() },
+            onSave = { text, bookTitle, author, style ->
+                vm.updateQuote(vm.selectedQuote!!.id, text, bookTitle, author)
+            },
+            onShare = { text, bookTitle, author, style ->
+                vm.showShareConfirmation(text, bookTitle, author, style)
+            },
+            preferredStyle = preferredStyle,
+            onStyleChanged = { vm.savePreferredStyle(it) },
+            showShareConfirmDialog = vm.showShareConfirmDialog,
+            onDismissShareConfirm = { vm.dismissShareConfirmation() },
+            onConfirmShare = { vm.confirmShare() },
+            isSharing = vm.isSharing
+        )
+        return
+    }
+    
+    Scaffold(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { vm.showCreateDialog() },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(64.dp)
+            ) {
+                Icon(Icons.Default.Add, "Create", Modifier.size(28.dp))
+            }
+        }
+    ) { pv ->
+        Column(Modifier.fillMaxSize().padding(pv)) {
+            // Modern header
+            InstagramHeader(
+                quoteCount = quotes.size,
+                onBack = onBack,
+                onSearch = { vm.updateSearchQuery(it) },
+                searchQuery = vm.searchQuery
+            )
+            
             when {
-                vm.isLoading -> item { Box(Modifier.fillMaxWidth().height(300.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
-                quotes.isEmpty() -> item { QEmpty(vm.searchQuery, Modifier.fillMaxWidth().padding(32.dp)) }
-                else -> items(quotes, key = { it.id }) { q ->
-                    QCard(q, { clip.setText(AnnotatedString(q.text)); vm.showSnackBar(ireader.i18n.UiText.DynamicString("Copied")) },
-                        { vm.showDeleteConfirmation(q) }, { vm.showShareConfirmation(q) }, Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+                vm.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { 
+                    CircularProgressIndicator() 
+                }
+                quotes.isEmpty() -> InstagramEmptyState(onCreate = { vm.showCreateDialog() })
+                else -> InstagramQuoteGrid(
+                    quotes = quotes,
+                    onQuoteClick = { vm.selectQuote(it) },
+                    onDelete = { vm.showDeleteConfirmation(it) },
+                    onShare = { vm.showShareConfirmation(it) }
+                )
+            }
+        }
+    }
+    
+    // Dialogs
+    if (vm.showDeleteDialog) {
+        ModernDeleteDialog(
+            onDismiss = { vm.dismissDeleteDialog() },
+            onConfirm = { vm.deleteQuote() }
+        )
+    }
+    
+    if (vm.showShareDialog) {
+        ModernShareDialog(
+            validation = vm.shareValidation,
+            isSharing = vm.isSharing,
+            onDismiss = { vm.dismissShareDialog() },
+            onShare = { style, username -> vm.shareQuoteToDiscord(style, username) }
+        )
+    }
+}
+
+@Composable
+private fun InstagramHeader(
+    quoteCount: Int,
+    onBack: () -> Unit,
+    onSearch: (String) -> Unit,
+    searchQuery: String,
+    modifier: Modifier = Modifier
+) {
+    var showSearch by remember { mutableStateOf(false) }
+    
+    Column(modifier.fillMaxWidth()) {
+        // Top bar
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    "My Quotes",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Row {
+                IconButton(onClick = { showSearch = !showSearch }) {
+                    Icon(if (showSearch) Icons.Default.Close else Icons.Default.Search, "Search")
+                }
+            }
+        }
+        
+        // Search bar
+        AnimatedVisibility(
+            visible = showSearch,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearch,
+                placeholder = { Text("Search quotes...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                leadingIcon = { Icon(Icons.Default.Search, null) },
+                singleLine = true
+            )
+        }
+        
+        // Stats bar
+        if (quoteCount > 0) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        "$quoteCount ${if (quoteCount == 1) "quote" else "quotes"}",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }
     }
-    QDeleteDlg(vm.showDeleteDialog, { vm.dismissDeleteDialog() }, { vm.deleteQuote() })
-    QShareDlg(vm.showShareDialog, vm.shareValidation, vm.isSharing, { vm.dismissShareDialog() }, { style, username -> vm.shareQuoteToDiscord(style, username) })
 }
 
 @Composable
-private fun QHeader(count: Int, onBack: () -> Unit) {
-    Box(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(
-        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),
-        MaterialTheme.colorScheme.background))).padding(top = 8.dp, bottom = 24.dp)) {
-        Column {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
-            }
-            Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(Modifier.size(80.dp).clip(CircleShape).background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary))), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.FormatQuote, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onPrimary)
+private fun InstagramQuoteGrid(
+    quotes: List<LocalQuote>,
+    onQuoteClick: (LocalQuote) -> Unit,
+    onDelete: (LocalQuote) -> Unit,
+    onShare: (LocalQuote) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Adaptive(160.dp),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalItemSpacing = 12.dp
+    ) {
+        items(quotes, key = { it.id }) { quote ->
+            InstagramQuoteCard(
+                quote = quote,
+                onClick = { onQuoteClick(quote) },
+                onDelete = { onDelete(quote) },
+                onShare = { onShare(quote) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun InstagramQuoteCard(
+    quote: LocalQuote,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    onShare: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    
+    // Random gradient for visual variety
+    val gradients = remember {
+        listOf(
+            listOf(Color(0xFFFF6B6B), Color(0xFFFFE66D)),
+            listOf(Color(0xFF667EEA), Color(0xFF764BA2)),
+            listOf(Color(0xFF11998E), Color(0xFF38EF7D)),
+            listOf(Color(0xFFDA22FF), Color(0xFF9733EE)),
+            listOf(Color(0xFF2C3E50), Color(0xFF4CA1AF)),
+            listOf(Color(0xFFF093FB), Color(0xFFF5576C)),
+            listOf(Color(0xFFFA709A), Color(0xFFFEE140)),
+            listOf(Color(0xFF30CFD0), Color(0xFF330867))
+        )
+    }
+    val gradient = remember(quote.id) { gradients[(quote.id % gradients.size).toInt()] }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(4.dp, RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Brush.verticalGradient(gradient))
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // IReader logo at top
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Images.infinity(),
+                            contentDescription = "IReader",
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.White.copy(alpha = 0.9f)
+                        )
+                        Text(
+                            text = "IReader",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Icon(
+                        Icons.Default.FormatQuote,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.White.copy(alpha = 0.3f)
+                    )
                 }
-                Spacer(Modifier.height(16.dp))
-                Text("My Quotes", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                
                 Spacer(Modifier.height(4.dp))
-                Text(if (count == 0) "Start collecting memorable passages" else "$count saved quote${if (count != 1) "s" else ""}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-    }
-}
-
-
-@Composable
-private fun QStats(quotes: List<LocalQuote>) {
-    if (quotes.isEmpty()) return
-    val books = remember(quotes) { quotes.map { it.bookTitle }.distinct().size }
-    val ctx = remember(quotes) { quotes.count { it.hasContextBackup } }
-    LazyRow(Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { QStatChip("📚", "$books", "Books") }
-        item { QStatChip("💬", "${quotes.size}", "Quotes") }
-        item { QStatChip("📖", "$ctx", "With Context") }
-    }
-}
-
-@Composable
-private fun QStatChip(emoji: String, value: String, label: String) {
-    Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)) {
-        Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(emoji, fontSize = 20.sp)
-            Column { Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold); Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-        }
-    }
-}
-
-@Composable
-private fun QSearch(query: String, onChange: (String) -> Unit, modifier: Modifier = Modifier) {
-    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)) {
-        TextField(query, onChange, placeholder = { Text("Search quotes...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) },
-            leadingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-            trailingIcon = { AnimatedVisibility(query.isNotEmpty(), enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) { IconButton({ onChange("") }) { Icon(Icons.Default.Close, "Clear") } } },
-            modifier = Modifier.fillMaxWidth(), singleLine = true,
-            colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
-    }
-}
-
-@Composable
-private fun QFilters(selected: String, onChange: (String) -> Unit, modifier: Modifier = Modifier) {
-    LazyRow(modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(listOf("All", "With Context", "Recent")) { f ->
-            FilterChip(selected == f, { onChange(f) }, { Text(f) }, shape = RoundedCornerShape(12.dp),
-                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primaryContainer))
-        }
-    }
-}
-
-
-@Composable
-private fun QCard(quote: LocalQuote, onCopy: () -> Unit, onDelete: () -> Unit, onShare: () -> Unit, modifier: Modifier = Modifier) {
-    Card(modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(2.dp)) {
-        Column(Modifier.padding(20.dp)) {
-            Text("", style = MaterialTheme.typography.displayMedium, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), fontWeight = FontWeight.Bold, modifier = Modifier.offset(y = (-8).dp))
-            Text(quote.text, style = MaterialTheme.typography.bodyLarge, fontStyle = FontStyle.Italic, lineHeight = 26.sp, modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 16.dp))
-            Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)) {
-                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer))), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Outlined.MenuBook, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(quote.bookTitle, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(quote.chapterTitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                
+                // Quote text
+                Text(
+                    text = "\"${quote.text}\"",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White,
+                    fontStyle = FontStyle.Italic,
+                    maxLines = 6,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 20.sp
+                )
+                
+                Spacer(Modifier.height(8.dp))
+                
+                // Book info
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = quote.bookTitle,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (!quote.author.isNullOrBlank()) {
+                        Text(
+                            text = "by ${quote.author}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
-            if (quote.hasContextBackup) {
-                Spacer(Modifier.height(12.dp))
-                Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f)) {
-                    Row(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onTertiaryContainer)
-                        Text("Context saved", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onTertiaryContainer, fontWeight = FontWeight.Medium)
-                    }
+            
+            // Menu button
+            Box(Modifier.align(Alignment.TopEnd)) {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = "Menu",
+                        tint = Color.White
+                    )
                 }
-            }
-            Spacer(Modifier.height(16.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                QBtn(Icons.Default.ContentCopy, "Copy", onCopy, MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.width(4.dp))
-                QBtn(Icons.Default.Share, "Share", onShare, MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(4.dp))
-                QBtn(Icons.Default.Delete, "Delete", onDelete, MaterialTheme.colorScheme.error.copy(alpha = 0.8f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun QBtn(icon: ImageVector, label: String, onClick: () -> Unit, tint: Color) {
-    Surface(shape = RoundedCornerShape(10.dp), color = tint.copy(alpha = 0.1f), onClick = onClick) {
-        Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(icon, label, Modifier.size(18.dp), tint = tint)
-            Text(label, style = MaterialTheme.typography.labelMedium, color = tint, fontWeight = FontWeight.Medium)
-        }
-    }
-}
-
-
-@Composable
-private fun QEmpty(searchQuery: String, modifier: Modifier = Modifier) {
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Box(Modifier.size(140.dp).clip(CircleShape).background(Brush.radialGradient(listOf(
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-            MaterialTheme.colorScheme.background))), contentAlignment = Alignment.Center) {
-            Text(if (searchQuery.isBlank()) "📚" else "🔍", fontSize = 48.sp)
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(if (searchQuery.isBlank()) "No quotes yet" else "No quotes found", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        Text(if (searchQuery.isBlank()) "Save memorable passages from your reading.\nUse Copy Quote in the reader settings." else "Try a different search term",
-            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, lineHeight = 22.sp)
-        if (searchQuery.isBlank()) {
-            Spacer(Modifier.height(24.dp))
-            Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)) {
-                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("💡", fontSize = 24.sp)
-                    Column { Text("Quick Tip", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold); Text("Open any book → Settings → Copy Quote", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Edit") },
+                        onClick = { showMenu = false; onClick() },
+                        leadingIcon = { Icon(Icons.Default.Edit, null) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Share") },
+                        onClick = { showMenu = false; onShare() },
+                        leadingIcon = { Icon(Icons.Default.Share, null) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete") },
+                        onClick = { showMenu = false; onDelete() },
+                        leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) }
+                    )
                 }
             }
         }
@@ -247,49 +393,170 @@ private fun QEmpty(searchQuery: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun QDeleteDlg(show: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    if (!show) return
-    AlertDialog(onDismissRequest = onDismiss, shape = RoundedCornerShape(24.dp),
-        title = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error); Text("Delete Quote?") } },
-        text = { Text("This quote will be permanently deleted.", style = MaterialTheme.typography.bodyMedium) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text("Delete", color = MaterialTheme.colorScheme.error) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+private fun InstagramEmptyState(
+    onCreate: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            // Animated icon
+            val infiniteTransition = rememberInfiniteTransition(label = "float")
+            val offsetY by infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = -20f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(2000, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "float"
+            )
+            
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .offset(y = offsetY.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.FormatQuote,
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            
+            Text(
+                "No quotes yet",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Text(
+                "Create beautiful quote cards\nfrom your favorite books",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                lineHeight = 24.sp
+            )
+            
+            Button(
+                onClick = onCreate,
+                modifier = Modifier.height(56.dp),
+                shape = RoundedCornerShape(28.dp)
+            ) {
+                Icon(Icons.Default.Add, null, Modifier.size(24.dp))
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    "Create Your First Quote",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
 }
 
 @Composable
-private fun QShareDlg(show: Boolean, v: ShareValidation?, loading: Boolean, onDismiss: () -> Unit, onShare: (ireader.domain.models.quote.QuoteCardStyle, String) -> Unit) {
-    if (!show) return
-    var selectedStyle by remember { mutableStateOf(ireader.domain.models.quote.QuoteCardStyle.GRADIENT_SUNSET) }
+private fun ModernDeleteDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(28.dp),
+        icon = {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+        },
+        title = { Text("Delete Quote?", fontWeight = FontWeight.Bold) },
+        text = { Text("This quote will be permanently deleted.") },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Delete", fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun ModernShareDialog(
+    validation: ireader.domain.models.quote.ShareValidation?,
+    isSharing: Boolean,
+    onDismiss: () -> Unit,
+    onShare: (QuoteCardStyle, String) -> Unit
+) {
+    var selectedStyle by remember { mutableStateOf(QuoteCardStyle.GRADIENT_SUNSET) }
     var username by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     
-    AlertDialog(onDismissRequest = onDismiss, shape = RoundedCornerShape(24.dp),
-        title = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Default.Share, null, tint = MaterialTheme.colorScheme.primary); Text("Share to Discord") } },
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(28.dp),
+        icon = {
+            Icon(
+                Icons.Default.Share,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = { Text("Share to Discord", fontWeight = FontWeight.Bold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 when {
-                    v?.tooShort == true -> Text("Quote too short (min 10 chars).", style = MaterialTheme.typography.bodyMedium)
+                    validation?.tooShort == true -> {
+                        Text("Quote too short (minimum 10 characters).")
+                    }
                     else -> {
-                        Text("Choose a visual style for your quote card:", style = MaterialTheme.typography.bodyMedium)
-                        
-                        // Style selector dropdown
+                        // Style selector
                         Box {
-                            Surface(
+                            OutlinedButton(
                                 onClick = { expanded = true },
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
                             ) {
                                 Row(
-                                    Modifier.fillMaxWidth().padding(16.dp),
+                                    Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(selectedStyle.displayName, style = MaterialTheme.typography.bodyMedium)
+                                    Text(selectedStyle.displayName)
                                     Icon(Icons.Default.ArrowDropDown, null)
                                 }
                             }
                             DropdownMenu(expanded, { expanded = false }) {
-                                ireader.domain.models.quote.QuoteCardStyle.entries.forEach { style ->
+                                QuoteCardStyle.entries.forEach { style ->
                                     DropdownMenuItem(
                                         text = { Text(style.displayName) },
                                         onClick = { selectedStyle = style; expanded = false }
@@ -299,30 +566,38 @@ private fun QShareDlg(show: Boolean, v: ShareValidation?, loading: Boolean, onDi
                         }
                         
                         // Username input
-                        TextField(
+                        OutlinedTextField(
                             value = username,
                             onValueChange = { username = it },
-                            label = { Text("Your username (optional)") },
+                            label = { Text("Username (optional)") },
                             placeholder = { Text("Anonymous") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
+                            shape = RoundedCornerShape(12.dp)
                         )
                     }
                 }
             }
         },
-        confirmButton = { 
-            if (v?.canShare == true) { 
-                TextButton({ onShare(selectedStyle, username.ifBlank { "Anonymous" }) }, enabled = !loading) { 
-                    if (loading) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp) 
-                    else Text("Share") 
-                } 
-            } 
+        confirmButton = {
+            if (validation?.canShare == true) {
+                Button(
+                    onClick = { onShare(selectedStyle, username.ifBlank { "Anonymous" }) },
+                    enabled = !isSharing,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    if (isSharing) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text("Share", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

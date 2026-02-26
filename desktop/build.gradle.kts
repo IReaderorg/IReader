@@ -15,6 +15,7 @@ plugins {
     id(kotlinx.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
     alias(kotlinx.plugins.compose.compiler)
+    alias(libs.plugins.composeHotReload)
 }
 
 // Load local.properties for local development

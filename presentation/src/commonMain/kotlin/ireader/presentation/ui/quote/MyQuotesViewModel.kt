@@ -16,12 +16,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
+ * Pending share data for confirmation dialog
+ */
+data class PendingShare(
+    val text: String,
+    val bookTitle: String,
+    val author: String,
+    val style: QuoteCardStyle
+)
+
+/**
  * ViewModel for My Quotes tab in Reading Buddy
  */
 class MyQuotesViewModel(
     private val localQuoteUseCases: LocalQuoteUseCases,
     private val discordQuoteRepository: DiscordQuoteRepository,
-    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
+    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?,
+    private val uiPreferences: ireader.domain.preferences.prefs.UiPreferences
 ) : BaseViewModel() {
     
     private val _quotes = MutableStateFlow<List<LocalQuote>>(emptyList())
@@ -60,8 +71,47 @@ class MyQuotesViewModel(
     var shareValidation by mutableStateOf<ireader.domain.models.quote.ShareValidation?>(null)
         private set
     
+    var showCreateDialog by mutableStateOf(false)
+        private set
+    
+    var isCreating by mutableStateOf(false)
+        private set
+    
+    var showShareConfirmDialog by mutableStateOf(false)
+        private set
+    
+    var pendingShareData by mutableStateOf<PendingShare?>(null)
+        private set
+    
+    // Rate limiting: track last share timestamp
+    private var lastShareTimestamp: Long = 0L
+    private val shareRateLimitMs: Long = 30_000L // 30 seconds between shares
+    
+    // Preferred quote style
+    private val _preferredQuoteStyle = MutableStateFlow(QuoteCardStyle.GRADIENT_SUNSET)
+    val preferredQuoteStyle: StateFlow<QuoteCardStyle> = _preferredQuoteStyle.asStateFlow()
+    
     init {
         observeQuotes()
+        loadPreferredStyle()
+    }
+    
+    private fun loadPreferredStyle() {
+        scope.launch {
+            val styleName = uiPreferences.preferredQuoteStyle().get()
+            _preferredQuoteStyle.value = try {
+                QuoteCardStyle.valueOf(styleName)
+            } catch (e: Exception) {
+                QuoteCardStyle.GRADIENT_SUNSET
+            }
+        }
+    }
+    
+    fun savePreferredStyle(style: QuoteCardStyle) {
+        scope.launch {
+            uiPreferences.preferredQuoteStyle().set(style.name)
+            _preferredQuoteStyle.value = style
+        }
     }
     
     private fun observeQuotes() {
@@ -205,11 +255,12 @@ class MyQuotesViewModel(
         isSharing = true
         
         scope.launch {
-            // Get username from Supabase if available
+            // Get username from Supabase if available, otherwise use provided username
             val finalUsername = try {
-                getCurrentUser()?.username ?: username
+                val user = getCurrentUser()
+                user?.username?.takeIf { it.isNotBlank() } ?: username.ifBlank { "Anonymous" }
             } catch (e: Exception) {
-                username
+                username.ifBlank { "Anonymous" }
             }
             
             val result = discordQuoteRepository.submitQuote(
@@ -222,7 +273,7 @@ class MyQuotesViewModel(
             
             result.fold(
                 onSuccess = {
-                    showSnackBar(UiText.DynamicString("Quote shared to Discord!"))
+                    showSnackBar(UiText.DynamicString("Quote shared to Discord! 🎉"))
                     dismissShareDialog()
                 },
                 onFailure = { error ->
@@ -236,4 +287,215 @@ class MyQuotesViewModel(
      * Get quote count
      */
     val quoteCount: Int get() = _quotes.value.size
+    
+    /**
+     * Show create quote dialog
+     */
+    fun showCreateDialog() {
+        showCreateDialog = true
+    }
+    
+    /**
+     * Dismiss create quote dialog
+     */
+    fun dismissCreateDialog() {
+        showCreateDialog = false
+    }
+    
+    /**
+     * Create a new quote manually (without book context)
+     */
+    fun createQuote(text: String, bookTitle: String, author: String) {
+        if (text.length < 10) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Quote must be at least 10 characters"))
+            }
+            return
+        }
+        
+        if (bookTitle.isBlank()) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Book title is required"))
+            }
+            return
+        }
+        
+        isCreating = true
+        scope.launch {
+            val result = localQuoteUseCases.saveQuote(
+                text = text,
+                bookId = 0L, // No book context
+                bookTitle = bookTitle,
+                chapterTitle = "Manual Entry",
+                chapterNumber = null,
+                author = author.ifBlank { null },
+                includeContext = false,
+                currentChapterId = null,
+                prevChapterId = null,
+                nextChapterId = null
+            )
+            
+            isCreating = false
+            
+            result.fold(
+                onSuccess = {
+                    showSnackBar(UiText.DynamicString("Quote created! 📚"))
+                    dismissCreateDialog()
+                },
+                onFailure = { error ->
+                    showSnackBar(UiText.DynamicString("Failed to create: ${error.message}"))
+                }
+            )
+        }
+    }
+    
+    /**
+     * Show share confirmation dialog (with rate limit check)
+     */
+    fun showShareConfirmation(text: String, bookTitle: String, author: String, style: QuoteCardStyle) {
+        if (text.length < 10) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Quote must be at least 10 characters"))
+            }
+            return
+        }
+        
+        if (bookTitle.isBlank()) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Book title is required"))
+            }
+            return
+        }
+        
+        // Check rate limit
+        val currentTime = System.currentTimeMillis()
+        val timeSinceLastShare = currentTime - lastShareTimestamp
+        
+        if (timeSinceLastShare < shareRateLimitMs) {
+            val remainingSeconds = ((shareRateLimitMs - timeSinceLastShare) / 1000).toInt()
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Please wait $remainingSeconds seconds before sharing again"))
+            }
+            return
+        }
+        
+        // Show confirmation dialog
+        pendingShareData = PendingShare(text, bookTitle, author, style)
+        showShareConfirmDialog = true
+    }
+    
+    /**
+     * Dismiss share confirmation dialog
+     */
+    fun dismissShareConfirmation() {
+        showShareConfirmDialog = false
+        pendingShareData = null
+    }
+    
+    /**
+     * Confirm and execute share to Discord
+     */
+    fun confirmShare() {
+        val shareData = pendingShareData ?: return
+        dismissShareConfirmation()
+        
+        isSharing = true
+        
+        scope.launch {
+            // Create temporary quote for sharing
+            val tempQuote = LocalQuote(
+                id = 0L,
+                text = shareData.text,
+                bookId = 0L,
+                bookTitle = shareData.bookTitle,
+                chapterTitle = "Manual Entry",
+                chapterNumber = null,
+                author = shareData.author.ifBlank { null },
+                createdAt = ireader.domain.utils.extensions.currentTimeToLong(),
+                hasContextBackup = false
+            )
+            
+            // Get username from Supabase if available
+            val username = try {
+                val user = getCurrentUser()
+                user?.username?.takeIf { it.isNotBlank() } ?: "Anonymous"
+            } catch (e: Exception) {
+                "Anonymous"
+            }
+            
+            val result = discordQuoteRepository.submitQuote(
+                quote = tempQuote,
+                style = shareData.style,
+                username = username
+            )
+            
+            isSharing = false
+            
+            result.fold(
+                onSuccess = {
+                    // Update last share timestamp
+                    lastShareTimestamp = System.currentTimeMillis()
+                    showSnackBar(UiText.DynamicString("Quote shared to Discord! 🎉"))
+                    dismissCreateDialog()
+                },
+                onFailure = { error ->
+                    showSnackBar(UiText.DynamicString("Failed to share: ${error.message}"))
+                }
+            )
+        }
+    }
+    
+    /**
+     * Share quote directly from editor (DEPRECATED - use showShareConfirmation instead)
+     */
+    fun shareQuoteDirectly(text: String, bookTitle: String, author: String, style: QuoteCardStyle) {
+        showShareConfirmation(text, bookTitle, author, style)
+    }
+    
+    /**
+     * Update an existing quote
+     */
+    fun updateQuote(quoteId: Long, text: String, bookTitle: String, author: String) {
+        if (text.length < 10) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Quote must be at least 10 characters"))
+            }
+            return
+        }
+        
+        if (bookTitle.isBlank()) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Book title is required"))
+            }
+            return
+        }
+        
+        scope.launch {
+            // Delete old quote and create new one with updated data
+            localQuoteUseCases.deleteQuote(quoteId)
+            
+            val result = localQuoteUseCases.saveQuote(
+                text = text,
+                bookId = 0L,
+                bookTitle = bookTitle,
+                chapterTitle = "Manual Entry",
+                chapterNumber = null,
+                author = author.ifBlank { null },
+                includeContext = false,
+                currentChapterId = null,
+                prevChapterId = null,
+                nextChapterId = null
+            )
+            
+            result.fold(
+                onSuccess = {
+                    showSnackBar(UiText.DynamicString("Quote updated! 📚"))
+                    clearSelectedQuote()
+                },
+                onFailure = { error ->
+                    showSnackBar(UiText.DynamicString("Failed to update: ${error.message}"))
+                }
+            )
+        }
+    }
 }
