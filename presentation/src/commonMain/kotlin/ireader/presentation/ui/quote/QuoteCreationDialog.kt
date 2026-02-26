@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.domain.models.quote.QuoteCardConstants
 
 /**
  * Dialog for creating a new quote manually (without book context)
@@ -121,7 +122,7 @@ fun QuoteCreationDialog(
                     onSave(quoteText, bookTitle, author)
                     onDismiss()
                 },
-                enabled = quoteText.length >= 10 && bookTitle.isNotBlank(),
+                enabled = quoteText.length >= QuoteCardConstants.MIN_QUOTE_LENGTH && bookTitle.isNotBlank(),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Save Quote", fontWeight = FontWeight.SemiBold)

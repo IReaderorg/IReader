@@ -45,6 +45,12 @@ data class CharacterArtScreenState(
     val selectedModel: ImageModel? = null,
     val isLoadingModels: Boolean = false,
     val isGenerating: Boolean = false,
+    // TODO: Memory optimization - Consider storing URI/path instead of ByteArray
+    // Storing large image data directly in UI state can cause memory pressure, especially
+    // with multiple generated images or during configuration changes. Consider:
+    // 1. Store file URI/path and load bytes on-demand for display
+    // 2. Use a separate image cache with LRU eviction policy
+    // 3. Compress images before storing in state if ByteArray is necessary
     val generatedImageBytes: ByteArray? = null,
     val generationError: String? = null,
     // API keys for different providers
@@ -68,6 +74,22 @@ class CharacterArtViewModel(
     val state: StateFlow<CharacterArtScreenState> = _state.asStateFlow()
     
     private val pageSize = 30
+    
+    /**
+     * Helper function to handle errors consistently across the ViewModel.
+     * Fixed Issue #15: Extracted repetitive error handling pattern.
+     */
+    private fun handleError(error: Throwable, message: String) {
+        _state.update { it.copy(error = "$message: ${error.message}") }
+    }
+    
+    /**
+     * Helper function to handle generation errors consistently.
+     * Fixed Issue #15: Extracted repetitive error handling pattern.
+     */
+    private fun handleGenerationError(error: Throwable, message: String) {
+        _state.update { it.copy(generationError = "$message: ${error.message}") }
+    }
     
     init {
         loadInitialData()
@@ -140,12 +162,7 @@ class CharacterArtViewModel(
                     )
                 }
             }.onFailure { error ->
-                _state.update { 
-                    it.copy(
-                        isLoading = false,
-                        error = "Failed to load art: ${error.message}"
-                    )
-                }
+                handleError(error, "Failed to load art")
             }
         }
     }
@@ -172,9 +189,7 @@ class CharacterArtViewModel(
                     _state.update { it.copy(pendingArt = pending) }
                 }
                 .onFailure { error ->
-                    _state.update { 
-                        it.copy(error = "Failed to load pending art: ${error.message}")
-                    }
+                    handleError(error, "Failed to load pending art")
                 }
         }
     }

@@ -124,7 +124,13 @@ class AndroidDeviceInfoService(
     }
     
     override fun observeOrientationChanges(): Flow<OrientationEvent> {
-        // TODO: Implement orientation change observer
+        // TODO: Implement proper orientation change observer
+        // This requires:
+        // 1. Register Configuration.ORIENTATION_* listener via context.registerComponentCallbacks()
+        // 2. Create a callbackFlow that emits OrientationEvent on configuration changes
+        // 3. Properly unregister the callback when the flow is cancelled
+        // 4. Handle rotation angle calculation based on WindowManager.getDefaultDisplay().getRotation()
+        // Current implementation returns a static flow with current orientation only
         return MutableStateFlow(OrientationEvent(isLandscape(), 0))
     }
     

@@ -6,7 +6,7 @@ import ireader.domain.usecases.reader.ContentFilterUseCase
 import ireader.domain.usecases.reader.TextReplacementUseCase
 import ireader.i18n.LAST_CHAPTER
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 
 
 class FindChapterById(
@@ -31,7 +31,7 @@ class FindChapterById(
         return chapter?.let { applyContentProcessing(it) }
     }
     
-    private fun applyContentProcessing(chapter: Chapter): Chapter {
+    private suspend fun applyContentProcessing(chapter: Chapter): Chapter {
         if (chapter.content.isEmpty()) {
             return chapter
         }
@@ -75,10 +75,10 @@ class SubscribeChapterById(
         }
         
         // Apply text replacements and content filter to chapter content
-        return flow.map { chapter -> chapter?.let { applyContentProcessing(it) } }
+        return flow.mapLatest { chapter -> chapter?.let { applyContentProcessing(it) } }
     }
     
-    private fun applyContentProcessing(chapter: Chapter): Chapter {
+    private suspend fun applyContentProcessing(chapter: Chapter): Chapter {
         if (chapter.content.isEmpty()) {
             return chapter
         }

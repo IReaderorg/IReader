@@ -153,6 +153,7 @@ class SyncLocalDataSourceImpl(
                 val contentJson = try {
                     chapter.content.encode()
                 } catch (e: Exception) {
+                    Log.error("Failed to encode chapter content for chapter ${chapter.name} (${chapter.url})", e)
                     "[]" // Empty content if encoding fails
                 }
                 

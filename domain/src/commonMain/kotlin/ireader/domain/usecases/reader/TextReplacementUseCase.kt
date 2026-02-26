@@ -31,12 +31,20 @@ class TextReplacementUseCase(
         
         // Regex metacharacters used to detect if a pattern is regex or literal
         private val REGEX_META_CHARS = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
+        
+        /**
+         * Helper function to detect if a pattern contains regex metacharacters.
+         * Extracted to avoid duplication (Issue #17).
+         */
+        private fun isRegexPattern(pattern: String): Boolean {
+            return pattern.any { it in REGEX_META_CHARS }
+        }
     }
     
     /**
      * Apply replacements to a list of Page objects (for Reader screen)
      */
-    fun applyReplacementsToPages(pages: List<Page>, bookId: Long? = null): List<Page> {
+    suspend fun applyReplacementsToPages(pages: List<Page>, bookId: Long? = null): List<Page> {
         val replacements = getEnabledReplacements(bookId)
         
         if (replacements.isEmpty()) {
@@ -63,7 +71,7 @@ class TextReplacementUseCase(
     /**
      * Apply replacements to a list of strings (for TTS screen)
      */
-    fun applyReplacementsToStrings(content: List<String>, bookId: Long? = null): List<String> {
+    suspend fun applyReplacementsToStrings(content: List<String>, bookId: Long? = null): List<String> {
         val replacements = getEnabledReplacements(bookId)
         
         if (replacements.isEmpty()) {
@@ -80,7 +88,7 @@ class TextReplacementUseCase(
     /**
      * Apply replacements to a single string
      */
-    fun applyReplacementsToText(text: String, bookId: Long? = null): String {
+    suspend fun applyReplacementsToText(text: String, bookId: Long? = null): String {
         val replacements = getEnabledReplacements(bookId)
         
         if (replacements.isEmpty()) {
@@ -91,18 +99,16 @@ class TextReplacementUseCase(
     }
     
     /**
-     * Get enabled replacements from repository
-     * Note: No caching here - let the repository/database handle caching
+     * Get enabled replacements from repository.
+     * Fixed Issue #10: Now properly suspend instead of using runBlocking.
      */
-    private fun getEnabledReplacements(bookId: Long? = null): List<TextReplacement> {
+    private suspend fun getEnabledReplacements(bookId: Long? = null): List<TextReplacement> {
         val replacements = if (repository != null) {
             try {
-                runBlocking {
-                    if (bookId != null) {
-                        repository.getEnabledReplacementsForBook(bookId)
-                    } else {
-                        repository.getEnabledGlobalReplacements()
-                    }
+                if (bookId != null) {
+                    repository.getEnabledReplacementsForBook(bookId)
+                } else {
+                    repository.getEnabledGlobalReplacements()
                 }
             } catch (e: Exception) {
                 Log.warn { "$TAG: Failed to load replacements from repository: ${e.message}" }
@@ -116,8 +122,9 @@ class TextReplacementUseCase(
     }
     
     /**
-     * Apply all replacements to text efficiently
-     * Supports both literal string replacement and regex patterns
+     * Apply all replacements to text efficiently.
+     * Supports both literal string replacement and regex patterns.
+     * Fixed Issue #17: Uses extracted isRegexPattern() helper to avoid duplication.
      */
     private fun applyReplacements(text: String, replacements: List<TextReplacement>): String {
         if (replacements.isEmpty() || text.isEmpty()) {
@@ -129,8 +136,8 @@ class TextReplacementUseCase(
         // Apply each replacement in order
         for (replacement in replacements) {
             try {
-                // Check if it looks like a regex pattern (contains common regex metacharacters)
-                val isRegex = replacement.findText.any { it in REGEX_META_CHARS }
+                // Use extracted helper function (Issue #17 fix)
+                val isRegex = isRegexPattern(replacement.findText)
                 
                 result = if (isRegex) {
                     // Use regex replacement
@@ -165,7 +172,17 @@ class TextReplacementUseCase(
     
     /**
      * Invalidate the replacement cache (call when replacements are modified)
-     * Note: No longer needed since we removed caching, but kept for API compatibility
+     * 
+     * **Note:** This method is currently a no-op. Caching was removed to ensure real-time updates
+     * from the database. The method is kept for API compatibility with existing code that may
+     * call it, but it no longer performs any action.
+     * 
+     * **Background:** Previously, this use case cached replacements in memory for performance.
+     * However, this caused issues with stale data when replacements were modified. The caching
+     * logic was removed, and now the repository/database layer handles any necessary caching.
+     * 
+     * **Future:** This method may be removed in a future version once all callers are verified
+     * to not depend on it.
      */
     fun invalidateCache() {
         // No-op: caching removed to ensure real-time updates
@@ -174,11 +191,12 @@ class TextReplacementUseCase(
     /**
      * Test replacements against sample text
      * @return the replaced result
+     * Fixed Issue #17: Uses extracted isRegexPattern() helper.
      */
     fun testReplacement(text: String, findText: String, replaceText: String, caseSensitive: Boolean = false): String {
         return try {
-            // Check if it looks like a regex pattern (contains common regex metacharacters)
-            val isRegex = findText.any { it in REGEX_META_CHARS }
+            // Use extracted helper function (Issue #17 fix)
+            val isRegex = isRegexPattern(findText)
             
             if (isRegex) {
                 // Use regex replacement

@@ -1,3 +1,3 @@
 package ireader.data.quote
 
-actual fun createQuoteCardGenerator(): QuoteCardGenerator = IosQuoteCardGenerator()
+actual fun createQuoteCardGenerator(): QuoteCardGenerator = IOSQuoteCardGenerator()

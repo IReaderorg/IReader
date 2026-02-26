@@ -10,6 +10,17 @@ import ireader.domain.models.sync.SyncError
  * - Actionable suggestions for resolving the error
  * - Consistent error messaging across the app
  * 
+ * Error Message Standards:
+ * - Use present tense for error descriptions ("WiFi connection lost", not "WiFi connection was lost")
+ * - Keep messages concise and user-friendly (avoid technical jargon)
+ * - Provide specific context when available (versions, storage amounts, device names)
+ * - Suggestions should be actionable and start with verbs ("Check...", "Ensure...", "Try...")
+ * - Use null for suggestions when no action is needed (e.g., Cancelled errors)
+ * 
+ * TODO: Standardize error messages across other features (Quote, CharacterArt) to follow
+ * the same patterns established here. Consider extracting to a shared ErrorMessageFormatter
+ * utility if error mapping becomes common across multiple features.
+ * 
  * Following TDD methodology - tests written first before implementation.
  */
 object SyncErrorMapper {

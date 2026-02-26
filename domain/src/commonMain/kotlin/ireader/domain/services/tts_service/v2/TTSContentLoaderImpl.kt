@@ -146,7 +146,7 @@ class TTSContentLoaderImpl(
      * Note: Content is already filtered at the Page level by FindChapterById use case.
      * This method applies additional string-level processing after HTML cleaning/splitting.
      */
-    private fun parseContent(content: List<Page>): List<String> {
+    private suspend fun parseContent(content: List<Page>): List<String> {
         if (content.isEmpty()) {
             return emptyList()
         }

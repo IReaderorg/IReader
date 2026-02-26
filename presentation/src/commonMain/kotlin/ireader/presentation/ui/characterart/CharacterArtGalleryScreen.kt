@@ -45,7 +45,10 @@ fun CharacterArtGalleryScreen(
     val state by vm.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
-    // Discord channel URL - TODO: Make this configurable
+    // Discord channel URL - TODO: Make this configurable via app settings or remote config
+    // Currently hardcoded to IReader community Discord channel. Should be moved to:
+    // - UiPreferences for user customization, or
+    // - Remote config for dynamic updates without app release
     val discordChannelUrl = "https://discord.gg/HHZZfnCm" // Replace with actual Discord invite/channel URL
     
     // Show success/error messages

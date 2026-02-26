@@ -261,6 +261,13 @@ val PresentationModules = module {
             pluginManager = get(),
             monetizationService = get(),
             getCurrentUserId = { 
+                // TODO: Replace with actual user authentication integration
+                // Currently returns hardcoded "default_user" as placeholder
+                // Required changes:
+                // 1. Implement user authentication service (Firebase Auth, custom backend, etc.)
+                // 2. Store authenticated user ID in UserPreferences or secure storage
+                // 3. Inject authentication service here and retrieve actual user ID
+                // 4. Handle unauthenticated state (return null or anonymous ID)
                 "default_user"
             },
             pluginRepository = get(),

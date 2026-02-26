@@ -3,6 +3,7 @@ package ireader.data.quote
 import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteCardStyle
 import ireader.domain.models.quote.QuoteCardStyleColors
+import ireader.domain.models.quote.QuoteCardConstants
 import kotlinx.cinterop.*
 import platform.CoreGraphics.*
 import platform.Foundation.*
@@ -11,12 +12,12 @@ import platform.UIKit.*
 /**
  * iOS implementation of QuoteCardGenerator using CoreGraphics
  */
-class IosQuoteCardGenerator : QuoteCardGenerator {
+class IOSQuoteCardGenerator : QuoteCardGenerator {
     
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun generateQuoteCard(quote: LocalQuote, style: QuoteCardStyle): ByteArray {
-        val width = 1080.0
-        val height = 1920.0
+        val width = QuoteCardConstants.IMAGE_WIDTH.toDouble()
+        val height = QuoteCardConstants.IMAGE_HEIGHT.toDouble()
         
         // Create bitmap context
         val colorSpace = CGColorSpaceCreateDeviceRGB()
@@ -60,14 +61,14 @@ class IosQuoteCardGenerator : QuoteCardGenerator {
             
             // Draw IReader logo text at top center
             val logoText = "IReader" as NSString
-            val logoFont = UIFont.boldSystemFontOfSize(42.0)
+            val logoFont = UIFont.boldSystemFontOfSize(QuoteCardConstants.AUTHOR_TEXT_SIZE.toDouble())
             val logoAttrs = mapOf(
                 NSFontAttributeName to logoFont,
                 NSForegroundColorAttributeName to textColor.colorWithAlphaComponent(0.9)
             )
             val logoSize = logoText.sizeWithAttributes(logoAttrs)
             logoText.drawAtPoint(
-                CGPointMake((width - logoSize.useContents { width }) / 2.0, centerY - 400.0),
+                CGPointMake((width - logoSize.useContents { width }) / 2.0, centerY + QuoteCardConstants.LOGO_OFFSET_Y),
                 withAttributes = logoAttrs
             )
             
@@ -80,13 +81,13 @@ class IosQuoteCardGenerator : QuoteCardGenerator {
             )
             val quoteMarkSize = quoteMarkText.sizeWithAttributes(quoteMarkAttrs)
             quoteMarkText.drawAtPoint(
-                CGPointMake((width - quoteMarkSize.useContents { width }) / 2.0, centerY - 300.0),
+                CGPointMake((width - quoteMarkSize.useContents { width }) / 2.0, centerY + QuoteCardConstants.QUOTE_MARK_OFFSET_Y),
                 withAttributes = quoteMarkAttrs
             )
             
             // Draw quote text (centered, italic)
             val quoteText = "\"${quote.text}\"" as NSString
-            val textFont = UIFont.italicSystemFontOfSize(56.0)
+            val textFont = UIFont.italicSystemFontOfSize(QuoteCardConstants.LOGO_TEXT_SIZE.toDouble())
             val paragraphStyle = NSMutableParagraphStyle().apply {
                 alignment = NSTextAlignmentCenter
                 lineSpacing = 14.0
@@ -96,33 +97,38 @@ class IosQuoteCardGenerator : QuoteCardGenerator {
                 NSForegroundColorAttributeName to textColor,
                 NSParagraphStyleAttributeName to paragraphStyle
             )
-            val textRect = CGRectMake(80.0, centerY - 200.0, width - 160.0, 400.0)
+            val textRect = CGRectMake(
+                QuoteCardConstants.HORIZONTAL_MARGIN.toDouble(), 
+                centerY - 200.0, 
+                width - (QuoteCardConstants.HORIZONTAL_MARGIN * 2).toDouble(), 
+                400.0
+            )
             quoteText.drawInRect(textRect, withAttributes = textAttrs)
             
             // Draw book title (centered, bold)
             val bookText = quote.bookTitle as NSString
-            val bookFont = UIFont.boldSystemFontOfSize(48.0)
+            val bookFont = UIFont.boldSystemFontOfSize(QuoteCardConstants.BOOK_TITLE_SIZE.toDouble())
             val bookAttrs = mapOf(
                 NSFontAttributeName to bookFont,
                 NSForegroundColorAttributeName to textColor.colorWithAlphaComponent(0.9)
             )
             val bookSize = bookText.sizeWithAttributes(bookAttrs)
             bookText.drawAtPoint(
-                CGPointMake((width - bookSize.useContents { width }) / 2.0, centerY + 250.0),
+                CGPointMake((width - bookSize.useContents { width }) / 2.0, centerY + QuoteCardConstants.BOOK_TITLE_OFFSET_Y),
                 withAttributes = bookAttrs
             )
             
             // Draw author (centered)
             if (!quote.author.isNullOrBlank()) {
                 val authorText = "by ${quote.author}" as NSString
-                val authorFont = UIFont.systemFontOfSize(40.0)
+                val authorFont = UIFont.systemFontOfSize(QuoteCardConstants.AUTHOR_TEXT_SIZE.toDouble())
                 val authorAttrs = mapOf(
                     NSFontAttributeName to authorFont,
                     NSForegroundColorAttributeName to textColor.colorWithAlphaComponent(0.7)
                 )
                 val authorSize = authorText.sizeWithAttributes(authorAttrs)
                 authorText.drawAtPoint(
-                    CGPointMake((width - authorSize.useContents { width }) / 2.0, centerY + 310.0),
+                    CGPointMake((width - authorSize.useContents { width }) / 2.0, centerY + QuoteCardConstants.AUTHOR_OFFSET_Y),
                     withAttributes = authorAttrs
                 )
             }
@@ -138,6 +144,8 @@ class IosQuoteCardGenerator : QuoteCardGenerator {
             // Convert NSData to ByteArray
             return pngData.toByteArray()
             
+        } catch (e: Exception) {
+            throw Exception("Failed to generate quote card: ${e.message}", e)
         } finally {
             CGContextRelease(context)
             CGColorSpaceRelease(colorSpace)
@@ -163,6 +171,15 @@ class IosQuoteCardGenerator : QuoteCardGenerator {
         )
     }
     
+    /**
+     * Retrieves the gradient colors for the specified quote card style.
+     * 
+     * Converts Compose Color objects from QuoteCardStyleColors to iOS's native
+     * UIColor objects for use with CoreGraphics gradient drawing.
+     * 
+     * @param style The quote card style (OCEAN, SUNSET, FOREST, etc.)
+     * @return Pair of UIColor objects (startColor, endColor) for gradient
+     */
     private fun getGradientColors(style: QuoteCardStyle): Pair<UIColor, UIColor> {
         val (startCompose, endCompose) = QuoteCardStyleColors.getGradientColors(style)
         

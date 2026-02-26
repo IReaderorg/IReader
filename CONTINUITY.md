@@ -1,8 +1,8 @@
 # Continuity Ledger
 
 ## Goal (incl. success criteria)
-- Review commits for code quality issues, fix critical problems
-- Success: Critical issues fixed, desktop build verified, changes committed
+- Review commits for code quality issues, fix all critical problems and compilation errors
+- Success: All issues fixed, desktop build verified, changes committed
 
 ## Constraints/Assumptions
 - Kotlin Multiplatform project (Android/iOS/Desktop)
@@ -14,13 +14,14 @@
 - Focus on critical and high-priority issues first
 - Replace println() with proper logging framework
 - Centralize duplicated code in domain layer
+- Fix all compilation errors before proceeding
 
 ## State
 
 ### Done
 - Analyzed 30+ commits using 5 parallel subagents
 - Created CODE_QUALITY_REPORT.md with 23 issues identified
-- **FIXED all critical and high-priority issues:**
+- **FIXED all critical and high-priority issues (commit 696d6af2e):**
   - ✅ Fixed duplicate HttpClients definition (prevented Android crash)
   - ✅ Fixed Desktop SyncWakeLock constructor inconsistency
   - ✅ Created shared QuoteCardStyleColors (~200 lines duplication eliminated)
@@ -28,23 +29,31 @@
   - ✅ Replaced 100+ println() with proper logging in Sync feature
   - ✅ Deleted empty ReadingBuddyScreen_NEW.kt file
   - ✅ Fixed Log.error() API usage (incorrect lambda syntax → correct varargs syntax)
+- **FIXED compilation errors:**
+  - ✅ iOS encryption service type mismatches (Int → ULong with .convert())
+  - ✅ iOS SecurityException → IllegalStateException
+  - ✅ iOS memcpy → platform.posix.memcpy
+  - ✅ TTSContentLoaderImpl parseContent made suspend
+  - ✅ SubscribeChapterById applyContentProcessing made suspend with mapLatest
+- **FIXED medium priority issues:**
+  - ✅ Issue #13: Created QuoteCardConstants object with all magic numbers
+  - ✅ Issue #14: Renamed IosQuoteCardGenerator → IOSQuoteCardGenerator
+  - ✅ Issue #11: Documented hardcoded TODOs with detailed explanations
 
 ### Now
-- Committing all fixes
+- Committing compilation fixes and remaining improvements
 
 ### Next
-- Consider addressing remaining medium/low priority issues from CODE_QUALITY_REPORT.md in future sessions
+- Final desktop build verification
+- Consider addressing remaining low priority issues in future sessions
 
 ## Open Questions
 - None
 
 ## Working Set (files/ids/commands)
 - CODE_QUALITY_REPORT.md
-- domain/src/commonMain/kotlin/ireader/domain/models/quote/QuoteCardStyleColors.kt (new)
-- domain/src/commonTest/kotlin/ireader/domain/models/quote/QuoteCardStyleColorsTest.kt (new)
-- desktop/build.gradle.kts (fixed test dependencies)
-- domain/src/androidMain/kotlin/ireader/domain/di/DomainModule.kt (kept HttpClients)
-- data/src/androidMain/kotlin/ireader/data/di/dataPlatformModule.kt (removed duplicate)
-- data/src/desktopMain/kotlin/ireader/data/sync/SyncWakeLock.kt (fixed constructor)
-- All Sync feature files (replaced println with Log, fixed Log.error() syntax)
-- All quote card generator files (use shared colors)
+- domain/src/iosMain/kotlin/ireader/domain/services/sync/CommonEncryptionService.ios.kt
+- domain/src/commonMain/kotlin/ireader/domain/services/tts_service/v2/TTSContentLoaderImpl.kt
+- domain/src/commonMain/kotlin/ireader/domain/usecases/local/chapter_usecases/SubscribeChapterById.kt
+- domain/src/commonMain/kotlin/ireader/domain/models/quote/QuoteCardConstants.kt
+- All quote card generator files

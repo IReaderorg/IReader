@@ -7,6 +7,7 @@ import ireader.domain.data.repository.DiscordQuoteRepository
 import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteCardStyle
 import ireader.domain.models.quote.QuoteContext
+import ireader.domain.models.quote.QuoteCardConstants
 import ireader.domain.usecases.quote.LocalQuoteUseCases
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -85,7 +86,7 @@ class MyQuotesViewModel(
     
     // Rate limiting: track last share timestamp
     private var lastShareTimestamp: Long = 0L
-    private val shareRateLimitMs: Long = 30_000L // 30 seconds between shares
+    private val shareRateLimitMs: Long = QuoteCardConstants.SHARE_RATE_LIMIT_MS
     
     // Preferred quote style
     private val _preferredQuoteStyle = MutableStateFlow(QuoteCardStyle.GRADIENT_SUNSET)
@@ -230,7 +231,7 @@ class MyQuotesViewModel(
         quoteToShare = quote
         // Calculate share validation (Discord has no length limit, but we validate for UX)
         shareValidation = ireader.domain.models.quote.ShareValidation(
-            canShare = quote.text.length >= 10,
+            canShare = quote.text.length >= QuoteCardConstants.MIN_QUOTE_LENGTH,
             currentLength = quote.text.length,
             maxLength = Int.MAX_VALUE, // Discord has no practical limit
             minLength = 10,

@@ -52,6 +52,12 @@ import java.io.File
 
 @OptIn(ExperimentalTextApi::class)
 actual val DomainModule = module {
+    // Module Organization Note:
+    // This module uses the includes() pattern for sub-modules (syncDomainModule, ServiceModule, etc.)
+    // which provides better organization and separation of concerns. Consider standardizing other
+    // DI modules across the codebase to follow this pattern where appropriate, especially for
+    // modules with 20+ definitions. Benefits: improved readability, easier testing, clearer dependencies.
+    
     // Include sync module for sync functionality
     includes(syncDomainModule)
     // Include ServiceModule for platform services (DownloadService, NotificationService, etc.)
@@ -257,7 +263,13 @@ actual val DomainModule = module {
     single<ireader.domain.plugins.PaymentProcessor> {
         ireader.domain.plugins.AndroidPaymentProcessor(
             getCurrentUserId = { 
-                // TODO: Get actual user ID from authentication service
+                // TODO: Replace with actual user authentication integration
+                // Currently returns hardcoded "default_user" as placeholder
+                // Required changes:
+                // 1. Implement user authentication service (Firebase Auth, custom backend, etc.)
+                // 2. Store authenticated user ID in UserPreferences or secure storage
+                // 3. Inject authentication service here and retrieve actual user ID
+                // 4. Handle unauthenticated state (return null or anonymous ID)
                 "default_user"
             }
         )

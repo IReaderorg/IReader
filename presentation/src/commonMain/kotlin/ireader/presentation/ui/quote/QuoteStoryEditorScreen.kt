@@ -162,18 +162,18 @@ fun QuoteStoryEditorScreen(
         TopActionBar(
             onClose = onDismiss,
             onSave = {
-                if (quoteText.length >= 10 && bookTitle.isNotBlank()) {
+                if (quoteText.length >= QuoteCardConstants.MIN_QUOTE_LENGTH && bookTitle.isNotBlank()) {
                     onSave(quoteText, bookTitle, author, currentStyle)
                 }
             },
             onShare = onShare?.let { shareCallback ->
                 {
-                    if (quoteText.length >= 10 && bookTitle.isNotBlank()) {
+                    if (quoteText.length >= QuoteCardConstants.MIN_QUOTE_LENGTH && bookTitle.isNotBlank()) {
                         shareCallback(quoteText, bookTitle, author, currentStyle)
                     }
                 }
             },
-            canSave = quoteText.length >= 10 && bookTitle.isNotBlank(),
+            canSave = quoteText.length >= QuoteCardConstants.MIN_QUOTE_LENGTH && bookTitle.isNotBlank(),
             modifier = Modifier.align(Alignment.TopCenter)
         )
         

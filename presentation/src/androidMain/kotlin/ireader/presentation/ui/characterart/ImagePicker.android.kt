@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import ireader.core.log.Log
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +71,7 @@ actual class ImagePicker(
                     }
                 }
             } catch (e: Exception) {
+                Log.error("Failed to read image from URI: $uri", e)
                 // Error handling - could add error callback
             }
         }

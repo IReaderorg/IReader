@@ -447,7 +447,7 @@ class SyncRepositoryImpl(
             
             Result.success(Pair(localManifest, remoteManifest))
         } catch (e: Exception) {
-            Log.error(e) { "[SyncRepository] ERROR: Failed to exchange manifests: ${e.message}" }
+            Log.error(e, "[SyncRepository] ERROR: Failed to exchange manifests: ${e.message}")
             Result.failure(e)
         }
     }
@@ -588,8 +588,8 @@ class SyncRepositoryImpl(
             
             Result.success(syncResult)
         } catch (e: Exception) {
-            Log.error(e) { "[SyncRepository] ========== SYNC FAILED ==========" }
-            Log.error(e) { "[SyncRepository] ERROR: ${e.message}" }
+            Log.error(e, "[SyncRepository] ========== SYNC FAILED ==========")
+            Log.error(e, "[SyncRepository] ERROR: ${e.message}")
             
             // Phase 10.4.3: Thread-safe status update
             concurrencyManager.withMutex {
@@ -665,7 +665,7 @@ class SyncRepositoryImpl(
                     localDataSource.applyBooks(data.books)
                     Log.debug { "[SyncRepository] ✓ Books applied successfully" }
                 } catch (e: Exception) {
-                    Log.error(e) { "[SyncRepository] ERROR applying books: ${e.message}" }
+                    Log.error(e, "[SyncRepository] ERROR applying books: ${e.message}")
                     throw e
                 }
             }
@@ -676,7 +676,7 @@ class SyncRepositoryImpl(
                     localDataSource.applyChapters(data.chapters)
                     Log.debug { "[SyncRepository] ✓ Chapters applied successfully" }
                 } catch (e: Exception) {
-                    Log.error(e) { "[SyncRepository] ERROR applying chapters: ${e.message}" }
+                    Log.error(e, "[SyncRepository] ERROR applying chapters: ${e.message}")
                     throw e
                 }
             }
@@ -687,7 +687,7 @@ class SyncRepositoryImpl(
                     localDataSource.applyHistory(data.history)
                     Log.debug { "[SyncRepository] ✓ History applied successfully" }
                 } catch (e: Exception) {
-                    Log.error(e) { "[SyncRepository] ERROR applying history: ${e.message}" }
+                    Log.error(e, "[SyncRepository] ERROR applying history: ${e.message}")
                     throw e
                 }
             }
@@ -695,7 +695,7 @@ class SyncRepositoryImpl(
             Log.info { "[SyncRepository] ✓ All sync data applied successfully" }
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.error(e) { "[SyncRepository] ERROR in applySync: ${e.message}" }
+            Log.error(e, "[SyncRepository] ERROR in applySync: ${e.message}")
             Result.failure(e)
         }
     }

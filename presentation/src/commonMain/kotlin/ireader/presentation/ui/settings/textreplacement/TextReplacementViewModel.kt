@@ -117,9 +117,26 @@ class TextReplacementViewModel(
         scope.launch {
             try {
                 // Validate inputs
+                if (name.isBlank()) {
+                    _state.value = TextReplacementState.Error("Replacement name cannot be empty")
+                    return@launch
+                }
+                
                 if (findText.isBlank()) {
                     _state.value = TextReplacementState.Error("Find text cannot be empty")
                     return@launch
+                }
+                
+                // Validate regex pattern if it looks like regex
+                val regexMetaChars = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
+                val isRegex = findText.any { it in regexMetaChars }
+                if (isRegex) {
+                    try {
+                        Regex(findText) // Test if valid regex
+                    } catch (e: Exception) {
+                        _state.value = TextReplacementState.Error("Invalid regex pattern: ${e.message}")
+                        return@launch
+                    }
                 }
                 
                 textReplacementUseCase.addReplacement(

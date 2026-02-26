@@ -67,6 +67,14 @@ class QuoteCreationViewModel(
             return
         }
         
+        // Validate minimum quote length
+        if (quoteText.length < 10) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Quote must be at least 10 characters"))
+            }
+            return
+        }
+        
         isSaving = true
         scope.launch {
             val result = localQuoteUseCases.saveQuote(

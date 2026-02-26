@@ -397,43 +397,19 @@ class SyncViewModel(
     }
 
     /**
-     * Format an error for display to the user.
-     * Converts technical errors into user-friendly messages.
+     * Convert a Throwable to a user-friendly error message using SyncErrorMapper.
+     * Maps domain SyncError types to friendly messages, or creates Unknown error for other exceptions.
      */
     private fun formatError(error: Throwable): String {
-        return when {
-            error.message?.contains("network", ignoreCase = true) == true ||
-            error.message?.contains("wifi", ignoreCase = true) == true ->
-                "WiFi connection lost. Please check your network and try again."
-            
-            error.message?.contains("connection", ignoreCase = true) == true ->
-                "Failed to connect to device. Please ensure both devices are on the same network."
-            
-            error.message?.contains("authentication", ignoreCase = true) == true ||
-            error.message?.contains("pairing", ignoreCase = true) == true ->
-                "Device authentication failed. Please try pairing again."
-            
-            error.message?.contains("version", ignoreCase = true) == true ||
-            error.message?.contains("incompatible", ignoreCase = true) == true ->
-                "App versions are incompatible. Please update the app on both devices."
-            
-            error.message?.contains("storage", ignoreCase = true) == true ||
-            error.message?.contains("space", ignoreCase = true) == true ->
-                "Insufficient storage space. Please free up some space and try again."
-            
-            error.message?.contains("transfer", ignoreCase = true) == true ->
-                "Data transfer failed. Please try again."
-            
-            error.message?.contains("conflict", ignoreCase = true) == true ->
-                "Failed to resolve data conflicts. Please try manual resolution."
-            
-            error.message?.contains("device not found", ignoreCase = true) == true ->
-                "Device not found. Please ensure the device is still on the network."
-            
-            error.message?.contains("cancelled", ignoreCase = true) == true ->
-                "Sync operation was cancelled."
-            
-            else -> error.message ?: "An unexpected error occurred. Please try again."
+        val syncError = when (error) {
+            is SyncError -> error
+            else -> SyncError.Unknown(error.message ?: "An unexpected error occurred")
+        }
+        val errorInfo = SyncErrorMapper.mapError(syncError)
+        return if (errorInfo.suggestion != null) {
+            "${errorInfo.message}\n${errorInfo.suggestion}"
+        } else {
+            errorInfo.message
         }
     }
 
