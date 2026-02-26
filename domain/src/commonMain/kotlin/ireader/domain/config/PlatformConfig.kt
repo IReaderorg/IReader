@@ -46,6 +46,7 @@ expect object PlatformConfig {
     
     // Discord Webhooks
     fun getDiscordCharacterArtWebhookUrl(): String
+    fun getDiscordQuoteWebhookUrl(): String
     
     // Device identification for license binding
     fun getDeviceId(): String

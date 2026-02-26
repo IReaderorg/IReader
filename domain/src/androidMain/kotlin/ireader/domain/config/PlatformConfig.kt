@@ -45,6 +45,7 @@ actual object PlatformConfig {
     
     // Discord Webhooks
     actual fun getDiscordCharacterArtWebhookUrl(): String = BuildConfig.DISCORD_CHARACTER_ART_WEBHOOK_URL
+    actual fun getDiscordQuoteWebhookUrl(): String = BuildConfig.DISCORD_QUOTE_WEBHOOK_URL
     
     // Device identification for license binding
     // Note: This requires context, so we use a fallback approach

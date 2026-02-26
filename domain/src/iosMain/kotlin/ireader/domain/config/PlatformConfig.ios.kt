@@ -44,6 +44,7 @@ actual object PlatformConfig {
     
     // Discord Webhooks
     actual fun getDiscordCharacterArtWebhookUrl(): String = getInfoPlistValue("DISCORD_CHARACTER_ART_WEBHOOK_URL")
+    actual fun getDiscordQuoteWebhookUrl(): String = getInfoPlistValue("DISCORD_QUOTE_WEBHOOK_URL")
     
     // Device identification for license binding
     actual fun getDeviceId(): String {

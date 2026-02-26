@@ -137,6 +137,12 @@ actual object PlatformConfig {
             ?: ConfigLoader.get("discord.characterArt.webhookUrl", "")
     }
     
+    actual fun getDiscordQuoteWebhookUrl(): String {
+        return System.getProperty("discord.quote.webhookUrl")
+            ?: System.getenv("DISCORD_QUOTE_WEBHOOK_URL")
+            ?: ConfigLoader.get("discord.quote.webhookUrl", "")
+    }
+    
     // Device identification for license binding
     actual fun getDeviceId(): String {
         // Desktop: Use combination of hostname and MAC address hash

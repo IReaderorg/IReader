@@ -57,6 +57,7 @@ android {
         
         // Discord Webhooks Configuration
         buildConfigField("String", "DISCORD_CHARACTER_ART_WEBHOOK_URL", "\"${getConfigProperty("DISCORD_CHARACTER_ART_WEBHOOK_URL", "discord.characterArt.webhookUrl")}\"")
+        buildConfigField("String", "DISCORD_QUOTE_WEBHOOK_URL", "\"${getConfigProperty("DISCORD_QUOTE_WEBHOOK_URL", "discord.quote.webhookUrl")}\"")
 
         // Use standard flavor by default when consumed by modules with flavors
         missingDimensionStrategy("default", "standard")
