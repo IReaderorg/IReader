@@ -2,6 +2,7 @@ package ireader.data.quote
 
 import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteCardStyle
+import ireader.domain.models.quote.QuoteCardStyleColors
 import java.awt.Color
 import java.awt.Font
 import java.awt.GradientPaint
@@ -119,51 +120,32 @@ class DesktopQuoteCardGenerator : QuoteCardGenerator {
     }
     
     private fun getTextColor(style: QuoteCardStyle): Color {
-        return when (style) {
-            QuoteCardStyle.MINIMAL_LIGHT,
-            QuoteCardStyle.PAPER_TEXTURE -> Color.BLACK
-            else -> Color.WHITE
-        }
+        val composeColor = QuoteCardStyleColors.getTextColor(style)
+        return Color(
+            (composeColor.red * 255).toInt(),
+            (composeColor.green * 255).toInt(),
+            (composeColor.blue * 255).toInt(),
+            (composeColor.alpha * 255).toInt()
+        )
     }
     
     private fun getGradientColors(style: QuoteCardStyle): Pair<Color, Color> {
-        return when (style) {
-            QuoteCardStyle.GRADIENT_SUNSET -> Pair(
-                Color(255, 107, 107),
-                Color(255, 230, 109)
-            )
-            QuoteCardStyle.GRADIENT_OCEAN -> Pair(
-                Color(102, 126, 234),
-                Color(118, 75, 162)
-            )
-            QuoteCardStyle.GRADIENT_FOREST -> Pair(
-                Color(17, 153, 142),
-                Color(56, 239, 125)
-            )
-            QuoteCardStyle.GRADIENT_LAVENDER -> Pair(
-                Color(218, 34, 255),
-                Color(151, 51, 238)
-            )
-            QuoteCardStyle.GRADIENT_MIDNIGHT -> Pair(
-                Color(44, 62, 80),
-                Color(76, 161, 175)
-            )
-            QuoteCardStyle.MINIMAL_LIGHT -> Pair(
-                Color(245, 245, 245),
-                Color(224, 224, 224)
-            )
-            QuoteCardStyle.MINIMAL_DARK -> Pair(
-                Color(26, 26, 26),
-                Color(45, 45, 45)
-            )
-            QuoteCardStyle.PAPER_TEXTURE -> Pair(
-                Color(255, 248, 220),
-                Color(250, 235, 215)
-            )
-            QuoteCardStyle.BOOK_COVER -> Pair(
-                Color(139, 69, 19),
-                Color(210, 105, 30)
-            )
-        }
+        val (startCompose, endCompose) = QuoteCardStyleColors.getGradientColors(style)
+        
+        val startColor = Color(
+            (startCompose.red * 255).toInt(),
+            (startCompose.green * 255).toInt(),
+            (startCompose.blue * 255).toInt(),
+            (startCompose.alpha * 255).toInt()
+        )
+        
+        val endColor = Color(
+            (endCompose.red * 255).toInt(),
+            (endCompose.green * 255).toInt(),
+            (endCompose.blue * 255).toInt(),
+            (endCompose.alpha * 255).toInt()
+        )
+        
+        return Pair(startColor, endColor)
     }
 }

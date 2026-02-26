@@ -3,6 +3,7 @@ package ireader.data.sync.datasource
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import ireader.core.log.Log
 import ireader.domain.models.sync.DeviceInfo
 import ireader.domain.models.sync.SyncData
 import ireader.domain.services.sync.CertificateService
@@ -75,11 +76,11 @@ class TcpTransferDataSource(
     
     override suspend fun startServer(port: Int): Result<Int> {
         return try {
-            println("[TcpTransferDataSource] Starting TCP server on port $port")
+            Log.debug { "[TcpTransferDataSource] Starting TCP server on port $port" }
             
             stateMutex.withLock {
                 if (serverSocket != null) {
-                    println("[TcpTransferDataSource] Server already running, stopping it first")
+                    Log.debug { "[TcpTransferDataSource] Server already running, stopping it first" }
                     serverSocket?.close()
                     serverJob?.cancel()
                     delay(200)
@@ -94,33 +95,31 @@ class TcpTransferDataSource(
                 serverSocket = socket
             }
             
-            println("[TcpTransferDataSource] TCP server started on 0.0.0.0:$port")
+            Log.info { "[TcpTransferDataSource] TCP server started on 0.0.0.0:$port" }
             
             // Accept client connection in background
             serverJob = scope.launch {
                 try {
-                    println("[TcpTransferDataSource] Server: Waiting for client connection...")
+                    Log.debug { "[TcpTransferDataSource] Server: Waiting for client connection..." }
                     val clientSocket = socket.accept()
-                    println("[TcpTransferDataSource] Server: Client connected from ${clientSocket.remoteAddress}")
+                    Log.info { "[TcpTransferDataSource] Server: Client connected from ${clientSocket.remoteAddress}" }
                     
                     handleConnection(clientSocket, isServer = true)
                 } catch (e: Exception) {
-                    println("[TcpTransferDataSource] Server error: ${e.message}")
-                    e.printStackTrace()
+                    Log.error(e, "[TcpTransferDataSource] Server error: ${e.message}")
                 }
             }
             
             Result.success(port)
         } catch (e: Exception) {
-            println("[TcpTransferDataSource] Failed to start server: ${e.message}")
-            e.printStackTrace()
+            Log.error(e, "[TcpTransferDataSource] Failed to start server: ${e.message}")
             Result.failure(e)
         }
     }
     
     override suspend fun stopServer(): Result<Unit> {
         return try {
-            println("[TcpTransferDataSource] Stopping TCP server...")
+            Log.debug { "[TcpTransferDataSource] Stopping TCP server..." }
             
             stateMutex.withLock {
                 closeChannels()
@@ -130,17 +129,17 @@ class TcpTransferDataSource(
                 serverJob = null
             }
             
-            println("[TcpTransferDataSource] TCP server stopped")
+            Log.info { "[TcpTransferDataSource] TCP server stopped" }
             Result.success(Unit)
         } catch (e: Exception) {
-            println("[TcpTransferDataSource] Error stopping server: ${e.message}")
+            Log.error(e, "[TcpTransferDataSource] Error stopping server: ${e.message}")
             Result.failure(e)
         }
     }
     
     override suspend fun connectToDevice(deviceInfo: DeviceInfo): Result<Unit> {
         return try {
-            println("[TcpTransferDataSource] Connecting to ${deviceInfo.ipAddress}:${deviceInfo.port}")
+            Log.debug { "[TcpTransferDataSource] Connecting to ${deviceInfo.ipAddress}:${deviceInfo.port}" }
             
             stateMutex.withLock {
                 if (clientSocket != null) {
@@ -158,15 +157,14 @@ class TcpTransferDataSource(
                 clientSocket = socket
             }
             
-            println("[TcpTransferDataSource] Connected to ${deviceInfo.ipAddress}:${deviceInfo.port}")
+            Log.info { "[TcpTransferDataSource] Connected to ${deviceInfo.ipAddress}:${deviceInfo.port}" }
             
             // Handle connection in background
             clientJob = scope.launch {
                 try {
                     handleConnection(socket, isServer = false)
                 } catch (e: Exception) {
-                    println("[TcpTransferDataSource] Client error: ${e.message}")
-                    e.printStackTrace()
+                    Log.error(e, "[TcpTransferDataSource] Client error: ${e.message}")
                 }
             }
             
@@ -175,15 +173,14 @@ class TcpTransferDataSource(
             
             Result.success(Unit)
         } catch (e: Exception) {
-            println("[TcpTransferDataSource] Failed to connect: ${e.message}")
-            e.printStackTrace()
+            Log.error(e, "[TcpTransferDataSource] Failed to connect: ${e.message}")
             Result.failure(e)
         }
     }
     
     private suspend fun handleConnection(socket: Socket, isServer: Boolean) {
         val role = if (isServer) "Server" else "Client"
-        println("[TcpTransferDataSource] $role: Starting message handler")
+        Log.debug { "[TcpTransferDataSource] $role: Starting message handler" }
         
         val input = socket.openReadChannel()
         val output = socket.openWriteChannel(autoFlush = true)
@@ -194,21 +191,21 @@ class TcpTransferDataSource(
                 try {
                     for (request in sendChannel) {
                         try {
-                            println("[TcpTransferDataSource] $role: Sending data...")
+                            Log.debug { "[TcpTransferDataSource] $role: Sending data..." }
                             val jsonData = json.encodeToString(request.data)
                             val compressed = compressData(jsonData)
                             
                             sendMessage(output, DATA_TYPE, compressed)
                             
-                            println("[TcpTransferDataSource] $role: Data sent (${compressed.size} bytes)")
+                            Log.debug { "[TcpTransferDataSource] $role: Data sent (${compressed.size} bytes)" }
                             request.completion.complete(Result.success(Unit))
                         } catch (e: Exception) {
-                            println("[TcpTransferDataSource] $role: Send failed: ${e.message}")
+                            Log.error(e, "[TcpTransferDataSource] $role: Send failed: ${e.message}")
                             request.completion.complete(Result.failure(e))
                         }
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
-                    println("[TcpTransferDataSource] $role: Sender cancelled")
+                    Log.debug { "[TcpTransferDataSource] $role: Sender cancelled" }
                     throw e
                 }
             }
@@ -218,21 +215,21 @@ class TcpTransferDataSource(
                 try {
                     for (request in manifestSendChannel) {
                         try {
-                            println("[TcpTransferDataSource] $role: Sending manifest...")
+                            Log.debug { "[TcpTransferDataSource] $role: Sending manifest..." }
                             val jsonData = json.encodeToString(request.manifest)
                             val bytes = jsonData.encodeToByteArray()
                             
                             sendMessage(output, MANIFEST_TYPE, bytes)
                             
-                            println("[TcpTransferDataSource] $role: Manifest sent (${bytes.size} bytes)")
+                            Log.debug { "[TcpTransferDataSource] $role: Manifest sent (${bytes.size} bytes)" }
                             request.completion.complete(Result.success(Unit))
                         } catch (e: Exception) {
-                            println("[TcpTransferDataSource] $role: Manifest send failed: ${e.message}")
+                            Log.error(e, "[TcpTransferDataSource] $role: Manifest send failed: ${e.message}")
                             request.completion.complete(Result.failure(e))
                         }
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
-                    println("[TcpTransferDataSource] $role: Manifest sender cancelled")
+                    Log.debug { "[TcpTransferDataSource] $role: Manifest sender cancelled" }
                     throw e
                 }
             }
@@ -245,28 +242,27 @@ class TcpTransferDataSource(
                         
                         when (type) {
                             MANIFEST_TYPE -> {
-                                println("[TcpTransferDataSource] $role: Received manifest (${data.size} bytes)")
+                                Log.debug { "[TcpTransferDataSource] $role: Received manifest (${data.size} bytes)" }
                                 val jsonData = data.decodeToString()
                                 val manifest = json.decodeFromString<ireader.domain.models.sync.SyncManifest>(jsonData)
                                 manifestReceiveChannel.send(manifest)
                             }
                             DATA_TYPE -> {
-                                println("[TcpTransferDataSource] $role: Received data (${data.size} bytes)")
+                                Log.debug { "[TcpTransferDataSource] $role: Received data (${data.size} bytes)" }
                                 val jsonData = decompressData(data)
                                 val syncData = json.decodeFromString<SyncData>(jsonData)
                                 receiveChannel.send(syncData)
                             }
                             else -> {
-                                println("[TcpTransferDataSource] $role: Unknown message type: $type")
+                                Log.warn { "[TcpTransferDataSource] $role: Unknown message type: $type" }
                             }
                         }
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
-                    println("[TcpTransferDataSource] $role: Receiver cancelled")
+                    Log.debug { "[TcpTransferDataSource] $role: Receiver cancelled" }
                     throw e
                 } catch (e: Exception) {
-                    println("[TcpTransferDataSource] $role: Receiver error: ${e.message}")
-                    e.printStackTrace()
+                    Log.error(e, "[TcpTransferDataSource] $role: Receiver error: ${e.message}")
                 }
             }
         }
@@ -375,10 +371,10 @@ class TcpTransferDataSource(
     
     override suspend fun sendManifest(manifest: ireader.domain.models.sync.SyncManifest): Result<Unit> {
         return try {
-            println("[TcpTransferDataSource] sendManifest() called with ${manifest.items.size} items")
+            Log.debug { "[TcpTransferDataSource] sendManifest() called with ${manifest.items.size} items" }
             
             if (!hasActiveConnection()) {
-                println("[TcpTransferDataSource] ERROR: No active connection")
+                Log.error { "[TcpTransferDataSource] ERROR: No active connection" }
                 return Result.failure(Exception("No active connection"))
             }
             
@@ -387,15 +383,14 @@ class TcpTransferDataSource(
             manifestSendChannel.send(request)
             completion.await()
         } catch (e: Exception) {
-            println("[TcpTransferDataSource] Failed to send manifest: ${e.message}")
-            e.printStackTrace()
+            Log.error(e, "[TcpTransferDataSource] Failed to send manifest: ${e.message}")
             Result.failure(e)
         }
     }
     
     override suspend fun receiveManifest(): Result<ireader.domain.models.sync.SyncManifest> {
         return try {
-            println("[TcpTransferDataSource] Waiting to receive manifest...")
+            Log.debug { "[TcpTransferDataSource] Waiting to receive manifest..." }
             
             if (!hasActiveConnection()) {
                 return Result.failure(Exception("No active connection"))
@@ -405,14 +400,13 @@ class TcpTransferDataSource(
                 manifestReceiveChannel.receive()
             }
             
-            println("[TcpTransferDataSource] Manifest received: ${manifest.items.size} items")
+            Log.debug { "[TcpTransferDataSource] Manifest received: ${manifest.items.size} items" }
             Result.success(manifest)
         } catch (e: TimeoutCancellationException) {
-            println("[TcpTransferDataSource] Manifest receive timeout")
+            Log.error { "[TcpTransferDataSource] Manifest receive timeout" }
             Result.failure(Exception("Manifest receive timeout"))
         } catch (e: Exception) {
-            println("[TcpTransferDataSource] Failed to receive manifest: ${e.message}")
-            e.printStackTrace()
+            Log.error(e, "[TcpTransferDataSource] Failed to receive manifest: ${e.message}")
             Result.failure(e)
         }
     }

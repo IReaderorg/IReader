@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.quote.QuoteCardStyle
+import ireader.domain.models.quote.QuoteCardStyleColors
 import ireader.i18n.Images
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -256,23 +257,13 @@ private fun QuoteStylePreview(
     modifier: Modifier = Modifier
 ) {
     val gradients = remember {
-        mapOf(
-            QuoteCardStyle.GRADIENT_SUNSET to listOf(Color(0xFFFF6B6B), Color(0xFFFFE66D)),
-            QuoteCardStyle.GRADIENT_OCEAN to listOf(Color(0xFF667EEA), Color(0xFF764BA2)),
-            QuoteCardStyle.GRADIENT_FOREST to listOf(Color(0xFF11998E), Color(0xFF38EF7D)),
-            QuoteCardStyle.GRADIENT_LAVENDER to listOf(Color(0xFFDA22FF), Color(0xFF9733EE)),
-            QuoteCardStyle.GRADIENT_MIDNIGHT to listOf(Color(0xFF2C3E50), Color(0xFF4CA1AF)),
-            QuoteCardStyle.MINIMAL_LIGHT to listOf(Color(0xFFF5F5F5), Color(0xFFE0E0E0)),
-            QuoteCardStyle.MINIMAL_DARK to listOf(Color(0xFF1A1A1A), Color(0xFF2D2D2D)),
-            QuoteCardStyle.PAPER_TEXTURE to listOf(Color(0xFFFFF8DC), Color(0xFFFAEBD7)),
-            QuoteCardStyle.BOOK_COVER to listOf(Color(0xFF8B4513), Color(0xFFD2691E))
-        )
+        QuoteCardStyle.entries.associate { style ->
+            val (startColor, endColor) = QuoteCardStyleColors.getGradientColors(style)
+            style to listOf(startColor, endColor)
+        }
     }
     
-    val textColor = when (style) {
-        QuoteCardStyle.MINIMAL_LIGHT, QuoteCardStyle.PAPER_TEXTURE -> Color.Black
-        else -> Color.White
-    }
+    val textColor = QuoteCardStyleColors.getTextColor(style)
     
     Box(
         modifier = modifier

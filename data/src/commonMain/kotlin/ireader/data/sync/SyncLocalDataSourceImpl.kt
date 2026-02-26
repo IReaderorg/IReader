@@ -1,5 +1,6 @@
 package ireader.data.sync
 
+import ireader.core.log.Log
 import ireader.core.source.model.Page
 import ireader.core.source.model.decode
 import ireader.core.source.model.encode
@@ -208,7 +209,7 @@ class SyncLocalDataSourceImpl(
                 
                 if (existingBook == null) {
                     // Book doesn't exist - insert it
-                    println("[SyncLocalDataSource] Inserting new book: ${book.title} (${book.globalId})")
+                    Log.debug { "[SyncLocalDataSource] Inserting new book: ${book.title} (${book.globalId})" }
                     bookQueries.upsert(
                         id = 0L, // Let database auto-generate ID
                         source = book.sourceId.toLongOrNull() ?: 0L,
@@ -239,7 +240,7 @@ class SyncLocalDataSourceImpl(
                     val localUpdatedAt = existingBook.last_update ?: existingBook.date_added
                     
                     if (remoteUpdatedAt > localUpdatedAt) {
-                        println("[SyncLocalDataSource] Updating book: ${book.title} (${book.globalId}) - remote is newer")
+                        Log.debug { "[SyncLocalDataSource] Updating book: ${book.title} (${book.globalId}) - remote is newer" }
                         bookQueries.update(
                             id = existingBook._id,
                             source = book.sourceId.toLongOrNull(),
@@ -263,7 +264,7 @@ class SyncLocalDataSourceImpl(
                             isArchived = null
                         )
                     } else {
-                        println("[SyncLocalDataSource] Skipping book: ${book.title} (${book.globalId}) - local is newer or same")
+                        Log.debug { "[SyncLocalDataSource] Skipping book: ${book.title} (${book.globalId}) - local is newer or same" }
                     }
                 }
             }
@@ -284,7 +285,7 @@ class SyncLocalDataSourceImpl(
                 ).executeAsOneOrNull()
                 
                 if (book == null) {
-                    println("[SyncLocalDataSource] WARNING: Book not found for chapter: ${chapter.name} (${chapter.bookGlobalId})")
+                    Log.warn { "[SyncLocalDataSource] WARNING: Book not found for chapter: ${chapter.name} (${chapter.bookGlobalId})" }
                     return@forEach
                 }
                 
@@ -301,9 +302,9 @@ class SyncLocalDataSourceImpl(
                 
                 if (shouldUpdate) {
                     if (existingChapter == null) {
-                        println("[SyncLocalDataSource] Inserting new chapter: ${chapter.name} (${chapter.globalId})")
+                        Log.debug { "[SyncLocalDataSource] Inserting new chapter: ${chapter.name} (${chapter.globalId})" }
                     } else {
-                        println("[SyncLocalDataSource] Updating chapter: ${chapter.name} (${chapter.globalId}) - remote is newer")
+                        Log.debug { "[SyncLocalDataSource] Updating chapter: ${chapter.name} (${chapter.globalId}) - remote is newer" }
                     }
                     
                     // Decode content from JSON string to List<Page> using extension function
@@ -329,7 +330,7 @@ class SyncLocalDataSourceImpl(
                         type = 0L // Default type
                     )
                 } else {
-                    println("[SyncLocalDataSource] Skipping chapter: ${chapter.name} (${chapter.globalId}) - local is newer or same")
+                    Log.debug { "[SyncLocalDataSource] Skipping chapter: ${chapter.name} (${chapter.globalId}) - local is newer or same" }
                 }
             }
         }
@@ -352,7 +353,7 @@ class SyncLocalDataSourceImpl(
                     }
                 
                 if (matchingChapter == null) {
-                    println("[SyncLocalDataSource] WARNING: Chapter not found for history: ${historyData.chapterGlobalId}")
+                    Log.warn { "[SyncLocalDataSource] WARNING: Chapter not found for history: ${historyData.chapterGlobalId}" }
                     return@forEach
                 }
                 
@@ -361,7 +362,7 @@ class SyncLocalDataSourceImpl(
                 
                 if (existingHistory == null) {
                     // History doesn't exist - insert it
-                    println("[SyncLocalDataSource] Inserting new history for chapter: ${matchingChapter._id}")
+                    Log.debug { "[SyncLocalDataSource] Inserting new history for chapter: ${matchingChapter._id}" }
                     historyQueries.upsert(
                         chapterId = matchingChapter._id,
                         readAt = historyData.lastRead,
@@ -374,7 +375,7 @@ class SyncLocalDataSourceImpl(
                     val localLastRead = existingHistory.last_read ?: 0L
                     
                     if (remoteLastRead > localLastRead) {
-                        println("[SyncLocalDataSource] Updating history for chapter: ${matchingChapter._id} - remote is newer")
+                        Log.debug { "[SyncLocalDataSource] Updating history for chapter: ${matchingChapter._id} - remote is newer" }
                         historyQueries.upsert(
                             chapterId = matchingChapter._id,
                             readAt = historyData.lastRead,
@@ -382,7 +383,7 @@ class SyncLocalDataSourceImpl(
                             reading_progress = historyData.readingProgress
                         )
                     } else {
-                        println("[SyncLocalDataSource] Skipping history for chapter: ${matchingChapter._id} - local is newer or same")
+                        Log.debug { "[SyncLocalDataSource] Skipping history for chapter: ${matchingChapter._id} - local is newer or same" }
                     }
                 }
             }

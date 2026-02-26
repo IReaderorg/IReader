@@ -3,6 +3,7 @@ package ireader.data.sync
 import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.PowerManager
+import ireader.core.log.Log
 
 /**
  * Android implementation of SyncWakeLock.
@@ -40,10 +41,9 @@ actual class SyncWakeLock(private val context: Context) {
                 acquire(10 * 60 * 1000L) // 10 minutes max
             }
             
-            println("[SyncWakeLock] Locks acquired - WiFi will stay active during sync")
+            Log.debug { "[SyncWakeLock] Locks acquired - WiFi will stay active during sync" }
         } catch (e: Exception) {
-            println("[SyncWakeLock] Failed to acquire locks: ${e.message}")
-            e.printStackTrace()
+            Log.error(e) { "[SyncWakeLock] Failed to acquire locks: ${e.message}" }
         }
     }
     
@@ -67,10 +67,9 @@ actual class SyncWakeLock(private val context: Context) {
             }
             wakeLock = null
             
-            println("[SyncWakeLock] Locks released - normal power management resumed")
+            Log.debug { "[SyncWakeLock] Locks released - normal power management resumed" }
         } catch (e: Exception) {
-            println("[SyncWakeLock] Failed to release locks: ${e.message}")
-            e.printStackTrace()
+            Log.error(e) { "[SyncWakeLock] Failed to release locks: ${e.message}" }
         }
     }
 }

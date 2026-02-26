@@ -4,7 +4,7 @@ package ireader.data.sync
  * Desktop implementation of SyncWakeLock.
  * Desktop doesn't need wake locks - no-op implementation.
  */
-actual class SyncWakeLock {
+actual class SyncWakeLock(private val context: Any? = null) {
     /**
      * No-op on desktop - power management not needed.
      */

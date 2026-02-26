@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.quote.QuoteCardStyle
+import ireader.domain.models.quote.QuoteCardStyleColors
 
 /**
  * Instagram story-style quote style selector screen.
@@ -161,44 +162,13 @@ private fun QuoteStylePreview(
  * Get background brush for a quote card style
  */
 private fun getStyleBackground(style: QuoteCardStyle): Brush {
-    return when (style) {
-        QuoteCardStyle.GRADIENT_SUNSET -> Brush.verticalGradient(
-            colors = listOf(Color(0xFFFF6B6B), Color(0xFFFFE66D))
-        )
-        QuoteCardStyle.GRADIENT_OCEAN -> Brush.verticalGradient(
-            colors = listOf(Color(0xFF4ECDC4), Color(0xFF556270))
-        )
-        QuoteCardStyle.GRADIENT_FOREST -> Brush.verticalGradient(
-            colors = listOf(Color(0xFF134E5E), Color(0xFF71B280))
-        )
-        QuoteCardStyle.GRADIENT_LAVENDER -> Brush.verticalGradient(
-            colors = listOf(Color(0xFFDA22FF), Color(0xFF9733EE))
-        )
-        QuoteCardStyle.GRADIENT_MIDNIGHT -> Brush.verticalGradient(
-            colors = listOf(Color(0xFF232526), Color(0xFF414345))
-        )
-        QuoteCardStyle.MINIMAL_LIGHT -> Brush.verticalGradient(
-            colors = listOf(Color(0xFFF5F5F5), Color(0xFFFFFFFF))
-        )
-        QuoteCardStyle.MINIMAL_DARK -> Brush.verticalGradient(
-            colors = listOf(Color(0xFF1A1A1A), Color(0xFF2D2D2D))
-        )
-        QuoteCardStyle.PAPER_TEXTURE -> Brush.verticalGradient(
-            colors = listOf(Color(0xFFFFF8DC), Color(0xFFFAF0E6))
-        )
-        QuoteCardStyle.BOOK_COVER -> Brush.verticalGradient(
-            colors = listOf(Color(0xFF8B4513), Color(0xFFD2691E))
-        )
-    }
+    val (startColor, endColor) = QuoteCardStyleColors.getGradientColors(style)
+    return Brush.verticalGradient(colors = listOf(startColor, endColor))
 }
 
 /**
  * Get text color for a quote card style
  */
 private fun getStyleTextColor(style: QuoteCardStyle): Color {
-    return when (style) {
-        QuoteCardStyle.MINIMAL_LIGHT,
-        QuoteCardStyle.PAPER_TEXTURE -> Color.Black
-        else -> Color.White
-    }
+    return QuoteCardStyleColors.getTextColor(style)
 }

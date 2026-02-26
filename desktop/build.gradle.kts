@@ -62,6 +62,10 @@ dependencies {
     // Removed duplicate compose dependencies - already provided by presentation module
     // Only keeping desktop-specific dependencies
     implementation(libs.kermit)
+    
+    // Test dependencies
+    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }
 
 kotlin {

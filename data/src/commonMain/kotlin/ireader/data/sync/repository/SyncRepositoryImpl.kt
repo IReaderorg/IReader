@@ -1,5 +1,6 @@
 package ireader.data.sync.repository
 
+import ireader.core.log.Log
 import ireader.data.sync.ConcurrencyManager
 import ireader.data.sync.datasource.DiscoveryDataSource
 import ireader.data.sync.datasource.SyncLocalDataSource
@@ -71,11 +72,11 @@ class SyncRepositoryImpl(
         val appVersion = getAppVersion()
         
         // Debug logging
-        println("[SyncRepository] Device Info:")
-        println("[SyncRepository]   ID: $deviceId")
-        println("[SyncRepository]   Name: $deviceName")
-        println("[SyncRepository]   Type: $deviceType")
-        println("[SyncRepository]   Version: $appVersion")
+        Log.debug { "[SyncRepository] Device Info:" }
+        Log.debug { "[SyncRepository]   ID: $deviceId" }
+        Log.debug { "[SyncRepository]   Name: $deviceName" }
+        Log.debug { "[SyncRepository]   Type: $deviceType" }
+        Log.debug { "[SyncRepository]   Version: $appVersion" }
         
         DeviceInfo(
             deviceId = deviceId,
@@ -173,47 +174,45 @@ class SyncRepositoryImpl(
     
     override suspend fun startDiscovery(): Result<Unit> {
         return try {
-            println("[SyncRepository] ========== START DISCOVERY ==========")
-            println("[SyncRepository] Broadcasting device info:")
-            println("[SyncRepository]   Device ID: ${currentDeviceInfo.deviceId}")
-            println("[SyncRepository]   Device Name: ${currentDeviceInfo.deviceName}")
-            println("[SyncRepository]   Device Type: ${currentDeviceInfo.deviceType}")
-            println("[SyncRepository]   IP: ${currentDeviceInfo.ipAddress}:${currentDeviceInfo.port}")
+            Log.info { "[SyncRepository] ========== START DISCOVERY ==========" }
+            Log.debug { "[SyncRepository] Broadcasting device info:" }
+            Log.debug { "[SyncRepository]   Device ID: ${currentDeviceInfo.deviceId}" }
+            Log.debug { "[SyncRepository]   Device Name: ${currentDeviceInfo.deviceName}" }
+            Log.debug { "[SyncRepository]   Device Type: ${currentDeviceInfo.deviceType}" }
+            Log.debug { "[SyncRepository]   IP: ${currentDeviceInfo.ipAddress}:${currentDeviceInfo.port}" }
             
             // Start broadcasting this device's presence
             discoveryDataSource.startBroadcasting(currentDeviceInfo).getOrThrow()
-            println("[SyncRepository] Broadcasting started successfully")
+            Log.info { "[SyncRepository] Broadcasting started successfully" }
             
             // Start discovering other devices
             discoveryDataSource.startDiscovery().getOrThrow()
-            println("[SyncRepository] Discovery started successfully")
+            Log.info { "[SyncRepository] Discovery started successfully" }
             
             _syncStatus.value = SyncStatus.Discovering
             Result.success(Unit)
         } catch (e: Exception) {
-            println("[SyncRepository] ERROR: Failed to start discovery: ${e.message}")
-            e.printStackTrace()
+            Log.error(e, "[SyncRepository] ERROR: Failed to start discovery: ${e.message}")
             Result.failure(e)
         }
     }
     
     override suspend fun stopDiscovery(): Result<Unit> {
         return try {
-            println("[SyncRepository] ========== STOP DISCOVERY ==========")
+            Log.info { "[SyncRepository] ========== STOP DISCOVERY ==========" }
             
             // Stop broadcasting
             discoveryDataSource.stopBroadcasting().getOrThrow()
-            println("[SyncRepository] Broadcasting stopped")
+            Log.debug { "[SyncRepository] Broadcasting stopped" }
             
             // Stop discovering
             discoveryDataSource.stopDiscovery().getOrThrow()
-            println("[SyncRepository] Discovery stopped")
+            Log.debug { "[SyncRepository] Discovery stopped" }
             
             _syncStatus.value = SyncStatus.Idle
             Result.success(Unit)
         } catch (e: Exception) {
-            println("[SyncRepository] ERROR: Failed to stop discovery: ${e.message}")
-            e.printStackTrace()
+            Log.error(e, "[SyncRepository] ERROR: Failed to stop discovery: ${e.message}")
             Result.failure(e)
         }
     }
@@ -245,33 +244,33 @@ class SyncRepositoryImpl(
         // Phase 10.4.1: Use IO dispatcher for network operations
         return withContext(Dispatchers.IO) {
             try {
-                println("[SyncRepository] ========== CONNECT TO DEVICE ==========")
+                Log.info { "[SyncRepository] ========== CONNECT TO DEVICE ==========" }
                 _syncStatus.value = SyncStatus.Connecting(device.deviceName)
                 
                 // Determine role based on user manual selection
                 val shouldBeServer = syncPreferences.isServer()
                 
                 // Debug logging
-                println("[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode")
-                println("[SyncRepository] Current device ID: ${currentDeviceInfo.deviceId}")
-                println("[SyncRepository] Remote device ID: ${device.deviceId}")
-                println("[SyncRepository] Should be server: $shouldBeServer")
-                println("[SyncRepository] Remote device: ${device.deviceName} at ${device.ipAddress}:${device.port}")
+                Log.debug { "[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode" }
+                Log.debug { "[SyncRepository] Current device ID: ${currentDeviceInfo.deviceId}" }
+                Log.debug { "[SyncRepository] Remote device ID: ${device.deviceId}" }
+                Log.debug { "[SyncRepository] Should be server: $shouldBeServer" }
+                Log.debug { "[SyncRepository] Remote device: ${device.deviceName} at ${device.ipAddress}:${device.port}" }
                 
                 if (shouldBeServer) {
                     // This device acts as SERVER
-                    println("[SyncRepository] ========== ROLE: SERVER ==========")
-                    println("[SyncRepository] Starting server on port 8963")
+                    Log.info { "[SyncRepository] ========== ROLE: SERVER ==========" }
+                    Log.debug { "[SyncRepository] Starting server on port 8963" }
                     // Start server first and wait for client to connect
                     val serverPort = 8963 // Use fixed port for server
                     val startResult = transferDataSource.startServer(serverPort)
                     
                     if (startResult.isFailure) {
-                        println("[SyncRepository] ERROR: Failed to start server: ${startResult.exceptionOrNull()?.message}")
+                        Log.error { "[SyncRepository] ERROR: Failed to start server: ${startResult.exceptionOrNull()?.message}" }
                         throw startResult.exceptionOrNull() ?: Exception("Failed to start server")
                     }
                     
-                    println("[SyncRepository] Server started successfully, waiting for client connection...")
+                    Log.debug { "[SyncRepository] Server started successfully, waiting for client connection..." }
                     
                     // Wait for actual client connection with timeout
                     var retryCount = 0
@@ -287,24 +286,24 @@ class SyncRepositoryImpl(
                         if (!connected) {
                             retryCount++
                             if (retryCount % 5 == 0) {
-                                println("[SyncRepository] Still waiting for client... (${retryCount}s elapsed)")
+                                Log.debug { "[SyncRepository] Still waiting for client... (${retryCount}s elapsed)" }
                             }
                         }
                     }
                     
                     if (!connected) {
                         // Clean up server if client didn't connect
-                        println("[SyncRepository] ERROR: Client failed to connect after ${maxRetries} seconds")
-                        println("[SyncRepository] Stopping server...")
+                        Log.error { "[SyncRepository] ERROR: Client failed to connect after ${maxRetries} seconds" }
+                        Log.debug { "[SyncRepository] Stopping server..." }
                         transferDataSource.stopServer()
                         throw Exception("Client failed to connect after ${maxRetries} seconds. Ensure both devices are on the same network and the other device has started sync.")
                     }
                     
-                    println("[SyncRepository] ✓ Client connected successfully!")
+                    Log.info { "[SyncRepository] ✓ Client connected successfully!" }
                 } else {
                     // This device acts as CLIENT
-                    println("[SyncRepository] ========== ROLE: CLIENT ==========")
-                    println("[SyncRepository] Connecting to server at ${device.ipAddress}:${device.port}")
+                    Log.info { "[SyncRepository] ========== ROLE: CLIENT ==========" }
+                    Log.debug { "[SyncRepository] Connecting to server at ${device.ipAddress}:${device.port}" }
                     // Connect to the server with retry logic
                     var retryCount = 0
                     val maxRetries = 10
@@ -316,14 +315,14 @@ class SyncRepositoryImpl(
                             // Wait before attempting connection (give server time to start)
                             delay(2000L) // Wait 2 seconds between attempts
                             
-                            println("[SyncRepository] Connection attempt ${retryCount + 1}/$maxRetries to ${device.ipAddress}:${device.port}")
+                            Log.debug { "[SyncRepository] Connection attempt ${retryCount + 1}/$maxRetries to ${device.ipAddress}:${device.port}" }
                             val connectResult = transferDataSource.connectToDevice(device)
                             
                             if (connectResult.isFailure) {
                                 throw connectResult.exceptionOrNull() ?: Exception("Connection failed")
                             }
                             
-                            println("[SyncRepository] WebSocket connection initiated, verifying session...")
+                            Log.debug { "[SyncRepository] WebSocket connection initiated, verifying session..." }
                             
                             // Verify connection is actually established
                             // Give WebSocket more time to establish and set session
@@ -331,26 +330,26 @@ class SyncRepositoryImpl(
                             connected = transferDataSource.hasActiveConnection()
                             
                             if (connected) {
-                                println("[SyncRepository] ✓ Connected successfully!")
+                                Log.info { "[SyncRepository] ✓ Connected successfully!" }
                                 break // Connection successful
                             } else {
-                                println("[SyncRepository] WARNING: Connection established but no active session, retrying...")
+                                Log.warn { "[SyncRepository] WARNING: Connection established but no active session, retrying..." }
                                 // Don't increment retry count for this case, just retry
                             }
                         } catch (e: Exception) {
-                            println("[SyncRepository] Connection attempt failed: ${e.message}")
+                            Log.debug { "[SyncRepository] Connection attempt failed: ${e.message}" }
                             lastError = e
                             retryCount++
                             
                             if (retryCount >= maxRetries) {
-                                println("[SyncRepository] ERROR: All connection attempts exhausted")
+                                Log.error { "[SyncRepository] ERROR: All connection attempts exhausted" }
                                 throw Exception("Failed to connect after $maxRetries attempts: ${e.message}. Ensure the other device has started sync and is acting as server.", e)
                             }
                         }
                     }
                     
                     if (!connected) {
-                        println("[SyncRepository] ERROR: Failed to establish connection after all retries")
+                        Log.error { "[SyncRepository] ERROR: Failed to establish connection after all retries" }
                         throw Exception("Failed to establish connection after $maxRetries attempts. ${lastError?.message ?: "Unknown error"}")
                     }
                 }
@@ -360,15 +359,14 @@ class SyncRepositoryImpl(
                     deviceName = device.deviceName
                 )
                 
-                println("[SyncRepository] ✓ Connection established successfully")
-                println("[SyncRepository] Connection details: ${device.deviceName} (${device.deviceId})")
+                Log.info { "[SyncRepository] ✓ Connection established successfully" }
+                Log.debug { "[SyncRepository] Connection details: ${device.deviceName} (${device.deviceId})" }
                 
                 _syncStatus.value = SyncStatus.Idle
                 Result.success(connection)
             } catch (e: Exception) {
-                println("[SyncRepository] ========== CONNECTION FAILED ==========")
-                println("[SyncRepository] ERROR: ${e.message}")
-                e.printStackTrace()
+                Log.error(e, "[SyncRepository] ========== CONNECTION FAILED ==========")
+                Log.error(e, "[SyncRepository] ERROR: ${e.message}")
                 
                 _syncStatus.value = SyncStatus.Failed(
                     device.deviceName,
@@ -408,49 +406,48 @@ class SyncRepositoryImpl(
     
     override suspend fun exchangeManifests(connection: Connection): Result<Pair<SyncManifest, SyncManifest>> {
         return try {
-            println("[SyncRepository] ========== EXCHANGE MANIFESTS ==========")
+            Log.info { "[SyncRepository] ========== EXCHANGE MANIFESTS ==========" }
             
             // Build local manifest from local data
             val localManifest = buildLocalManifest()
-            println("[SyncRepository] Local manifest built: ${localManifest.items.size} items")
+            Log.debug { "[SyncRepository] Local manifest built: ${localManifest.items.size} items" }
             
             // Determine role based on user manual selection
             val shouldBeServer = syncPreferences.isServer()
-            println("[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode")
-            println("[SyncRepository] Role determination: currentDeviceId=${currentDeviceInfo.deviceId}, remoteDeviceId=${connection.deviceId}, shouldBeServer=$shouldBeServer")
+            Log.debug { "[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode" }
+            Log.debug { "[SyncRepository] Role determination: currentDeviceId=${currentDeviceInfo.deviceId}, remoteDeviceId=${connection.deviceId}, shouldBeServer=$shouldBeServer" }
             
             val remoteManifest = if (shouldBeServer) {
                 // SERVER: Receive client manifest first, then send ours
-                println("[SyncRepository] Server: Waiting for client manifest...")
+                Log.debug { "[SyncRepository] Server: Waiting for client manifest..." }
                 val clientManifest = transferDataSource.receiveManifest().getOrThrow()
-                println("[SyncRepository] Server: Received client manifest with ${clientManifest.items.size} items")
+                Log.debug { "[SyncRepository] Server: Received client manifest with ${clientManifest.items.size} items" }
                 
-                println("[SyncRepository] Server: Sending our manifest...")
+                Log.debug { "[SyncRepository] Server: Sending our manifest..." }
                 transferDataSource.sendManifest(localManifest).getOrThrow()
-                println("[SyncRepository] Server: Manifest sent")
+                Log.debug { "[SyncRepository] Server: Manifest sent" }
                 
                 clientManifest
             } else {
                 // CLIENT: Send our manifest first, then receive server's
-                println("[SyncRepository] Client: Sending our manifest...")
+                Log.debug { "[SyncRepository] Client: Sending our manifest..." }
                 transferDataSource.sendManifest(localManifest).getOrThrow()
-                println("[SyncRepository] Client: Manifest sent")
+                Log.debug { "[SyncRepository] Client: Manifest sent" }
                 
-                println("[SyncRepository] Client: Waiting for server manifest...")
+                Log.debug { "[SyncRepository] Client: Waiting for server manifest..." }
                 val serverManifest = transferDataSource.receiveManifest().getOrThrow()
-                println("[SyncRepository] Client: Received server manifest with ${serverManifest.items.size} items")
+                Log.debug { "[SyncRepository] Client: Received server manifest with ${serverManifest.items.size} items" }
                 
                 serverManifest
             }
             
-            println("[SyncRepository] ========== MANIFESTS EXCHANGED ==========")
-            println("[SyncRepository] Local: ${localManifest.items.size} items")
-            println("[SyncRepository] Remote: ${remoteManifest.items.size} items")
+            Log.info { "[SyncRepository] ========== MANIFESTS EXCHANGED ==========" }
+            Log.debug { "[SyncRepository] Local: ${localManifest.items.size} items" }
+            Log.debug { "[SyncRepository] Remote: ${remoteManifest.items.size} items" }
             
             Result.success(Pair(localManifest, remoteManifest))
         } catch (e: Exception) {
-            println("[SyncRepository] ERROR: Failed to exchange manifests: ${e.message}")
-            e.printStackTrace()
+            Log.error(e) { "[SyncRepository] ERROR: Failed to exchange manifests: ${e.message}" }
             Result.failure(e)
         }
     }
@@ -461,14 +458,14 @@ class SyncRepositoryImpl(
         remoteManifest: SyncManifest
     ): Result<SyncResult> {
         return try {
-            println("[SyncRepository] ========== PERFORM SYNC ==========")
-            println("[SyncRepository] Syncing with: ${connection.deviceName} (${connection.deviceId})")
-            println("[SyncRepository] Local manifest: ${localManifest.items.size} items")
-            println("[SyncRepository] Remote manifest: ${remoteManifest.items.size} items")
+            Log.info { "[SyncRepository] ========== PERFORM SYNC ==========" }
+            Log.debug { "[SyncRepository] Syncing with: ${connection.deviceName} (${connection.deviceId})" }
+            Log.debug { "[SyncRepository] Local manifest: ${localManifest.items.size} items" }
+            Log.debug { "[SyncRepository] Remote manifest: ${remoteManifest.items.size} items" }
             
             if (isCancelled) {
                 isCancelled = false
-                println("[SyncRepository] Sync was cancelled")
+                Log.warn { "[SyncRepository] Sync was cancelled" }
                 return Result.failure(Exception("Sync cancelled"))
             }
             
@@ -485,7 +482,7 @@ class SyncRepositoryImpl(
             
             // Phase 10.4.1: Use Default dispatcher for CPU-intensive manifest comparison
             val (itemsToSend, itemsToReceive) = withContext(Dispatchers.Default) {
-                println("[SyncRepository] Calculating items to sync...")
+                Log.debug { "[SyncRepository] Calculating items to sync..." }
                 // Phase 10.4.2: Calculate items in parallel
                 val itemsToSendDeferred = async {
                     calculateItemsToSend(localManifest, remoteManifest)
@@ -497,8 +494,8 @@ class SyncRepositoryImpl(
                 Pair(itemsToSendDeferred.await(), itemsToReceiveDeferred.await())
             }
             
-            println("[SyncRepository] Items to send: ${itemsToSend.size}")
-            println("[SyncRepository] Items to receive: ${itemsToReceive.size}")
+            Log.debug { "[SyncRepository] Items to send: ${itemsToSend.size}" }
+            Log.debug { "[SyncRepository] Items to receive: ${itemsToReceive.size}" }
             
             var itemsSynced = 0
             
@@ -506,51 +503,51 @@ class SyncRepositoryImpl(
             itemsSynced = coroutineScope {
                 val sendJob = async(Dispatchers.IO) {
                     if (itemsToSend.isNotEmpty()) {
-                        println("[SyncRepository] Sending ${itemsToSend.size} items...")
+                        Log.debug { "[SyncRepository] Sending ${itemsToSend.size} items..." }
                         concurrencyManager.withConcurrencyControl {
                             val dataToSend = buildSyncData(itemsToSend)
-                            println("[SyncRepository] Built sync data: ${dataToSend.books.size} books, ${dataToSend.chapters.size} chapters, ${dataToSend.history.size} history")
+                            Log.debug { "[SyncRepository] Built sync data: ${dataToSend.books.size} books, ${dataToSend.chapters.size} chapters, ${dataToSend.history.size} history" }
                             
                             val sendResult = transferDataSource.sendData(dataToSend)
                             if (sendResult.isFailure) {
-                                println("[SyncRepository] ERROR: Failed to send data: ${sendResult.exceptionOrNull()?.message}")
+                                Log.error { "[SyncRepository] ERROR: Failed to send data: ${sendResult.exceptionOrNull()?.message}" }
                                 throw sendResult.exceptionOrNull() ?: Exception("Failed to send data")
                             }
                             
-                            println("[SyncRepository] ✓ Data sent successfully")
+                            Log.info { "[SyncRepository] ✓ Data sent successfully" }
                             itemsToSend.size
                         }
                     } else {
-                        println("[SyncRepository] No items to send")
+                        Log.debug { "[SyncRepository] No items to send" }
                         0
                     }
                 }
                 
                 val receiveJob = async(Dispatchers.IO) {
                     if (itemsToReceive.isNotEmpty()) {
-                        println("[SyncRepository] Receiving ${itemsToReceive.size} items...")
+                        Log.debug { "[SyncRepository] Receiving ${itemsToReceive.size} items..." }
                         concurrencyManager.withConcurrencyControl {
                             val receiveResult = transferDataSource.receiveData()
                             if (receiveResult.isFailure) {
-                                println("[SyncRepository] ERROR: Failed to receive data: ${receiveResult.exceptionOrNull()?.message}")
+                                Log.error { "[SyncRepository] ERROR: Failed to receive data: ${receiveResult.exceptionOrNull()?.message}" }
                                 throw receiveResult.exceptionOrNull() ?: Exception("Failed to receive data")
                             }
                             
                             val receivedData = receiveResult.getOrThrow()
-                            println("[SyncRepository] ✓ Data received: ${receivedData.books.size} books, ${receivedData.chapters.size} chapters, ${receivedData.history.size} history")
+                            Log.debug { "[SyncRepository] ✓ Data received: ${receivedData.books.size} books, ${receivedData.chapters.size} chapters, ${receivedData.history.size} history" }
                             
-                            println("[SyncRepository] Applying received data...")
+                            Log.debug { "[SyncRepository] Applying received data..." }
                             val applyResult = applySync(receivedData)
                             if (applyResult.isFailure) {
-                                println("[SyncRepository] ERROR: Failed to apply sync: ${applyResult.exceptionOrNull()?.message}")
+                                Log.error { "[SyncRepository] ERROR: Failed to apply sync: ${applyResult.exceptionOrNull()?.message}" }
                                 throw applyResult.exceptionOrNull() ?: Exception("Failed to apply sync")
                             }
                             
-                            println("[SyncRepository] ✓ Data applied successfully")
+                            Log.info { "[SyncRepository] ✓ Data applied successfully" }
                             itemsToReceive.size
                         }
                     } else {
-                        println("[SyncRepository] No items to receive")
+                        Log.debug { "[SyncRepository] No items to receive" }
                         0
                     }
                 }
@@ -558,7 +555,7 @@ class SyncRepositoryImpl(
                 // Wait for both operations to complete
                 val sent = sendJob.await()
                 val received = receiveJob.await()
-                println("[SyncRepository] Sync operations completed: sent=$sent, received=$received")
+                Log.debug { "[SyncRepository] Sync operations completed: sent=$sent, received=$received" }
                 sent + received
             }
             
@@ -566,7 +563,7 @@ class SyncRepositoryImpl(
             
             // Phase 10.4.1: Use IO dispatcher for database update
             withContext(Dispatchers.IO) {
-                println("[SyncRepository] Updating last sync time...")
+                Log.debug { "[SyncRepository] Updating last sync time..." }
                 updateLastSyncTime(connection.deviceId, System.currentTimeMillis()).getOrThrow()
             }
             
@@ -576,9 +573,9 @@ class SyncRepositoryImpl(
                 duration = duration
             )
             
-            println("[SyncRepository] ========== SYNC COMPLETED ==========")
-            println("[SyncRepository] Items synced: $itemsSynced")
-            println("[SyncRepository] Duration: ${duration}ms")
+            Log.info { "[SyncRepository] ========== SYNC COMPLETED ==========" }
+            Log.info { "[SyncRepository] Items synced: $itemsSynced" }
+            Log.info { "[SyncRepository] Duration: ${duration}ms" }
             
             // Phase 10.4.3: Thread-safe status update
             concurrencyManager.withMutex {
@@ -591,9 +588,8 @@ class SyncRepositoryImpl(
             
             Result.success(syncResult)
         } catch (e: Exception) {
-            println("[SyncRepository] ========== SYNC FAILED ==========")
-            println("[SyncRepository] ERROR: ${e.message}")
-            e.printStackTrace()
+            Log.error(e) { "[SyncRepository] ========== SYNC FAILED ==========" }
+            Log.error(e) { "[SyncRepository] ERROR: ${e.message}" }
             
             // Phase 10.4.3: Thread-safe status update
             concurrencyManager.withMutex {
@@ -661,16 +657,15 @@ class SyncRepositoryImpl(
     
     override suspend fun applySync(data: SyncData): Result<Unit> {
         return try {
-            println("[SyncRepository] Applying sync data: ${data.books.size} books, ${data.chapters.size} chapters, ${data.history.size} history")
+            Log.debug { "[SyncRepository] Applying sync data: ${data.books.size} books, ${data.chapters.size} chapters, ${data.history.size} history" }
             
             // Apply books first
             if (data.books.isNotEmpty()) {
                 try {
                     localDataSource.applyBooks(data.books)
-                    println("[SyncRepository] ✓ Books applied successfully")
+                    Log.debug { "[SyncRepository] ✓ Books applied successfully" }
                 } catch (e: Exception) {
-                    println("[SyncRepository] ERROR applying books: ${e.message}")
-                    e.printStackTrace()
+                    Log.error(e) { "[SyncRepository] ERROR applying books: ${e.message}" }
                     throw e
                 }
             }
@@ -679,10 +674,9 @@ class SyncRepositoryImpl(
             if (data.chapters.isNotEmpty()) {
                 try {
                     localDataSource.applyChapters(data.chapters)
-                    println("[SyncRepository] ✓ Chapters applied successfully")
+                    Log.debug { "[SyncRepository] ✓ Chapters applied successfully" }
                 } catch (e: Exception) {
-                    println("[SyncRepository] ERROR applying chapters: ${e.message}")
-                    e.printStackTrace()
+                    Log.error(e) { "[SyncRepository] ERROR applying chapters: ${e.message}" }
                     throw e
                 }
             }
@@ -691,19 +685,17 @@ class SyncRepositoryImpl(
             if (data.history.isNotEmpty()) {
                 try {
                     localDataSource.applyHistory(data.history)
-                    println("[SyncRepository] ✓ History applied successfully")
+                    Log.debug { "[SyncRepository] ✓ History applied successfully" }
                 } catch (e: Exception) {
-                    println("[SyncRepository] ERROR applying history: ${e.message}")
-                    e.printStackTrace()
+                    Log.error(e) { "[SyncRepository] ERROR applying history: ${e.message}" }
                     throw e
                 }
             }
             
-            println("[SyncRepository] ✓ All sync data applied successfully")
+            Log.info { "[SyncRepository] ✓ All sync data applied successfully" }
             Result.success(Unit)
         } catch (e: Exception) {
-            println("[SyncRepository] ERROR in applySync: ${e.message}")
-            e.printStackTrace()
+            Log.error(e) { "[SyncRepository] ERROR in applySync: ${e.message}" }
             Result.failure(e)
         }
     }

@@ -2,6 +2,7 @@ package ireader.data.quote
 
 import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteCardStyle
+import ireader.domain.models.quote.QuoteCardStyleColors
 import kotlinx.cinterop.*
 import platform.CoreGraphics.*
 import platform.Foundation.*
@@ -153,51 +154,32 @@ class IosQuoteCardGenerator : QuoteCardGenerator {
     }
     
     private fun getTextColor(style: QuoteCardStyle): UIColor {
-        return when (style) {
-            QuoteCardStyle.MINIMAL_LIGHT,
-            QuoteCardStyle.PAPER_TEXTURE -> UIColor.blackColor
-            else -> UIColor.whiteColor
-        }
+        val composeColor = QuoteCardStyleColors.getTextColor(style)
+        return UIColor(
+            red = composeColor.red.toDouble(),
+            green = composeColor.green.toDouble(),
+            blue = composeColor.blue.toDouble(),
+            alpha = composeColor.alpha.toDouble()
+        )
     }
     
     private fun getGradientColors(style: QuoteCardStyle): Pair<UIColor, UIColor> {
-        return when (style) {
-            QuoteCardStyle.GRADIENT_SUNSET -> Pair(
-                UIColor(red = 255.0/255, green = 107.0/255, blue = 107.0/255, alpha = 1.0),
-                UIColor(red = 255.0/255, green = 230.0/255, blue = 109.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.GRADIENT_OCEAN -> Pair(
-                UIColor(red = 102.0/255, green = 126.0/255, blue = 234.0/255, alpha = 1.0),
-                UIColor(red = 118.0/255, green = 75.0/255, blue = 162.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.GRADIENT_FOREST -> Pair(
-                UIColor(red = 17.0/255, green = 153.0/255, blue = 142.0/255, alpha = 1.0),
-                UIColor(red = 56.0/255, green = 239.0/255, blue = 125.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.GRADIENT_LAVENDER -> Pair(
-                UIColor(red = 218.0/255, green = 34.0/255, blue = 255.0/255, alpha = 1.0),
-                UIColor(red = 151.0/255, green = 51.0/255, blue = 238.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.GRADIENT_MIDNIGHT -> Pair(
-                UIColor(red = 44.0/255, green = 62.0/255, blue = 80.0/255, alpha = 1.0),
-                UIColor(red = 76.0/255, green = 161.0/255, blue = 175.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.MINIMAL_LIGHT -> Pair(
-                UIColor(red = 245.0/255, green = 245.0/255, blue = 245.0/255, alpha = 1.0),
-                UIColor(red = 224.0/255, green = 224.0/255, blue = 224.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.MINIMAL_DARK -> Pair(
-                UIColor(red = 26.0/255, green = 26.0/255, blue = 26.0/255, alpha = 1.0),
-                UIColor(red = 45.0/255, green = 45.0/255, blue = 45.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.PAPER_TEXTURE -> Pair(
-                UIColor(red = 255.0/255, green = 248.0/255, blue = 220.0/255, alpha = 1.0),
-                UIColor(red = 250.0/255, green = 235.0/255, blue = 215.0/255, alpha = 1.0)
-            )
-            QuoteCardStyle.BOOK_COVER -> Pair(
-                UIColor(red = 139.0/255, green = 69.0/255, blue = 19.0/255, alpha = 1.0),
-                UIColor(red = 210.0/255, green = 105.0/255, blue = 30.0/255, alpha = 1.0)
-            )
-        }
+        val (startCompose, endCompose) = QuoteCardStyleColors.getGradientColors(style)
+        
+        val startColor = UIColor(
+            red = startCompose.red.toDouble(),
+            green = startCompose.green.toDouble(),
+            blue = startCompose.blue.toDouble(),
+            alpha = startCompose.alpha.toDouble()
+        )
+        
+        val endColor = UIColor(
+            red = endCompose.red.toDouble(),
+            green = endCompose.green.toDouble(),
+            blue = endCompose.blue.toDouble(),
+            alpha = endCompose.alpha.toDouble()
+        )
+        
+        return Pair(startColor, endColor)
     }
 }

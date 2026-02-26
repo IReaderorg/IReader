@@ -2,8 +2,6 @@ package ireader.data.di
 
 import app.cash.sqldelight.db.SqlDriver
 import ireader.core.db.Transactions
-import ireader.core.http.BrowserEngine
-import ireader.core.http.HttpClients
 import ireader.core.http.WebViewCookieJar
 import ireader.core.os.PackageInstaller
 import ireader.data.catalog.CatalogGithubApi
@@ -95,17 +93,7 @@ actual val dataPlatformModule = module {
             get()
         )
     }
-    // HttpClients - LAZY: OkHttp client creation is expensive
-    single<HttpClients>(createdAtStart = false) {
-        HttpClients(
-            get(),
-            BrowserEngine(get(), get()),
-            get(),
-            get(),
-            get(),
-            getOrNull() // WebViewManager is optional, may not be available yet
-        )
-    }
+    // HttpClients is defined in DomainModule with complete dependencies
     single<BiometricAuthenticator>(createdAtStart = false) { BiometricAuthenticatorImpl(get()) }
     single<MemoryTracker>(createdAtStart = false) { AndroidMemoryTracker(get()) }
     single<NotificationRepository>(createdAtStart = false) { NotificationRepositoryImpl(get()) }
