@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.quote.QuoteCardStyle
 import ireader.domain.models.quote.QuoteCardStyleColors
+import ireader.domain.models.quote.QuoteCardConstants
 import ireader.i18n.Images
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
