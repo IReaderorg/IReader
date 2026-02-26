@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
@@ -56,6 +57,8 @@ fun CommunityHubScreen(
     onAdminUserPanel: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val uriHandler = LocalUriHandler.current
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -154,10 +157,22 @@ fun CommunityHubScreen(
             
             item {
                 SettingsItem(
-                    title = localizeHelper.localize(Res.string.character_art_gallery),
-                    description = "Browse and share AI-generated character art",
+                    title = "Upload Character Art",
+                    description = "Create and share AI-generated character art",
                     icon = Icons.Filled.Image,
-                    onClick = onCharacterArtGallery
+                    onClick = onCharacterArtGallery // Will navigate to upload screen
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Character Art Discord",
+                    description = "View community character art gallery on Discord",
+                    icon = Icons.Filled.Forum,
+                    onClick = {
+                        // Open Discord channel - user needs to configure this URL
+                        uriHandler.openUri("https://discord.gg/HHZZfnCm")
+                    }
                 )
             }
             

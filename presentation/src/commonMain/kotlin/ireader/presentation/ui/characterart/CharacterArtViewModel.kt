@@ -39,7 +39,7 @@ data class CharacterArtScreenState(
     val hasMorePages: Boolean = true,
     val currentPage: Int = 0,
     // AI generation state - supports multiple providers
-    val selectedProvider: ImageProvider = ImageProvider.POLLINATIONS, // Default to Pollinations (more reliable)
+    val selectedProvider: ImageProvider = ImageProvider.QWEN_FAST, // Default to Qwen Fast (free and fast)
     val availableProviders: List<ImageProvider> = ImageProvider.entries,
     val availableModels: List<ImageModel> = emptyList(),
     val selectedModel: ImageModel? = null,
