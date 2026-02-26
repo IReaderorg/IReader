@@ -159,14 +159,15 @@ fun CommonNavHost(
             ireader.presentation.core.ui.ReadingHubScreenSpec().Content()
         }
         
-        // Quotes Screen - Instagram-style immersive quotes browsing
-        composable(NavigationRoutes.quotesScreen) {
-            ireader.presentation.core.ui.QuotesScreenSpec().Content()
-        }
-        
-        // Submit Quote Screen - Submit new quotes
-        composable(NavigationRoutes.submitQuote) {
-            ireader.presentation.core.ui.SubmitQuoteScreenSpec().Content()
+        // My Quotes Screen - View and manage saved quotes (replaces old quotes/submit screens)
+        composable(NavigationRoutes.myQuotes) {
+            val vm: ireader.presentation.ui.quote.MyQuotesViewModel = getIViewModel()
+            val navController = requireNotNull(LocalNavigator.current)
+            
+            ireader.presentation.ui.community.QuotesScreen(
+                vm = vm,
+                onBack = { navController.popBackStack() }
+            )
         }
         
         // Community Hub - parent screen for all community features

@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.entities.ReadingStatisticsType1
 import ireader.domain.models.quote.BuddyAchievement
-import ireader.domain.models.quote.Quote
 import ireader.domain.models.quote.QuoteCardStyle
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.readingbuddy.components.ReadingBuddyCharacter
@@ -46,8 +45,6 @@ import ireader.i18n.resources.*
 fun ReadingHubScreen(
     vm: ReadingHubViewModel,
     onBack: () -> Unit,
-    onShareQuote: (Quote, QuoteCardStyle) -> Unit,
-    onNavigateToQuotes: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -108,7 +105,6 @@ fun ReadingHubScreen(
         UnifiedHubContent(
             state = state,
             isWideScreen = isWideScreen,
-            onNavigateToQuotes = onNavigateToQuotes,
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -186,7 +182,6 @@ private fun ModernReadingHubTopBar(
 private fun UnifiedHubContent(
     state: ReadingHubState,
     isWideScreen: Boolean,
-    onNavigateToQuotes: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val contentPadding = if (isWideScreen) 24.dp else 16.dp
@@ -227,9 +222,6 @@ private fun UnifiedHubContent(
         
         // Achievements Section
         item { AchievementsSection(state.unlockedAchievements, state.allAchievements) }
-        
-        // Quotes Entry Card
-        item { QuotesEntryCard(state.dailyQuote, onNavigateToQuotes) }
         
         // Favorite Genres
         if (state.statistics.favoriteGenres.isNotEmpty()) {
@@ -706,93 +698,6 @@ private fun AchievementBadge(achievement: BuddyAchievement, isUnlocked: Boolean)
                     fontWeight = FontWeight.Bold
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun QuotesEntryCard(dailyQuote: Quote?, onNavigateToQuotes: () -> Unit) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onNavigateToQuotes() },
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "💭", fontSize = 22.sp)
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = localizeHelper.localize(Res.string.quotes),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Icon(
-                    Icons.Default.ChevronRight,
-                    contentDescription = localizeHelper.localize(Res.string.view_quotes),
-                    tint = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-            }
-            
-            if (dailyQuote != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("✨", fontSize = 14.sp)
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = localizeHelper.localize(Res.string.quote_of_the_day),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        Text(
-                            text = "\"${dailyQuote.text}\"",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontStyle = FontStyle.Italic,
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis,
-                            lineHeight = 22.sp
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        Text(
-                            text = "— ${dailyQuote.bookTitle}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Text(
-                text = localizeHelper.localize(Res.string.tap_to_explore_all_quotes),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
-            )
         }
     }
 }

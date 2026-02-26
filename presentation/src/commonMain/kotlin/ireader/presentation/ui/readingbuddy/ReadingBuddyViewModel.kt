@@ -1,7 +1,6 @@
 package ireader.presentation.ui.readingbuddy
 
 import androidx.compose.runtime.Stable
-import ireader.domain.data.repository.QuoteRepository
 import ireader.domain.models.quote.*
 import ireader.domain.preferences.prefs.ReadingBuddyPreferences
 import ireader.domain.usecases.quote.ReadingBuddyUseCases
@@ -13,17 +12,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * State for the Reading Buddy & Quotes screen
+ * State for the Reading Buddy screen
  */
 @Stable
 data class ReadingBuddyScreenState(
     val buddyState: ReadingBuddyState = ReadingBuddyState(),
-    val dailyQuote: Quote? = null,
-    val approvedQuotes: List<Quote> = emptyList(),
-    val userQuotes: List<Quote> = emptyList(),
     val selectedCardStyle: QuoteCardStyle = QuoteCardStyle.GRADIENT_SUNSET,
     val isLoading: Boolean = false,
-    val isSubmitting: Boolean = false,
     val error: String? = null,
     val successMessage: String? = null,
     val unlockedAchievements: List<BuddyAchievement> = emptyList(),
@@ -34,13 +29,12 @@ data class ReadingBuddyScreenState(
 )
 
 /**
- * ViewModel for Reading Buddy and Daily Quotes feature.
+ * ViewModel for Reading Buddy feature.
  * Now uses unified database statistics via ReadingBuddyUseCases for consistent
  * data across Leaderboard, Statistics, and Reading Buddy screens.
  */
 @Stable
 class ReadingBuddyViewModel(
-    private val quoteRepository: QuoteRepository,
     private val readingBuddyUseCases: ReadingBuddyUseCases,
     private val preferences: ReadingBuddyPreferences, // Only for card style preference
     private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
@@ -94,93 +88,10 @@ class ReadingBuddyViewModel(
                     buddyState = buddyState,
                     unlockedAchievements = achievements,
                     levelProgress = levelProgress,
-                    isAdmin = isAdmin
+                    isAdmin = isAdmin,
+                    isLoading = false
                 )
             }
-            
-            // Load quotes
-            loadDailyQuote()
-            loadApprovedQuotes()
-            
-            _state.update { it.copy(isLoading = false) }
-        }
-    }
-
-    fun loadDailyQuote() {
-        scope.launch {
-            quoteRepository.getDailyQuote()
-                .onSuccess { quote ->
-                    _state.update { it.copy(dailyQuote = quote) }
-                }
-                .onFailure { error ->
-                    // Silent fail for daily quote
-                }
-        }
-    }
-    
-    fun loadApprovedQuotes() {
-        scope.launch {
-            quoteRepository.getApprovedQuotes()
-                .onSuccess { quotes ->
-                    _state.update { it.copy(approvedQuotes = quotes) }
-                }
-                .onFailure { error ->
-                    _state.update { it.copy(error = "Failed to load quotes: ${error.message}") }
-                }
-        }
-    }
-    
-    fun submitQuote(quoteText: String, bookTitle: String, author: String, chapterTitle: String) {
-        scope.launch {
-            _state.update { it.copy(isSubmitting = true, error = null) }
-            
-            val request = SubmitQuoteRequest(
-                quoteText = quoteText.trim(),
-                bookTitle = bookTitle.trim(),
-                author = author.trim(),
-                chapterTitle = chapterTitle.trim()
-            )
-            
-            quoteRepository.submitQuote(request)
-                .onSuccess { quote ->
-                    _state.update { current ->
-                        current.copy(
-                            isSubmitting = false,
-                            successMessage = "Quote published! 📚",
-                            userQuotes = current.userQuotes + quote
-                        )
-                    }
-                    // Refresh approved quotes to show the new one
-                    loadApprovedQuotes()
-                }
-                .onFailure { error ->
-                    _state.update { 
-                        it.copy(
-                            isSubmitting = false,
-                            error = error.message ?: "Failed to submit quote"
-                        )
-                    }
-                }
-        }
-    }
-    
-    fun toggleLike(quoteId: String) {
-        scope.launch {
-            quoteRepository.toggleLike(quoteId)
-                .onSuccess { isLiked ->
-                    // Update the quote in the list
-                    _state.update { current ->
-                        val updatedQuotes = current.approvedQuotes.map { quote ->
-                            if (quote.id == quoteId) {
-                                quote.copy(
-                                    isLikedByUser = isLiked,
-                                    likesCount = if (isLiked) quote.likesCount + 1 else quote.likesCount - 1
-                                )
-                            } else quote
-                        }
-                        current.copy(approvedQuotes = updatedQuotes)
-                    }
-                }
         }
     }
     

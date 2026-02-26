@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -38,6 +39,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -53,7 +56,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,7 +99,7 @@ fun QuotesScreen(vm: MyQuotesViewModel, onBack: () -> Unit, modifier: Modifier =
         }
     }
     QDeleteDlg(vm.showDeleteDialog, { vm.dismissDeleteDialog() }, { vm.deleteQuote() })
-    QShareDlg(vm.showShareDialog, vm.shareValidation, vm.isSharing, { vm.dismissShareDialog() }, { vm.shareQuoteToCommunity(truncate = it) })
+    QShareDlg(vm.showShareDialog, vm.shareValidation, vm.isSharing, { vm.dismissShareDialog() }, { style, username -> vm.shareQuoteToDiscord(style, username) })
 }
 
 @Composable
@@ -252,19 +257,72 @@ private fun QDeleteDlg(show: Boolean, onDismiss: () -> Unit, onConfirm: () -> Un
 }
 
 @Composable
-private fun QShareDlg(show: Boolean, v: ShareValidation?, loading: Boolean, onDismiss: () -> Unit, onShare: (Boolean) -> Unit) {
+private fun QShareDlg(show: Boolean, v: ShareValidation?, loading: Boolean, onDismiss: () -> Unit, onShare: (ireader.domain.models.quote.QuoteCardStyle, String) -> Unit) {
     if (!show) return
+    var selectedStyle by remember { mutableStateOf(ireader.domain.models.quote.QuoteCardStyle.GRADIENT_SUNSET) }
+    var username by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    
     AlertDialog(onDismissRequest = onDismiss, shape = RoundedCornerShape(24.dp),
-        title = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Default.Share, null, tint = MaterialTheme.colorScheme.primary); Text("Share to Community") } },
+        title = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Default.Share, null, tint = MaterialTheme.colorScheme.primary); Text("Share to Discord") } },
         text = {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 when {
                     v?.tooShort == true -> Text("Quote too short (min 10 chars).", style = MaterialTheme.typography.bodyMedium)
-                    v?.needsTruncation == true -> { Text("Quote has ${v.currentLength} chars.", style = MaterialTheme.typography.bodyMedium); Spacer(Modifier.height(8.dp)); Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)) { Text("Limit is ${v.maxLength}. Truncate?", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(12.dp)) } }
-                    else -> Text("Share this quote with the community?", style = MaterialTheme.typography.bodyMedium)
+                    else -> {
+                        Text("Choose a visual style for your quote card:", style = MaterialTheme.typography.bodyMedium)
+                        
+                        // Style selector dropdown
+                        Box {
+                            Surface(
+                                onClick = { expanded = true },
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant
+                            ) {
+                                Row(
+                                    Modifier.fillMaxWidth().padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(selectedStyle.displayName, style = MaterialTheme.typography.bodyMedium)
+                                    Icon(Icons.Default.ArrowDropDown, null)
+                                }
+                            }
+                            DropdownMenu(expanded, { expanded = false }) {
+                                ireader.domain.models.quote.QuoteCardStyle.entries.forEach { style ->
+                                    DropdownMenuItem(
+                                        text = { Text(style.displayName) },
+                                        onClick = { selectedStyle = style; expanded = false }
+                                    )
+                                }
+                            }
+                        }
+                        
+                        // Username input
+                        TextField(
+                            value = username,
+                            onValueChange = { username = it },
+                            label = { Text("Your username (optional)") },
+                            placeholder = { Text("Anonymous") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            )
+                        )
+                    }
                 }
             }
         },
-        confirmButton = { if (v?.canShare == true || v?.needsTruncation == true) { TextButton({ onShare(v.needsTruncation) }, enabled = !loading) { if (loading) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp) else Text(if (v.needsTruncation) "Truncate & Share" else "Share") } } },
+        confirmButton = { 
+            if (v?.canShare == true) { 
+                TextButton({ onShare(selectedStyle, username.ifBlank { "Anonymous" }) }, enabled = !loading) { 
+                    if (loading) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp) 
+                    else Text("Share") 
+                } 
+            } 
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
 }

@@ -128,6 +128,8 @@ jobs:
           SUPABASE_BADGES_KEY: ${{ secrets.SUPABASE_BADGES_KEY }}
           SUPABASE_ANALYTICS_URL: ${{ secrets.SUPABASE_ANALYTICS_URL }}
           SUPABASE_ANALYTICS_KEY: ${{ secrets.SUPABASE_ANALYTICS_KEY }}
+          # Discord Webhooks
+          DISCORD_QUOTE_WEBHOOK_URL: ${{ secrets.DISCORD_QUOTE_WEBHOOK_URL }}
           # Cloudflare R2 Storage
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}

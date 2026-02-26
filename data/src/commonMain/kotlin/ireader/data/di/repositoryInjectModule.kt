@@ -281,6 +281,16 @@ val repositoryInjectModule = module {
         ireader.data.quote.LocalQuoteRepositoryImpl(get())
     }
     
+    // Discord Quote repository - for community quote sharing
+    single<ireader.domain.data.repository.DiscordQuoteRepository> {
+        val discordWebhookUrl = ireader.domain.config.PlatformConfig.getDiscordQuoteWebhookUrl()
+        ireader.data.quote.DiscordQuoteRepositoryImpl(
+            webhookUrl = discordWebhookUrl,
+            httpClient = get<ireader.core.http.HttpClients>().default,
+            quoteCardGenerator = ireader.data.quote.QuoteCardGenerator()
+        )
+    }
+    
     // Character Art Gallery repository - Discord only
     single<ireader.domain.data.repository.CharacterArtRepository> {
         val discordWebhookUrl = ireader.domain.config.PlatformConfig.getDiscordCharacterArtWebhookUrl()

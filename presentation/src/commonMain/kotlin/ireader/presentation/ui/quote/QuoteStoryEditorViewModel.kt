@@ -6,60 +6,69 @@ import androidx.compose.runtime.setValue
 import ireader.domain.data.repository.DiscordQuoteRepository
 import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteCardStyle
-import ireader.domain.models.quote.QuoteCreationParams
-import ireader.domain.models.quote.ShareValidation
 import ireader.domain.usecases.quote.LocalQuoteUseCases
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel for the Quote Creation screen
+ * ViewModel for Quote Story Editor screen.
+ * Handles saving locally and sharing to Discord.
  */
-class QuoteCreationViewModel(
+class QuoteStoryEditorViewModel(
     private val localQuoteUseCases: LocalQuoteUseCases,
     private val discordQuoteRepository: DiscordQuoteRepository,
-    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?,
-    val params: QuoteCreationParams
+    private val bookId: Long,
+    private val initialBookTitle: String,
+    private val initialChapterTitle: String,
+    private val initialAuthor: String?,
+    private val chapterNumber: Int?,
+    private val currentChapterId: Long?,
+    private val prevChapterId: Long?,
+    private val nextChapterId: Long?
 ) : BaseViewModel() {
     
-    // Quote text input
     var quoteText by mutableStateOf("")
         private set
     
-    // Context backup toggle
-    var includeContextBackup by mutableStateOf(false)
+    var bookTitle by mutableStateOf(initialBookTitle)
         private set
     
-    // Loading states
+    var author by mutableStateOf(initialAuthor ?: "")
+        private set
+    
+    var selectedStyle by mutableStateOf(QuoteCardStyle.GRADIENT_SUNSET)
+        private set
+    
     var isSaving by mutableStateOf(false)
         private set
     
     var isSharing by mutableStateOf(false)
         private set
     
-    // Success state
     var saveSuccess by mutableStateOf(false)
         private set
     
-    /**
-     * Update quote text
-     */
     fun updateQuoteText(text: String) {
         quoteText = text
     }
     
-    /**
-     * Toggle context backup
-     */
-    fun toggleContextBackup() {
-        includeContextBackup = !includeContextBackup
+    fun updateBookTitle(title: String) {
+        bookTitle = title
+    }
+    
+    fun updateAuthor(authorName: String) {
+        author = authorName
+    }
+    
+    fun setStyle(style: QuoteCardStyle) {
+        selectedStyle = style
     }
     
     /**
-     * Save quote locally
+     * Save quote locally to SQLDelight database
      */
-    fun saveQuoteLocally(onSuccess: () -> Unit) {
+    fun saveLocally(onSuccess: () -> Unit) {
         if (quoteText.isBlank()) {
             scope.launch {
                 showSnackBar(UiText.DynamicString("Please enter quote text"))
@@ -71,15 +80,15 @@ class QuoteCreationViewModel(
         scope.launch {
             val result = localQuoteUseCases.saveQuote(
                 text = quoteText,
-                bookId = params.bookId,
-                bookTitle = params.bookTitle,
-                chapterTitle = params.chapterTitle,
-                chapterNumber = params.chapterNumber,
-                author = params.author,
-                includeContext = includeContextBackup,
-                currentChapterId = params.currentChapterId,
-                prevChapterId = params.prevChapterId,
-                nextChapterId = params.nextChapterId
+                bookId = bookId,
+                bookTitle = bookTitle,
+                chapterTitle = initialChapterTitle,
+                chapterNumber = chapterNumber,
+                author = author.ifBlank { null },
+                includeContext = false,
+                currentChapterId = currentChapterId,
+                prevChapterId = prevChapterId,
+                nextChapterId = nextChapterId
             )
             
             isSaving = false
@@ -87,7 +96,7 @@ class QuoteCreationViewModel(
             result.fold(
                 onSuccess = {
                     saveSuccess = true
-                    showSnackBar(UiText.DynamicString("Quote saved!"))
+                    showSnackBar(UiText.DynamicString("Quote saved! 📚"))
                     onSuccess()
                 },
                 onFailure = { error ->
@@ -98,9 +107,10 @@ class QuoteCreationViewModel(
     }
     
     /**
-     * Share quote to Discord
+     * Share quote to Discord webhook
+     * Saves locally first, then submits to Discord
      */
-    fun shareToDiscord(style: QuoteCardStyle, username: String, onSuccess: () -> Unit) {
+    fun shareToDiscord(username: String, onSuccess: () -> Unit) {
         if (quoteText.isBlank()) {
             scope.launch {
                 showSnackBar(UiText.DynamicString("Please enter quote text"))
@@ -108,28 +118,28 @@ class QuoteCreationViewModel(
             return
         }
         
+        if (bookTitle.isBlank()) {
+            scope.launch {
+                showSnackBar(UiText.DynamicString("Book title is required for sharing"))
+            }
+            return
+        }
+        
         isSharing = true
         
         scope.launch {
-            // Get username from Supabase if available
-            val finalUsername = try {
-                getCurrentUser()?.username ?: username
-            } catch (e: Exception) {
-                username
-            }
-            
             // Save locally first
             val saveResult = localQuoteUseCases.saveQuote(
                 text = quoteText,
-                bookId = params.bookId,
-                bookTitle = params.bookTitle,
-                chapterTitle = params.chapterTitle,
-                chapterNumber = params.chapterNumber,
-                author = params.author,
-                includeContext = includeContextBackup,
-                currentChapterId = params.currentChapterId,
-                prevChapterId = params.prevChapterId,
-                nextChapterId = params.nextChapterId
+                bookId = bookId,
+                bookTitle = bookTitle,
+                chapterTitle = initialChapterTitle,
+                chapterNumber = chapterNumber,
+                author = author.ifBlank { null },
+                includeContext = false,
+                currentChapterId = currentChapterId,
+                prevChapterId = prevChapterId,
+                nextChapterId = nextChapterId
             )
             
             saveResult.fold(
@@ -138,26 +148,26 @@ class QuoteCreationViewModel(
                     val localQuote = LocalQuote(
                         id = quoteId,
                         text = quoteText,
-                        bookId = params.bookId,
-                        bookTitle = params.bookTitle,
-                        chapterTitle = params.chapterTitle,
-                        chapterNumber = params.chapterNumber,
-                        author = params.author,
-                        hasContextBackup = includeContextBackup
+                        bookId = bookId,
+                        bookTitle = bookTitle,
+                        chapterTitle = initialChapterTitle,
+                        chapterNumber = chapterNumber,
+                        author = author.ifBlank { null },
+                        hasContextBackup = false
                     )
                     
                     // Submit to Discord
                     val result = discordQuoteRepository.submitQuote(
                         quote = localQuote,
-                        style = style,
-                        username = finalUsername
+                        style = selectedStyle,
+                        username = username
                     )
                     
                     isSharing = false
                     
                     result.fold(
                         onSuccess = {
-                            showSnackBar(UiText.DynamicString("Quote shared to Discord!"))
+                            showSnackBar(UiText.DynamicString("Quote shared to Discord! 🎉"))
                             onSuccess()
                         },
                         onFailure = { error ->
@@ -173,8 +183,5 @@ class QuoteCreationViewModel(
         }
     }
     
-    /**
-     * Get character count info
-     */
     val characterCount: Int get() = quoteText.length
 }

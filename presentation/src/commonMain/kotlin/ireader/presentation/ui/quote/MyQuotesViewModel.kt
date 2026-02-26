@@ -3,10 +3,10 @@ package ireader.presentation.ui.quote
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import ireader.domain.data.repository.QuoteRepository
+import ireader.domain.data.repository.DiscordQuoteRepository
 import ireader.domain.models.quote.LocalQuote
+import ireader.domain.models.quote.QuoteCardStyle
 import ireader.domain.models.quote.QuoteContext
-import ireader.domain.models.quote.ShareValidation
 import ireader.domain.usecases.quote.LocalQuoteUseCases
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
  */
 class MyQuotesViewModel(
     private val localQuoteUseCases: LocalQuoteUseCases,
-    private val quoteRepository: QuoteRepository
+    private val discordQuoteRepository: DiscordQuoteRepository,
+    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
 ) : BaseViewModel() {
     
     private val _quotes = MutableStateFlow<List<LocalQuote>>(emptyList())
@@ -53,10 +54,10 @@ class MyQuotesViewModel(
     var quoteToShare by mutableStateOf<LocalQuote?>(null)
         private set
     
-    var shareValidation by mutableStateOf<ShareValidation?>(null)
+    var isSharing by mutableStateOf(false)
         private set
     
-    var isSharing by mutableStateOf(false)
+    var shareValidation by mutableStateOf<ireader.domain.models.quote.ShareValidation?>(null)
         private set
     
     init {
@@ -177,7 +178,14 @@ class MyQuotesViewModel(
      */
     fun showShareConfirmation(quote: LocalQuote) {
         quoteToShare = quote
-        shareValidation = localQuoteUseCases.validateForCommunityShare(quote)
+        // Calculate share validation (Discord has no length limit, but we validate for UX)
+        shareValidation = ireader.domain.models.quote.ShareValidation(
+            canShare = quote.text.length >= 10,
+            currentLength = quote.text.length,
+            maxLength = Int.MAX_VALUE, // Discord has no practical limit
+            minLength = 10,
+            reason = if (quote.text.length < 10) "Quote too short" else null
+        )
         showShareDialog = true
     }
     
@@ -187,25 +195,34 @@ class MyQuotesViewModel(
     fun dismissShareDialog() {
         showShareDialog = false
         quoteToShare = null
-        shareValidation = null
     }
     
     /**
-     * Share quote to community
+     * Share quote to Discord
      */
-    fun shareQuoteToCommunity(truncate: Boolean = false) {
+    fun shareQuoteToDiscord(style: QuoteCardStyle, username: String) {
         val quote = quoteToShare ?: return
         isSharing = true
         
         scope.launch {
-            val request = localQuoteUseCases.toSubmitRequest(quote, truncate = truncate)
-            val result = quoteRepository.submitQuote(request)
+            // Get username from Supabase if available
+            val finalUsername = try {
+                getCurrentUser()?.username ?: username
+            } catch (e: Exception) {
+                username
+            }
+            
+            val result = discordQuoteRepository.submitQuote(
+                quote = quote,
+                style = style,
+                username = finalUsername
+            )
             
             isSharing = false
             
             result.fold(
                 onSuccess = {
-                    showSnackBar(UiText.DynamicString("Quote shared to community!"))
+                    showSnackBar(UiText.DynamicString("Quote shared to Discord!"))
                     dismissShareDialog()
                 },
                 onFailure = { error ->

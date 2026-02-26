@@ -159,10 +159,9 @@ val screenModelModule = module {
         )
     }
     
-    // Reading Buddy & Quotes ViewModel
+    // Reading Buddy ViewModel
     factory {
         ireader.presentation.ui.readingbuddy.ReadingBuddyViewModel(
-            quoteRepository = get(),
             readingBuddyUseCases = get(),
             preferences = get(),
             getCurrentUser = {
@@ -176,7 +175,11 @@ val screenModelModule = module {
     factory { (params: ireader.domain.models.quote.QuoteCreationParams) ->
         ireader.presentation.ui.quote.QuoteCreationViewModel(
             localQuoteUseCases = get(),
-            quoteRepository = get(),
+            discordQuoteRepository = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            },
             params = params
         )
     }
@@ -185,7 +188,27 @@ val screenModelModule = module {
     factory {
         ireader.presentation.ui.quote.MyQuotesViewModel(
             localQuoteUseCases = get(),
-            quoteRepository = get()
+            discordQuoteRepository = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            }
+        )
+    }
+    
+    // Quote Story Editor ViewModel - Instagram story-style quote editor
+    factory { params ->
+        ireader.presentation.ui.quote.QuoteStoryEditorViewModel(
+            localQuoteUseCases = get(),
+            discordQuoteRepository = get(),
+            bookId = params.get<Long>(),
+            initialBookTitle = params.get<String>(),
+            initialChapterTitle = params.get<String>(),
+            initialAuthor = params.getOrNull<String>(),
+            chapterNumber = params.getOrNull<Int>(),
+            currentChapterId = params.getOrNull<Long>(),
+            prevChapterId = params.getOrNull<Long>(),
+            nextChapterId = params.getOrNull<Long>()
         )
     }
     
@@ -194,7 +217,6 @@ val screenModelModule = module {
         ireader.presentation.ui.readinghub.ReadingHubViewModel(
             statisticsRepository = get(),
             getReadingStatistics = get(),
-            quoteRepository = get(),
             readingBuddyUseCases = get(),
             preferences = get(),
             getCurrentUser = {

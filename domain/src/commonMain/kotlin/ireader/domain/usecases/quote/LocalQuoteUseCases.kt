@@ -7,7 +7,6 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteContext
 import ireader.domain.models.quote.ShareValidation
-import ireader.domain.models.quote.SubmitQuoteRequest
 import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.flow.Flow
 
@@ -176,7 +175,8 @@ class LocalQuoteUseCases(
     }
     
     /**
-     * Validate if quote can be shared to community
+     * Validate if quote can be shared to Discord
+     * Discord has no practical length limit, but we validate for UX
      */
     fun validateForCommunityShare(quote: LocalQuote): ShareValidation {
         val length = quote.text.length
@@ -186,34 +186,11 @@ class LocalQuoteUseCases(
                 currentLength = length,
                 reason = "Quote is too short. Minimum 10 characters required."
             )
-            length > 1000 -> ShareValidation(
-                canShare = false,
-                currentLength = length,
-                reason = "Quote exceeds community limit of 1000 characters."
-            )
             else -> ShareValidation(
                 canShare = true,
                 currentLength = length
             )
         }
-    }
-    
-    /**
-     * Create a SubmitQuoteRequest from LocalQuote for community sharing
-     */
-    fun toSubmitRequest(quote: LocalQuote, truncate: Boolean = false): SubmitQuoteRequest {
-        val text = if (truncate && quote.text.length > 1000) {
-            quote.text.take(997) + "..."
-        } else {
-            quote.text
-        }
-        
-        return SubmitQuoteRequest(
-            quoteText = text,
-            bookTitle = quote.bookTitle,
-            author = quote.author ?: "",
-            chapterTitle = quote.chapterTitle
-        )
     }
     
     /**

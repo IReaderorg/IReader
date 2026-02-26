@@ -3,7 +3,6 @@ package ireader.data.quote
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
-import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -13,6 +12,7 @@ import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteCardStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -52,8 +52,9 @@ class DiscordQuoteRepositoryImpl(
             description = "\"${quote.text.take(2000)}\"", // Discord limit
             fields = buildList {
                 add(DiscordEmbedField("Book", quote.bookTitle, inline = true))
-                if (!quote.author.isNullOrBlank()) {
-                    add(DiscordEmbedField("Author", quote.author, inline = true))
+                val authorValue = quote.author
+                if (!authorValue.isNullOrBlank()) {
+                    add(DiscordEmbedField("Author", authorValue, inline = true))
                 }
                 if (quote.chapterTitle.isNotBlank()) {
                     add(DiscordEmbedField("Chapter", quote.chapterTitle, inline = false))
@@ -61,7 +62,7 @@ class DiscordQuoteRepositoryImpl(
                 add(DiscordEmbedField("Shared by", "@$username", inline = false))
             },
             color = 5814783, // Purple color
-            timestamp = kotlinx.datetime.Clock.System.now().toString(),
+            timestamp = kotlin.time.Clock.System.now().toString(),
             footer = DiscordEmbedFooter("IReader Community")
         )
         
@@ -82,7 +83,7 @@ class DiscordQuoteRepositoryImpl(
                     imageBytes,
                     Headers.build {
                         append(HttpHeaders.ContentType, "image/png")
-                        append(HttpHeaders.ContentDisposition, "filename=\"quote_${System.currentTimeMillis()}.png\"")
+                        append(HttpHeaders.ContentDisposition, "filename=\"quote_${quote.createdAt}.png\"")
                     }
                 )
             }
@@ -124,18 +125,3 @@ private data class DiscordEmbedField(
 private data class DiscordEmbedFooter(
     val text: String
 )
-
-/**
- * Interface for generating quote card images
- * Platform-specific implementations will handle actual image generation
- */
-interface QuoteCardGenerator {
-    /**
-     * Generate a quote card image as PNG bytes
-     * 
-     * @param quote The quote to render
-     * @param style The visual style to use
-     * @return PNG image bytes
-     */
-    suspend fun generateQuoteCard(quote: LocalQuote, style: QuoteCardStyle): ByteArray
-}

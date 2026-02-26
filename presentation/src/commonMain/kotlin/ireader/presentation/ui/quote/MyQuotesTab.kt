@@ -150,13 +150,19 @@ fun MyQuotesTab(
             confirmButton = {
                 if (validation?.canShare == true || validation?.needsTruncation == true) {
                     TextButton(
-                        onClick = { vm.shareQuoteToCommunity(truncate = validation.needsTruncation) },
+                        onClick = { 
+                            // Share to Discord with default style and username
+                            vm.shareQuoteToDiscord(
+                                style = ireader.domain.models.quote.QuoteCardStyle.GRADIENT_SUNSET,
+                                username = "Anonymous"
+                            )
+                        },
                         enabled = !vm.isSharing
                     ) {
                         if (vm.isSharing) {
                             CircularProgressIndicator(modifier = Modifier.size(16.dp))
                         } else {
-                            Text(if (validation.needsTruncation) "Truncate & Share" else "Share")
+                            Text("Share")
                         }
                     }
                 }

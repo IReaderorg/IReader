@@ -85,6 +85,8 @@ object NavigationRoutes {
     const val pluginManagement = "pluginManagement"
     const val quoteCreation = "quoteCreation"
     const val myQuotes = "myQuotes"
+    const val quoteStyleSelector = "quoteStyleSelector"
+    const val quoteStoryEditor = "quoteStoryEditor"
     const val contentFilter = "contentFilter"
     const val textReplacement = "textReplacement"
     
@@ -102,6 +104,34 @@ object NavigationRoutes {
             params.currentChapterId?.let { append("&currentChapterId=$it") }
             params.prevChapterId?.let { append("&prevChapterId=$it") }
             params.nextChapterId?.let { append("&nextChapterId=$it") }
+        }
+    }
+    
+    fun quoteStoryEditor(
+        styleId: String,
+        bookId: Long,
+        bookTitle: String,
+        chapterTitle: String,
+        author: String? = null,
+        chapterNumber: Int? = null,
+        currentChapterId: Long? = null,
+        prevChapterId: Long? = null,
+        nextChapterId: Long? = null
+    ): String {
+        val encodedBookTitle = bookTitle.encodeForNav()
+        val encodedChapterTitle = chapterTitle.encodeForNav()
+        val encodedAuthor = author?.encodeForNav()
+        
+        return buildString {
+            append("$quoteStoryEditor?styleId=$styleId")
+            append("&bookId=$bookId")
+            append("&bookTitle=$encodedBookTitle")
+            append("&chapterTitle=$encodedChapterTitle")
+            chapterNumber?.let { append("&chapterNumber=$it") }
+            encodedAuthor?.let { append("&author=$it") }
+            currentChapterId?.let { append("&currentChapterId=$it") }
+            prevChapterId?.let { append("&prevChapterId=$it") }
+            nextChapterId?.let { append("&nextChapterId=$it") }
         }
     }
     

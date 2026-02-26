@@ -172,21 +172,19 @@ fun QuoteCreationScreen(
                 Text(
                     text = "${vm.characterCount} characters",
                     style = MaterialTheme.typography.bodySmall,
-                    color = when {
-                        vm.characterCount > vm.maxCommunityLength -> MaterialTheme.colorScheme.error
-                        vm.characterCount < vm.minCommunityLength && vm.characterCount > 0 -> MaterialTheme.colorScheme.error
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (vm.characterCount < 10 && vm.characterCount > 0) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )
                 
-                vm.shareValidation?.let { validation ->
-                    if (!validation.canShare && vm.characterCount > 0) {
-                        Text(
-                            text = validation.reason ?: "",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                if (vm.characterCount > 0 && vm.characterCount < 10) {
+                    Text(
+                        text = "Minimum 10 characters",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
             
@@ -251,10 +249,16 @@ fun QuoteCreationScreen(
                     Text("Save")
                 }
                 
-                // Share to community button
+                // Share to Discord button
                 OutlinedButton(
-                    onClick = { vm.shareQuoteToCommunity(onSaveSuccess) },
-                    enabled = !vm.isSaving && !vm.isSharing && vm.quoteText.isNotBlank(),
+                    onClick = { 
+                        vm.shareToDiscord(
+                            style = ireader.domain.models.quote.QuoteCardStyle.GRADIENT_SUNSET,
+                            username = "Anonymous",
+                            onSuccess = onSaveSuccess
+                        )
+                    },
+                    enabled = !vm.isSaving && !vm.isSharing && vm.quoteText.isNotBlank() && vm.characterCount >= 10,
                     modifier = Modifier.weight(1f)
                 ) {
                     if (vm.isSharing) {
@@ -275,43 +279,10 @@ fun QuoteCreationScreen(
             
             // Info text
             Text(
-                text = "💡 Save locally for unlimited length quotes. Share to community for quotes between 10-1000 characters.",
+                text = "💡 Save locally for unlimited length quotes. Share to Discord for quotes with minimum 10 characters.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-    
-    // Truncation dialog
-    if (vm.showTruncationDialog) {
-        AlertDialog(
-            onDismissRequest = { vm.dismissTruncationDialog() },
-            title = { Text("Quote Too Long") },
-            text = {
-                Column {
-                    Text("Your quote has ${vm.characterCount} characters, but community quotes are limited to ${vm.maxCommunityLength} characters.")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Would you like to truncate it or keep it local only?")
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { vm.submitToCommunity(truncate = true, onSuccess = onSaveSuccess) }) {
-                    Text("Truncate & Share")
-                }
-            },
-            dismissButton = {
-                Row {
-                    TextButton(onClick = { vm.dismissTruncationDialog() }) {
-                        Text("Cancel")
-                    }
-                    TextButton(onClick = { 
-                        vm.dismissTruncationDialog()
-                        vm.saveQuoteLocally(onSaveSuccess)
-                    }) {
-                        Text("Save Locally")
-                    }
-                }
-            }
-        )
     }
 }
