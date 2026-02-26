@@ -448,6 +448,62 @@ class TranslationEnginesManager(
     }
     
     /**
+     * Generate content using the current translation engine's AI capabilities
+     * This is used for tasks like generating image prompts from text
+     * 
+     * @param systemPrompt The system instruction for the AI
+     * @param userPrompt The user's request/input
+     * @param temperature Creativity level (0.0-1.0, default 0.7)
+     * @param maxTokens Maximum tokens to generate (default 500)
+     * @return Result with generated text or error
+     */
+    suspend fun generateContent(
+        systemPrompt: String,
+        userPrompt: String,
+        temperature: Float = 0.7f,
+        maxTokens: Int = 500
+    ): Result<String> {
+        val engine = get()
+        
+        // Check if engine supports AI content generation
+        if (!engine.supportsAI) {
+            return Result.failure(Exception("Current translation engine (${engine.engineName}) does not support AI content generation. Please select an AI-powered engine like Gemini, OpenAI, or DeepSeek."))
+        }
+        
+        // Validate API key if required
+        if (engine.requiresApiKey) {
+            val apiKeyError = validateApiKey(engine)
+            if (apiKeyError != null) {
+                return Result.failure(Exception("API key not configured for ${engine.engineName}. Please set it in Settings > Translation."))
+            }
+        }
+        
+        return engine.generateContent(systemPrompt, userPrompt, temperature, maxTokens)
+    }
+    
+    /**
+     * Get the current translation engine (for external use)
+     */
+    fun getCurrentEngine(): TranslateEngine {
+        return get()
+    }
+    
+    /**
+     * Get API key for the current engine
+     */
+    fun getApiKeyForCurrentEngine(): String {
+        val engine = get()
+        return when (engine.id) {
+            2L -> readerPreferences.openAIApiKey().get()
+            3L -> readerPreferences.deepSeekApiKey().get()
+            8L -> readerPreferences.geminiApiKey().get()
+            9L -> readerPreferences.openRouterApiKey().get()
+            10L -> readerPreferences.nvidiaApiKey().get()
+            else -> ""
+        }
+    }
+    
+    /**
      * Clear translation cache
      */
     fun clearCache() {

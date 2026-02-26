@@ -1578,7 +1578,6 @@ private fun OpenRouterConfig(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    var showApiKey by remember { mutableStateOf(false) }
     var modelExpanded by remember { mutableStateOf(false) }
     
     Card(
@@ -1610,25 +1609,6 @@ private fun OpenRouterConfig(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            
-            // API Key Input
-            OutlinedTextField(
-                value = apiKey,
-                onValueChange = onApiKeyChange,
-                label = { Text(localizeHelper.localize(Res.string.openrouter_api_key), maxLines = 1) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { showApiKey = !showApiKey }) {
-                        Icon(
-                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (showApiKey) "Hide" else "Show"
-                        )
-                    }
-                },
-                textStyle = MaterialTheme.typography.bodyMedium
-            )
             
             // Model Selection
             ExposedDropdownMenuBox(
@@ -1713,7 +1693,6 @@ private fun NvidiaConfig(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    var showApiKey by remember { mutableStateOf(false) }
     var modelExpanded by remember { mutableStateOf(false) }
     
     Card(
@@ -1745,25 +1724,6 @@ private fun NvidiaConfig(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            
-            // API Key Input
-            OutlinedTextField(
-                value = apiKey,
-                onValueChange = onApiKeyChange,
-                label = { Text(localizeHelper.localize(Res.string.nvidia_api_key), maxLines = 1) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { showApiKey = !showApiKey }) {
-                        Icon(
-                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                            contentDescription = if (showApiKey) "Hide" else "Show"
-                        )
-                    }
-                },
-                textStyle = MaterialTheme.typography.bodyMedium
-            )
             
             // Model Selection
             ExposedDropdownMenuBox(

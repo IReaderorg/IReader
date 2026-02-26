@@ -96,7 +96,10 @@ fun CharacterArtGalleryScreen(
         ) {
             // Discord Info Card
             item {
-                DiscordInfoCard()
+                DiscordInfoCard(
+                    discordChannelUrl = discordChannelUrl,
+                    onViewChannel = { uriHandler.openUri(discordChannelUrl) }
+                )
             }
             
             // Recently Posted Section
@@ -125,7 +128,10 @@ fun CharacterArtGalleryScreen(
 }
 
 @Composable
-private fun DiscordInfoCard() {
+private fun DiscordInfoCard(
+    discordChannelUrl: String,
+    onViewChannel: () -> Unit
+) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -162,7 +168,7 @@ private fun DiscordInfoCard() {
             )
             
             Button(
-                onClick = { uriHandler.openUri(discordChannelUrl) },
+                onClick = onViewChannel,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(localizeHelper.localize(Res.string.view_in_discord))

@@ -34,7 +34,7 @@ import kotlinx.serialization.json.Json
  * without API keys
  */
 open class WebscrapingTranslateEngine(
-    private val client: HttpClients,
+    protected val client: HttpClients,
     val readerPreferences: ReaderPreferences
 ) : TranslateEngine() {
 
@@ -955,4 +955,106 @@ class GeminiTranslateEngine(httpClients: HttpClients, readerPreferences: ReaderP
     override val rateLimitDelayMs: Long = 5000L
     
     override val isOffline: Boolean = false
+    
+    /**
+     * Generate content using Gemini API
+     */
+    override suspend fun generateContent(
+        systemPrompt: String,
+        userPrompt: String,
+        temperature: Float,
+        maxTokens: Int
+    ): Result<String> {
+        val apiKey = readerPreferences.geminiApiKey().get()
+        if (apiKey.isBlank()) {
+            return Result.failure(Exception("Gemini API key not configured"))
+        }
+        
+        val model = readerPreferences.geminiModel().get().ifBlank { "gemini-2.0-flash" }
+        val apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey"
+        
+        return try {
+            val json = Json { ignoreUnknownKeys = true }
+            
+            val requestBody = json.encodeToString(
+                GeminiGenerateRequest.serializer(),
+                GeminiGenerateRequest(
+                    contents = listOf(
+                        GeminiContent(
+                            parts = listOf(
+                                GeminiPart(text = systemPrompt),
+                                GeminiPart(text = userPrompt)
+                            )
+                        )
+                    ),
+                    generationConfig = GeminiGenerationConfig(
+                        temperature = temperature,
+                        maxOutputTokens = maxTokens
+                    )
+                )
+            )
+            
+            val response = client.default.post(apiUrl) {
+                contentType(io.ktor.http.ContentType.Application.Json)
+                setBody(requestBody)
+            }
+            
+            val responseBody = response.bodyAsText()
+            val geminiResponse = json.decodeFromString<GeminiGenerateResponse>(responseBody)
+            
+            val generatedText = geminiResponse.candidates
+                ?.firstOrNull()
+                ?.content
+                ?.parts
+                ?.firstOrNull()
+                ?.text
+            
+            if (generatedText.isNullOrBlank()) {
+                Result.failure(Exception("Empty response from Gemini API"))
+            } else {
+                Result.success(generatedText.trim())
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Gemini API error: ${e.message}"))
+        }
+    }
 }
+
+// Gemini API DTOs for content generation
+@Serializable
+private data class GeminiGenerateRequest(
+    val contents: List<GeminiContent>,
+    val generationConfig: GeminiGenerationConfig? = null
+)
+
+@Serializable
+private data class GeminiContent(
+    val parts: List<GeminiPart>,
+    val role: String = "user"
+)
+
+@Serializable
+private data class GeminiPart(
+    val text: String
+)
+
+@Serializable
+private data class GeminiGenerationConfig(
+    val temperature: Float = 0.7f,
+    val maxOutputTokens: Int = 500
+)
+
+@Serializable
+private data class GeminiGenerateResponse(
+    val candidates: List<GeminiCandidate>? = null
+)
+
+@Serializable
+private data class GeminiCandidate(
+    val content: GeminiResponseContent? = null
+)
+
+@Serializable
+private data class GeminiResponseContent(
+    val parts: List<GeminiPart>? = null
+)

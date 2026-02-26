@@ -9,12 +9,14 @@ import kotlinx.serialization.json.Json
  * Providers:
  * - Gemini (Google) - Requires API key, high quality
  * - Pollinations.ai - Requires API key (free tier available)
+ * - Qwen Fast - FREE, no API key, fast generation (~15 seconds)
  */
 class UnifiedImageGenerator(
     private val httpClient: HttpClient
 ) {
     private val geminiGenerator by lazy { GeminiImageGenerator(httpClient) }
     private val pollinationsGenerator by lazy { PollinationsImageGenerator(httpClient) }
+    private val qwenFastGenerator by lazy { QwenFastImageGenerator(httpClient) }
     
     /**
      * Get all available providers
@@ -28,6 +30,7 @@ class UnifiedImageGenerator(
         return when (provider) {
             ImageProvider.GEMINI -> geminiGenerator.fetchAvailableModels(apiKey)
             ImageProvider.POLLINATIONS -> pollinationsGenerator.getAvailableModels(apiKey)
+            ImageProvider.QWEN_FAST -> qwenFastGenerator.getAvailableModels(apiKey)
         }
     }
     
@@ -51,6 +54,9 @@ class UnifiedImageGenerator(
             ImageProvider.POLLINATIONS -> {
                 val model = modelId ?: "flux"
                 pollinationsGenerator.generateWithModel(apiKey, prompt, characterName, bookTitle, style, model)
+            }
+            ImageProvider.QWEN_FAST -> {
+                qwenFastGenerator.generateImage(apiKey, prompt, characterName, bookTitle, style)
             }
         }
     }
@@ -80,9 +86,15 @@ class UnifiedImageGenerator(
                           error?.message?.contains("rate limit", ignoreCase = true) == true
         
         if (isRateLimit) {
-            // Fallback to Pollinations if not already using it
+            // Fallback to Qwen Fast (free) if not already using it
+            if (primaryProvider != ImageProvider.QWEN_FAST) {
+                println("Primary provider rate limited, falling back to Qwen Fast (free)")
+                return generateImage(ImageProvider.QWEN_FAST, "", prompt, characterName, bookTitle, style, null)
+            }
+            
+            // If Qwen Fast also fails, try Pollinations
             if (primaryProvider != ImageProvider.POLLINATIONS) {
-                println("Primary provider rate limited, falling back to Pollinations.ai")
+                println("Falling back to Pollinations.ai")
                 return generateImage(ImageProvider.POLLINATIONS, "", prompt, characterName, bookTitle, style, "flux")
             }
         }

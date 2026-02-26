@@ -131,7 +131,7 @@ fun UploadCharacterArtScreen(
     uploadProgress: Float,
     generationError: String?,
     // Provider selection
-    selectedProvider: AIProviderOption = AIProviderOption.POLLINATIONS,
+    selectedProvider: AIProviderOption = AIProviderOption.QWEN_FAST,
     onProviderSelect: (AIProviderOption) -> Unit = {},
     // Model selection parameters
     availableModels: List<GeminiModelInfo> = defaultModels,
@@ -183,6 +183,7 @@ fun UploadCharacterArtScreen(
     val currentApiKey = when (currentProvider) {
         AIProviderOption.GEMINI -> geminiApiKey
         AIProviderOption.POLLINATIONS -> pollinationsApiKey
+        AIProviderOption.QWEN_FAST -> "" // No API key needed
     }
     
     // API Key dialog - supports multiple providers
@@ -200,6 +201,9 @@ fun UploadCharacterArtScreen(
                     AIProviderOption.POLLINATIONS -> {
                         pollinationsApiKey = key
                         onPollinationsApiKeyChanged(key)
+                    }
+                    AIProviderOption.QWEN_FAST -> {
+                        // No API key needed for Qwen Fast
                     }
                 }
                 // Fetch models when API key is set
@@ -297,6 +301,7 @@ fun UploadCharacterArtScreen(
                                         onFetchModels(provider, when (provider) {
                                             AIProviderOption.GEMINI -> geminiApiKey
                                             AIProviderOption.POLLINATIONS -> pollinationsApiKey
+                                            AIProviderOption.QWEN_FAST -> ""
                                         })
                                         showProviderSelector = false
                                     },
@@ -821,6 +826,14 @@ enum class AIProviderOption(
     val apiKeyUrl: String,
     val isVisible: Boolean = true // Hide from UI but keep logic
 ) {
+    QWEN_FAST(
+        displayName = "Qwen Fast",
+        emoji = "⚡",
+        requiresApiKey = false,
+        description = "Free - Fast generation (~15 seconds)",
+        apiKeyUrl = "",
+        isVisible = true
+    ),
     POLLINATIONS(
         displayName = "Pollinations.ai",
         emoji = "🌸",
@@ -1441,6 +1454,7 @@ private fun MultiProviderApiKeyDialog(
                         Text(when (provider) {
                             AIProviderOption.GEMINI -> "AIza..."
                             AIProviderOption.POLLINATIONS -> "pk_..."
+                            AIProviderOption.QWEN_FAST -> "No API key needed"
                         })
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -1607,7 +1621,7 @@ fun UploadCharacterArtScreen(
         isGenerating = false,
         uploadProgress = uploadProgress,
         generationError = null,
-        selectedProvider = AIProviderOption.QWEN,
+        selectedProvider = AIProviderOption.QWEN_FAST,
         onProviderSelect = {},
         availableModels = defaultModels,
         selectedModel = defaultModels.firstOrNull(),

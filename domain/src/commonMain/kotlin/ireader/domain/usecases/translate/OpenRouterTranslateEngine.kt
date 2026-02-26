@@ -65,6 +65,62 @@ class OpenRouterTranslateEngine(
     
     override val isOffline: Boolean = false
     
+    /**
+     * Generate content using OpenRouter API
+     */
+    override suspend fun generateContent(
+        systemPrompt: String,
+        userPrompt: String,
+        temperature: Float,
+        maxTokens: Int
+    ): Result<String> {
+        val apiKey = readerPreferences.openRouterApiKey().get()
+        if (apiKey.isBlank()) {
+            return Result.failure(Exception("OpenRouter API key not configured"))
+        }
+        
+        val selectedModel = readerPreferences.openRouterModel().get().ifBlank { defaultModel }
+        
+        return try {
+            val response = client.default.post("$baseUrl/chat/completions") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $apiKey")
+                    append("HTTP-Referer", "https://ireader.app")
+                    append("X-Title", "IReader")
+                }
+                contentType(ContentType.Application.Json)
+                timeout {
+                    requestTimeoutMillis = 120000
+                    connectTimeoutMillis = 30000
+                }
+                setBody(OpenRouterRequest(
+                    model = selectedModel,
+                    messages = listOf(
+                        Message(role = "system", content = systemPrompt),
+                        Message(role = "user", content = userPrompt)
+                    ),
+                    temperature = temperature.toDouble(),
+                    max_tokens = maxTokens
+                ))
+            }
+            
+            if (response.status.value !in 200..299) {
+                return Result.failure(Exception("OpenRouter API error: HTTP ${response.status.value}"))
+            }
+            
+            val result = response.body<OpenRouterResponse>()
+            val generatedText = result.choices?.firstOrNull()?.message?.content
+            
+            if (generatedText.isNullOrBlank()) {
+                Result.failure(Exception("Empty response from OpenRouter API"))
+            } else {
+                Result.success(generatedText.trim())
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("OpenRouter API error: ${e.message}"))
+        }
+    }
+    
     // OpenRouter API base URL
     private val baseUrl = "https://openrouter.ai/api/v1"
     

@@ -149,6 +149,26 @@ abstract class TranslateEngine {
         translate(texts, source, target, onProgress, onSuccess, onError)
     }
     
+    /**
+     * Generate content using AI (for engines that support it)
+     * This is used for tasks like generating image prompts from text
+     * 
+     * @param systemPrompt The system instruction for the AI
+     * @param userPrompt The user's request/input
+     * @param temperature Creativity level (0.0-1.0, default 0.7)
+     * @param maxTokens Maximum tokens to generate (default 500)
+     * @return Result with generated text or error
+     */
+    open suspend fun generateContent(
+        systemPrompt: String,
+        userPrompt: String,
+        temperature: Float = 0.7f,
+        maxTokens: Int = 500
+    ): Result<String> {
+        // Default implementation returns error - only AI engines should override this
+        return Result.failure(Exception("Content generation not supported by this engine"))
+    }
+    
     companion object {
         // Define engine IDs as constants for easier reference
         const val BUILT_IN = 0L

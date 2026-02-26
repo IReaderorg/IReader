@@ -67,6 +67,7 @@ class CharacterArtUploadScreenSpec(
             when (state.selectedProvider) {
                 ImageProvider.GEMINI -> AIProviderOption.GEMINI
                 ImageProvider.POLLINATIONS -> AIProviderOption.POLLINATIONS
+                ImageProvider.QWEN_FAST -> AIProviderOption.QWEN_FAST
             }
         }
         
@@ -119,6 +120,7 @@ class CharacterArtUploadScreenSpec(
                 val domainProvider = when (uiProvider) {
                     AIProviderOption.GEMINI -> ImageProvider.GEMINI
                     AIProviderOption.POLLINATIONS -> ImageProvider.POLLINATIONS
+                    AIProviderOption.QWEN_FAST -> ImageProvider.QWEN_FAST
                 }
                 vm.setProvider(domainProvider)
             },
@@ -136,6 +138,7 @@ class CharacterArtUploadScreenSpec(
                 val domainProvider = when (provider) {
                     AIProviderOption.GEMINI -> ImageProvider.GEMINI
                     AIProviderOption.POLLINATIONS -> ImageProvider.POLLINATIONS
+                    AIProviderOption.QWEN_FAST -> ImageProvider.QWEN_FAST
                 }
                 vm.setProvider(domainProvider)
             },

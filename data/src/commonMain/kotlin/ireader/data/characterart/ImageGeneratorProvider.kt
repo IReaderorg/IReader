@@ -34,6 +34,12 @@ enum class ImageProvider(
     val requiresApiKey: Boolean,
     val description: String
 ) {
+    QWEN_FAST(
+        displayName = "Qwen Fast",
+        emoji = "⚡",
+        requiresApiKey = false,
+        description = "Free - Fast generation (~15 seconds)"
+    ),
     GEMINI(
         displayName = "Google Gemini",
         emoji = "✨",

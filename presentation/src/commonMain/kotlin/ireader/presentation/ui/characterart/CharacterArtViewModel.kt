@@ -560,6 +560,7 @@ class CharacterArtViewModel(
             val apiKey = when (currentState.selectedProvider) {
                 ImageProvider.GEMINI -> currentState.geminiApiKey
                 ImageProvider.POLLINATIONS -> currentState.pollinationsApiKey
+                ImageProvider.QWEN_FAST -> "" // No API key needed for Qwen Fast
             }
             
             generator.getModelsForProvider(currentState.selectedProvider, apiKey)
@@ -608,6 +609,7 @@ class CharacterArtViewModel(
         val apiKey = when (provider) {
             ImageProvider.GEMINI -> currentState.geminiApiKey
             ImageProvider.POLLINATIONS -> currentState.pollinationsApiKey
+            ImageProvider.QWEN_FAST -> "" // No API key needed for Qwen Fast
         }
         
         if (provider.requiresApiKey && apiKey.isBlank()) {

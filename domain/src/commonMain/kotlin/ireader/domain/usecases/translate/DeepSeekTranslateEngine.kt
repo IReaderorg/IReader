@@ -40,6 +40,59 @@ class DeepSeekTranslateEngine(
     
     override val isOffline: Boolean = false
     
+    /**
+     * Generate content using DeepSeek API
+     */
+    override suspend fun generateContent(
+        systemPrompt: String,
+        userPrompt: String,
+        temperature: Float,
+        maxTokens: Int
+    ): Result<String> {
+        val apiKey = readerPreferences.deepSeekApiKey().get()
+        if (apiKey.isBlank()) {
+            return Result.failure(Exception("DeepSeek API key not configured"))
+        }
+        
+        return try {
+            val response = client.default.post("https://api.deepseek.com/v1/chat/completions") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $apiKey")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(DeepSeekRequest(
+                    model = "deepseek-chat",
+                    messages = listOf(
+                        Message(role = "system", content = systemPrompt),
+                        Message(role = "user", content = userPrompt)
+                    ),
+                    temperature = temperature.toDouble(),
+                    max_tokens = maxTokens
+                ))
+                timeout {
+                    requestTimeoutMillis = 60000
+                    connectTimeoutMillis = 15000
+                    socketTimeoutMillis = 60000
+                }
+            }
+            
+            if (response.status.value !in 200..299) {
+                return Result.failure(Exception("DeepSeek API error: HTTP ${response.status.value}"))
+            }
+            
+            val result = response.body<DeepSeekResponse>()
+            val generatedText = result.choices?.firstOrNull()?.message?.content
+            
+            if (generatedText.isNullOrBlank()) {
+                Result.failure(Exception("Empty response from DeepSeek API"))
+            } else {
+                Result.success(generatedText.trim())
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("DeepSeek API error: ${e.message}"))
+        }
+    }
+    
     // DeepSeek has excellent language support similar to OpenAI
     override val supportedLanguages: List<Pair<String, String>> = listOf(
         "auto" to "Auto-detect",

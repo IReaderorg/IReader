@@ -1,29 +1,22 @@
 package ireader.data.characterart
 
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import ireader.domain.usecases.translate.TranslationEnginesManager
 
 /**
- * Generates image prompts from chapter text using Gemini AI.
+ * Generates image prompts from chapter text using the configured translation engine.
  * 
  * This class:
  * 1. Cleans chapter text (removes dialogs, unnecessary content)
  * 2. Summarizes the chapter focusing on visual elements
  * 3. Generates an image prompt for character art or scene
+ * 
+ * Uses the user's configured translation engine's AI capabilities.
  */
 class ChapterArtPromptGenerator(
-    private val httpClient: HttpClient,
-    private val json: Json = Json { ignoreUnknownKeys = true }
+    private val translationEnginesManager: TranslationEnginesManager
 ) {
     companion object {
-        private const val GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-        private const val DEFAULT_MODEL = "gemini-2.0-flash"
-        
-        // Max characters to send to Gemini (to avoid token limits)
+        // Max characters to send to AI (to avoid token limits)
         private const val MAX_INPUT_CHARS = 15000
         
         // Prompt template for generating image prompts
@@ -89,21 +82,18 @@ Return ONLY the image prompt, nothing else. No explanations, no prefixes.
     }
     
     /**
-     * Generate an image prompt from chapter text using Gemini
-     * @param model Optional model to use (defaults to gemini-2.0-flash if blank)
+     * Generate an image prompt from chapter text using the configured translation engine
+     * @param chapterText The chapter text to analyze
+     * @param bookTitle The book title (for context)
+     * @param chapterTitle The chapter title (for context)
+     * @param preferredFocus What to focus on (character, scene, setting, or auto)
      */
     suspend fun generateImagePrompt(
-        apiKey: String,
         chapterText: String,
         bookTitle: String,
         chapterTitle: String,
-        preferredFocus: PromptFocus = PromptFocus.AUTO,
-        model: String = ""
+        preferredFocus: PromptFocus = PromptFocus.AUTO
     ): Result<GeneratedPromptResult> {
-        if (apiKey.isBlank()) {
-            return Result.failure(Exception("Gemini API key is required"))
-        }
-        
         val cleanedText = cleanChapterText(chapterText)
         
         if (cleanedText.length < 100) {
@@ -132,55 +122,21 @@ Generate an image prompt based on this chapter.
         """.trimIndent()
         
         return try {
-            val modelToUse = model.ifBlank { DEFAULT_MODEL }
-            val response = httpClient.post("$GEMINI_API_URL/$modelToUse:generateContent?key=$apiKey") {
-                contentType(ContentType.Application.Json)
-                setBody(json.encodeToString(
-                    GeminiRequest.serializer(),
-                    GeminiRequest(
-                        contents = listOf(
-                            GeminiContent(
-                                parts = listOf(
-                                    GeminiPart(text = SYSTEM_PROMPT),
-                                    GeminiPart(text = userPrompt)
-                                )
-                            )
-                        ),
-                        generationConfig = GeminiGenerationConfig(
-                            temperature = 0.7f,
-                            maxOutputTokens = 500
-                        )
-                    )
-                ))
-            }
+            // Use the translation engine's generateContent method
+            val result = translationEnginesManager.generateContent(
+                systemPrompt = SYSTEM_PROMPT,
+                userPrompt = userPrompt,
+                temperature = 0.7f,
+                maxTokens = 500
+            )
             
-            if (response.status.isSuccess()) {
-                val responseBody = response.bodyAsText()
-                val geminiResponse = json.decodeFromString<GeminiResponse>(responseBody)
-                
-                val generatedPrompt = geminiResponse.candidates
-                    ?.firstOrNull()
-                    ?.content
-                    ?.parts
-                    ?.firstOrNull()
-                    ?.text
-                    ?.trim()
-                
-                if (generatedPrompt.isNullOrBlank()) {
-                    Result.failure(Exception("Failed to generate prompt - empty response"))
-                } else {
-                    Result.success(
-                        GeneratedPromptResult(
-                            imagePrompt = generatedPrompt,
-                            bookTitle = bookTitle,
-                            chapterTitle = chapterTitle,
-                            focus = preferredFocus
-                        )
-                    )
-                }
-            } else {
-                val errorBody = response.bodyAsText()
-                Result.failure(Exception("Gemini API error: ${response.status} - $errorBody"))
+            result.map { generatedPrompt ->
+                GeneratedPromptResult(
+                    imagePrompt = generatedPrompt.trim(),
+                    bookTitle = bookTitle,
+                    chapterTitle = chapterTitle,
+                    focus = preferredFocus
+                )
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -206,43 +162,4 @@ data class GeneratedPromptResult(
     val bookTitle: String,
     val chapterTitle: String,
     val focus: PromptFocus
-)
-
-// Gemini API DTOs
-@Serializable
-private data class GeminiRequest(
-    val contents: List<GeminiContent>,
-    val generationConfig: GeminiGenerationConfig? = null
-)
-
-@Serializable
-private data class GeminiContent(
-    val parts: List<GeminiPart>,
-    val role: String = "user"
-)
-
-@Serializable
-private data class GeminiPart(
-    val text: String
-)
-
-@Serializable
-private data class GeminiGenerationConfig(
-    val temperature: Float = 0.7f,
-    val maxOutputTokens: Int = 500
-)
-
-@Serializable
-private data class GeminiResponse(
-    val candidates: List<GeminiCandidate>? = null
-)
-
-@Serializable
-private data class GeminiCandidate(
-    val content: GeminiResponseContent? = null
-)
-
-@Serializable
-private data class GeminiResponseContent(
-    val parts: List<GeminiPart>? = null
 )

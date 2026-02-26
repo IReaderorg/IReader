@@ -61,6 +61,63 @@ class NvidiaTranslateEngine(
     
     override val isOffline: Boolean = false
     
+    /**
+     * Generate content using NVIDIA NIM API
+     */
+    override suspend fun generateContent(
+        systemPrompt: String,
+        userPrompt: String,
+        temperature: Float,
+        maxTokens: Int
+    ): Result<String> {
+        val apiKey = readerPreferences.nvidiaApiKey().get()
+        if (apiKey.isBlank()) {
+            return Result.failure(Exception("NVIDIA API key not configured"))
+        }
+        
+        val selectedModel = readerPreferences.nvidiaModel().get().ifBlank { defaultModel }
+        
+        return try {
+            val response = client.default.post("$baseUrl/chat/completions") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $apiKey")
+                    append("Accept", "application/json")
+                }
+                contentType(ContentType.Application.Json)
+                timeout {
+                    requestTimeoutMillis = 120000
+                    connectTimeoutMillis = 30000
+                }
+                setBody(NvidiaRequest(
+                    model = selectedModel,
+                    messages = listOf(
+                        Message(role = "system", content = systemPrompt),
+                        Message(role = "user", content = userPrompt)
+                    ),
+                    temperature = temperature.toDouble(),
+                    max_tokens = maxTokens,
+                    top_p = 1.0,
+                    stream = false
+                ))
+            }
+            
+            if (response.status.value !in 200..299) {
+                return Result.failure(Exception("NVIDIA API error: HTTP ${response.status.value}"))
+            }
+            
+            val result = response.body<NvidiaResponse>()
+            val generatedText = result.choices?.firstOrNull()?.message?.content
+            
+            if (generatedText.isNullOrBlank()) {
+                Result.failure(Exception("Empty response from NVIDIA API"))
+            } else {
+                Result.success(generatedText.trim())
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("NVIDIA API error: ${e.message}"))
+        }
+    }
+    
     // NVIDIA NIM API base URL
     private val baseUrl = "https://integrate.api.nvidia.com/v1"
     

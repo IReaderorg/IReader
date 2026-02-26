@@ -40,6 +40,54 @@ class OpenAITranslateEngine(
     
     override val isOffline: Boolean = false
     
+    /**
+     * Generate content using OpenAI API
+     */
+    override suspend fun generateContent(
+        systemPrompt: String,
+        userPrompt: String,
+        temperature: Float,
+        maxTokens: Int
+    ): Result<String> {
+        val apiKey = readerPreferences.openAIApiKey().get()
+        if (apiKey.isBlank()) {
+            return Result.failure(Exception("OpenAI API key not configured"))
+        }
+        
+        return try {
+            val response = client.default.post("https://api.openai.com/v1/chat/completions") {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $apiKey")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(OpenAIRequest(
+                    model = "gpt-3.5-turbo",
+                    messages = listOf(
+                        Message(role = "system", content = systemPrompt),
+                        Message(role = "user", content = userPrompt)
+                    ),
+                    temperature = temperature.toDouble(),
+                    max_tokens = maxTokens
+                ))
+            }
+            
+            if (response.status.value !in 200..299) {
+                return Result.failure(Exception("OpenAI API error: HTTP ${response.status.value}"))
+            }
+            
+            val result = response.body<OpenAIResponse>()
+            val generatedText = result.choices?.firstOrNull()?.message?.content
+            
+            if (generatedText.isNullOrBlank()) {
+                Result.failure(Exception("Empty response from OpenAI API"))
+            } else {
+                Result.success(generatedText.trim())
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("OpenAI API error: ${e.message}"))
+        }
+    }
+    
     override val supportedLanguages: List<Pair<String, String>> = listOf(
         "auto" to "Auto-detect",
         "af" to "Afrikaans",

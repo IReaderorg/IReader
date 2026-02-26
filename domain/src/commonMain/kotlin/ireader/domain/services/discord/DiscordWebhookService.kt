@@ -57,7 +57,7 @@ class DiscordWebhookService(
                 if (aiModel.isNotBlank()) {
                     append("🤖 **AI Model:** $aiModel\n")
                 }
-                if (prompt.isNotBlank() && prompt.length <= 200) {
+                if (prompt.isNotBlank() && prompt.length <= 500) {
                     append("💭 **Prompt:** $prompt\n")
                 }
             }

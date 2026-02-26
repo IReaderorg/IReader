@@ -1532,31 +1532,30 @@ class ReaderScreenViewModel(
     val chapterArtError: String?
         get() = (_state.value as? ReaderState.Success)?.chapterArtError
     
-    // Lazy-initialized HttpClient for chapter art generation (reused across calls)
-    private val chapterArtHttpClientLazy = lazy { io.ktor.client.HttpClient() }
-    private val chapterArtHttpClient by chapterArtHttpClientLazy
-    
-    // Lazy-initialized prompt generator (reuses HttpClient)
+    // Lazy-initialized prompt generator
     private val chapterArtPromptGenerator by lazy {
-        ireader.data.characterart.ChapterArtPromptGenerator(httpClient = chapterArtHttpClient)
+        ireader.data.characterart.ChapterArtPromptGenerator(
+            translationEnginesManager = translationEnginesManager
+        )
     }
     
     /**
-     * Generate an image prompt from the current chapter using Gemini AI.
+     * Generate an image prompt from the current chapter using the configured translation engine.
      * @param focus The type of visual element to focus on (CHARACTER, SCENE, SETTING, or AUTO)
      */
     fun generateChapterArtPrompt(focus: ireader.data.characterart.PromptFocus) {
         val currentState = _state.value as? ReaderState.Success ?: return
         
-        val apiKey = readerPreferences.geminiApiKey().get()
+        // Check if translation engine is configured
+        val apiKey = translationEnginesManager.getApiKeyForCurrentEngine()
         if (apiKey.isBlank()) {
             updateSuccessState { 
                 it.copy(
                     showChapterArtDialog = false,
-                    chapterArtError = "Please set your Gemini API key in Settings > Translation"
+                    chapterArtError = "Please configure your translation engine API key in Settings > Translation"
                 )
             }
-            showSnackBar(UiText.DynamicString("Please set your Gemini API key in Settings > Translation"))
+            showSnackBar(UiText.DynamicString("Please configure your translation engine API key in Settings > Translation"))
             return
         }
         
@@ -1587,16 +1586,11 @@ class ReaderScreenViewModel(
         
         scope.launch {
             try {
-                // Get user's selected Gemini model (or use default if not set)
-                val selectedModel = readerPreferences.geminiModel().get()
-                
                 chapterArtPromptGenerator.generateImagePrompt(
-                    apiKey = apiKey,
                     chapterText = chapterText,
                     bookTitle = currentState.book.title,
                     chapterTitle = currentState.currentChapter.name,
-                    preferredFocus = focus,
-                    model = selectedModel
+                    preferredFocus = focus
                 ).onSuccess { result ->
                     updateSuccessState { 
                         it.copy(
@@ -2165,14 +2159,5 @@ class ReaderScreenViewModel(
         
         // Cleanup ChapterController state (Requirements: 9.2, 9.4, 9.5)
         chapterController.dispatch(ChapterCommand.Cleanup)
-        
-        // Close chapter art HttpClient only if it was initialized
-        if (chapterArtHttpClientLazy.isInitialized()) {
-            try {
-                chapterArtHttpClient.close()
-            } catch (_: Exception) {
-                // Ignore close errors
-            }
-        }
     }
 }

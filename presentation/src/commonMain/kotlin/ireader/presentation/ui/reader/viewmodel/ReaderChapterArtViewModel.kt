@@ -89,12 +89,6 @@ class ReaderChapterArtViewModel(
             return
         }
         
-        val apiKey = readerPreferences.geminiApiKey().get()
-        if (apiKey.isBlank()) {
-            error = "Please set your Gemini API key in settings"
-            return
-        }
-        
         if (cachedChapterText.length < 100) {
             error = "Chapter text is too short to analyze"
             return
@@ -105,7 +99,6 @@ class ReaderChapterArtViewModel(
         
         scope.launch {
             generator.generateImagePrompt(
-                apiKey = apiKey,
                 chapterText = cachedChapterText,
                 bookTitle = cachedBookTitle,
                 chapterTitle = cachedChapterTitle,

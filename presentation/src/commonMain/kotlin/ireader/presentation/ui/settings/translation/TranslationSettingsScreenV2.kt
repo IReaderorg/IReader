@@ -112,8 +112,10 @@ fun TranslationSettingsScreenV2(
     // Check if current engine is a plugin
     val isPluginEngine = currentEngine is PluginTranslateEngineWrapper
     
-    // Show API key section for engines that need it (Gemini, OpenAI, DeepSeek, or plugin engines that require API key)
+    // Show API key section for engines that need it (Gemini, OpenAI, DeepSeek, OpenRouter, NVIDIA, or plugin engines that require API key)
     val showApiKeySection = isGeminiSelected || isOpenAISelected || isDeepSeekSelected || 
+                           viewModel.translatorEngine.value == 9L || // OpenRouter
+                           viewModel.translatorEngine.value == 10L || // NVIDIA
                            (currentEngine?.requiresApiKey == true)
 
     // Load cached models on first composition
@@ -326,6 +328,8 @@ private fun getApiKeyForEngine(viewModel: TranslationSettingsViewModel, engineId
         2L -> viewModel.openAIApiKey.value
         3L -> viewModel.deepSeekApiKey.value
         8L -> viewModel.geminiApiKey.value
+        9L -> viewModel.openRouterApiKey.value
+        10L -> viewModel.nvidiaApiKey.value
         else -> ""
     }
 }
@@ -335,5 +339,7 @@ private fun setApiKeyForEngine(viewModel: TranslationSettingsViewModel, engineId
         2L -> viewModel.updateOpenAIApiKey(value)
         3L -> viewModel.updateDeepSeekApiKey(value)
         8L -> viewModel.updateGeminiApiKey(value)
+        9L -> viewModel.updateOpenRouterApiKey(value)
+        10L -> viewModel.updateNvidiaApiKey(value)
     }
 }
