@@ -194,6 +194,36 @@ val DomainServices = module {
     factory  { GetRemoteChapters() }
     factory  { GetRemoteReadingContent() }
     factory  { ireader.domain.usecases.remote.GlobalSearchUseCase(get()) }
+    
+    // Remote Backend Use Cases - Authentication and User Management
+    factory  { ireader.domain.usecases.remote.SignUpUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.SignInUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.GetCurrentUserUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.SignOutUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.UpdateUsernameUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.UpdateEthWalletAddressUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.UpdatePasswordUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.SyncReadingProgressUseCase(get(), get()) }
+    factory  { ireader.domain.usecases.remote.GetReadingProgressUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.ObserveReadingProgressUseCase(get()) }
+    factory  { ireader.domain.usecases.remote.ObserveConnectionStatusUseCase(get()) }
+    
+    // RemoteBackendUseCases aggregate
+    factory {
+        ireader.domain.usecases.remote.RemoteBackendUseCases(
+            signUp = get(),
+            signIn = get(),
+            getCurrentUser = get(),
+            signOut = get(),
+            updateUsername = get(),
+            updateEthWalletAddress = get(),
+            updatePassword = get(),
+            syncReadingProgress = get(),
+            getReadingProgress = get(),
+            observeReadingProgress = get(),
+            observeConnectionStatus = get()
+        )
+    }
 
     factory  {
         TranslationEnginesManager(

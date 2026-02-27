@@ -200,8 +200,8 @@ val PresentationModules = module {
     factory  { SettingsDataViewModel(get(), getOrNull(), getOrNull()) }
     
     // Authentication ViewModels
-    factory  { ireader.presentation.ui.settings.auth.AuthViewModel(get()) }
-    factory  { ireader.presentation.ui.settings.auth.ProfileViewModel(get(), getOrNull(), getOrNull()) }
+    factory  { ireader.presentation.ui.settings.auth.AuthViewModel(getOrNull()) }
+    factory  { ireader.presentation.ui.settings.auth.ProfileViewModel(getOrNull(), getOrNull(), getOrNull()) }
     
     // Sync ViewModels
     factory  { ireader.presentation.ui.settings.sync.SupabaseConfigViewModel(get(), get(), getOrNull(), getOrNull()) }
