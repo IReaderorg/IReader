@@ -41,7 +41,7 @@ class TranslationEnginesManager(
     // - OpenRouter AI (requires API key, access to multiple AI models)
     // - NVIDIA NIM (requires API key, access to NVIDIA-optimized AI models)
     // Other engines (like Ollama) are available as plugins from the Feature Store
-    private val builtInEngines = listOf(
+    val builtInEngines = listOf(
         GoogleTranslateML(),  // id=0, offline, default
         GeminiTranslateEngine(httpClients, readerPreferences),  // id=8, requires API key
         OpenRouterTranslateEngine(httpClients, readerPreferences),  // id=9, requires API key

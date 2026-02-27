@@ -7,7 +7,8 @@ data class ChaptersFilters(val type: Type, val value: Value) {
         Downloaded,
         Bookmarked,
         Read,
-        Duplicate;
+        Duplicate,
+        Locked;
     }
 
     enum class Value {

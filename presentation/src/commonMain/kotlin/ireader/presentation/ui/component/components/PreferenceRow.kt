@@ -245,6 +245,59 @@ fun SwitchPreference(
     )
 }
 
+/**
+ * SwitchPreference with onValueChanged callback
+ * Allows executing custom logic when the switch value changes
+ */
+@Composable
+fun SwitchPreference(
+        modifier: Modifier = Modifier,
+        preference: PreferenceMutableState<Boolean>,
+        title: String,
+        subtitle: String? = null,
+        painter: Painter? = null,
+        icon: ImageVector? = null,
+        onValueChanged: ((Boolean) -> Unit)? = null,
+) {
+    // Build content description for accessibility
+    val contentDesc = buildString {
+        append(title)
+        if (subtitle != null) {
+            append(". ")
+            append(subtitle)
+        }
+        append(". ")
+        append(if (preference.value) "Enabled" else "Disabled")
+    }
+    
+    PreferenceRow(
+            modifier = modifier.semantics(mergeDescendants = true) {
+                contentDescription = contentDesc
+                role = androidx.compose.ui.semantics.Role.Switch
+            },
+            title = title,
+            subtitle = subtitle,
+            painter = painter,
+            icon = icon,
+            action = {
+                Switch(
+                        checked = preference.value,
+                        onCheckedChange = { 
+                            val newValue = !preference.value
+                            preference.value = newValue
+                            onValueChanged?.invoke(newValue)
+                        },
+                )
+            },
+            onClick = { 
+                val newValue = !preference.value
+                preference.value = newValue
+                onValueChanged?.invoke(newValue)
+            },
+            clickable = true,
+    )
+}
+
 // @Composable
 // fun SliderPreference(
 //    preference: MutableState<Float>,

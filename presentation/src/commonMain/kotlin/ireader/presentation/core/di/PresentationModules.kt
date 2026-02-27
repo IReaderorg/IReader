@@ -179,7 +179,7 @@ val PresentationModules = module {
     // Dependencies: downloadService, downloadUseCases, networkStateProvider, downloadPreferences
     factory  { DownloaderViewModel(get(), get(), get(), get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get(), get()) }
-    factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get(),get()) }
+    factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get(),get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get(), getOrNull(), get(),get()) }
     factory  { CommunitySourceConfigViewModel(get(), getOrNull(), getOrNull()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }

@@ -112,6 +112,8 @@ import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.asStateIn
+import kotlinx.coroutines.launch
+import ireader.i18n.asString
 
 @Composable
 fun GeneralSettingScreen(
@@ -122,6 +124,17 @@ fun GeneralSettingScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val manageNotificationComponent = mangeNotificationRow()
+    
+    // Show initialization dialog when needed
+    if (vm.showInitializationDialog.value) {
+        TranslationEngineInitializationDialog(
+            state = vm.initializationState.value,
+            onInitialize = { vm.initializeGoogleMLEngine() },
+            onDismiss = { vm.dismissInitializationDialog() },
+            onRetry = { vm.retryInitialization() }
+        )
+    }
+    
     val items = remember {
         listOf<Components>(
                 // Language Section - Moved to top for better visibility
@@ -206,10 +219,10 @@ fun GeneralSettingScreen(
                     ChoicePreference<String>(
                         preference = vm.defaultChapterSort,
                         choices = mapOf(
-                            "SOURCE_ORDER" to "By Source Order",
-                            "CHAPTER_NUMBER" to "By Chapter Number",
-                            "UPLOAD_DATE_ASC" to "By Upload Date (Ascending)",
-                            "UPLOAD_DATE_DESC" to "By Upload Date (Descending)"
+                            "SOURCE_ORDER" to localizeHelper.localize(Res.string.sort_by_source_order),
+                            "CHAPTER_NUMBER" to localizeHelper.localize(Res.string.sort_by_chapter_number),
+                            "UPLOAD_DATE_ASC" to localizeHelper.localize(Res.string.sort_by_upload_date_asc),
+                            "UPLOAD_DATE_DESC" to localizeHelper.localize(Res.string.sort_by_upload_date_desc)
                         ),
                         title = localizeHelper.localize(Res.string.default_chapter_sort),
                         subtitle = localizeHelper.localize(Res.string.default_sorting_method_for_chapter_lists)
@@ -295,7 +308,10 @@ fun GeneralSettingScreen(
                             preference = pref,
                             title = localizeHelper.localize(Res.string.auto_translate_novel_names),
                             subtitle = localizeHelper.localize(Res.string.automatically_translate_novel_titles_when),
-                            icon = Icons.Filled.Translate
+                            icon = Icons.Filled.Translate,
+                            onValueChanged = { enabled ->
+                                vm.checkTranslationEngineInitialization(enabled)
+                            }
                         )
                     }
                 },
@@ -305,7 +321,10 @@ fun GeneralSettingScreen(
                             preference = pref,
                             title = localizeHelper.localize(Res.string.auto_translate_descriptions),
                             subtitle = localizeHelper.localize(Res.string.automatically_translate_novel_descriptions_when),
-                            icon = Icons.Filled.Description
+                            icon = Icons.Filled.Description,
+                            onValueChanged = { enabled ->
+                                vm.checkTranslationEngineInitialization(enabled)
+                            }
                         )
                     }
                 },
@@ -328,13 +347,13 @@ fun GeneralSettingScreen(
                     ChoicePreference<Int>(
                         preference = vm.thumbnailQuality,
                         choices = mapOf(
-                            0 to "Low (128px) - Fastest",
-                            1 to "Medium (256px)",
-                            2 to "High (384px) - Recommended",
-                            3 to "Ultra (512px) - Best for custom covers"
+                            0 to localizeHelper.localize(Res.string.thumbnail_quality_low),
+                            1 to localizeHelper.localize(Res.string.thumbnail_quality_medium),
+                            2 to localizeHelper.localize(Res.string.thumbnail_quality_high),
+                            3 to localizeHelper.localize(Res.string.thumbnail_quality_ultra)
                         ),
-                        title = "Thumbnail Quality",
-                        subtitle = "Higher quality = sharper covers but more memory"
+                        title = localizeHelper.localize(Res.string.thumbnail_quality),
+                        subtitle = localizeHelper.localize(Res.string.thumbnail_quality_subtitle)
                     )
                 },
                 Components.Switch(
@@ -612,7 +631,10 @@ class GeneralSettingScreenViewModel(
         private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences,
         private val libraryPreferences: ireader.domain.preferences.prefs.LibraryPreferences,
         private val translationPreferences: ireader.domain.preferences.prefs.TranslationPreferences? = null,
-        val localeHelper: LocaleHelper
+        private val translationEnginesManager: ireader.domain.usecases.translate.TranslationEnginesManager? = null,
+        private val readerPreferences: ireader.domain.preferences.prefs.ReaderPreferences? = null,
+        val localeHelper: LocaleHelper,
+        val localizeHelper: ireader.i18n.LocalizeHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
     val appUpdater = appPreferences.appUpdater().asStateIn(scope)
@@ -639,6 +661,13 @@ class GeneralSettingScreenViewModel(
     val translationRateLimitDelay = translationPreferences?.translationRateLimitDelayMs()?.asStateIn(scope)
     val autoTranslateNovelNames = translationPreferences?.autoTranslateNovelNames()?.asStateIn(scope)
     val autoTranslateDescriptions = translationPreferences?.autoTranslateDescriptions()?.asStateIn(scope)
+    
+    // Translation engine initialization state
+    private val _initializationState = kotlinx.coroutines.flow.MutableStateFlow(TranslationEngineInitState())
+    val initializationState = _initializationState.asState()
+    
+    private val _showInitializationDialog = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val showInitializationDialog = _showInitializationDialog.asState()
     
     // New General Settings Enhancements
     // Library preferences
@@ -687,7 +716,7 @@ class GeneralSettingScreenViewModel(
      */
     fun formatDownloadDelay(delayMs: Long): String {
         return when {
-            delayMs == 0L -> "No delay"
+            delayMs == 0L -> localizeHelper.localize(Res.string.no_delay)
             delayMs >= 1000L -> {
                 val seconds = delayMs / 1000.0
                 if (seconds % 1.0 == 0.0) {
@@ -698,5 +727,92 @@ class GeneralSettingScreenViewModel(
             }
             else -> "${delayMs}ms"
         }
+    }
+    
+    /**
+     * Check if Google ML requires initialization when auto-translate is toggled
+     * Auto-translate always uses Google ML regardless of selected engine
+     */
+    fun checkTranslationEngineInitialization(enabled: Boolean) {
+        if (!enabled || translationEnginesManager == null || readerPreferences == null) return
+        
+        scope.launch {
+            // Always use Google ML (id=0) for auto-translate
+            val googleML = translationEnginesManager.builtInEngines.first { it.id == 0L }
+            
+            if (googleML.requiresInitialization) {
+                val (source, target) = readerPreferences.translatorOriginLanguage().get() to 
+                                       readerPreferences.translatorTargetLanguage().get()
+                
+                _initializationState.value = TranslationEngineInitState(
+                    engineName = googleML.engineName,
+                    sourceLanguage = source,
+                    targetLanguage = target
+                )
+                _showInitializationDialog.value = true
+            }
+        }
+    }
+    
+    /**
+     * Initialize Google ML translation engine (always used for auto-translate)
+     */
+    fun initializeGoogleMLEngine() {
+        if (translationEnginesManager == null || readerPreferences == null) return
+        
+        scope.launch {
+            _initializationState.value = _initializationState.value.copy(
+                isInitializing = true,
+                progress = 0,
+                error = null
+            )
+            
+            // Always use Google ML (id=0) for auto-translate
+            val googleML = translationEnginesManager.builtInEngines.first { it.id == 0L }
+            val (source, target) = readerPreferences.translatorOriginLanguage().get() to 
+                                   readerPreferences.translatorTargetLanguage().get()
+            
+            googleML.initialize(
+                sourceLanguage = source,
+                targetLanguage = target,
+                onProgress = { progress ->
+                    _initializationState.value = _initializationState.value.copy(
+                        progress = progress
+                    )
+                },
+                onSuccess = { message ->
+                    _initializationState.value = _initializationState.value.copy(
+                        isInitializing = false,
+                        isComplete = true,
+                        progress = 100
+                    )
+                },
+                onError = { error ->
+                    _initializationState.value = _initializationState.value.copy(
+                        isInitializing = false,
+                        error = error.asString(localizeHelper)
+                    )
+                }
+            )
+        }
+    }
+    
+    /**
+     * Dismiss initialization dialog
+     */
+    fun dismissInitializationDialog() {
+        _showInitializationDialog.value = false
+        _initializationState.value = TranslationEngineInitState()
+    }
+    
+    /**
+     * Retry initialization
+     */
+    fun retryInitialization() {
+        _initializationState.value = _initializationState.value.copy(
+            error = null,
+            isComplete = false
+        )
+        initializeGoogleMLEngine()
     }
 }

@@ -63,22 +63,31 @@ object AppLocales {
     val AVAILABLE_LOCALES = listOf(
         "en",      // English (default)
         "ar",      // Arabic
+        "bn",      // Bengali
         "de",      // German
+        "es",      // Spanish
         "fa",      // Persian/Farsi
         "fi",      // Finnish
+        "fil",     // Filipino
         "fr",      // French
+        "hi",      // Hindi
         "hr",      // Croatian
         "hu",      // Hungarian
         "in",      // Indonesian
+        "it",      // Italian
         "ja",      // Japanese
         "ko",      // Korean
         "ml",      // Malayalam
         "my",      // Burmese
+        "pl",      // Polish
+        "pt",      // Portuguese
         "ro",      // Romanian
         "ru",      // Russian
         "si",      // Sinhala
         "sk",      // Slovak
+        "th",      // Thai
         "tr",      // Turkish
+        "uk",      // Ukrainian
         "uz",      // Uzbek
         "vi",      // Vietnamese
         "zh-CN",   // Chinese Simplified
@@ -91,22 +100,31 @@ object AppLocales {
     val LANGUAGE_NAMES = mapOf(
         "en" to "English",
         "ar" to "العربية",
+        "bn" to "বাংলা",
         "de" to "Deutsch",
+        "es" to "Español",
         "fa" to "فارسی",
         "fi" to "Suomi",
+        "fil" to "Filipino",
         "fr" to "Français",
+        "hi" to "हिन्दी",
         "hr" to "Hrvatski",
         "hu" to "Magyar",
         "in" to "Indonesia",
+        "it" to "Italiano",
         "ja" to "日本語",
         "ko" to "한국어",
         "ml" to "മലയാളം",
         "my" to "မြန်မာဘာသာ",
+        "pl" to "Polski",
+        "pt" to "Português",
         "ro" to "Română",
         "ru" to "Русский",
         "si" to "සිංහල",
         "sk" to "Slovenčina",
+        "th" to "ไทย",
         "tr" to "Türkçe",
+        "uk" to "Українська",
         "uz" to "Oʻzbekcha",
         "vi" to "Tiếng Việt",
         "zh-CN" to "简体中文",

@@ -3,6 +3,7 @@ package ireader.domain.usecases.translate
 import ireader.core.log.Log
 import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.MangasPageInfo
+import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.TranslationPreferences
 import ireader.i18n.UiText
@@ -18,6 +19,9 @@ import kotlin.time.ExperimentalTime
 /**
  * Use case for translating book metadata (title and description) when browsing.
  * This provides auto-translation of novel names and descriptions for better user experience.
+ * 
+ * IMPORTANT: Auto-translate for metadata ALWAYS uses Google ML (offline, free)
+ * regardless of the user's selected engine for content translation.
  * 
  * Uses TranslationQueueManager to coordinate with content translation:
  * - Metadata translations are cancelled when content translation starts
@@ -46,6 +50,14 @@ class TranslateBookMetadataUseCase(
         val translatedText: String,
         val timestamp: Long
     )
+    
+    /**
+     * Get Google ML engine for metadata translation
+     * Auto-translate always uses Google ML (id=0) regardless of selected engine
+     */
+    private fun getGoogleMLEngine(): TranslateEngine {
+        return translationEnginesManager.builtInEngines.first { it.id == 0L }
+    }
 
     /**
      * Check if auto-translate is enabled for novel names
@@ -79,6 +91,7 @@ class TranslateBookMetadataUseCase(
      * Translate a single text string with caching
      * Returns the translated text or the original if translation fails
      * 
+     * ALWAYS uses Google ML for metadata translation
      * Will skip translation if content translation is active (reader content has priority)
      */
     @OptIn(ExperimentalTime::class)
@@ -126,6 +139,7 @@ class TranslateBookMetadataUseCase(
     /**
      * Internal method to perform the actual translation.
      * Separated from translateText to work with queue manager.
+     * ALWAYS uses Google ML for metadata translation.
      */
     @OptIn(ExperimentalTime::class)
     private suspend fun performTranslation(
@@ -139,7 +153,10 @@ class TranslateBookMetadataUseCase(
                 var translatedText: String? = null
                 var error: UiText? = null
 
-                translationEnginesManager.translateWithContext(
+                // Always use Google ML (id=0) for metadata translation
+                val googleML = getGoogleMLEngine()
+                
+                googleML.translate(
                     texts = listOf(text),
                     source = sourceLang,
                     target = targetLang,
@@ -237,6 +254,7 @@ class TranslateBookMetadataUseCase(
     /**
      * Internal method to perform batch translation.
      * Separated from translateTexts to work with queue manager.
+     * ALWAYS uses Google ML for metadata translation.
      */
     @OptIn(ExperimentalTime::class)
     private suspend fun performBatchTranslation(
@@ -251,7 +269,10 @@ class TranslateBookMetadataUseCase(
                 var translatedTexts: List<String>? = null
                 var error: UiText? = null
 
-                translationEnginesManager.translateWithContext(
+                // Always use Google ML (id=0) for metadata translation
+                val googleML = getGoogleMLEngine()
+                
+                googleML.translate(
                     texts = uncachedTexts,
                     source = sourceLang,
                     target = targetLang,
@@ -313,8 +334,11 @@ class TranslateBookMetadataUseCase(
     }
 
     /**
-     * Translate a MangasPageInfo (list of manga info)
+     * Translate a MangasPageInfo (list of manga info) using batch translation
      * Returns a new MangasPageInfo with translated fields
+     * 
+     * OPTIMIZED: Uses batch translation for better performance
+     * ALWAYS uses Google ML for metadata translation
      */
     suspend fun translateMangasPage(
         page: MangasPageInfo,
@@ -324,30 +348,67 @@ class TranslateBookMetadataUseCase(
         if (!translateTitles && !translateDescriptions) return page
         if (page.mangas.isEmpty()) return page
 
-        // Collect all titles and descriptions for batch translation
-        val titles = if (translateTitles) page.mangas.map { it.title }.filter { it.isNotBlank() } else emptyList()
-        val descriptions = if (translateDescriptions) page.mangas.mapNotNull { it.description?.takeIf { it.isNotBlank() } } else emptyList()
-
-        // Batch translate
-        val translatedTitles = if (titles.isNotEmpty()) translateTexts(titles) else emptyList()
-        val translatedDescriptions = if (descriptions.isNotEmpty()) translateTexts(descriptions) else emptyList()
-
-        // Build new list with translated content
-        var titleIndex = 0
-        var descIndex = 0
-        val translatedMangas = page.mangas.map { manga ->
-            val newTitle = if (translateTitles && manga.title.isNotBlank()) {
-                translatedTitles.getOrElse(titleIndex++) { manga.title }
-            } else manga.title
-
-            val newDescription = if (translateDescriptions && !manga.description.isNullOrBlank()) {
-                translatedDescriptions.getOrElse(descIndex++) { manga.description }
-            } else manga.description
-
-            manga.copy(title = newTitle, description = newDescription)
+        return withContext(Dispatchers.IO) {
+            try {
+                // Collect all unique titles and descriptions for batch translation
+                val titlesToTranslate = mutableListOf<String>()
+                val descriptionsToTranslate = mutableListOf<String>()
+                val titleIndices = mutableListOf<Int>()
+                val descIndices = mutableListOf<Int>()
+                
+                page.mangas.forEachIndexed { index, manga ->
+                    if (translateTitles && manga.title.isNotBlank()) {
+                        titlesToTranslate.add(manga.title)
+                        titleIndices.add(index)
+                    }
+                    if (translateDescriptions && !manga.description.isNullOrBlank()) {
+                        descriptionsToTranslate.add(manga.description)
+                        descIndices.add(index)
+                    }
+                }
+                
+                // Batch translate all titles and descriptions at once
+                val translatedTitles = if (titlesToTranslate.isNotEmpty()) {
+                    translateTexts(titlesToTranslate)
+                } else {
+                    emptyList()
+                }
+                
+                val translatedDescriptions = if (descriptionsToTranslate.isNotEmpty()) {
+                    translateTexts(descriptionsToTranslate)
+                } else {
+                    emptyList()
+                }
+                
+                // Build new list with translated content
+                val translatedMangas = page.mangas.mapIndexed { index, manga ->
+                    val titleIdx = titleIndices.indexOf(index)
+                    val descIdx = descIndices.indexOf(index)
+                    
+                    val newTitle = if (titleIdx >= 0 && titleIdx < translatedTitles.size) {
+                        translatedTitles[titleIdx]
+                    } else {
+                        manga.title
+                    }
+                    
+                    val newDescription = if (descIdx >= 0 && descIdx < translatedDescriptions.size) {
+                        translatedDescriptions[descIdx]
+                    } else {
+                        manga.description
+                    }
+                    
+                    manga.copy(title = newTitle, description = newDescription)
+                }
+                
+                page.copy(mangas = translatedMangas)
+            } catch (e: CancellationException) {
+                Log.info { "$TAG: MangasPage translation cancelled" }
+                page // Return original on cancellation
+            } catch (e: Exception) {
+                Log.error { "$TAG: Exception during MangasPage translation: ${e.message}" }
+                page // Return original on error
+            }
         }
-
-        return page.copy(mangas = translatedMangas)
     }
 
     /**

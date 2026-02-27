@@ -39,6 +39,7 @@ import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
 import ireader.core.startup.ScreenProfiler
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.isLockedChapter
 import ireader.domain.services.processstate.BookDetailProcessState
 import ireader.domain.services.processstate.ProcessStateManager
 import ireader.domain.utils.extensions.currentTimeToLong
@@ -515,6 +516,7 @@ data class BookDetailScreenSpec constructor(
                                                 other.id != ch.id && other.name.trim().equals(ch.name.trim(), ignoreCase = true)
                                             }
                                         }
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type.Locked -> { ch -> ch.isLockedChapter() }
                                     }
                                     
                                     result = when (filter.value) {

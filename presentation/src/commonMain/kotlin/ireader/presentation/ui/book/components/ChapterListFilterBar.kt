@@ -73,11 +73,21 @@ fun ChapterListFilterBar(
                         )
                     }
                     
+                    // Hide Locked Chapters chip
+                    val hideLockedFilter = filtersByType[ChaptersFilters.Type.Locked]
+                    if (hideLockedFilter?.value == ChaptersFilters.Value.Excluded) {
+                        CompactFilterChip(
+                            label = "Hide Locked",
+                            onClick = { onToggleFilter(ChaptersFilters.Type.Locked) }
+                        )
+                    }
+                    
                     // Show other active filters
                     filters.forEach { filter ->
                         if (filter.value == ChaptersFilters.Value.Included && 
                             filter.type != ChaptersFilters.Type.Read && 
-                            filter.type != ChaptersFilters.Type.Duplicate) {
+                            filter.type != ChaptersFilters.Type.Duplicate &&
+                            filter.type != ChaptersFilters.Type.Locked) {
                             CompactFilterChip(
                                 label = getShortFilterLabel(filter.type),
                                 onClick = { onToggleFilter(filter.type) }
@@ -205,6 +215,7 @@ private fun getFilterLabel(type: ChaptersFilters.Type): String {
         ChaptersFilters.Type.Bookmarked -> "Bookmarked Chapters"
         ChaptersFilters.Type.Read -> "Read Chapters"
         ChaptersFilters.Type.Duplicate -> "Duplicate Chapters"
+        ChaptersFilters.Type.Locked -> "Locked Chapters"
     }
 }
 
@@ -216,6 +227,7 @@ private fun getShortFilterLabel(type: ChaptersFilters.Type): String {
         ChaptersFilters.Type.Bookmarked -> "Bookmarked"
         ChaptersFilters.Type.Read -> "Read"
         ChaptersFilters.Type.Duplicate -> "Duplicates"
+        ChaptersFilters.Type.Locked -> "Locked"
     }
 }
 

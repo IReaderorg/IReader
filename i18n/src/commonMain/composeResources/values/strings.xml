@@ -2861,6 +2861,17 @@
     <string name="translation_same_as_original">%1$s returned the text unchanged. The translation may have failed or the text may already be in the target language.</string>
     <string name="gemini_api_key_invalid">Gemini API key is invalid or has expired. Please get a new key from Google AI Studio.</string>
     
+    <!-- Translation Engine Initialization -->
+    <string name="translation_engine_initialization">Translation Engine Initialization</string>
+    <string name="engine_requires_initialization">Engine Requires Initialization</string>
+    <string name="engine_initialization_description">%1$s requires downloading language models before it can translate. This is a one-time setup.</string>
+    <string name="downloading_language_model">Downloading Language Model</string>
+    <string name="initialization_complete">Initialization Complete!</string>
+    <string name="initialization_failed">Initialization Failed</string>
+    <string name="translation_engine_ready">Translation engine is ready to use</string>
+    <string name="language_pair">Language Pair</string>
+    <string name="initialize">Initialize</string>
+    
     <!-- Translation Language Preferences -->
     <string name="preferred_source_language">Preferred Source Language</string>
     <string name="preferred_target_language">Preferred Target Language</string>
@@ -2927,4 +2938,21 @@
     <!-- Color Customization Strings (Additional) -->
     <string name="custom_background_color">Customize background color for reader</string>
     <string name="custom_text_color">Customize text color for reader</string>
+    
+    <!-- Thumbnail Quality Settings -->
+    <string name="thumbnail_quality">Thumbnail Quality</string>
+    <string name="thumbnail_quality_subtitle">Higher quality = sharper covers but more memory</string>
+    <string name="thumbnail_quality_low">Low (128px) - Fastest</string>
+    <string name="thumbnail_quality_medium">Medium (256px)</string>
+    <string name="thumbnail_quality_high">High (384px) - Recommended</string>
+    <string name="thumbnail_quality_ultra">Ultra (512px) - Best for custom covers</string>
+    
+    <!-- Chapter Sort Options -->
+    <string name="sort_by_source_order">By Source Order</string>
+    <string name="sort_by_chapter_number">By Chapter Number</string>
+    <string name="sort_by_upload_date_asc">By Upload Date (Ascending)</string>
+    <string name="sort_by_upload_date_desc">By Upload Date (Descending)</string>
+    
+    <!-- Download Delay Formatting -->
+    <string name="no_delay">No delay</string>
 </resources>

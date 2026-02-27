@@ -7,6 +7,7 @@ import ireader.core.source.model.Command
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.isLockedChapter
 import ireader.domain.models.entities.SourceComparison
 import ireader.domain.usecases.source.MigrateToSourceUseCase
 import kotlinx.collections.immutable.ImmutableList
@@ -125,6 +126,7 @@ sealed interface BookDetailState {
                             other.id != ch.id && other.name.trim().equals(ch.name.trim(), ignoreCase = true)
                         }
                     }
+                    ChaptersFilters.Type.Locked -> { ch -> ch.isLockedChapter() }
                 }
                 
                 result = when (filter.value) {

@@ -339,17 +339,17 @@ class ExploreViewModel(
     private suspend fun processSuccessResult(pageInfo: MangasPageInfo) {
         val sourceId = source?.id ?: return
         
-        // Auto-translate book metadata if enabled
+        // Auto-translate book names (NOT descriptions) if enabled
+        // Descriptions are translated later in book details screen
         val translatedPageInfo = if (translateBookMetadataUseCase != null) {
             val translateNames = translateBookMetadataUseCase.isAutoTranslateNamesEnabled()
-            val translateDescriptions = translateBookMetadataUseCase.isAutoTranslateDescriptionsEnabled()
             
-            if (translateNames || translateDescriptions) {
+            if (translateNames) {
                 try {
                     translateBookMetadataUseCase.translateMangasPage(
                         page = pageInfo,
-                        translateTitles = translateNames,
-                        translateDescriptions = translateDescriptions
+                        translateTitles = true,
+                        translateDescriptions = false // Don't translate descriptions in explore screen
                     )
                 } catch (e: Exception) {
                     Log.error { "[ExploreViewModel] Auto-translation failed: ${e.message}" }

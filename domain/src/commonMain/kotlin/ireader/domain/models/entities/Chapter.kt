@@ -75,3 +75,17 @@ fun ChapterInfo.toChapter(bookId: Long): Chapter {
 
     )
 }
+
+/**
+ * Check if the chapter is locked/premium.
+ * 
+ * A chapter is considered locked if its name contains:
+ * - Lock emoji (🔒)
+ * - "locked" text (case-insensitive)
+ */
+fun Chapter.isLockedChapter(): Boolean {
+    if (name.isEmpty()) return false
+    
+    return name.contains("🔒") || 
+           name.contains("locked", ignoreCase = true)
+}
