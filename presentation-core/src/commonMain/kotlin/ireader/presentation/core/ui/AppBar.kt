@@ -68,7 +68,7 @@ fun MediumAppBar(
         modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
         navigationIcon = navigationIcon,
         actions = actions,
-        colors = TopAppBarDefaults.mediumTopAppBarColors(),
+        colors = TopAppBarDefaults.topAppBarColors(),
         scrollBehavior = scrollBehavior
     )
 }
@@ -91,7 +91,7 @@ fun LargeAppBar(
         modifier = if (applyInsets) modifier.statusBarsPadding() else modifier,
         navigationIcon = navigationIcon,
         actions = actions,
-        colors = TopAppBarDefaults.largeTopAppBarColors(),
+        colors = TopAppBarDefaults.topAppBarColors(),
         scrollBehavior = scrollBehavior
     )
 }

@@ -1,0 +1,31 @@
+# gradle.properties.local.template
+# Copy this file to gradle.properties.local and customize for your machine
+# gradle.properties.local is gitignored and will override settings in gradle.properties
+
+# ============================================
+# MACHINE-SPECIFIC OPTIMIZATIONS
+# ============================================
+
+# JVM Memory Settings
+# Adjust based on your available RAM:
+# - 8GB RAM system: -Xmx4096m
+# - 16GB RAM system: -Xmx8192m
+# - 32GB+ RAM system: -Xmx12288m
+org.gradle.jvmargs=-Xmx8192m -XX:+UseG1GC -XX:MaxMetaspaceSize=1536m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:ReservedCodeCacheSize=512m
+
+# Kotlin daemon memory
+kotlin.daemon.jvmargs=-Xmx4096m -XX:+UseG1GC
+
+# Worker count (set to CPU cores - 1)
+# Check your cores with: nproc
+# org.gradle.workers.max=7
+
+# File system watching (disable if you have issues)
+# org.gradle.vfs.watch=false
+
+# ============================================
+# OPTIONAL: CUSTOM CACHE LOCATIONS
+# ============================================
+
+# Uncomment to use custom cache directory (not recommended with vfs.watch=true)
+# org.gradle.projectcachedir=/path/to/custom/cache
