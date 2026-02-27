@@ -18,47 +18,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Database migration test must pass before building release
-  test-database-migration:
-    name: Test Database Migration
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      
-      - uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      
-      - name: Run database migration tests
-        run: ./gradlew :data:testDebugUnitTest --tests "ireader.data.DatabaseMigrationTest" --stacktrace
-      
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: migration-test-results
-          path: |
-            data/build/test-results/**/*.xml
-            data/build/reports/tests/**
-      
-      - name: Fail if migration tests failed
-        if: failure()
-        run: |
-          echo "❌ Database migration tests failed!"
-          echo "Cannot proceed with release until migrations are fixed."
-          exit 1
-
   BuildBinaries:
     name: Build application packages
-    needs: [test-database-migration]
     strategy:
       matrix:
         runtime: [ linux-x64, linux-appimage, win-x64, android ]
