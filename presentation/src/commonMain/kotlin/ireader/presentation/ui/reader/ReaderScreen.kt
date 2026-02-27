@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,8 +42,16 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.LocalPlatformContext
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.analyzing_chapter_with_gemini_ai
+import ireader.i18n.resources.generating_art_prompt
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.components.AutoScrollSpeedControl
+import ireader.presentation.ui.reader.components.ChapterArtErrorDialog
+import ireader.presentation.ui.reader.components.ChapterArtFocusDialog
+import ireader.presentation.ui.reader.components.ChapterArtGeneratingDialog
+import ireader.presentation.ui.reader.components.ChapterArtPromptResultDialog
 import ireader.presentation.ui.reader.components.FindInChapterBar
 import ireader.presentation.ui.reader.components.FindInChapterState
 import ireader.presentation.ui.reader.components.GlossaryDialogWithFilePickers
@@ -53,18 +61,12 @@ import ireader.presentation.ui.reader.components.ReaderSettingsBottomSheet
 import ireader.presentation.ui.reader.components.ReadingTimeEstimator
 import ireader.presentation.ui.reader.components.ReadingTimeIndicator
 import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
-import ireader.presentation.ui.reader.components.ChapterArtFocusDialog
-import ireader.presentation.ui.reader.components.ChapterArtGeneratingDialog
-import ireader.presentation.ui.reader.components.ChapterArtPromptResultDialog
-import ireader.presentation.ui.reader.components.ChapterArtErrorDialog
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
 
 /**
  * Pre-computed modifiers for ReaderScreen to avoid recreation on each recomposition
@@ -85,35 +87,37 @@ private object ReaderScreenModifiers {
 )
 @Composable
 fun ReadingScreen(
-        vm: ReaderScreenViewModel,
-        scrollState: ScrollState,
-        lazyListState: LazyListState,
-        swipeState: SwipeRefreshState,
-        onNext: (reset: Boolean) -> Unit,
-        onPrev: (reset: Boolean) -> Unit,
-        readerScreenPreferencesState: ReaderScreenViewModel,
-        toggleReaderMode: () -> Unit,
-        onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
-        snackBarHostState: SnackbarHostState,
-        drawerState: DrawerState,
-        onReaderBottomOnSetting: () -> Unit,
-        onSliderFinished: () -> Unit,
-        onSliderChange: (index: Float) -> Unit,
-        onReaderPlay: () -> Unit,
-        onChapterShown: (chapter: Chapter) -> Unit,
-        paddingValues: PaddingValues,
-        onNavigateToTranslationSettings: () -> Unit,
-        onNavigateToCharacterArtUpload: (bookTitle: String, chapterTitle: String, prompt: String) -> Unit = { _, _, _ -> },
-        onChangeBrightness: (Float) -> Unit = {},
-        onToggleAutoBrightness: () -> Unit = {},
-        onNavigateToQuoteCreation: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null
+    vm: ReaderScreenViewModel,
+    scrollState: ScrollState,
+    lazyListState: LazyListState,
+    swipeState: SwipeRefreshState,
+    onNext: (reset: Boolean) -> Unit,
+    onPrev: (reset: Boolean) -> Unit,
+    readerScreenPreferencesState: ReaderScreenViewModel,
+    toggleReaderMode: () -> Unit,
+    onBackgroundColorAndTextColorApply: (bgColor: String, txtColor: String) -> Unit,
+    snackBarHostState: SnackbarHostState,
+    drawerState: DrawerState,
+    onReaderBottomOnSetting: () -> Unit,
+    onSliderFinished: () -> Unit,
+    onSliderChange: (index: Float) -> Unit,
+    onReaderPlay: () -> Unit,
+    onChapterShown: (chapter: Chapter) -> Unit,
+    paddingValues: PaddingValues,
+    onNavigateToTranslationSettings: () -> Unit,
+    onNavigateToCharacterArtUpload: (bookTitle: String, chapterTitle: String, prompt: String) -> Unit = { _, _, _ -> },
+    onChangeBrightness: (Float) -> Unit = {},
+    onToggleAutoBrightness: () -> Unit = {},
+    onNavigateToQuoteCreation: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null,
+    onNavigate: ((String) -> Unit)
 ) {
 
     val scope = rememberCoroutineScope()
     val context = LocalPlatformContext.current
     val chapter = vm.stateChapter
-    var showChapterReviews = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-    
+    var showChapterReviews =
+        androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
     // Handle status bar for reading screen with proper colors based on background
     ireader.presentation.ui.core.theme.CustomSystemColor(
         enable = true,
@@ -143,7 +147,8 @@ fun ReadingScreen(
             showChapterReviews = showChapterReviews,
             onChangeBrightness = onChangeBrightness,
             onToggleAutoBrightness = onToggleAutoBrightness,
-            onNavigateToQuoteCreation = onNavigateToQuoteCreation
+            onNavigateToQuoteCreation = onNavigateToQuoteCreation,
+            onNavigate = onNavigate
         )
     }
 }
@@ -155,54 +160,56 @@ fun ReadingScreen(
 )
 @Composable
 private fun ReadingScreenContent(
-        vm: ReaderScreenViewModel,
-        scrollState: ScrollState,
-        lazyListState: LazyListState,
-        swipeState: SwipeRefreshState,
-        onNext: (reset: Boolean) -> Unit,
-        onPrev: (reset: Boolean) -> Unit,
-        readerScreenPreferencesState: ReaderScreenViewModel,
-        toggleReaderMode: () -> Unit,
-        snackBarHostState: SnackbarHostState,
-        drawerState: DrawerState,
-        onSliderFinished: () -> Unit,
-        onSliderChange: (index: Float) -> Unit,
-        onReaderPlay: () -> Unit,
-        onChapterShown: (chapter: Chapter) -> Unit,
-        paddingValues: PaddingValues,
-        onNavigateToTranslationSettings: () -> Unit,
-        onNavigateToCharacterArtUpload: (bookTitle: String, chapterTitle: String, prompt: String) -> Unit,
-        scope: kotlinx.coroutines.CoroutineScope,
-        chapter: Chapter?,
-        showChapterReviews: androidx.compose.runtime.MutableState<Boolean>,
-        onChangeBrightness: (Float) -> Unit,
-        onToggleAutoBrightness: () -> Unit,
-        onNavigateToQuoteCreation: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null
+    vm: ReaderScreenViewModel,
+    scrollState: ScrollState,
+    lazyListState: LazyListState,
+    swipeState: SwipeRefreshState,
+    onNext: (reset: Boolean) -> Unit,
+    onPrev: (reset: Boolean) -> Unit,
+    readerScreenPreferencesState: ReaderScreenViewModel,
+    toggleReaderMode: () -> Unit,
+    snackBarHostState: SnackbarHostState,
+    drawerState: DrawerState,
+    onSliderFinished: () -> Unit,
+    onSliderChange: (index: Float) -> Unit,
+    onReaderPlay: () -> Unit,
+    onChapterShown: (chapter: Chapter) -> Unit,
+    paddingValues: PaddingValues,
+    onNavigateToTranslationSettings: () -> Unit,
+    onNavigateToCharacterArtUpload: (bookTitle: String, chapterTitle: String, prompt: String) -> Unit,
+    scope: kotlinx.coroutines.CoroutineScope,
+    chapter: Chapter?,
+    showChapterReviews: androidx.compose.runtime.MutableState<Boolean>,
+    onChangeBrightness: (Float) -> Unit,
+    onToggleAutoBrightness: () -> Unit,
+    onNavigateToQuoteCreation: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null,
+    onNavigate: ((String) -> Unit),
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val localizeHelper =
+        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Pre-compute background color to avoid repeated conversions
-    val backgroundColor = remember(vm.backgroundColor.value) { 
-        vm.backgroundColor.value.toComposeColor() 
+    val backgroundColor = remember(vm.backgroundColor.value) {
+        vm.backgroundColor.value.toComposeColor()
     }
-    
+
     // Derive loading state for efficient Crossfade
     val isContentLoading by remember(vm.isLoading, vm.readingMode.value, vm.chapterShell) {
         derivedStateOf {
             vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues) vm.chapterShell.isEmpty() else true
         }
     }
-    
+
     // Use rememberUpdatedState to always have the latest callback references
     // This ensures the callbacks use the current state values, not stale captured values
     val currentOnNext by rememberUpdatedState(onNext)
     val currentOnPrev by rememberUpdatedState(onPrev)
-    
+
     // Create stable callback wrappers that always call the latest callback
     val onNextWithReset = remember { { currentOnNext(true) } }
     val onPrevWithReset = remember { { currentOnPrev(true) } }
     val onNextWithoutReset = remember { { currentOnNext(false) } }
     val onPrevWithoutReset = remember { { currentOnPrev(false) } }
-    
+
     // Calculate reading time when chapter changes
     LaunchedEffect(key1 = chapter?.id, key2 = vm.isLoading) {
         if (chapter != null && !vm.isLoading && vm.initialized) {
@@ -212,7 +219,7 @@ private fun ReadingScreenContent(
 
     // No complex syncing needed - Material3 ModalBottomSheet is controlled by boolean condition
     // The sheet visibility is controlled by !vm.isReaderModeEnable
-    
+
     Box(
         modifier = ReaderScreenModifiers.fillMaxSize
             .background(backgroundColor)
@@ -223,7 +230,7 @@ private fun ReadingScreenContent(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        
+
         Crossfade(
             modifier = ReaderScreenModifiers.fillMaxSize,
             targetState = isContentLoading,
@@ -249,6 +256,7 @@ private fun ReadingScreenContent(
                         }
                     }
                 }
+
                 else -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Box(
@@ -273,7 +281,7 @@ private fun ReadingScreenContent(
                                 },
                                 onCopyModeDone = onNavigateToQuoteCreation
                             )
-                            
+
                             // Settings Bottom Sheet
                             if (vm.showSettingsBottomSheet) {
                                 ReaderSettingsBottomSheet(
@@ -287,10 +295,11 @@ private fun ReadingScreenContent(
                                     },
                                     onTextAlign = { alignment ->
                                         vm.saveTextAlignment(alignment)
-                                    }
+                                    },
+                                    onNavigate = onNavigate
                                 )
                             }
-                            
+
                             // Chapter Reviews Modal
                             if (showChapterReviews.value) {
                                 val currentBook = vm.book
@@ -308,7 +317,7 @@ private fun ReadingScreenContent(
                                     }
                                 }
                             }
-                            
+
                             // Translation toggle button
                             // Directly observe translationViewModel.translationState.hasTranslation for reactivity
                             // This ensures the button shows/hides immediately when translation is loaded
@@ -321,7 +330,7 @@ private fun ReadingScreenContent(
                                     .statusBarsPadding()
                                     .padding(top = 56.dp, end = 16.dp) // Below top bar
                             )
-                            
+
                             // Translation badge
 //                            if (vm.showTranslatedContent.value) {
 //                                TranslationBadge(
@@ -333,7 +342,7 @@ private fun ReadingScreenContent(
 //
 //                                )
 //                            }
-                            
+
                             // Translation progress indicator
                             TranslationProgressIndicator(
                                 isVisible = vm.translationViewModel.isTranslating,
@@ -342,7 +351,7 @@ private fun ReadingScreenContent(
                                 totalItems = 100,
                                 engine = vm.translationEnginesManager.get(),
                                 textColor = vm.textColor.value.toComposeColor(),
-                                onCancel = { 
+                                onCancel = {
                                     vm.scope.launch {
                                         vm.translationViewModel.cancelTranslation()
                                     }
@@ -351,7 +360,7 @@ private fun ReadingScreenContent(
                                     .align(Alignment.Center)
                                     .padding(horizontal = 16.dp)
                             )
-                            
+
                             // Preload indicator
                             PreloadIndicator(
                                 isVisible = vm.isPreloading,
@@ -359,11 +368,12 @@ private fun ReadingScreenContent(
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 16.dp)
                             )
-                            
+
                             // Chapter repair banner
                             ireader.presentation.ui.reader.components.ChapterRepairBanner(
                                 visible = vm.showRepairBanner,
-                                message = vm.chapterBreakReason ?: "This chapter appears to be broken",
+                                message = vm.chapterBreakReason
+                                    ?: "This chapter appears to be broken",
                                 isRepairing = vm.isRepairing,
                                 onRepairClick = { vm.repairChapter() },
                                 onDismiss = { vm.dismissRepairBanner() },
@@ -371,7 +381,7 @@ private fun ReadingScreenContent(
                                     .align(Alignment.TopCenter)
                                     .padding(top = 16.dp)
                             )
-                            
+
                             // Chapter repair success banner
                             ireader.presentation.ui.reader.components.ChapterRepairSuccessBanner(
                                 visible = vm.showRepairSuccess,
@@ -381,7 +391,7 @@ private fun ReadingScreenContent(
                                     .align(Alignment.TopCenter)
                                     .padding(top = 16.dp)
                             )
-                            
+
                             // Chapter Art Generation progress indicator
                             if (vm.isGeneratingArtPrompt) {
                                 Box(
@@ -396,7 +406,9 @@ private fun ReadingScreenContent(
                                 ) {
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
+                                        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+                                            12.dp
+                                        )
                                     ) {
                                         CircularProgressIndicator(
                                             modifier = Modifier.size(48.dp),
@@ -415,7 +427,7 @@ private fun ReadingScreenContent(
                                     }
                                 }
                             }
-                            
+
                             // Autoscroll speed control
                             AutoScrollSpeedControl(
                                 visible = vm.autoScrollMode,
@@ -428,7 +440,7 @@ private fun ReadingScreenContent(
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 80.dp)
                             )
-                            
+
                             // Find in chapter bar
                             if (vm.showFindInChapter) {
                                 FindInChapterBar(
@@ -446,7 +458,7 @@ private fun ReadingScreenContent(
                                         .padding(top = 56.dp)
                                 )
                             }
-                            
+
                             // Reading time estimator
                             ReadingTimeEstimator(
                                 visible = vm.showReadingTime && !vm.isLoading,
@@ -456,7 +468,7 @@ private fun ReadingScreenContent(
                                     .align(Alignment.BottomCenter)
                                     .padding(bottom = 16.dp)
                             )
-                            
+
                             // Current reading time indicator
                             ReadingTimeIndicator(
                                 sessionStartTime = vm.statisticsViewModel.currentSessionStartTime,
@@ -466,13 +478,16 @@ private fun ReadingScreenContent(
                                     .padding(bottom = 16.dp, end = 16.dp)
                             )
                         }
-                        
+
                         // Glossary dialog
                         if (vm.translationViewModel.translationState.showGlossaryDialog) {
                             GlossaryDialogWithFilePickers(
                                 glossaryEntries = vm.translationViewModel.glossaryEntries.toImmutableList(),
                                 bookTitle = vm.book?.title,
-                                onDismiss = { vm.translationViewModel.translationState.showGlossaryDialog = false },
+                                onDismiss = {
+                                    vm.translationViewModel.translationState.showGlossaryDialog =
+                                        false
+                                },
                                 onAddEntry = { source, target, type, notes ->
                                     vm.addGlossaryEntry(source, target, type, notes)
                                 },
@@ -493,7 +508,7 @@ private fun ReadingScreenContent(
                                 }
                             )
                         }
-                        
+
                         // Report broken chapter dialog
                         if (vm.showReportDialog) {
                             ReportBrokenChapterDialog(
@@ -504,7 +519,7 @@ private fun ReadingScreenContent(
                                 }
                             )
                         }
-                        
+
                         // Chapter Art Generation - Focus selection dialog
                         if (vm.showChapterArtDialog) {
                             ChapterArtFocusDialog(
@@ -516,14 +531,14 @@ private fun ReadingScreenContent(
                                 }
                             )
                         }
-                        
+
                         // Chapter Art Generation - Loading dialog
                         if (vm.isGeneratingArtPrompt) {
                             ChapterArtGeneratingDialog(
                                 onDismiss = { vm.dismissChapterArtDialog() }
                             )
                         }
-                        
+
                         // Chapter Art Generation - Result dialog
                         vm.generatedArtPrompt?.let { prompt ->
                             val bookTitle = vm.book?.title ?: "Unknown Book"
@@ -549,7 +564,7 @@ private fun ReadingScreenContent(
                                 }
                             )
                         }
-                        
+
                         // Chapter Art Generation - Error dialog
                         vm.chapterArtError?.let { error ->
                             ChapterArtErrorDialog(
@@ -558,7 +573,7 @@ private fun ReadingScreenContent(
                                 onRetry = { vm.showChapterArtDialog() }
                             )
                         }
-                        
+
                         // Paragraph translation dialog
                         if (vm.showParagraphTranslationDialog) {
                             ireader.presentation.ui.reader.components.TranslationResultDialog(
@@ -570,7 +585,7 @@ private fun ReadingScreenContent(
                                 onRetry = { vm.retryParagraphTranslation() }
                             )
                         }
-                        
+
                         // Translation API key prompt dialog
                         if (vm.showTranslationApiKeyPrompt) {
                             ireader.presentation.ui.reader.components.TranslationApiKeyPromptDialog(
@@ -582,7 +597,7 @@ private fun ReadingScreenContent(
                                 }
                             )
                         }
-                        
+
                         // Reading break reminder dialog
                         if (vm.showReadingBreakDialog) {
                             ireader.presentation.ui.reader.components.ReadingBreakReminderDialog(
@@ -593,7 +608,7 @@ private fun ReadingScreenContent(
                                 onDismiss = { vm.dismissReadingBreakDialog() }
                             )
                         }
-                        
+
                         // Reader controls bottom bar (non-modal) with fast animation
                         AnimatedVisibility(
                             visible = !vm.isReaderModeEnable,
@@ -632,7 +647,11 @@ private fun ReadingScreenContent(
                                             .width(40.dp)
                                             .height(4.dp)
                                             .clip(RoundedCornerShape(2.dp))
-                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                            .background(
+                                                MaterialTheme.colorScheme.onSurface.copy(
+                                                    alpha = 0.5f
+                                                )
+                                            )
                                             .align(Alignment.CenterHorizontally)
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -657,5 +676,6 @@ private fun ReadingScreenContent(
                 }
             }
         }
-    }}
+    }
+}
 

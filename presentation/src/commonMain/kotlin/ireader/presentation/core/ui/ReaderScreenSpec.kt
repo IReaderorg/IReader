@@ -68,16 +68,16 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import ireader.presentation.core.safePopBackStack
 
-@OptIn( ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 data class ReaderScreenSpec(
     val bookId: Long,
     val chapterId: Long
 ) {
 
-    
+
     @OptIn(
         ExperimentalAnimationApi::class,
-         ExperimentalMaterial3Api::class
+        ExperimentalMaterial3Api::class
     )
     @Composable
     fun Content() {
@@ -95,7 +95,7 @@ data class ReaderScreenSpec(
         val platformReader: PlatformReaderSettingReader = koinInject()
         val processStateManager: ProcessStateManager = koinInject()
         val readerState by vm.state.collectAsState()
-        
+
         // Plugin integration for reader menu items
         // Use getKoin().getOrNull() instead of try-catch around koinInject (composable)
         val koin = org.koin.compose.getKoin()
@@ -105,15 +105,15 @@ data class ReaderScreenSpec(
         val pluginMenuItems = remember(featurePluginIntegration) {
             featurePluginIntegration?.getPluginMenuItems() ?: emptyList()
         }
-        
+
         // Get FeaturePlugin instances that implement PluginUIProvider for declarative UI rendering
         val featurePlugins = remember(featurePluginIntegration) {
             featurePluginIntegration?.getFeaturePlugins() ?: emptyList()
         }
-        
+
         var showPluginMenu by rememberSaveable { mutableStateOf(false) }
         var selectedPluginId by rememberSaveable { mutableStateOf<String?>(null) }
-        
+
         // Extract values from state
         val successState = readerState as? ReaderState.Success
         val currentIndex = successState?.currentChapterIndex ?: 0
@@ -124,7 +124,7 @@ data class ReaderScreenSpec(
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-        
+
         // Show dialog for incompatible plugins that need update
         IncompatiblePluginHandler(
             featurePluginIntegration = featurePluginIntegration,
@@ -134,14 +134,15 @@ data class ReaderScreenSpec(
         )
 
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
-        
+
         // Restore scroll position from process death state
         val restoredState = remember { processStateManager.getReaderState() }
         LaunchedEffect(restoredState, successState) {
-            if (restoredState != null && 
-                restoredState.bookId == bookId && 
+            if (restoredState != null &&
+                restoredState.bookId == bookId &&
                 restoredState.chapterId == chapterId &&
-                successState != null) {
+                successState != null
+            ) {
                 // Restore scroll position
                 try {
                     delay(100) // Wait for content to load
@@ -153,7 +154,7 @@ data class ReaderScreenSpec(
                 processStateManager.clearReaderState()
             }
         }
-        
+
         // Save state periodically for process death recovery
         LaunchedEffect(scrollState.value, chapter?.id) {
             if (chapter != null) {
@@ -172,7 +173,7 @@ data class ReaderScreenSpec(
                 )
             }
         }
-        
+
         DisposableEffect(key1 = true) {
             onDispose {
                 platformReader.apply {
@@ -184,7 +185,7 @@ data class ReaderScreenSpec(
                 processStateManager.clearReaderState()
             }
         }
-        
+
 
         // Track reading time - records time spent in reader screen
         // Save periodically to avoid losing data if app crashes or user reads for long periods
@@ -192,7 +193,7 @@ data class ReaderScreenSpec(
             val startTime = currentTimeToLong()
             var lastSaveTime = startTime
             Log.info { "Reading time tracking started at: $startTime" }
-            
+
             // Launch a coroutine to save reading time periodically (every 30 seconds)
             val saveJob = scope.launch {
                 while (true) {
@@ -200,9 +201,9 @@ data class ReaderScreenSpec(
                     val currentTime = currentTimeToLong()
                     val durationSinceLastSave = currentTime - lastSaveTime
                     val durationMinutes = durationSinceLastSave / 60000
-                    
+
                     Log.info { "Periodic save check: duration since last save = ${durationSinceLastSave}ms (${durationMinutes}min)" }
-                    
+
                     // Save incremental time
                     if (durationSinceLastSave >= 5000) { // At least 5 seconds
                         try {
@@ -218,20 +219,20 @@ data class ReaderScreenSpec(
                     }
                 }
             }
-            
+
             onDispose {
                 // Cancel periodic save job
                 saveJob.cancel()
-                
+
                 // Save final reading time
                 val endTime = currentTimeToLong()
                 val finalDuration = endTime - lastSaveTime
                 val totalDuration = endTime - startTime
                 val finalMinutes = finalDuration / 60000
                 val totalMinutes = totalDuration / 60000
-                
+
                 Log.info { "Reading session ended. Final duration: ${finalDuration}ms (${finalMinutes}min), Total: ${totalDuration}ms (${totalMinutes}min)" }
-                
+
                 // Only track if user spent at least 5 seconds reading since last save
                 if (finalDuration >= 5000) {
                     scope.launch {
@@ -248,7 +249,7 @@ data class ReaderScreenSpec(
                 } else {
                     Log.info { "Skipping final save: duration (${finalDuration}ms) is less than 5 seconds" }
                 }
-                
+
                 // Clear process state when user intentionally leaves the screen
                 processStateManager.clearReaderState()
             }
@@ -261,7 +262,7 @@ data class ReaderScreenSpec(
                 delay(vm.settingsViewModel.autoScrollInterval.value.toLong())
             }
         }
-        
+
         // Sync with TTS chapter when screen becomes active
         // Observe the back stack to detect when we return from TTS screen
         val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
@@ -342,10 +343,10 @@ data class ReaderScreenSpec(
         val sheetState = rememberModalBottomSheetState()
         val drawerState =
             androidx.compose.material3.rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
-        
+
         // Handle back button to close drawer instead of closing screen
         // BackHandler removed - Android-specific, implement in androidMain if needed
-        
+
         IModalDrawer(
             state = drawerState,
             sheetContent = {
@@ -575,7 +576,11 @@ data class ReaderScreenSpec(
                         },
                         onNavigateToCharacterArtUpload = { bookTitle, chapterTitle, prompt ->
                             navController.navigate(
-                                NavigationRoutes.characterArtUploadWithData(bookTitle, chapterTitle, prompt)
+                                NavigationRoutes.characterArtUploadWithData(
+                                    bookTitle,
+                                    chapterTitle,
+                                    prompt
+                                )
                             )
                         },
                         onChangeBrightness = { brightness ->
@@ -590,9 +595,10 @@ data class ReaderScreenSpec(
                         },
                         onNavigateToQuoteCreation = { params ->
                             navController.navigate(NavigationRoutes.quoteCreation(params))
-                        }
+                        },
+                        onNavigate = { navController.navigate(it) }
                     )
-                    
+
                     // Top bar overlay (rendered on top of content)
                     val catalog = successState?.catalog
                     val book = successState?.book
@@ -601,60 +607,60 @@ data class ReaderScreenSpec(
                         modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter),
                         isReaderModeEnable = successState?.isReaderModeEnabled ?: false,
                         isLoaded = successState?.isChapterLoaded ?: false,
-                            onRefresh = {
-                                scope.launch {
-                                    vm.getLocalChapter(
-                                        chapter?.id,
-                                        force = true
+                        onRefresh = {
+                            scope.launch {
+                                vm.getLocalChapter(
+                                    chapter?.id,
+                                    force = true
+                                )
+                            }
+                        },
+                        chapter = chapter,
+                        onWebView = {
+                            try {
+                                catalog?.let { catalog ->
+                                    val absoluteUrl = chapter?.key?.let { url ->
+                                        ensureAbsoluteUrlForWebView(url, catalog.source)
+                                    }
+                                    navController.navigateTo(
+                                        WebViewScreenSpec(
+                                            url = absoluteUrl,
+                                            sourceId = catalog.sourceId,
+                                            chapterId = chapter?.id,
+                                            bookId = book?.id,
+                                            enableChapterFetch = true,
+                                            enableChaptersFetch = false,
+                                            enableBookFetch = false
+                                        )
                                     )
                                 }
-                            },
-                            chapter = chapter,
-                            onWebView = {
-                                try {
-                                    catalog?.let { catalog ->
-                                        val absoluteUrl = chapter?.key?.let { url ->
-                                            ensureAbsoluteUrlForWebView(url, catalog.source)
-                                        }
-                                        navController.navigateTo(
-                                            WebViewScreenSpec(
-                                                url = absoluteUrl,
-                                                sourceId = catalog.sourceId,
-                                                chapterId = chapter?.id,
-                                                bookId = book?.id,
-                                                enableChapterFetch = true,
-                                                enableChaptersFetch = false,
-                                                enableBookFetch = false
-                                            )
+                            } catch (e: Throwable) {
+                                scope.launch {
+                                    vm.showSnackBar(
+                                        UiText.ExceptionString(
+                                            e
                                         )
-                                    }
-                                } catch (e: Throwable) {
-                                    scope.launch {
-                                        vm.showSnackBar(
-                                            UiText.ExceptionString(
-                                                e
-                                            )
-                                        )
-                                    }
+                                    )
                                 }
-                            },
-                            vm = vm,
-                            state = vm,
-                            onBookMark = {
-                                vm.bookmarkChapter()
-                            },
-                            onPopBackStack = {
-                                navController.safePopBackStack()
-                            },
-                            onChapterArt = {
-                                vm.showChapterArtDialog()
-                            },
-                            hasPluginMenuItems = featurePlugins.isNotEmpty(),
-                            onPluginMenu = {
-                                showPluginMenu = true
                             }
-                        )
-                    
+                        },
+                        vm = vm,
+                        state = vm,
+                        onBookMark = {
+                            vm.bookmarkChapter()
+                        },
+                        onPopBackStack = {
+                            navController.safePopBackStack()
+                        },
+                        onChapterArt = {
+                            vm.showChapterArtDialog()
+                        },
+                        hasPluginMenuItems = featurePlugins.isNotEmpty(),
+                        onPluginMenu = {
+                            showPluginMenu = true
+                        }
+                    )
+
                     // Plugin panel bottom sheet - uses ReaderPluginPanel for declarative UI
                     if (showPluginMenu && featurePlugins.isNotEmpty()) {
                         androidx.compose.material3.ModalBottomSheet(
@@ -676,20 +682,26 @@ data class ReaderScreenSpec(
                             )
                         }
                     }
-                    
+
                     // Modal sheet rendered inside the Box to ensure it appears above content
                     val isSettingChanging = vm.settingsViewModel.isSettingChanging
                     if (sheetState.isVisible) {
                         IModalSheets(
                             bottomSheetState = sheetState,
-                            backgroundColor = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.background,
-                            contentColor = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground,
+                            backgroundColor = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(
+                                0f
+                            ) else MaterialTheme.colorScheme.background,
+                            contentColor = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(
+                                0f
+                            ) else MaterialTheme.colorScheme.onBackground,
                             sheetContent = { sheetModifier ->
                                 Column(sheetModifier) {
                                     HorizontalDivider(
                                         modifier = Modifier.fillMaxWidth(),
                                         thickness = 1.dp,
-                                        color = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground.copy(.2f)
+                                        color = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(
+                                            0f
+                                        ) else MaterialTheme.colorScheme.onBackground.copy(.2f)
                                     )
                                     Spacer(modifier = Modifier.height(5.dp))
                                     ReaderSettingMainLayout(
@@ -704,7 +716,10 @@ data class ReaderScreenSpec(
                                             }
                                         },
                                         onBackgroundChange = { index ->
-                                            vm.settingsViewModel.changeBackgroundColor(index, vm.readerColors)
+                                            vm.settingsViewModel.changeBackgroundColor(
+                                                index,
+                                                vm.readerColors
+                                            )
                                         },
                                         vm = vm,
                                         onTextAlign = { alignment ->
@@ -712,7 +727,8 @@ data class ReaderScreenSpec(
                                             vm.settingsViewModel.saveTextAlignment(alignment)
                                         },
                                         onToggleAutoBrightness = {
-                                            vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
+                                            vm.autoBrightnessMode.value =
+                                                !vm.autoBrightnessMode.value
                                         },
                                         onNavigate = { route ->
                                             navController.navigate(route)

@@ -25,7 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.prefs.PreferenceValues
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 import ireader.i18n.resources.colors
 import ireader.i18n.resources.fonts
 import ireader.i18n.resources.general
@@ -50,7 +50,8 @@ fun ReaderSettingsBottomSheet(
     onToggleAutoBrightness: () -> Unit,
     onChangeBrightness: (Float) -> Unit,
     onBackgroundChange: (themeId: Long) -> Unit,
-    onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit
+    onTextAlign: (PreferenceValues.PreferenceTextAlignment) -> Unit,
+    onNavigate: ((String) -> Unit) = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -190,7 +191,7 @@ fun ReaderSettingsBottomSheet(
             ) { page ->
                 when (page) {
                     0 -> ReaderScreenTab(vm, onTextAlign)
-                    1 -> GeneralScreenTab(vm)
+                    1 -> GeneralScreenTab(vm, onNavigate = onNavigate)
                     2 -> ColorScreenTab(vm, onChangeBrightness, onBackgroundChange)
                     3 -> FontPickerTab(vm)
                 }
