@@ -48,11 +48,11 @@ class IOSQuoteCardGenerator : QuoteCardGenerator {
                     null
                 )
                 
-                val locations = allocArrayOf(0.0, 1.0)
+                val locations = doubleArrayOf(0.0, 1.0)
                 val gradient = CGGradientCreateWithColors(
                     colorSpace,
                     cfArray,
-                    locations
+                    locations.refTo(0)
                 )
                 
                 CGContextDrawLinearGradient(
@@ -100,8 +100,8 @@ class IOSQuoteCardGenerator : QuoteCardGenerator {
             val quoteText = "\"${quote.text}\"" as NSString
             val textFont = UIFont.italicSystemFontOfSize(QuoteCardConstants.LOGO_TEXT_SIZE.toDouble())
             val paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.alignment = NSTextAlignmentCenter
-            paragraphStyle.lineSpacing = 14.0
+            paragraphStyle.setAlignment(NSTextAlignmentCenter)
+            paragraphStyle.setLineSpacing(14.0)
             
             val textAttrs = mapOf<Any?, Any?>(
                 NSFontAttributeName to textFont,
