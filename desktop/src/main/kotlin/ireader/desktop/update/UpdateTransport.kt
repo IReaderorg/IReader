@@ -16,7 +16,7 @@ enum class UpdateTransport {
     /**
      * GitHub Releases with zsync
      * Format: gh-releases-zsync|<owner>|<repo>|<tag>|<filename>
-     * Example: gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync
+     * Example: gh-releases-zsync|IReaderorg|IReader|latest|IReader-x86_64.AppImage.zsync
      */
     GH_RELEASES_ZSYNC;
     

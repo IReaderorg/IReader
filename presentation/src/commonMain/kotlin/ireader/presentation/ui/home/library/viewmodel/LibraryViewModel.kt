@@ -18,6 +18,7 @@ import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.services.library.LibraryChangeNotifier
 import ireader.domain.services.library.LibraryCommand
 import ireader.domain.services.library.LibraryController
+import ireader.domain.services.library.LibraryEvent
 import ireader.domain.services.platform.PlatformServices
 import ireader.domain.usecases.library.LibraryUseCases
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
@@ -242,6 +243,28 @@ class LibraryViewModel(
     init {
         initializeState()
         libraryController.dispatch(LibraryCommand.LoadLibrary)
+        observeLibraryControllerEvents()
+    }
+    
+    /**
+     * Observe LibraryController events to react to external changes.
+     * This handles cases like sync adding books from another device.
+     */
+    private fun observeLibraryControllerEvents() {
+        scope.launch {
+            libraryController.events.collect { event ->
+                when (event) {
+                    is LibraryEvent.RefreshCompleted -> {
+                        // Reset pagination to reload books after external changes (e.g., sync)
+                        Log.info { "$TAG: RefreshCompleted event received - resetting pagination" }
+                        resetAllPagination()
+                    }
+                    else -> {
+                        // Ignore other events
+                    }
+                }
+            }
+        }
     }
     
     private fun initializeState() {

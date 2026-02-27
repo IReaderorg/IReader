@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=IReader
+Comment=A novel reader application with TTS support
+Exec=ireader
+Icon=ireader
+Type=Application
+Categories=Office;
+MimeType=application/epub+zip;application/x-mobipocket-ebook;application/pdf;text/plain;
+Terminal=false
+X-AppImage-Version=2.0.14

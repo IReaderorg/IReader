@@ -36,6 +36,7 @@ import kotlin.uuid.Uuid
  * @property transferDataSource Handles data transfer between devices
  * @property localDataSource Handles local database operations
  * @property platformConfig Platform-specific configuration for device ID
+ * @property libraryController Controller to notify when books are synced
  */
 @OptIn(ExperimentalUuidApi::class)
 class SyncRepositoryImpl(
@@ -43,7 +44,8 @@ class SyncRepositoryImpl(
     private val transferDataSource: TransferDataSource,
     private val localDataSource: SyncLocalDataSource,
     private val platformConfig: ireader.domain.config.PlatformConfig,
-    private val syncPreferences: ireader.domain.preferences.prefs.SyncPreferences
+    private val syncPreferences: ireader.domain.preferences.prefs.SyncPreferences,
+    private val libraryController: ireader.domain.services.library.LibraryController? = null
 ) : SyncRepository {
     
     // Repository scope for Flow lifecycle management (Task 10.1.3)
@@ -680,10 +682,13 @@ class SyncRepositoryImpl(
         return try {
             Log.debug { "[SyncRepository] Applying sync data: ${data.books.size} books, ${data.chapters.size} chapters, ${data.history.size} history" }
             
+            var booksApplied = false
+            
             // Apply books first
             if (data.books.isNotEmpty()) {
                 try {
                     localDataSource.applyBooks(data.books)
+                    booksApplied = true
                     Log.debug { "[SyncRepository] ✓ Books applied successfully" }
                 } catch (e: Exception) {
                     Log.error(e, "[SyncRepository] ERROR applying books: ${e.message}")
@@ -711,6 +716,12 @@ class SyncRepositoryImpl(
                     Log.error(e, "[SyncRepository] ERROR applying history: ${e.message}")
                     throw e
                 }
+            }
+            
+            // Notify LibraryController to refresh if books were added/updated
+            if (booksApplied) {
+                libraryController?.dispatch(ireader.domain.services.library.LibraryCommand.RefreshLibrary)
+                Log.debug { "[SyncRepository] ✓ LibraryController notified to refresh" }
             }
             
             Log.info { "[SyncRepository] ✓ All sync data applied successfully" }
@@ -856,22 +867,37 @@ class SyncRepositoryImpl(
         val allChapters = localDataSource.getChapters()
         val allHistory = localDataSource.getHistory()
         
+        Log.debug { "[SyncRepository] buildSyncData: Total local data: ${allBooks.size} books, ${allChapters.size} chapters, ${allHistory.size} history" }
+        
         // Filter based on items to send
         val itemIds = items.map { it.itemId }.toSet()
-        
-        // Add books that match the items list
-        books.addAll(
-            allBooks.filter { book ->
-                itemIds.contains(book.globalId)
-            }
-        )
+        Log.debug { "[SyncRepository] buildSyncData: Items to send: ${itemIds.size} items" }
         
         // Add chapters that match the items list
-        chapters.addAll(
-            allChapters.filter { chapter ->
-                itemIds.contains(chapter.globalId)
-            }
-        )
+        val selectedChapters = allChapters.filter { chapter ->
+            itemIds.contains(chapter.globalId)
+        }
+        chapters.addAll(selectedChapters)
+        Log.debug { "[SyncRepository] buildSyncData: Selected ${selectedChapters.size} chapters" }
+        
+        // Collect parent book IDs from selected chapters
+        val parentBookIds = selectedChapters.map { it.bookGlobalId }.toSet()
+        Log.debug { "[SyncRepository] buildSyncData: Found ${parentBookIds.size} unique parent books for chapters" }
+        
+        // Add books that match the items list OR are parents of selected chapters
+        val selectedBooks = allBooks.filter { book ->
+            val isInManifest = itemIds.contains(book.globalId)
+            val isParentOfChapter = parentBookIds.contains(book.globalId)
+            isInManifest || isParentOfChapter
+        }
+        books.addAll(selectedBooks)
+        
+        Log.info { "[SyncRepository] buildSyncData: Including ${books.size} books (${selectedBooks.count { itemIds.contains(it.globalId) }} from manifest, ${selectedBooks.count { parentBookIds.contains(it.globalId) && !itemIds.contains(it.globalId) }} parent books)" }
+        
+        // Log first few books for debugging
+        books.take(3).forEach { book ->
+            Log.debug { "[SyncRepository]   Book: ${book.title} (${book.globalId})" }
+        }
         
         // Add history that matches the items list
         history.addAll(
@@ -879,6 +905,8 @@ class SyncRepositoryImpl(
                 itemIds.contains(hist.chapterGlobalId)
             }
         )
+        
+        Log.info { "[SyncRepository] buildSyncData: Final counts - ${books.size} books, ${chapters.size} chapters, ${history.size} history" }
         
         return SyncData(
             books = books,

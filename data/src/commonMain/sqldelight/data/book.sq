@@ -1242,3 +1242,21 @@ WHERE book.favorite = 1;
 -- Sync-specific queries
 findBookBySourceAndUrl:
 SELECT * FROM book WHERE source = :source AND url = :url LIMIT 1;
+
+-- Insert new book for sync (without _id to allow auto-increment)
+-- Uses INSERT OR IGNORE to handle race conditions where book might already exist
+insertForSync:
+INSERT OR IGNORE INTO book(
+source,url,
+artist,author,description,
+genre,title,status,
+thumbnail_url,custom_cover,favorite,
+last_update,next_update,initialized,
+viewer,chapter_flags,cover_last_modified,
+date_added,is_pinned,pinned_order,is_archived)
+VALUES (:source,:url,
+:artist,:author,:description,
+:genre,:title,:status,:thumbnailUrl,
+:customCover,:favorite,:lastUpdate,:nextUpdate,:initialized,
+:viewerFlags,:chapterFlags,:coverLastModified,
+:dateAdded,:isPinned,:pinnedOrder,:isArchived);

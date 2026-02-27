@@ -108,7 +108,7 @@ data class AppImageUpdateInfo(
          * @param owner GitHub repository owner
          * @param repo GitHub repository name
          * @param releaseTag Release tag (e.g., "latest", "v1.0.0")
-         * @param filename Filename pattern (e.g., "IReader-*-x86_64.AppImage.zsync")
+         * @param filename Filename (e.g., "IReader-x86_64.AppImage.zsync")
          * @return AppImageUpdateInfo instance
          */
         fun forGitHubReleases(

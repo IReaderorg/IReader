@@ -27,7 +27,8 @@ val syncDataModule = module {
             transferDataSource = get(),
             localDataSource = get(),
             platformConfig = ireader.domain.config.PlatformConfig,
-            syncPreferences = get()
+            syncPreferences = get(),
+            libraryController = getOrNull() // Optional - may not be available in all contexts
         )
     }
     

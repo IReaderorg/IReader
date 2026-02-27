@@ -15,30 +15,30 @@ class AppImageUpdateInfoTest {
     @Test
     fun `parseUpdateInfo should parse zsync transport correctly`() {
         // Arrange
-        val updateInfoString = "zsync|https://github.com/IReader-org/IReader/releases/latest/download/IReader-x86_64.AppImage.zsync"
+        val updateInfoString = "zsync|https://github.com/IReaderorg/IReader/releases/latest/download/IReader-x86_64.AppImage.zsync"
         
         // Act
         val result = AppImageUpdateInfo.parse(updateInfoString)
         
         // Assert
         assertEquals(UpdateTransport.ZSYNC, result?.transport)
-        assertEquals("https://github.com/IReader-org/IReader/releases/latest/download/IReader-x86_64.AppImage.zsync", result?.url)
+        assertEquals("https://github.com/IReaderorg/IReader/releases/latest/download/IReader-x86_64.AppImage.zsync", result?.url)
     }
     
     @Test
     fun `parseUpdateInfo should parse gh-releases-zsync transport correctly`() {
         // Arrange
-        val updateInfoString = "gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync"
+        val updateInfoString = "gh-releases-zsync|IReaderorg|IReader|latest|IReader-x86_64.AppImage.zsync"
         
         // Act
         val result = AppImageUpdateInfo.parse(updateInfoString)
         
         // Assert
         assertEquals(UpdateTransport.GH_RELEASES_ZSYNC, result?.transport)
-        assertEquals("IReader-org", result?.owner)
+        assertEquals("IReaderorg", result?.owner)
         assertEquals("IReader", result?.repo)
         assertEquals("latest", result?.releaseTag)
-        assertEquals("IReader-*-x86_64.AppImage.zsync", result?.filename)
+        assertEquals("IReader-x86_64.AppImage.zsync", result?.filename)
     }
     
     @Test
@@ -85,17 +85,17 @@ class AppImageUpdateInfoTest {
         // Arrange
         val updateInfo = AppImageUpdateInfo(
             transport = UpdateTransport.GH_RELEASES_ZSYNC,
-            owner = "IReader-org",
+            owner = "IReaderorg",
             repo = "IReader",
             releaseTag = "latest",
-            filename = "IReader-*-x86_64.AppImage.zsync"
+            filename = "IReader-x86_64.AppImage.zsync"
         )
         
         // Act
         val result = updateInfo.toUpdateInfoString()
         
         // Assert
-        assertEquals("gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync", result)
+        assertEquals("gh-releases-zsync|IReaderorg|IReader|latest|IReader-x86_64.AppImage.zsync", result)
     }
     
     @Test
@@ -127,10 +127,10 @@ class AppImageUpdateInfoTest {
         // Arrange
         val updateInfo = AppImageUpdateInfo(
             transport = UpdateTransport.GH_RELEASES_ZSYNC,
-            owner = "IReader-org",
+            owner = "IReaderorg",
             repo = "IReader",
             releaseTag = "latest",
-            filename = "IReader-*-x86_64.AppImage.zsync"
+            filename = "IReader-x86_64.AppImage.zsync"
         )
         
         // Act & Assert
@@ -142,10 +142,10 @@ class AppImageUpdateInfoTest {
         // Arrange
         val updateInfo = AppImageUpdateInfo(
             transport = UpdateTransport.GH_RELEASES_ZSYNC,
-            owner = "IReader-org",
+            owner = "IReaderorg",
             repo = null,
             releaseTag = "latest",
-            filename = "IReader-*-x86_64.AppImage.zsync"
+            filename = "IReader-x86_64.AppImage.zsync"
         )
         
         // Act & Assert

@@ -201,79 +201,114 @@ class SyncLocalDataSourceImpl(
     
     override suspend fun applyBooks(books: List<BookSyncData>) {
         handler.await {
-            books.forEach { book ->
-                // Find book by sourceId + key (global ID)
-                val existingBook = bookQueries.findBookBySourceAndUrl(
-                    source = book.sourceId.toLongOrNull() ?: 0L,
-                    url = book.key
-                ).executeAsOneOrNull()
-                
-                if (existingBook == null) {
-                    // Book doesn't exist - insert it
-                    Log.debug { "[SyncLocalDataSource] Inserting new book: ${book.title} (${book.globalId})" }
-                    bookQueries.upsert(
-                        id = 0L, // Let database auto-generate ID
-                        source = book.sourceId.toLongOrNull() ?: 0L,
-                        url = book.key,
-                        artist = null,
-                        author = book.author.ifEmpty { null },
-                        description = book.description.ifEmpty { null },
-                        genre = book.genres,
-                        title = book.title,
-                        status = book.status,
-                        thumbnailUrl = book.coverUrl ?: "",
-                        customCover = "",
-                        favorite = book.favorite,
-                        lastUpdate = book.updatedAt,
-                        nextUpdate = 0L,
-                        initialized = true,
-                        viewerFlags = 0L,
-                        chapterFlags = 0L,
-                        coverLastModified = 0L,
-                        dateAdded = book.addedAt,
-                        isPinned = false,
-                        pinnedOrder = 0L,
-                        isArchived = false
-                    )
-                } else {
-                    // Book exists - update only if remote is newer
-                    val remoteUpdatedAt = book.updatedAt
-                    val localUpdatedAt = existingBook.last_update ?: existingBook.date_added
+            Log.debug { "[SyncLocalDataSource] applyBooks: Received ${books.size} books to apply" }
+            books.forEachIndexed { index, book ->
+                try {
+                    Log.debug { "[SyncLocalDataSource] Processing book ${index + 1}/${books.size}: ${book.title} (${book.globalId})" }
                     
-                    if (remoteUpdatedAt > localUpdatedAt) {
-                        Log.debug { "[SyncLocalDataSource] Updating book: ${book.title} (${book.globalId}) - remote is newer" }
-                        bookQueries.update(
-                            id = existingBook._id,
-                            source = book.sourceId.toLongOrNull(),
+                    // Find book by sourceId + key (global ID)
+                    val sourceId = book.sourceId.toLongOrNull() ?: 0L
+                    Log.debug { "[SyncLocalDataSource]   Looking for existing book: sourceId=$sourceId, key=${book.key}" }
+                    
+                    val existingBook = bookQueries.findBookBySourceAndUrl(
+                        source = sourceId,
+                        url = book.key
+                    ).executeAsOneOrNull()
+                    
+                    if (existingBook == null) {
+                        // Book doesn't exist - insert it
+                        Log.info { "[SyncLocalDataSource] Inserting new book: ${book.title} (${book.globalId})" }
+                        Log.debug { "[SyncLocalDataSource]   sourceId=$sourceId, key=${book.key}, favorite=${book.favorite}" }
+                        
+                        // Use insertForSync which doesn't include _id parameter
+                        // This allows SQLite to auto-generate the ID properly
+                        // INSERT OR IGNORE means if (url, source) already exists, it does nothing
+                        bookQueries.insertForSync(
+                            source = sourceId,
                             url = book.key,
+                            artist = null,
                             author = book.author.ifEmpty { null },
                             description = book.description.ifEmpty { null },
-                            genre = null, // Keep existing genre
+                            genre = book.genres,
                             title = book.title,
                             status = book.status,
-                            thumbnailUrl = book.coverUrl,
-                            customCover = null,
+                            thumbnailUrl = book.coverUrl ?: "",
+                            customCover = "",
                             favorite = book.favorite,
                             lastUpdate = book.updatedAt,
+                            nextUpdate = 0L,
                             initialized = true,
-                            viewer = null,
-                            chapterFlags = null,
-                            coverLastModified = null,
-                            dateAdded = null,
-                            isPinned = null,
-                            pinnedOrder = null,
-                            isArchived = null
+                            viewerFlags = 0L,
+                            chapterFlags = 0L,
+                            coverLastModified = 0L,
+                            dateAdded = book.addedAt,
+                            isPinned = false,
+                            pinnedOrder = 0L,
+                            isArchived = false
                         )
+                        
+                        // Verify insertion - book might already exist due to race condition
+                        val inserted = bookQueries.findBookBySourceAndUrl(sourceId, book.key).executeAsOneOrNull()
+                        if (inserted != null) {
+                            Log.info { "[SyncLocalDataSource] ✓ Book inserted/found successfully with ID: ${inserted._id}" }
+                        } else {
+                            Log.error { "[SyncLocalDataSource] ✗ Book insertion failed - not found after insert!" }
+                            Log.error { "[SyncLocalDataSource]   This might indicate a database constraint issue or the book was deleted immediately after insert" }
+                        }
                     } else {
-                        Log.debug { "[SyncLocalDataSource] Skipping book: ${book.title} (${book.globalId}) - local is newer or same" }
+                        // Book exists - update only if remote is newer
+                        val remoteUpdatedAt = book.updatedAt
+                        val localUpdatedAt = existingBook.last_update ?: existingBook.date_added
+                        
+                        Log.debug { "[SyncLocalDataSource]   Book exists with ID: ${existingBook._id}" }
+                        Log.debug { "[SyncLocalDataSource]   Remote updatedAt: $remoteUpdatedAt, Local updatedAt: $localUpdatedAt" }
+                        
+                        if (remoteUpdatedAt > localUpdatedAt) {
+                            Log.debug { "[SyncLocalDataSource] Updating book: ${book.title} (${book.globalId}) - remote is newer" }
+                            bookQueries.update(
+                                id = existingBook._id,
+                                source = sourceId,
+                                url = book.key,
+                                author = book.author.ifEmpty { null },
+                                description = book.description.ifEmpty { null },
+                                genre = null, // Keep existing genre
+                                title = book.title,
+                                status = book.status,
+                                thumbnailUrl = book.coverUrl,
+                                customCover = null,
+                                favorite = book.favorite,
+                                lastUpdate = book.updatedAt,
+                                initialized = true,
+                                viewer = null,
+                                chapterFlags = null,
+                                coverLastModified = null,
+                                dateAdded = null,
+                                isPinned = null,
+                                pinnedOrder = null,
+                                isArchived = null
+                            )
+                            Log.info { "[SyncLocalDataSource] ✓ Book updated successfully" }
+                        } else {
+                            Log.debug { "[SyncLocalDataSource] Skipping book: ${book.title} (${book.globalId}) - local is newer or same" }
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.error(e, "[SyncLocalDataSource] ERROR processing book: ${book.title} (${book.globalId}): ${e.message}")
+                    // Continue with next book instead of failing entire sync
                 }
             }
+            Log.info { "[SyncLocalDataSource] ✓ Finished applying ${books.size} books" }
         }
     }
     
     override suspend fun applyChapters(chapters: List<ChapterSyncData>) {
         handler.await {
+            Log.debug { "[SyncLocalDataSource] applyChapters: Received ${chapters.size} chapters to apply" }
+            
+            var successCount = 0
+            var skippedCount = 0
+            val missingBooks = mutableMapOf<String, MutableList<String>>() // bookGlobalId -> list of chapter names
+            
             chapters.forEach { chapter ->
                 // Extract sourceId from bookGlobalId
                 val sourceId = chapter.bookGlobalId.substringBefore("|").toLongOrNull() ?: 0L
@@ -286,7 +321,8 @@ class SyncLocalDataSourceImpl(
                 ).executeAsOneOrNull()
                 
                 if (book == null) {
-                    Log.warn { "[SyncLocalDataSource] WARNING: Book not found for chapter: ${chapter.name} (${chapter.bookGlobalId})" }
+                    // Track missing book and its chapters
+                    missingBooks.getOrPut(chapter.bookGlobalId) { mutableListOf() }.add(chapter.name)
                     return@forEach
                 }
                 
@@ -297,43 +333,64 @@ class SyncLocalDataSourceImpl(
                 ).executeAsOneOrNull()
                 
                 // Use upsertForSync to handle both insert and update cases
-                // This query doesn't include _id in INSERT, letting database auto-generate it
-                // The query uses (book_id, url) unique constraint to detect conflicts
                 val shouldUpdate = existingChapter == null || chapter.dateFetch > existingChapter.date_fetch
                 
                 if (shouldUpdate) {
-                    if (existingChapter == null) {
-                        Log.debug { "[SyncLocalDataSource] Inserting new chapter: ${chapter.name} (${chapter.globalId})" }
-                    } else {
-                        Log.debug { "[SyncLocalDataSource] Updating chapter: ${chapter.name} (${chapter.globalId}) - remote is newer" }
-                    }
-                    
-                    // Decode content from JSON string to List<Page> using extension function
-                    val contentPages: List<Page> = try {
-                        chapter.content.decode()
+                    try {
+                        // Decode content from JSON string to List<Page> using extension function
+                        val contentPages: List<Page> = try {
+                            chapter.content.decode()
+                        } catch (e: Exception) {
+                            emptyList() // Empty content if decoding fails
+                        }
+                        
+                        chapterQueries.upsertForSync(
+                            bookId = book._id,
+                            key = chapter.key,
+                            name = chapter.name,
+                            translator = chapter.translator.ifEmpty { null },
+                            read = chapter.read,
+                            bookmark = chapter.bookmark,
+                            last_page_read = chapter.lastPageRead,
+                            chapter_number = chapter.number,
+                            source_order = chapter.sourceOrder,
+                            date_fetch = chapter.dateFetch,
+                            date_upload = chapter.dateUpload,
+                            content = contentPages,
+                            type = 0L
+                        )
+                        successCount++
                     } catch (e: Exception) {
-                        emptyList() // Empty content if decoding fails
+                        Log.error(e, "[SyncLocalDataSource] ERROR inserting/updating chapter: ${chapter.name}")
+                        skippedCount++
                     }
-                    
-                    chapterQueries.upsertForSync(
-                        bookId = book._id,
-                        key = chapter.key,
-                        name = chapter.name,
-                        translator = chapter.translator.ifEmpty { null },
-                        read = chapter.read,
-                        bookmark = chapter.bookmark,
-                        last_page_read = chapter.lastPageRead,
-                        chapter_number = chapter.number,
-                        source_order = chapter.sourceOrder,
-                        date_fetch = chapter.dateFetch,
-                        date_upload = chapter.dateUpload,
-                        content = contentPages, // Decoded content from remote device
-                        type = 0L // Default type
-                    )
                 } else {
-                    Log.debug { "[SyncLocalDataSource] Skipping chapter: ${chapter.name} (${chapter.globalId}) - local is newer or same" }
+                    skippedCount++
                 }
             }
+            
+            // Log summary instead of individual warnings
+            if (missingBooks.isNotEmpty()) {
+                val totalMissingChapters = missingBooks.values.sumOf { it.size }
+                Log.warn { "[SyncLocalDataSource] WARNING: ${missingBooks.size} book(s) not found for $totalMissingChapters chapter(s)" }
+                
+                // Log details for each missing book (consolidated)
+                missingBooks.forEach { (bookGlobalId, chapterNames) ->
+                    Log.warn { "[SyncLocalDataSource]   Book not found: $bookGlobalId (${chapterNames.size} chapters skipped)" }
+                    // Only log first few chapter names to avoid spam
+                    if (chapterNames.size <= 3) {
+                        chapterNames.forEach { name ->
+                            Log.debug { "[SyncLocalDataSource]     - $name" }
+                        }
+                    } else {
+                        Log.debug { "[SyncLocalDataSource]     - ${chapterNames[0]}" }
+                        Log.debug { "[SyncLocalDataSource]     - ${chapterNames[1]}" }
+                        Log.debug { "[SyncLocalDataSource]     - ... and ${chapterNames.size - 2} more" }
+                    }
+                }
+            }
+            
+            Log.info { "[SyncLocalDataSource] ✓ Chapters applied: $successCount inserted/updated, $skippedCount skipped, ${missingBooks.values.sumOf { it.size }} failed (missing books)" }
         }
     }
     

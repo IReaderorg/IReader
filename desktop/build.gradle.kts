@@ -384,17 +384,97 @@ tasks.register<Exec>("buildAppImage") {
     // Format: gh-releases-zsync|owner|repo|tag|filename
     // 
     // Update channels:
-    // - 'latest': Points to the latest stable release (default for Release workflow)
-    // - 'continuous': Points to the latest pre-release (for Preview workflow)
-    // - Specific tag: e.g., 'v1.2.0' for a specific version
+    // - 'latest': Points to the latest release (default)
+    //   Note: GitHub's 'latest' excludes prereleases, so this works for stable releases only
+    // - For preview builds: Users need to manually download until it becomes 'latest'
     //
-    // Set via: ./gradlew buildAppImage -Pappimage.update.channel=continuous
+    // Set via: ./gradlew buildAppImage -Pappimage.update.channel=latest
     val updateChannel = project.findProperty("appimage.update.channel")?.toString() ?: "latest"
-    val updateInfo = "gh-releases-zsync|ireaderorg|ireader|$updateChannel|IReader-*-x86_64.AppImage.zsync"
+    val updateInfo = "gh-releases-zsync|IReaderorg|IReader|$updateChannel|IReader-x86_64.AppImage.zsync"
+    
+    // Build AppImage with update information
+    environment("ARCH", "x86_64")
     
     doFirst {
         // Create output directory
         outputAppImage.parentFile.mkdirs()
+        
+        // Check if appimagetool is available, if not, download and extract it
+        val appimagetoolPath = "/usr/local/bin/appimagetool"
+        val appimagetoolExtracted = buildDir.get().asFile.resolve("appimagetool-extracted/AppRun")
+        
+        if (!File(appimagetoolPath).exists() && !appimagetoolExtracted.exists()) {
+            println("appimagetool not found, downloading and extracting...")
+            val appimagetoolAppImage = buildDir.get().asFile.resolve("appimagetool.AppImage")
+            
+            // Download appimagetool
+            println("  Downloading appimagetool...")
+            ProcessBuilder(
+                "wget", "-O", appimagetoolAppImage.absolutePath,
+                "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+            ).inheritIO().start().waitFor()
+            
+            // Make executable
+            appimagetoolAppImage.setExecutable(true)
+            
+            // Extract (avoids FUSE requirement)
+            println("  Extracting appimagetool...")
+            ProcessBuilder(appimagetoolAppImage.absolutePath, "--appimage-extract")
+                .directory(buildDir.get().asFile)
+                .inheritIO()
+                .start()
+                .waitFor()
+            
+            // Move to expected location
+            buildDir.get().asFile.resolve("squashfs-root").renameTo(
+                buildDir.get().asFile.resolve("appimagetool-extracted")
+            )
+            
+            println("✓ appimagetool extracted to ${appimagetoolExtracted.absolutePath}")
+        }
+        
+        // Determine which appimagetool to use
+        // Prefer extracted version (no FUSE) over system-installed AppImage
+        val appimagetoolCmd = when {
+            buildDir.get().asFile.resolve("appimagetool-extracted/AppRun").exists() -> {
+                buildDir.get().asFile.resolve("appimagetool-extracted/AppRun").absolutePath
+            }
+            File("/opt/appimagetool/AppRun").exists() -> {
+                "/opt/appimagetool/AppRun"
+            }
+            File("/usr/local/bin/appimagetool").exists() -> {
+                val file = File("/usr/local/bin/appimagetool")
+                // Check if it's a symlink to extracted version or an AppImage
+                if (file.canonicalPath.contains("/opt/appimagetool")) {
+                    file.absolutePath
+                } else {
+                    // It's an AppImage, extract it first
+                    println("  Found AppImage at /usr/local/bin/appimagetool, extracting...")
+                    val tempExtract = buildDir.get().asFile.resolve("appimagetool-temp")
+                    ProcessBuilder(file.absolutePath, "--appimage-extract")
+                        .directory(buildDir.get().asFile)
+                        .inheritIO()
+                        .start()
+                        .waitFor()
+                    buildDir.get().asFile.resolve("squashfs-root").renameTo(
+                        buildDir.get().asFile.resolve("appimagetool-extracted")
+                    )
+                    buildDir.get().asFile.resolve("appimagetool-extracted/AppRun").absolutePath
+                }
+            }
+            else -> "appimagetool" // Fallback to PATH
+        }
+        
+        println("Using appimagetool: $appimagetoolCmd")
+        
+        // Set the command line for the Exec task
+        commandLine = listOf(
+            appimagetoolCmd,
+            "--no-appstream",
+            "--updateinformation", updateInfo,
+            appDir.absolutePath,
+            outputAppImage.absolutePath
+        )
         
         // Create AppDir structure
         appDir.mkdirs()
@@ -455,16 +535,6 @@ tasks.register<Exec>("buildAppImage") {
             )
         }
     }
-    
-    // Build AppImage with update information
-    environment("ARCH", "x86_64")
-    commandLine(
-        "appimagetool",
-        "--no-appstream",
-        "--updateinformation", updateInfo,
-        appDir.absolutePath,
-        outputAppImage.absolutePath
-    )
     
     doLast {
         println("")

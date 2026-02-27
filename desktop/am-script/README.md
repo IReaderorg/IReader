@@ -31,7 +31,7 @@ If you want to install IReader manually using this script:
 
 ```bash
 # Download the script
-wget https://raw.githubusercontent.com/IReader-org/IReader/main/desktop/am-script/ireader
+wget https://raw.githubusercontent.com/IReaderorg/IReader/main/desktop/am-script/ireader
 
 # Make it executable
 chmod +x ireader
@@ -54,7 +54,7 @@ chmod +x ireader
 The IReader AppImage includes embedded update information:
 
 ```
-gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync
+gh-releases-zsync|IReaderorg|IReader|latest|IReader-x86_64.AppImage.zsync
 ```
 
 This enables efficient delta updates using [AppImageUpdate](https://github.com/AppImageCommunity/AppImageUpdate).
@@ -201,7 +201,7 @@ See the [AM contribution guide](https://github.com/ivan-hc/AM/blob/main/CONTRIBU
 
 ## Links
 
-- [IReader GitHub](https://github.com/IReader-org/IReader)
+- [IReader GitHub](https://github.com/IReaderorg/IReader)
 - [AM Package Manager](https://github.com/ivan-hc/AM)
 - [AppImageUpdate](https://github.com/AppImageCommunity/AppImageUpdate)
 - [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher)

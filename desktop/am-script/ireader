@@ -7,7 +7,7 @@
 set -e
 
 APP=ireader
-SITE="IReader-org/IReader"
+SITE="IReaderorg/IReader"
 VERSION="latest"
 
 # Determine architecture
@@ -61,7 +61,7 @@ MimeType=application/epub+zip;application/x-mobipocket-ebook;application/pdf;tex
 Terminal=false
 StartupNotify=true
 X-AppImage-Version=latest
-X-AppImage-UpdateInformation=gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync
+X-AppImage-UpdateInformation=gh-releases-zsync|IReaderorg|IReader|latest|IReader-x86_64.AppImage.zsync
 EOF
 
 # Download icon

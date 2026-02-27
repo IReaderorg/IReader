@@ -11,7 +11,7 @@ am -i ireader
 
 **Or download directly:**
 ```bash
-wget https://github.com/IReader-org/IReader/releases/latest/download/IReader-x86_64.AppImage
+wget https://github.com/IReaderorg/IReader/releases/latest/download/IReader-x86_64.AppImage
 chmod +x IReader-x86_64.AppImage
 ./IReader-x86_64.AppImage
 ```

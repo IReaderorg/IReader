@@ -27,10 +27,24 @@ sudo dnf install zsync wget
 
 # Arch Linux
 sudo pacman -S zsync wget
+```
 
-# Install appimagetool
+**Note about appimagetool:** The build script will automatically download and extract appimagetool if needed, avoiding FUSE requirements. If you want to install it manually:
+
+```bash
+# Download appimagetool
 wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
 chmod +x appimagetool-x86_64.AppImage
+
+# Option 1: Extract and install (no FUSE needed - recommended)
+./appimagetool-x86_64.AppImage --appimage-extract
+sudo mv squashfs-root /opt/appimagetool
+sudo ln -s /opt/appimagetool/AppRun /usr/local/bin/appimagetool
+
+# Option 2: Install FUSE and use directly
+# Ubuntu/Debian: sudo apt install fuse libfuse2
+# Fedora: sudo dnf install fuse fuse-libs
+# Arch: sudo pacman -S fuse2
 sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
 ```
 
@@ -105,7 +119,7 @@ Follow this naming pattern:
 
 The embedded update information uses wildcards:
 ```
-gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync
+gh-releases-zsync|IReaderorg|IReader|latest|IReader-x86_64.AppImage.zsync
 ```
 
 This allows version numbers in filenames while still matching.
@@ -145,7 +159,7 @@ appman -i ireader
 
 ```bash
 # Download AppImage
-wget https://github.com/IReader-org/IReader/releases/latest/download/IReader-x86_64.AppImage
+wget https://github.com/IReaderorg/IReader/releases/latest/download/IReader-x86_64.AppImage
 
 # Make executable
 chmod +x IReader-x86_64.AppImage
@@ -216,15 +230,15 @@ Download the latest version and replace the old one.
 IReader AppImages embed update information in this format:
 
 ```
-gh-releases-zsync|IReader-org|IReader|latest|IReader-*-x86_64.AppImage.zsync
+gh-releases-zsync|IReaderorg|IReader|latest|IReader-x86_64.AppImage.zsync
 ```
 
 This tells the updater:
 - **Transport**: GitHub Releases with zsync
-- **Owner**: IReader-org
+- **Owner**: IReaderorg
 - **Repository**: IReader
 - **Tag**: latest (always get the latest release)
-- **Filename pattern**: IReader-*-x86_64.AppImage.zsync
+- **Filename pattern**: IReader-x86_64.AppImage.zsync
 
 ### How Delta Updates Work
 
@@ -338,7 +352,7 @@ If missing, re-download from official releases.
 am -u am
 
 # Try manual installation
-wget https://github.com/IReader-org/IReader/releases/latest/download/IReader-x86_64.AppImage
+wget https://github.com/IReaderorg/IReader/releases/latest/download/IReader-x86_64.AppImage
 chmod +x IReader-x86_64.AppImage
 ```
 
