@@ -16,6 +16,7 @@ import org.koin.dsl.module
  * - AndroidDiscoveryDataSource: Uses NsdManager for mDNS service discovery
  * - AndroidCertificateService: Uses Android Keystore for certificate management
  * - AndroidKeyStorageService: Uses Android Keystore System for secure key storage
+ * - SocketConfigurator: Configures sockets to bypass VPN for local network sync
  */
 actual val syncPlatformModule = module {
     
@@ -55,6 +56,21 @@ actual val syncPlatformModule = module {
      */
     single<KeyStorageService> {
         AndroidKeyStorageService(
+            context = get<Context>()
+        )
+    }
+    
+    /**
+     * Socket configurator for VPN bypass.
+     * 
+     * Configures network sockets to bypass VPN and use the underlying
+     * WiFi network directly for local sync operations.
+     * 
+     * This ensures WiFi sync works even when a VPN is active by binding
+     * the process to the WiFi network using ConnectivityManager.
+     */
+    single<ireader.data.sync.datasource.SocketConfigurator> {
+        ireader.data.sync.datasource.SocketConfigurator(
             context = get<Context>()
         )
     }

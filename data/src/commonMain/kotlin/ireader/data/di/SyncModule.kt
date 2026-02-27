@@ -41,12 +41,15 @@ val syncDataModule = module {
      * 
      * Dependencies:
      * - CertificateService: For TLS certificate operations (optional, future use)
+     * - SocketConfigurator: For VPN bypass and local network routing (platform-specific)
      * 
      * Uses raw TCP sockets instead of WebSockets to avoid firewall issues.
+     * Bypasses VPN on Android to ensure direct local network communication.
      */
     single<TransferDataSource> { 
         ireader.data.sync.datasource.TcpTransferDataSource(
-            certificateService = get()
+            certificateService = get(),
+            socketConfigurator = getOrNull() // Platform-specific, may not be available on all platforms
         )
     }
     

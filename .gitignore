@@ -1,6 +1,8 @@
 *.iml
 .gradle
 /local.properties
+gradle.properties.local
+buildSrc/.kotlin/
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml

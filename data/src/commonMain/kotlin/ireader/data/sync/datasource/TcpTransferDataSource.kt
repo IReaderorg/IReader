@@ -32,9 +32,11 @@ import kotlin.time.Duration.Companion.seconds
  * - N bytes: Message data (JSON)
  * 
  * @property certificateService Service for certificate operations (optional, for TLS)
+ * @property socketConfigurator Platform-specific socket configuration for VPN bypass
  */
 class TcpTransferDataSource(
-    private val certificateService: CertificateService? = null
+    private val certificateService: CertificateService? = null,
+    private val socketConfigurator: SocketConfigurator? = null
 ) : TransferDataSource {
     
     private var serverSocket: ServerSocket? = null
@@ -78,6 +80,16 @@ class TcpTransferDataSource(
         return try {
             Log.debug { "[TcpTransferDataSource] Starting TCP server on port $port" }
             
+            // Bind to WiFi network to bypass VPN (Android only)
+            socketConfigurator?.let {
+                val bound = it.bindToWiFiNetwork()
+                if (bound) {
+                    Log.info { "[TcpTransferDataSource] Process bound to WiFi network (VPN bypassed)" }
+                } else {
+                    Log.warn { "[TcpTransferDataSource] Could not bind to WiFi network, using default routing" }
+                }
+            }
+            
             stateMutex.withLock {
                 if (serverSocket != null) {
                     Log.debug { "[TcpTransferDataSource] Server already running, stopping it first" }
@@ -105,14 +117,23 @@ class TcpTransferDataSource(
                     Log.info { "[TcpTransferDataSource] Server: Client connected from ${clientSocket.remoteAddress}" }
                     
                     handleConnection(clientSocket, isServer = true)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    // Normal cancellation - don't log as error
+                    Log.debug { "[TcpTransferDataSource] Server: Connection cancelled" }
+                    throw e // Re-throw to properly cancel the coroutine
                 } catch (e: Exception) {
                     Log.error(e, "[TcpTransferDataSource] Server error: ${e.message}")
+                } finally {
+                    // Reset network binding when server stops
+                    socketConfigurator?.resetNetworkBinding()
                 }
             }
             
             Result.success(port)
         } catch (e: Exception) {
             Log.error(e, "[TcpTransferDataSource] Failed to start server: ${e.message}")
+            // Reset network binding on failure
+            socketConfigurator?.resetNetworkBinding()
             Result.failure(e)
         }
     }
@@ -122,12 +143,20 @@ class TcpTransferDataSource(
             Log.debug { "[TcpTransferDataSource] Stopping TCP server..." }
             
             stateMutex.withLock {
-                closeChannels()
-                serverSocket?.close()
-                serverSocket = null
+                // Cancel jobs first to stop processing
                 serverJob?.cancel()
                 serverJob = null
+                
+                // Then close channels gracefully
+                closeChannels()
+                
+                // Finally close the socket
+                serverSocket?.close()
+                serverSocket = null
             }
+            
+            // Reset network binding
+            socketConfigurator?.resetNetworkBinding()
             
             Log.info { "[TcpTransferDataSource] TCP server stopped" }
             Result.success(Unit)
@@ -140,6 +169,16 @@ class TcpTransferDataSource(
     override suspend fun connectToDevice(deviceInfo: DeviceInfo): Result<Unit> {
         return try {
             Log.debug { "[TcpTransferDataSource] Connecting to ${deviceInfo.ipAddress}:${deviceInfo.port}" }
+            
+            // Bind to WiFi network to bypass VPN (Android only)
+            socketConfigurator?.let {
+                val bound = it.bindToWiFiNetwork()
+                if (bound) {
+                    Log.info { "[TcpTransferDataSource] Process bound to WiFi network (VPN bypassed)" }
+                } else {
+                    Log.warn { "[TcpTransferDataSource] Could not bind to WiFi network, using default routing" }
+                }
+            }
             
             stateMutex.withLock {
                 if (clientSocket != null) {
@@ -163,8 +202,15 @@ class TcpTransferDataSource(
             clientJob = scope.launch {
                 try {
                     handleConnection(socket, isServer = false)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    // Normal cancellation - don't log as error
+                    Log.debug { "[TcpTransferDataSource] Client: Connection cancelled" }
+                    throw e // Re-throw to properly cancel the coroutine
                 } catch (e: Exception) {
                     Log.error(e, "[TcpTransferDataSource] Client error: ${e.message}")
+                } finally {
+                    // Reset network binding when client disconnects
+                    socketConfigurator?.resetNetworkBinding()
                 }
             }
             
@@ -174,6 +220,8 @@ class TcpTransferDataSource(
             Result.success(Unit)
         } catch (e: Exception) {
             Log.error(e, "[TcpTransferDataSource] Failed to connect: ${e.message}")
+            // Reset network binding on failure
+            socketConfigurator?.resetNetworkBinding()
             Result.failure(e)
         }
     }
@@ -298,12 +346,21 @@ class TcpTransferDataSource(
     override suspend fun disconnectFromDevice(): Result<Unit> {
         return try {
             stateMutex.withLock {
-                closeChannels()
-                clientSocket?.close()
-                clientSocket = null
+                // Cancel jobs first to stop processing
                 clientJob?.cancel()
                 clientJob = null
+                
+                // Then close channels gracefully
+                closeChannels()
+                
+                // Finally close the socket
+                clientSocket?.close()
+                clientSocket = null
             }
+            
+            // Reset network binding
+            socketConfigurator?.resetNetworkBinding()
+            
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -418,14 +475,19 @@ class TcpTransferDataSource(
         manifestReceiveChannel = kotlinx.coroutines.channels.Channel(kotlinx.coroutines.channels.Channel.UNLIMITED)
     }
     
-    private fun closeChannels() {
+    private suspend fun closeChannels() {
         try {
-            sendChannel.close()
-            receiveChannel.close()
-            manifestSendChannel.close()
-            manifestReceiveChannel.close()
+            // Cancel all pending operations gracefully before closing channels
+            sendChannel.cancel()
+            receiveChannel.cancel()
+            manifestSendChannel.cancel()
+            manifestReceiveChannel.cancel()
+            
+            // Give pending operations time to complete cancellation
+            delay(100)
         } catch (e: Exception) {
             // Channels might already be closed
+            Log.debug { "[TcpTransferDataSource] Channel closure: ${e.message}" }
         }
     }
     

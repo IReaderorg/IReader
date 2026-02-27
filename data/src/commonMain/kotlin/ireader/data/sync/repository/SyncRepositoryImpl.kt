@@ -447,6 +447,7 @@ class SyncRepositoryImpl(
             Log.debug { "[SyncRepository] Items to send: ${itemsToSend.size}" }
             Log.debug { "[SyncRepository] Items to receive: ${itemsToReceive.size}" }
             
+            val totalItems = itemsToSend.size + itemsToReceive.size
             var itemsSynced = 0
             
             // Phase 10.4.2: Send and receive in parallel using coroutineScope
@@ -454,9 +455,32 @@ class SyncRepositoryImpl(
                 val sendJob = async(ireader.domain.utils.extensions.ioDispatcher) {
                     if (itemsToSend.isNotEmpty()) {
                         Log.debug { "[SyncRepository] Sending ${itemsToSend.size} items..." }
+                        
+                        // Update progress: preparing to send
+                        concurrencyManager.withMutex {
+                            _syncStatus.value = SyncStatus.Syncing(
+                                deviceName = connection.deviceName,
+                                progress = 0.1f,
+                                currentItem = "Preparing data to send",
+                                currentIndex = 0,
+                                totalItems = totalItems
+                            )
+                        }
+                        
                         concurrencyManager.withConcurrencyControl {
                             val dataToSend = buildSyncData(itemsToSend)
                             Log.debug { "[SyncRepository] Built sync data: ${dataToSend.books.size} books, ${dataToSend.chapters.size} chapters, ${dataToSend.history.size} history" }
+                            
+                            // Update progress: sending data
+                            concurrencyManager.withMutex {
+                                _syncStatus.value = SyncStatus.Syncing(
+                                    deviceName = connection.deviceName,
+                                    progress = 0.3f,
+                                    currentItem = "Sending ${itemsToSend.size} items",
+                                    currentIndex = 0,
+                                    totalItems = totalItems
+                                )
+                            }
                             
                             val sendResult = transferDataSource.sendData(dataToSend)
                             if (sendResult.isFailure) {
@@ -465,6 +489,18 @@ class SyncRepositoryImpl(
                             }
                             
                             Log.info { "[SyncRepository] ✓ Data sent successfully" }
+                            
+                            // Update progress: send complete
+                            concurrencyManager.withMutex {
+                                _syncStatus.value = SyncStatus.Syncing(
+                                    deviceName = connection.deviceName,
+                                    progress = 0.5f,
+                                    currentItem = "Sent ${itemsToSend.size} items",
+                                    currentIndex = itemsToSend.size,
+                                    totalItems = totalItems
+                                )
+                            }
+                            
                             itemsToSend.size
                         }
                     } else {
@@ -476,6 +512,18 @@ class SyncRepositoryImpl(
                 val receiveJob = async(ireader.domain.utils.extensions.ioDispatcher) {
                     if (itemsToReceive.isNotEmpty()) {
                         Log.debug { "[SyncRepository] Receiving ${itemsToReceive.size} items..." }
+                        
+                        // Update progress: preparing to receive
+                        concurrencyManager.withMutex {
+                            _syncStatus.value = SyncStatus.Syncing(
+                                deviceName = connection.deviceName,
+                                progress = 0.5f,
+                                currentItem = "Receiving data",
+                                currentIndex = itemsToSend.size,
+                                totalItems = totalItems
+                            )
+                        }
+                        
                         concurrencyManager.withConcurrencyControl {
                             val receiveResult = transferDataSource.receiveData()
                             if (receiveResult.isFailure) {
@@ -486,6 +534,17 @@ class SyncRepositoryImpl(
                             val receivedData = receiveResult.getOrThrow()
                             Log.debug { "[SyncRepository] ✓ Data received: ${receivedData.books.size} books, ${receivedData.chapters.size} chapters, ${receivedData.history.size} history" }
                             
+                            // Update progress: applying received data
+                            concurrencyManager.withMutex {
+                                _syncStatus.value = SyncStatus.Syncing(
+                                    deviceName = connection.deviceName,
+                                    progress = 0.7f,
+                                    currentItem = "Applying ${itemsToReceive.size} items",
+                                    currentIndex = itemsToSend.size,
+                                    totalItems = totalItems
+                                )
+                            }
+                            
                             Log.debug { "[SyncRepository] Applying received data..." }
                             val applyResult = applySync(receivedData)
                             if (applyResult.isFailure) {
@@ -494,6 +553,18 @@ class SyncRepositoryImpl(
                             }
                             
                             Log.info { "[SyncRepository] ✓ Data applied successfully" }
+                            
+                            // Update progress: receive complete
+                            concurrencyManager.withMutex {
+                                _syncStatus.value = SyncStatus.Syncing(
+                                    deviceName = connection.deviceName,
+                                    progress = 0.9f,
+                                    currentItem = "Applied ${itemsToReceive.size} items",
+                                    currentIndex = totalItems,
+                                    totalItems = totalItems
+                                )
+                            }
+                            
                             itemsToReceive.size
                         }
                     } else {

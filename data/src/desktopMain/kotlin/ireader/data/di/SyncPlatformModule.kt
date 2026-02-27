@@ -15,6 +15,7 @@ import org.koin.dsl.module
  * - DesktopDiscoveryDataSource: Uses JmDNS for mDNS service discovery
  * - DesktopCertificateService: Uses Java Keystore for certificate management
  * - DesktopKeyStorageService: Uses Java Keystore (JKS) for secure key storage
+ * - SocketConfigurator: No-op implementation (VPN bypass not needed on desktop)
  */
 actual val syncPlatformModule = module {
     
@@ -50,5 +51,15 @@ actual val syncPlatformModule = module {
      */
     single<KeyStorageService> {
         DesktopKeyStorageService()
+    }
+    
+    /**
+     * Socket configurator (no-op on desktop).
+     * 
+     * Desktop OS typically handles local network routing correctly,
+     * so VPN bypass is not needed. This is a no-op implementation.
+     */
+    single<ireader.data.sync.datasource.SocketConfigurator> {
+        ireader.data.sync.datasource.SocketConfigurator()
     }
 }

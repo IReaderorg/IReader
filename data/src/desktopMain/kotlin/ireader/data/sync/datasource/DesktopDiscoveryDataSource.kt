@@ -42,7 +42,24 @@ class DesktopDiscoveryDataSource : DiscoveryDataSource {
             
             // Create JmDNS instance if not exists
             if (jmdns == null) {
-                jmdns = JmDNS.create(InetAddress.getLocalHost())
+                // Find the best network interface (prefer non-VPN, non-loopback)
+                val networkInterface = findBestNetworkInterface()
+                val inetAddress = networkInterface?.let { 
+                    it.inetAddresses.asSequence()
+                        .firstOrNull { addr -> 
+                            !addr.isLoopbackAddress && 
+                            addr is java.net.Inet4Address // Prefer IPv4
+                        }
+                } ?: InetAddress.getLocalHost()
+                
+                println("[DesktopDiscovery] Using network interface: ${networkInterface?.displayName ?: "default"}")
+                println("[DesktopDiscovery] Using IP address: ${inetAddress.hostAddress}")
+                
+                jmdns = if (networkInterface != null) {
+                    JmDNS.create(inetAddress, "IReader-${deviceInfo.deviceName}")
+                } else {
+                    JmDNS.create(InetAddress.getLocalHost())
+                }
             }
             
             // Create service info
@@ -237,6 +254,69 @@ class DesktopDiscoveryDataSource : DiscoveryDataSource {
                 discoveredAt = System.currentTimeMillis()
             )
         } catch (e: Exception) {
+            null
+        }
+    }
+    
+    /**
+     * Find the best network interface for mDNS discovery.
+     * 
+     * Prefers:
+     * 1. Non-VPN interfaces (eth, wlan, en)
+     * 2. Up and running interfaces
+     * 3. Interfaces with IPv4 addresses
+     * 4. Non-loopback interfaces
+     * 
+     * This helps bypass VPN and use the actual local network interface.
+     */
+    private fun findBestNetworkInterface(): java.net.NetworkInterface? {
+        return try {
+            val interfaces = java.net.NetworkInterface.getNetworkInterfaces().toList()
+            
+            // Score each interface
+            val scored = interfaces.mapNotNull { iface ->
+                if (!iface.isUp || iface.isLoopback) return@mapNotNull null
+                
+                var score = 0
+                val name = iface.name.lowercase()
+                val displayName = iface.displayName.lowercase()
+                
+                // Prefer physical network interfaces
+                when {
+                    name.startsWith("eth") || name.startsWith("en") -> score += 100 // Ethernet
+                    name.startsWith("wlan") || name.startsWith("wl") || name.startsWith("wi-fi") -> score += 90 // WiFi
+                    displayName.contains("ethernet") -> score += 100
+                    displayName.contains("wi-fi") || displayName.contains("wireless") -> score += 90
+                }
+                
+                // Penalize VPN interfaces
+                when {
+                    name.contains("tun") || name.contains("tap") -> score -= 1000 // VPN tunnel
+                    name.contains("vpn") -> score -= 1000
+                    name.contains("v2ray") -> score -= 1000
+                    name.contains("ppp") -> score -= 500 // PPP connections
+                    displayName.contains("vpn") -> score -= 1000
+                    displayName.contains("virtual") -> score -= 500
+                }
+                
+                // Prefer interfaces with IPv4 addresses
+                val hasIPv4 = iface.inetAddresses.asSequence()
+                    .any { it is java.net.Inet4Address && !it.isLoopbackAddress }
+                if (hasIPv4) score += 50
+                
+                // Prefer interfaces that support multicast (needed for mDNS)
+                if (iface.supportsMulticast()) score += 30
+                
+                println("[DesktopDiscovery] Interface: ${iface.name} (${iface.displayName}) - Score: $score")
+                
+                Pair(iface, score)
+            }
+            
+            // Return interface with highest score
+            val best = scored.maxByOrNull { it.second }
+            best?.first
+        } catch (e: Exception) {
+            println("[DesktopDiscovery] Error finding network interface: ${e.message}")
             null
         }
     }
