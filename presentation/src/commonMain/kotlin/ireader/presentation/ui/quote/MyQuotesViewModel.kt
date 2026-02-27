@@ -5,9 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.domain.data.repository.DiscordQuoteRepository
 import ireader.domain.models.quote.LocalQuote
+import ireader.domain.models.quote.QuoteCardConstants
 import ireader.domain.models.quote.QuoteCardStyle
 import ireader.domain.models.quote.QuoteContext
-import ireader.domain.models.quote.QuoteCardConstants
 import ireader.domain.usecases.quote.LocalQuoteUseCases
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 /**
  * Pending share data for confirmation dialog
@@ -369,7 +370,7 @@ class MyQuotesViewModel(
         }
         
         // Check rate limit
-        val currentTime = System.currentTimeMillis()
+        val currentTime = Clock.System.now().toEpochMilliseconds()
         val timeSinceLastShare = currentTime - lastShareTimestamp
         
         if (timeSinceLastShare < shareRateLimitMs) {
@@ -435,7 +436,7 @@ class MyQuotesViewModel(
             result.fold(
                 onSuccess = {
                     // Update last share timestamp
-                    lastShareTimestamp = System.currentTimeMillis()
+                    lastShareTimestamp = Clock.System.now().toEpochMilliseconds()
                     showSnackBar(UiText.DynamicString("Quote shared to Discord! 🎉"))
                     dismissCreateDialog()
                 },

@@ -1,7 +1,20 @@
 package ireader.presentation.ui.sync.viewmodel
 
-import ireader.domain.models.sync.*
-import ireader.domain.usecases.sync.*
+import ireader.domain.models.sync.ConflictResolutionStrategy
+import ireader.domain.models.sync.DataConflict
+import ireader.domain.models.sync.DeviceInfo
+import ireader.domain.models.sync.DeviceType
+import ireader.domain.models.sync.DiscoveredDevice
+import ireader.domain.models.sync.SyncError
+import ireader.domain.models.sync.SyncStatus
+import ireader.domain.usecases.sync.CancelSyncUseCase
+import ireader.domain.usecases.sync.GetDiscoveredDevicesUseCase
+import ireader.domain.usecases.sync.GetSyncStatusUseCase
+import ireader.domain.usecases.sync.ResolveConflictsUseCase
+import ireader.domain.usecases.sync.StartSyncUseCase
+import ireader.domain.usecases.sync.StopSyncUseCase
+import ireader.domain.usecases.sync.SyncWithDeviceUseCase
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.core.viewmodel.IReaderStateScreenModel
 import ireader.presentation.ui.sync.SyncErrorMapper
 import ireader.presentation.ui.sync.SyncServiceController
@@ -402,7 +415,6 @@ class SyncViewModel(
      */
     private fun formatError(error: Throwable): String {
         val syncError = when (error) {
-            is SyncError -> error
             else -> SyncError.Unknown(error.message ?: "An unexpected error occurred")
         }
         val errorInfo = SyncErrorMapper.mapError(syncError)
@@ -476,14 +488,14 @@ class SyncViewModel(
                     appVersion = "unknown",
                     ipAddress = ip,
                     port = port,
-                    lastSeen = System.currentTimeMillis()
+                    lastSeen = currentTimeToLong()
                 )
                 
                 // Create DiscoveredDevice
                 val discoveredDevice = DiscoveredDevice(
                     deviceInfo = deviceInfo,
                     isReachable = true,
-                    discoveredAt = System.currentTimeMillis()
+                    discoveredAt = currentTimeToLong()
                 )
                 
                 // Select and sync with device

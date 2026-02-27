@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FormatAlignCenter
+import ireader.presentation.ui.core.utils.formatMultiplier
 import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
@@ -521,5 +522,5 @@ private fun AlignmentButton(
 }
 
 private fun formatMultiplier(value: Float): String {
-    return String.format("%.1fx", value)
+    return formatMultiplier(value, 1)
 }
