@@ -432,13 +432,13 @@ class TcpTransferDataSource(
     private fun compressData(data: String): ByteArray {
         val buffer = Buffer()
         GzipSink(buffer).buffer().use { sink ->
-            sink.writeString(data, Charsets.UTF_8)
+            sink.writeUtf8(data)
         }
         return buffer.readByteArray()
     }
     
     private fun decompressData(compressedData: ByteArray): String {
         val source = Buffer().write(compressedData)
-        return GzipSource(source).buffer().readString(Charsets.UTF_8)
+        return GzipSource(source).buffer().readUtf8()
     }
 }

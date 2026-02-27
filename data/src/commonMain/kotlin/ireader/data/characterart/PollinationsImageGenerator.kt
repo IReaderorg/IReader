@@ -77,7 +77,7 @@ class PollinationsImageGenerator(
             
             // Build URL with new API format
             // Note: seed must be a reasonable integer (not timestamp in milliseconds)
-            val seed = (System.currentTimeMillis() % 2147483647).toInt() // Keep within Int32 range
+            val seed = (ireader.core.util.currentTimeMillis() % 2147483647).toInt() // Keep within Int32 range
             val url = buildString {
                 append("$API_URL/$encodedPrompt")
                 append("?model=$modelId")

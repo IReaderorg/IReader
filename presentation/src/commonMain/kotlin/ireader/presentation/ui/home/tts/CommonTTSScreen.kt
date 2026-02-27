@@ -495,7 +495,10 @@ fun TTSContentDisplay(
     actions: CommonTTSActions,
     lazyListState: LazyListState = rememberLazyListState(),
     backgroundColor: Color = MaterialTheme.colorScheme.background,
-    textColor: Color = MaterialTheme.colorScheme.onBackground,
+    textColor: Color = MaterialTheme.colorScheme.onBackground, // Legacy - kept for backward compatibility
+    currentParagraphColor: Color = MaterialTheme.colorScheme.onBackground,
+    currentParagraphHighlightColor: Color = Color.Transparent,
+    otherTextColor: Color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer,
     fontSize: Int = 18,
     textAlignment: TextAlign = TextAlign.Start,
@@ -608,6 +611,9 @@ fun TTSContentDisplay(
                                 isLoadingCache = false,
                                 isInPlayingChunk = false,
                                 textColor = textColor,
+                                currentParagraphColor = currentParagraphColor,
+                                currentParagraphHighlightColor = currentParagraphHighlightColor,
+                                otherTextColor = otherTextColor,
                                 highlightColor = highlightColor,
                                 fontSize = fontSizeSp,
                                 smallerFontSize = smallerFontSizeSp,
@@ -648,6 +654,9 @@ fun TTSContentDisplay(
                             isLoadingCache = false,
                             isInPlayingChunk = false,
                             textColor = textColor,
+                            currentParagraphColor = currentParagraphColor,
+                            currentParagraphHighlightColor = currentParagraphHighlightColor,
+                            otherTextColor = otherTextColor,
                             highlightColor = highlightColor,
                             fontSize = fontSizeSp,
                             smallerFontSize = smallerFontSizeSp,
@@ -749,6 +758,9 @@ fun TTSContentDisplay(
                         isLoadingCache = finalIsLoading,
                         isInPlayingChunk = isInPlayingChunk,
                         textColor = textColor,
+                        currentParagraphColor = currentParagraphColor,
+                        currentParagraphHighlightColor = currentParagraphHighlightColor,
+                        otherTextColor = otherTextColor,
                         highlightColor = highlightColor,
                         fontSize = fontSizeSp,
                         smallerFontSize = smallerFontSizeSp,
@@ -804,7 +816,10 @@ private fun TTSParagraphItemWithSentenceHighlight(
     isCached: Boolean,
     isLoadingCache: Boolean,
     isInPlayingChunk: Boolean = false,
-    textColor: Color,
+    textColor: Color, // Legacy - kept for backward compatibility
+    currentParagraphColor: Color = textColor,
+    currentParagraphHighlightColor: Color = Color.Transparent,
+    otherTextColor: Color = textColor.copy(alpha = 0.6f),
     highlightColor: Color,
     fontSize: androidx.compose.ui.unit.TextUnit,
     smallerFontSize: androidx.compose.ui.unit.TextUnit,
@@ -814,9 +829,13 @@ private fun TTSParagraphItemWithSentenceHighlight(
     fontWeight: Int,
     onParagraphClick: (Int) -> Unit
 ) {
-    // Pre-compute colors once
-    val textAlpha = if (isCurrentParagraph) 1f else 0.6f
-    val displayTextColor = remember(textColor, textAlpha) { textColor.copy(alpha = textAlpha) }
+    // Use new color system: current paragraph vs other text
+    val displayTextColor = if (isCurrentParagraph) currentParagraphColor else otherTextColor
+    val paragraphBackgroundColor = if (isCurrentParagraph && currentParagraphHighlightColor != Color.Transparent) {
+        currentParagraphHighlightColor
+    } else {
+        Color.Transparent
+    }
     val showSentenceHighlight = isCurrentParagraph && sentences.isNotEmpty()
     
     // Pre-compute modifier to avoid recreation
@@ -830,6 +849,7 @@ private fun TTSParagraphItemWithSentenceHighlight(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(paragraphBackgroundColor)
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.Top
@@ -852,7 +872,7 @@ private fun TTSParagraphItemWithSentenceHighlight(
                     SentenceHighlightedText(
                         sentences = sentences,
                         currentSentenceIndex = currentSentenceIndex,
-                        textColor = textColor,
+                        textColor = currentParagraphColor,
                         highlightColor = highlightColor,
                         fontSize = fontSize,
                         lineHeight = lineHeight,
@@ -902,7 +922,7 @@ private fun TTSParagraphItemWithSentenceHighlight(
                     SentenceHighlightedText(
                         sentences = sentences,
                         currentSentenceIndex = currentSentenceIndex,
-                        textColor = textColor,
+                        textColor = currentParagraphColor,
                         highlightColor = highlightColor,
                         fontSize = fontSize,
                         lineHeight = lineHeight,

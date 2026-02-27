@@ -176,6 +176,21 @@ class TTSPreferencesUseCase(
     fun getTextColor(): Long = readerPreferences.ttsTextColor().get()
     
     /**
+     * Get current paragraph color
+     */
+    fun getCurrentParagraphColor(): Long = readerPreferences.ttsCurrentParagraphColor().get()
+    
+    /**
+     * Get current paragraph highlight color
+     */
+    fun getCurrentParagraphHighlightColor(): Long = readerPreferences.ttsCurrentParagraphHighlightColor().get()
+    
+    /**
+     * Get other text color (non-current paragraphs)
+     */
+    fun getOtherTextColor(): Long = readerPreferences.ttsOtherTextColor().get()
+    
+    /**
      * Get font size
      */
     fun getFontSize(): Int = readerPreferences.ttsFontSize().get()

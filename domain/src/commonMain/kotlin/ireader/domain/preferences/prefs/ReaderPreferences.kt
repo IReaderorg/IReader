@@ -725,6 +725,21 @@ Visit.*for more chapters"""
         return preferenceStore.getLong("tts_text_color", 0xFFFFFFFF)
     }
     
+    fun ttsCurrentParagraphColor(): Preference<Long> {
+        // Default: White 0xFFFFFFFF (current reading paragraph)
+        return preferenceStore.getLong("tts_current_paragraph_color", 0xFFFFFFFF)
+    }
+    
+    fun ttsCurrentParagraphHighlightColor(): Preference<Long> {
+        // Default: Transparent 0x00000000 (no highlight)
+        return preferenceStore.getLong("tts_current_paragraph_highlight_color", 0x00000000)
+    }
+    
+    fun ttsOtherTextColor(): Preference<Long> {
+        // Default: Gray 0xFF808080 (non-current paragraphs)
+        return preferenceStore.getLong("tts_other_text_color", 0xFF808080)
+    }
+    
     fun ttsFontSize(): Preference<Int> {
         return preferenceStore.getInt("tts_font_size", 18)
     }

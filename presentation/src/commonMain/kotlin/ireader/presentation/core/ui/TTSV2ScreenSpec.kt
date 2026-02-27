@@ -238,6 +238,15 @@ class TTSV2ScreenSpec(
         var customTextColor by remember { 
             mutableStateOf(Color(readerPreferences.ttsTextColor().get().toInt()))
         }
+        var currentParagraphColor by remember {
+            mutableStateOf(Color(readerPreferences.ttsCurrentParagraphColor().get().toInt()))
+        }
+        var currentParagraphHighlightColor by remember {
+            mutableStateOf(Color(readerPreferences.ttsCurrentParagraphHighlightColor().get().toInt()))
+        }
+        var otherTextColor by remember {
+            mutableStateOf(Color(readerPreferences.ttsOtherTextColor().get().toInt()))
+        }
         var fontSize by remember { mutableStateOf(readerPreferences.ttsFontSize().get()) }
         var textAlignment by remember { 
             val savedAlignment = readerPreferences.ttsTextAlignment().get()
@@ -985,6 +994,9 @@ class TTSV2ScreenSpec(
             useCustomColors = useCustomColors,
             customBackgroundColor = customBackgroundColor,
             customTextColor = customTextColor,
+            currentParagraphColor = currentParagraphColor,
+            currentParagraphHighlightColor = currentParagraphHighlightColor,
+            otherTextColor = otherTextColor,
             fontSize = fontSize,
             textAlignment = textAlignment,
             sleepModeEnabled = sleepModeEnabled,
@@ -1014,6 +1026,18 @@ class TTSV2ScreenSpec(
             onTextColorChange = { color ->
                 customTextColor = color
                 scope.launch { readerPreferences.ttsTextColor().set(color.toArgb().toLong()) }
+            },
+            onCurrentParagraphColorChange = { color ->
+                currentParagraphColor = color
+                scope.launch { readerPreferences.ttsCurrentParagraphColor().set(color.toArgb().toLong()) }
+            },
+            onCurrentParagraphHighlightColorChange = { color ->
+                currentParagraphHighlightColor = color
+                scope.launch { readerPreferences.ttsCurrentParagraphHighlightColor().set(color.toArgb().toLong()) }
+            },
+            onOtherTextColorChange = { color ->
+                otherTextColor = color
+                scope.launch { readerPreferences.ttsOtherTextColor().set(color.toArgb().toLong()) }
             },
             onFontSizeChange = { 
                 fontSize = it
@@ -1414,7 +1438,10 @@ class TTSV2ScreenSpec(
                             actions = actions,
                             lazyListState = lazyListState,
                             backgroundColor = resolvedBackgroundColor,
-                            textColor = resolvedTextColor,
+                            textColor = resolvedTextColor, // Legacy
+                            currentParagraphColor = if (useCustomColors) currentParagraphColor else Color.Unspecified,
+                            currentParagraphHighlightColor = if (useCustomColors) currentParagraphHighlightColor else Color.Transparent,
+                            otherTextColor = if (useCustomColors) otherTextColor else Color.Unspecified,
                             highlightColor = MaterialTheme.colorScheme.primaryContainer,
                             fontSize = fontSize,
                             textAlignment = textAlignment,

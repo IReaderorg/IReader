@@ -83,6 +83,9 @@ android {
         versionName = ProjectConfig.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
+        // Enable multidex for apps with 65K+ methods
+        multiDexEnabled = true
+        
         // Note: ndk.abiFilters removed to avoid conflict with splits.abi
         // ABI filtering is handled by splits configuration below
     }

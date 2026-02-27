@@ -1,13 +1,12 @@
 package ireader.presentation.ui.tts.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,13 +38,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.components.ColorPickerDialog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
@@ -59,6 +64,9 @@ fun TTSSettingsDrawer(
     useCustomColors: Boolean,
     customBackgroundColor: Color,
     customTextColor: Color,
+    currentParagraphColor: Color,
+    currentParagraphHighlightColor: Color,
+    otherTextColor: Color,
     fontSize: Int,
     textAlignment: TextAlign,
     sleepModeEnabled: Boolean,
@@ -77,6 +85,9 @@ fun TTSSettingsDrawer(
     onUseCustomColorsChange: (Boolean) -> Unit,
     onBackgroundColorChange: (Color) -> Unit,
     onTextColorChange: (Color) -> Unit,
+    onCurrentParagraphColorChange: (Color) -> Unit,
+    onCurrentParagraphHighlightColorChange: (Color) -> Unit,
+    onOtherTextColorChange: (Color) -> Unit,
     onFontSizeChange: (Int) -> Unit,
     onTextAlignmentChange: (TextAlign) -> Unit,
     onSleepModeChange: (Boolean) -> Unit,
@@ -102,7 +113,7 @@ fun TTSSettingsDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(0.85f)
+                modifier = Modifier.fillMaxWidth(0.33f)
             ) {
                 val scrollState = rememberScrollState()
                 
@@ -280,25 +291,50 @@ fun TTSSettingsDrawer(
                                     HorizontalDivider()
                                     
                                     Text("Background", style = MaterialTheme.typography.bodySmall)
-                                    ColorPicker(
+                                    ColorPickerButton(
                                         selectedColor = customBackgroundColor,
                                         onColorSelected = onBackgroundColorChange,
-                                        colors = listOf(
-                                            Color(0xFF1E1E1E), Color(0xFF2C2C2C), Color(0xFF1A1A2E),
-                                            Color(0xFF16213E), Color(0xFFFFFBF0), Color(0xFFF5F5DC)
-                                        )
+                                        label = "Background"
                                     )
                                     
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     
-                                    Text("Text", style = MaterialTheme.typography.bodySmall)
-                                    ColorPicker(
-                                        selectedColor = customTextColor,
-                                        onColorSelected = onTextColorChange,
-                                        colors = listOf(
-                                            Color.White, Color(0xFFE0E0E0), Color(0xFFFFF8DC),
-                                            Color.Black, Color(0xFF333333), Color(0xFF2196F3)
-                                        )
+                                    Text("Current Paragraph Color", style = MaterialTheme.typography.bodySmall)
+                                    ColorPickerButton(
+                                        selectedColor = currentParagraphColor,
+                                        onColorSelected = onCurrentParagraphColorChange,
+                                        label = "Current Paragraph"
+                                    )
+                                    
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    
+                                    Text("Current Paragraph Highlight", style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        text = "Set to transparent to disable highlighting",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 11.sp
+                                    )
+                                    ColorPickerButton(
+                                        selectedColor = currentParagraphHighlightColor,
+                                        onColorSelected = onCurrentParagraphHighlightColorChange,
+                                        label = "Highlight",
+                                        allowTransparent = true
+                                    )
+                                    
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    
+                                    Text("Other Text Color", style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        text = "Color for non-current paragraphs",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 11.sp
+                                    )
+                                    ColorPickerButton(
+                                        selectedColor = otherTextColor,
+                                        onColorSelected = onOtherTextColorChange,
+                                        label = "Other Text"
                                     )
                                 }
                             }
@@ -414,28 +450,50 @@ private fun SettingRow(
 }
 
 @Composable
-private fun ColorPicker(
+private fun ColorPickerButton(
     selectedColor: Color,
     onColorSelected: (Color) -> Unit,
-    colors: List<Color>
+    label: String,
+    allowTransparent: Boolean = false
 ) {
-    Row(
+    var showDialog by remember { mutableStateOf(false) }
+    
+    // Color preview button
+    OutlinedButton(
+        onClick = { showDialog = true },
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        shape = MaterialTheme.shapes.medium
     ) {
-        colors.forEach { color ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Select $label Color")
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .background(color, shape = MaterialTheme.shapes.small)
-                    .clickable { onColorSelected(color) }
-                    .then(
-                        if (color == selectedColor) {
-                            Modifier.padding(2.dp)
-                        } else Modifier
+                    .size(32.dp)
+                    .background(selectedColor, MaterialTheme.shapes.small)
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline,
+                        MaterialTheme.shapes.small
                     )
             )
         }
+    }
+    
+    // Color picker dialog
+    if (showDialog) {
+        ColorPickerDialog(
+            title = { Text("$label Color") },
+            onDismissRequest = { showDialog = false },
+            onSelected = { color ->
+                onColorSelected(color)
+                showDialog = false
+            },
+            initialColor = selectedColor
+        )
     }
 }
 

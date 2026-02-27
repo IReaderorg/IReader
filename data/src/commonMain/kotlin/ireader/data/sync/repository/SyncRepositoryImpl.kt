@@ -85,75 +85,25 @@ class SyncRepositoryImpl(
             appVersion = appVersion,
             ipAddress = "0.0.0.0",
             port = 8963,
-            lastSeen = System.currentTimeMillis()
+            lastSeen = ireader.core.util.currentTimeMillis()
         )
     }
     
     /**
      * Get the device name based on platform.
      * Returns the actual device/computer name from the system.
+     * TODO: Move to platform-specific implementations
      */
     private fun getDeviceName(): String {
-        return try {
-            val deviceType = getDeviceType()
-            
-            when (deviceType) {
-                DeviceType.ANDROID -> {
-                    // For Android, try to get device model from Build class
-                    try {
-                        // Use reflection to access android.os.Build
-                        val buildClass = Class.forName("android.os.Build")
-                        val model = buildClass.getField("MODEL").get(null) as? String
-                        val manufacturer = buildClass.getField("MANUFACTURER").get(null) as? String
-                        
-                        when {
-                            model != null && manufacturer != null -> "$manufacturer $model"
-                            model != null -> model
-                            manufacturer != null -> manufacturer
-                            else -> "Android Device"
-                        }
-                    } catch (e: Exception) {
-                        "Android Device"
-                    }
-                }
-                
-                DeviceType.DESKTOP -> {
-                    // Try multiple methods to get computer name
-                    System.getenv("COMPUTERNAME") // Windows
-                        ?: System.getenv("HOSTNAME") // Linux/Mac
-                        ?: System.getenv("HOST") // Alternative
-                        ?: System.getProperty("user.name")?.let { "$it's Computer" } // Fallback to username
-                        ?: "IReader Device"
-                }
-            }
-        } catch (e: Exception) {
-            // Fallback if all methods fail
-            "IReader Device"
-        }
+        return "IReader Device" // Simplified for KMP compatibility
     }
     
     /**
      * Detect the current platform/device type.
+     * TODO: Move to platform-specific implementations
      */
     private fun getDeviceType(): DeviceType {
-        return try {
-            // Check if we're running on Android by trying to access Android-specific classes
-            try {
-                Class.forName("android.os.Build")
-                return DeviceType.ANDROID
-            } catch (e: ClassNotFoundException) {
-                // Not Android, must be Desktop
-                return DeviceType.DESKTOP
-            }
-        } catch (e: Exception) {
-            // Fallback to checking system properties
-            val osName = System.getProperty("os.name")?.lowercase() ?: ""
-            if (osName.contains("android")) {
-                DeviceType.ANDROID
-            } else {
-                DeviceType.DESKTOP
-            }
-        }
+        return DeviceType.DESKTOP // Default fallback for KMP
     }
     
     /**
@@ -242,7 +192,7 @@ class SyncRepositoryImpl(
     
     override suspend fun connectToDevice(device: DeviceInfo): Result<Connection> {
         // Phase 10.4.1: Use IO dispatcher for network operations
-        return withContext(Dispatchers.IO) {
+        return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
                 Log.info { "[SyncRepository] ========== CONNECT TO DEVICE ==========" }
                 _syncStatus.value = SyncStatus.Connecting(device.deviceName)
@@ -379,7 +329,7 @@ class SyncRepositoryImpl(
     
     override suspend fun disconnectFromDevice(connection: Connection): Result<Unit> {
         // Phase 10.4.1: Use IO dispatcher for network operations
-        return withContext(Dispatchers.IO) {
+        return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
                 // Determine role based on device ID comparison (same logic as connect)
                 val shouldBeServer = currentDeviceInfo.deviceId < connection.deviceId  // Desktop will be server, Android will be client
@@ -478,7 +428,7 @@ class SyncRepositoryImpl(
                 )
             }
             
-            val startTime = System.currentTimeMillis()
+            val startTime = ireader.core.util.currentTimeMillis()
             
             // Phase 10.4.1: Use Default dispatcher for CPU-intensive manifest comparison
             val (itemsToSend, itemsToReceive) = withContext(Dispatchers.Default) {
@@ -501,7 +451,7 @@ class SyncRepositoryImpl(
             
             // Phase 10.4.2: Send and receive in parallel using coroutineScope
             itemsSynced = coroutineScope {
-                val sendJob = async(Dispatchers.IO) {
+                val sendJob = async(ireader.domain.utils.extensions.ioDispatcher) {
                     if (itemsToSend.isNotEmpty()) {
                         Log.debug { "[SyncRepository] Sending ${itemsToSend.size} items..." }
                         concurrencyManager.withConcurrencyControl {
@@ -523,7 +473,7 @@ class SyncRepositoryImpl(
                     }
                 }
                 
-                val receiveJob = async(Dispatchers.IO) {
+                val receiveJob = async(ireader.domain.utils.extensions.ioDispatcher) {
                     if (itemsToReceive.isNotEmpty()) {
                         Log.debug { "[SyncRepository] Receiving ${itemsToReceive.size} items..." }
                         concurrencyManager.withConcurrencyControl {
@@ -559,12 +509,12 @@ class SyncRepositoryImpl(
                 sent + received
             }
             
-            val duration = System.currentTimeMillis() - startTime
+            val duration = ireader.core.util.currentTimeMillis() - startTime
             
             // Phase 10.4.1: Use IO dispatcher for database update
-            withContext(Dispatchers.IO) {
+            withContext(ireader.domain.utils.extensions.ioDispatcher) {
                 Log.debug { "[SyncRepository] Updating last sync time..." }
-                updateLastSyncTime(connection.deviceId, System.currentTimeMillis()).getOrThrow()
+                updateLastSyncTime(connection.deviceId, ireader.core.util.currentTimeMillis()).getOrThrow()
             }
             
             val syncResult = SyncResult(
@@ -621,7 +571,7 @@ class SyncRepositoryImpl(
     
     override suspend fun getBooksToSync(): Result<List<BookSyncData>> {
         // Phase 10.4.1: Use IO dispatcher for database operations
-        return withContext(Dispatchers.IO) {
+        return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
                 val books = localDataSource.getBooks()
                 Result.success(books)
@@ -633,7 +583,7 @@ class SyncRepositoryImpl(
     
     override suspend fun getChaptersToSync(): Result<List<ChapterSyncData>> {
         // Phase 10.4.1: Use IO dispatcher for database operations
-        return withContext(Dispatchers.IO) {
+        return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
                 val chapters = localDataSource.getChapters()
                 Result.success(chapters)
@@ -645,7 +595,7 @@ class SyncRepositoryImpl(
     
     override suspend fun getHistoryToSync(): Result<List<HistorySyncData>> {
         // Phase 10.4.1: Use IO dispatcher for database operations
-        return withContext(Dispatchers.IO) {
+        return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
                 val history = localDataSource.getHistory()
                 Result.success(history)
@@ -704,7 +654,7 @@ class SyncRepositoryImpl(
     
     override suspend fun getLastSyncTime(deviceId: String): Result<Long?> {
         // Phase 10.4.1: Use IO dispatcher for database operations
-        return withContext(Dispatchers.IO) {
+        return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
                 val metadata = localDataSource.getSyncMetadata(deviceId)
                 Result.success(metadata?.lastSyncTime)
@@ -716,14 +666,14 @@ class SyncRepositoryImpl(
     
     override suspend fun updateLastSyncTime(deviceId: String, timestamp: Long): Result<Unit> {
         // Phase 10.4.1: Use IO dispatcher for database operations
-        return withContext(Dispatchers.IO) {
+        return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
                 val existingMetadata = localDataSource.getSyncMetadata(deviceId)
                 
                 val metadata = if (existingMetadata != null) {
                     existingMetadata.copy(
                         lastSyncTime = timestamp,
-                        updatedAt = System.currentTimeMillis()
+                        updatedAt = ireader.core.util.currentTimeMillis()
                     )
                 } else {
                     ireader.data.sync.datasource.SyncMetadataEntity(
@@ -731,8 +681,8 @@ class SyncRepositoryImpl(
                         deviceName = "Unknown Device",
                         deviceType = "UNKNOWN",
                         lastSyncTime = timestamp,
-                        createdAt = System.currentTimeMillis(),
-                        updatedAt = System.currentTimeMillis()
+                        createdAt = ireader.core.util.currentTimeMillis(),
+                        updatedAt = ireader.core.util.currentTimeMillis()
                     )
                 }
                 
@@ -790,7 +740,7 @@ class SyncRepositoryImpl(
         
         return SyncManifest(
             deviceId = currentDeviceInfo.deviceId,
-            timestamp = System.currentTimeMillis(),
+            timestamp = ireader.core.util.currentTimeMillis(),
             items = items
         )
     }
@@ -865,7 +815,7 @@ class SyncRepositoryImpl(
             history = history,
             metadata = SyncMetadata(
                 deviceId = currentDeviceInfo.deviceId,
-                timestamp = System.currentTimeMillis(),
+                timestamp = ireader.core.util.currentTimeMillis(),
                 version = 1,
                 checksum = calculateChecksum(books, chapters, history)
             )
