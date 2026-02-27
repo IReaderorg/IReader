@@ -48,7 +48,7 @@ actual class CommonEncryptionService actual constructor() : EncryptionService {
         val plaintextBytes = plaintext.encodeToByteArray()
         val encryptedBytes = encryptBytes(plaintextBytes, key)
         
-        return encryptedBytes.toNSData().base64EncodedStringWithOptions(0)
+        return encryptedBytes.toNSData().base64EncodedStringWithOptions(0u)
     }
     
     /**
@@ -59,7 +59,7 @@ actual class CommonEncryptionService actual constructor() : EncryptionService {
             "Key must be $KEY_SIZE_BYTES bytes (256 bits), got ${key.size} bytes"
         }
         
-        val encryptedData = NSData.create(base64EncodedString = ciphertext, options = 0)
+        val encryptedData = NSData.create(base64EncodedString = ciphertext, options = 0u)
             ?: throw IllegalArgumentException("Invalid Base64 string")
         
         val encryptedBytes = encryptedData.toByteArray()
@@ -158,7 +158,7 @@ actual class CommonEncryptionService actual constructor() : EncryptionService {
     private fun NSData.toByteArray(): ByteArray {
         return ByteArray(this.length.toInt()).apply {
             usePinned { pinned ->
-                platform.posix.memcpy(pinned.addressOf(0), this@toByteArray.bytes, this@toByteArray.length.toULong())
+                platform.posix.memcpy(pinned.addressOf(0), this@toByteArray.bytes, this@toByteArray.length)
             }
         }
     }

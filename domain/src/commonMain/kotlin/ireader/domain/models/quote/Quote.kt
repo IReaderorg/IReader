@@ -3,6 +3,18 @@
 import kotlinx.serialization.Serializable
 
 /**
+ * Quote model for sharing - simplified version of LocalQuote
+ * Used for quote card generation and sharing
+ */
+@Serializable
+data class Quote(
+    val text: String,
+    val bookTitle: String,
+    val author: String = "",
+    val submitterUsername: String = ""
+)
+
+/**
  * Available card styles for shareable quote cards
  */
 enum class QuoteCardStyle(val displayName: String) {

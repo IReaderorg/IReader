@@ -35,10 +35,21 @@ fun getGitOutput(vararg command: String): Provider<String> {
 val gitCommitCount: Provider<String> = getGitOutput("git", "rev-list", "--count", "HEAD")
 val gitCommitSha: Provider<String> = getGitOutput("git", "rev-parse", "--short", "HEAD")
 
+// Detect if this is a release build
+val isReleaseBuild: Boolean = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("release", ignoreCase = true) || 
+    taskName.contains("Release")
+}
+
+// Only compute build time for release builds to avoid cache invalidation on every debug build
 val currentBuildTime: String by lazy {
-    val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-    df.timeZone = TimeZone.getTimeZone("UTC")
-    df.format(Date())
+    if (isReleaseBuild) {
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+        df.timeZone = TimeZone.getTimeZone("UTC")
+        df.format(Date())
+    } else {
+        "dev-build"
+    }
 }
 
 // Load local.properties for local development
@@ -146,9 +157,17 @@ android {
 
 
     defaultConfig {
-        buildConfigField("String", "COMMIT_COUNT", "\"${gitCommitCount.get()}\"")
-        buildConfigField("String", "COMMIT_SHA", "\"${gitCommitSha.get()}\"")
-        buildConfigField("String", "BUILD_TIME", "\"${currentBuildTime}\"")
+        // Only include dynamic values for release builds to enable caching for debug builds
+        if (isReleaseBuild) {
+            buildConfigField("String", "COMMIT_COUNT", "\"${gitCommitCount.get()}\"")
+            buildConfigField("String", "COMMIT_SHA", "\"${gitCommitSha.get()}\"")
+            buildConfigField("String", "BUILD_TIME", "\"${currentBuildTime}\"")
+        } else {
+            // Use static values for debug builds to enable caching
+            buildConfigField("String", "COMMIT_COUNT", "\"dev\"")
+            buildConfigField("String", "COMMIT_SHA", "\"dev\"")
+            buildConfigField("String", "BUILD_TIME", "\"dev-build\"")
+        }
         buildConfigField("boolean", "INCLUDE_UPDATER", "false")
         buildConfigField("boolean", "PREVIEW", "false")
         buildConfigField("String", "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
@@ -208,6 +227,10 @@ android {
             extra["enableCrashlytics"] = false
             extra["alwaysUpdateBuildId"] = false
             isCrunchPngs = false
+            
+            // Disable resource optimization for faster debug builds
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
         named("release") {
             isShrinkResources = true

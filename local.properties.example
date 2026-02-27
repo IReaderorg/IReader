@@ -4,13 +4,6 @@
 # Copy this file to local.properties and fill in your values
 
 # ============================================
-# SDK LOCATION (Required by Gradle)
-# ============================================
-# Uncomment and set your Android SDK path
-# sdk.dir=C\:\\sdk
-# sdk.dir=/Users/username/Library/Android/sdk
-
-# ============================================
 # SINGLE PROJECT SETUP (500MB)
 # ============================================
 # Use the same URL and key for all 7 projects

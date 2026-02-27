@@ -86,6 +86,7 @@ android {
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
 // Cached to avoid running git commands on every configuration
+// IMPORTANT: Only compute these for release builds to avoid cache invalidation
 val commitCount: Provider<String> = providers.exec {
     commandLine("git", "rev-list", "--count", "HEAD")
     isIgnoreExitValue = true
@@ -98,12 +99,6 @@ val gitSha: Provider<String> = providers.exec {
 }.standardOutput.asText.map { it.trim().takeIf { it.isNotEmpty() } ?: "unknown" }
     .orElse("unknown")
 
-val buildTime: Provider<String> = provider {
-    val df: java.text.SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
-    df.timeZone = TimeZone.getTimeZone("UTC")
-    df.format(Date())
-}
-
 // Detect if this is a release build based on Gradle task names
 val isReleaseBuild: Boolean = gradle.startParameter.taskNames.any { taskName ->
     taskName.contains("release", ignoreCase = true) || 
@@ -111,14 +106,33 @@ val isReleaseBuild: Boolean = gradle.startParameter.taskNames.any { taskName ->
     taskName.contains("assemble") && !taskName.contains("debug", ignoreCase = true)
 }
 
+// Only compute build time for release builds to avoid cache invalidation
+val buildTime: Provider<String> = provider {
+    if (isReleaseBuild) {
+        val df: java.text.SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+        df.timeZone = TimeZone.getTimeZone("UTC")
+        df.format(Date())
+    } else {
+        "dev-build"
+    }
+}
+
 buildkonfig {
     packageName = "ireader.i18n"
     exposeObjectWithName = "BuildKonfig"
     defaultConfigs {
         buildConfigField(BOOLEAN, "DEBUG", isReleaseBuild.not().toString())
-        buildConfigField(STRING, "COMMIT_COUNT", "\"${commitCount.get()}\"")
-        buildConfigField(STRING, "COMMIT_SHA", "\"${gitSha.get()}\"")
-        buildConfigField(STRING, "BUILD_TIME", "\"${buildTime.get()}\"")
+        // Only include dynamic values for release builds
+        if (isReleaseBuild) {
+            buildConfigField(STRING, "COMMIT_COUNT", "\"${commitCount.get()}\"")
+            buildConfigField(STRING, "COMMIT_SHA", "\"${gitSha.get()}\"")
+            buildConfigField(STRING, "BUILD_TIME", "\"${buildTime.get()}\"")
+        } else {
+            // Use static values for debug builds to enable caching
+            buildConfigField(STRING, "COMMIT_COUNT", "\"dev\"")
+            buildConfigField(STRING, "COMMIT_SHA", "\"dev\"")
+            buildConfigField(STRING, "BUILD_TIME", "\"dev-build\"")
+        }
         buildConfigField(BOOLEAN, "INCLUDE_UPDATER", "false")
         buildConfigField(BOOLEAN, "PREVIEW", "false")
         buildConfigField(STRING, "VERSION_NAME", "\"${ProjectConfig.versionName}\"")
@@ -130,5 +144,9 @@ buildkonfig {
 compose.resources {
     publicResClass = true
     packageOfResClass = "ireader.i18n.resources"
-    generateResClass = org.jetbrains.compose.resources.ResourcesExtension.ResourceClassGeneration.Auto
+    // Only generate resource accessors when needed (skip during fast development builds)
+    generateResClass = when {
+        project.hasProperty("skipI18n") -> org.jetbrains.compose.resources.ResourcesExtension.ResourceClassGeneration.Never
+        else -> org.jetbrains.compose.resources.ResourcesExtension.ResourceClassGeneration.Auto
+    }
 }
