@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FormatAlignCenter
-import ireader.presentation.ui.core.utils.formatMultiplier
 import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.FormatAlignRight
@@ -33,9 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,10 +46,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.i18n.localize
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.auto_next_chapter_1
+import ireader.i18n.resources.color_theme
+import ireader.i18n.resources.current_engine
+import ireader.i18n.resources.playback
+import ireader.i18n.resources.read_translated_text
+import ireader.i18n.resources.select_voice
+import ireader.i18n.resources.text_alignment
+import ireader.i18n.resources.tts_engine
+import ireader.i18n.resources.tts_settings
+import ireader.i18n.resources.use_coqui_tts
+import ireader.i18n.resources.use_custom_colors
+import ireader.i18n.resources.voice
 import ireader.presentation.ui.component.components.ColorPickerDialog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatMultiplier
 
 /**
  * TTS Settings Drawer - Right-side drawer containing all TTS settings
@@ -114,7 +123,7 @@ fun TTSSettingsDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(0.33f)
+                modifier = Modifier
             ) {
                 val scrollState = rememberScrollState()
                 
