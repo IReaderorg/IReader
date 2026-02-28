@@ -179,6 +179,13 @@ fun TranslationSettingsScreenV2(
                 )
             }
 
+            // Gemini Nano warning for unsupported devices
+            if (viewModel.translatorEngine.value == 12L) {
+                item(key = "gemini_nano_warning") {
+                    GeminiNanoWarningBanner()
+                }
+            }
+
             // API Key Section - Show for Gemini, OpenAI, DeepSeek
             if (showApiKeySection) {
                 item(key = "api_key_header") {
@@ -342,5 +349,61 @@ private fun setApiKeyForEngine(viewModel: TranslationSettingsViewModel, engineId
         8L -> viewModel.updateGeminiApiKey(value)
         9L -> viewModel.updateOpenRouterApiKey(value)
         10L -> viewModel.updateNvidiaApiKey(value)
+    }
+}
+
+@Composable
+private fun GeminiNanoWarningBanner() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
+    
+    // Check Android version
+    val isAndroid14Plus = try {
+        val buildClass = Class.forName("android.os.Build\$VERSION")
+        val sdkIntField = buildClass.getField("SDK_INT")
+        val sdkInt = sdkIntField.getInt(null)
+        sdkInt >= 34 // Android 14 = API 34
+    } catch (e: Exception) {
+        true // On non-Android platforms, don't show warning
+    }
+    
+    if (!isAndroid14Plus) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(24.dp)
+                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Android 14+ Required",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Text(
+                        text = "Gemini Nano requires Android 14 or higher. Please use Google Translate (Free) or GoogleML instead.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        }
     }
 }
