@@ -16,10 +16,10 @@ actual class GoogleTranslateML : TranslateEngine() {
     
     companion object {
         /** Maximum paragraphs per chunk to avoid overwhelming ML Kit */
-        const val MAX_CHUNK_SIZE = 10
+        const val MAX_CHUNK_SIZE = 5 // Reduced from 10 to improve accuracy
         
-        /** Paragraph separator marker */
-        const val MARKER = "####"
+        /** Paragraph separator marker - using unique marker less likely to be translated */
+        const val MARKER = "\n<<<PARA_SEP>>>\n"
     }
     
     override val supportedLanguages: List<Pair<String, String>> = listOf(
@@ -214,7 +214,14 @@ actual class GoogleTranslateML : TranslateEngine() {
                 val chunkProgress = 20 + ((chunkIndex + 1) * 70 / totalChunks)
                 onProgress(chunkProgress)
                 
-                val translatedChunk = translateChunk(client, chunk)
+                var translatedChunk = translateChunk(client, chunk)
+                
+                // If chunked translation failed or returned wrong count, translate individually
+                if (translatedChunk == null || translatedChunk.size != chunk.size) {
+                    println("[GoogleML] Chunk translation failed or returned wrong count, translating individually")
+                    translatedChunk = translateIndividually(client, chunk)
+                }
+                
                 if (translatedChunk == null) {
                     onError(TranslationError.Unknown("Google ML Kit",
                         Exception("Translation failed for chunk ${chunkIndex + 1}")).toUiText())
@@ -345,8 +352,19 @@ actual class GoogleTranslateML : TranslateEngine() {
             ) { _, _, args ->
                 val result = args?.get(0) as? String
                 if (result != null && result.isNotEmpty()) {
-                    val splitResults = result.split(MARKER).map { it.trim() }
-                    continuation.resume(splitResults)
+                    // Split by marker, handling cases where marker might be translated or modified
+                    val splitResults = result.split(MARKER, "\n<<<", ">>>\n", "PARA_SEP")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() && !it.matches(Regex("[<>_]+")) }
+                    
+                    // If split didn't work well, try to match paragraph count
+                    val finalResults = if (splitResults.size == chunk.size) {
+                        splitResults
+                    } else {
+                        // Fallback: translate each paragraph individually
+                        null
+                    }
+                    continuation.resume(finalResults)
                 } else {
                     continuation.resume(null)
                 }
@@ -373,6 +391,65 @@ actual class GoogleTranslateML : TranslateEngine() {
         } catch (e: Exception) {
             println("Error translating chunk: ${e.message}")
             continuation.resume(null)
+        }
+    }
+    
+    /**
+     * Translate paragraphs individually (fallback when chunking fails)
+     */
+    private suspend fun translateIndividually(client: Any, texts: List<String>): List<String>? {
+        return try {
+            val results = mutableListOf<String>()
+            
+            for (text in texts) {
+                if (text.isBlank()) {
+                    results.add(text)
+                    continue
+                }
+                
+                val translated = suspendCoroutine<String?> { continuation ->
+                    try {
+                        val translateMethod = client.javaClass.getMethod("translate", String::class.java)
+                        val translateTask = translateMethod.invoke(client, text)
+                        
+                        val addOnSuccessListenerMethod = translateTask.javaClass.getMethod("addOnSuccessListener",
+                            Class.forName("com.google.android.gms.tasks.OnSuccessListener"))
+                        
+                        val successListener = java.lang.reflect.Proxy.newProxyInstance(
+                            javaClass.classLoader,
+                            arrayOf(Class.forName("com.google.android.gms.tasks.OnSuccessListener"))
+                        ) { _, _, args ->
+                            val result = args?.get(0) as? String
+                            continuation.resume(result)
+                            null
+                        }
+                        
+                        addOnSuccessListenerMethod.invoke(translateTask, successListener)
+                        
+                        val addOnFailureListenerMethod = translateTask.javaClass.getMethod("addOnFailureListener",
+                            Class.forName("com.google.android.gms.tasks.OnFailureListener"))
+                        
+                        val failureListener = java.lang.reflect.Proxy.newProxyInstance(
+                            javaClass.classLoader,
+                            arrayOf(Class.forName("com.google.android.gms.tasks.OnFailureListener"))
+                        ) { _, _, _ ->
+                            continuation.resume(null)
+                            null
+                        }
+                        
+                        addOnFailureListenerMethod.invoke(translateTask, failureListener)
+                    } catch (e: Exception) {
+                        continuation.resume(null)
+                    }
+                }
+                
+                results.add(translated ?: text)
+            }
+            
+            results
+        } catch (e: Exception) {
+            println("Individual translation failed: ${e.message}")
+            null
         }
     }
     

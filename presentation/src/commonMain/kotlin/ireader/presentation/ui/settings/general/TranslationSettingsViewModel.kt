@@ -176,6 +176,7 @@ class TranslationSettingsViewModel(
                         3L -> deepSeekApiKey.value // DeepSeek
                         8L -> geminiApiKey.value // Gemini
                         9L -> openRouterApiKey.value // OpenRouter
+                        10L -> nvidiaApiKey.value // NVIDIA
                         else -> ""
                     }
                     

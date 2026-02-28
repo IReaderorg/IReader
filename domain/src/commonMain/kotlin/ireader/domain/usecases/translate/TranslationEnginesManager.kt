@@ -36,13 +36,15 @@ class TranslationEnginesManager(
 ) {
 
     // Built-in translation engines:
-    // - Google ML Kit (offline, default)
+    // - Google ML Kit (offline, requires model download)
+    // - Google Translate Free (online, no setup required) - NEW!
     // - Gemini API (requires API key, for users who prefer Google's AI)
     // - OpenRouter AI (requires API key, access to multiple AI models)
     // - NVIDIA NIM (requires API key, access to NVIDIA-optimized AI models)
     // Other engines (like Ollama) are available as plugins from the Feature Store
     val builtInEngines = listOf(
         GoogleTranslateML(),  // id=0, offline, default
+        GoogleTranslateFree(),  // id=11, online, no setup - RECOMMENDED for Android
         GeminiTranslateEngine(httpClients, readerPreferences),  // id=8, requires API key
         OpenRouterTranslateEngine(httpClients, readerPreferences),  // id=9, requires API key
         NvidiaTranslateEngine(httpClients, readerPreferences)  // id=10, requires API key

@@ -64,10 +64,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.custom
+import ireader.i18n.resources.presents
+import ireader.i18n.resources.preview
+import ireader.i18n.resources.select
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlin.math.round
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ColorPickerDialog(
@@ -77,10 +80,11 @@ fun ColorPickerDialog(
     title: (@Composable () -> Unit)? = null,
     initialColor: Color = Color.Unspecified,
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val localizeHelper =
+        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var currentColor by remember { mutableStateOf(initialColor) }
     var showPresets by remember { mutableStateOf(true) }
-    
+
     // Enhanced dialog with better styling
     IAlertDialog(
         onDismissRequest = onDismissRequest,
@@ -116,13 +120,21 @@ fun ColorPickerDialog(
                             color = if (currentColor.luminance() > 0.5) Color.Black else Color.White
                         )
                         androidx.compose.material3.Text(
-                            text = "#${currentColor.value.toString(16).substring(2, 8).uppercase()}",
+                            text = "#${
+                                currentColor.value.toString(16).let {
+                                    if (it.length < 8) {
+                                        ""
+                                    } else {
+                                        it.substring(2, 8).uppercase()
+                                    }
+                                }
+                            }",
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (currentColor.luminance() > 0.5) Color.Black else Color.White
                         )
                     }
                 }
-                
+
                 // Color picker content
                 if (showPresets) {
                     ColorPresets(
@@ -226,7 +238,7 @@ private fun ColorPresetItem(
             dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
         )
     )
-    
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -473,12 +485,12 @@ private fun Color.toHsv(): FloatArray {
 
     val sat = delta / value
     val hue = (
-        when {
-            red == value -> (green - blue) / delta
-            green == value -> 2 + (blue - red) / delta
-            else -> 4 + (red - green) / delta
-        } * 60
-        ).let { if (it < 0) it + 360 else it }
+            when {
+                red == value -> (green - blue) / delta
+                green == value -> 2 + (blue - red) / delta
+                else -> 4 + (red - green) / delta
+            } * 60
+            ).let { if (it < 0) it + 360 else it }
     return floatArrayOf(hue, sat, value)
 }
 
@@ -524,9 +536,10 @@ private val presetColors = listOf(
     Color(0xFF607D8B), // BLUE GREY 500
     Color(0xFF9E9E9E), // GREY 500
 )
+
 data class ColorPickerInfo(
     val preference: PreferenceMutableState<Color>? = null,
-    val title: String ? = null,
+    val title: String? = null,
     val onChangeColor: () -> Unit = {},
     val initialColor: Color = Color.Unspecified,
 )

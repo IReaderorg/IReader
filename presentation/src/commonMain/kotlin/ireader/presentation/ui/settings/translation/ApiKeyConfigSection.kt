@@ -181,6 +181,8 @@ fun getApiKeyLabel(engineId: Long): String {
         2L -> "OpenAI API Key"
         3L -> "DeepSeek API Key"
         8L -> "Gemini API Key"
+        9L -> "OpenRouter API Key"
+        10L -> "NVIDIA API Key"
         else -> "API Key"
     }
 }
@@ -190,6 +192,8 @@ fun getApiKeyHelpText(engineId: Long): String {
         2L -> "Get key from platform.openai.com"
         3L -> "Get key from platform.deepseek.com"
         8L -> "Get key from aistudio.google.com"
+        9L -> "Get key from openrouter.ai/keys"
+        10L -> "Get key from build.nvidia.com"
         else -> "Enter your API key"
     }
 }
