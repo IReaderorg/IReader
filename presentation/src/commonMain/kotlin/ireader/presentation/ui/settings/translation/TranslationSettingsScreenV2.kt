@@ -24,6 +24,12 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 
 /**
+ * Platform-specific check for Android version.
+ * Returns true if running on Android 14+ (API 34+), or true on non-Android platforms.
+ */
+expect fun isAndroid14Plus(): Boolean
+
+/**
  * Wrapper class to adapt TranslationPlugin to TranslateEngine interface
  * This allows plugin engines to be displayed alongside built-in engines
  */
@@ -356,17 +362,10 @@ private fun setApiKeyForEngine(viewModel: TranslationSettingsViewModel, engineId
 private fun GeminiNanoWarningBanner() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
     
-    // Check Android version
-    val isAndroid14Plus = try {
-        val buildClass = Class.forName("android.os.Build\$VERSION")
-        val sdkIntField = buildClass.getField("SDK_INT")
-        val sdkInt = sdkIntField.getInt(null)
-        sdkInt >= 34 // Android 14 = API 34
-    } catch (e: Exception) {
-        true // On non-Android platforms, don't show warning
-    }
+    // Check Android version using platform-specific implementation
+    val isAndroid14OrHigher = isAndroid14Plus()
     
-    if (!isAndroid14Plus) {
+    if (!isAndroid14OrHigher) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
