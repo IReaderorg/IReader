@@ -233,19 +233,19 @@ class TTSV2ScreenSpec(
         // Settings state from preferences
         var useCustomColors by remember { mutableStateOf(readerPreferences.ttsUseCustomColors().get()) }
         var customBackgroundColor by remember { 
-            mutableStateOf(Color(readerPreferences.ttsBackgroundColor().get().toInt()))
+            mutableStateOf(Color((readerPreferences.ttsBackgroundColor().get() and 0xFFFFFFFF).toInt()))
         }
         var customTextColor by remember { 
-            mutableStateOf(Color(readerPreferences.ttsTextColor().get().toInt()))
+            mutableStateOf(Color((readerPreferences.ttsTextColor().get() and 0xFFFFFFFF).toInt()))
         }
         var currentParagraphColor by remember {
-            mutableStateOf(Color(readerPreferences.ttsCurrentParagraphColor().get().toInt()))
+            mutableStateOf(Color((readerPreferences.ttsCurrentParagraphColor().get() and 0xFFFFFFFF).toInt()))
         }
         var currentParagraphHighlightColor by remember {
-            mutableStateOf(Color(readerPreferences.ttsCurrentParagraphHighlightColor().get().toInt()))
+            mutableStateOf(Color((readerPreferences.ttsCurrentParagraphHighlightColor().get() and 0xFFFFFFFF).toInt()))
         }
         var otherTextColor by remember {
-            mutableStateOf(Color(readerPreferences.ttsOtherTextColor().get().toInt()))
+            mutableStateOf(Color((readerPreferences.ttsOtherTextColor().get() and 0xFFFFFFFF).toInt()))
         }
         var fontSize by remember { mutableStateOf(readerPreferences.ttsFontSize().get()) }
         var textAlignment by remember { 
