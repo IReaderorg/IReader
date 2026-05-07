@@ -1,21 +1,21 @@
 [versions]
 # Compose
 apkParser = "2.6.10"
-composeGradle = "1.10.1"
-composeHotReload = "1.0.0"
+composeGradle = "1.10.3"
+composeHotReload = "1.1.0"
 # Static Analysis
 detekt = "1.23.8"
-composeRules = "0.5.7"
+composeRules = "0.5.8"
 # Immutable Collections for Compose stability
 j2v8 = "6.3.4"
-js = "25.0.2"
+js = "25.0.3"
 kotlinxImmutable = "0.4.0"
 coreSplashscreen = "1.2.0"
-ktorClientDarwin = "3.4.2"
+ktorClientDarwin = "3.4.3"
 ktorClientMock = "3.4.2"
 mockk = "1.14.9"
 profileinstaller = "1.4.1"
-firebaseAnalytics = "23.0.0"
+firebaseAnalytics = "23.2.0"
 junitVintageEngine = "6.0.3"
 kotlinxCoroutinesSwing = "1.10.2"
 navigation = "2.9.2"
@@ -32,23 +32,23 @@ koinAndroid = "4.2.1"
 koinAndroidCompose = "4.2.1"
 koinCompose = "4.2.1"
 # Network
-ktor = "3.4.2"
+ktor = "3.4.3"
 # Storage
 sqldelight = "2.3.2"
 datastore = "1.2.1"
 # Backend
-supabase = "3.5.0"
+supabase = "3.6.0"
 
 # Localization - Migrated to Compose Multiplatform Resources (built into Compose plugin)
 # BuildConfigs
-buildkonfig = "0.18.0"
+buildkonfig = "0.20.0"
 okhttp = "5.3.2"
 
-jsoup = "1.22.1"
+jsoup = "1.22.2"
 ksoup = "0.2.6"
-dex2jar = "2.4.35"
+dex2jar = "2.4.36"
 coil = "3.4.0"
-uiText = "1.10.6"
+uiText = "1.11.1"
 workTesting = "2.11.2"
 # Removed readium version - not used
 

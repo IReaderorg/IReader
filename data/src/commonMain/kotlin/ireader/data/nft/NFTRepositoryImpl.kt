@@ -1,22 +1,22 @@
 ﻿package ireader.data.nft
 
+
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.bodyOrNull
 import io.github.jan.supabase.functions.functions
+import io.ktor.client.call.body
 import ireader.data.backend.BackendService
 import ireader.data.core.DatabaseHandler
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.data.repository.NFTRepository
 import ireader.domain.models.remote.NFTVerificationResult
 import ireader.domain.models.remote.NFTWallet
+import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import ireader.domain.utils.extensions.currentTimeToLong
 
 class NFTRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -118,7 +118,6 @@ class NFTRepositoryImpl(
             result?.walletAddress
         }
     
-    @OptIn(SupabaseInternal::class)
     override suspend fun verifyNFTOwnership(address: String): Result<NFTVerificationResult> =
         RemoteErrorMapper.withErrorMapping {
             // Validate Ethereum address format
@@ -145,9 +144,7 @@ class NFTRepositoryImpl(
                 throw Exception("NFT verification failed: ${e.message}", e)
             }
             
-            val responseBody = response.bodyOrNull<String>()?.let {
-                json.decodeFromString<VerifyNFTResponse>(it.toString())
-            } ?: throw Exception("Invalid response from verification service")
+            val responseBody = response.body<VerifyNFTResponse>()
             
             // Parse timestamps
             val verifiedAt = parseTimestamp(responseBody.verifiedAt)
