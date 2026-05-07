@@ -397,20 +397,20 @@
 //
 //        val playPauseAction = if (_isPlaying.value) {
 //            NotificationCompat.Action(
-//                android.R.drawable.ic_media_pause,
+//                DrawableResources.ic_media_pause,
 //                "Pause",
 //                playPauseIntent
 //            )
 //        } else {
 //            NotificationCompat.Action(
-//                android.R.drawable.ic_media_play,
+//                DrawableResources.ic_media_play,
 //                "Play",
 //                playPauseIntent
 //            )
 //        }
 //
 //        return NotificationCompat.Builder(context, Constants.CHANNEL_ID)
-//            .setSmallIcon(android.R.drawable.ic_media_play)
+//            .setSmallIcon(DrawableResources.ic_media_play)
 //            .setContentTitle(bookTitle.ifEmpty { "IReader TTS" })
 //            .setContentText(chapterTitle.ifEmpty { "Reading..." })
 //            .setSubText("Paragraph ${_currentParagraph.value + 1}/${paragraphs.size}")
@@ -418,7 +418,7 @@
 //            .setOngoing(_isPlaying.value)
 //            .addAction(
 //                NotificationCompat.Action(
-//                    android.R.drawable.ic_media_previous,
+//                    DrawableResources.ic_media_previous,
 //                    "Previous",
 //                    prevIntent
 //                )
@@ -426,14 +426,14 @@
 //            .addAction(playPauseAction)
 //            .addAction(
 //                NotificationCompat.Action(
-//                    android.R.drawable.ic_media_next,
+//                    DrawableResources.ic_media_next,
 //                    "Next",
 //                    nextIntent
 //                )
 //            )
 //            .addAction(
 //                NotificationCompat.Action(
-//                    android.R.drawable.ic_menu_close_clear_cancel,
+//                    DrawableResources.ic_menu_close_clear_cancel,
 //                    "Stop",
 //                    stopIntent
 //                )

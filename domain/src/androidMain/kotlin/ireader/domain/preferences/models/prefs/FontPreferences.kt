@@ -8,7 +8,6 @@ import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.core.prefs.Preference
 import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
-import ireader.i18n.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted

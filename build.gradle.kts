@@ -15,7 +15,6 @@ buildscript {
 }
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    alias(kotlinx.plugins.kotlinAndroid) apply false
     alias(kotlinx.plugins.kotlinSerilization) apply false
     alias(libs.plugins.jetbrainCompose) apply false
     alias(kotlinx.plugins.compose.compiler) apply false

@@ -1,8 +1,8 @@
 [versions]
-kotlin = "2.3.10"
-dokka = "2.1.0"
+kotlin = "2.3.20"
+dokka = "2.2.0"
 coroutines = "1.10.2"
-serialization = "1.10.0"
+serialization = "1.11.0"
 datetime = "0.7.1"
 ksp = "2.3.2"
 [libraries]
@@ -16,7 +16,6 @@ datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "d
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlinSerilization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 # Kotlin

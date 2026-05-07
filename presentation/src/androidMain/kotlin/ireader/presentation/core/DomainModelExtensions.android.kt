@@ -1,24 +1,39 @@
 package ireader.presentation.core
 
+import android.content.Context
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import ireader.domain.models.common.FontFamilyModel
+
 /**
  * Android-specific implementation for converting FontFamilyModel to Compose FontFamily
  * This implementation supports Google Fonts with caching
  */
 
+// Context holder for getting resources
+private var appContext: Context? = null
+
+fun initFontProvider(context: Context) {
+    appContext = context.applicationContext
+}
+
 @OptIn(ExperimentalTextApi::class)
 private val googleFontProvider: GoogleFont.Provider by lazy {
-    // Using proper R class reference for font certificates
-    // The resource is defined in presentation/src/androidMain/res/values/font_certs.xml
+    // Workaround for R class generation issues with Android KMP library plugin
+    val context = appContext ?: throw IllegalStateException("Call initFontProvider() first")
+    val certsArrayId = context.resources.getIdentifier(
+        "com_google_android_gms_fonts_certs",
+        "array",
+        context.packageName
+    )
+    
     GoogleFont.Provider(
         providerAuthority = "com.google.android.gms.fonts",
         providerPackage = "com.google.android.gms",
-        certificates = ireader.presentation.R.array.com_google_android_gms_fonts_certs
+        certificates = certsArrayId
     )
 }
 

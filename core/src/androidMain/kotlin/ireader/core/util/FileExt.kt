@@ -14,27 +14,10 @@ import android.content.pm.ProviderInfo
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
-import ireader.core.BuildConfig
 import ireader.core.log.Log
 import java.io.File
 
-/**
- * Returns the uri of a file
- *
- * @param context context of application
- */
-fun File.getUriCompat(context: Context): Uri {
-  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-    val expectedAuthority = BuildConfig.LIBRARY_PACKAGE_NAME + ".provider"
-    
-    // Verify FileProvider configuration
-    verifyFileProviderConfiguration(context, expectedAuthority)
-    
-    return FileProvider.getUriForFile(context, expectedAuthority, this)
-  } else {
-    return Uri.fromFile(this)
-  }
-}
+
 
 /**
  * Verifies that the FileProvider is correctly configured in AndroidManifest.xml

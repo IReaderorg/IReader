@@ -1,4 +1,5 @@
 package ireader.domain.services.common
+import ireader.domain.utils.DrawableResources
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -241,13 +242,13 @@ class AndroidTranslationService(
             .setContentTitle(title)
             .setContentText(subtitle)
             .setSubText(if (total > 1) bookTitle else null)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
+            .setSmallIcon(DrawableResources.ic_downloading)
             .setProgress(total, completed, false)
             .setOngoing(true)
             .setSilent(true)
             .setAutoCancel(false)
             .addAction(
-                ireader.i18n.R.drawable.baseline_close_24,
+                DrawableResources.baseline_close_24,
                 "Cancel",
                 getCancelPendingIntent()
             )
@@ -271,7 +272,7 @@ class AndroidTranslationService(
         val notification = NotificationCompat.Builder(context, NotificationsIds.CHANNEL_TRANSLATION_COMPLETE)
             .setContentTitle(title)
             .setContentText(bookTitle)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
+            .setSmallIcon(DrawableResources.ic_downloading)
             .setAutoCancel(true)
             .build()
         
@@ -287,7 +288,7 @@ class AndroidTranslationService(
             .setContentTitle("Translation Failed")
             .setContentText(bookTitle)
             .setStyle(NotificationCompat.BigTextStyle().bigText("$bookTitle\n$errorMessage"))
-            .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
+            .setSmallIcon(DrawableResources.ic_downloading)
             .setAutoCancel(true)
             .build()
         

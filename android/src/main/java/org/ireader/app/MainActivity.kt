@@ -89,6 +89,10 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Initialize Compose Multiplatform resources context BEFORE splash screen
+        // This must happen before any Composable code runs
+        initializeComposeResources()
+
         // Install splash screen
         var isContentReady = false
         installSplashScreen().apply {
@@ -514,6 +518,37 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     }
     
     // FirstLaunchDialogHandler removed - now handled in OnboardingScreen
+
+    /**
+     * Initialize Compose Multiplatform resources with Android context
+     */
+    private fun initializeComposeResources() {
+        try {
+            val providerClass = Class.forName("org.jetbrains.compose.resources.AndroidContextProvider")
+            
+            // Try method first
+            try {
+                val method = providerClass.getDeclaredMethod("setAndroidContext", android.content.Context::class.java)
+                method.isAccessible = true
+                method.invoke(null, this.applicationContext)
+                android.util.Log.d("MainActivity", "✅ Compose resources context initialized via method")
+                return
+            } catch (e: NoSuchMethodException) {
+                // Try field
+                try {
+                    val field = providerClass.getDeclaredField("androidContext")
+                    field.isAccessible = true
+                    field.set(null, this.applicationContext)
+                    android.util.Log.d("MainActivity", "✅ Compose resources context initialized via field")
+                    return
+                } catch (e2: Exception) {
+                    android.util.Log.e("MainActivity", "⚠️ Failed to set context via field: ${e2.message}")
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "⚠️ Failed to initialize Compose resources: ${e.message}")
+        }
+    }
 
 }
 

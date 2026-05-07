@@ -1,4 +1,5 @@
 package ireader.domain.notification
+import ireader.domain.utils.DrawableResources
 
 import android.Manifest
 import android.app.Application
@@ -86,7 +87,7 @@ class AndroidNotificationManager(
             .setOngoing(data.ongoing)
         
         // Set small icon - use provided or default to ic_downloading
-        val iconRes = data.smallIconRes ?: ireader.i18n.R.drawable.ic_downloading
+        val iconRes = data.smallIconRes ?: DrawableResources.ic_downloading
         builder.setSmallIcon(iconRes)
         
         // Set progress if provided

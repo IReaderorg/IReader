@@ -1,24 +1,42 @@
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     kotlin("plugin.serialization")
     id(libs.plugins.sqldelight.get().pluginId)
     id("com.google.devtools.ksp")
     alias(libs.plugins.jetbrainCompose)
     alias(kotlinx.plugins.compose.compiler)
+    id(libs.plugins.buildkonfig.get().pluginId)
 }
 
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
-        compilations {
-            all {
-                compilerOptions.configure {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
-                }
-            }
+    androidLibrary {
+        namespace = "ireader.data"
+        compileSdk = ProjectConfig.compileSdk
+        minSdk = ProjectConfig.minSdk
+        
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+        }
+        
+        packaging {
+            resources.excludes.addAll(
+                listOf(
+                    "LICENSE.txt",
+                    "META-INF/LICENSE",
+                    "META-INF/LICENSE.txt",
+                    "META-INF/README.md",
+                    "META-INF/AL2.0",
+                    "META-INF/LGPL2.1",
+                    "**/attach_hotspot_windows.dll",
+                    "META-INF/licenses/ASM",
+                    "META-INF/*",
+                    "META-INF/gradle/incremental.annotation.processors"
+                )
+            )
         }
     }
+    
     jvm("desktop") {
         compilations {
             all {
@@ -97,6 +115,9 @@ kotlin {
                 implementation(libs.ktor.okhttp)
                 implementation(libs.ktor.core.android)
                 
+                // SQLDelight Android-specific dependencies
+                implementation(libs.sqldelight.android.paging)
+                
                 // Ktor server dependencies (JVM-only, not available on iOS)
                 implementation("io.ktor:ktor-server-core:3.3.2")
                 implementation("io.ktor:ktor-server-netty:3.3.2") // Changed from CIO to Netty
@@ -127,18 +148,6 @@ kotlin {
             }
         }
         
-        val androidUnitTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.sqldelight.jvm)
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-                // AndroidX Test dependencies for certificate service tests
-                implementation("androidx.test:core:1.5.0")
-                implementation("androidx.test.ext:junit:1.1.5")
-                implementation("org.robolectric:robolectric:4.11.1")
-            }
-        }
-
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
@@ -202,55 +211,7 @@ kotlin {
     }
 
 }
-dependencies {
 
-    implementation(libs.sqldelight.android.paging)
-}
-
-android {
-    namespace = "ireader.data"
-    compileSdk = ProjectConfig.compileSdk
-
-    defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-    
-
-    
-    sourceSets {
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
-    }
-    packaging {
-        resources.excludes.addAll(
-            listOf(
-                "LICENSE.txt",
-                "META-INF/LICENSE",
-                "META-INF/LICENSE.txt",
-                "META-INF/README.md",
-                "META-INF/AL2.0",
-                "META-INF/LGPL2.1",
-                "**/attach_hotspot_windows.dll",
-                "META-INF/licenses/ASM",
-                "META-INF/*",
-                "META-INF/gradle/incremental.annotation.processors"
-            )
-        )
-    }
-    androidComponents.onVariants { variant ->
-        val name = variant.name
-        sourceSets {
-            getByName(name).kotlin.srcDir("${layout.buildDirectory.get().asFile.absolutePath}/generated/ksp/${name}/kotlin")
-        }
-    }
-    compileOptions {
-        sourceCompatibility = ProjectConfig.androidJvmTarget
-        targetCompatibility = ProjectConfig.androidJvmTarget
-    }
-    buildFeatures {
-        buildConfig = true
-    }
-
-}
 sqldelight {
     databases {
         create("Database") {
@@ -268,3 +229,13 @@ sqldelight {
 
 
 
+
+buildkonfig {
+    packageName = "ireader.data"
+    exposeObjectWithName = "BuildConfig"
+    
+    defaultConfigs {
+        // Debug flag - true for debug builds, false for release
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN, "DEBUG", "${!gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) }}")
+    }
+}

@@ -1,4 +1,5 @@
 package ireader.domain.services.library_update_service
+import ireader.domain.utils.DrawableResources
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
@@ -9,7 +10,6 @@ import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.notification.PlatformNotificationManager
-import ireader.i18n.R
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
@@ -42,12 +42,12 @@ class LibraryUpdatesService(
                 NotificationsIds.CHANNEL_LIBRARY_PROGRESS
             ).apply {
                 setContentTitle("Checking Updates")
-                setSmallIcon(R.drawable.ic_update)
+                setSmallIcon(DrawableResources.ic_update)
                 setOnlyAlertOnce(true)
                 priority = NotificationCompat.PRIORITY_LOW
                 setAutoCancel(true)
                 setOngoing(true)
-                addAction(R.drawable.baseline_close_24, "Cancel", cancelIntent)
+                addAction(DrawableResources.baseline_close_24, "Cancel", cancelIntent)
             }
         val forceUpdate = inputData.getBoolean(FORCE_UPDATE, false)
         val result = runLibraryUpdateService(
@@ -65,7 +65,7 @@ class LibraryUpdatesService(
                             setContentTitle("Failed to Check Library Updates.")
                             setSubText(e.localizedMessage)
                         }
-                        setSmallIcon(R.drawable.ic_update)
+                        setSmallIcon(DrawableResources.ic_update)
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setAutoCancel(true)
                     }.build()
@@ -90,7 +90,7 @@ class LibraryUpdatesService(
                             if (skipped != 0) " $skipped books was skipped." else ""
                         )
                         setContentTitle(title)
-                        setSmallIcon(R.drawable.ic_update)
+                        setSmallIcon(DrawableResources.ic_update)
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setSubText("It was Updated Successfully")
                         setAutoCancel(true)

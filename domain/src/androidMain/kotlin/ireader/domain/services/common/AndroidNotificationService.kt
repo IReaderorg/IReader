@@ -1,4 +1,5 @@
 package ireader.domain.services.common
+import ireader.domain.utils.DrawableResources
 
 import android.app.NotificationManager
 import android.content.Context
@@ -32,7 +33,7 @@ class AndroidNotificationService(
         val builder = NotificationCompat.Builder(context, getChannelId(priority))
             .setContentTitle(title)
             .setContentText(message)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
+            .setSmallIcon(DrawableResources.ic_downloading)
             .apply {
                 this.priority = mapPriority(priority)
             }
@@ -53,7 +54,7 @@ class AndroidNotificationService(
         val builder = NotificationCompat.Builder(context, NotificationsIds.CHANNEL_DOWNLOADER_PROGRESS)
             .setContentTitle(title)
             .setContentText(message)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
+            .setSmallIcon(DrawableResources.ic_downloading)
             .setProgress(maxProgress, progress, indeterminate)
             .setOngoing(true)
         

@@ -1,24 +1,22 @@
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     alias(libs.plugins.jetbrainCompose)
     id("kotlinx-serialization")
     alias(kotlinx.plugins.compose.compiler)
 }
 
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
-        compilations {
-            all {
-                compileTaskProvider.configure {
-                    compilerOptions {
-                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
-                    }
-                }
-            }
+    androidLibrary {
+        namespace = "ireader.presentation.core"
+        compileSdk = ProjectConfig.compileSdk
+        minSdk = ProjectConfig.minSdk
+        
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
         }
     }
+    
     jvm("desktop") {
         compilations {
             all {
@@ -111,23 +109,6 @@ kotlin {
     }
 }
 
-android {
-    namespace = "ireader.presentation.core"
-    compileSdk = ProjectConfig.compileSdk
-    defaultConfig {
-        minSdk = ProjectConfig.minSdk
-    }
-    
-
-    
-    compileOptions {
-        sourceCompatibility = ProjectConfig.androidJvmTarget
-        targetCompatibility = ProjectConfig.androidJvmTarget
-    }
-    lint {
-        targetSdk = ProjectConfig.targetSdk
-    }
-}
 
 
 

@@ -268,7 +268,7 @@ Modify the `ireader.extension` plugin to support multiplatform:
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
-    id("com.android.library")  // For Android APK generation
+  // For Android APK generation
 }
 
 kotlin {

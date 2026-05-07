@@ -6,15 +6,22 @@ import java.util.*
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     alias(libs.plugins.jetbrainCompose)
     id(libs.plugins.buildkonfig.get().pluginId)
     alias(kotlinx.plugins.compose.compiler)
 }
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
+    androidLibrary {
+        namespace = "ireader.i18n"
+        compileSdk = ProjectConfig.compileSdk
+        minSdk = ProjectConfig.minSdk
+        
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+        }
     }
+    
     jvm("desktop") {
         compilations.all {
             compileTaskProvider.configure {
@@ -69,20 +76,6 @@ kotlin {
 
 }
 
-android {
-    namespace = "ireader.i18n"
-    compileSdk = ProjectConfig.compileSdk
-    defaultConfig {
-        minSdk = ProjectConfig.minSdk
-    }
-    lint {
-        targetSdk = ProjectConfig.targetSdk
-    }
-    compileOptions {
-        sourceCompatibility = ProjectConfig.androidJvmTarget
-        targetCompatibility = ProjectConfig.androidJvmTarget
-    }
-}
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
 // Cached to avoid running git commands on every configuration

@@ -6,7 +6,6 @@ import java.util.TimeZone
 
 plugins {
     id("com.android.application")
-    kotlin("android")
     kotlin("plugin.serialization")
     kotlin("plugin.parcelize")
     id("com.google.devtools.ksp")
@@ -115,9 +114,6 @@ android {
         jniLibs {
             useLegacyPackaging = false
         }
-    }
-    sourceSets.getByName("main") {
-        java.srcDirs("build/generated/ksp/main/kotlin")
     }
     buildFeatures {
         // Disable some unused things
@@ -291,12 +287,6 @@ android {
         getByName("preview").res.srcDirs("src/debug/res")
     }
 
-    androidComponents.onVariants { variant ->
-        val name = variant.name
-        sourceSets {
-            getByName(name).kotlin.srcDir("${layout.buildDirectory.get().asFile.absolutePath}/generated/ksp/${name}/kotlin")
-        }
-    }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility(ProjectConfig.androidJvmTarget)

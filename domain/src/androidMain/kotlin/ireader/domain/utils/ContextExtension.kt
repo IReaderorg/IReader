@@ -11,8 +11,8 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import ireader.core.log.Log
-import ireader.i18n.R
 import java.io.File
+import ireader.domain.utils.DrawableResources
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
 

@@ -1,4 +1,5 @@
 package ireader.domain.usecases.tts
+import ireader.domain.utils.DrawableResources
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -156,20 +157,20 @@ class AndroidTTSNotificationManager(
     ): Notification {
         val playPauseAction = if (state.isPlaying) {
             NotificationCompat.Action(
-                android.R.drawable.ic_media_pause,
+                DrawableResources.ic_media_pause,
                 "Pause",
                 createPendingIntent(ACTION_PLAY_PAUSE)
             )
         } else {
             NotificationCompat.Action(
-                android.R.drawable.ic_media_play,
+                DrawableResources.ic_media_play,
                 "Play",
                 createPendingIntent(ACTION_PLAY_PAUSE)
             )
         }
         
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(DrawableResources.ic_media_play)
             .setContentTitle(book.title)
             .setContentText(chapter.name)
             .setSubText("${state.ttsProvider} • Paragraph ${state.currentParagraph + 1}/${state.totalParagraphs}")
@@ -181,7 +182,7 @@ class AndroidTTSNotificationManager(
             // Actions
             .addAction(
                 NotificationCompat.Action(
-                    android.R.drawable.ic_media_previous,
+                    DrawableResources.ic_media_previous,
                     "Previous",
                     createPendingIntent(ACTION_PREVIOUS)
                 )
@@ -189,14 +190,14 @@ class AndroidTTSNotificationManager(
             .addAction(playPauseAction)
             .addAction(
                 NotificationCompat.Action(
-                    android.R.drawable.ic_media_next,
+                    DrawableResources.ic_media_next,
                     "Next",
                     createPendingIntent(ACTION_NEXT)
                 )
             )
             .addAction(
                 NotificationCompat.Action(
-                    android.R.drawable.ic_menu_close_clear_cancel,
+                    DrawableResources.ic_menu_close_clear_cancel,
                     "Stop",
                     createPendingIntent(ACTION_STOP)
                 )

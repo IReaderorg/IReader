@@ -2,42 +2,25 @@
 
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     id("org.jetbrains.dokka")
     kotlin("plugin.serialization")
     id("com.google.devtools.ksp")
     alias(libs.plugins.jetbrainCompose)
     alias(kotlinx.plugins.compose.compiler)
 }
-android {
-    namespace = "ireader.core"
-    compileSdk = ProjectConfig.compileSdk
-    defaultConfig {
-        minSdk = ProjectConfig.minSdk
-    }
-    lint {
-        targetSdk = ProjectConfig.targetSdk
-    }
-    compileOptions {
-        sourceCompatibility = ProjectConfig.androidJvmTarget
-        targetCompatibility = ProjectConfig.androidJvmTarget
-    }
-    buildFeatures {
-        buildConfig = true
-    }
-}
 
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
-        compilations.all {
-            compileTaskProvider.configure {
-                compilerOptions {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
-                }
-            }
+    androidLibrary {
+        namespace = "ireader.core"
+        compileSdk = ProjectConfig.compileSdk
+        minSdk = ProjectConfig.minSdk
+        
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
         }
     }
+    
     jvm("desktop") {
         compilations.all {
             compileTaskProvider.configure {
@@ -106,12 +89,6 @@ kotlin {
                 implementation(androidx.dataStore)
 //                implementation(libs.quickjs.android)
                 api(libs.ktor.okhttp)
-            }
-        }
-        
-        val androidUnitTest by getting {
-            dependencies {
-                implementation(libs.mock)
             }
         }
         

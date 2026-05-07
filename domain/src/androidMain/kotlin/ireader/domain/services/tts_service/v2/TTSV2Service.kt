@@ -12,8 +12,8 @@ import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
-import android.media.MediaPlayer
 import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -27,10 +27,11 @@ import coil3.ImageLoader
 import coil3.asDrawable
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
+import ireader.core.log.Log
 import ireader.domain.notification.NotificationsIds
+import ireader.domain.utils.DrawableResources
 import ireader.domain.utils.extensions.launchMainActivityIntent
 import ireader.i18n.Args
-import ireader.i18n.R
 import ireader.i18n.SHORTCUTS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -526,39 +527,39 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         // Build actions - order matters for compact view
         // 0: Previous, 1: Play/Pause, 2: Next, 3: Close
         val prevAction = NotificationCompat.Action(
-            R.drawable.ic_baseline_skip_previous,
+            DrawableResources.ic_baseline_skip_previous,
             "Previous",
             createActionPendingIntent(ACTION_PREVIOUS)
         )
         
         val playPauseAction = if (state.isPlaying) {
             NotificationCompat.Action(
-                R.drawable.ic_baseline_pause,
+                DrawableResources.ic_baseline_pause,
                 "Pause",
                 createActionPendingIntent(ACTION_PLAY_PAUSE)
             )
         } else {
             NotificationCompat.Action(
-                R.drawable.ic_baseline_play_arrow,
+                DrawableResources.ic_baseline_play_arrow,
                 "Play",
                 createActionPendingIntent(ACTION_PLAY_PAUSE)
             )
         }
         
         val nextAction = NotificationCompat.Action(
-            R.drawable.ic_baseline_skip_next,
+            DrawableResources.ic_baseline_skip_next,
             "Next",
             createActionPendingIntent(ACTION_NEXT)
         )
         
         val closeAction = NotificationCompat.Action(
-            R.drawable.baseline_close_24,
+            DrawableResources.baseline_close_24,
             "Close",
             createActionPendingIntent(ACTION_STOP)
         )
         
         val openAction = NotificationCompat.Action(
-            R.drawable.ic_baseline_open_in_new_24,
+            DrawableResources.ic_baseline_open_in_new_24,
             "Open",
             createContentIntent()
         )
@@ -572,7 +573,7 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         }
         
         val builder = NotificationCompat.Builder(this, NotificationsIds.CHANNEL_TTS)
-            .setSmallIcon(R.drawable.ic_infinity)
+            .setSmallIcon(DrawableResources.ic_infinity)
             .setContentTitle(chapterTitle)
             .setContentText(progressText)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -738,20 +739,26 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
     private fun startSilentMediaPlayer() {
         try {
             silentPlayer?.release()
-            silentPlayer = MediaPlayer.create(this, ireader.i18n.R.raw.silence)?.apply {
+            silentPlayer = MediaPlayer().apply {
+                // Load silence.wav from assets
+                val afd = assets.openFd("raw/silence.wav")
+                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                afd.close()
+                
                 isLooping = true
                 setVolume(0f, 0f)
-                // Use USAGE_MEDIA so the system treats this as media audio
                 setAudioAttributes(
                     AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .build()
                 )
+                prepare()
                 start()
             }
-
         } catch (e: Exception) {
+            Log.error { "Failed to start silent player: ${e.message}" }
+            silentPlayer = null
         }
     }
     

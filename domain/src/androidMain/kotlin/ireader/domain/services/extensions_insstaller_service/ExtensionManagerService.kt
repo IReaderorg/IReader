@@ -1,4 +1,5 @@
 package ireader.domain.services.extensions_insstaller_service
+import ireader.domain.utils.DrawableResources
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
@@ -10,7 +11,6 @@ import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.services.downloaderService.DefaultNotificationHelper
 import ireader.domain.notification.PlatformNotificationManager
-import ireader.i18n.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -73,7 +73,7 @@ class ExtensionManagerService constructor(
                             NotificationsIds.CHANNEL_INSTALLER_COMPLETE
                         ).apply {
                             setContentTitle("$notInstalled sources was Installed successfully.")
-                            setSmallIcon(R.drawable.ic_downloading)
+                            setSmallIcon(DrawableResources.ic_downloading)
                             priority = NotificationCompat.PRIORITY_DEFAULT
                             setSubText("Installed Successfully")
                             setAutoCancel(true)

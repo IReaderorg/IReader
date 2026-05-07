@@ -2,11 +2,12 @@ import java.util.Properties
 
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     alias(libs.plugins.jetbrainCompose)
     id("kotlinx-serialization")
     id("com.google.devtools.ksp")
     alias(kotlinx.plugins.compose.compiler)
+    id(libs.plugins.buildkonfig.get().pluginId)
 }
 
 // Load local.properties for local development
@@ -25,73 +26,21 @@ fun getConfigProperty(envVar: String, propertyKey: String): String {
         ?: ""
 }
 
-android {
-    namespace = "ireader.domain"
-    compileSdk = ProjectConfig.compileSdk
-    defaultConfig {
-        minSdk = ProjectConfig.minSdk
-
-        // Build config fields with fallback chain: env vars -> local.properties -> gradle.properties
-        // 7-Project Supabase Configuration
-        buildConfigField("String", "SUPABASE_AUTH_URL", "\"${getConfigProperty("SUPABASE_AUTH_URL", "supabase.auth.url")}\"")
-        buildConfigField("String", "SUPABASE_AUTH_KEY", "\"${getConfigProperty("SUPABASE_AUTH_KEY", "supabase.auth.key")}\"")
-        buildConfigField("String", "SUPABASE_READING_URL", "\"${getConfigProperty("SUPABASE_READING_URL", "supabase.reading.url")}\"")
-        buildConfigField("String", "SUPABASE_READING_KEY", "\"${getConfigProperty("SUPABASE_READING_KEY", "supabase.reading.key")}\"")
-        buildConfigField("String", "SUPABASE_LIBRARY_URL", "\"${getConfigProperty("SUPABASE_LIBRARY_URL", "supabase.library.url")}\"")
-        buildConfigField("String", "SUPABASE_LIBRARY_KEY", "\"${getConfigProperty("SUPABASE_LIBRARY_KEY", "supabase.library.key")}\"")
-        buildConfigField("String", "SUPABASE_BOOK_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_BOOK_REVIEWS_URL", "supabase.book_reviews.url")}\"")
-        buildConfigField("String", "SUPABASE_BOOK_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_BOOK_REVIEWS_KEY", "supabase.book_reviews.key")}\"")
-        buildConfigField("String", "SUPABASE_CHAPTER_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_CHAPTER_REVIEWS_URL", "supabase.chapter_reviews.url")}\"")
-        buildConfigField("String", "SUPABASE_CHAPTER_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_CHAPTER_REVIEWS_KEY", "supabase.chapter_reviews.key")}\"")
-        buildConfigField("String", "SUPABASE_BADGES_URL", "\"${getConfigProperty("SUPABASE_BADGES_URL", "supabase.badges.url")}\"")
-        buildConfigField("String", "SUPABASE_BADGES_KEY", "\"${getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key")}\"")
-        buildConfigField("String", "SUPABASE_ANALYTICS_URL", "\"${getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url")}\"")
-        buildConfigField("String", "SUPABASE_ANALYTICS_KEY", "\"${getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key")}\"")
-        
-        // Cloudflare D1 + R2 Community Translations Configuration
-        buildConfigField("String", "COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "community.cloudflare.accountId")}\"")
-        buildConfigField("String", "COMMUNITY_CLOUDFLARE_API_TOKEN", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_API_TOKEN", "community.cloudflare.apiToken")}\"")
-        buildConfigField("String", "COMMUNITY_D1_DATABASE_ID", "\"${getConfigProperty("COMMUNITY_D1_DATABASE_ID", "community.d1.databaseId")}\"")
-        buildConfigField("String", "COMMUNITY_R2_BUCKET_NAME", "\"${getConfigProperty("COMMUNITY_R2_BUCKET_NAME", "community.r2.bucketName")}\"")
-        buildConfigField("String", "COMMUNITY_R2_PUBLIC_URL", "\"${getConfigProperty("COMMUNITY_R2_PUBLIC_URL", "community.r2.publicUrl")}\"")
-        
-        // Discord Webhooks Configuration
-        buildConfigField("String", "DISCORD_CHARACTER_ART_WEBHOOK_URL", "\"${getConfigProperty("DISCORD_CHARACTER_ART_WEBHOOK_URL", "discord.characterArt.webhookUrl")}\"")
-        buildConfigField("String", "DISCORD_QUOTE_WEBHOOK_URL", "\"${getConfigProperty("DISCORD_QUOTE_WEBHOOK_URL", "discord.quote.webhookUrl")}\"")
-
-        // Use standard flavor by default when consumed by modules with flavors
-        missingDimensionStrategy("default", "standard")
-    }
-    lint {
-        targetSdk = ProjectConfig.targetSdk
-    }
-    compileOptions {
-        sourceCompatibility = ProjectConfig.androidJvmTarget
-        targetCompatibility = ProjectConfig.androidJvmTarget
-    }
-    buildFeatures {
-        buildConfig = true
-    }
-    androidComponents.onVariants { variant ->
-        val name = variant.name
-        sourceSets {
-            getByName(name).kotlin.srcDir("${layout.buildDirectory.get().asFile.absolutePath}/generated/ksp/${name}/kotlin")
-        }
-    }
-}
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
-        compilations {
-            all {
-                compileTaskProvider.configure {
-                    compilerOptions {
-                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
-                    }
-                }
-            }
+    androidLibrary {
+        namespace = "ireader.domain"
+        compileSdk = ProjectConfig.compileSdk
+        minSdk = ProjectConfig.minSdk
+        
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
+        }
+        
+        androidResources {
+            enable = true
         }
     }
+    
     jvm("desktop") {
         compilations {
             all {
@@ -150,18 +99,6 @@ kotlin {
                 implementation(libs.coroutines.test)
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation(libs.ktor.client.mock)
-                // Data module for testing certificate service implementations
-                implementation(project(Modules.data))
-            }
-        }
-
-        val androidUnitTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.mock)
-                // AndroidX Test dependencies for certificate service tests
-                implementation("androidx.test:core:1.5.0")
-                implementation("androidx.test.ext:junit:1.1.5")
                 // Data module for testing certificate service implementations
                 implementation(project(Modules.data))
             }
@@ -287,4 +224,38 @@ dependencies {
     // Pure Kotlin EPUB implementation using ZipFile + Jsoup
     // No external EPUB libraries needed - works on both Android and Desktop
     // Uses existing dependencies: okio and jsoup
+}
+
+buildkonfig {
+    packageName = "ireader.domain"
+    exposeObjectWithName = "BuildConfig"
+    
+    defaultConfigs {
+        // Supabase Configuration - 7 Projects
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_AUTH_URL", "\"${getConfigProperty("SUPABASE_AUTH_URL", "supabase.auth.url")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_AUTH_KEY", "\"${getConfigProperty("SUPABASE_AUTH_KEY", "supabase.auth.key")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_READING_URL", "\"${getConfigProperty("SUPABASE_READING_URL", "supabase.reading.url")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_READING_KEY", "\"${getConfigProperty("SUPABASE_READING_KEY", "supabase.reading.key")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_LIBRARY_URL", "\"${getConfigProperty("SUPABASE_LIBRARY_URL", "supabase.library.url")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_LIBRARY_KEY", "\"${getConfigProperty("SUPABASE_LIBRARY_KEY", "supabase.library.key")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BOOK_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_BOOK_REVIEWS_URL", "supabase.book_reviews.url")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BOOK_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_BOOK_REVIEWS_KEY", "supabase.book_reviews.key")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_CHAPTER_REVIEWS_URL", "\"${getConfigProperty("SUPABASE_CHAPTER_REVIEWS_URL", "supabase.chapter_reviews.url")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_CHAPTER_REVIEWS_KEY", "\"${getConfigProperty("SUPABASE_CHAPTER_REVIEWS_KEY", "supabase.chapter_reviews.key")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BADGES_URL", "\"${getConfigProperty("SUPABASE_BADGES_URL", "supabase.badges.url")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BADGES_KEY", "\"${getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_ANALYTICS_URL", "\"${getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_ANALYTICS_KEY", "\"${getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key")}\"")
+        
+        // Cloudflare D1 + R2 Community Translations Configuration
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "community.cloudflare.accountId")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "COMMUNITY_CLOUDFLARE_API_TOKEN", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_API_TOKEN", "community.cloudflare.apiToken")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "COMMUNITY_D1_DATABASE_ID", "\"${getConfigProperty("COMMUNITY_D1_DATABASE_ID", "community.d1.databaseId")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "COMMUNITY_R2_BUCKET_NAME", "\"${getConfigProperty("COMMUNITY_R2_BUCKET_NAME", "community.r2.bucketName")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "COMMUNITY_R2_PUBLIC_URL", "\"${getConfigProperty("COMMUNITY_R2_PUBLIC_URL", "community.r2.publicUrl")}\"")
+        
+        // Discord Webhooks Configuration
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "DISCORD_CHARACTER_ART_WEBHOOK_URL", "\"${getConfigProperty("DISCORD_CHARACTER_ART_WEBHOOK_URL", "discord.characterArt.webhookUrl")}\"")
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "DISCORD_QUOTE_WEBHOOK_URL", "\"${getConfigProperty("DISCORD_QUOTE_WEBHOOK_URL", "discord.quote.webhookUrl")}\"")
+    }
 }

@@ -1,4 +1,5 @@
 package ireader.domain.services.update_service
+import ireader.domain.utils.DrawableResources
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -403,13 +404,13 @@ class AppUpdateDownloadService : Service() {
         )
         
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_infinity)
+            .setSmallIcon(DrawableResources.ic_infinity)
             .setContentTitle("Downloading IReader $version")
             .setContentText(status)
             .setProgress(100, progress, isIndeterminate)
             .setOngoing(true)
             .addAction(
-                ireader.i18n.R.drawable.baseline_close_24,
+                DrawableResources.baseline_close_24,
                 "Cancel",
                 cancelPendingIntent
             )
@@ -437,13 +438,13 @@ class AppUpdateDownloadService : Service() {
         )
         
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_infinity)
+            .setSmallIcon(DrawableResources.ic_infinity)
             .setContentTitle("IReader $version downloaded")
             .setContentText("Tap to install the update")
             .setAutoCancel(true)
             .setContentIntent(installPendingIntent)
             .addAction(
-                android.R.drawable.ic_input_add, // Using system install icon
+                DrawableResources.ic_input_add, // Using system install icon
                 "Install",
                 installPendingIntent
             )
@@ -452,7 +453,7 @@ class AppUpdateDownloadService : Service() {
     
     private fun createErrorNotification(version: String, error: String): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_infinity)
+            .setSmallIcon(DrawableResources.ic_infinity)
             .setContentTitle("Download failed")
             .setContentText("Failed to download IReader $version: $error")
             .setAutoCancel(true)
@@ -461,7 +462,7 @@ class AppUpdateDownloadService : Service() {
     
     private fun createCancelNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(ireader.i18n.R.drawable.ic_infinity)
+            .setSmallIcon(DrawableResources.ic_infinity)
             .setContentTitle("Download cancelled")
             .setContentText("Update download was cancelled")
             .setAutoCancel(true)

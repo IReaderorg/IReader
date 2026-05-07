@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     id("org.jetbrains.dokka")
     kotlin("plugin.serialization")
     `maven-publish`
@@ -8,32 +8,14 @@ plugins {
     id("com.gradleup.nmcp")
 }
 
-android {
-    namespace = "ireader.plugin.api"
-    compileSdk = ProjectConfig.compileSdk
-    defaultConfig {
-        minSdk = ProjectConfig.minSdk
-    }
-    compileOptions {
-        sourceCompatibility = ProjectConfig.androidJvmTarget
-        targetCompatibility = ProjectConfig.androidJvmTarget
-    }
-    lint {
-        targetSdk = ProjectConfig.targetSdk
-    }
-}
-
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
-        compilations {
-            all {
-                compileTaskProvider.configure {
-                    compilerOptions {
-                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
-                    }
-                }
-            }
+    androidLibrary {
+        namespace = "ireader.plugin.api"
+        compileSdk = ProjectConfig.compileSdk
+        minSdk = ProjectConfig.minSdk
+        
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
         }
     }
     

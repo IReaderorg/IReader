@@ -1,5 +1,6 @@
 package org.ireader.app
 
+// BuildConfig for accessing build-time configuration
 import android.app.Application
 import android.os.Build
 import android.os.Looper
@@ -34,8 +35,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.ireader.app.di.AppModule
 import org.ireader.app.crash.CrashHandler
+import org.ireader.app.di.AppModule
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -44,9 +45,6 @@ import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
-
-// BuildConfig for accessing build-time configuration
-import org.ireader.app.BuildConfig
 
 class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
     
@@ -63,6 +61,35 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         // Add trace for baseline profile generation
         Trace.beginSection("MyApplication.onCreate")
         super.onCreate()
+        
+        // Initialize Compose Multiplatform resources with application context
+        // This prevents the library from falling back to instrumentation
+        try {
+            // Access the internal AndroidContextProvider to set the context
+            val providerClass = Class.forName("org.jetbrains.compose.resources.AndroidContextProvider")
+            
+            // Try to find and invoke the setAndroidContext method
+            try {
+                val method = providerClass.getDeclaredMethod("setAndroidContext", android.content.Context::class.java)
+                method.isAccessible = true
+                method.invoke(null, this.applicationContext)
+                println("✅ Compose resources context initialized successfully")
+            } catch (e: NoSuchMethodException) {
+                // Try alternative: set the androidContext field directly
+                try {
+                    val field = providerClass.getDeclaredField("androidContext")
+                    field.isAccessible = true
+                    field.set(null, this.applicationContext)
+                    println("✅ Compose resources context initialized via field")
+                } catch (e2: Exception) {
+                    println("⚠️ Failed to set Android context for Compose resources: ${e2.message}")
+                }
+            }
+        } catch (e: ClassNotFoundException) {
+            println("⚠️ AndroidContextProvider class not found - resources may not work correctly")
+        } catch (e: Exception) {
+            println("⚠️ Failed to initialize Compose resources: ${e.message}")
+        }
         
         // Start profiling
         StartupProfiler.start()

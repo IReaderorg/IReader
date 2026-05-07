@@ -1,4 +1,5 @@
 package ireader.domain.js.update
+import ireader.domain.utils.DrawableResources
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

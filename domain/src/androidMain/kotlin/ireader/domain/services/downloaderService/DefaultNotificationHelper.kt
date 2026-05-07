@@ -1,4 +1,5 @@
 package ireader.domain.services.downloaderService
+import ireader.domain.utils.DrawableResources
 
 import android.app.PendingIntent
 import android.content.Context
@@ -8,7 +9,6 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.WorkManager
-import ireader.i18n.R
 import ireader.domain.models.download.Download
 import ireader.domain.models.download.DownloadStatus
 import ireader.domain.models.entities.Book
@@ -102,14 +102,14 @@ class DefaultNotificationHelper(
         ).apply {
 
             setContentTitle("Installing")
-            setSmallIcon(R.drawable.ic_downloading)
+            setSmallIcon(DrawableResources.ic_downloading)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
             setAutoCancel(true)
             setOngoing(true)
             if (addCancel) {
                 addAction(
-                    R.drawable.baseline_close_24,
+                    DrawableResources.baseline_close_24,
                     localizeHelper.localize(Res.string.cancel),
                     cancelDownloadIntent
                 )
@@ -132,13 +132,13 @@ class DefaultNotificationHelper(
                 setContentTitle("Downloading ${chapter.name}")
             }
 
-            setSmallIcon(R.drawable.ic_downloading)
+            setSmallIcon(DrawableResources.ic_downloading)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
             setAutoCancel(false) // Don't auto-cancel on click
             setOngoing(true) // Keep notification ongoing during download
             addAction(
-                R.drawable.baseline_close_24,
+                DrawableResources.baseline_close_24,
                 localizeHelper.localize(Res.string.cancel),
                 cancelDownloadIntent
             )
@@ -164,7 +164,7 @@ class DefaultNotificationHelper(
                 setContentTitle(localizeHelper.localize(Res.string.failed_to_download) + " $bookName")
                 setSubText(e.localizedMessage)
             }
-            setSmallIcon(R.drawable.ic_downloading)
+            setSmallIcon(DrawableResources.ic_downloading)
             priority = NotificationCompat.PRIORITY_DEFAULT
             setAutoCancel(true)
             setContentIntent(openDownloadsPendingIntent)
@@ -190,7 +190,7 @@ class DefaultNotificationHelper(
                 setContentTitle(localizeHelper.localize(Res.string.failed_to_download) + " $${book.title}")
                 setSubText(e.localizedMessage)
             }
-            setSmallIcon(R.drawable.ic_downloading)
+            setSmallIcon(DrawableResources.ic_downloading)
             priority = NotificationCompat.PRIORITY_DEFAULT
             setAutoCancel(true)
             setContentIntent(
@@ -244,7 +244,7 @@ class DefaultNotificationHelper(
         return NotificationCompat.Builder(context, NotificationsIds.CHANNEL_DOWNLOADER_PROGRESS).apply {
             setContentTitle(bookName)
             setContentText(contentText.ifEmpty { if (isPaused) "Paused" else "Downloading..." })
-            setSmallIcon(if (isPaused) R.drawable.baseline_pause_24 else R.drawable.ic_downloading)
+            setSmallIcon(if (isPaused) DrawableResources.baseline_pause_24 else DrawableResources.ic_downloading)
             setProgress(100, progress, false)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
@@ -255,13 +255,13 @@ class DefaultNotificationHelper(
             // Pause/Resume action
             if (isPaused) {
                 addAction(
-                    R.drawable.ic_baseline_play_arrow,
+                    DrawableResources.ic_baseline_play_arrow,
                     "Resume",
                     resumeIntent
                 )
             } else {
                 addAction(
-                    R.drawable.baseline_pause_24,
+                    DrawableResources.baseline_pause_24,
                     "Pause",
                     pauseIntent
                 )
@@ -269,7 +269,7 @@ class DefaultNotificationHelper(
             
             // Cancel action
             addAction(
-                R.drawable.baseline_close_24,
+                DrawableResources.baseline_close_24,
                 localizeHelper.localize(Res.string.cancel),
                 cancelDownloadIntent
             )
@@ -344,31 +344,31 @@ class DefaultNotificationHelper(
             when (status) {
                 DownloadNotificationStatus.DOWNLOADING -> {
                     addAction(
-                        R.drawable.baseline_pause_24,
+                        DrawableResources.baseline_pause_24,
                         "Pause",
                         pauseIntent
                     )
                     addAction(
-                        R.drawable.baseline_close_24,
+                        DrawableResources.baseline_close_24,
                         localizeHelper.localize(Res.string.cancel),
                         cancelDownloadIntent
                     )
                 }
                 DownloadNotificationStatus.PAUSED -> {
                     addAction(
-                        R.drawable.ic_baseline_play_arrow,
+                        DrawableResources.ic_baseline_play_arrow,
                         "Resume",
                         resumeIntent
                     )
                     addAction(
-                        R.drawable.baseline_close_24,
+                        DrawableResources.baseline_close_24,
                         localizeHelper.localize(Res.string.cancel),
                         cancelDownloadIntent
                     )
                 }
                 DownloadNotificationStatus.QUEUED -> {
                     addAction(
-                        R.drawable.baseline_close_24,
+                        DrawableResources.baseline_close_24,
                         localizeHelper.localize(Res.string.cancel),
                         cancelDownloadIntent
                     )
@@ -391,10 +391,10 @@ class DefaultNotificationHelper(
     
     private fun getStatusIcon(status: DownloadNotificationStatus): Int {
         return when (status) {
-            DownloadNotificationStatus.COMPLETED -> R.drawable.baseline_check_circle_24
-            DownloadNotificationStatus.FAILED -> R.drawable.baseline_error_24
-            DownloadNotificationStatus.PAUSED -> R.drawable.baseline_pause_24
-            else -> R.drawable.ic_downloading
+            DownloadNotificationStatus.COMPLETED -> DrawableResources.baseline_check_circle_24
+            DownloadNotificationStatus.FAILED -> DrawableResources.baseline_error_24
+            DownloadNotificationStatus.PAUSED -> DrawableResources.baseline_pause_24
+            else -> DrawableResources.ic_downloading
         }
     }
     
@@ -415,7 +415,7 @@ class DefaultNotificationHelper(
         
         val isSuccess = failedCount == 0
         val titleText = if (isSuccess) "Download Complete" else "Download Finished"
-        val icon = if (isSuccess) R.drawable.baseline_check_circle_24 else R.drawable.baseline_warning_24
+        val icon = if (isSuccess) DrawableResources.baseline_check_circle_24 else DrawableResources.baseline_warning_24
         
         return NotificationCompat.Builder(context, NotificationsIds.CHANNEL_DOWNLOADER_COMPLETE).apply {
             setContentTitle(titleText)
@@ -527,7 +527,7 @@ class DefaultNotificationHelper(
             setContentTitle(title)
             setContentText(contentText)
             subText?.let { setSubText(it) }
-            setSmallIcon(if (isPaused) R.drawable.baseline_pause_24 else R.drawable.ic_downloading)
+            setSmallIcon(if (isPaused) DrawableResources.baseline_pause_24 else DrawableResources.ic_downloading)
             
             // Progress bar
             if (!isPaused && activeCount > 0) {
@@ -552,11 +552,11 @@ class DefaultNotificationHelper(
             
             // Actions
             if (isPaused) {
-                addAction(R.drawable.ic_baseline_play_arrow, "Resume", resumeIntent)
+                addAction(DrawableResources.ic_baseline_play_arrow, "Resume", resumeIntent)
             } else {
-                addAction(R.drawable.baseline_pause_24, "Pause", pauseIntent)
+                addAction(DrawableResources.baseline_pause_24, "Pause", pauseIntent)
             }
-            addAction(R.drawable.baseline_close_24, localizeHelper.localize(Res.string.cancel), cancelDownloadIntent)
+            addAction(DrawableResources.baseline_close_24, localizeHelper.localize(Res.string.cancel), cancelDownloadIntent)
         }
     }
     
@@ -585,7 +585,7 @@ class DefaultNotificationHelper(
             setContentTitle("Downloads Paused")
             setContentText("Waiting for WiFi connection")
             setSubText("WiFi-only mode is enabled")
-            setSmallIcon(R.drawable.baseline_wifi_off_24)
+            setSmallIcon(DrawableResources.baseline_wifi_off_24)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_DEFAULT
             setAutoCancel(false)
@@ -595,14 +595,14 @@ class DefaultNotificationHelper(
             
             // Action to allow mobile data temporarily
             addAction(
-                R.drawable.baseline_signal_cellular_alt_24,
+                DrawableResources.baseline_signal_cellular_alt_24,
                 "Use Mobile Data",
                 allowMobileIntent
             )
             
             // Action to open WiFi settings
             addAction(
-                R.drawable.baseline_settings_24,
+                DrawableResources.baseline_settings_24,
                 "WiFi Settings",
                 openSettingsIntent
             )
@@ -630,7 +630,7 @@ class DefaultNotificationHelper(
             setContentTitle("Downloads Paused")
             setContentText("Not enough storage space")
             setSubText("${availableSpaceMb}MB available, ${requiredSpaceMb}MB required")
-            setSmallIcon(R.drawable.baseline_storage_24)
+            setSmallIcon(DrawableResources.baseline_storage_24)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_HIGH
             setAutoCancel(false)
@@ -640,7 +640,7 @@ class DefaultNotificationHelper(
             
             // Action to open storage settings
             addAction(
-                R.drawable.baseline_settings_24,
+                DrawableResources.baseline_settings_24,
                 "Manage Storage",
                 openStorageIntent
             )
@@ -673,7 +673,7 @@ class DefaultNotificationHelper(
         return NotificationCompat.Builder(context, NotificationsIds.CHANNEL_DOWNLOADER_ERROR).apply {
             setContentTitle("$failedCount downloads failed")
             setContentText(errorSummary ?: "Tap to view details")
-            setSmallIcon(R.drawable.baseline_error_24)
+            setSmallIcon(DrawableResources.baseline_error_24)
             priority = NotificationCompat.PRIORITY_DEFAULT
             setAutoCancel(true)
             setContentIntent(openDownloadsPendingIntent)
@@ -681,14 +681,14 @@ class DefaultNotificationHelper(
             
             // Retry all action
             addAction(
-                R.drawable.baseline_refresh_24,
+                DrawableResources.baseline_refresh_24,
                 "Retry All",
                 retryAllIntent
             )
             
             // Clear failed action
             addAction(
-                R.drawable.baseline_close_24,
+                DrawableResources.baseline_close_24,
                 "Clear",
                 clearFailedIntent
             )
