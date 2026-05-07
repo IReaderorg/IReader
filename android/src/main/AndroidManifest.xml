@@ -142,14 +142,6 @@
                 tools:node="merge" />
         </provider>
 
-        <!-- Compose Multiplatform Resources Initializer -->
-        <!-- This ContentProvider runs before Application.onCreate() to initialize resources context -->
-        <provider
-            android:name="org.ireader.app.ComposeResourcesInitializer"
-            android:authorities="${applicationId}.compose-resources-initializer"
-            android:exported="false"
-            android:initOrder="100" />
-
         <!-- TTS Service - Clean architecture background service -->
         <service
             android:name="ireader.domain.services.tts_service.v2.TTSV2Service"

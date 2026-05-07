@@ -46,6 +46,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
+@OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)
 class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
     
     private val backgroundScope = CoroutineScope(Dispatchers.IO)
@@ -63,30 +64,9 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         super.onCreate()
         
         // Initialize Compose Multiplatform resources with application context
-        // This prevents the library from falling back to instrumentation
         try {
-            // Access the internal AndroidContextProvider to set the context
-            val providerClass = Class.forName("org.jetbrains.compose.resources.AndroidContextProvider")
-            
-            // Try to find and invoke the setAndroidContext method
-            try {
-                val method = providerClass.getDeclaredMethod("setAndroidContext", android.content.Context::class.java)
-                method.isAccessible = true
-                method.invoke(null, this.applicationContext)
-                println("✅ Compose resources context initialized successfully")
-            } catch (e: NoSuchMethodException) {
-                // Try alternative: set the androidContext field directly
-                try {
-                    val field = providerClass.getDeclaredField("androidContext")
-                    field.isAccessible = true
-                    field.set(null, this.applicationContext)
-                    println("✅ Compose resources context initialized via field")
-                } catch (e2: Exception) {
-                    println("⚠️ Failed to set Android context for Compose resources: ${e2.message}")
-                }
-            }
-        } catch (e: ClassNotFoundException) {
-            println("⚠️ AndroidContextProvider class not found - resources may not work correctly")
+            org.jetbrains.compose.resources.setResourceReaderAndroidContext(this.applicationContext)
+            println("✅ Compose resources context initialized successfully")
         } catch (e: Exception) {
             println("⚠️ Failed to initialize Compose resources: ${e.message}")
         }

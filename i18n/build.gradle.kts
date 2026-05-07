@@ -16,12 +16,13 @@ kotlin {
         namespace = "ireader.i18n"
         compileSdk = ProjectConfig.compileSdk
         minSdk = ProjectConfig.minSdk
-        
+        androidResources.enable = true
+
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
         }
     }
-    
+
     jvm("desktop") {
         compilations.all {
             compileTaskProvider.configure {
@@ -31,7 +32,7 @@ kotlin {
             }
         }
     }
-    
+
     // iOS targets
     listOf(
         iosX64(),
@@ -43,7 +44,7 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
         commonMain {
             dependencies {
@@ -62,7 +63,7 @@ kotlin {
                 implementation(compose.components.resources)
             }
         }
-        
+
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
@@ -75,6 +76,8 @@ kotlin {
     }
 
 }
+
+
 
 // Git is needed in your system PATH for these commands to work.
 // If it's not installed, you can return a random value as a workaround
