@@ -114,7 +114,7 @@ jobs:
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :desktop:packageRpm
+            build: :desktop:compileKotlinDesktop
             setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: win-x64
