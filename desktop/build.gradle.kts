@@ -233,6 +233,13 @@ listOf(
     tasks.findByName(taskName)?.dependsOn("createWindowsLauncher")
 }
 
+// Exclude .cvr files from JARs to avoid the 65535 entries limit
+// These are Compose Multiplatform Resources that are already handled by the platform-specific plugins
+tasks.withType<Jar>().configureEach {
+    exclude("**/*.cvr")
+    exclude("**/composeResources/**")
+}
+
 // Create a batch file for Windows users to help with JRE troubleshooting
 tasks.register<Copy>("createWindowsLauncher") {
     group = "build"

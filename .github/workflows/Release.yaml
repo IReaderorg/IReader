@@ -28,7 +28,7 @@ jobs:
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :desktop:packageUberJarForCurrentOS :desktop:packageDeb
+            build: :desktop:packageDeb
             setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: linux-appimage
