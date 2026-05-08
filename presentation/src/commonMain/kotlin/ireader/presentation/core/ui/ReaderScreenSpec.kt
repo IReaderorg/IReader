@@ -609,10 +609,12 @@ data class ReaderScreenSpec(
                         isLoaded = successState?.isChapterLoaded ?: false,
                         onRefresh = {
                             scope.launch {
-                                vm.getLocalChapter(
-                                    chapter?.id,
-                                    force = true
-                                )
+                                vm.loadChapterFromLocal(chapter?.id)
+                            }
+                        },
+                        onRefreshFromRemote = {
+                            scope.launch {
+                                vm.fetchChapterFromRemote(chapter?.id)
                             }
                         },
                         chapter = chapter,

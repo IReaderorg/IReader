@@ -212,11 +212,23 @@ fun AppIconButton(
     painter: Painter? = null,
     contentDescription: String? = null,
     onClick: () -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     tint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
+    val modifierWithClick = if (onLongClick != null) {
+        modifier
+            .size(48.dp)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+                role = Role.Button,
+            )
+    } else {
+        modifier.size(48.dp)
+    }
+
     IconButton(
-        modifier = modifier
-            .size(48.dp), // Ensure minimum 48dp touch target for accessibility
+        modifier = modifierWithClick,
         onClick = {
             onClick()
         },

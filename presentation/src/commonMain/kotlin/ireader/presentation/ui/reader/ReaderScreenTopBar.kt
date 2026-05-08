@@ -54,6 +54,7 @@ fun ReaderScreenTopBar(
     state: ReaderScreenViewModel, // Using ViewModel directly for state access
     chapter: Chapter?,
     onRefresh: () -> Unit,
+    onRefreshFromRemote: () -> Unit,
     onWebView: () -> Unit,
     onBookMark: () -> Unit,
     onPopBackStack: () -> Unit,
@@ -166,7 +167,8 @@ fun ReaderScreenTopBar(
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
                         contentDescription = localize(Res.string.refresh),
-                        onClick = { onRefresh() }
+                        onClick = { onRefreshFromRemote() },
+                        onLongClick = { onRefresh() }
                     )
                 }
             }
@@ -199,7 +201,8 @@ fun ReaderScreenTopBar(
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
                         contentDescription = localize(Res.string.refresh),
-                        onClick = { onRefresh() },
+                        onClick = { onRefreshFromRemote() },
+                        onLongClick = { onRefresh() },
                         tint = vm.textColor.value.toComposeColor()
                     )
                     AppIconButton(

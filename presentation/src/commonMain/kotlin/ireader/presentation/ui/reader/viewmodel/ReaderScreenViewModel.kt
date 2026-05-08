@@ -857,7 +857,8 @@ class ReaderScreenViewModel(
         chapterId: Long,
         next: Boolean = true,
         force: Boolean = false,
-        scrollToEnd: Boolean? = null
+        scrollToEnd: Boolean? = null,
+        forceRemote: Boolean = false
     ): Chapter? {
         // Save current scroll position before loading new chapter
         // This ensures we don't lose progress when navigating between chapters
@@ -937,7 +938,10 @@ class ReaderScreenViewModel(
 
         // Fetch remote content if needed
         val needsRemoteFetch = chapter.isEmpty() && catalog?.source != null
-        if (needsRemoteFetch && !force) {
+        if (forceRemote && catalog?.source != null) {
+            // Force refresh from remote: always fetch, ignoring cached content
+            fetchRemoteChapter(book, catalog, chapter)
+        } else if (needsRemoteFetch && !force) {
             // Fetch content asynchronously via the Reader's own fetch path.
             // IMPORTANT: Do NOT also dispatch ChapterCommand.LoadChapter before this completes,
             // because ChapterController.loadChapter() would also try to fetch from remote
@@ -1189,6 +1193,51 @@ class ReaderScreenViewModel(
         }
     }
 
+
+    // ==================== Chapter Refresh ====================
+
+    /**
+     * Force fetch chapter content from remote source.
+     * Click action: always re-fetches from the remote server, ignoring cached content.
+     */
+    suspend fun fetchChapterFromRemote(chapterId: Long?): Chapter? {
+        if (chapterId == null) return null
+        val currentState = _state.value
+        if (currentState !is ReaderState.Success) return null
+
+        val book = currentState.book
+        val catalog = currentState.catalog
+        val existingChapter = getChapterUseCase.findChapterById(chapterId) ?: return null
+
+        updateSuccessState { it.copy(isLoadingContent = true) }
+
+        return try {
+            val chapterToRead = preloadedChapters.remove(chapterId) ?: existingChapter
+            loadChapter(
+                book = book,
+                catalog = catalog,
+                chapterId = chapterId,
+                next = true,
+                force = false,
+                scrollToEnd = null,
+                forceRemote = true
+            )
+        } catch (e: Exception) {
+            Log.error(e, "Failed to fetch chapter from remote")
+            updateSuccessState { it.copy(isLoadingContent = false) }
+            null
+        }
+    }
+
+    /**
+     * Load chapter from local database (force reload from DB).
+     * Long-click action: re-reads from the local database, useful when content
+     * was downloaded by the background downloader.
+     */
+    suspend fun loadChapterFromLocal(chapterId: Long?): Chapter? {
+        if (chapterId == null) return null
+        return getLocalChapter(chapterId, next = true, force = true)
+    }
 
     // ==================== Chapter Shell Management ====================
 
