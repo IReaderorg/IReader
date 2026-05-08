@@ -120,7 +120,7 @@ jobs:
             -e R2_PUBLIC_URL="${{ secrets.R2_PUBLIC_URL }}" \
             fedora:latest bash -c "
             dnf install -y java-latest-openjdk-devel rpm-build git &&
-            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
+            export JAVA_HOME=/usr/lib/jvm/java-latest-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
             ./gradlew ${{ matrix.build }} --stacktrace
           "
