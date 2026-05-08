@@ -23,8 +23,8 @@ val chapterRepositoryModule = module {
     // Note: Only ChapterController emits notifications (single source of truth).
     single { ChapterNotifier() }
     
-    // ChapterRepository - pure data access, no notification emission
-    single<ChapterRepository> { ChapterRepositoryImpl(get(), getOrNull()) }
+    // ChapterRepository - data access with change notification
+    single<ChapterRepository> { ChapterRepositoryImpl(get(), getOrNull(), get<ChapterNotifier>()) }
     single<ChapterHealthRepository> { ChapterHealthRepositoryImpl(get()) }
     single<ChapterReportRepository> { ChapterReportRepositoryImpl(get()) }
 }

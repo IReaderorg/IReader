@@ -6,6 +6,7 @@ import ireader.data.core.DatabaseOptimizations
 import ireader.data.util.toDB
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
+import ireader.domain.services.chapter.ChapterNotifier
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
@@ -22,7 +23,8 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(FlowPreview::class)
 class ChapterRepositoryImpl(
     private val handler: DatabaseHandler,
-    private val dbOptimizations: DatabaseOptimizations? = null
+    private val dbOptimizations: DatabaseOptimizations? = null,
+    private val chapterNotifier: ChapterNotifier? = null
 ) : ChapterRepository {
     override fun subscribeChapterById(chapterId: Long): Flow<Chapter?> {
         return handler.subscribeToOneOrNull {
@@ -126,7 +128,16 @@ class ChapterRepositoryImpl(
         handler.await {
             chapterQueries.refreshBookChapterCounts(chapter.bookId)
         }
-        
+
+        // Notify observers that chapter content was updated
+        // This allows the reader screen to reload content when chapters are downloaded
+        // by the downloader or other background processes
+        if (chapterNotifier != null && chapter.content.isNotEmpty()) {
+            chapterNotifier.tryNotifyChange(
+                ChapterNotifier.ChangeType.ContentFetched(chapter.id, chapter.bookId)
+            )
+        }
+
         return result
     }
 

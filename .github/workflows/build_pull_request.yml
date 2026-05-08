@@ -119,7 +119,7 @@ jobs:
             -e R2_BUCKET_NAME="${{ secrets.R2_BUCKET_NAME }}" \
             -e R2_PUBLIC_URL="${{ secrets.R2_PUBLIC_URL }}" \
             fedora:latest bash -c "
-            dnf install -y java-21-openjdk-devel java-21-openjdk-jmods rpm-build findutils git &&
+            dnf install -y java-21-openjdk rpm-build findutils git &&
             export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
             ./gradlew ${{ matrix.build }} --stacktrace

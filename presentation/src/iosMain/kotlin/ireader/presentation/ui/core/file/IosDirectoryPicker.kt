@@ -24,7 +24,7 @@ actual fun rememberPlatformDirectoryPickerLauncher(
     title: String,
     onDirectorySelected: (String?) -> Unit
 ): DirectoryPickerLauncher {
-    val fileKitLauncher = rememberDirectoryPickerLauncher(title = title) { directory ->
+    val fileKitLauncher = rememberDirectoryPickerLauncher { directory ->
         onDirectorySelected(directory?.toString())
     }
     

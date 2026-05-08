@@ -210,7 +210,7 @@ class LibraryViewModel(
             columnsInPortrait = columnsPortrait,
             columnsInLandscape = columnsLandscape
         )
-    }.stateIn(scope, SharingStarted.WhileSubscribed(5000), LibraryScreenState())
+    }.stateIn(scope, SharingStarted.WhileSubscribed(), LibraryScreenState())
     
     // Convenience accessors
     val isLoading: Boolean get() = state.value.isLoading

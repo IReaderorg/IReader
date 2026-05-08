@@ -26,6 +26,7 @@ import ireader.i18n.resources.*
 import ireader.i18n.resources.library_screen_label
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.LocalVisibleTabIndex
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
@@ -66,6 +67,15 @@ object LibraryScreenSpec {
             ScreenProfiler.mark("Library", "vm_obtained")
         }
         val state by vm.state.collectAsState()
+
+        // Refresh books when the library tab becomes visible (e.g., after returning from another screen)
+        // This ensures the book list is always up-to-date when the user navigates back to the library
+        val currentTabIndex = LocalVisibleTabIndex.current
+        LaunchedEffect(currentTabIndex) {
+            if (currentTabIndex == 0) {
+                vm.refreshCurrentCategoryIfStale()
+            }
+        }
         
         // Track screen entry for profiling when returning to library
         LaunchedEffect(Unit) {
