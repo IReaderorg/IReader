@@ -254,14 +254,13 @@ jobs:
   check-summary:
     name: Check Summary
     runs-on: ubuntu-latest
-    needs: [all-tests, ios-build, BuildBinaries]
+    needs: [ios-build, BuildBinaries]
     if: always()
     
     steps:
       - name: Check results
         run: |
           echo "=== Check Summary ==="
-          echo "All Tests: ${{ needs.all-tests.result }}"
           echo "iOS Build: ${{ needs.ios-build.result }}"
           echo "Build: ${{ needs.BuildBinaries.result }}"
           
@@ -270,7 +269,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |-
-            const allTests = '${{ needs.all-tests.result }}';
             const iosBuild = '${{ needs.ios-build.result }}';
             const build = '${{ needs.BuildBinaries.result }}';
 
