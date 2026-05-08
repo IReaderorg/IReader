@@ -218,6 +218,7 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
           # 7-Project Supabase Configuration
           SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
           SUPABASE_AUTH_KEY: ${{ secrets.SUPABASE_AUTH_KEY }}
