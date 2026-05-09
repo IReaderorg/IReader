@@ -207,6 +207,21 @@ val isPreview: Boolean
 val previewCode: String
     get() = project.properties["preview"]?.toString()?.trim('"') ?: 0.toString()
 
+// Enable zip64 for Uber JAR to support more than 65535 entries
+// This is needed because Compose Multiplatform resources add many files
+afterEvaluate {
+    tasks.findByName("packageUberJarForCurrentOS")?.let { task ->
+        if (task is org.gradle.api.tasks.bundling.Jar) {
+            (task as org.gradle.api.tasks.bundling.Jar).isZip64 = true
+        }
+    }
+    tasks.findByName("packageReleaseUberJarForCurrentOS")?.let { task ->
+        if (task is org.gradle.api.tasks.bundling.Jar) {
+            (task as org.gradle.api.tasks.bundling.Jar).isZip64 = true
+        }
+    }
+}
+
 // Add dependencies for package tasks
 listOf(
     "packageDeb", 
@@ -220,8 +235,7 @@ listOf(
     tasks.findByName(taskName)?.dependsOn("createWindowsLauncher")
 }
 
-// Enable zip64 for Uber JAR to support more than 65535 entries
-// This is needed because Compose Multiplatform resources add many files
+// Enable zip64 for all JAR tasks
 tasks.withType<org.gradle.api.tasks.bundling.Jar>().configureEach {
     isZip64 = true
 }
