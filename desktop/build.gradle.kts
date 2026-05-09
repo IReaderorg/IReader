@@ -220,6 +220,12 @@ listOf(
     tasks.findByName(taskName)?.dependsOn("createWindowsLauncher")
 }
 
+// Enable zip64 for Uber JAR to support more than 65535 entries
+// This is needed because Compose Multiplatform resources add many files
+tasks.withType<org.gradle.api.tasks.bundling.Jar>().configureEach {
+    isZip64 = true
+}
+
 // For release variants
 listOf(
     "packageReleaseDeb", 
