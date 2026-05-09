@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin'
+          distribution: 'zulu'
           cache: gradle
       
       - name: Setup Gradle
@@ -145,7 +145,7 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
           java-version: 21
-          distribution: temurin
+          distribution: zulu
           architecture: ${{ matrix.arch }}
 
       - name: Setup Cl

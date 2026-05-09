@@ -74,7 +74,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: temurin
+          distribution: zulu
 
       - name: Get previous release
         id: last_release
@@ -87,7 +87,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: temurin
+          distribution: zulu
           architecture: ${{ matrix.arch }}
 
       - name: Setup Cl
