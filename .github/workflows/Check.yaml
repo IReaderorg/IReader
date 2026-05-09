@@ -17,6 +17,75 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ==================== Test Jobs ====================
+  
+  all-tests:
+    name: All Module Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+          
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        
+      - name: Run all tests
+        run: ./gradlew test --stacktrace
+        continue-on-error: true
+        
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-test-results
+          path: '**/build/test-results/**/*.xml'
+          
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-test-reports
+          path: '**/build/reports/tests/**'
+
+  lint:
+    name: Android Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+          
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        
+      - name: Run Android Lint
+        run: ./gradlew lintDebug --stacktrace
+        continue-on-error: true
+        
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-reports
+          path: '**/build/reports/lint-results-*.html'
+
   # ==================== Build Jobs ====================
   
   ios-build:
@@ -32,7 +101,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'zulu'
+          distribution: 'temurin'
           cache: gradle
       
       - name: Setup Gradle
@@ -98,6 +167,7 @@ jobs:
 
   BuildBinaries:
     name: Build application packages
+    needs: [all-tests]
     if: always()
     strategy:
       matrix:
@@ -145,80 +215,82 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
           java-version: 21
-          distribution: zulu
+          distribution: temurin
           architecture: ${{ matrix.arch }}
 
       - name: Setup Cl
         run: ${{ matrix.setupCl }}
 
-      # - name: Build rpm Package
-      #   if: ${{ matrix.runtime == 'linux-fedora-x64' }}
-      #   env:
-      #     # 7-Project Supabase Configuration
-      #     SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
-      #     SUPABASE_AUTH_KEY: ${{ secrets.SUPABASE_AUTH_KEY }}
-      #     SUPABASE_READING_URL: ${{ secrets.SUPABASE_READING_URL }}
-      #     SUPABASE_READING_KEY: ${{ secrets.SUPABASE_READING_KEY }}
-      #     SUPABASE_LIBRARY_URL: ${{ secrets.SUPABASE_LIBRARY_URL }}
-      #     SUPABASE_LIBRARY_KEY: ${{ secrets.SUPABASE_LIBRARY_KEY }}
-      #     SUPABASE_BOOK_REVIEWS_URL: ${{ secrets.SUPABASE_BOOK_REVIEWS_URL }}
-      #     SUPABASE_BOOK_REVIEWS_KEY: ${{ secrets.SUPABASE_BOOK_REVIEWS_KEY }}
-      #     SUPABASE_CHAPTER_REVIEWS_URL: ${{ secrets.SUPABASE_CHAPTER_REVIEWS_URL }}
-      #     SUPABASE_CHAPTER_REVIEWS_KEY: ${{ secrets.SUPABASE_CHAPTER_REVIEWS_KEY }}
-      #     SUPABASE_BADGES_URL: ${{ secrets.SUPABASE_BADGES_URL }}
-      #     SUPABASE_BADGES_KEY: ${{ secrets.SUPABASE_BADGES_KEY }}
-      #     SUPABASE_ANALYTICS_URL: ${{ secrets.SUPABASE_ANALYTICS_URL }}
-      #     SUPABASE_ANALYTICS_KEY: ${{ secrets.SUPABASE_ANALYTICS_KEY }}
-      #     # Cloudflare R2 Storage
-      #     R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-      #     R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      #     R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      #     R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-      #     R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
-      #     # Cloudflare D1 + R2 Community Translations
-      #     COMMUNITY_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.COMMUNITY_CLOUDFLARE_ACCOUNT_ID }}
-      #     COMMUNITY_CLOUDFLARE_API_TOKEN: ${{ secrets.COMMUNITY_CLOUDFLARE_API_TOKEN }}
-      #     COMMUNITY_D1_DATABASE_ID: ${{ secrets.COMMUNITY_D1_DATABASE_ID }}
-      #     COMMUNITY_R2_BUCKET_NAME: ${{ secrets.COMMUNITY_R2_BUCKET_NAME }}
-      #     COMMUNITY_R2_PUBLIC_URL: ${{ secrets.COMMUNITY_R2_PUBLIC_URL }}
-      #   run: |
-      #     docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
-      #       -e SUPABASE_AUTH_URL="${{ secrets.SUPABASE_AUTH_URL }}" \
-      #       -e SUPABASE_AUTH_KEY="${{ secrets.SUPABASE_AUTH_KEY }}" \
-      #       -e SUPABASE_READING_URL="${{ secrets.SUPABASE_READING_URL }}" \
-      #       -e SUPABASE_READING_KEY="${{ secrets.SUPABASE_READING_KEY }}" \
-      #       -e SUPABASE_LIBRARY_URL="${{ secrets.SUPABASE_LIBRARY_URL }}" \
-      #       -e SUPABASE_LIBRARY_KEY="${{ secrets.SUPABASE_LIBRARY_KEY }}" \
-      #       -e SUPABASE_BOOK_REVIEWS_URL="${{ secrets.SUPABASE_BOOK_REVIEWS_URL }}" \
-      #       -e SUPABASE_BOOK_REVIEWS_KEY="${{ secrets.SUPABASE_BOOK_REVIEWS_KEY }}" \
-      #       -e SUPABASE_CHAPTER_REVIEWS_URL="${{ secrets.SUPABASE_CHAPTER_REVIEWS_URL }}" \
-      #       -e SUPABASE_CHAPTER_REVIEWS_KEY="${{ secrets.SUPABASE_CHAPTER_REVIEWS_KEY }}" \
-      #       -e SUPABASE_BADGES_URL="${{ secrets.SUPABASE_BADGES_URL }}" \
-      #       -e SUPABASE_BADGES_KEY="${{ secrets.SUPABASE_BADGES_KEY }}" \
-      #       -e SUPABASE_ANALYTICS_URL="${{ secrets.SUPABASE_ANALYTICS_URL }}" \
-      #       -e SUPABASE_ANALYTICS_KEY="${{ secrets.SUPABASE_ANALYTICS_KEY }}" \
-      #       -e R2_ACCOUNT_ID="${{ secrets.R2_ACCOUNT_ID }}" \
-      #       -e R2_ACCESS_KEY_ID="${{ secrets.R2_ACCESS_KEY_ID }}" \
-      #       -e R2_SECRET_ACCESS_KEY="${{ secrets.R2_SECRET_ACCESS_KEY }}" \
-      #       -e R2_BUCKET_NAME="${{ secrets.R2_BUCKET_NAME }}" \
-      #       -e R2_PUBLIC_URL="${{ secrets.R2_PUBLIC_URL }}" \
-      #       -e COMMUNITY_CLOUDFLARE_ACCOUNT_ID="${{ secrets.COMMUNITY_CLOUDFLARE_ACCOUNT_ID }}" \
-      #       -e COMMUNITY_CLOUDFLARE_API_TOKEN="${{ secrets.COMMUNITY_CLOUDFLARE_API_TOKEN }}" \
-      #       -e COMMUNITY_D1_DATABASE_ID="${{ secrets.COMMUNITY_D1_DATABASE_ID }}" \
-      #       -e COMMUNITY_R2_BUCKET_NAME="${{ secrets.COMMUNITY_R2_BUCKET_NAME }}" \
-      #       -e COMMUNITY_R2_PUBLIC_URL="${{ secrets.COMMUNITY_R2_PUBLIC_URL }}" \
-      #       fedora:latest bash -c "
-      #       dnf install -y java-21-openjdk rpm-build git &&
-      #       export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
-      #       export PATH=\$JAVA_HOME/bin:\$PATH &&
-      #       ./gradlew ${{ matrix.build }} --stacktrace
-      #     "
+      - name: Build rpm Package
+        if: ${{ matrix.runtime == 'linux-fedora-x64' }}
+        env:
+          # 7-Project Supabase Configuration
+          SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
+          SUPABASE_AUTH_KEY: ${{ secrets.SUPABASE_AUTH_KEY }}
+          SUPABASE_READING_URL: ${{ secrets.SUPABASE_READING_URL }}
+          SUPABASE_READING_KEY: ${{ secrets.SUPABASE_READING_KEY }}
+          SUPABASE_LIBRARY_URL: ${{ secrets.SUPABASE_LIBRARY_URL }}
+          SUPABASE_LIBRARY_KEY: ${{ secrets.SUPABASE_LIBRARY_KEY }}
+          SUPABASE_BOOK_REVIEWS_URL: ${{ secrets.SUPABASE_BOOK_REVIEWS_URL }}
+          SUPABASE_BOOK_REVIEWS_KEY: ${{ secrets.SUPABASE_BOOK_REVIEWS_KEY }}
+          SUPABASE_CHAPTER_REVIEWS_URL: ${{ secrets.SUPABASE_CHAPTER_REVIEWS_URL }}
+          SUPABASE_CHAPTER_REVIEWS_KEY: ${{ secrets.SUPABASE_CHAPTER_REVIEWS_KEY }}
+          SUPABASE_BADGES_URL: ${{ secrets.SUPABASE_BADGES_URL }}
+          SUPABASE_BADGES_KEY: ${{ secrets.SUPABASE_BADGES_KEY }}
+          SUPABASE_ANALYTICS_URL: ${{ secrets.SUPABASE_ANALYTICS_URL }}
+          SUPABASE_ANALYTICS_KEY: ${{ secrets.SUPABASE_ANALYTICS_KEY }}
+          # Cloudflare R2 Storage
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+          # Cloudflare D1 + R2 Community Translations
+          COMMUNITY_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.COMMUNITY_CLOUDFLARE_ACCOUNT_ID }}
+          COMMUNITY_CLOUDFLARE_API_TOKEN: ${{ secrets.COMMUNITY_CLOUDFLARE_API_TOKEN }}
+          COMMUNITY_D1_DATABASE_ID: ${{ secrets.COMMUNITY_D1_DATABASE_ID }}
+          COMMUNITY_R2_BUCKET_NAME: ${{ secrets.COMMUNITY_R2_BUCKET_NAME }}
+          COMMUNITY_R2_PUBLIC_URL: ${{ secrets.COMMUNITY_R2_PUBLIC_URL }}
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
+            -e SUPABASE_AUTH_URL="${{ secrets.SUPABASE_AUTH_URL }}" \
+            -e SUPABASE_AUTH_KEY="${{ secrets.SUPABASE_AUTH_KEY }}" \
+            -e SUPABASE_READING_URL="${{ secrets.SUPABASE_READING_URL }}" \
+            -e SUPABASE_READING_KEY="${{ secrets.SUPABASE_READING_KEY }}" \
+            -e SUPABASE_LIBRARY_URL="${{ secrets.SUPABASE_LIBRARY_URL }}" \
+            -e SUPABASE_LIBRARY_KEY="${{ secrets.SUPABASE_LIBRARY_KEY }}" \
+            -e SUPABASE_BOOK_REVIEWS_URL="${{ secrets.SUPABASE_BOOK_REVIEWS_URL }}" \
+            -e SUPABASE_BOOK_REVIEWS_KEY="${{ secrets.SUPABASE_BOOK_REVIEWS_KEY }}" \
+            -e SUPABASE_CHAPTER_REVIEWS_URL="${{ secrets.SUPABASE_CHAPTER_REVIEWS_URL }}" \
+            -e SUPABASE_CHAPTER_REVIEWS_KEY="${{ secrets.SUPABASE_CHAPTER_REVIEWS_KEY }}" \
+            -e SUPABASE_BADGES_URL="${{ secrets.SUPABASE_BADGES_URL }}" \
+            -e SUPABASE_BADGES_KEY="${{ secrets.SUPABASE_BADGES_KEY }}" \
+            -e SUPABASE_ANALYTICS_URL="${{ secrets.SUPABASE_ANALYTICS_URL }}" \
+            -e SUPABASE_ANALYTICS_KEY="${{ secrets.SUPABASE_ANALYTICS_KEY }}" \
+            -e R2_ACCOUNT_ID="${{ secrets.R2_ACCOUNT_ID }}" \
+            -e R2_ACCESS_KEY_ID="${{ secrets.R2_ACCESS_KEY_ID }}" \
+            -e R2_SECRET_ACCESS_KEY="${{ secrets.R2_SECRET_ACCESS_KEY }}" \
+            -e R2_BUCKET_NAME="${{ secrets.R2_BUCKET_NAME }}" \
+            -e R2_PUBLIC_URL="${{ secrets.R2_PUBLIC_URL }}" \
+            -e COMMUNITY_CLOUDFLARE_ACCOUNT_ID="${{ secrets.COMMUNITY_CLOUDFLARE_ACCOUNT_ID }}" \
+            -e COMMUNITY_CLOUDFLARE_API_TOKEN="${{ secrets.COMMUNITY_CLOUDFLARE_API_TOKEN }}" \
+            -e COMMUNITY_D1_DATABASE_ID="${{ secrets.COMMUNITY_D1_DATABASE_ID }}" \
+            -e COMMUNITY_R2_BUCKET_NAME="${{ secrets.COMMUNITY_R2_BUCKET_NAME }}" \
+            -e COMMUNITY_R2_PUBLIC_URL="${{ secrets.COMMUNITY_R2_PUBLIC_URL }}" \
+            fedora:latest bash -c "
+            dnf install -y rpm-build git curl &&
+            curl -L -o /tmp/zulu21.tar.gz 'https://cdn.azul.com/zulu/bin/zulu21.38.21-ca-jdk21.0.5-linux_x64.tar.gz' &&
+            tar -xzf /tmp/zulu21.tar.gz -C /opt/ &&
+            export JAVA_HOME=/opt/zulu21.38.21-ca-jdk21.0.5-linux_x64 &&
+            export PATH=\$JAVA_HOME/bin:\$PATH &&
+            java -version &&
+            ./gradlew ${{ matrix.build }} --stacktrace
+          "
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
           # 7-Project Supabase Configuration
           SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
           SUPABASE_AUTH_KEY: ${{ secrets.SUPABASE_AUTH_KEY }}
@@ -255,13 +327,15 @@ jobs:
   check-summary:
     name: Check Summary
     runs-on: ubuntu-latest
-    needs: [ios-build, BuildBinaries]
+    needs: [all-tests, lint, ios-build, BuildBinaries]
     if: always()
     
     steps:
       - name: Check results
         run: |
           echo "=== Check Summary ==="
+          echo "All Tests: ${{ needs.all-tests.result }}"
+          echo "Lint: ${{ needs.lint.result }}"
           echo "iOS Build: ${{ needs.ios-build.result }}"
           echo "Build: ${{ needs.BuildBinaries.result }}"
           
@@ -270,6 +344,8 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |-
+            const allTests = '${{ needs.all-tests.result }}';
+            const lint = '${{ needs.lint.result }}';
             const iosBuild = '${{ needs.ios-build.result }}';
             const build = '${{ needs.BuildBinaries.result }}';
 
@@ -280,6 +356,7 @@ jobs:
             | Check | Status |
             |-------|--------|
             | All Module Tests | ${getEmoji(allTests)} ${allTests} |
+            | Android Lint | ${getEmoji(lint)} ${lint} |
             | iOS Build | ${getEmoji(iosBuild)} ${iosBuild} |
             | Build | ${getEmoji(build)} ${build} |
 

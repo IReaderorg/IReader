@@ -65,7 +65,7 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         with:
           java-version: 21
-          distribution: zulu
+          distribution: temurin
           architecture: ${{ matrix.arch }}
 
       - name: Setup Cl
@@ -119,8 +119,8 @@ jobs:
             -e R2_BUCKET_NAME="${{ secrets.R2_BUCKET_NAME }}" \
             -e R2_PUBLIC_URL="${{ secrets.R2_PUBLIC_URL }}" \
             fedora:latest bash -c "
-            dnf install -y java-latest-openjdk-devel rpm-build git &&
-            export JAVA_HOME=/usr/lib/jvm/java-latest-openjdk &&
+            dnf install -y java-21-openjdk rpm-build findutils git &&
+            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
             ./gradlew ${{ matrix.build }} --stacktrace
           "
@@ -129,7 +129,6 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         env:
-          JAVA_HOME: ${{ env.JAVA_HOME }}
           # 7-Project Supabase Configuration
           SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
           SUPABASE_AUTH_KEY: ${{ secrets.SUPABASE_AUTH_KEY }}

@@ -28,7 +28,7 @@ jobs:
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :desktop:packageDeb
+            build: :desktop:packageUberJarForCurrentOS :desktop:packageDeb
             setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: linux-appimage
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: zulu
+          distribution: temurin
           architecture: ${{ matrix.arch }}
 
       - name: Setup Cl
