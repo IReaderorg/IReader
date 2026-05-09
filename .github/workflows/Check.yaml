@@ -208,10 +208,9 @@ jobs:
             -e COMMUNITY_R2_BUCKET_NAME="${{ secrets.COMMUNITY_R2_BUCKET_NAME }}" \
             -e COMMUNITY_R2_PUBLIC_URL="${{ secrets.COMMUNITY_R2_PUBLIC_URL }}" \
             fedora:latest bash -c "
-            dnf install -y 'java-21-openjdk-devel*' rpm-build git &&
-            export JAVA_HOME=\$(readlink -f /usr/bin/javac | sed 's:/bin/javac::') &&
+            dnf install -y java-21-openjdk rpm-build git &&
+            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
             export PATH=\$JAVA_HOME/bin:\$PATH &&
-            java -version &&
             ./gradlew ${{ matrix.build }} --stacktrace
           "
 
