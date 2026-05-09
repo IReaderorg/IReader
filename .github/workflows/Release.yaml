@@ -22,7 +22,7 @@ jobs:
     name: Build application packages
     strategy:
       matrix:
-        runtime: [ linux-x64, linux-appimage, win-x64, android ]
+        runtime: [ linux-x64, win-x64, android ]
         include:
           - runtime: linux-x64
             arch: x64
