@@ -207,21 +207,6 @@ val isPreview: Boolean
 val previewCode: String
     get() = project.properties["preview"]?.toString()?.trim('"') ?: 0.toString()
 
-// Enable zip64 for Uber JAR to support more than 65535 entries
-// This is needed because Compose Multiplatform resources add many files
-afterEvaluate {
-    tasks.findByName("packageUberJarForCurrentOS")?.let { task ->
-        if (task is org.gradle.api.tasks.bundling.Jar) {
-            (task as org.gradle.api.tasks.bundling.Jar).isZip64 = true
-        }
-    }
-    tasks.findByName("packageReleaseUberJarForCurrentOS")?.let { task ->
-        if (task is org.gradle.api.tasks.bundling.Jar) {
-            (task as org.gradle.api.tasks.bundling.Jar).isZip64 = true
-        }
-    }
-}
-
 // Add dependencies for package tasks
 listOf(
     "packageDeb", 
@@ -235,11 +220,6 @@ listOf(
     tasks.findByName(taskName)?.dependsOn("createWindowsLauncher")
 }
 
-// Enable zip64 for all JAR tasks
-tasks.withType<org.gradle.api.tasks.bundling.Jar>().configureEach {
-    isZip64 = true
-}
-
 // For release variants
 listOf(
     "packageReleaseDeb", 
@@ -251,13 +231,6 @@ listOf(
     "packageReleaseUberJarForCurrentOS"
 ).forEach { taskName ->
     tasks.findByName(taskName)?.dependsOn("createWindowsLauncher")
-}
-
-// Exclude .cvr files from JARs to avoid the 65535 entries limit
-// These are Compose Multiplatform Resources that are already handled by the platform-specific plugins
-tasks.withType<Jar>().configureEach {
-    exclude("**/*.cvr")
-    exclude("**/composeResources/**")
 }
 
 // Create a batch file for Windows users to help with JRE troubleshooting

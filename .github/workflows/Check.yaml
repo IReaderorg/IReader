@@ -121,7 +121,7 @@ jobs:
             arch: x64
             os: windows-latest
             shell: powershell
-            build: :desktop:packageUberJarForCurrentOS :desktop:packageMsi
+            build: :desktop:packageMsi
             setupCl: ./.github/scripts/SetupClWindows.ps1
 
           - runtime: android
