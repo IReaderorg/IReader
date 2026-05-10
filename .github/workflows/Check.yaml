@@ -83,7 +83,8 @@ jobs:
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -configuration Debug \
-            -destination "id=$SIMULATOR_ID" \
+            # -destination "id=$SIMULATOR_ID" \
+            -destination "platform=iOS Simulator,name=iPhone 16" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
