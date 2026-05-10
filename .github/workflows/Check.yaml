@@ -85,9 +85,11 @@ jobs:
             -configuration Debug \
             # -destination "id=$SIMULATOR_ID" \
             -destination "platform=iOS Simulator,name=iPhone 16" \
+            DEVELOPMENT_TEAM="" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
+            COMPILER_INDEX_STORE_ENABLE=NO
       
       - name: Upload Framework Artifact
         if: always()
