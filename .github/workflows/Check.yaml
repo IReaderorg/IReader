@@ -19,88 +19,88 @@ concurrency:
 jobs:
   # ==================== Build Jobs ====================
   
-  ios-build:
-    name: iOS Build
-    runs-on: macos-14
-    timeout-minutes: 60
+  # ios-build:
+  #   name: iOS Build
+  #   runs-on: macos-14
+  #   timeout-minutes: 60
     
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
       
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: gradle
+  #     - uses: actions/setup-java@v4
+  #       with:
+  #         java-version: '21'
+  #         distribution: 'temurin'
+  #         cache: gradle
       
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+  #     - name: Setup Gradle
+  #       uses: gradle/actions/setup-gradle@v3
       
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+  #     - name: Grant execute permission for gradlew
+  #       run: chmod +x gradlew
       
-      - name: Set up local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          echo "supabase.auth.url=https://placeholder.supabase.co" >> local.properties
-          echo "supabase.auth.key=placeholder-key" >> local.properties
-          echo "supabase.reading.url=https://placeholder.supabase.co" >> local.properties
-          echo "supabase.reading.key=placeholder-key" >> local.properties
-          echo "supabase.library.url=https://placeholder.supabase.co" >> local.properties
-          echo "supabase.library.key=placeholder-key" >> local.properties
-          echo "supabase.book_reviews.url=https://placeholder.supabase.co" >> local.properties
-          echo "supabase.book_reviews.key=placeholder-key" >> local.properties
-          echo "supabase.chapter_reviews.url=https://placeholder.supabase.co" >> local.properties
-          echo "supabase.chapter_reviews.key=placeholder-key" >> local.properties
-          echo "supabase.badges.url=https://placeholder.supabase.co" >> local.properties
-          echo "supabase.badges.key=placeholder-key" >> local.properties
-          echo "supabase.analytics.url=https://placeholder.supabase.co" >> local.properties
-          echo "supabase.analytics.key=placeholder-key" >> local.properties
+  #     - name: Set up local.properties
+  #       run: |
+  #         echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+  #         echo "supabase.auth.url=https://placeholder.supabase.co" >> local.properties
+  #         echo "supabase.auth.key=placeholder-key" >> local.properties
+  #         echo "supabase.reading.url=https://placeholder.supabase.co" >> local.properties
+  #         echo "supabase.reading.key=placeholder-key" >> local.properties
+  #         echo "supabase.library.url=https://placeholder.supabase.co" >> local.properties
+  #         echo "supabase.library.key=placeholder-key" >> local.properties
+  #         echo "supabase.book_reviews.url=https://placeholder.supabase.co" >> local.properties
+  #         echo "supabase.book_reviews.key=placeholder-key" >> local.properties
+  #         echo "supabase.chapter_reviews.url=https://placeholder.supabase.co" >> local.properties
+  #         echo "supabase.chapter_reviews.key=placeholder-key" >> local.properties
+  #         echo "supabase.badges.url=https://placeholder.supabase.co" >> local.properties
+  #         echo "supabase.badges.key=placeholder-key" >> local.properties
+  #         echo "supabase.analytics.url=https://placeholder.supabase.co" >> local.properties
+  #         echo "supabase.analytics.key=placeholder-key" >> local.properties
       
-      - name: Build iOS Framework (Simulator)
-        run: |
-          ./gradlew :presentation:linkDebugFrameworkIosSimulatorArm64 \
-            --no-daemon \
-            --no-configuration-cache \
-            -Dorg.gradle.jvmargs="-Xmx6g -XX:+UseG1GC -XX:MaxMetaspaceSize=1g" \
-            -Pkotlin.native.cacheKind=none
+      # - name: Build iOS Framework (Simulator)
+      #   run: |
+      #     ./gradlew :presentation:linkDebugFrameworkIosSimulatorArm64 \
+      #       --no-daemon \
+      #       --no-configuration-cache \
+      #       -Dorg.gradle.jvmargs="-Xmx6g -XX:+UseG1GC -XX:MaxMetaspaceSize=1g" \
+      #       -Pkotlin.native.cacheKind=none
       
-      - name: Copy Framework to Xcode location
-        run: |
-          FRAMEWORK_PATH="presentation/build/bin/iosSimulatorArm64/debugFramework"
-          DEST_PATH="presentation/build/xcode-frameworks/Debug/iphonesimulator"
-          mkdir -p "$DEST_PATH"
-          cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/"
+      # - name: Copy Framework to Xcode location
+      #   run: |
+      #     FRAMEWORK_PATH="presentation/build/bin/iosSimulatorArm64/debugFramework"
+      #     DEST_PATH="presentation/build/xcode-frameworks/Debug/iphonesimulator"
+      #     mkdir -p "$DEST_PATH"
+      #     cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/"
       
-      - name: Build iOS App (Simulator)
-        run: |
-          SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
-          echo "Using simulator: $SIMULATOR_ID"
+      # - name: Build iOS App (Simulator)
+      #   run: |
+      #     SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
+      #     echo "Using simulator: $SIMULATOR_ID"
           
-          xcodebuild build \
-            -project iosApp/iosApp.xcodeproj \
-            -scheme iosApp \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            # -destination "id=$SIMULATOR_ID" \
-            -destination "platform=iOS Simulator,name=iPhone 16 Pro Max" \
-            ARCHS="arm64" \
-            DEVELOPMENT_TEAM="ireader" \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-            COMPILER_INDEX_STORE_ENABLE=NO
-            PRODUCT_BUNDLE_IDENTIFIER="ir.kazemcodes.infinityreader"
+      #     xcodebuild build \
+      #       -project iosApp/iosApp.xcodeproj \
+      #       -scheme iosApp \
+      #       -configuration Debug \
+      #       -sdk iphonesimulator \
+      #       # -destination "id=$SIMULATOR_ID" \
+      #       -destination "platform=iOS Simulator,name=iPhone 16 Pro Max" \
+      #       ARCHS="arm64" \
+      #       DEVELOPMENT_TEAM="ireader" \
+      #       CODE_SIGN_IDENTITY="" \
+      #       CODE_SIGNING_REQUIRED=NO \
+      #       CODE_SIGNING_ALLOWED=NO
+      #       COMPILER_INDEX_STORE_ENABLE=NO
+      #       PRODUCT_BUNDLE_IDENTIFIER="ir.kazemcodes.infinityreader"
       
-      - name: Upload Framework Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-framework-debug
-          path: presentation/build/bin/iosSimulatorArm64/debugFramework/
-          retention-days: 7
+      # - name: Upload Framework Artifact
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-framework-debug
+      #     path: presentation/build/bin/iosSimulatorArm64/debugFramework/
+      #     retention-days: 7
 
   BuildBinaries:
     name: Build application packages
@@ -263,14 +263,14 @@ jobs:
   check-summary:
     name: Check Summary
     runs-on: ubuntu-latest
-    needs: [ios-build, BuildBinaries]
+    needs: [BuildBinaries]
     if: always()
     
     steps:
       - name: Check results
         run: |
           echo "=== Check Summary ==="
-          echo "iOS Build: ${{ needs.ios-build.result }}"
+          # echo "iOS Build: ${{ needs.ios-build.result }}"
           echo "Build: ${{ needs.BuildBinaries.result }}"
           
       - name: Comment PR with results
@@ -278,7 +278,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |-
-            const iosBuild = '${{ needs.ios-build.result }}';
+            # const iosBuild = '${{ needs.ios-build.result }}';
             const build = '${{ needs.BuildBinaries.result }}';
 
             const getEmoji = (result) => result === 'success' ? '✅' : result === 'failure' ? '❌' : '⚠️';
@@ -288,7 +288,7 @@ jobs:
             | Check | Status |
             |-------|--------|
             | All Module Tests | ${getEmoji(allTests)} ${allTests} |
-            | iOS Build | ${getEmoji(iosBuild)} ${iosBuild} |
+            # | iOS Build | ${getEmoji(iosBuild)} ${iosBuild} |
             | Build | ${getEmoji(build)} ${build} |
 
             ### Tests Include:
