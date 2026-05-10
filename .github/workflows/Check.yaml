@@ -85,7 +85,8 @@ jobs:
             -configuration Debug \
             -sdk iphonesimulator \
             # -destination "id=$SIMULATOR_ID" \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
+            -destination "platform=iOS Simulator,name=iPhone 16 Pro Max" \
+            ARCHS="arm64" \
             DEVELOPMENT_TEAM="ireader" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
