@@ -100,6 +100,9 @@ class TranslationServiceImpl(
     private val circuitBreakerThreshold = 5
     private val circuitBreakerCooldownMs = 60000L // 1 minute
     
+    // Translation cache to avoid re-translating same paragraphs
+    private val translationCache = TranslationCache(maxSize = 2000)
+    
     // Offline engines that don't need rate limiting
     private val offlineEngineIds = setOf(
         0L,  // Google ML Kit (offline)
@@ -210,7 +213,9 @@ class TranslationServiceImpl(
                     bookId = bookId,
                     chapterName = chapter.name,
                     bookName = book.title,
-                    needsDownload = chapter.isEmpty()
+                    needsDownload = chapter.isEmpty(),
+                    sourceLang = currentSourceLang,
+                    targetLang = currentTargetLang
                 )
             }
             // Insert at front of queue
@@ -253,7 +258,9 @@ class TranslationServiceImpl(
                 bookId = bookId,
                 chapterName = chapter.name,
                 bookName = book.title,
-                needsDownload = chapter.isEmpty()
+                needsDownload = chapter.isEmpty(),
+                sourceLang = currentSourceLang,
+                targetLang = currentTargetLang
             )
             translationQueue.add(task)
             stateHolder.updateChapterProgress(
@@ -567,6 +574,28 @@ class TranslationServiceImpl(
                 )
             )
             
+            // Check cache first for each paragraph in the chunk
+            val cachedResults = mutableListOf<String?>()
+            val uncachedParagraphs = mutableListOf<String>()
+            val uncachedIndices = mutableListOf<Int>()
+            
+            for ((paraIndex, paragraph) in chunk.withIndex()) {
+                val cached = translationCache.get(paragraph, task.sourceLang, task.targetLang)
+                cachedResults.add(cached)
+                if (cached == null) {
+                    uncachedParagraphs.add(paragraph)
+                    uncachedIndices.add(paraIndex)
+                }
+            }
+            
+            // If all paragraphs are cached, skip translation
+            if (uncachedParagraphs.isEmpty()) {
+                Log.info { "Chunk ${index + 1}/$totalChunks: All ${chunk.size} paragraphs cached" }
+                result.addAll(cachedResults.filterNotNull())
+                translatedParagraphCount += chunk.size
+                continue
+            }
+            
             // Apply rate limiting between chunks for online engines
             if (index > 0 && !engine.isOffline) {
                 Log.info { "Rate limiting: waiting ${delayMs}ms before next chunk" }
@@ -593,9 +622,37 @@ class TranslationServiceImpl(
             when (retryResult) {
                 is TranslationRetryHandler.RetryResult.Success -> {
                     // Sanitize: remove leftover PARAGRAPH_BREAK markers from dumb AI models
-                    val chunkResult = TranslateEngine.sanitizeTranslatedParagraphs(retryResult.value)
+                    val translatedChunk = TranslateEngine.sanitizeTranslatedParagraphs(retryResult.value)
                         .map { TranslateEngine.sanitizeParagraphBreakMarkers(it) }
-                    result.addAll(chunkResult)
+                    
+                    // Cache the newly translated paragraphs
+                    for ((i, translated) in translatedChunk.withIndex()) {
+                        if (i < uncachedParagraphs.size) {
+                            translationCache.put(uncachedParagraphs[i], task.sourceLang, task.targetLang, translated)
+                        }
+                    }
+                    
+                    // Merge cached and newly translated results
+                    val mergedResult = mutableListOf<String>()
+                    var translatedIndex = 0
+                    for (i in chunk.indices) {
+                        val cachedIndex = uncachedIndices.indexOf(i)
+                        if (cachedIndex == -1) {
+                            // This paragraph was cached
+                            val cached = cachedResults[i]
+                            if (cached != null) {
+                                mergedResult.add(cached)
+                            }
+                        } else {
+                            // This paragraph was just translated
+                            if (translatedIndex < translatedChunk.size) {
+                                mergedResult.add(translatedChunk[translatedIndex])
+                                translatedIndex++
+                            }
+                        }
+                    }
+                    
+                    result.addAll(mergedResult)
                     translatedParagraphCount += chunk.size
                     // Reset consecutive failures on success
                     consecutiveFailures = 0
@@ -844,7 +901,9 @@ class TranslationServiceImpl(
             bookId = stateHolder.currentBookId.value ?: return ServiceResult.Error("No active translation"),
             chapterName = progress.chapterName,
             bookName = progress.bookName,
-            needsDownload = false
+            needsDownload = false,
+            sourceLang = currentSourceLang,
+            targetLang = currentTargetLang
         )
         
         translationQueue.add(task)
@@ -924,5 +983,7 @@ private data class TranslationTask(
     val bookId: Long,
     val chapterName: String,
     val bookName: String,
-    val needsDownload: Boolean
+    val needsDownload: Boolean,
+    val sourceLang: String = "en",
+    val targetLang: String = "en"
 )

@@ -31,6 +31,12 @@ import kotlin.coroutines.CoroutineContext
     fun repairDatabase()
     
     /**
+     * Verify database integrity by checking if required tables exist and have data.
+     * Returns true if database is valid, false if corruption detected.
+     */
+    fun verifyDatabaseIntegrity(): Boolean
+    
+    /**
      * Force a WAL checkpoint to ensure all data is written to the main database file.
      * This is important for ensuring data survives app kill/restart.
      */

@@ -93,6 +93,37 @@ class AndroidDatabaseHandler(
             // Silently ignore repair errors
         }
     }
+    
+    override fun verifyDatabaseIntegrity(): Boolean {
+        return try {
+            // Check if required tables exist and are accessible
+            val requiredTables = listOf(
+                "book",
+                "chapter",
+                "category",
+                "category_book",
+                "extension_source",  // Sources table
+                "plugin"             // Plugins table
+            )
+            
+            for (table in requiredTables) {
+                // Try to query each table - if it doesn't exist, this will throw
+                driver.executeQuery(
+                    identifier = null,
+                    sql = "SELECT COUNT(*) FROM $table",
+                    mapper = { cursor -> cursor.next() },
+                    parameters = 0
+                )
+            }
+            
+            // All tables exist and are accessible
+            true
+        } catch (e: Exception) {
+            // Database corruption detected - one or more tables are missing or corrupted
+            ireader.core.log.Log.error("Database integrity check failed: ${e.message}", e)
+            false
+        }
+    }
 
     override suspend fun <T> await(inTransaction: Boolean, block: suspend Database.() -> T): T {
         return dispatch(inTransaction, block)

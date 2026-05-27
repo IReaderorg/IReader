@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.*
@@ -15,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -22,6 +25,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.sync.ConflictResolutionStrategy
 import ireader.domain.models.sync.DiscoveredDevice
+import ireader.domain.models.sync.DeviceType
 import ireader.domain.models.sync.SyncStatus
 import ireader.presentation.ui.sync.components.ConflictResolutionDialog
 import ireader.presentation.ui.sync.components.DeviceListItem
@@ -66,9 +70,17 @@ fun SyncScreen(
     onUpdateManualIp: (String) -> Unit,
     onConnectManualIp: (String) -> Unit,
     onSetServerMode: (String) -> Unit,
+    onUpdateDeviceName: (String) -> Unit,
+    onUpdateDeviceType: (DeviceType) -> Unit,
+    onUpdateSyncLibrary: (Boolean) -> Unit,
+    onUpdateSyncReadingProgress: (Boolean) -> Unit,
+    onUpdateSyncDownloadedChapters: (Boolean) -> Unit,
+    onUpdateSyncSettings: (Boolean) -> Unit,
+    onSaveDeviceSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    var showDeviceSettings by remember { mutableStateOf(false) }
     
     // Show snackbar when error occurs
     LaunchedEffect(state.error) {
@@ -98,6 +110,18 @@ fun SyncScreen(
                     }
                 },
                 actions = {
+                    // Device settings button
+                    IconButton(
+                        onClick = { showDeviceSettings = true },
+                        modifier = Modifier.semantics {
+                            contentDescription = "Device Settings"
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Device Settings"
+                        )
+                    }
                     // Sync status indicator in TopAppBar
                     SyncStatusIndicator(
                         syncStatus = state.syncStatus,
@@ -330,6 +354,29 @@ fun SyncScreen(
             onDismiss = onDismissConflicts
         )
     }
+    
+    // Device settings dialog
+    if (showDeviceSettings) {
+        DeviceSettingsDialog(
+            currentDeviceName = state.deviceName,
+            currentDeviceType = state.deviceType,
+            syncLibrary = state.syncLibrary,
+            syncReadingProgress = state.syncReadingProgress,
+            syncDownloadedChapters = state.syncDownloadedChapters,
+            syncSettings = state.syncSettings,
+            onDeviceNameChange = onUpdateDeviceName,
+            onDeviceTypeChange = onUpdateDeviceType,
+            onSyncLibraryChange = onUpdateSyncLibrary,
+            onSyncReadingProgressChange = onUpdateSyncReadingProgress,
+            onSyncDownloadedChaptersChange = onUpdateSyncDownloadedChapters,
+            onSyncSettingsChange = onUpdateSyncSettings,
+            onDismiss = { showDeviceSettings = false },
+            onSave = {
+                onSaveDeviceSettings()
+                showDeviceSettings = false
+            }
+        )
+    }
 }
 
 /**
@@ -364,6 +411,13 @@ fun SyncScreen(
         onUpdateManualIp = viewModel::updateManualIp,
         onConnectManualIp = viewModel::connectToManualIp,
         onSetServerMode = viewModel::setServerMode,
+        onUpdateDeviceName = viewModel::updateDeviceName,
+        onUpdateDeviceType = viewModel::updateDeviceType,
+        onUpdateSyncLibrary = viewModel::updateSyncLibrary,
+        onUpdateSyncReadingProgress = viewModel::updateSyncReadingProgress,
+        onUpdateSyncDownloadedChapters = viewModel::updateSyncDownloadedChapters,
+        onUpdateSyncSettings = viewModel::updateSyncSettings,
+        onSaveDeviceSettings = viewModel::saveDeviceSettings,
         modifier = modifier
     )
 }

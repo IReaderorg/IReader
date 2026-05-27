@@ -52,6 +52,7 @@ import ireader.presentation.ui.book.components.ModernBookSummary
 import ireader.presentation.ui.book.components.NovelInfoFab
 import ireader.presentation.ui.book.components.TranslationWarningDialog
 import ireader.presentation.ui.book.components.ChapterRangeDownloadDialog
+import ireader.presentation.ui.book.components.DownloadNextChaptersDialog
 import ireader.presentation.ui.book.components.CharacterArtSection
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import androidx.compose.runtime.mutableStateOf
@@ -247,6 +248,13 @@ fun BookDetailScreen(
     ChapterRangeDownloadDialog(
         vm = vm,
         totalChapters = chapters.value.size
+    )
+    
+    // Download next chapters dialog
+    DownloadNextChaptersDialog(
+        vm = vm,
+        totalChapters = chapters.value.size,
+        currentChapterIndex = vm.currentChapterIndex
     )
 
     // Responsive layout: tablet uses two-panel, phone uses single column

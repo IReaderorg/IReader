@@ -13,9 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,8 +80,23 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.currentTimeToLong
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.bounce
+import ireader.i18n.resources.bounceoffset
+import ireader.i18n.resources.chapter_complete
+import ireader.i18n.resources.continue_reading
+import ireader.i18n.resources.first_chapter
+import ireader.i18n.resources.float
+import ireader.i18n.resources.glow
 import ireader.i18n.resources.image
+import ireader.i18n.resources.loading_1
+import ireader.i18n.resources.next_chapter
+import ireader.i18n.resources.pulse
+import ireader.i18n.resources.release_for_previous
+import ireader.i18n.resources.the_end
+import ireader.i18n.resources.view_comments
+import ireader.i18n.resources.void
+import ireader.i18n.resources.youve_completed_this_story
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeFontFamily
 import ireader.presentation.core.toComposeTextAlign
@@ -98,6 +111,30 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
+
+/**
+ * Enum representing tap zones for page mode navigation.
+ * LEFT: 30% of screen width - previous page
+ * CENTER: 40% of screen width - toggle reader mode
+ * RIGHT: 30% of screen width - next page
+ */
+private enum class TapZone {
+    LEFT, CENTER, RIGHT
+}
+
+/**
+ * Determine the tap zone based on x-coordinate and screen width.
+ * LEFT: 30% of screen width - previous page
+ * CENTER: 40% of screen width - toggle reader mode
+ * RIGHT: 30% of screen width - next page
+ */
+private fun getTapZone(x: Float, screenWidth: Float): TapZone {
+    return when {
+        x < screenWidth * 0.3f -> TapZone.LEFT
+        x > screenWidth * 0.7f -> TapZone.RIGHT
+        else -> TapZone.CENTER
+    }
+}
 
 @Composable
 fun ReaderText(
@@ -116,23 +153,23 @@ fun ReaderText(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
-    
+
     // ==================== Scroll Position Restoration ====================
     // This logic restores scroll position from lastPageRead when opening a chapter
     // Works for both Page and Continues reading modes
-    
+
     // Track the last chapter ID to detect chapter changes
     var lastScrolledChapterId by remember { mutableStateOf<Long?>(null) }
-    
+
     // Track if we've done initial scroll restoration for this screen instance  
     var hasRestoredInitialPosition by remember { mutableStateOf(false) }
-    
+
     // Collect state from ViewModel's StateFlow for reliable observation
     val readerState by vm.state.collectAsState()
     val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
     val currentChapterId = successState?.currentChapter?.id
     val lastPageRead = successState?.currentChapter?.lastPageRead ?: 0L
-    
+
     // Refresh chapter from database when screen is entered
     // This ensures we have the fresh lastPageRead even if ViewModel is cached
     LaunchedEffect(Unit) {
@@ -140,36 +177,36 @@ fun ReaderText(
         kotlinx.coroutines.delay(50)
         vm.refreshCurrentChapterFromDatabase()
     }
-    
+
     // Single LaunchedEffect to handle initial scroll position restoration
     // This runs for BOTH Page and Continues modes
     // Key: chapter ID change triggers this, scrollToEnd is handled separately
     LaunchedEffect(key1 = currentChapterId) {
         val chapterId = currentChapterId ?: return@LaunchedEffect
-        
+
         // Wait for database refresh to complete (triggered by the Unit LaunchedEffect above)
         // This ensures we get the fresh lastPageRead from the database
         kotlinx.coroutines.delay(100)
-        
+
         // Get the fresh state AFTER the delay (not stale composition capture)
         val freshState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
         val currentLastPageRead = freshState?.currentChapter?.lastPageRead ?: 0L
         val contentSize = freshState?.currentChapter?.content?.size ?: 0
         val shouldScrollToEnd = freshState?.scrollToEndOnChapterChange ?: false
-        
 
-        
+
+
         // Check if this is the same chapter we already processed
         if (chapterId == lastScrolledChapterId) {
             return@LaunchedEffect
         }
-        
+
         // Mark that we're processing this chapter
         val isFirstChapterOfSession = lastScrolledChapterId == null
         lastScrolledChapterId = chapterId
-        
 
-        
+
+
         // Wait for LazyColumn to have items
         var totalItems = 0
         repeat(50) { // Wait up to ~800ms for content
@@ -177,15 +214,15 @@ fun ReaderText(
             totalItems = lazyListState.layoutInfo.totalItemsCount
             if (totalItems > 0) return@repeat
         }
-        
 
-        
+
+
         if (totalItems == 0) {
 
             hasRestoredInitialPosition = true
             return@LaunchedEffect
         }
-        
+
         // Decide what scroll action to take
         when {
             shouldScrollToEnd -> {
@@ -212,16 +249,16 @@ fun ReaderText(
                 lazyListState.scrollToItem(0)
             }
         }
-        
+
         hasRestoredInitialPosition = true
 
     }
-    
+
     // Separate LaunchedEffect for scrollToEnd changes (when navigating to previous chapter)
     LaunchedEffect(key1 = successState?.scrollToEndOnChapterChange) {
         val shouldScrollToEnd = successState?.scrollToEndOnChapterChange ?: false
         if (!shouldScrollToEnd) return@LaunchedEffect
-        
+
         // Only scroll to end if we've already set up this chapter
         if (lastScrolledChapterId == currentChapterId && hasRestoredInitialPosition) {
             repeat(20) {
@@ -237,13 +274,13 @@ fun ReaderText(
             }
         }
     }
-    
+
     // ==================== Periodic Scroll Position Saving ====================
     // Save scroll position periodically as user scrolls to prevent data loss
     // This ensures progress is saved even if app crashes or screen is disposed abruptly
-    
+
     var lastSavedScrollPosition by remember { mutableStateOf(-1) }
-    
+
     // Immediately update ViewModel's tracked position on every scroll
     // This ensures the position is available even if the debounced save hasn't completed
     LaunchedEffect(key1 = lazyListState.firstVisibleItemIndex) {
@@ -253,17 +290,17 @@ fun ReaderText(
             vm.saveScrollPosition(currentPosition.toLong())
         }
     }
-    
+
     // Debounced save to database - saves after user stops scrolling
     LaunchedEffect(key1 = lazyListState.firstVisibleItemIndex, key2 = successState?.currentChapter?.id) {
         val chapter = successState?.currentChapter ?: return@LaunchedEffect
         val currentPosition = lazyListState.firstVisibleItemIndex
-        
+
         // Only save if position has actually changed and we've finished initial restoration
         if (hasRestoredInitialPosition && currentPosition != lastSavedScrollPosition) {
             // Debounce: wait a bit before saving to database to avoid too many writes
             kotlinx.coroutines.delay(500) // 500ms debounce (reduced from 1s for better reliability)
-            
+
             // Check again if position is still the same (user stopped scrolling)
             if (lazyListState.firstVisibleItemIndex == currentPosition) {
 
@@ -271,13 +308,13 @@ fun ReaderText(
             }
         }
     }
-    
+
     // ==================== Toggle Mode Debounce ====================
-    
+
     // Add debounce mechanism for toggleReaderMode
     var lastToggleTime by remember { mutableStateOf(0L) }
     val debounceInterval = 500L // 500ms debounce
-    
+
     val debouncedToggleReaderMode = remember {
         {
             val currentTime = currentTimeToLong()
@@ -287,7 +324,7 @@ fun ReaderText(
             }
         }
     }
-    
+
     BoxWithConstraints(
         modifier = Modifier
             .clickable(
@@ -321,7 +358,7 @@ fun ReaderText(
             // At top if first item is visible and scroll offset is minimal
             firstIndex == 0 && firstOffset <= 20
         }}
-        
+
         val isAtBottom by remember { derivedStateOf {
             val layoutInfo = lazyListState.layoutInfo
             val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
@@ -344,7 +381,7 @@ fun ReaderText(
                 result
             }
         }}
-        
+
         // Check if content doesn't fill the screen (both at top and bottom)
         // This means nested scroll won't work, so we need direct drag handling
         val contentDoesNotFillScreen by remember { derivedStateOf {
@@ -363,7 +400,7 @@ fun ReaderText(
                 isFirstVisible && isLastVisible && contentHeight <= viewportHeight
             }
         }}
-        
+
         // Get chapter names for indicators
         val currentIndex = vm.currentChapterIndex
         val chapters = vm.stateChapters
@@ -374,7 +411,7 @@ fun ReaderText(
 
         // Use lazyValue for immediate UI updates during slider drag
         val refreshTriggerPx = with(androidx.compose.ui.platform.LocalDensity.current) { 80.dp.toPx() }
-        
+
         Box(
             modifier = Modifier
                 .padding(
@@ -403,7 +440,7 @@ fun ReaderText(
                                     isTop = true
                                 )
                             }
-                        }, 
+                        },
                         onRefresh = {
                             onPrev()
                         }
@@ -430,104 +467,129 @@ fun ReaderText(
                     ),
                 ),
             ) {
-                Box(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
                             // Translate content based on swipe state for drag effect
                             translationY = swipeState.indicatorOffset * 0.3f
                         }
-                        .pointerInput(contentDoesNotFillScreen, hasPrevChapter, hasNextChapter) {
-                            // Combined gesture handling
-                            if (contentDoesNotFillScreen && (hasPrevChapter || hasNextChapter)) {
-                                // When content doesn't fill screen, handle both tap and drag
-                                // But allow horizontal gestures to pass through for drawer
-                                awaitEachGesture {
-                                    val down = awaitFirstDown(requireUnconsumed = false)
-                                    
-                                    var dragAmount = 0f
-                                    var isDragging = false
-                                    var isHorizontalGesture = false // Track if this is a horizontal gesture (drawer)
-                                    val touchSlop = viewConfiguration.touchSlop
-                                    
-                                    // Track pointer movement
-                                    var currentPosition = down.position
-                                    var pointer = down
-                                    
-                                    while (true) {
-                                        val event = awaitPointerEvent()
-                                        val change = event.changes.firstOrNull { it.id == pointer.id }
-                                        
-                                        if (change == null || !change.pressed) {
-                                            // Pointer released
-                                            if (isDragging && !isHorizontalGesture) {
-                                                if (dragAmount > refreshTriggerPx && hasPrevChapter) {
-                                                    onPrev()
-                                                } else if (dragAmount < -refreshTriggerPx && hasNextChapter) {
-                                                    onNext()
-                                                }
-                                                swipeState.isSwipeInProgress = false
-                                                scope.launch {
-                                                    swipeState.animateOffsetTo(0f)
-                                                }
-                                            } else if (!isDragging && !isHorizontalGesture) {
-                                                // It was a tap
-                                                debouncedToggleReaderMode()
-                                            }
-                                            break
-                                        }
-                                        
-                                        // If already determined to be horizontal gesture, don't process further
-                                        if (isHorizontalGesture) {
-                                            continue
-                                        }
-                                        
-                                        val deltaY = change.position.y - currentPosition.y
-                                        val deltaX = change.position.x - currentPosition.x
-                                        currentPosition = change.position
-                                        
-                                        val totalDeltaY = change.position.y - down.position.y
-                                        val totalDeltaX = change.position.x - down.position.x
-                                        
-                                        if (!isDragging) {
-                                            // Check if movement exceeds touch slop
-                                            val absX = kotlin.math.abs(totalDeltaX)
-                                            val absY = kotlin.math.abs(totalDeltaY)
-                                            
-                                            if (absX > touchSlop || absY > touchSlop) {
-                                                // Determine gesture direction - if horizontal movement is dominant, let it pass through for drawer
-                                                if (absX > absY * 1.5f) {
-                                                    // Horizontal gesture - likely drawer swipe, don't consume
-                                                    isHorizontalGesture = true
-                                                    continue
-                                                } else if (absY > touchSlop) {
-                                                    // Vertical gesture - handle chapter navigation
-                                                    isDragging = true
-                                                    swipeState.isSwipeInProgress = true
-                                                }
-                                            }
-                                        }
-                                        
-                                        if (isDragging) {
-                                            dragAmount += deltaY
-                                            val dragMultiplier = 0.5f
-                                            scope.launch {
-                                                swipeState.dispatchScrollDelta(deltaY * dragMultiplier)
-                                            }
-                                            change.consume()
-                                        }
-                                    }
-                                }
-                            } else {
-                                // Normal case - just tap detection
-                                detectTapGestures(
-                                    onTap = {
-                                        debouncedToggleReaderMode()
-                                    }
-                                )
-                            }
-                        }
                 ) {
+                    // Capture constraints for use in tap zone detection
+                    val screenWidth = constraints.maxWidth.toFloat()
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(contentDoesNotFillScreen, hasPrevChapter, hasNextChapter) {
+                                // Combined gesture handling
+                                if (contentDoesNotFillScreen && (hasPrevChapter || hasNextChapter)) {
+                                    // When content doesn't fill screen, handle both tap and drag
+                                    // But allow horizontal gestures to pass through for drawer
+                                    awaitEachGesture {
+                                        val down = awaitFirstDown(requireUnconsumed = false)
+
+                                        var dragAmount = 0f
+                                        var isDragging = false
+                                        var isHorizontalGesture = false // Track if this is a horizontal gesture (drawer)
+                                        val touchSlop = viewConfiguration.touchSlop
+
+                                        // Track pointer movement
+                                        var currentPosition = down.position
+                                        var pointer = down
+
+                                        while (true) {
+                                            val event = awaitPointerEvent()
+                                            val change = event.changes.firstOrNull { it.id == pointer.id }
+
+                                            if (change == null || !change.pressed) {
+                                                // Pointer released
+                                                if (isDragging && !isHorizontalGesture) {
+                                                    if (dragAmount > refreshTriggerPx && hasPrevChapter) {
+                                                        onPrev()
+                                                    } else if (dragAmount < -refreshTriggerPx && hasNextChapter) {
+                                                        onNext()
+                                                    }
+                                                    swipeState.isSwipeInProgress = false
+                                                    scope.launch {
+                                                        swipeState.animateOffsetTo(0f)
+                                                    }
+                                                 } else if (!isDragging && !isHorizontalGesture) {
+                                                     // It was a tap - use zone detection for Page mode
+                                                     if (vm.readingMode.value == ReadingMode.Page) {
+                                                         val tapZone = getTapZone(down.position.x, screenWidth)
+                                                         when (tapZone) {
+                                                             TapZone.LEFT -> onPrev()
+                                                             TapZone.RIGHT -> onNext()
+                                                             TapZone.CENTER -> debouncedToggleReaderMode()
+                                                         }
+                                                     } else {
+                                                         debouncedToggleReaderMode()
+                                                     }
+                                                 }
+                                                break
+                                            }
+
+                                            // If already determined to be horizontal gesture, don't process further
+                                            if (isHorizontalGesture) {
+                                                continue
+                                            }
+
+                                            val deltaY = change.position.y - currentPosition.y
+                                            val deltaX = change.position.x - currentPosition.x
+                                            currentPosition = change.position
+
+                                            val totalDeltaY = change.position.y - down.position.y
+                                            val totalDeltaX = change.position.x - down.position.x
+
+                                            if (!isDragging) {
+                                                // Check if movement exceeds touch slop
+                                                val absX = kotlin.math.abs(totalDeltaX)
+                                                val absY = kotlin.math.abs(totalDeltaY)
+
+                                                if (absX > touchSlop || absY > touchSlop) {
+                                                    // Determine gesture direction - if horizontal movement is dominant, let it pass through for drawer
+                                                    if (absX > absY * 1.5f) {
+                                                        // Horizontal gesture - likely drawer swipe, don't consume
+                                                        isHorizontalGesture = true
+                                                        continue
+                                                    } else if (absY > touchSlop) {
+                                                        // Vertical gesture - handle chapter navigation
+                                                        isDragging = true
+                                                        swipeState.isSwipeInProgress = true
+                                                    }
+                                                }
+                                            }
+
+                                            if (isDragging) {
+                                                dragAmount += deltaY
+                                                val dragMultiplier = 0.5f
+                                                scope.launch {
+                                                    swipeState.dispatchScrollDelta(deltaY * dragMultiplier)
+                                                }
+                                                change.consume()
+                                            }
+                                        }
+                                    }
+                                 } else {
+                                     // Normal case - tap detection with zone support for Page mode
+                                     detectTapGestures(
+                                         onTap = { offset ->
+                                             if (vm.readingMode.value == ReadingMode.Page) {
+                                                 val tapZone = getTapZone(offset.x, screenWidth)
+                                                 when (tapZone) {
+                                                     TapZone.LEFT -> onPrev()
+                                                     TapZone.RIGHT -> onNext()
+                                                     TapZone.CENTER -> debouncedToggleReaderMode()
+                                                 }
+                                             } else {
+                                                 debouncedToggleReaderMode()
+                                             }
+                                         }
+                                     )
+                                 }
+                             }
+                    ) {
                     // Use copy mode OR selectable mode for text selection
                     TextSelectionContainer(selectable = vm.copyModeActive || vm.selectableMode.value) {
                         when (vm.readingMode.value) {
@@ -573,7 +635,7 @@ fun ReaderText(
             }
 
         }
-        
+
         // Copy Mode Overlay
         ireader.presentation.ui.reader.components.CopyModeOverlay(
             isActive = vm.copyModeActive,
@@ -588,6 +650,7 @@ fun ReaderText(
 
     }
 
+}
 }
 
 @Composable
@@ -656,38 +719,38 @@ private fun OptimizedPagedReaderText(
     onShowComments: (chapter: Chapter) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    
+
     // NOTE: Scroll position restoration is now handled in the parent ReaderText composable
     // This ensures it works for both Page and Continues reading modes
-    
+
     // Collect state from ViewModel's StateFlow for reliable observation
     val readerState by vm.state.collectAsState()
     val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
-    
+
     // Track scroll progress for reading time estimation
     val visibleItemInfo = remember { derivedStateOf { lazyListState.layoutInfo } }
     LaunchedEffect(key1 = visibleItemInfo.value, key2 = vm.stateChapter?.id) {
         val layoutInfo = lazyListState.layoutInfo
         val totalItems = layoutInfo.totalItemsCount
         val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-        
+
         if (totalItems > 0 && !vm.isLoading) {
             val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
             vm.updateReadingTimeEstimation(scrollProgress)
         }
     }
-    
+
     // Auto-scroll logic for optimized Page mode
     LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
         if (vm.autoScrollMode) {
             while (vm.autoScrollMode) {
                 val scrollAmount = vm.autoScrollOffset.value.toFloat()
-                
+
                 // Check if we've reached the end before scrolling
                 val layoutInfo = lazyListState.layoutInfo
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
                 val isAtEnd = lastVisibleItem?.index == layoutInfo.totalItemsCount - 1
-                
+
                 if (isAtEnd) {
                     // Stop auto-scroll before advancing to prevent double-advance
                     vm.autoScrollMode = false
@@ -695,9 +758,9 @@ private fun OptimizedPagedReaderText(
                     onNext()
                     break
                 }
-                
+
                 lazyListState.scrollBy(scrollAmount)
-                
+
                 // Delay based on interval (smooth scrolling)
                 kotlinx.coroutines.delay(16L) // ~60fps
             }
@@ -705,7 +768,7 @@ private fun OptimizedPagedReaderText(
     }
     // Content is already filtered at the data layer
     val content = successState?.currentContent ?: emptyList()
-    
+
     // Check chapter navigation availability
     val currentIndex = vm.currentChapterIndex
     val chapters = vm.stateChapters
@@ -715,7 +778,7 @@ private fun OptimizedPagedReaderText(
     val nextChapterName = if (hasNextChapter) chapters.getOrNull(currentIndex + 1)?.name else null
 
     val prevChapter = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1) else null
-    
+
     Box(modifier = Modifier.fillMaxSize()) {
         ILazyColumnScrollbar(
             listState = lazyListState,
@@ -732,7 +795,7 @@ private fun OptimizedPagedReaderText(
                 state = lazyListState,
             ) {
 
-                
+
                 // Chapter content items
                 items(
                     count = content.size,
@@ -752,7 +815,7 @@ private fun OptimizedPagedReaderText(
                         )
                     }
                 }
-                
+
                 // Void space at end of chapter with comments (only shown when content exists)
                 // Users must read the chapter before seeing the "chapter complete" section
                 if (content.isNotEmpty()) {
@@ -771,7 +834,7 @@ private fun OptimizedPagedReaderText(
             }
         }
     }
-    
+
 
 }
 
@@ -791,7 +854,7 @@ private fun LegacyPagedReaderText(
     toggleReaderMode: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    
+
     // Track scroll progress for reading time estimation in Page mode
     LaunchedEffect(key1 = scrollState.value, key2 = scrollState.maxValue, key3 = vm.stateChapter?.id) {
         if (scrollState.maxValue > 0 && !vm.isLoading) {
@@ -799,13 +862,13 @@ private fun LegacyPagedReaderText(
             vm.updateReadingTimeEstimation(scrollProgress)
         }
     }
-    
+
     // Auto-scroll logic for Page mode
     LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
         if (vm.autoScrollMode) {
             while (vm.autoScrollMode) {
                 val scrollAmount = vm.autoScrollOffset.value.toFloat()
-                
+
                 // Check if we've reached the end before scrolling
                 if (scrollState.value >= scrollState.maxValue) {
                     // Stop auto-scroll before advancing to prevent double-advance
@@ -814,15 +877,15 @@ private fun LegacyPagedReaderText(
                     onNext()
                     break
                 }
-                
+
                 scrollState.scrollBy(scrollAmount)
-                
+
                 // Delay based on interval (smooth scrolling)
                 kotlinx.coroutines.delay(16L) // ~60fps
             }
         }
     }
-    
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Use lazyValue for immediate UI updates during slider drag
         IColumnScrollbar(
@@ -840,7 +903,7 @@ private fun LegacyPagedReaderText(
             val readerState by vm.state.collectAsState()
             val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
             val content = successState?.currentContent ?: emptyList()
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -872,7 +935,7 @@ private fun MainText(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val context = LocalPlatformContext.current
-    
+
     // Use key to prevent unnecessary recomposition when only index changes
     androidx.compose.runtime.key(page) {
         when (page) {
@@ -969,7 +1032,7 @@ private fun StyleText(
     val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
     val currentContent = successState?.currentContent ?: emptyList()
     val isLastIndex = index == currentContent.lastIndex
-    
+
     val originalText = setText(
         text = page.text,
         index = index,
@@ -978,11 +1041,11 @@ private fun StyleText(
         contentPadding = vm.distanceBetweenParagraphs.lazyValue,
         bottomContentPadding = vm.bottomContentPadding.lazyValue
     )
-    
+
     // Check if bilingual mode is enabled and we have a translation for this paragraph
     val bilingualModeEnabled = vm.bilingualModeEnabled.value
     val translatedText = vm.getTranslationForParagraph(index)
-    
+
     if (bilingualModeEnabled && translatedText != null) {
         // Display bilingual text
         val bilingualMode = if (vm.bilingualModeLayout.value == 0) {
@@ -990,7 +1053,7 @@ private fun StyleText(
         } else {
             ireader.presentation.ui.reader.components.BilingualMode.PARAGRAPH_BY_PARAGRAPH
         }
-        
+
         ireader.presentation.ui.reader.components.BilingualText(
             originalText = originalText,
             translatedText = translatedText,
@@ -998,8 +1061,8 @@ private fun StyleText(
             modifier = modifier
                 .fillMaxWidth(),
             fontSize = vm.fontSize.lazyValue.sp,
-            fontFamily = remember(vm.font?.value, vm.fontVersion) { 
-                vm.font?.value?.fontFamily?.toComposeFontFamily() 
+            fontFamily = remember(vm.font?.value, vm.fontVersion) {
+                vm.font?.value?.fontFamily?.toComposeFontFamily()
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             originalColor = vm.textColor.value.toComposeColor(),
@@ -1045,8 +1108,8 @@ private fun StyleText(
                 .fillMaxWidth()
                 .padding(horizontal = vm.paragraphsIndent.lazyValue.dp),
             fontSize = vm.fontSize.lazyValue.sp,
-            fontFamily = remember(vm.font?.value, vm.fontVersion) { 
-                vm.font?.value?.fontFamily?.toComposeFontFamily() 
+            fontFamily = remember(vm.font?.value, vm.fontVersion) {
+                vm.font?.value?.fontFamily?.toComposeFontFamily()
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value.toComposeColor(),
@@ -1061,8 +1124,8 @@ private fun StyleText(
             modifier = modifier
                 .fillMaxWidth(),
             fontSize = vm.fontSize.lazyValue.sp,
-            fontFamily = remember(vm.font?.value, vm.fontVersion) { 
-                vm.font?.value?.fontFamily?.toComposeFontFamily() 
+            fontFamily = remember(vm.font?.value, vm.fontVersion) {
+                vm.font?.value?.fontFamily?.toComposeFontFamily()
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value.toComposeColor(),
@@ -1096,12 +1159,12 @@ private fun StyleTextOptimized(
     val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
     val currentContent = successState?.currentContent ?: emptyList()
     val isLastIndex = index == currentContent.lastIndex
-    
+
     // Use lazyValue for immediate UI updates during slider drag
     val originalText = remember(
-        page.text, 
-        index, 
-        isLastIndex, 
+        page.text,
+        index,
+        isLastIndex,
         vm.topContentPadding.lazyValue,
         vm.distanceBetweenParagraphs.lazyValue,
         vm.bottomContentPadding.lazyValue,
@@ -1117,11 +1180,11 @@ private fun StyleTextOptimized(
             paragraphIndent = vm.paragraphsIndent.lazyValue
         )
     }
-    
+
     // Check if bilingual mode is enabled and we have a translation for this paragraph
     val bilingualModeEnabled = vm.bilingualModeEnabled.value
     val translatedText = vm.getTranslationForParagraph(index)
-    
+
     if (bilingualModeEnabled && translatedText != null) {
         // Display bilingual text
         val bilingualMode = if (vm.bilingualModeLayout.value == 0) {
@@ -1129,7 +1192,7 @@ private fun StyleTextOptimized(
         } else {
             ireader.presentation.ui.reader.components.BilingualMode.PARAGRAPH_BY_PARAGRAPH
         }
-        
+
         ireader.presentation.ui.reader.components.BilingualText(
             originalText = originalText,
             translatedText = translatedText,
@@ -1165,7 +1228,7 @@ private fun StyleTextOptimized(
                 }
             }
         }
-        
+
         Text(
             text = bionicText,
             modifier = modifier
@@ -1222,17 +1285,17 @@ private fun ContinuesReaderPage(
     onShowComments: (chapter: Chapter) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    
+
     // Track current chapter for state updates
     var lastChapterId: Chapter? by remember { mutableStateOf(null) }
-    
+
     LaunchedEffect(key1 = lastChapterId) {
         lastChapterId?.let { chapter ->
             onChapterShown(chapter)
             // Chapter index is managed by the ViewModel state
         }
     }
-    
+
     // Scroll to appropriate position when navigating to previous chapter
     LaunchedEffect(key1 = vm.stateChapter?.id, key2 = vm.scrollToEndOnChapterChange) {
         if (vm.scrollToEndOnChapterChange) {
@@ -1241,10 +1304,10 @@ private fun ContinuesReaderPage(
             if (contentSize > 0) {
                 // Structure: header (1) + content items (N) + void (1)
                 val voidIndex = contentSize + 1
-                
+
                 // Wait a bit for the LazyColumn to be populated
                 kotlinx.coroutines.delay(150)
-                
+
                 // Scroll to the void (end of chapter)
                 val totalItems = scrollState.layoutInfo.totalItemsCount
                 if (totalItems > voidIndex) {
@@ -1257,7 +1320,7 @@ private fun ContinuesReaderPage(
             vm.scrollToEndOnChapterChange = false
         }
     }
-    
+
     // Build items for infinite scroll with void spaces
     val items = remember(vm.chapterShell, vm.stateChapters, vm.currentChapterIndex) {
         buildInfiniteReaderItems(
@@ -1266,10 +1329,10 @@ private fun ContinuesReaderPage(
             currentIndex = vm.currentChapterIndex
         )
     }
-    
+
     // Track visible item to update chapter state
     val visibleItemInfo = remember { derivedStateOf { scrollState.layoutInfo } }
-    
+
     LaunchedEffect(key1 = visibleItemInfo.value.visibleItemsInfo.firstOrNull()?.key) {
         runCatching {
             val visibleKey = scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key?.toString()
@@ -1293,30 +1356,30 @@ private fun ContinuesReaderPage(
             ireader.core.log.Log.error("Error tracking visible chapter", e)
         }
     }
-    
+
     // Track scroll progress for reading time estimation
     LaunchedEffect(key1 = visibleItemInfo.value, key2 = vm.stateChapter?.id) {
         val layoutInfo = scrollState.layoutInfo
         val totalItems = layoutInfo.totalItemsCount
         val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-        
+
         if (totalItems > 0 && !vm.isLoading) {
             val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
             vm.updateReadingTimeEstimation(scrollProgress)
         }
     }
-    
+
     // Auto-scroll logic for Continues mode
     LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
         if (vm.autoScrollMode) {
             while (vm.autoScrollMode) {
                 val scrollAmount = vm.autoScrollOffset.value.toFloat()
-                
+
                 // Check if we've reached the end before scrolling
                 val layoutInfo = scrollState.layoutInfo
                 val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
                 val isAtEnd = lastVisibleItem?.index == layoutInfo.totalItemsCount - 1
-                
+
                 if (isAtEnd) {
                     // Stop auto-scroll before advancing to prevent double-advance
                     vm.autoScrollMode = false
@@ -1324,15 +1387,15 @@ private fun ContinuesReaderPage(
                     onNext()
                     break
                 }
-                
+
                 scrollState.scrollBy(scrollAmount)
-                
+
                 // Delay based on interval (smooth scrolling)
                 kotlinx.coroutines.delay(16L) // ~60fps
             }
         }
     }
-    
+
     // Check chapter navigation availability
     val currentIndex = vm.currentChapterIndex
     val chapters = vm.stateChapters
@@ -1376,7 +1439,7 @@ private fun ContinuesReaderPage(
                         )
                     }
                 }
-                
+
                 // Void space at end of chapter (only shown when content exists)
                 // Users must read the chapter before seeing the "chapter complete" section
                 if (content.isNotEmpty()) {
@@ -1406,13 +1469,13 @@ private fun buildInfiniteReaderItems(
     currentIndex: Int
 ): List<Any> {
     if (chapterShell.isEmpty()) return emptyList()
-    
+
     val items = mutableListOf<Any>()
     val prevChapter = if (currentIndex > 0) allChapters.getOrNull(currentIndex - 1) else null
-    
+
     // Add prev indicator
     items.add("prev-indicator" to prevChapter)
-    
+
     chapterShell.forEachIndexed { shellIndex, chapter ->
         items.add("header" to chapter)
         chapter.content?.forEachIndexed { index, page ->
@@ -1420,7 +1483,7 @@ private fun buildInfiniteReaderItems(
         }
         items.add("void" to chapter)
     }
-    
+
     return items
 }
 
@@ -1441,7 +1504,7 @@ private fun OverscrollPrevIndicator(
     val showThreshold = 20f
     val maxOffset = 120f
     val progress = ((dragOffset - showThreshold) / (maxOffset - showThreshold)).coerceIn(0f, 1f)
-    
+
     if (progress > 0f) {
         val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.bounce))
         val bounceOffset by infiniteTransition.animateFloat(
@@ -1453,7 +1516,7 @@ private fun OverscrollPrevIndicator(
             ),
             label = localizeHelper.localize(Res.string.bounceoffset)
         )
-        
+
         Box(
             modifier = modifier
                 .fillMaxWidth()
@@ -1481,7 +1544,7 @@ private fun OverscrollPrevIndicator(
                     tint = textColor.copy(alpha = 0.6f * progress),
                     modifier = Modifier.size(24.dp)
                 )
-                
+
                 if (prevChapter != null && progress > 0.5f) {
                     Text(
                         text = localizeHelper.localize(Res.string.release_for_previous),
@@ -1526,7 +1589,7 @@ private fun ChapterVoidSpace(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.void))
-    
+
     // Smooth floating animation
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -1537,7 +1600,7 @@ private fun ChapterVoidSpace(
         ),
         label = localizeHelper.localize(Res.string.float)
     )
-    
+
     // Breathing glow effect
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.2f,
@@ -1548,7 +1611,7 @@ private fun ChapterVoidSpace(
         ),
         label = localizeHelper.localize(Res.string.glow)
     )
-    
+
     // Pulse for the continue button
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -1559,13 +1622,13 @@ private fun ChapterVoidSpace(
         ),
         label = localizeHelper.localize(Res.string.pulse)
     )
-    
+
     // Use reader colors directly - no hardcoded colors
     val contentTextColor = textColor
     val contentTextColorMuted = textColor.copy(alpha = 0.6f)
     val contentTextColorSubtle = textColor.copy(alpha = 0.35f)
     val accentColor = textColor.copy(alpha = 0.8f)
-    
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -1577,7 +1640,7 @@ private fun ChapterVoidSpace(
             modifier = Modifier
                 .size(150.dp)
                 .align(Alignment.Center)
-                .graphicsLayer { 
+                .graphicsLayer {
                     translationY = floatOffset
                     alpha = glowAlpha * 0.3f
                 }
@@ -1591,7 +1654,7 @@ private fun ChapterVoidSpace(
                     )
                 )
         )
-        
+
         // Content
         Column(
             modifier = Modifier
@@ -1615,9 +1678,9 @@ private fun ChapterVoidSpace(
                         )
                     )
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Floating chapter completion content (no card, just text)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -1632,9 +1695,9 @@ private fun ChapterVoidSpace(
                     tint = accentColor,
                     modifier = Modifier.size(28.dp)
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
                     text = localizeHelper.localize(Res.string.chapter_complete),
                     color = contentTextColorMuted,
@@ -1642,9 +1705,9 @@ private fun ChapterVoidSpace(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 3.sp
                 )
-                
+
                 Spacer(modifier = Modifier.height(10.dp))
-                
+
                 Text(
                     text = chapter.name,
                     color = contentTextColor.copy(alpha = 0.9f),
@@ -1655,9 +1718,9 @@ private fun ChapterVoidSpace(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(28.dp))
-            
+
             // Comment button - uses reader text color
             OutlinedButton(
                 onClick = onShowComments,
@@ -1684,7 +1747,7 @@ private fun ChapterVoidSpace(
                     color = contentTextColorSubtle,
                 )
             }
-            
+
             // Loading indicator when fetching next chapter
             if (isLoading) {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -1700,11 +1763,11 @@ private fun ChapterVoidSpace(
                     fontSize = 12.sp
                 )
             }
-            
+
             // Next chapter section
             if (!isLast && !isLoading) {
                 Spacer(modifier = Modifier.height(32.dp))
-                
+
                 // Decorative dots
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -1727,15 +1790,15 @@ private fun ChapterVoidSpace(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Continue button with pulse
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .clickable { onNextChapter() }
-                        .graphicsLayer { 
+                        .graphicsLayer {
                             scaleX = pulseScale
                             scaleY = pulseScale
                         }
@@ -1760,7 +1823,7 @@ private fun ChapterVoidSpace(
                 }
             } else if (isLast) {
                 Spacer(modifier = Modifier.height(28.dp))
-                
+
                 // End of book indicator
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -1788,9 +1851,9 @@ private fun ChapterVoidSpace(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             // Bottom decorative line
             Box(
                 modifier = Modifier
@@ -1825,7 +1888,7 @@ private fun ReaderHorizontalScreen(
     // RTL support: In RTL layouts, swap left/right tap zones for natural reading direction
     val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
     val isRtl = layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl
-    
+
     if (!vm.verticalScrolling.value) {
         Row(modifier = Modifier.fillMaxSize()) {
             // Left zone: Previous in LTR, Next in RTL
@@ -1908,16 +1971,16 @@ private fun ReaderHorizontalScreen(
 /**
  * Get highlight color based on background color
  * Returns a color that is visible in both light and dark themes
- * 
+ *
  * Requirements: 5.2 - Highlight must be visible in light and dark themes
  */
 private fun getHighlightColor(backgroundColor: Color): Color {
     // Calculate relative luminance using the standard formula
     // https://www.w3.org/TR/WCAG20/#relativeluminancedef
-    val luminance = (0.299 * backgroundColor.red + 
-                    0.587 * backgroundColor.green + 
+    val luminance = (0.299 * backgroundColor.red +
+                    0.587 * backgroundColor.green +
                     0.114 * backgroundColor.blue)
-    
+
     // Return appropriate highlight color based on background luminance
     return if (luminance > 0.5) {
         // Light background (e.g., white, light gray, beige)
@@ -1943,14 +2006,14 @@ private fun setText(
     if (text.isEmpty()) {
         return ""
     }
-    
+
     val stringBuilder = StringBuilder()
-    
+
     // Add top padding only if this is the first chunk (index 0)
     if (index == 0 && topContentPadding > 0) {
         stringBuilder.append("\n".repeat(topContentPadding.coerceAtLeast(0)))
     }
-    
+
     // Add the text content without any leading newlines for the first paragraph
     val cleanedText = if (index == 0) {
         // For the first paragraph, remove any leading newlines
@@ -1959,7 +2022,7 @@ private fun setText(
         // For other paragraphs, keep as is
         text
     }
-    
+
     // Add first-line indent by prepending spaces
     // Each indent unit represents approximately 4 spaces for readability
     val indentSpaces = if (paragraphIndent > 0) {
@@ -1967,19 +2030,19 @@ private fun setText(
     } else {
         ""
     }
-    
+
     stringBuilder.append(indentSpaces)
     stringBuilder.append(cleanedText)
-    
+
     // Add bottom padding if this is the last chunk
     if (isLast && bottomContentPadding > 0) {
         stringBuilder.append("\n".repeat(bottomContentPadding.coerceAtLeast(0)))
     }
-    
+
     // Add spacing between paragraphs only for non-first paragraphs
     if (index > 0 && contentPadding > 0) {
         stringBuilder.append("\n".repeat(contentPadding.coerceAtLeast(0)))
     }
-    
+
     return stringBuilder.toString()
 }

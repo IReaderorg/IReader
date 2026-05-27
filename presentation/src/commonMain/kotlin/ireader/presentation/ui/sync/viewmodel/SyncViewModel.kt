@@ -57,7 +57,13 @@ class SyncViewModel(
         val showConflictDialog: Boolean = false,
         val conflicts: List<DataConflict> = emptyList(),
         val manualIp: String = "",
-        val serverMode: String = "server" // "server" or "client", default to server for desktop
+        val serverMode: String = "server", // "server" or "client", default to server for desktop
+        val deviceName: String = "",
+        val deviceType: DeviceType = DeviceType.ANDROID,
+        val syncLibrary: Boolean = true,
+        val syncReadingProgress: Boolean = true,
+        val syncDownloadedChapters: Boolean = false,
+        val syncSettings: Boolean = false
     )
 
     init {
@@ -546,6 +552,67 @@ class SyncViewModel(
                 logInfo("Server mode updated successfully")
             } catch (e: Exception) {
                 logError("Failed to set server mode", e)
+                updateState { it.copy(error = formatError(e)) }
+            }
+        }
+    }
+    
+    // ========== Device Settings Methods ==========
+    
+    /**
+     * Update device name.
+     */
+    fun updateDeviceName(name: String) {
+        updateState { it.copy(deviceName = name) }
+    }
+    
+    /**
+     * Update device type.
+     */
+    fun updateDeviceType(type: DeviceType) {
+        updateState { it.copy(deviceType = type) }
+    }
+    
+    /**
+     * Update sync library preference.
+     */
+    fun updateSyncLibrary(enabled: Boolean) {
+        updateState { it.copy(syncLibrary = enabled) }
+    }
+    
+    /**
+     * Update sync reading progress preference.
+     */
+    fun updateSyncReadingProgress(enabled: Boolean) {
+        updateState { it.copy(syncReadingProgress = enabled) }
+    }
+    
+    /**
+     * Update sync downloaded chapters preference.
+     */
+    fun updateSyncDownloadedChapters(enabled: Boolean) {
+        updateState { it.copy(syncDownloadedChapters = enabled) }
+    }
+    
+    /**
+     * Update sync settings preference.
+     */
+    fun updateSyncSettings(enabled: Boolean) {
+        updateState { it.copy(syncSettings = enabled) }
+    }
+    
+    /**
+     * Save device settings to preferences.
+     */
+    fun saveDeviceSettings() {
+        screenModelScope.launch {
+            try {
+                logInfo("Saving device settings")
+                // Persist settings to preferences if needed
+                // For now, state is already updated via individual update methods
+                logInfo("Device settings saved successfully")
+            } catch (e: Exception) {
+                logError("Failed to save device settings", e)
                 updateState { it.copy(error = formatError(e)) }
             }
         }

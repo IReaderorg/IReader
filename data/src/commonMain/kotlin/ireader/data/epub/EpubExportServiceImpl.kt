@@ -1,6 +1,7 @@
 ﻿package ireader.data.epub
 
 import ireader.core.log.Log
+import ireader.core.source.model.ImageUrl
 import ireader.core.util.randomUUID
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.common.Uri
@@ -12,6 +13,7 @@ import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.ExperimentalTime
 
 /**
@@ -124,16 +126,51 @@ class EpubExportServiceImpl(
         // 2. META-INF/container.xml
         entries.add(EpubZipEntry("META-INF/container.xml", generateContainerXml().encodeToByteArray()))
         
-        // 3. OEBPS/content.opf (metadata and manifest)
-        entries.add(EpubZipEntry("OEBPS/content.opf", generateContentOpf(book, chapters, options).encodeToByteArray()))
+        // 3. Cover image if available and requested (must be before OPF for hasCover flag)
+        var hasCover = false
+        if (options.includeCover && book.cover.isNotBlank()) {
+            try {
+                val coverData = fileProvider.downloadCoverImage(book.cover)
+                if (coverData != null) {
+                    val (extension, mimeType) = detectImageFormat(coverData)
+                    entries.add(EpubZipEntry("OEBPS/images/cover.$extension", coverData))
+                    hasCover = true
+                    Log.info { "Cover image added to EPUB (format: $mimeType)" }
+                }
+            } catch (e: Exception) {
+                Log.warn { "Failed to include cover image: ${e.message}" }
+            }
+        }
         
-        // 4. OEBPS/toc.ncx (table of contents)
+        // 4. Chapter images - download and embed images from chapter content
+        val imageCounter = AtomicInteger(1)
+        chapters.forEachIndexed { chapterIndex, chapter ->
+            chapter.content.forEach { page ->
+                if (page is ireader.core.source.model.ImageUrl) {
+                    try {
+                        val imageData = fileProvider.downloadCoverImage(page.url)
+                        if (imageData != null) {
+                            val (extension, _) = detectImageFormat(imageData)
+                            val imageName = "chapter${chapterIndex + 1}_image${imageCounter.getAndIncrement()}.$extension"
+                            entries.add(EpubZipEntry("OEBPS/images/$imageName", imageData))
+                        }
+                    } catch (e: Exception) {
+                        Log.warn { "Failed to download chapter image: ${e.message}" }
+                    }
+                }
+            }
+        }
+        
+        // 5. OEBPS/content.opf (metadata and manifest) - after images so hasCover is known
+        entries.add(EpubZipEntry("OEBPS/content.opf", generateContentOpf(book, chapters, options, hasCover).encodeToByteArray()))
+        
+        // 6. OEBPS/toc.ncx (table of contents)
         entries.add(EpubZipEntry("OEBPS/toc.ncx", generateTocNcx(book, chapters).encodeToByteArray()))
         
-        // 5. OEBPS/stylesheet.css
+        // 7. OEBPS/stylesheet.css
         entries.add(EpubZipEntry("OEBPS/stylesheet.css", generateStylesheet(options).encodeToByteArray()))
         
-        // 6. Chapter XHTML files
+        // 8. Chapter XHTML files
         chapters.forEachIndexed { index, chapter ->
             val progress = 0.4f + (0.4f * (index.toFloat() / chapters.size))
             onProgress(progress, "Writing chapter ${index + 1}/${chapters.size}...")
@@ -142,18 +179,6 @@ class EpubExportServiceImpl(
                 "OEBPS/chapter${index + 1}.xhtml",
                 generateChapterXhtml(chapter, index + 1, options).encodeToByteArray()
             ))
-        }
-        
-        // 7. Cover image if available and requested
-        if (options.includeCover && book.cover.isNotBlank()) {
-            try {
-                val coverData = fileProvider.downloadCoverImage(book.cover)
-                if (coverData != null) {
-                    entries.add(EpubZipEntry("OEBPS/images/cover.jpg", coverData))
-                }
-            } catch (e: Exception) {
-                Log.warn { "Failed to include cover image: ${e.message}" }
-            }
         }
         
         // Use platform-specific ZIP creation
@@ -185,7 +210,7 @@ class EpubExportServiceImpl(
      * Generate OEBPS/content.opf (metadata and manifest)
      */
     @OptIn(ExperimentalTime::class)
-    private fun generateContentOpf(book: Book, chapters: List<Chapter>, options: EpubExportOptions): String {
+    private fun generateContentOpf(book: Book, chapters: List<Chapter>, options: EpubExportOptions, hasCover: Boolean = false): String {
         val uuid = randomUUID()
         val chapterManifest = chapters.indices.joinToString("\n") { index ->
             """        <item id="chapter${index + 1}" href="chapter${index + 1}.xhtml" media-type="application/xhtml+xml"/>"""
@@ -193,8 +218,11 @@ class EpubExportServiceImpl(
         val chapterSpine = chapters.indices.joinToString("\n") { index ->
             """        <itemref idref="chapter${index + 1}"/>"""
         }
-        val coverItem = if (options.includeCover) {
-            """        <item id="cover" href="images/cover.jpg" media-type="image/jpeg"/>"""
+        val coverItem = if (hasCover) {
+            """        <item id="cover-image" href="images/cover.jpg" media-type="image/jpeg"/>"""
+        } else ""
+        val coverMeta = if (hasCover) {
+            """                    <meta name="cover" content="cover-image"/>"""
         } else ""
         
         return """
@@ -208,15 +236,16 @@ class EpubExportServiceImpl(
                     <dc:description>${escapeXml(book.description)}</dc:description>
                     <dc:date>${kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.UTC).date}</dc:date>
                     <meta name="generator" content="iReader"/>
+$coverMeta
                 </metadata>
                 <manifest>
                     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
                     <item id="stylesheet" href="stylesheet.css" media-type="text/css"/>
-        $chapterManifest
-        $coverItem
+$chapterManifest
+$coverItem
                 </manifest>
                 <spine toc="ncx">
-        $chapterSpine
+$chapterSpine
                 </spine>
             </package>
         """.trimIndent()
@@ -382,6 +411,43 @@ class EpubExportServiceImpl(
     private fun sanitizeFileName(fileName: String): String = fileName
         .replace(Regex("[^a-zA-Z0-9._\\- ]"), "")
         .take(200)
+    
+    /**
+     * Detect image format from byte array magic bytes.
+     * Returns (extension, mimeType) tuple.
+     */
+    private fun detectImageFormat(data: ByteArray): Pair<String, String> {
+        if (data.size < 4) return "jpg" to "image/jpeg"
+        
+        // JPEG: FF D8 FF
+        if (data[0] == 0xFF.toByte() && data[1] == 0xD8.toByte() && data[2] == 0xFF.toByte()) {
+            return "jpg" to "image/jpeg"
+        }
+        
+        // PNG: 89 50 4E 47
+        if (data[0] == 0x89.toByte() && data[1] == 0x50.toByte() && 
+            data[2] == 0x4E.toByte() && data[3] == 0x47.toByte()) {
+            return "png" to "image/png"
+        }
+        
+        // GIF: 47 49 46 38
+        if (data[0] == 0x47.toByte() && data[1] == 0x49.toByte() && 
+            data[2] == 0x46.toByte() && data[3] == 0x38.toByte()) {
+            return "gif" to "image/gif"
+        }
+        
+        // WebP: RIFF....WEBP
+        if (data.size >= 12 && 
+            data[0] == 0x52.toByte() && data[1] == 0x49.toByte() && 
+            data[2] == 0x46.toByte() && data[3] == 0x46.toByte() &&
+            data[8] == 0x57.toByte() && data[9] == 0x45.toByte() &&
+            data[10] == 0x42.toByte() && data[11] == 0x50.toByte()) {
+            return "webp" to "image/webp"
+        }
+        
+        // Default to JPEG
+        return "jpg" to "image/jpeg"
+    }
 }
 
 /**

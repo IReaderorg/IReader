@@ -86,6 +86,24 @@ internal class IosDatabaseHandler(
             // Silently ignore repair errors
         }
     }
+    
+    override fun verifyDatabaseIntegrity(): Boolean {
+        return try {
+            val requiredTables = listOf("book", "chapter", "category", "category_book", "extension_source", "plugin")
+            for (table in requiredTables) {
+                driver.executeQuery(
+                    identifier = null,
+                    sql = "SELECT COUNT(*) FROM $table",
+                    mapper = { cursor -> cursor.next() },
+                    parameters = 0
+                )
+            }
+            true
+        } catch (e: Exception) {
+            ireader.core.log.Log.error("Database integrity check failed: ${e.message}", e)
+            false
+        }
+    }
 
     override suspend fun <T> await(inTransaction: Boolean, block: suspend Database.() -> T): T {
         return dispatch(inTransaction, block)

@@ -187,6 +187,13 @@ class BookDetailViewModel(
     var chapterRangeEnd by mutableStateOf("")
         private set
     
+    // Download next chapters state
+    var showDownloadNextChaptersDialog by mutableStateOf(false)
+    var downloadNextStartChapter by mutableStateOf("")
+        private set
+    var downloadNextChapterCount by mutableStateOf("")
+        private set
+    
     // Translation export state
     var hasTranslationsForExport by mutableStateOf(false)
         private set
@@ -230,6 +237,9 @@ class BookDetailViewModel(
     val isPaginated: Boolean get() = (_state.value as? BookDetailState.Success)?.isPaginated ?: false
     val hasNextPage: Boolean get() = (_state.value as? BookDetailState.Success)?.hasNextPage ?: false
     val hasPreviousPage: Boolean get() = (_state.value as? BookDetailState.Success)?.hasPreviousPage ?: false
+    
+    // Current chapter index for "Download Next" feature (defaults to 0 since BookDetailState doesn't track this)
+    val currentChapterIndex: Int get() = 0
     
     // Track if ViewModel has been initialized
     private var isInitialized = false
@@ -1559,6 +1569,106 @@ class BookDetailViewModel(
      */
     fun updateChapterRangeEnd(value: String) {
         chapterRangeEnd = value
+    }
+    
+    // ==================== Download Next Chapapters ====================
+    
+    /**
+     * Shows the download next chapters dialog.
+     */
+    fun showDownloadNextChaptersDialog() {
+        downloadNextStartChapter = ""
+        downloadNextChapterCount = "10"
+        showDownloadNextChaptersDialog = true
+    }
+    
+    /**
+     * Hides the download next chapters dialog.
+     */
+    fun hideDownloadNextChaptersDialog() {
+        showDownloadNextChaptersDialog = false
+        downloadNextStartChapter = ""
+        downloadNextChapterCount = ""
+    }
+    
+    /**
+     * Update download next start chapter value.
+     */
+    fun updateDownloadNextStartChapter(value: String) {
+        downloadNextStartChapter = value
+    }
+    
+    /**
+     * Update download next chapter count value.
+     */
+    fun updateDownloadNextChapterCount(value: String) {
+        downloadNextChapterCount = value
+    }
+    
+    /**
+     * Download next N chapters starting from a specific chapter.
+     * If count is empty, downloads all remaining chapters.
+     */
+    fun downloadNextChapters() {
+        val allChapters = chapters
+        if (allChapters.isEmpty()) {
+            emitEvent(BookDetailEvent.ShowSnackbar("No chapters available"))
+            hideDownloadNextChaptersDialog()
+            return
+        }
+        
+        val startNum = downloadNextStartChapter.toIntOrNull()
+        if (startNum == null || startNum < 1) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Please enter a valid start chapter number"))
+            return
+        }
+        
+        if (startNum > allChapters.size) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Start chapter exceeds available chapters (${allChapters.size})"))
+            return
+        }
+        
+        // Get chapters from start position
+        val startIndex = startNum - 1
+        val remainingChapters = allChapters.drop(startIndex)
+        
+        // Determine how many chapters to download
+        val chaptersToDownload = if (downloadNextChapterCount.isBlank()) {
+            // Download all remaining
+            remainingChapters
+        } else {
+            val count = downloadNextChapterCount.toIntOrNull()
+            if (count == null || count < 1) {
+                emitEvent(BookDetailEvent.ShowSnackbar("Please enter a valid number of chapters"))
+                return
+            }
+            remainingChapters.take(count)
+        }
+        
+        if (chaptersToDownload.isEmpty()) {
+            emitEvent(BookDetailEvent.ShowSnackbar("No chapters to download"))
+            hideDownloadNextChaptersDialog()
+            return
+        }
+        
+        hideDownloadNextChaptersDialog()
+        
+        // Clear current selection and add chapters to download
+        selection.clear()
+        chaptersToDownload.forEach { chapter ->
+            selection.add(chapter.id)
+        }
+        
+        // Also update ChapterController for UI consistency
+        chapterController.dispatch(ChapterCommand.ClearSelection)
+        chaptersToDownload.forEach { chapter ->
+            chapterController.dispatch(ChapterCommand.SelectChapter(chapter.id))
+        }
+        
+        // Use the existing downloadChapters() which works correctly
+        downloadChapters()
+        
+        emitEvent(BookDetailEvent.ShowSnackbar("Downloading ${chaptersToDownload.size} chapters"))
     }
     
     /**

@@ -91,6 +91,39 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         Trace.endSection()
         StartupProfiler.mark("koin_init")
         
+        // Check database integrity after Koin init
+        // This handles cases where database corruption occurred during a crash
+        // Run on a background thread to avoid ANR on main thread
+        Trace.beginSection("DatabaseIntegrityCheck")
+        val dbHandler: ireader.data.core.DatabaseHandler by inject()
+        // Use a new thread for the integrity check to avoid blocking the main thread
+        val dbCheckThread = Thread({
+            try {
+                val isValid = dbHandler.verifyDatabaseIntegrity()
+                if (!isValid) {
+                    println("⚠️ Database integrity check failed - attempting repair")
+                    dbHandler.repairDatabase()
+                    // Re-verify after repair
+                    val repaired = dbHandler.verifyDatabaseIntegrity()
+                    if (!repaired) {
+                        println("❌ Database repair failed - some data may be lost")
+                    } else {
+                        println("✅ Database repair successful")
+                    }
+                } else {
+                    println("✅ Database integrity check passed")
+                }
+            } catch (e: Exception) {
+                println("⚠️ Database integrity check error: ${e.message}")
+            }
+        }, "DBIntegrityCheck").apply {
+            isDaemon = true
+            start()
+        }
+        // Don't join - let it run in background to avoid blocking startup
+        Trace.endSection()
+        StartupProfiler.mark("db_integrity_check")
+        
         // Schedule background initialization (non-blocking)
         scheduleBackgroundInit()
         StartupProfiler.mark("background_scheduled")

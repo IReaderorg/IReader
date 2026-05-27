@@ -62,27 +62,45 @@ internal class JvmDatabaseHandler constructor(
     }
   }
 
-  override fun repairDatabase() {
-    try {
-      // Ensure required columns exist before view creation
-      DatabaseMigrations.ensureRequiredColumns(driver)
-      
-      // Force create views
-      DatabaseMigrations.forceViewReinit(driver)
+    override fun repairDatabase() {
+        try {
+            // Ensure required columns exist before view creation
+            DatabaseMigrations.ensureRequiredColumns(driver)
+            
+            // Force create views
+            DatabaseMigrations.forceViewReinit(driver)
 
-      // Verify library data is accessible
-      driver.executeQuery(
-        identifier = null,
-        sql = "SELECT COUNT(*) FROM book WHERE favorite = 1",
-        mapper = { cursor ->
-          cursor.next()
-        },
-        parameters = 0
-      )
-    } catch (_: Exception) {
-      // Silently ignore repair errors
+            // Verify library data is accessible
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT COUNT(*) FROM book WHERE favorite = 1",
+                mapper = { cursor ->
+                    cursor.next()
+                },
+                parameters = 0
+            )
+        } catch (_: Exception) {
+            // Silently ignore repair errors
+        }
     }
-  }
+    
+    override fun verifyDatabaseIntegrity(): Boolean {
+        return try {
+            val requiredTables = listOf("book", "chapter", "category", "category_book", "extension_source", "plugin")
+            for (table in requiredTables) {
+                driver.executeQuery(
+                    identifier = null,
+                    sql = "SELECT COUNT(*) FROM $table",
+                    mapper = { cursor -> cursor.next() },
+                    parameters = 0
+                )
+            }
+            true
+        } catch (e: Exception) {
+            ireader.core.log.Log.error("Database integrity check failed: ${e.message}", e)
+            false
+        }
+    }
 
   override suspend fun <T> await(inTransaction: Boolean, block: suspend Database.() -> T): T {
     return dispatch(inTransaction, block)

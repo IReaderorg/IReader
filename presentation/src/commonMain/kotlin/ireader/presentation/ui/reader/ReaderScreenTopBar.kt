@@ -167,8 +167,8 @@ fun ReaderScreenTopBar(
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
                         contentDescription = localize(Res.string.refresh),
-                        onClick = { onRefreshFromRemote() },
-                        onLongClick = { onRefresh() }
+                        onClick = { onRefresh() },
+                        onLongClick = { onRefreshFromRemote() }
                     )
                 }
             }
@@ -201,8 +201,8 @@ fun ReaderScreenTopBar(
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
                         contentDescription = localize(Res.string.refresh),
-                        onClick = { onRefreshFromRemote() },
-                        onLongClick = { onRefresh() },
+                        onClick = { onRefresh() },
+                        onLongClick = { onRefreshFromRemote() },
                         tint = vm.textColor.value.toComposeColor()
                     )
                     AppIconButton(
