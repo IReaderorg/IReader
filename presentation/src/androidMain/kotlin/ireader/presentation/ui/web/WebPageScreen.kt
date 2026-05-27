@@ -422,9 +422,10 @@ private fun WebView.configureWebViewSettings(userAgent: String?) {
         useWideViewPort = true
         setRenderPriority(android.webkit.WebSettings.RenderPriority.HIGH)
         
-        // Enable support for multiple windows (new tabs)
-        setSupportMultipleWindows(true)
-        javaScriptCanOpenWindowsAutomatically = true
+        // Disable multiple windows to prevent "Parent WebView cannot host its own popup window" error
+        // Popups will be handled by loading in the same WebView
+        setSupportMultipleWindows(false)
+        javaScriptCanOpenWindowsAutomatically = false
     }
     
     // Scrollbar and performance settings
