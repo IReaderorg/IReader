@@ -45,6 +45,14 @@ actual fun isLNReaderBackupPlatform(bytes: ByteArray): Boolean {
     return findZipEntryData(bytes, "backup.json") != null || findZipEntryData(bytes, "novels.json") != null
 }
 
+/**
+ * iOS stub implementation - returns empty map since iOS doesn't support download.zip extraction.
+ */
+actual fun extractChapterContentPlatform(backupBytes: ByteArray): Map<Int, String> {
+    println("[LNReaderBackup] iOS platform does not support chapter content extraction from download.zip")
+    return emptyMap()
+}
+
 private fun extractBackupJsonFromZip(zipData: ByteArray): String? {
     val possibleNames = listOf("backup.json", "novels.json", "data.json")
     for (name in possibleNames) {
