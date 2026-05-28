@@ -38,15 +38,15 @@ import ireader.domain.usecases.reader.ReaderUseCasesAggregate
 import ireader.domain.usecases.reader.ScreenAlwaysOn
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.utils.extensions.ioDispatcher
-import ireader.domain.utils.removeIf
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 import ireader.i18n.resources.something_wrong_with_book
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toDomainColor
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import ireader.presentation.ui.reader.ReaderConstants
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,9 +104,13 @@ class ReaderScreenViewModel(
     val ttsViewModel: ReaderTTSViewModel,
     val statisticsViewModel: ReaderStatisticsViewModel,
 ) : BaseViewModel() {
-    
 
-    
+    /** Scroll manager for handling scroll position persistence */
+    private val scrollManager = ReaderScrollManager(
+        scope = scope,
+        chapterRepository = readerUseCasesAggregate.chapterRepository
+    )
+
     // Convenience accessors for aggregate use cases (backward compatibility)
     val getBookUseCases get() = readerUseCasesAggregate.getBookUseCases
     val getChapterUseCase get() = readerUseCasesAggregate.getChapterUseCase
@@ -310,49 +314,31 @@ class ReaderScreenViewModel(
      */
     fun saveScrollPosition(scrollPosition: Long) {
         val chapter = stateChapter ?: return
-        
+
         // Update in-memory state immediately
-        _currentScrollPosition = scrollPosition
-        
+        scrollManager.updatePosition(scrollPosition)
+
         // Also update the state's currentChapter.lastPageRead so it's reflected in the cached ViewModel
         updateSuccessState { state ->
             state.copy(
                 currentChapter = state.currentChapter.copy(lastPageRead = scrollPosition)
             )
         }
-        
-        // Save to database asynchronously
-        scope.launch {
-            try {
-                // Use the repository's dedicated updateLastPageRead method
-                // which only updates the lastPageRead field without touching content
-                readerUseCasesAggregate.chapterRepository.updateLastPageRead(chapter.id, scrollPosition)
-            } catch (e: Exception) {
-                Log.error("Failed to save scroll position", e)
-            }
-        }
+
+        // Save to database asynchronously via scroll manager
+        scrollManager.saveScrollPosition(chapter.id, scrollPosition)
     }
-    
-    // Track the current scroll position (used for saving when navigating away)
-    private var _currentScrollPosition: Long = 0L
-    val currentScrollPosition: Long get() = _currentScrollPosition
-    
+
+    /** Current scroll position (delegated to scrollManager) */
+    val currentScrollPosition: Long get() = scrollManager.currentScrollPosition
+
     /**
      * Force save the current scroll position to the database immediately.
      * This should be called before navigating to a new chapter.
      */
     fun saveCurrentScrollPositionToDatabase() {
         val chapter = stateChapter ?: return
-        val position = _currentScrollPosition
-        if (position > 0) {
-            scope.launch {
-                try {
-                    readerUseCasesAggregate.chapterRepository.updateLastPageRead(chapter.id, position)
-                } catch (e: Exception) {
-                    Log.error("Failed to force save scroll position", e)
-                }
-            }
-        }
+        scrollManager.forceSaveScrollPosition(chapter.id)
     }
     
     /**
