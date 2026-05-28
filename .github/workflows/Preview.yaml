@@ -20,28 +20,28 @@ jobs:
     name: Build application packages
     strategy:
       matrix:
-        runtime: [ linux-x64, linux-appimage, win-x64, android ]
+        runtime: [ linux-x64, win-x64, macos-x64, android ]
         include:
           - runtime: linux-x64
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :desktop:packageDeb
+            build: :desktop:packageDeb :desktop:packageRpm :desktop:createDistributable
             setupCl: ./.github/scripts/SetupClUnix.sh
-
-          # - runtime: linux-appimage
-          #   arch: x64
-          #   os: ubuntu-latest
-          #   shell: bash
-          #   build: :desktop:packageUberJarForCurrentOS
-          #   setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: win-x64
             arch: x64
             os: windows-latest
             shell: powershell
-            build: :desktop:packageMsi
+            build: :desktop:packageMsi :desktop:packageExe
             setupCl: ./.github/scripts/SetupClWindows.ps1
+
+          - runtime: macos-x64
+            arch: x64
+            os: macos-latest
+            shell: bash
+            build: :desktop:packageDmg
+            setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: android
             arch: x64
@@ -139,43 +139,24 @@ jobs:
           arguments: >
             ${{ matrix.build }}
 
-      - name: Build AppImage with Delta Updates
-        if: ${{ matrix.runtime == 'linux-appimage' }}
-        env:
-          ARCH: x86_64
+      - name: Create Tarball from Portable Distribution
+        if: ${{ matrix.runtime == 'linux-x64' }}
         run: |
-          # Install zsync for delta updates
-          sudo apt-get update
-          sudo apt-get install -y zsync
-          
-          # Download and extract appimagetool (extract to avoid FUSE requirement)
-          wget -O appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool.AppImage
-          ./appimagetool.AppImage --appimage-extract
-          sudo mv squashfs-root /opt/appimagetool
-          sudo ln -s /opt/appimagetool/AppRun /usr/local/bin/appimagetool
-          
-          # Clean previous AppImage build artifacts
-          rm -rf desktop/build/appimage
-          rm -rf desktop/build/compose/binaries/main/*.AppImage*
-          
-          # Build AppImage with embedded update information and generate .zsync file
-          # Note: Preview builds use 'latest' tag. Updates will work once this becomes the latest release.
-          ./gradlew buildAppImageWithZsync --no-configuration-cache
-          
-          # Move files to expected location
-          mkdir -p desktop/build/compose/binaries/main/appimage
-          mv desktop/build/compose/binaries/main/IReader-x86_64.AppImage desktop/build/compose/binaries/main/appimage/
-          mv desktop/build/compose/binaries/main/IReader-x86_64.AppImage.zsync desktop/build/compose/binaries/main/appimage/
-          
+          # Create tar.gz from the app directory (already built by createDistributable)
+          mkdir -p desktop/build/compose/binaries/main/tar
+          cd desktop/build/compose/binaries/main
+          tar -czf "tar/IReader-Preview-linux-x64-r${{ env.COMMIT_COUNT }}.tar.gz" app/
+
           # Generate checksums
-          cd desktop/build/compose/binaries/main/appimage
-          sha256sum IReader-x86_64.AppImage > IReader-x86_64.AppImage.sha256
-          sha256sum IReader-x86_64.AppImage.zsync > IReader-x86_64.AppImage.zsync.sha256
-          
-          echo "✅ AppImage with delta updates created successfully!"
+          cd tar
+          for f in *; do
+            sha256sum "$f" > "$f.sha256"
+          done
+
+          echo "✅ Tarball distribution created successfully!"
           echo "Files:"
           ls -lh
+
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         if: ${{ matrix.runtime == 'android' }}
@@ -187,25 +168,39 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
-      # Upload runner package tar.gz/zip as artifact
-      - name: Publish Artifact
-        if: ${{ matrix.runtime != 'linux-appimage' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: runner-package-${{ matrix.runtime }}
-          path: |
-            desktop/build/compose/binaries/main/*/
-            desktop/build/compose/jars/
-            !desktop/build/compose/binaries/main/app/
 
-      # Upload AppImage only (JAR already uploaded by linux-x64)
-      - name: Publish AppImage Artifact
-        if: ${{ matrix.runtime == 'linux-appimage' }}
+      # Upload Linux artifacts (deb, rpm, tar)
+      - name: Publish Linux Artifact
+        if: ${{ matrix.runtime == 'linux-x64' }}
         uses: actions/upload-artifact@v4
         with:
           name: runner-package-${{ matrix.runtime }}
           path: |
-            desktop/build/compose/binaries/main/appimage/
+            desktop/build/compose/binaries/main/deb/
+            desktop/build/compose/binaries/main/rpm/
+            desktop/build/compose/binaries/main/tar/
+            desktop/build/compose/jars/
+
+      # Upload Windows artifacts (msi, exe)
+      - name: Publish Windows Artifact
+        if: ${{ matrix.runtime == 'win-x64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-package-${{ matrix.runtime }}
+          path: |
+            desktop/build/compose/binaries/main/msi/
+            desktop/build/compose/binaries/main/exe/
+            desktop/build/compose/jars/
+
+      # Upload macOS artifacts (dmg)
+      - name: Publish macOS Artifact
+        if: ${{ matrix.runtime == 'macos-x64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-package-${{ matrix.runtime }}
+          path: |
+            desktop/build/compose/binaries/main/dmg/
+            desktop/build/compose/jars/
 
       - name: Publish Android Artifact
         if: ${{ matrix.runtime == 'android' }}
@@ -214,6 +209,7 @@ jobs:
           name: runner-package-${{ matrix.runtime }}
           path: |
             android/build/outputs/apk/standard/preview/*-signed.apk
+
         # Upload runner errors
       - name: Upload error logs
         uses: actions/upload-artifact@v4
@@ -262,19 +258,19 @@ jobs:
         run: |
           # Read the release template
           TEMPLATE=$(cat .github/RELEASE_TEMPLATE.md)
-          
+
           # Replace placeholders
           TEMPLATE="${TEMPLATE//PREV_SHA/${{ env.PREV_RELEASE_SHA }}}"
           TEMPLATE="${TEMPLATE//CURRENT_SHA/${{ env.CURRENT_SHA }}}"
-          
+
           # Insert commit logs after "What's New" section
           RELEASE_BODY=$(echo "$TEMPLATE" | sed "/<!-- Auto-generated commit logs will be inserted here -->/a\\
           \\
           ${{ env.COMMIT_LOGS }}")
-          
+
           # Save to file for use in release
           echo "$RELEASE_BODY" > release_notes.md
-          
+
           # Set output for use in next steps
           echo "RELEASE_BODY<<EOF" >> $GITHUB_OUTPUT
           echo "$RELEASE_BODY" >> $GITHUB_OUTPUT
@@ -284,7 +280,7 @@ jobs:
       # - name: Create Preview Release
       #   uses: ncipollo/release-action@v1.12.0
       #   with:
-      #     artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage"
+      #     artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk"
       #     allowUpdates: true
       #     replacesArtifacts: true
       #     token: ${{ secrets.WINGET_PUBLISH_PAT }}
@@ -296,7 +292,7 @@ jobs:
       - name: Create Main Repository Pre-Release
         uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage,**/*.AppImage.zsync,**/*.sha256"
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.tar.gz,**/*.sha256"
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}

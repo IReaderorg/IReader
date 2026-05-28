@@ -22,28 +22,28 @@ jobs:
     name: Build application packages
     strategy:
       matrix:
-        runtime: [ linux-x64, win-x64, android ]
+        runtime: [ linux-x64, win-x64, macos-x64, android ]
         include:
           - runtime: linux-x64
             arch: x64
             os: ubuntu-latest
             shell: bash
-            build: :desktop:packageDeb
+            build: :desktop:packageDeb :desktop:packageRpm :desktop:createDistributable
             setupCl: ./.github/scripts/SetupClUnix.sh
-
-          # - runtime: linux-appimage
-          #   arch: x64
-          #   os: ubuntu-latest
-          #   shell: bash
-          #   build: :desktop:packageUberJarForCurrentOS
-          #   setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: win-x64
             arch: x64
             os: windows-latest
             shell: powershell
-            build:  :desktop:packageMsi
+            build: :desktop:packageMsi :desktop:packageExe
             setupCl: ./.github/scripts/SetupClWindows.ps1
+
+          - runtime: macos-x64
+            arch: x64
+            os: macos-latest
+            shell: bash
+            build: :desktop:packageDmg
+            setupCl: ./.github/scripts/SetupClUnix.sh
 
           - runtime: android
             arch: x64
@@ -111,43 +111,22 @@ jobs:
           arguments: >
             ${{ matrix.build }}
 
-      - name: Build AppImage with Delta Updates
-        if: ${{ matrix.runtime == 'linux-appimage' }}
-        env:
-          ARCH: x86_64
+      - name: Create Tarball from Portable Distribution
+        if: ${{ matrix.runtime == 'linux-x64' }}
         run: |
-          # Install zsync for delta updates
-          sudo apt-get update
-          sudo apt-get install -y zsync
-          
-          # Download and extract appimagetool (extract to avoid FUSE requirement)
-          wget -O appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool.AppImage
-          ./appimagetool.AppImage --appimage-extract
-          sudo mv squashfs-root /opt/appimagetool
-          sudo ln -s /opt/appimagetool/AppRun /usr/local/bin/appimagetool
-          
-          # Clean previous AppImage build artifacts
-          rm -rf desktop/build/appimage
-          rm -rf desktop/build/compose/binaries/main/*.AppImage*
-          
-          # Build AppImage with embedded update information and generate .zsync file
-          # Use 'latest' channel for stable releases (default)
-          ./gradlew buildAppImageWithZsync --no-configuration-cache
-          
-          # Move files to expected location
-          mkdir -p desktop/build/compose/binaries/main/appimage
-          mv desktop/build/compose/binaries/main/IReader-x86_64.AppImage desktop/build/compose/binaries/main/appimage/
-          mv desktop/build/compose/binaries/main/IReader-x86_64.AppImage.zsync desktop/build/compose/binaries/main/appimage/
-          
+          # Create tar.gz from the app directory (already built by createDistributable)
+          mkdir -p desktop/build/compose/binaries/main/tar
+          cd desktop/build/compose/binaries/main
+          tar -czf "tar/IReader-linux-x64-${{ github.event.inputs.release-tag }}.tar.gz" app/
+
           # Generate checksums
-          cd desktop/build/compose/binaries/main/appimage
-          sha256sum IReader-x86_64.AppImage > IReader-x86_64.AppImage.sha256
-          sha256sum IReader-x86_64.AppImage.zsync > IReader-x86_64.AppImage.zsync.sha256
-          
-          echo "✅ AppImage with delta updates created successfully!"
+          cd tar
+          for f in *; do
+            sha256sum "$f" > "$f.sha256"
+          done
+
+          echo "✅ Tarball distribution created successfully!"
           echo "Files:"
-          ls -lh
           ls -lh
 
       - name: Sign APK
@@ -161,25 +140,39 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
-      # Upload runner package tar.gz/zip as artifact
-      - name: Publish Artifact
-        if: ${{ matrix.runtime != 'linux-appimage' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: runner-package-${{ matrix.runtime }}
-          path: |
-            desktop/build/compose/binaries/main/*/
-            desktop/build/compose/jars/
-            !desktop/build/compose/binaries/main/app/
 
-      # Upload AppImage only (JAR already uploaded by linux-x64)
-      - name: Publish AppImage Artifact
-        if: ${{ matrix.runtime == 'linux-appimage' }}
+      # Upload Linux artifacts (deb, rpm, tar)
+      - name: Publish Linux Artifact
+        if: ${{ matrix.runtime == 'linux-x64' }}
         uses: actions/upload-artifact@v4
         with:
           name: runner-package-${{ matrix.runtime }}
           path: |
-            desktop/build/compose/binaries/main/appimage/
+            desktop/build/compose/binaries/main/deb/
+            desktop/build/compose/binaries/main/rpm/
+            desktop/build/compose/binaries/main/tar/
+            desktop/build/compose/jars/
+
+      # Upload Windows artifacts (msi, exe)
+      - name: Publish Windows Artifact
+        if: ${{ matrix.runtime == 'win-x64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-package-${{ matrix.runtime }}
+          path: |
+            desktop/build/compose/binaries/main/msi/
+            desktop/build/compose/binaries/main/exe/
+            desktop/build/compose/jars/
+
+      # Upload macOS artifacts (dmg)
+      - name: Publish macOS Artifact
+        if: ${{ matrix.runtime == 'macos-x64' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-package-${{ matrix.runtime }}
+          path: |
+            desktop/build/compose/binaries/main/dmg/
+            desktop/build/compose/jars/
 
       - name: Publish Android Artifact
         if: ${{ matrix.runtime == 'android' }}
@@ -235,18 +228,18 @@ jobs:
         run: |
           CURRENT_SHA=$(git rev-parse --short HEAD)
           echo "current_sha=$CURRENT_SHA" >> $GITHUB_OUTPUT
-          
+
           PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
-          
+
           if [ -n "$PREV_TAG" ]; then
             PREV_SHA=$(git rev-parse --short $PREV_TAG)
             echo "prev_sha=$PREV_SHA" >> $GITHUB_OUTPUT
-            
+
             # Generate commit logs
             COMMIT_LOGS=$(curl -s -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/repos/${{ github.repository }}/compare/${PREV_TAG}...HEAD" \
               | jq -r '[.commits[]|{message:(.commit.message | split("\n") | first), username:.author.login}] | .[] | "- \(.message) (@\(.username))"' 2>/dev/null || echo "")
-            
+
             if [ -z "$COMMIT_LOGS" ]; then
               COMMIT_LOGS="- Various improvements and bug fixes"
             fi
@@ -254,10 +247,10 @@ jobs:
             PREV_SHA=""
             COMMIT_LOGS="- Initial release"
           fi
-          
+
           # Save commit logs to file (handles multiline)
           echo "$COMMIT_LOGS" > /tmp/commit_logs.txt
-          
+
           # Count commits
           if [ -n "$PREV_TAG" ]; then
             COMMIT_COUNT=$(git rev-list --count ${PREV_TAG}..HEAD)
@@ -271,28 +264,28 @@ jobs:
           PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
           CURRENT_SHA="${{ steps.changelog.outputs.current_sha }}"
           COMMIT_COUNT="${{ steps.changelog.outputs.commit_count }}"
-          
+
           cat > release_notes.md << 'RELEASE_EOF'
           ## 🎉 ${{ github.event.inputs.release-name }}
-          
+
           ### 📦 What's New
-          
+
           RELEASE_EOF
-          
+
           # Append commit logs
           cat /tmp/commit_logs.txt >> release_notes.md
-          
+
           cat >> release_notes.md << RELEASE_EOF
-          
+
           ### 📊 Release Stats
-          
+
           - **Commits since last release**: ${COMMIT_COUNT}
           - **Release tag**: \`${{ github.event.inputs.release-tag }}\`
-          
+
           ### 📥 Downloads
-          
+
           Choose the appropriate package for your platform:
-          
+
           #### 🤖 Android
           | Package | Description |
           |---------|-------------|
@@ -300,119 +293,96 @@ jobs:
           | \`*-armeabi-v7a-*.apk\` | Older 32-bit ARM devices |
           | \`*-x86_64-*.apk\` | 64-bit Intel/AMD (emulators, some tablets) |
           | \`*-x86-*.apk\` | 32-bit Intel/AMD devices |
-          
+
           #### 🖥️ Desktop
           | Package | Platform | Notes |
           |---------|----------|-------|
           | \`.msi\` | Windows 10/11 installer | |
+          | \`.exe\` | Windows portable | No install needed |
+          | \`.dmg\` | macOS installer | |
           | \`.deb\` | Debian/Ubuntu Linux | |
           | \`.rpm\` | Fedora/RHEL Linux | |
-          | \`.AppImage\` | Universal Linux (no install needed) | **Supports delta updates!** |
-          | \`.AppImage.zsync\` | Delta update metadata | For AppImageUpdate tool |
+          | \`.tar.gz\` | Universal Linux (any distro) | Extract and run |
           | \`.jar\` | Cross-platform (requires Java 21+) | |
-          
-          **🎉 New: AppImage Delta Updates!**
-          
-          The AppImage now supports efficient delta updates:
-          - **70-90% smaller downloads** - Only download what changed
-          - **Faster updates** - Less waiting time
-          - **Bandwidth efficient** - Great for slow connections
-          
-          To use delta updates:
-          \`\`\`bash
-          # Install AppImageUpdate
-          wget https://github.com/AppImageCommunity/AppImageUpdate/releases/latest/download/appimageupdatetool-x86_64.AppImage
-          chmod +x appimageupdatetool-x86_64.AppImage
-          
-          # Update IReader (downloads only the diff!)
-          ./appimageupdatetool-x86_64.AppImage IReader-x86_64.AppImage
-          \`\`\`
-          
-          Or install via AM package manager:
-          \`\`\`bash
-          am -i ireader  # Install
-          am -u ireader  # Update
-          \`\`\`
-          
+
           ### 🔗 Links
-          
+
           RELEASE_EOF
-          
+
           if [ -n "$PREV_TAG" ]; then
             echo "- **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ github.event.inputs.release-tag }}" >> release_notes.md
           fi
-          
+
           cat >> release_notes.md << 'RELEASE_EOF'
           - **Website**: https://ireaderorg.netlify.app/
           - **Documentation**: https://github.com/ireaderorg/ireader/wiki
           - **Report Issues**: https://github.com/ireaderorg/ireader/issues
-          
+
           ### 📝 Installation Notes
-          
+
           <details>
           <summary>Android</summary>
-          
+
           1. Download the APK matching your device architecture
           2. Enable "Install from Unknown Sources" in Settings > Security
           3. Open the downloaded APK to install
-          
+
           </details>
-          
+
           <details>
           <summary>Windows</summary>
-          
-          1. Download the `.msi` installer
+
+          1. Download the `.msi` installer or `.exe` portable
           2. Run the installer (you may need to allow it through SmartScreen)
           3. Follow the installation wizard
-          
+          - Or use the `.exe` portable version (no install needed)
+
           </details>
-          
+
+          <details>
+          <summary>macOS</summary>
+
+          1. Download the `.dmg` installer
+          2. Open the DMG file
+          3. Drag IReader to Applications folder
+
+          </details>
+
           <details>
           <summary>Linux</summary>
-          
-          ```bash
+
+          \`\`\`bash
           # Debian/Ubuntu
           sudo dpkg -i ireader_*.deb
           sudo apt-get install -f  # Install dependencies if needed
-          
+
           # Fedora/RHEL
           sudo rpm -i ireader-*.rpm
-          
-          # AppImage (any distro)
-          chmod +x IReader-*.AppImage
-          ./IReader-*.AppImage
-          
-          # AppImage with AM package manager (recommended)
-          am -i ireader  # Install
-          am -u ireader  # Update
-          
-          # AppImage delta updates (70-90% smaller downloads)
-          # Install AppImageUpdate
-          wget https://github.com/AppImageCommunity/AppImageUpdate/releases/latest/download/appimageupdatetool-x86_64.AppImage
-          chmod +x appimageupdatetool-x86_64.AppImage
-          
-          # Update IReader (downloads only changes)
-          ./appimageupdatetool-x86_64.AppImage IReader-*.AppImage
-          ```
-          
+
+          # Tarball (any distro)
+          tar -xzf IReader-*.tar.gz
+          cd IReader
+          ./bin/IReader
+          \`\`\`
+
           **Verify checksums:**
-          ```bash
-          sha256sum -c IReader-x86_64.AppImage.sha256
-          ```
-          
+          \`\`\`bash
+          sha256sum -c IReader-*.tar.gz.sha256
+          \`\`\`
+
           </details>
-          
+
           ---
-          
-          *Built from commit `CURRENT_SHA`*
+
+          *Built from commit \`CURRENT_SHA\`*
           RELEASE_EOF
-          
+
           # Replace placeholder
           sed -i "s/CURRENT_SHA/${CURRENT_SHA}/g" release_notes.md
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/IReader-*.apk,**/*.AppImage,**/*.AppImage.zsync,**/*.sha256"
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/IReader-*.apk,**/*.tar.gz,**/*.sha256"
           draft: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
           allowUpdates: true

@@ -332,9 +332,15 @@ tasks.whenTaskAdded {
 }
 
 // Enable ZIP64 for uber JAR to support more than 65535 entries
-tasks.withType<Jar> {
+tasks.withType<Jar>().configureEach {
     isZip64 = true
 }
+
+// Note: flattenJars is AbstractJarsFlattenTask (not Jar), so isZip64 can't be set on it.
+// The AppImage build requires packageUberJarForCurrentOS which depends on flattenJars.
+// Since the uber JAR has >65535 entries and the plugin doesn't support zip64,
+// we use .tar.gz distribution for universal Linux instead (see packageDistributionForCurrentOS).
+// The AppImage workflow step in Release.yaml handles this via the linux-appimage matrix entry.
 
 
 // ============================================================================
