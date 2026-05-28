@@ -1,6 +1,0 @@
-[versions]
-accompanist = "0.37.3"
-[libraries]
-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-[bundles]
-accompanist = ["permissions"]

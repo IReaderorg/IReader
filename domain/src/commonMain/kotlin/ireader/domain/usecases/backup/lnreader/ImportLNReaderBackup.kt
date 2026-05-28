@@ -57,7 +57,7 @@ import kotlin.time.ExperimentalTime
 // * - Other: Falls back to loading entire file into memory
 // */
 class ImportLNReaderBackup(
-    private val parser: LNReaderBackupParser,
+    val parser: LNReaderBackupParser,
     internal val sourceMapper: LNReaderSourceMapper,
     internal val bookRepository: BookRepository,
     internal val chapterRepository: ChapterRepository,

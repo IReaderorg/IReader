@@ -74,8 +74,5 @@ dependencyResolutionManagement {
         create("androidx") {
             from(files("gradle/androidx.versions.toml"))
         }
-        create("accompanist") {
-            from(files("gradle/accompanist.versions.toml"))
-        }
     }
 }

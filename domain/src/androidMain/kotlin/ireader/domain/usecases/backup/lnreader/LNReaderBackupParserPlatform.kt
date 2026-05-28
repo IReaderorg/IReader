@@ -194,10 +194,28 @@ fun extractChapterContentFromDownloadZip(backupBytes: ByteArray): Map<Int, Strin
             while (entry != null) {
                 // Look for download.zip entry
                 if (entry.name == "download.zip") {
-                    ireader.core.log.Log.info { "LNReader: Found download.zip, extracting chapter content..." }
+                    ireader.core.log.Log.info { "LNReader: Found download.zip (${entry.size} bytes), extracting chapter content..." }
 
-                    // Read the download.zip bytes
-                    val downloadZipBytes = zipIn.readBytes()
+                    // Read only the bytes for this entry
+                    val downloadZipBytes = if (entry.size > 0) {
+                        val bytes = ByteArray(entry.size.toInt())
+                        var offset = 0
+                        while (offset < bytes.size) {
+                            val read = zipIn.read(bytes, offset, bytes.size - offset)
+                            if (read == -1) break
+                            offset += read
+                        }
+                        bytes
+                    } else {
+                        val buffer = java.io.ByteArrayOutputStream()
+                        val tempBuffer = ByteArray(8192)
+                        var bytesRead: Int
+                        while (zipIn.read(tempBuffer).also { bytesRead = it } != -1) {
+                            buffer.write(tempBuffer, 0, bytesRead)
+                        }
+                        buffer.toByteArray()
+                    }
+                    ireader.core.log.Log.info { "LNReader: Read ${downloadZipBytes.size} bytes from download.zip" }
 
                     // Parse download.zip
                     ZipInputStream(ByteArrayInputStream(downloadZipBytes)).use { downloadZipIn ->

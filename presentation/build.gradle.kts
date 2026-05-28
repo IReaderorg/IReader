@@ -127,7 +127,7 @@ kotlin {
 
                 api(composeLib.compose.ui.util)
                 api(composeLib.compose.constraintlayout)
-                api(accompanist.permissions)
+                api(libs.permissions)
                 api(androidx.appCompat)
                 api(androidx.activity)
                 api(androidx.webkit)
