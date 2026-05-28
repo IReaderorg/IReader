@@ -331,18 +331,6 @@ private fun ReadingScreenContent(
                                     .padding(top = 56.dp, end = 16.dp) // Below top bar
                             )
 
-                            // Translation badge
-//                            if (vm.showTranslatedContent.value) {
-//                                TranslationBadge(
-//                                    isTranslated = true,
-//                                    textColor = vm.textColor.value.toComposeColor(),
-//                                    modifier = Modifier
-//                                        .align(Alignment.TopEnd)
-//                                        .padding(paddingValues)
-//
-//                                )
-//                            }
-
                             // Translation progress indicator
                             TranslationProgressIndicator(
                                 isVisible = vm.translationViewModel.isTranslating,
