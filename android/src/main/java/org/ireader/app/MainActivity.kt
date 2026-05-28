@@ -61,6 +61,7 @@ import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.getPerformanceConfigForDevice
 import ireader.presentation.ui.core.theme.themes
+import ireader.presentation.core.initFontProvider
 import ireader.presentation.ui.settings.storage.StorageFolderPickerScreen
 import ireader.presentation.ui.core.ui.asStateIn
 // FirstLaunchDialog removed - now handled in OnboardingScreen
@@ -88,6 +89,10 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize Google Font provider BEFORE any UI is created
+        // This is required for Google Fonts to work correctly
+        initFontProvider(this)
 
         // Initialize Compose Multiplatform resources context BEFORE splash screen
         // This must happen before any Composable code runs

@@ -22,13 +22,18 @@ fun initFontProvider(context: Context) {
 
 @OptIn(ExperimentalTextApi::class)
 private val googleFontProvider: GoogleFont.Provider by lazy {
-    // Workaround for R class generation issues with Android KMP library plugin
     val context = appContext ?: throw IllegalStateException("Call initFontProvider() first")
+    // Use the presentation module's own font_certs resource
     val certsArrayId = context.resources.getIdentifier(
         "com_google_android_gms_fonts_certs",
         "array",
         context.packageName
     )
+    
+    if (certsArrayId == 0) {
+        // Fallback: try to get the resource from the app module
+        ireader.core.log.Log.warn("Could not find com_google_android_gms_fonts_certs in presentation module, trying fallback")
+    }
     
     GoogleFont.Provider(
         providerAuthority = "com.google.android.gms.fonts",

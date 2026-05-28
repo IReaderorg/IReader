@@ -1,9 +1,9 @@
 [versions]
 kotlin = "2.3.21"
 dokka = "2.2.0"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 serialization = "1.11.0"
-datetime = "0.7.1"
+datetime = "0.8.0"
 ksp = "2.3.2"
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-common", version.ref = "kotlin" }
