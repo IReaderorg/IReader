@@ -67,6 +67,9 @@ class ExtensionViewModel(
     companion object {
         /** Debounce delay for auto-fetch after repository changes (ms) */
         private const val AUTO_FETCH_DEBOUNCE_MS = 500L
+
+        /** Delay before retrying empty sources check after crash recovery (ms) */
+        private const val EMPTY_SOURCES_RETRY_DELAY_MS = 1500L
     }
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -172,6 +175,34 @@ class ExtensionViewModel(
         
         // Initialize controller if available
         extensionController?.dispatch(ExtensionCommand.LoadExtensions)
+
+        // Fix: After a crash/force close, the catalog flow subscription and the
+        // ExtensionController's subscription can race, causing both to cancel
+        // each other via flatMapLatest. Schedule a retry check to ensure sources
+        // appear even if the initial subscription race is lost.
+        scheduleEmptySourcesRetry()
+    }
+
+    /**
+     * After a crash recovery, the catalog flow subscription can lose the race
+     * against the ExtensionController's subscription. This method schedules a
+     * delayed check: if userSources is still empty after catalogs should have
+     * been loaded, it triggers a re-dispatch to recover.
+     */
+    private fun scheduleEmptySourcesRetry() {
+        scope.launch(ioDispatcher) {
+            // Wait for CatalogStore initialization + flow collection to stabilize
+            delay(EMPTY_SOURCES_RETRY_DELAY_MS)
+            val state = _state.value
+            val hasEmptyInstalledLists = state.allPinnedCatalogs.isEmpty() && state.allUnpinnedCatalogs.isEmpty()
+            val hasEmptyRemoteLists = state.allRemoteCatalogs.isEmpty()
+            // If all catalog lists are empty after the retry delay, the initial
+            // subscription race was likely lost. Re-dispatch to recover.
+            if (hasEmptyInstalledLists && hasEmptyRemoteLists) {
+                Log.debug { "ExtensionViewModel: All catalog lists empty after retry delay, re-dispatching LoadExtensions" }
+                extensionController?.dispatch(ExtensionCommand.LoadExtensions)
+            }
+        }
     }
     
     /**
@@ -263,7 +294,7 @@ class ExtensionViewModel(
         // Subscribe to catalog changes based on repository type filter
         scope.launch {
             snapshotFlow { _state.value.selectedRepositoryType }
-                .flatMapLatest { repositoryType: String? ->
+                .flatMapConcat { repositoryType: String? ->
                     getCatalogsByType.subscribe(
                         excludeRemoteInstalled = true,
                         repositoryType = repositoryType
@@ -285,6 +316,30 @@ class ExtensionViewModel(
                                 .filteredByChoice(state.selectedLanguage),
                             languageChoices = languageChoices
                         )
+                    }
+
+                    // Fix: If we received catalogs but the filtered lists are empty
+                    // while all-lists have data, the language filter is too restrictive.
+                    // Reset to All to prevent "No sources installed" after crash recovery.
+                    val totalInstalled = catalogs.pinned.size + catalogs.unpinned.size
+                    val filteredPinned = catalogs.pinned.filteredByQuery(_state.value.searchQuery)
+                        .filteredByLanguageChoice(_state.value.selectedLanguage)
+                    val filteredUnpinned = catalogs.unpinned.filteredByQuery(_state.value.searchQuery)
+                        .filteredByLanguageChoice(_state.value.selectedLanguage)
+                    if (totalInstalled > 0 && filteredPinned.isEmpty() && filteredUnpinned.isEmpty()) {
+                        Log.debug { "ExtensionViewModel: Language filter excluded all $totalInstalled installed sources, resetting to All" }
+                        updateState { state ->
+                            state.copy(
+                                selectedUserSourceLanguage = LanguageChoice.All,
+                                selectedLanguage = LanguageChoice.All,
+                                pinnedCatalogs = catalogs.pinned.filteredByQuery(state.searchQuery)
+                                    .filteredByLanguageChoice(LanguageChoice.All),
+                                unpinnedCatalogs = catalogs.unpinned.filteredByQuery(state.searchQuery)
+                                    .filteredByLanguageChoice(LanguageChoice.All),
+                                remoteCatalogs = catalogs.remote.filteredByQuery(state.searchQuery)
+                                    .filteredByChoice(LanguageChoice.All)
+                            )
+                        }
                     }
                 }
         }
