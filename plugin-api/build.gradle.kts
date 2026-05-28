@@ -31,28 +31,28 @@ kotlin {
         }
     }
     
-    // iOS targets
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "pluginApi"
-            isStatic = true
-        }
-    }
-    
-    // JS target
-    js(IR) {
-        browser {
-            webpackTask {
-                mainOutputFileName = "plugin-api.js"
-            }
-        }
-        binaries.library()
-        generateTypeScriptDefinitions()
-    }
+//    // iOS targets
+//    listOf(
+//        iosX64(),
+//        iosArm64(),
+//        iosSimulatorArm64()
+//    ).forEach { iosTarget ->
+//        iosTarget.binaries.framework {
+//            baseName = "pluginApi"
+//            isStatic = true
+//        }
+//    }
+//
+//    // JS target
+//    js(IR) {
+//        browser {
+//            webpackTask {
+//                mainOutputFileName = "plugin-api.js"
+//            }
+//        }
+//        binaries.library()
+//        generateTypeScriptDefinitions()
+//    }
 
     sourceSets {
         commonMain {
@@ -85,24 +85,24 @@ kotlin {
             }
         }
         
-        val jsMain by getting {
-            dependencies {
-                implementation(libs.ktor.client.js)
-            }
-        }
-        
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain.get())
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-            dependencies {
-                implementation(libs.ktor.client.darwin.v333)
-            }
-        }
+//        val jsMain by getting {
+//            dependencies {
+//                implementation(libs.ktor.client.js)
+//            }
+//        }
+//
+//        val iosX64Main by getting
+//        val iosArm64Main by getting
+//        val iosSimulatorArm64Main by getting
+//        val iosMain by creating {
+//            dependsOn(commonMain.get())
+//            iosX64Main.dependsOn(this)
+//            iosArm64Main.dependsOn(this)
+//            iosSimulatorArm64Main.dependsOn(this)
+//            dependencies {
+//                implementation(libs.ktor.client.darwin.v333)
+//            }
+//        }
         
         commonTest {
             dependencies {

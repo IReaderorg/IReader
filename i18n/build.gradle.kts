@@ -1,7 +1,10 @@
-import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.*
-import java.io.ByteArrayOutputStream
+
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.BOOLEAN
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.INT
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.TimeZone
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -33,17 +36,17 @@ kotlin {
         }
     }
 
-    // iOS targets
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "i18n"
-            isStatic = true
-        }
-    }
+//    // iOS targets
+//    listOf(
+//        iosX64(),
+//        iosArm64(),
+//        iosSimulatorArm64()
+//    ).forEach { iosTarget ->
+//        iosTarget.binaries.framework {
+//            baseName = "i18n"
+//            isStatic = true
+//        }
+//    }
 
     sourceSets {
         commonMain {
@@ -64,15 +67,15 @@ kotlin {
             }
         }
 
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain.get())
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-        }
+//        val iosX64Main by getting
+//        val iosArm64Main by getting
+//        val iosSimulatorArm64Main by getting
+//        val iosMain by creating {
+//            dependsOn(commonMain.get())
+//            iosX64Main.dependsOn(this)
+//            iosArm64Main.dependsOn(this)
+//            iosSimulatorArm64Main.dependsOn(this)
+//        }
     }
 
 }

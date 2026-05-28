@@ -59,19 +59,19 @@ kotlin {
         }
     }
     
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "presentation"
-            isStatic = true
-            
-            // Note: We don't export data module to avoid SQLDelight cinterop issues
-            // The Main.kt entry point is self-contained for now
-        }
-    }
+//    listOf(
+//        iosX64(),
+//        iosArm64(),
+//        iosSimulatorArm64()
+//    ).forEach { iosTarget ->
+//        iosTarget.binaries.framework {
+//            baseName = "presentation"
+//            isStatic = true
+//
+//            // Note: We don't export data module to avoid SQLDelight cinterop issues
+//            // The Main.kt entry point is self-contained for now
+//        }
+//    }
 
     sourceSets {
          commonMain {
@@ -166,18 +166,18 @@ kotlin {
             }
         }
         
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain.get())
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-            dependencies {
-                // iOS-specific dependencies if needed
-            }
-        }
+//        val iosX64Main by getting
+//        val iosArm64Main by getting
+//        val iosSimulatorArm64Main by getting
+//        val iosMain by creating {
+//            dependsOn(commonMain.get())
+//            iosX64Main.dependsOn(this)
+//            iosArm64Main.dependsOn(this)
+//            iosSimulatorArm64Main.dependsOn(this)
+//            dependencies {
+//                // iOS-specific dependencies if needed
+//            }
+//        }
     }
 }
 

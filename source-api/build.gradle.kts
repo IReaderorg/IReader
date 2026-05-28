@@ -34,35 +34,35 @@ kotlin {
         }
     }
     
-    // iOS targets
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "sourceApi"
-            isStatic = true
-        }
-    }
-    
-    // JS target for iOS JavaScriptCore runtime
-    js(IR) {
-        browser {
-            webpackTask {
-                mainOutputFileName = "source-api.js"
-            }
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
-            }
-        }
-        binaries.library()
-        
-        // Generate TypeScript declarations for better interop
-        generateTypeScriptDefinitions()
-    }
+//    // iOS targets
+//    listOf(
+//        iosX64(),
+//        iosArm64(),
+//        iosSimulatorArm64()
+//    ).forEach { iosTarget ->
+//        iosTarget.binaries.framework {
+//            baseName = "sourceApi"
+//            isStatic = true
+//        }
+//    }
+//
+//    // JS target for iOS JavaScriptCore runtime
+//    js(IR) {
+//        browser {
+//            webpackTask {
+//                mainOutputFileName = "source-api.js"
+//            }
+//            testTask {
+//                useKarma {
+//                    useChromeHeadless()
+//                }
+//            }
+//        }
+//        binaries.library()
+//
+//        // Generate TypeScript declarations for better interop
+//        generateTypeScriptDefinitions()
+//    }
 
     sourceSets {
          commonMain {
@@ -112,42 +112,42 @@ kotlin {
             }
         }
         
-        // JS source set for iOS JavaScriptCore runtime
-        val jsMain by getting {
-            dependencies {
-                api(libs.ktor.client.js)
-            }
-        }
-        
-        val jsTest by getting {
-            dependencies {
-                implementation(kotlin("test-js"))
-            }
-        }
-        
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain.get())
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-            dependencies {
-                api(libs.ktor.core)
-                implementation(libs.ktor.client.darwin.v333)
-            }
-        }
-        
-        val iosX64Test by getting
-        val iosArm64Test by getting
-        val iosSimulatorArm64Test by getting
-        val iosTest by creating {
-            dependsOn(commonTest.get())
-            iosX64Test.dependsOn(this)
-            iosArm64Test.dependsOn(this)
-            iosSimulatorArm64Test.dependsOn(this)
-        }
+//        // JS source set for iOS JavaScriptCore runtime
+//        val jsMain by getting {
+//            dependencies {
+//                api(libs.ktor.client.js)
+//            }
+//        }
+//
+//        val jsTest by getting {
+//            dependencies {
+//                implementation(kotlin("test-js"))
+//            }
+//        }
+//
+//        val iosX64Main by getting
+//        val iosArm64Main by getting
+//        val iosSimulatorArm64Main by getting
+//        val iosMain by creating {
+//            dependsOn(commonMain.get())
+//            iosX64Main.dependsOn(this)
+//            iosArm64Main.dependsOn(this)
+//            iosSimulatorArm64Main.dependsOn(this)
+//            dependencies {
+//                api(libs.ktor.core)
+//                implementation(libs.ktor.client.darwin.v333)
+//            }
+//        }
+//
+//        val iosX64Test by getting
+//        val iosArm64Test by getting
+//        val iosSimulatorArm64Test by getting
+//        val iosTest by creating {
+//            dependsOn(commonTest.get())
+//            iosX64Test.dependsOn(this)
+//            iosArm64Test.dependsOn(this)
+//            iosSimulatorArm64Test.dependsOn(this)
+//        }
         
         commonTest {
             dependencies {
