@@ -185,7 +185,13 @@ class ImportLNReaderBackup(
             throw LNReaderImportException.EmptyBackupException()
         }
 
-        val result = importBackupData(backup, options)
+        // Extract chapter content from download.zip if present
+        val chapterContentMap = extractChapterContent(bytes)
+        if (chapterContentMap.isNotEmpty()) {
+            emit(ImportProgress.Parsing("Extracted content for ${chapterContentMap.size} chapters from download.zip"))
+        }
+
+        val result = importBackupData(backup, options, chapterContentMap)
         emit(ImportProgress.Complete(result))
     }
 
@@ -196,10 +202,15 @@ class ImportLNReaderBackup(
     /**
      * Import parsed backup data into the database.
      * This is the shared logic used by both streaming and byte-array approaches.
+     *
+     * @param backup The parsed backup data
+     * @param options Import options
+     * @param chapterContentMap Map of chapter ID to HTML content from download.zip
      */
     internal suspend fun importBackupData(
         backup: ireader.domain.models.lnreader.LNReaderBackup,
-        options: ImportOptions
+        options: ImportOptions,
+        chapterContentMap: Map<Int, String> = emptyMap()
     ): ImportResult {
         val errors = mutableListOf<ImportError>()
         var novelsImported = 0
@@ -211,7 +222,7 @@ class ImportLNReaderBackup(
         // Step 1: Import all novels
         for (novel in backup.novels) {
             try {
-                when (val result = importNovel(novel, options)) {
+                when (val result = importNovel(novel, options, chapterContentMap)) {
                     is NovelImportResult.Imported -> {
                         novelsImported++
                         chaptersImported += result.chaptersImported
@@ -262,7 +273,11 @@ class ImportLNReaderBackup(
         data class Failed(val error: String) : NovelImportResult()
     }
 
-    internal suspend fun importNovel(novel: LNReaderNovel, options: ImportOptions): NovelImportResult {
+    internal suspend fun importNovel(
+        novel: LNReaderNovel,
+        options: ImportOptions,
+        chapterContentMap: Map<Int, String> = emptyMap()
+    ): NovelImportResult {
         val sourceId = sourceMapper.mapPluginId(novel.pluginId)
             ?: sourceMapper.getUnmappedSourceId()
 
@@ -272,20 +287,20 @@ class ImportLNReaderBackup(
             return when (options.conflictStrategy) {
                 ConflictStrategy.SKIP -> NovelImportResult.Skipped
                 ConflictStrategy.MERGE -> {
-                    val chaptersImported = mergeChapters(existing.id, novel.chapters, options)
+                    val chaptersImported = mergeChapters(existing.id, novel.chapters, options, chapterContentMap)
                     NovelImportResult.Imported(existing.id, chaptersImported)
                 }
                 ConflictStrategy.OVERWRITE -> {
                     chapterRepository.deleteChaptersByBookId(existing.id)
                     val bookId = upsertBook(existing.id, novel, sourceId)
-                    val chaptersImported = importChapters(bookId, novel.chapters, options)
+                    val chaptersImported = importChapters(bookId, novel.chapters, options, chapterContentMap)
                     NovelImportResult.Imported(bookId, chaptersImported)
                 }
             }
         }
 
         val bookId = upsertBook(0, novel, sourceId)
-        val chaptersImported = importChapters(bookId, novel.chapters, options)
+        val chaptersImported = importChapters(bookId, novel.chapters, options, chapterContentMap)
         return NovelImportResult.Imported(bookId, chaptersImported)
     }
 
@@ -311,9 +326,19 @@ class ImportLNReaderBackup(
     // CHAPTER IMPORT
     // ─────────────────────────────────────────────────────────
 
-    private suspend fun importChapters(bookId: Long, chapters: List<LNReaderChapter>, options: ImportOptions): Int {
+    private suspend fun importChapters(
+        bookId: Long,
+        chapters: List<LNReaderChapter>,
+        options: ImportOptions,
+        chapterContentMap: Map<Int, String> = emptyMap()
+    ): Int {
         if (chapters.isEmpty()) return 0
         val newChapters = chapters.mapIndexed { index, chapter ->
+            // Look up chapter content from download.zip by chapter ID
+            val content = chapterContentMap[chapter.id]?.let { htmlContent ->
+                htmlToPages(htmlContent)
+            } ?: emptyList()
+
             Chapter(
                 id = 0, bookId = bookId, key = chapter.path, name = chapter.name,
                 read = !chapter.unread && options.importReadProgress,
@@ -323,14 +348,19 @@ class ImportLNReaderBackup(
                 number = chapter.chapterNumber ?: (index + 1).toFloat(),
                 sourceOrder = (chapter.position ?: index).toLong(),
                 lastPageRead = if (options.importReadProgress) ((chapter.progress ?: 0f) * 100).toLong() else 0,
-                content = emptyList(), type = 0, translator = ""
+                content = content, type = 0, translator = ""
             )
         }
         chapterRepository.insertChapters(newChapters)
         return newChapters.size
     }
 
-    private suspend fun mergeChapters(bookId: Long, backupChapters: List<LNReaderChapter>, options: ImportOptions): Int {
+    private suspend fun mergeChapters(
+        bookId: Long,
+        backupChapters: List<LNReaderChapter>,
+        options: ImportOptions,
+        chapterContentMap: Map<Int, String> = emptyMap()
+    ): Int {
         val existingChapters = chapterRepository.findChaptersByBookId(bookId)
         val existingMap = existingChapters.associateBy { it.key }
         var merged = 0
@@ -344,14 +374,25 @@ class ImportLNReaderBackup(
                     (backupChapter.bookmark && !existing.bookmark) ||
                     ((backupChapter.progress ?: 0f) * 100).toLong() > existing.lastPageRead
                 if (shouldUpdate) {
+                    // Also update content if available in download.zip
+                    val newContent = chapterContentMap[backupChapter.id]?.let { htmlContent ->
+                        htmlToPages(htmlContent)
+                    }
+
                     chaptersToUpdate.add(existing.copy(
                         read = existing.read || !backupChapter.unread,
                         bookmark = existing.bookmark || backupChapter.bookmark,
-                        lastPageRead = maxOf(existing.lastPageRead, ((backupChapter.progress ?: 0f) * 100).toLong())
+                        lastPageRead = maxOf(existing.lastPageRead, ((backupChapter.progress ?: 0f) * 100).toLong()),
+                        content = newContent ?: existing.content
                     ))
                     merged++
                 }
             } else if (existing == null) {
+                // Look up chapter content from download.zip by chapter ID
+                val content = chapterContentMap[backupChapter.id]?.let { htmlContent ->
+                    htmlToPages(htmlContent)
+                } ?: emptyList()
+
                 chaptersToAdd.add(Chapter(
                     id = 0, bookId = bookId, key = backupChapter.path, name = backupChapter.name,
                     read = !backupChapter.unread && options.importReadProgress,
@@ -361,7 +402,7 @@ class ImportLNReaderBackup(
                     number = backupChapter.chapterNumber ?: (index + 1).toFloat(),
                     sourceOrder = (backupChapter.position ?: index).toLong(),
                     lastPageRead = if (options.importReadProgress) ((backupChapter.progress ?: 0f) * 100).toLong() else 0,
-                    content = emptyList(), type = 0, translator = ""
+                    content = content, type = 0, translator = ""
                 ))
                 merged++
             }
@@ -437,6 +478,74 @@ class ImportLNReaderBackup(
         if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed
         if (trimmed.startsWith("file://") || trimmed.startsWith("/")) return ""
         return trimmed
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // CHAPTER CONTENT EXTRACTION FROM download.zip
+    // ─────────────────────────────────────────────────────────
+
+    /**
+     * Extract chapter content from download.zip contained in the backup.
+     * This is a platform-specific function - Android provides the actual implementation.
+     *
+     * @param backupBytes The main backup ZIP file bytes
+     * @return Map of chapter ID to HTML content string
+     */
+    internal fun extractChapterContent(backupBytes: ByteArray): Map<Int, String> {
+        return extractChapterContentPlatform(backupBytes)
+    }
+
+    /**
+     * Convert HTML content to a list of Page objects.
+     * Extracts text from paragraph tags and creates Text pages.
+     */
+    private fun htmlToPages(html: String): List<ireader.core.source.model.Page> {
+        val pages = mutableListOf<ireader.core.source.model.Page>()
+
+        // Simple HTML to text extraction
+        // Look for content between <p> tags or other text-containing elements
+        val paragraphRegex = Regex("<p[^>]*>(.*?)</p>", RegexOption.DOT_MATCHES_ALL)
+        val matches = paragraphRegex.findAll(html)
+
+        for (match in matches) {
+            var text = match.groupValues[1]
+                .replace(Regex("<[^>]+>"), "") // Remove inner HTML tags
+                .replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'")
+                .trim()
+
+            // Decode HTML entities (basic)
+            text = text.replace(Regex("&#(\\d+);")) { result ->
+                val code = result.groupValues[1].toIntOrNull()
+                if (code != null) code.toChar().toString() else result.value
+            }
+
+            if (text.isNotBlank()) {
+                pages.add(ireader.core.source.model.Text(text))
+            }
+        }
+
+        // If no paragraphs found, try to extract text from the body
+        if (pages.isEmpty()) {
+            val bodyRegex = Regex("<body[^>]*>(.*?)</body>", RegexOption.DOT_MATCHES_ALL)
+            val bodyMatch = bodyRegex.find(html)
+            if (bodyMatch != null) {
+                var text = bodyMatch.groupValues[1]
+                    .replace(Regex("<[^>]+>"), " ")
+                    .replace(Regex("\\s+"), " ")
+                    .trim()
+
+                if (text.isNotBlank()) {
+                    pages.add(ireader.core.source.model.Text(text))
+                }
+            }
+        }
+
+        return pages
     }
 }
 

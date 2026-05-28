@@ -178,6 +178,144 @@ suspend fun parseBackupStreamingPlatform(
 }
 
 /**
+ * Extract chapter content from download.zip contained in the backup.
+ *
+ * The download.zip contains HTML files at: Novels/{source}/{novelId}/{chapterId}/index.html
+ *
+ * @param backupBytes The main backup ZIP file bytes
+ * @return Map of chapterId (Int) to HTML content string
+ */
+fun extractChapterContentFromDownloadZip(backupBytes: ByteArray): Map<Int, String> {
+    val chapterContentMap = mutableMapOf<Int, String>()
+
+    try {
+        ZipInputStream(ByteArrayInputStream(backupBytes)).use { zipIn ->
+            var entry = zipIn.nextEntry
+            while (entry != null) {
+                // Look for download.zip entry
+                if (entry.name == "download.zip") {
+                    ireader.core.log.Log.info { "LNReader: Found download.zip, extracting chapter content..." }
+
+                    // Read the download.zip bytes
+                    val downloadZipBytes = zipIn.readBytes()
+
+                    // Parse download.zip
+                    ZipInputStream(ByteArrayInputStream(downloadZipBytes)).use { downloadZipIn ->
+                        var downloadEntry = downloadZipIn.nextEntry
+                        while (downloadEntry != null) {
+                            val entryName = downloadEntry.name
+
+                            // Look for index.html files in Novels/{source}/{novelId}/{chapterId}/index.html
+                            if (entryName.startsWith("Novels/") && entryName.endsWith("/index.html")) {
+                                try {
+                                    // Extract chapter ID from path: Novels/{source}/{novelId}/{chapterId}/index.html
+                                    val parts = entryName.removePrefix("Novels/")
+                                        .removeSuffix("/index.html")
+                                        .split("/")
+
+                                    if (parts.size == 3) {
+                                        // parts[0] = source (e.g., "royalroad")
+                                        // parts[1] = novelId in download.zip (e.g., "1")
+                                        // parts[2] = chapterId (e.g., "414853")
+                                        val chapterId = parts[2].toIntOrNull()
+                                        if (chapterId != null) {
+                                            val htmlContent = downloadZipIn.readBytes().decodeToString()
+                                            chapterContentMap[chapterId] = htmlContent
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    ireader.core.log.Log.warn(e, "Failed to extract chapter content from: $entryName")
+                                }
+                            } else {
+                                // Skip non-matching entries
+                                val skipBuffer = ByteArray(8192)
+                                while (downloadZipIn.read(skipBuffer) != -1) { /* skip */ }
+                            }
+
+                            downloadZipIn.closeEntry()
+                            downloadEntry = downloadZipIn.nextEntry
+                        }
+                    }
+
+                    ireader.core.log.Log.info { "LNReader: Extracted content for ${chapterContentMap.size} chapters from download.zip" }
+                } else {
+                    // Skip non-download.zip entries
+                    val skipBuffer = ByteArray(8192)
+                    while (zipIn.read(skipBuffer) != -1) { /* skip */ }
+                }
+
+                zipIn.closeEntry()
+                entry = zipIn.nextEntry
+            }
+        }
+    } catch (e: Exception) {
+        ireader.core.log.Log.warn(e, "Failed to extract download.zip content", e)
+    }
+
+    return chapterContentMap
+}
+
+/**
+ * Convert HTML content to a list of Text pages.
+ * Extracts text from paragraph tags and creates Text pages.
+ */
+fun htmlToTextPages(html: String): List<ireader.core.source.model.Page> {
+    val pages = mutableListOf<ireader.core.source.model.Page>()
+
+    // Simple HTML to text extraction
+    // Look for content between <p> tags or other text-containing elements
+    val paragraphRegex = Regex("<p[^>]*>(.*?)</p>", RegexOption.DOT_MATCHES_ALL)
+    val matches = paragraphRegex.findAll(html)
+
+    for (match in matches) {
+        var text = match.groupValues[1]
+            .replace(Regex("<[^>]+>"), "") // Remove inner HTML tags
+            .replace("&nbsp;", " ")
+            .replace("&amp;", "&")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&quot;", "\"")
+            .replace("&#39;", "'")
+            .trim()
+
+        // Decode HTML entities (basic)
+        text = text.replace(Regex("&#(\\d+);")) { result ->
+            val code = result.groupValues[1].toIntOrNull()
+            if (code != null) code.toChar().toString() else result.value
+        }
+
+        if (text.isNotBlank()) {
+            pages.add(ireader.core.source.model.Text(text))
+        }
+    }
+
+    // If no paragraphs found, try to extract text from the body
+    if (pages.isEmpty()) {
+        val bodyRegex = Regex("<body[^>]*>(.*?)</body>", RegexOption.DOT_MATCHES_ALL)
+        val bodyMatch = bodyRegex.find(html)
+        if (bodyMatch != null) {
+            var text = bodyMatch.groupValues[1]
+                .replace(Regex("<[^>]+>"), " ")
+                .replace(Regex("\\s+"), " ")
+                .trim()
+
+            if (text.isNotBlank()) {
+                pages.add(ireader.core.source.model.Text(text))
+            }
+        }
+    }
+
+    return pages
+}
+
+/**
+ * Android implementation of chapter content extraction from download.zip.
+ */
+actual fun extractChapterContentPlatform(backupBytes: ByteArray): Map<Int, String> {
+    return extractChapterContentFromDownloadZip(backupBytes)
+}
+
+/**
  * Android implementation of LNReader backup detection
  */
 actual fun isLNReaderBackupPlatform(bytes: ByteArray): Boolean {

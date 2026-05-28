@@ -120,3 +120,12 @@ expect suspend fun parseBackupPlatform(bytes: ByteArray): LNReaderBackup
  * Platform-specific LNReader backup detection
  */
 expect fun isLNReaderBackupPlatform(bytes: ByteArray): Boolean
+
+/**
+ * Platform-specific chapter content extraction from download.zip.
+ * Extracts chapter HTML content from the download.zip file contained in the backup.
+ *
+ * @param backupBytes The main backup ZIP file bytes
+ * @return Map of chapter ID to HTML content string
+ */
+expect fun extractChapterContentPlatform(backupBytes: ByteArray): Map<Int, String>

@@ -12,7 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
 import java.io.InputStream
+import java.util.zip.ZipInputStream
 
 ///**
 // * Android-specific streaming implementation for LNReader backup import.
@@ -113,6 +115,9 @@ private suspend fun parseZipAndImport(
 
     val json = ireader.domain.usecases.backup.lnreader.LNReaderBackupParser.json
 
+    // Chapter content map extracted from download.zip
+    val chapterContentMap = mutableMapOf<Int, String>()
+
     Log.info { "LNReader: Starting ZIP parsing" }
 
     java.util.zip.ZipInputStream(bufferedStream).use { zipIn ->
@@ -138,13 +143,25 @@ private suspend fun parseZipAndImport(
 
                 entryName == "Setting.json" -> { /* skip */ }
 
+                // Extract download.zip for chapter content
+                entryName == "download.zip" -> {
+                    Log.info { "LNReader: Found download.zip, extracting chapter content..." }
+                    try {
+                        val downloadZipBytes = zipIn.readBytes()
+                        extractChapterContentFromDownloadZipBytes(downloadZipBytes, chapterContentMap)
+                        Log.info { "LNReader: Extracted content for ${chapterContentMap.size} chapters from download.zip" }
+                    } catch (e: Exception) {
+                        Log.warn(e, "Failed to extract download.zip content")
+                    }
+                }
+
                 entryName.startsWith("NovelAndChapters/") && entryName.endsWith(".json") -> {
                     val content = zipIn.readBytes().decodeToString()
                     try {
                         val novel = json.decodeFromString<LNReaderNovel>(content)
                         Log.info { "LNReader: Importing novel '${novel.name}' (${novel.chapters.size} chapters)" }
 
-                        when (val result = instance.importNovel(novel, options)) {
+                        when (val result = instance.importNovel(novel, options, chapterContentMap)) {
                             is ImportLNReaderBackup.NovelImportResult.Imported -> {
                                 novelsImported++
                                 chaptersImported += result.chaptersImported
@@ -243,4 +260,51 @@ private suspend fun parseZipAndImport(
         categoriesImported = categoriesImported,
         errors = errors
     )
+}
+
+/**
+ * Extract chapter content from download.zip bytes.
+ * Populates the chapterContentMap with chapter ID to HTML content mapping.
+ */
+private fun extractChapterContentFromDownloadZipBytes(
+    downloadZipBytes: ByteArray,
+    chapterContentMap: MutableMap<Int, String>
+) {
+    try {
+        ZipInputStream(ByteArrayInputStream(downloadZipBytes)).use { downloadZipIn ->
+            var downloadEntry = downloadZipIn.nextEntry
+            while (downloadEntry != null) {
+                val entryName = downloadEntry.name
+
+                // Look for index.html files in Novels/{source}/{novelId}/{chapterId}/index.html
+                if (entryName.startsWith("Novels/") && entryName.endsWith("/index.html")) {
+                    try {
+                        // Extract chapter ID from path
+                        val parts = entryName.removePrefix("Novels/")
+                            .removeSuffix("/index.html")
+                            .split("/")
+
+                        if (parts.size == 3) {
+                            val chapterId = parts[2].toIntOrNull()
+                            if (chapterId != null) {
+                                val htmlContent = downloadZipIn.readBytes().decodeToString()
+                                chapterContentMap[chapterId] = htmlContent
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.warn(e, "Failed to extract chapter content from: $entryName")
+                    }
+                } else {
+                    // Skip non-matching entries
+                    val skipBuffer = ByteArray(8192)
+                    while (downloadZipIn.read(skipBuffer) != -1) { /* skip */ }
+                }
+
+                downloadZipIn.closeEntry()
+                downloadEntry = downloadZipIn.nextEntry
+            }
+        }
+    } catch (e: Exception) {
+        Log.warn(e, "Failed to parse download.zip", e)
+    }
 }
