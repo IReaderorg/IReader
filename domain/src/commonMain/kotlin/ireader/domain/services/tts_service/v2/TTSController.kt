@@ -46,8 +46,43 @@ class TTSController(
     companion object {
         private const val TAG = "TTSController"
     }
-    
+
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    // ========== Validation Helpers ==========
+
+    /** Validate that a book and chapter are loaded. Returns null with logged warning if not. */
+    private fun requireBookAndChapter(): Pair<Book, Chapter>? {
+        val currentState = _state.value
+        val book = currentState.book
+        val chapter = currentState.chapter
+        if (book == null || chapter == null) {
+            Log.warn { "$TAG: Operation requires loaded book/chapter, but none found" }
+            return null
+        }
+        return book to chapter
+    }
+
+    /** Validate that content is loaded. Returns false with logged warning if not. */
+    private fun requireContent(operation: String): Boolean {
+        if (!_state.value.hasContent) {
+            Log.warn { "$TAG: $operation requires content, but none loaded" }
+            return false
+        }
+        return true
+    }
+
+    /** Validate paragraph index is within bounds. */
+    private fun isValidParagraphIndex(index: Int): Boolean {
+        val currentState = _state.value
+        return index >= 0 && index < currentState.paragraphs.size
+    }
+
+    /** Validate chunk index is within bounds. */
+    private fun isValidChunkIndex(index: Int): Boolean {
+        val currentState = _state.value
+        return index >= 0 && index < currentState.totalChunks
+    }
     
     // Mutex to ensure commands are processed sequentially
     private val commandMutex = Mutex()
@@ -470,9 +505,12 @@ class TTSController(
     }
     
     private suspend fun jumpToParagraph(index: Int) {
+        if (!isValidParagraphIndex(index)) {
+            Log.warn { "$TAG: jumpToParagraph($index) - invalid index, ignoring" }
+            return
+        }
+
         val currentState = _state.value
-        if (index < 0 || index >= currentState.paragraphs.size) return
-        
         Log.debug { "$TAG: jumpToParagraph($index) - chunkModeEnabled=${currentState.chunkModeEnabled}" }
         
         val wasPlaying = currentState.isPlaying
@@ -517,31 +555,24 @@ class TTSController(
     }
     
     private suspend fun nextChapter() {
-        val currentState = _state.value
-        val book = currentState.book ?: return
-        val chapter = currentState.chapter ?: return
-        
+        val (book, chapter) = requireBookAndChapter() ?: return
+
         Log.debug { "$TAG: nextChapter() - current chapter: ${chapter.id}" }
-        
-        val wasPlaying = currentState.isPlaying
+
+        val wasPlaying = _state.value.isPlaying
         engine?.stop()
-        
+
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
-        
+
         try {
-            // Get next chapter ID using contentLoader (TTS-specific content handling)
             val nextChapterId = contentLoader.getNextChapterId(book.id, chapter.id)
-            
+
             if (nextChapterId != null) {
-                Log.warn { "$TAG: Loading next chapter: $nextChapterId" }
-                
-                // Load chapter content for TTS (with paragraph parsing)
+                Log.debug { "$TAG: Loading next chapter: $nextChapterId" }
                 loadChapter(book.id, nextChapterId, 0)
-                if (wasPlaying) {
-                    play()
-                }
+                if (wasPlaying) { play() }
             } else {
-                Log.warn { "$TAG: No next chapter available" }
+                Log.debug { "$TAG: No next chapter available" }
                 _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
             }
         } catch (e: Exception) {
@@ -549,33 +580,26 @@ class TTSController(
             handleError(TTSError.ContentLoadFailed(e.message ?: "Failed to load next chapter"))
         }
     }
-    
+
     private suspend fun previousChapter() {
-        val currentState = _state.value
-        val book = currentState.book ?: return
-        val chapter = currentState.chapter ?: return
-        
+        val (book, chapter) = requireBookAndChapter() ?: return
+
         Log.debug { "$TAG: previousChapter() - current chapter: ${chapter.id}" }
-        
-        val wasPlaying = currentState.isPlaying
+
+        val wasPlaying = _state.value.isPlaying
         engine?.stop()
-        
+
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
-        
+
         try {
-            // Get previous chapter ID using contentLoader (TTS-specific content handling)
             val prevChapterId = contentLoader.getPreviousChapterId(book.id, chapter.id)
-            
+
             if (prevChapterId != null) {
-                Log.warn { "$TAG: Loading previous chapter: $prevChapterId" }
-                
-                // Load chapter content for TTS (with paragraph parsing)
+                Log.debug { "$TAG: Loading previous chapter: $prevChapterId" }
                 loadChapter(book.id, prevChapterId, 0)
-                if (wasPlaying) {
-                    play()
-                }
+                if (wasPlaying) { play() }
             } else {
-                Log.warn { "$TAG: No previous chapter available" }
+                Log.debug { "$TAG: No previous chapter available" }
                 _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
             }
         } catch (e: Exception) {
