@@ -105,17 +105,6 @@ class ReaderScreenViewModel(
     val statisticsViewModel: ReaderStatisticsViewModel,
 ) : BaseViewModel() {
     
-    companion object {
-        /** Delay (ms) after a remote fetch completes before notifying ChapterController.
-         *  This ensures the DB insert is fully committed so ChapterController's loadChapter
-         *  finds content and doesn't try to re-fetch from remote. */
-        private const val FETCH_TO_CONTROLLER_DELAY_MS = 300L
-        
-        /** Delay (ms) before starting preload of the next chapter after the current
-         *  chapter's remote fetch completes. This prevents two remote fetches from
-         *  hitting the source server simultaneously. */
-        private const val PRELOAD_AFTER_FETCH_DELAY_MS = 500L
-    }
 
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -785,7 +774,7 @@ class ReaderScreenViewModel(
                 chapterController.dispatch(ChapterCommand.LoadBook(bookId))
 
                 // Wait for chapters to load from ChapterController
-                delay(100)
+                delay(ReaderConstants.CHAPTER_CONTROLLER_INIT_DELAY_MS)
 
                 // Setup initial chapter
                 setupChapters(book, catalog, bookId, chapterId)
@@ -1029,7 +1018,7 @@ class ReaderScreenViewModel(
                 // NOW it's safe to notify ChapterController - the chapter has content,
                 // so ChapterController.loadChapter() will skip remote fetch.
                 // Add a small delay to ensure the DB insert has fully committed.
-                delay(FETCH_TO_CONTROLLER_DELAY_MS)
+                delay(ReaderConstants.FETCH_TO_CONTROLLER_DELAY_MS)
                 chapterController.dispatch(ChapterCommand.LoadChapter(filteredChapter.id))
                 
                 // Check chapter health after content loads
@@ -1261,7 +1250,7 @@ class ReaderScreenViewModel(
             try {
                 // Add a small delay to avoid racing with any in-progress DB operations
                 // from the current chapter's fetch/insert cycle
-                delay(PRELOAD_AFTER_FETCH_DELAY_MS)
+                delay(ReaderConstants.PRELOAD_AFTER_FETCH_DELAY_MS)
                 
                 // NOTE: We intentionally do NOT dispatch ChapterCommand.PreloadNextChapter here.
                 // ChapterController.preloadNextChapter() uses loadChapterContentUseCase which
@@ -1328,7 +1317,7 @@ class ReaderScreenViewModel(
                     currentState.chapters.drop(currentIndex + 1).take(count).forEach { chapter ->
                         if (!preloadedChapters.containsKey(chapter.id)) {
                             preloadChapter(chapter)
-                            delay(500)
+                            delay(ReaderConstants.PRELOAD_AFTER_FETCH_DELAY_MS)
                         }
                     }
                 }
@@ -2002,7 +1991,7 @@ class ReaderScreenViewModel(
     fun makeSettingTransparent() {
         settingsViewModel.isSettingChanging = true
         scope.launch {
-            delay(100)
+            delay(ReaderConstants.SETTINGS_CHANGE_RESET_DELAY_MS)
             settingsViewModel.isSettingChanging = false
         }
     }
