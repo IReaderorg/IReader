@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -216,7 +217,10 @@ fun TextReplacementScreen(
                 }
                 showAddDialog = false
                 editingReplacement = null
-            }
+            },
+            validatePattern = { pattern -> vm.validateRegexPattern(pattern) },
+            isRegexPattern = { pattern -> vm.isRegexPattern(pattern) },
+            escapePattern = { pattern -> vm.escapeRegexPattern(pattern) }
         )
     }
     
@@ -350,13 +354,31 @@ fun TextReplacementItem(
 fun TextReplacementDialog(
     replacement: TextReplacement?,
     onDismiss: () -> Unit,
-    onSave: (name: String, findText: String, replaceText: String, caseSensitive: Boolean) -> Unit
+    onSave: (name: String, findText: String, replaceText: String, caseSensitive: Boolean) -> Unit,
+    validatePattern: ((String) -> String?)? = null,
+    isRegexPattern: ((String) -> Boolean)? = null,
+    escapePattern: ((String) -> String)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var name by remember { mutableStateOf(replacement?.name ?: "") }
     var findText by remember { mutableStateOf(replacement?.findText ?: "") }
     var replaceText by remember { mutableStateOf(replacement?.replaceText ?: "") }
     var caseSensitive by remember { mutableStateOf(replacement?.caseSensitive ?: false) }
+    
+    // Real-time validation state
+    var findTextError by remember { mutableStateOf<String?>(null) }
+    var isRegex by remember { mutableStateOf(false) }
+    
+    // Validate pattern in real-time as user types
+    LaunchedEffect(findText) {
+        if (findText.isNotBlank() && validatePattern != null) {
+            findTextError = validatePattern(findText)
+            isRegex = isRegexPattern?.invoke(findText) ?: false
+        } else {
+            findTextError = null
+            isRegex = false
+        }
+    }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -381,8 +403,42 @@ fun TextReplacementDialog(
                     onValueChange = { findText = it },
                     label = { Text("Find Text") },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("e.g., khan") },
-                    supportingText = { Text("Text to search for") }
+                    placeholder = { Text("e.g., khan or regex pattern") },
+                    isError = findTextError != null,
+                    supportingText = {
+                        Column {
+                            if (findTextError != null) {
+                                Text(
+                                    text = findTextError!!,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            } else if (isRegex && findText.isNotBlank()) {
+                                Text(
+                                    text = "✓ Valid regex pattern",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            } else {
+                                Text("Text to search for (supports regex patterns)")
+                            }
+                        }
+                    },
+                    trailingIcon = {
+                        if (isRegex && findText.isNotBlank() && escapePattern != null) {
+                            IconButton(
+                                onClick = { findText = escapePattern(findText) },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.TextFields,
+                                    contentDescription = "Escape special characters",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
                 )
                 
                 OutlinedTextField(
@@ -391,7 +447,7 @@ fun TextReplacementDialog(
                     label = { Text("Replace With") },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("e.g., khaaan") },
-                    supportingText = { Text("Leave empty to remove the text") }
+                    supportingText = { Text("Leave empty to remove the matched text") }
                 )
                 
                 Row(
@@ -412,16 +468,51 @@ fun TextReplacementDialog(
                         onCheckedChange = { caseSensitive = it }
                     )
                 }
+                
+                // Help text for regex patterns
+                if (isRegex || findText.contains("[") || findText.contains("{") || findText.contains("(")) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "Regex Pattern Help:",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "• Use \\{ for literal braces, \\( for literal parentheses",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "• Use \\[ for literal brackets",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "• Common patterns: .* (any chars), \\d+ (digits), \\w+ (words)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (name.isNotBlank() && findText.isNotBlank()) {
+                    if (name.isNotBlank() && findText.isNotBlank() && findTextError == null) {
                         onSave(name, findText, replaceText, caseSensitive)
                     }
                 },
-                enabled = name.isNotBlank() && findText.isNotBlank()
+                enabled = name.isNotBlank() && findText.isNotBlank() && findTextError == null
             ) {
                 Text(localizeHelper.localize(Res.string.save))
             }

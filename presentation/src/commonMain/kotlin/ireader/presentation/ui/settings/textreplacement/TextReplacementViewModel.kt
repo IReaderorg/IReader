@@ -128,15 +128,10 @@ class TextReplacementViewModel(
                 }
                 
                 // Validate regex pattern if it looks like regex
-                val regexMetaChars = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
-                val isRegex = findText.any { it in regexMetaChars }
-                if (isRegex) {
-                    try {
-                        Regex(findText) // Test if valid regex
-                    } catch (e: Exception) {
-                        _state.value = TextReplacementState.Error("Invalid regex pattern: ${e.message}")
-                        return@launch
-                    }
+                val validationError = validateRegexPattern(findText)
+                if (validationError != null) {
+                    _state.value = TextReplacementState.Error(validationError)
+                    return@launch
                 }
                 
                 textReplacementUseCase.addReplacement(
@@ -169,6 +164,13 @@ class TextReplacementViewModel(
                 // Validate inputs
                 if (replacement.findText.isBlank()) {
                     _state.value = TextReplacementState.Error("Find text cannot be empty")
+                    return@launch
+                }
+                
+                // Validate regex pattern
+                val validationError = validateRegexPattern(replacement.findText)
+                if (validationError != null) {
+                    _state.value = TextReplacementState.Error(validationError)
                     return@launch
                 }
                 
@@ -221,6 +223,74 @@ class TextReplacementViewModel(
                 )
             }
         }
+    }
+    
+    /**
+     * Validate a regex pattern and return an error message if invalid, or null if valid.
+     * This is a user-friendly validation that provides clear error messages.
+     */
+    fun validateRegexPattern(pattern: String): String? {
+        // Check if pattern contains regex metacharacters
+        val regexMetaChars = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
+        val hasRegexChars = pattern.any { it in regexMetaChars }
+        
+        if (!hasRegexChars) {
+            // No regex metacharacters, so it's a literal string - always valid
+            return null
+        }
+        
+        // Try to compile the pattern to check if it's valid regex
+        return try {
+            Regex(pattern)
+            null // Valid regex
+        } catch (e: Exception) {
+            // Provide user-friendly error message
+            val errorMsg = e.message ?: "Unknown error"
+            when {
+                errorMsg.contains("Unclosed character class", ignoreCase = true) -> {
+                    "Invalid pattern: Unclosed bracket '[' - make sure to close all brackets"
+                }
+                errorMsg.contains("Unclosed group", ignoreCase = true) -> {
+                    "Invalid pattern: Unclosed parenthesis '(' - make sure to close all groups"
+                }
+                errorMsg.contains("Illegal repetition", ignoreCase = true) || 
+                errorMsg.contains("Syntax error in regex pattern", ignoreCase = true) -> {
+                    // Check for common issues
+                    if (pattern.contains("{") && !pattern.contains("}")) {
+                        "Invalid pattern: Unclosed brace '{' - use \\{ for literal braces or close with '}'"
+                    } else if (pattern.contains("}") && !pattern.contains("{")) {
+                        "Invalid pattern: Unmatched closing brace '}' - use \\} for literal braces"
+                    } else if (pattern.contains("[") && !pattern.contains("]")) {
+                        "Invalid pattern: Unclosed bracket '[' - use \\[ for literal brackets or close with ']'"
+                    } else if (pattern.contains("]") && !pattern.contains("[")) {
+                        "Invalid pattern: Unmatched closing bracket ']' - use \\] for literal brackets"
+                    } else {
+                        "Invalid pattern: $errorMsg"
+                    }
+                }
+                else -> "Invalid pattern: $errorMsg"
+            }
+        }
+    }
+    
+    /**
+     * Check if a pattern is likely intended to be a regex pattern.
+     * Returns true if the pattern contains regex metacharacters.
+     */
+    fun isRegexPattern(pattern: String): Boolean {
+        val regexMetaChars = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
+        return pattern.any { it in regexMetaChars }
+    }
+    
+    /**
+     * Escape all regex metacharacters in a pattern to make it a literal string.
+     * Useful when user wants to match special characters literally.
+     */
+    fun escapeRegexPattern(pattern: String): String {
+        val specialChars = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
+        return pattern.map { char ->
+            if (char in specialChars) "\\$char" else char.toString()
+        }.joinToString("")
     }
     
     /**
