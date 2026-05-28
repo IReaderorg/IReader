@@ -118,7 +118,13 @@ val DomainServices = module {
             bookCategoryRepository = get(),
             transactions = get(),
             fileSaver = get()
-        )
+        ).also { instance ->
+            // Inject platform-specific streaming importer if available (Android defines this binding)
+            val streamingImporter = getOrNull<ireader.domain.usecases.backup.lnreader.LNReaderStreamingImporter>()
+            if (streamingImporter != null) {
+                instance.streamingImporter = streamingImporter
+            }
+        }
     }
     factory  { CategoriesUseCases(get(), get(), get(), get(), get()) }
     factory  { CreateCategoryWithName(get()) }

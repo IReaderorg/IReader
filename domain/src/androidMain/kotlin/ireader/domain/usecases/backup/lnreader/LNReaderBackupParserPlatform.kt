@@ -105,28 +105,20 @@ suspend fun parseBackupStreamingPlatform(
     callback: LNReaderBackupStreamCallback
 ) {
     var novelCount = 0
-    var totalNovels = 0
-    
-    // First pass: count total novels for progress reporting
-    inputStream.mark(Int.MAX_VALUE)
-    ZipInputStream(inputStream).use { zipIn ->
+    var entryCount = 0
+
+    // Use BufferedInputStream for better read performance
+    val bufferedStream = if (inputStream is java.io.BufferedInputStream) inputStream
+        else java.io.BufferedInputStream(inputStream, 65536)
+
+    // Single pass: process entries as we read them.
+    ZipInputStream(bufferedStream).use { zipIn ->
         var entry = zipIn.nextEntry
         while (entry != null) {
-            if (entry.name.startsWith("NovelAndChapters/") && entry.name.endsWith(".json")) {
-                totalNovels++
-            }
-            zipIn.closeEntry()
-            entry = zipIn.nextEntry
-        }
-    }
-    inputStream.reset()
-    
-    // Second pass: process entries
-    ZipInputStream(inputStream).use { zipIn ->
-        var entry = zipIn.nextEntry
-        while (entry != null) {
+            entryCount++
             val entryName = entry.name
-            
+            ireader.core.log.Log.info { "LNReader parse: entry #$entryCount: $entryName (${entry.size} bytes)" }
+
             when {
                 entryName == "Version.json" -> {
                     val content = zipIn.readBytes().decodeToString()
@@ -151,6 +143,7 @@ suspend fun parseBackupStreamingPlatform(
                     val settings = try {
                         json.decodeFromString<Map<String, String>>(content)
                     } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to parse Setting.json")
                         emptyMap()
                     }
                     callback.onSettings(settings)
@@ -159,19 +152,29 @@ suspend fun parseBackupStreamingPlatform(
                     val content = zipIn.readBytes().decodeToString()
                     try {
                         val novel = json.decodeFromString<LNReaderNovel>(content)
+                        ireader.core.log.Log.info { "LNReader parse: novel #$novelCount: ${novel.name} (${novel.chapters.size} chapters)" }
                         callback.onNovel(novel)
                         novelCount++
-                        callback.onProgress(novelCount, totalNovels)
+                        callback.onProgress(novelCount, novelCount)
                     } catch (e: Exception) {
                         ireader.core.log.Log.warn(e, "Failed to parse novel: $entryName")
                     }
                 }
             }
-            
+
+            // Skip any remaining bytes in this entry (important for large entries like download.zip)
+            if (entryName != "Version.json" && entryName != "Category.json" && 
+                entryName != "Setting.json" && 
+                !(entryName.startsWith("NovelAndChapters/") && entryName.endsWith(".json"))) {
+                // For non-matching entries, skip the data efficiently
+                val skipBuffer = ByteArray(8192)
+                while (zipIn.read(skipBuffer) != -1) { /* skip */ }
+            }
             zipIn.closeEntry()
             entry = zipIn.nextEntry
         }
     }
+    ireader.core.log.Log.info { "LNReader parse: finished. Total entries: $entryCount, novels: $novelCount" }
 }
 
 /**

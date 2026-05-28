@@ -45,11 +45,18 @@ fun BackUpAndRestoreScreen(
     // LNReader import progress
     val lnReaderProgress by vm.lnReaderImportProgress.collectAsState()
     val lnReaderResult by vm.lnReaderImportResult.collectAsState()
-    
+    val lnReaderImportProgressDialog by vm.lnReaderImportProgressDialog.collectAsState()
+
     // Progress dialog
     BackupProgressDialog(
         progress = backupRestoreProgress,
         onDismiss = { vm.dismissProgress() }
+    )
+
+    // LNReader import progress dialog
+    LNReaderImportProgressDialog(
+        progress = lnReaderImportProgressDialog,
+        onDismiss = { vm.dismissLNReaderImportDialog() }
     )
     
     // Platform-specific file picker for LNReader backup

@@ -313,6 +313,20 @@ actual val DomainModule = module {
         )
     }
     
+    // LNReader streaming importer for Android
+    factory<ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup.LNReaderStreamingImporter> {
+        ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup(
+            parser = get(),
+            sourceMapper = get(),
+            bookRepository = get(),
+            chapterRepository = get(),
+            categoryRepository = get(),
+            bookCategoryRepository = get(),
+            transactions = get(),
+            fileSaver = get()
+        ).createAndroidStreamingImporter()
+    }
+
     // Gradio TTS Manager for online TTS services
     single<ireader.domain.services.tts_service.GradioTTSManager> {
         val appPrefs: ireader.domain.preferences.prefs.AppPreferences = get()

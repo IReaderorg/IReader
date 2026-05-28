@@ -2,6 +2,7 @@ package ireader.presentation.ui.settings.backups
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import ireader.core.util.IO
 import ireader.domain.models.BackUpBook
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.storage.StorageManager
@@ -25,12 +26,13 @@ import ireader.i18n.resources.lnreader_import_not_available
 import ireader.i18n.resources.lnreader_import_starting
 import ireader.i18n.resources.save_backup
 import ireader.i18n.resources.select_backup_file
-import ireader.i18n.resources.select_lnreader_backup
 import ireader.presentation.ui.settings.reader.SettingState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import okio.buffer
@@ -94,6 +96,47 @@ sealed class BackupRestoreProgress {
         }
 }
 
+
+/**
+ * Progress state for LNReader import operations (for visual progress dialog)
+ */
+sealed class LNReaderImportProgress {
+    object Idle : LNReaderImportProgress()
+    data class Starting(val message: String = "Preparing import...") : LNReaderImportProgress()
+    data class Parsing(val message: String = "Parsing backup data...") : LNReaderImportProgress()
+    data class ImportingNovels(
+        val current: Int,
+        val total: Int,
+        val novelName: String
+    ) : LNReaderImportProgress()
+    data class ImportingCategories(
+        val current: Int,
+        val total: Int
+    ) : LNReaderImportProgress()
+    data class Complete(
+        val novelsImported: Int,
+        val chaptersImported: Int,
+        val categoriesImported: Int,
+        val novelsSkipped: Int,
+        val novelsFailed: Int,
+        val message: String = "Import completed!"
+    ) : LNReaderImportProgress()
+    data class Error(val error: String) : LNReaderImportProgress()
+
+    val isInProgress: Boolean
+        get() = this !is Idle && this !is Complete && this !is Error
+
+    val progress: Float
+        get() = when (this) {
+            is Idle -> 0f
+            is Starting -> 0.05f
+            is Parsing -> 0.1f
+            is ImportingNovels -> 0.15f + (current.toFloat() / total.coerceAtLeast(1)) * 0.75f
+            is ImportingCategories -> 0.9f
+            is Complete -> 1f
+            is Error -> 0f
+        }
+}
 
 class BackupScreenViewModel(
     private val booksUseCasa: ireader.domain.usecases.local.LocalGetBookUseCases,
@@ -403,27 +446,16 @@ class BackupScreenViewModel(
         }
     }
     
-    // ==================== LNReader Backup Import ====================
-    
-    /**
-     * Pick LNReader backup file for import
-     */
-    fun pickLNReaderBackupFile() {
-        scope.launch {
-            when (val result = fileSystemService.pickFile(
-                fileTypes = listOf("zip"),
-                title = localizeHelper.localize(Res.string.select_lnreader_backup)
-            )) {
-                is ireader.domain.services.common.ServiceResult.Success -> {
-                    importLNReaderBackupFromUri(result.data)
-                }
-                is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Import cancelled"))
-                }
-                else -> {}
-            }
-        }
+    // ==================== LNReader Import Progress Dialog ====================
+
+    private val _lnReaderImportProgressDialog = MutableStateFlow<LNReaderImportProgress>(LNReaderImportProgress.Idle)
+    val lnReaderImportProgressDialog: StateFlow<LNReaderImportProgress> = _lnReaderImportProgressDialog.asStateFlow()
+
+    fun dismissLNReaderImportDialog() {
+        _lnReaderImportProgressDialog.value = LNReaderImportProgress.Idle
     }
+
+    // ==================== LNReader Backup Import ====================
     
     /**
      * Import LNReader backup from URI
@@ -438,50 +470,71 @@ class BackupScreenViewModel(
         }
         
         scope.launch {
-            importLNReaderBackup.invoke(uri, options).collect { progress ->
-                _lnReaderImportProgress.value = progress
+            withContext(Dispatchers.IO) {
+                importLNReaderBackup.invoke(uri, options).collect { progress ->
+                    _lnReaderImportProgress.value = progress
+
+                    // Map to dialog progress
+                    _lnReaderImportProgressDialog.value = when (progress) {
+                    is ImportLNReaderBackup.ImportProgress.Starting ->
+                        LNReaderImportProgress.Starting()
+                    is ImportLNReaderBackup.ImportProgress.Parsing ->
+                        LNReaderImportProgress.Parsing(progress.message)
+                    is ImportLNReaderBackup.ImportProgress.ImportingNovels ->
+                        LNReaderImportProgress.ImportingNovels(
+                            current = progress.current,
+                            total = progress.total,
+                            novelName = progress.novelName
+                        )
+                    is ImportLNReaderBackup.ImportProgress.ImportingCategories ->
+                        LNReaderImportProgress.ImportingCategories(
+                            current = progress.current,
+                            total = progress.total
+                        )
+                    is ImportLNReaderBackup.ImportProgress.Complete -> {
+                        _lnReaderImportResult.value = progress.result
+                        val result = progress.result
+                        LNReaderImportProgress.Complete(
+                            novelsImported = result.novelsImported,
+                            chaptersImported = result.chaptersImported,
+                            categoriesImported = result.categoriesImported,
+                            novelsSkipped = result.novelsSkipped,
+                            novelsFailed = result.novelsFailed,
+                            message = if (result.errors.isNotEmpty()) {
+                                "Import completed with ${result.errors.size} errors. " +
+                                "${result.novelsImported} novels, ${result.chaptersImported} chapters imported."
+                            } else {
+                                "Import complete: ${result.novelsImported} novels, " +
+                                "${result.chaptersImported} chapters, " +
+                                "${result.categoriesImported} categories imported"
+                            }
+                        )
+                    }
+                    is ImportLNReaderBackup.ImportProgress.Error -> {
+                        LNReaderImportProgress.Error(getErrorMessage(progress.error))
+                    }
+                }
                 
                 when (progress) {
                     is ImportLNReaderBackup.ImportProgress.Starting -> {
                         showSnackBar(ireader.i18n.UiText.MStringResource(Res.string.lnreader_import_starting))
                     }
-                    is ImportLNReaderBackup.ImportProgress.Parsing -> {
-                        // Progress update handled by UI
-                    }
-                    is ImportLNReaderBackup.ImportProgress.ImportingNovels -> {
-                        // Progress update handled by UI
-                    }
-                    is ImportLNReaderBackup.ImportProgress.ImportingCategories -> {
-                        // Progress update handled by UI
-                    }
                     is ImportLNReaderBackup.ImportProgress.Complete -> {
-                        _lnReaderImportResult.value = progress.result
                         val result = progress.result
-                        
-                        // Show appropriate message based on errors
-                        val message = if (result.errors.isNotEmpty()) {
-                            "Import completed with ${result.errors.size} errors. " +
-                            "${result.novelsImported} novels, ${result.chaptersImported} chapters imported."
-                        } else {
-                            "Import complete: ${result.novelsImported} novels, " +
-                            "${result.chaptersImported} chapters, " +
-                            "${result.categoriesImported} categories imported"
-                        }
-                        
-                        // Add warning about skipped novels
                         val fullMessage = if (result.novelsSkipped > 0) {
-                            "$message\n${result.novelsSkipped} novels were skipped (already in library)"
+                            "${_lnReaderImportProgressDialog.value.let { (it as? LNReaderImportProgress.Complete)?.message ?: "" }}\n${result.novelsSkipped} novels were skipped (already in library)"
                         } else {
-                            message
+                            (lnReaderImportProgressDialog.value as? LNReaderImportProgress.Complete)?.message ?: ""
                         }
-                        
                         showSnackBar(ireader.i18n.UiText.DynamicString(fullMessage))
                     }
                     is ImportLNReaderBackup.ImportProgress.Error -> {
                         val errorMessage = getErrorMessage(progress.error)
                         showSnackBar(ireader.i18n.UiText.DynamicString(errorMessage))
                     }
+                    else -> { /* Progress updates handled by dialog */ }
                 }
+            }
             }
         }
     }
