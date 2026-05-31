@@ -13,16 +13,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import ireader.core.startup.ScreenProfiler
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
+import ireader.core.startup.ScreenProfiler
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.localize
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 import ireader.i18n.resources.library_screen_label
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
@@ -194,7 +193,12 @@ object LibraryScreenSpec {
                         },
                         showFilterSheet = sheetState.isVisible,
                         onShowFilterSheet = { scope.launch { sheetState.partialExpand() } },
-                        onHideFilterSheet = { scope.launch { sheetState.hide() } }
+                        onHideFilterSheet = { scope.launch { sheetState.hide() } },
+                        onNavigateToSources = {
+                            scope.launch {
+                                MainStarterScreen.switchToTab(3) // 3 = Extensions tab
+                            }
+                        }
                     )
                 }
             }
@@ -221,5 +225,7 @@ object LibraryScreenSpec {
                 }
             }
         )
+        
+        // Onboarding is now handled inside LibraryScreen's empty state
     }
 }

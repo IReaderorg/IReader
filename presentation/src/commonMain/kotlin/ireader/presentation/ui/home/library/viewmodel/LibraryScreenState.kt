@@ -192,7 +192,9 @@ data class LibraryScreenState(
     
     // Column settings - defaults optimized for phones, tablets/desktop use adaptive sizing
     val columnsInPortrait: Int = 3,
-    val columnsInLandscape: Int = 5
+    val columnsInLandscape: Int = 5,
+    
+
 ) {
     @Stable
     val selectionMode: Boolean get() = selectedBookIds.isNotEmpty()

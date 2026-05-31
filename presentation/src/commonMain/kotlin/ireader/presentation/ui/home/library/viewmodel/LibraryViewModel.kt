@@ -1643,4 +1643,7 @@ class LibraryViewModel(
             loadMoreBooks(categoryId)
         }
     }
+    
+    // ==================== Simplified Onboarding Methods ====================
+    
 }

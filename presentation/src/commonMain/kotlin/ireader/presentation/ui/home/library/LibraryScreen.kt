@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 import ireader.i18n.resources.empty_library
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
@@ -64,6 +65,8 @@ fun LibraryScreen(
     showFilterSheet: Boolean = false,
     onShowFilterSheet: () -> Unit = {},
     onHideFilterSheet: () -> Unit = {},
+    // Navigation callback for empty state "Add Sources" button
+    onNavigateToSources: () -> Unit = {}
 ) {
     // Collect state from ViewModel
     val state by vm.state.collectAsState()
@@ -160,9 +163,20 @@ fun LibraryScreen(
                 )
             }
             
-            // Show empty screen only when not loading and truly empty
-            if (!state.isLoading && state.isEmpty && state.filters.isEmpty()) {
-                EmptyScreen(text = localize(Res.string.empty_library))
+            // Show empty screen with "Add Sources" button when not loading and truly empty
+            // Use activeFilters (not filters) to check if any filters are actually applied
+            if (!state.isLoading && state.isEmpty && state.activeFilters.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        EmptyScreen(text = localize(Res.string.empty_library), onButtonClicked = onNavigateToSources)
+                    }
+                }
             }
 
             // Selection bar - Always show when in selection mode

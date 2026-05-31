@@ -81,7 +81,8 @@ fun LibraryScreenTopBar(
     onImportPdf: () -> Unit = {},
     onOpenRandom: () -> Unit = {},
     onSyncRemote: () -> Unit = {},
-    onSearchLibrary: () -> Unit = {}
+    onSearchLibrary: () -> Unit = {},
+    onShowOnboarding: () -> Unit = {}
 ) {
     // Collect state reactively
     val screenState by state.state.collectAsState()

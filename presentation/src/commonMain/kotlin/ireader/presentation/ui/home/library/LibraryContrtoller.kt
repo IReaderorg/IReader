@@ -16,7 +16,6 @@ import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBookCategory
 import ireader.domain.utils.extensions.ioDispatcher
-import ireader.domain.utils.removeIf
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
@@ -32,7 +31,8 @@ fun LibraryController(
     requestHideNavigator: (Boolean) -> Unit,
     showFilterSheet: Boolean = false,
     onShowFilterSheet: () -> Unit = {},
-    onHideFilterSheet: () -> Unit = {}
+    onHideFilterSheet: () -> Unit = {},
+    onNavigateToSources: () -> Unit = {}
 ) {
     val state by vm.state.collectAsState()
     
@@ -134,6 +134,7 @@ fun LibraryController(
         },
         showFilterSheet = showFilterSheet,
         onShowFilterSheet = onShowFilterSheet,
-        onHideFilterSheet = onHideFilterSheet
+        onHideFilterSheet = onHideFilterSheet,
+        onNavigateToSources = onNavigateToSources
     )
 }
