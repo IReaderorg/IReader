@@ -26,6 +26,7 @@ include(":i18n")
 include(":desktop")
 include(":source-api")
 include(":plugin-api")
+include(":server")
 
 
 dependencyResolutionManagement {

@@ -9,4 +9,5 @@ object Modules {
     const val presentationCore = ":presentation-core"
     const val sourceApi = ":source-api"
     const val pluginApi = ":plugin-api"
+    const val server = ":server"
 }
