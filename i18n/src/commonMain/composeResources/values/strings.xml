@@ -294,9 +294,7 @@
     <string name="by_date_fetched">By date fetched</string>
     <string name="by_date_uploaded">By date Uploaded</string>
     <string name="by_date_read">By read</string>
-    <string name="empty_library">There is no book is Library, you can add books in the Explore
-        screen.
-    </string>
+    <string name="empty_library">There is no book is Library, you can add books in the Explore screen.</string>
     <string name="fatal_error">Fatal error for</string>
     <string name="installation_error">Error while (un)installing package</string>
     <string name="installation_error_aborted">PackageManger: Cancelled</string>

@@ -13,9 +13,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.http.content.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.nio.file.Paths
+import ireader.server.di.ServerModule
 
 fun main(args: Array<String>) {
     val config = ServerConfig.load(args)
@@ -26,6 +28,9 @@ fun main(args: Array<String>) {
 
 fun Application.module(config: ServerConfig) {
     val logger = LoggerFactory.getLogger("Server")
+
+    // Initialize DI module
+    val serverModule = ServerModule.create()
 
     // Install plugins
     install(ContentNegotiation) {
@@ -56,7 +61,7 @@ fun Application.module(config: ServerConfig) {
             logger.error("Request failed", cause)
             call.respond(
                 io.ktor.http.HttpStatusCode.InternalServerError,
-                mapOf("error" to (cause.message ?: "Unknown error"))
+                ErrorResponse(error = "Internal Server Error", message = cause.message)
             )
         }
     }
@@ -65,45 +70,25 @@ fun Application.module(config: ServerConfig) {
     routing {
         // Health check
         get("/health") {
-            call.respond(mapOf("status" to "ok"))
+            call.respond(HealthResponse(status = "ok"))
         }
 
-        // API routes
+        // API v1
         route("/api/v1") {
+            // Server info
             get("/info") {
-                call.respond(
-                    mapOf(
-                        "name" to "IReader Server",
-                        "version" to "1.0.0",
-                        "port" to config.port
-                    )
-                )
-            }
-
-            // Sources endpoints
-            route("/sources") {
-                get {
-                    call.respond(
-                        mapOf(
-                            "message" to "Sources endpoint - coming soon",
-                            "sources" to emptyList<String>()
-                        )
-                    )
-                }
-            }
-
-            // Books endpoints
-            route("/books") {
-                get {
-                    call.respond(
-                        mapOf(
-                            "message" to "Books endpoint - coming soon",
-                            "books" to emptyList<String>()
-                        )
-                    )
-                }
+                call.respond(ServerInfo(
+                    name = "IReader Server",
+                    version = "1.0.0",
+                    port = config.port.toString()
+                ))
             }
         }
+
+        // Register API routes from modules
+        serverModule.sourcesApi?.registerRoutes(this)
+        serverModule.booksApi?.registerRoutes(this)
+        serverModule.chaptersApi?.registerRoutes(this)
 
         // Static files (React UI) - serve from resources/static
         staticFiles("/", javaClass.classLoader.getResource("static")?.let {
@@ -116,6 +101,24 @@ fun Application.module(config: ServerConfig) {
     logger.info("IReader Server started on ${config.host}:${config.port}")
     logger.info("Access the UI at http://localhost:${config.port}")
 }
+
+@Serializable
+data class HealthResponse(
+    val status: String
+)
+
+@Serializable
+data class ServerInfo(
+    val name: String,
+    val version: String,
+    val port: String
+)
+
+@Serializable
+data class ErrorResponse(
+    val error: String,
+    val message: String? = null
+)
 
 data class ServerConfig(
     val port: Int,
@@ -134,7 +137,7 @@ data class ServerConfig(
             val host = args.find { it.startsWith("--host=") }
                 ?.substringAfter("=")
                 ?: System.getenv("IREADER_HOST")
-                ?: "0.0.0.0" // Listen on all interfaces for mobile access
+                ?: "0.0.0.0"
 
             val dataDir = args.find { it.startsWith("--data-dir=") }
                 ?.substringAfter("=")
