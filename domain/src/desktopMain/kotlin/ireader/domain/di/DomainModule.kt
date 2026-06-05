@@ -219,7 +219,22 @@ actual val DomainModule: Module = module {
             initialize()
         }
     }
-    
+
+    // Discord Rich Presence state writer — observes ActivityStateHolder and writes
+    // ~/.cache/IReader/discord_state.json for the standalone ireader-discord bridge.
+    single<ireader.domain.services.discord.DiscordStatePublisher> {
+        ireader.domain.services.discord.DiscordStatePublisher(holder = get()).apply { start() }
+    }
+
+    // TTS -> Rich Presence bridge. Publishes "Listening" activity while v2 TTS
+    // playback is active (subscribes to the real TTSController.state).
+    single<ireader.domain.services.discord.TTSActivityBridge> {
+        ireader.domain.services.discord.TTSActivityBridge(
+            ttsController = get(),
+            holder = get(),
+        ).apply { start() }
+    }
+
     // TTS Download Notification Helper
     single<ireader.domain.services.tts_service.TTSDownloadNotificationHelper> {
         ireader.domain.services.tts_service.TTSDownloadNotificationHelper(
