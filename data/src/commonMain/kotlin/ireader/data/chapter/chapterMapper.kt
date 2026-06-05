@@ -76,3 +76,19 @@ val chapterMapperLight = {_id: Long,
  * This must be at least 50 characters to pass the download filter check.
  */
 const val DOWNLOADED_CHAPTER_PLACEHOLDER = "[DOWNLOADED_CONTENT_PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER]"
+
+/**
+ * Return [emptyList] if [content] consists solely of the [DOWNLOADED_CHAPTER_PLACEHOLDER]
+ * marker that chapterMapperLight uses to signal "this chapter is downloaded". Otherwise
+ * return the content as-is. Callers use this to guard against writing the placeholder
+ * marker into the real `content` column — the upsert SQL already preserves existing
+ * content when the incoming value is empty, so stripping the placeholder here keeps
+ * the real content intact instead of corrupting it with the marker string.
+ */
+fun List<ireader.core.source.model.Page>.stripDownloadedPlaceholder(): List<ireader.core.source.model.Page> {
+    if (isEmpty()) return this
+    val onlyPlaceholder = all { page ->
+        page is ireader.core.source.model.Text && page.text.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER")
+    }
+    return if (onlyPlaceholder) emptyList() else this
+}
