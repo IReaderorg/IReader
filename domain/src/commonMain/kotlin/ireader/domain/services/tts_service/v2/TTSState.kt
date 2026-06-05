@@ -100,7 +100,8 @@ enum class PlaybackState {
 }
 
 enum class EngineType {
-    NATIVE,     // Platform native TTS (Android TTS, AVSpeechSynthesizer, etc.)
+    NATIVE,     // Platform native TTS (Android TTS on Android, Piper on desktop)
+    KOKORO,     // Kokoro Python TTS (desktop only; falls back to native on other platforms)
     GRADIO      // Remote Gradio-based TTS (Coqui, etc.)
 }
 

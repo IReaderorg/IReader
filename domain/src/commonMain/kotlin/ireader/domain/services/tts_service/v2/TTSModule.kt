@@ -3,6 +3,8 @@ package ireader.domain.services.tts_service.v2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.koin.dsl.module
 
 /**
@@ -49,13 +51,44 @@ val ttsV2Module = module {
     // Using single instead of factory to maintain state across the app
     // No ChapterController - TTS has its own independent state, sync happens via onPop
     single {
-        TTSController(
+        val appPrefs: ireader.domain.preferences.prefs.AppPreferences = get()
+        // Legacy DesktopTTSService writes TTSEngine.{PIPER,KOKORO,GRADIO,SIMULATION};
+        // V2 speaks EngineType.{NATIVE,KOKORO,GRADIO}. This mapping bridges both surfaces
+        // so whichever UI the user picks from, the other reflects it on next read.
+        fun nameToEngineType(name: String): EngineType? = when (name) {
+            "NATIVE", "PIPER", "SIMULATION" -> EngineType.NATIVE
+            "KOKORO" -> EngineType.KOKORO
+            "GRADIO" -> EngineType.GRADIO
+            else -> null
+        }
+
+        val controller = TTSController(
             contentLoader = get(),
             nativeEngineFactory = { TTSEngineFactory.createNativeEngine() },
             gradioEngineFactory = { config -> TTSEngineFactory.createGradioEngine(config) },
             initialGradioConfig = null, // Can be set via SetGradioConfig command
-            cacheUseCase = getOrNull() // Optional - for offline playback of cached audio
+            cacheUseCase = getOrNull(), // Optional - for offline playback of cached audio
+            kokoroEngineFactory = { TTSEngineFactory.createKokoroEngine() },
+            persistedEngineType = { nameToEngineType(appPrefs.selectedTTSEngine().get()) },
+            saveEngineType = { appPrefs.selectedTTSEngine().set(it.name) }
         )
+
+        // Reactively mirror pref changes into V2 state. The legacy TTS Engine Manager
+        // settings screen writes the pref via DesktopTTSService.setEngine, and the
+        // reader's TTSSettings drawer writes the same pref via V2's saveEngineType.
+        // Without this observer, the two surfaces drift: the user picks Kokoro from
+        // settings but the reader's engine label still says "Native TTS".
+        val syncScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+        syncScope.launch {
+            appPrefs.selectedTTSEngine().changes().collect { name ->
+                val type = nameToEngineType(name) ?: return@collect
+                if (controller.state.value.engineType != type) {
+                    controller.dispatch(ireader.domain.services.tts_service.v2.TTSCommand.SetEngine(type))
+                }
+            }
+        }
+
+        controller
     }
     
     // ViewModel adapter for UI layer

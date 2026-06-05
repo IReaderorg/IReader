@@ -25,7 +25,12 @@ import java.util.concurrent.TimeUnit
  */
 class KokoroTTSEngine(
     private val appDataDir: File = AppDir,
-    private var maxConcurrentProcesses: Int = 2
+    private var maxConcurrentProcesses: Int = 2,
+    /**
+     * Optional user override for the Python interpreter. Null/blank = auto-discover.
+     * Sourced from AppPreferences.kokoroPythonPath() at engine-creation time.
+     */
+    private val pythonPathOverride: String? = null,
 ) {
     private val kokoroDir = File(appDataDir, "kokoro").apply { mkdirs() }
     private val modelsDir = File(kokoroDir, "models").apply { mkdirs() }
@@ -479,6 +484,21 @@ class KokoroTTSEngine(
      * Kokoro requires Python 3.8 to 3.12 (not 3.13+)
      */
     private fun findPythonExecutable(): String? {
+        // User-configured override (Settings -> TTS -> Kokoro Python path). When set and
+        // runnable, it wins over auto-discovery so users whose interpreter lives somewhere
+        // non-standard (pyenv, conda, a venv, a system package) can point Kokoro at it.
+        pythonPathOverride?.takeIf { it.isNotBlank() }?.let { override ->
+            try {
+                val p = ProcessBuilder(override, "--version").redirectErrorStream(true).start()
+                if (p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
+                    Log.info { "Using configured Kokoro Python: $override" }
+                    return override
+                }
+            } catch (_: Exception) {
+                Log.warn { "Configured Kokoro Python '$override' not runnable; falling back to auto-discovery" }
+            }
+        }
+
         // First, try specific Python installations in AppData
         val userProfile = System.getenv("USERPROFILE") ?: System.getProperty("user.home")
         val pythonBaseDir = File(userProfile, "AppData/Local/Programs/Python")

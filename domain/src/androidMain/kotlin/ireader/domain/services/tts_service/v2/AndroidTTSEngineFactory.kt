@@ -45,6 +45,12 @@ actual object TTSEngineFactory : KoinComponent {
             null
         }
     }
+
+    /**
+     * Kokoro TTS requires a Python runtime and is desktop-only.
+     * Android falls back to the native engine; callers should handle null.
+     */
+    actual fun createKokoroEngine(): TTSEngine? = null
     
     /**
      * Get cache statistics
