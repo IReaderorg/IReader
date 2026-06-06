@@ -26,8 +26,6 @@ include(":i18n")
 include(":desktop")
 include(":source-api")
 include(":plugin-api")
-include(":server")
-
 
 dependencyResolutionManagement {
     // Use PREFER_SETTINGS to allow Kotlin/JS Node.js repository while preferring settings repos
