@@ -90,7 +90,6 @@ object RepositoryMigration {
         "ireader.domain.data.repository.ChapterHealthRepository",
         "ireader.domain.data.repository.FontRepository",
         "ireader.domain.data.repository.GlossaryRepository",
-        "ireader.domain.data.repository.NFTRepository",
         "ireader.domain.data.repository.MigrationRepository",
         "ireader.domain.data.repository.PluginRepository",
         "ireader.domain.data.repository.ReadingStatisticsRepository",

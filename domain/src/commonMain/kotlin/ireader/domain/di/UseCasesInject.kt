@@ -384,12 +384,6 @@ val UseCasesInject = module {
     factory { ireader.domain.usecases.badge.SetPrimaryBadgeUseCase(get()) }
     factory { ireader.domain.usecases.badge.SetFeaturedBadgesUseCase(get()) }
     
-    // NFT use cases
-    factory { ireader.domain.usecases.nft.SaveWalletAddressUseCase(get()) }
-    factory { ireader.domain.usecases.nft.VerifyNFTOwnershipUseCase(get()) }
-    factory { ireader.domain.usecases.nft.GetNFTVerificationStatusUseCase(get()) }
-    factory { ireader.domain.usecases.nft.GetNFTMarketplaceUrlUseCase() }
-    
     // Reading Buddy use cases - now uses unified database statistics (no preferences)
     factory { ireader.domain.usecases.quote.ReadingBuddyUseCases(get()) }
     factory { ireader.domain.usecases.quote.QuoteUseCases(get()) }

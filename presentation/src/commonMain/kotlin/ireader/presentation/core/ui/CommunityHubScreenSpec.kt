@@ -72,9 +72,6 @@ class CommunityHubScreenSpec {
             onBadgeStore = {
                 navController.navigate(NavigationRoutes.badgeStore)
             },
-            onNFTBadge = {
-                navController.navigate(NavigationRoutes.nftBadge)
-            },
             onBadgeManagement = {
                 navController.navigate(NavigationRoutes.badgeManagement)
             },

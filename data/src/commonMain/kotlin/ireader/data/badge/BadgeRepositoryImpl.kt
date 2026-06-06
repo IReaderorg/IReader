@@ -390,7 +390,6 @@ class BadgeRepositoryImpl(
     private fun parseBadgeType(type: String): BadgeType {
         return when (type.uppercase()) {
             "PURCHASABLE" -> BadgeType.PURCHASABLE
-            "NFT_EXCLUSIVE" -> BadgeType.NFT_EXCLUSIVE
             "ACHIEVEMENT" -> BadgeType.ACHIEVEMENT
             else -> BadgeType.ACHIEVEMENT
         }

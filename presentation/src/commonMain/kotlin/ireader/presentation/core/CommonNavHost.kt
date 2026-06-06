@@ -33,7 +33,6 @@ import ireader.presentation.core.ui.GeneralScreenSpec
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
 import ireader.presentation.core.ui.GoogleDriveBackupScreenSpec
 import ireader.presentation.core.ui.LocalNavigationViewModelStore
-import ireader.presentation.core.ui.NFTBadgeScreenSpec
 import ireader.presentation.core.ui.NavigationViewModelStore
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.ReaderSettingSpec
@@ -132,16 +131,13 @@ fun CommonNavHost(
         composable(NavigationRoutes.badgeStore) {
             BadgeStoreScreenSpec().Content()
         }
-        composable(NavigationRoutes.nftBadge) {
-            NFTBadgeScreenSpec().Content()
-        }
         composable(NavigationRoutes.badgeManagement) {
             BadgeManagementScreenSpec().Content()
         }
         composable(NavigationRoutes.adminBadgeVerification) {
             AdminBadgeVerificationScreenSpec().Content()
         }
-        
+
         composable(NavigationRoutes.leaderboard) {
             ireader.presentation.core.ui.LeaderboardScreenSpec().Content()
         }
@@ -651,10 +647,7 @@ fun CommonNavHost(
         composable(NavigationRoutes.adminBadgeVerification) {
             AdminBadgeVerificationScreenSpec().Content()
         }
-        composable(NavigationRoutes.nftBadge) {
-            NFTBadgeScreenSpec().Content()
-        }
-        
+
         composable(
             route = "sourceDetail/{sourceId}",
             arguments = listOf(

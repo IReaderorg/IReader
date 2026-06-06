@@ -1228,29 +1228,13 @@ object DatabaseMigrations {
     
     /**
      * Migration from version 16 to version 17
-     * Adds nftWallets table for NFT wallet management
+     * Previously added nftWallets table - removed as part of NFT feature removal
      */
     private fun migrateV16toV17(driver: SqlDriver) {
         try {
             Logger.logMigrationStart(16, 17)
-            
-            // Create nftWallets table
-            val createNftWalletsSql = """
-                CREATE TABLE IF NOT EXISTS nftWallets(
-                    userId TEXT NOT NULL PRIMARY KEY,
-                    walletAddress TEXT NOT NULL,
-                    lastVerified INTEGER,
-                    ownsNFT INTEGER NOT NULL DEFAULT 0,
-                    nftTokenId TEXT,
-                    cacheExpiresAt INTEGER NOT NULL
-                );
-            """.trimIndent()
-            
-            driver.execute(null, createNftWalletsSql, 0)
-            Logger.logTableCreated("nftWallets")
-            
+            // No-op: nftWallets table creation removed
             Logger.logMigrationSuccess(17)
-            
         } catch (e: Exception) {
             Logger.logMigrationError(17, e)
         }

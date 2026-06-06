@@ -67,7 +67,6 @@ class BadgeManagementViewModel(
                             imageUrl = userBadge.imageUrl ?: userBadge.badgeIcon,  // Use image_url from database, fallback to icon
                             type = when (userBadge.badgeType?.uppercase()) {
                                 "PURCHASABLE" -> BadgeType.PURCHASABLE
-                                "NFT_EXCLUSIVE" -> BadgeType.NFT_EXCLUSIVE
                                 "ACHIEVEMENT" -> BadgeType.ACHIEVEMENT
                                 else -> BadgeType.ACHIEVEMENT
                             },

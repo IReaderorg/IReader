@@ -211,7 +211,6 @@ val PresentationModules = module {
     
     // Badge ViewModels
     factory { ireader.presentation.ui.settings.badges.store.BadgeStoreViewModel(get(), get()) }
-    factory { ireader.presentation.ui.settings.badges.nft.NFTBadgeViewModel(get(), get(), get(), get(), get()) }
     factory { ireader.presentation.ui.settings.badges.manage.BadgeManagementViewModel(get(), get(), get()) }
     
     // Admin ViewModels

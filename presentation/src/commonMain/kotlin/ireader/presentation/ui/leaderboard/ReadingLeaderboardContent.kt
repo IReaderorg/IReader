@@ -389,7 +389,7 @@ private fun ReadingPodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) 
             Text(entry.username, style = MaterialTheme.typography.bodyMedium, fontWeight = if (place == 1) FontWeight.Bold else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 70.dp))
             if (entry.hasBadge) {
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(when (entry.badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodySmall)
+                Text(when (entry.badgeType) { "supporter" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodySmall)
             }
         }
         Text(formatReadingTime(entry.totalReadingTimeMinutes), style = MaterialTheme.typography.labelLarge, color = color, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -424,7 +424,7 @@ private fun ReadingLeaderboardEntryCard(entry: LeaderboardEntry, isCurrentUser: 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(entry.username, style = MaterialTheme.typography.titleMedium, fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    if (entry.hasBadge) { Spacer(modifier = Modifier.width(6.dp)); Text(when (entry.badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodyMedium) }
+                    if (entry.hasBadge) { Spacer(modifier = Modifier.width(6.dp)); Text(when (entry.badgeType) { "supporter" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodyMedium) }
                     if (isCurrentUser) { Spacer(modifier = Modifier.width(8.dp)); Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.secondary) { Text("YOU", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } }
                 }
                 Spacer(modifier = Modifier.height(6.dp))
@@ -471,7 +471,7 @@ private fun ReadingStatItem(icon: androidx.compose.ui.graphics.vector.ImageVecto
 private fun ReadingBadgeIndicator(badgeType: String?) {
     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.tertiaryContainer, modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            Text(when (badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.titleMedium)
+            Text(when (badgeType) { "supporter" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.width(8.dp))
             Text("${badgeType?.replaceFirstChar { it.uppercase() } ?: "Badge"} Member", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer)
         }

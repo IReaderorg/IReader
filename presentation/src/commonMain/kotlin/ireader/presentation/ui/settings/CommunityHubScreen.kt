@@ -50,7 +50,6 @@ fun CommunityHubScreen(
     onPluginRepository: () -> Unit = {},
     onDeveloperPortal: () -> Unit = {},
     onBadgeStore: () -> Unit,
-    onNFTBadge: () -> Unit,
     onBadgeManagement: () -> Unit,
     isAdmin: Boolean = false,
     onAdminBadgeVerification: () -> Unit = {},
@@ -287,15 +286,6 @@ fun CommunityHubScreen(
                     description = "Purchase unique badges to customize your profile",
                     icon = Icons.Outlined.AccountBalanceWallet,
                     onClick = onBadgeStore
-                )
-            }
-            
-            item {
-                SettingsItem(
-                    title = localize(Res.string.nft_badge),
-                    description = "Verify NFT ownership to unlock exclusive badge",
-                    icon = Icons.Filled.Star,
-                    onClick = onNFTBadge
                 )
             }
             

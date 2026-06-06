@@ -796,7 +796,6 @@ private fun RankBadge(rank: Int, size: Dp) {
 private fun BadgeIcon(badgeType: String?) {
     val icon = when (badgeType) {
         "supporter" -> "??"
-        "nft" -> "??"
         "premium" -> "?"
         else -> "??"
     }
@@ -949,7 +948,6 @@ private fun EnhancedPodiumPlace(
                 Text(
                     text = when (entry.badgeType) {
                         "supporter" -> "??"
-                        "nft" -> "??"
                         "premium" -> "?"
                         else -> "??"
                     },
@@ -1293,7 +1291,6 @@ private fun EnhancedBadgeIndicator(badgeType: String?) {
             Text(
                 text = when (badgeType) {
                     "supporter" -> "??"
-                    "nft" -> "??"
                     "premium" -> "?"
                     else -> "??"
                 },

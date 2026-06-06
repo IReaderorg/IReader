@@ -108,7 +108,7 @@ class MultiSupabaseClient(
     
     /**
      * Project 6: Badges Database
-     * Contains: badges, user_badges, payment_proofs, nft_wallets
+     * Contains: badges, user_badges, payment_proofs
      */
     val badgesClient: SupabaseClient by lazy {
         createSupabaseClient(

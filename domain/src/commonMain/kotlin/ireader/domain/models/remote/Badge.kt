@@ -10,8 +10,6 @@ data class Badge(
     val icon: String,
     val category: String,
     val rarity: String,
-    // New fields for monetization system
-    val price: Double? = null,  // null for NFT badges
     val type: BadgeType = BadgeType.ACHIEVEMENT,
     val badgeRarity: BadgeRarity = BadgeRarity.COMMON,
     val imageUrl: String = icon,  // Default to icon for backward compatibility
@@ -21,7 +19,6 @@ data class Badge(
 @Serializable
 enum class BadgeType {
     PURCHASABLE,
-    NFT_EXCLUSIVE,
     ACHIEVEMENT,
     DEVELOPER  // Developer badge - grants access to Developer Portal
 }
@@ -48,8 +45,7 @@ data class UserBadge(
     val isPrimary: Boolean = false,  // For review display
     val isFeatured: Boolean = false,  // For profile display (max 3)
     val acquiredAt: String = earnedAt,  // Timestamp field
-    val imageUrl: String? = null,  // Badge image URL from Supabase storage
-    val badgeType: String? = null  // Badge type (PURCHASABLE, NFT_EXCLUSIVE, ACHIEVEMENT)
+    val imageUrl: String? = null  // Badge image URL from Supabase storage
 )
 
 @Serializable

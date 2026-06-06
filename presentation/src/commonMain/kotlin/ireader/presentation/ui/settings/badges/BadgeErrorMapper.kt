@@ -127,16 +127,6 @@ data class RetryConfig(
         )
         
         /**
-         * Retry configuration for NFT verification operations.
-         * Max 2 retries with exponential backoff starting at 1 second.
-         */
-        val NFT_VERIFICATION = RetryConfig(
-            maxRetries = 2,
-            initialDelayMs = 1000,
-            maxDelayMs = 4000
-        )
-        
-        /**
          * Retry configuration for payment proof submission.
          * Max 2 retries with exponential backoff starting at 1 second.
          */

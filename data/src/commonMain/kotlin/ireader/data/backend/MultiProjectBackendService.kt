@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonElement
  * - synced_books, character_art, character_art_likes, character_art_reports → libraryClient (Project 3)
  * - book_reviews → bookReviewsClient (Project 4)
  * - chapter_reviews → chapterReviewsClient (Project 5)
- * - badges, user_badges, payment_proofs, nft_wallets → badgesClient (Project 6)
+ * - badges, user_badges, payment_proofs → badgesClient (Project 6)
  * - leaderboard → analyticsClient (Project 7)
  */
 class MultiProjectBackendService(
@@ -50,7 +50,7 @@ class MultiProjectBackendService(
             "chapter_reviews" -> chapterReviewsService
             
             // Project 6 - Badges
-            "badges", "user_badges", "payment_proofs", "nft_wallets" -> badgesService
+            "badges", "user_badges", "payment_proofs" -> badgesService
             
             // Project 7 - Analytics
             "leaderboard" -> analyticsService

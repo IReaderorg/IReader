@@ -18,7 +18,6 @@ import data.Explore_book
 import data.Global_glossary
 import data.Glossary
 import data.Local_quote
-import data.NftWallets
 import data.Plugin
 import data.Plugin_analytics_event
 import data.Plugin_cache
@@ -122,9 +121,6 @@ fun createDatabase(driver: SqlDriver): Database {
         sourceComparisonAdapter = SourceComparison.Adapter(
             longConverter,
             longConverter
-        ),
-        nftWalletsAdapter = NftWallets.Adapter(
-            longConverter,
         ),
         pluginAdapter = Plugin.Adapter(
             install_dateAdapter = longConverter

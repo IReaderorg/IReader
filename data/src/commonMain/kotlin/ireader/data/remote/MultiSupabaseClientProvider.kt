@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
  * 3. Library - Synced books library
  * 4. Book Reviews - Book reviews
  * 5. Chapter Reviews - Chapter reviews
- * 6. Badges - Badge system and NFT integration
+ * 6. Badges - Badge system and payment proofs
  * 7. Analytics - Leaderboard and statistics
  * 
  * Total Storage: 3.5GB (7 × 500MB)
@@ -122,7 +122,7 @@ class MultiSupabaseClientProvider(
     
     /**
      * Project 6: Badges Database
-     * Contains: badges, user_badges, payment_proofs, nft_wallets
+     * Contains: badges, user_badges, payment_proofs
      * Note: Requires Auth plugin for user-specific badge operations
      */
     val badgesClient: SupabaseClient by lazy {

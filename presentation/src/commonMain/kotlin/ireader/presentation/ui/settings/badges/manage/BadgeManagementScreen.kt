@@ -539,7 +539,6 @@ private fun SelectableBadgeCard(
                         BadgeIcon(
                             badge = badge,
                             size = 64.dp,
-                            showAnimation = badge.type == ireader.domain.models.remote.BadgeType.NFT_EXCLUSIVE,
                             modifier = Modifier.then(
                                 if (isDisabled) Modifier.graphicsLayer(alpha = 0.5f) else Modifier
                             )

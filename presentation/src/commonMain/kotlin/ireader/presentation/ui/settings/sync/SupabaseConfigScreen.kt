@@ -1008,7 +1008,7 @@ private fun MultiProjectCard(
                 // Project 6 - Badges
                 EndpointSection(
                     title = localizeHelper.localize(Res.string.project_6_badges),
-                    description = "Badge system and NFT integration (500MB)",
+                    description = "Badge system and payment proofs (500MB)",
                     icon = Icons.Default.Star,
                     url = badgesUrl,
                     apiKey = badgesApiKey,
