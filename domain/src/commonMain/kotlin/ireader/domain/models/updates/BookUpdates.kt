@@ -5,6 +5,7 @@ package ireader.domain.models.updates
 data class BookUpdates(
     val id: Long = 0,
     val sourceId: Long? = null,
+    val sourceName: String? = null,
     val key: String? = null,
     val title: String? = null,
     val author: String? = null,

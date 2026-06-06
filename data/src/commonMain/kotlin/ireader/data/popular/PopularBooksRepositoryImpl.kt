@@ -4,6 +4,7 @@ import io.github.jan.supabase.SupabaseClient
 import ireader.data.backend.BackendService
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.data.repository.PopularBooksRepository
+import ireader.domain.models.entities.SourceGroup
 import ireader.domain.models.remote.PopularBook
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,6 +27,7 @@ class PopularBooksRepositoryImpl(
         @SerialName("title") val title: String,
         @SerialName("book_url") val bookUrl: String,
         @SerialName("source_id") val sourceId: Long,
+        @SerialName("source_name") val sourceName: String? = null,
         @SerialName("reader_count") val readerCount: Int,
         @SerialName("last_read") val lastRead: Long
     )
@@ -53,6 +55,9 @@ class PopularBooksRepositoryImpl(
                         title = it.title,
                         bookUrl = it.bookUrl,
                         sourceId = it.sourceId,
+                        sourceName = it.sourceName ?: "",
+                        sourceGroup = SourceGroup.fromSourceName(it.sourceName ?: ""),
+                        description = it.description,
                         readerCount = it.readerCount,
                         lastRead = it.lastRead
                     )
@@ -61,7 +66,7 @@ class PopularBooksRepositoryImpl(
                 // Fallback to client-side grouping if SQL function doesn't exist
                 val queryResult = backendService.query(
                     table = "synced_books",
-                    columns = "book_id, title, book_url, source_id, last_read",
+                    columns = "book_id, title, book_url, source_id, source_name, last_read",
                     orderBy = "last_read",
                     ascending = false,
                     limit = limit * 3  // Get more to account for grouping
@@ -78,6 +83,8 @@ class PopularBooksRepositoryImpl(
                             title = first.title,
                             bookUrl = first.bookUrl,
                             sourceId = first.sourceId,
+                            sourceName = first.sourceName ?: "",
+                            sourceGroup = SourceGroup.fromSourceName(first.sourceName ?: ""),
                             readerCount = books.size,
                             lastRead = books.maxOf { it.lastRead }
                         )

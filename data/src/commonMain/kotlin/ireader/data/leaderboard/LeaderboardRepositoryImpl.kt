@@ -161,6 +161,7 @@ class LeaderboardRepositoryImpl(
         }
 
     private fun LeaderboardDto.toUserLeaderboardStats(): UserLeaderboardStats {
+        val readerLevel = ireader.domain.models.entities.ReaderLevel.fromMinutes(total_reading_time_minutes)
         return UserLeaderboardStats(
             userId = user_id,
             username = username,
@@ -170,11 +171,16 @@ class LeaderboardRepositoryImpl(
             readingStreak = reading_streak,
             hasBadge = has_badge,
             badgeType = badge_type,
-            lastSyncedAt = parseTimestamp(updated_at)
+            lastSyncedAt = parseTimestamp(updated_at),
+            level = readerLevel.level,
+            levelTitle = readerLevel.title,
+            xp = readerLevel.currentXp,
+            xpToNextLevel = readerLevel.xpToNextLevel
         )
     }
 
     private fun LeaderboardDto.toDomain(rank: Int): LeaderboardEntry {
+        val readerLevel = ireader.domain.models.entities.ReaderLevel.fromMinutes(total_reading_time_minutes)
         return LeaderboardEntry(
             id = id,
             userId = user_id,
@@ -183,7 +189,11 @@ class LeaderboardRepositoryImpl(
             rank = rank,
             hasBadge = has_badge,
             badgeType = badge_type,
-            updatedAt = parseTimestamp(updated_at)
+            updatedAt = parseTimestamp(updated_at),
+            level = readerLevel.level,
+            levelTitle = readerLevel.title,
+            xp = readerLevel.currentXp,
+            xpToNextLevel = readerLevel.xpToNextLevel
         )
     }
     

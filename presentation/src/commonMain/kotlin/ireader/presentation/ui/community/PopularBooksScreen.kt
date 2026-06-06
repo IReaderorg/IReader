@@ -204,7 +204,7 @@ fun PopularBooksScreen(
                         hasMore = state.hasMore,
                         loadingBookIds = state.loadingBookIds,
                         onBookClick = { book ->
-                            vm.checkBookInLibrary(book.bookId, book.title, book.sourceId) { action ->
+                            vm.checkBookInLibrary(book.bookId, book.title, book.sourceId, book.sourceName) { action ->
                                 when (action) {
                                     is BookNavigationAction.OpenLocalBook -> onNavigateToBook(action.bookId)
                                     is BookNavigationAction.OpenGlobalSearch -> onNavigateToGlobalSearch(action.query)

@@ -32,6 +32,7 @@ data class LibraryBackup(
 data class BackupBook(
     val id: Long,
     val sourceId: Long,
+    val sourceName: String = "",
     val title: String,
     val key: String,
     val author: String = "",

@@ -17,6 +17,7 @@ import ireader.domain.models.entities.UpdatesWithRelations
 data class BookCover(
     val bookId: Long,
     val sourceId: Long,
+    val sourceName: String = "",
     val cover: String?,
     val favorite: Boolean,
     val lastModified: Long = 0,

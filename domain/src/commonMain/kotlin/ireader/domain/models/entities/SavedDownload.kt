@@ -35,6 +35,7 @@ data class SavedDownloadWithInfo(
     val priority: Int = 0,
     val id: Long,
     val sourceId: Long,
+    val sourceName: String = "",
     val bookName: String,
     val chapterKey: String,
     val chapterName: String,

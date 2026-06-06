@@ -9,6 +9,7 @@ import kotlin.time.ExperimentalTime
 data class Book(
     override val id: Long = 0,
     override val sourceId: Long,
+    val sourceName: String = "",
     override val title: String,
     val key: String,
     val author: String = "",
@@ -77,10 +78,11 @@ fun String.takeIf(statement: () -> Boolean, defaultValue: String): String {
 }
 
 @OptIn(ExperimentalTime::class)
-fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, lastUpdated: Long = 0): Book {
+fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, lastUpdated: Long = 0, sourceName: String = ""): Book {
     return Book(
         id = bookId,
         sourceId = sourceId,
+        sourceName = sourceName,
         customCover = this.cover,
         cover = this.cover,
         flags = 0,
@@ -96,10 +98,11 @@ fun MangaInfo.toBook(sourceId: Long, bookId: Long = 0, lastUpdated: Long = 0): B
     )
 }
 
-fun MangaInfo.fromBookInfo(sourceId: Long): Book {
+fun MangaInfo.fromBookInfo(sourceId: Long, sourceName: String = ""): Book {
     return Book(
         id = 0,
         sourceId = sourceId,
+        sourceName = sourceName,
         customCover = this.cover,
         cover = this.cover,
         flags = 0,
@@ -126,6 +129,7 @@ data class BookWithInfo(
     val dateFetch: Long = 0,
     val dataAdded: Long = 0,
     val sourceId: Long,
+    val sourceName: String = "",
     val totalDownload: Int,
     val isRead: Int,
     val link: String,
@@ -145,6 +149,7 @@ fun BookWithInfo.toBook(): Book {
     return Book(
         id = this.id,
         sourceId = sourceId,
+        sourceName = sourceName,
         customCover = this.cover,
         cover = this.cover,
         flags = 0,
@@ -170,6 +175,7 @@ interface BookBase {
 data class LibraryBook(
     override val id: Long,
     override val sourceId: Long,
+    val sourceName: String = "",
     override val key: String,
     override val title: String,
     val status: Long,
@@ -243,6 +249,7 @@ data class BookItem(
     val column: Long = 0,
     override val id: Long = 0,
     override val sourceId: Long,
+    val sourceName: String = "",
     override val title: String,
     override val favorite: Boolean = false,
     override val cover: String = "",

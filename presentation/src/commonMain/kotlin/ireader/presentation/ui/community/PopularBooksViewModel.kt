@@ -130,14 +130,14 @@ class PopularBooksViewModel(
         loadInitialBooks()
     }
     
-    fun checkBookInLibrary(bookId: String, title: String, sourceId: Long, onResult: (BookNavigationAction) -> Unit) {
+    fun checkBookInLibrary(bookId: String, title: String, sourceId: Long, sourceName: String, onResult: (BookNavigationAction) -> Unit) {
         scope.launch {
             _state.update { it.copy(loadingBookIds = it.loadingBookIds + bookId) }
-            
+
             try {
                 // Try to find book in local library by title and source
                 val localBook = bookRepository.findDuplicateBook(title, sourceId)
-                
+
                 if (localBook != null) {
                     // Found in library - open it
                     onResult(BookNavigationAction.OpenLocalBook(localBook.id))

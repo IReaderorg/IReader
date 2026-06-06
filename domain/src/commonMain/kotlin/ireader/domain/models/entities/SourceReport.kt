@@ -10,6 +10,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 data class SourceReport(
     val id: Long = 0,
     val sourceId: Long,
+    val sourceName: String = "",
     val packageName: String,
     val version: String,
     val reason: String = "",

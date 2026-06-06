@@ -4,6 +4,7 @@ import ireader.domain.data.repository.LeaderboardRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.entities.LeaderboardEntry
+import ireader.domain.models.entities.ReaderLevel
 import ireader.domain.models.entities.UserLeaderboardStats
 import ireader.domain.preferences.prefs.UiPreferences
 import kotlinx.coroutines.flow.Flow
@@ -35,30 +36,45 @@ class LeaderboardUseCases(
         val remoteEntry = leaderboardRepository.getUserLeaderboardEntry(user.id).getOrNull()
 
         // Merge: take maximum values so reading time is never lost
+        val totalMinutes = if (remoteEntry != null) {
+            maxOf(stats.totalReadingTimeMinutes, remoteEntry.totalReadingTimeMinutes)
+        } else {
+            stats.totalReadingTimeMinutes
+        }
+        val readerLevel = ReaderLevel.fromMinutes(totalMinutes)
+
         val mergedStats = if (remoteEntry != null) {
             UserLeaderboardStats(
                 userId = user.id,
                 username = user.username ?: user.email.substringBefore("@"),
-                totalReadingTimeMinutes = maxOf(stats.totalReadingTimeMinutes, remoteEntry.totalReadingTimeMinutes),
+                totalReadingTimeMinutes = totalMinutes,
                 totalChaptersRead = maxOf(stats.totalChaptersRead, remoteEntry.totalChaptersRead),
                 booksCompleted = maxOf(stats.booksCompleted, remoteEntry.booksCompleted),
                 readingStreak = maxOf(stats.readingStreak, remoteEntry.readingStreak),
                 hasBadge = remoteEntry.hasBadge || user.isSupporter,
                 badgeType = remoteEntry.badgeType ?: if (user.isSupporter) "supporter" else null,
-                lastSyncedAt = currentTimeToLong()
+                lastSyncedAt = currentTimeToLong(),
+                level = readerLevel.level,
+                levelTitle = readerLevel.title,
+                xp = readerLevel.currentXp,
+                xpToNextLevel = readerLevel.xpToNextLevel
             )
         } else {
             // No remote entry yet, use local data
             UserLeaderboardStats(
                 userId = user.id,
                 username = user.username ?: user.email.substringBefore("@"),
-                totalReadingTimeMinutes = stats.totalReadingTimeMinutes,
+                totalReadingTimeMinutes = totalMinutes,
                 totalChaptersRead = stats.totalChaptersRead,
                 booksCompleted = stats.booksCompleted,
                 readingStreak = stats.readingStreak,
                 hasBadge = user.isSupporter,
                 badgeType = if (user.isSupporter) "supporter" else null,
-                lastSyncedAt = currentTimeToLong()
+                lastSyncedAt = currentTimeToLong(),
+                level = readerLevel.level,
+                levelTitle = readerLevel.title,
+                xp = readerLevel.currentXp,
+                xpToNextLevel = readerLevel.xpToNextLevel
             )
         }
 
@@ -113,5 +129,12 @@ class LeaderboardUseCases(
     
     fun setRealtimeEnabled(enabled: Boolean) {
         uiPreferences.leaderboardRealtimeEnabled().set(enabled)
+    }
+
+    /**
+     * Calculate the reader's current level from their total reading time.
+     */
+    fun getReaderLevel(totalMinutes: Long): ReaderLevel {
+        return ReaderLevel.fromMinutes(totalMinutes)
     }
 }

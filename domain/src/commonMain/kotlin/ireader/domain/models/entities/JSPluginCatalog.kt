@@ -17,7 +17,7 @@ data class JSPluginCatalog(
     override val name: String = metadata.name,
     override val description: String = metadata.site,
     override val pkgName: String = metadata.id,
-    override val versionName: String = metadata.version,
+    override val sourceName: String = "lnreader-${metadata.id}",
     override val versionCode: Int = metadata.version.replace(".", "").toIntOrNull() ?: 100,
     // Convert relative icon paths to LNReader GitHub URLs
     override val iconUrl: String = when {

@@ -11,6 +11,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
  */
 data class SourceHealth(
     val sourceId: Long,
+    val sourceName: String = "",
     val status: SourceStatus,
     val lastChecked: Long = currentTimeToLong(),
     val responseTime: Long? = null

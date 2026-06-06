@@ -12,6 +12,7 @@ data class SyncedBook(
     val userId: String,
     val bookId: String,
     val sourceId: Long,
+    val sourceName: String = "",
     val title: String,
     val bookUrl: String,
     val lastRead: Long

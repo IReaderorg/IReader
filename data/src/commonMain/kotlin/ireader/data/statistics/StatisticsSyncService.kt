@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import ireader.domain.models.entities.ReaderLevel
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
@@ -65,14 +66,18 @@ class StatisticsSyncService(
             val remoteStats = fetchRemoteStatistics(userId)
             
             // Merge statistics (take maximum values to prevent data loss)
+            val totalMinutes = if (remoteStats != null) {
+                maxOf(localStats.totalReadingTimeMinutes, remoteStats.total_reading_time_minutes)
+            } else {
+                localStats.totalReadingTimeMinutes
+            }
+            val readerLevel = ReaderLevel.fromMinutes(totalMinutes)
+
             val mergedStats = if (remoteStats != null) {
                 LeaderboardEntry(
                     user_id = userId,
                     username = username,
-                    total_reading_time_minutes = maxOf(
-                        localStats.totalReadingTimeMinutes,
-                        remoteStats.total_reading_time_minutes
-                    ),
+                    total_reading_time_minutes = totalMinutes,
                     total_chapters_read = maxOf(
                         localStats.totalChaptersRead,
                         remoteStats.total_chapters_read
@@ -86,19 +91,27 @@ class StatisticsSyncService(
                         remoteStats.reading_streak
                     ),
                     has_badge = remoteStats.has_badge, // Preserve badge status
-                    badge_type = remoteStats.badge_type
+                    badge_type = remoteStats.badge_type,
+                    level = readerLevel.level,
+                    level_title = readerLevel.title,
+                    xp = readerLevel.currentXp,
+                    xp_to_next_level = readerLevel.xpToNextLevel
                 )
             } else {
                 // No remote data, use local data
                 LeaderboardEntry(
                     user_id = userId,
                     username = username,
-                    total_reading_time_minutes = localStats.totalReadingTimeMinutes,
+                    total_reading_time_minutes = totalMinutes,
                     total_chapters_read = localStats.totalChaptersRead,
                     books_completed = localStats.booksCompleted,
                     reading_streak = localStats.readingStreak,
                     has_badge = false,
-                    badge_type = null
+                    badge_type = null,
+                    level = readerLevel.level,
+                    level_title = readerLevel.title,
+                    xp = readerLevel.currentXp,
+                    xp_to_next_level = readerLevel.xpToNextLevel
                 )
             }
             
@@ -359,7 +372,11 @@ data class LeaderboardEntry(
     val books_completed: Int,
     val reading_streak: Int,
     val has_badge: Boolean = false,
-    val badge_type: String? = null
+    val badge_type: String? = null,
+    val level: Int = 1,
+    val level_title: String = "Novice Reader",
+    val xp: Long = 0,
+    val xp_to_next_level: Long = 60
 )
 
 /**

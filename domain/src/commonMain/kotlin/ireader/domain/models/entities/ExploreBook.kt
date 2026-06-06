@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 data class ExploreBook(
     val id: Long = 0,
     val sourceId: Long,
+    val sourceName: String = "",
     val url: String,
     val title: String,
     val author: String = "",
@@ -27,6 +28,7 @@ data class ExploreBook(
         return Book(
             id = 0, // New book, will get ID on insert
             sourceId = sourceId,
+            sourceName = sourceName,
             key = url,
             title = title,
             author = author,
@@ -70,6 +72,7 @@ data class ExploreBook(
             return ExploreBook(
                 id = 0,
                 sourceId = book.sourceId,
+                sourceName = book.sourceName,
                 url = book.key,
                 title = book.title,
                 author = book.author,

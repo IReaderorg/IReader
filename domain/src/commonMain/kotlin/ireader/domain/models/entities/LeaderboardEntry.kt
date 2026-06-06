@@ -13,7 +13,11 @@ data class LeaderboardEntry(
     val avatarUrl: String? = null,
     val hasBadge: Boolean = false,
     val badgeType: String? = null,
-    val updatedAt: Long = currentTimeToLong()
+    val updatedAt: Long = currentTimeToLong(),
+    val level: Int = 1,
+    val levelTitle: String = "Novice Reader",
+    val xp: Long = 0,
+    val xpToNextLevel: Long = 60
 )
 
 @Serializable
@@ -26,5 +30,9 @@ data class UserLeaderboardStats(
     val readingStreak: Int = 0,
     val hasBadge: Boolean = false,
     val badgeType: String? = null,
-    val lastSyncedAt: Long = 0
+    val lastSyncedAt: Long = 0,
+    val level: Int = 1,
+    val levelTitle: String = "Novice Reader",
+    val xp: Long = 0,
+    val xpToNextLevel: Long = 60
 )
