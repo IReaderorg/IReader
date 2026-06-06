@@ -847,17 +847,23 @@ private fun StatItem(label: String, value: String) {
 }
 
 private fun formatReadingTime(minutes: Long): String {
+    val level = ireader.domain.models.entities.ReaderLevel.fromMinutes(minutes)
+    return "Lvl ${level.level} • ${level.title}"
+}
+
+private fun formatReadingTimeDetailed(minutes: Long): String {
+    val level = ireader.domain.models.entities.ReaderLevel.fromMinutes(minutes)
     return when {
-        minutes < 60 -> "${minutes}m"
+        minutes < 60 -> "${minutes}m (Lvl ${level.level})"
         minutes < 1440 -> {
             val hours = minutes / 60
             val mins = minutes % 60
-            if (mins > 0) "${hours}h ${mins}m" else "${hours}h"
+            if (mins > 0) "${hours}h ${mins}m (Lvl ${level.level})" else "${hours}h (Lvl ${level.level})"
         }
         else -> {
             val days = minutes / 1440
             val hours = (minutes % 1440) / 60
-            if (hours > 0) "${days}d ${hours}h" else "${days}d"
+            if (hours > 0) "${days}d ${hours}h (Lvl ${level.level})" else "${days}d (Lvl ${level.level})"
         }
     }
 }

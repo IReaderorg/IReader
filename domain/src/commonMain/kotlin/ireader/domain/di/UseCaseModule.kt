@@ -211,6 +211,12 @@ val useCaseModule = module {
             uiPreferences = get()
         )
     }
+
+    // Gamification use cases
+    single { ireader.domain.usecases.level.CalculateLevelUseCase() }
+    single { ireader.domain.usecases.reward.RewardEngineUseCase() }
+    single { ireader.domain.usecases.spiritstone.EarnSpiritStonesUseCase() }
+    single { ireader.domain.usecases.title.ActivateTitleUseCase() }
     
     // Book Prefetch Service - for faster book detail loading
     singleOf(::BookPrefetchService)

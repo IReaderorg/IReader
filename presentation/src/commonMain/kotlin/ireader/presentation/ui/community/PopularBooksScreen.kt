@@ -474,13 +474,45 @@ private fun TopBookCard(
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        
+
+                        // Description (if available)
+                        if (!book.description.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = book.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            // Source name badge
+                            if (book.sourceName.isNotBlank()) {
+                                val sourceColor = when (book.sourceGroup) {
+                                    ireader.domain.models.entities.SourceGroup.LNREADER -> Color(0xFF2196F3)
+                                    ireader.domain.models.entities.SourceGroup.IREADER -> Color(0xFF4CAF50)
+                                    else -> MaterialTheme.colorScheme.primary
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = sourceColor.copy(alpha = 0.1f)
+                                ) {
+                                    Text(
+                                        text = book.sourceName,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = sourceColor,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
@@ -504,7 +536,7 @@ private fun TopBookCard(
                                     )
                                 }
                             }
-                            
+
                             if (book.isInLibrary) {
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
@@ -648,13 +680,43 @@ private fun PopularBookCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     
-                    Spacer(modifier = Modifier.height(6.dp))
-                    
+                    // Description (if available)
+                    if (!book.description.isNullOrBlank()) {
+                        Text(
+                            text = book.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        // Source name badge
+                        if (book.sourceName.isNotBlank()) {
+                            val sourceColor = when (book.sourceGroup) {
+                                ireader.domain.models.entities.SourceGroup.LNREADER -> Color(0xFF2196F3) // Blue
+                                ireader.domain.models.entities.SourceGroup.IREADER -> Color(0xFF4CAF50) // Green
+                                else -> MaterialTheme.colorScheme.primary
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = sourceColor.copy(alpha = 0.1f)
+                            ) {
+                                Text(
+                                    text = book.sourceName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = sourceColor,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
