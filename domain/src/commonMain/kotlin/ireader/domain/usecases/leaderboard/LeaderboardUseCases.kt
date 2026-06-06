@@ -26,24 +26,77 @@ class LeaderboardUseCases(
     }
     
     suspend fun syncCurrentUserStats(): Result<Unit> {
-        val user = remoteRepository.getCurrentUser().getOrNull() 
+        val user = remoteRepository.getCurrentUser().getOrNull()
             ?: return Result.failure(Exception("User not logged in"))
-        
+
         val stats = statisticsRepository.getStatistics()
-        
-        val leaderboardStats = UserLeaderboardStats(
-            userId = user.id,
-            username = user.username ?: user.email.substringBefore("@"),
-            totalReadingTimeMinutes = stats.totalReadingTimeMinutes,
-            totalChaptersRead = stats.totalChaptersRead,
-            booksCompleted = stats.booksCompleted,
-            readingStreak = stats.readingStreak,
-            hasBadge = user.isSupporter, // Or check badge ownership
-            badgeType = if (user.isSupporter) "supporter" else null,
-            lastSyncedAt = currentTimeToLong()
-        )
-        
-        return leaderboardRepository.syncUserStats(leaderboardStats)
+
+        // Fetch remote leaderboard entry to merge (prevents data loss across devices)
+        val remoteEntry = leaderboardRepository.getUserLeaderboardEntry(user.id).getOrNull()
+
+        // Merge: take maximum values so reading time is never lost
+        val mergedStats = if (remoteEntry != null) {
+            UserLeaderboardStats(
+                userId = user.id,
+                username = user.username ?: user.email.substringBefore("@"),
+                totalReadingTimeMinutes = maxOf(stats.totalReadingTimeMinutes, remoteEntry.totalReadingTimeMinutes),
+                totalChaptersRead = maxOf(stats.totalChaptersRead, remoteEntry.totalChaptersRead),
+                booksCompleted = maxOf(stats.booksCompleted, remoteEntry.booksCompleted),
+                readingStreak = maxOf(stats.readingStreak, remoteEntry.readingStreak),
+                hasBadge = remoteEntry.hasBadge || user.isSupporter,
+                badgeType = remoteEntry.badgeType ?: if (user.isSupporter) "supporter" else null,
+                lastSyncedAt = currentTimeToLong()
+            )
+        } else {
+            // No remote entry yet, use local data
+            UserLeaderboardStats(
+                userId = user.id,
+                username = user.username ?: user.email.substringBefore("@"),
+                totalReadingTimeMinutes = stats.totalReadingTimeMinutes,
+                totalChaptersRead = stats.totalChaptersRead,
+                booksCompleted = stats.booksCompleted,
+                readingStreak = stats.readingStreak,
+                hasBadge = user.isSupporter,
+                badgeType = if (user.isSupporter) "supporter" else null,
+                lastSyncedAt = currentTimeToLong()
+            )
+        }
+
+        // Upsert merged stats to remote
+        val result = leaderboardRepository.syncUserStats(mergedStats)
+
+        // If remote had higher values, update local statistics to match
+        if (remoteEntry != null && result.isSuccess) {
+            updateLocalStatisticsIfNeeded(stats, remoteEntry)
+        }
+
+        return result
+    }
+
+    /**
+     * Update local statistics if remote leaderboard had higher values.
+     * This ensures data is never lost when syncing from another device.
+     */
+    private suspend fun updateLocalStatisticsIfNeeded(
+        local: ireader.domain.models.entities.ReadingStatisticsType1,
+        remote: UserLeaderboardStats
+    ) {
+        if (remote.totalReadingTimeMinutes > local.totalReadingTimeMinutes) {
+            val diff = remote.totalReadingTimeMinutes - local.totalReadingTimeMinutes
+            statisticsRepository.addReadingTime(diff)
+        }
+        if (remote.totalChaptersRead > local.totalChaptersRead) {
+            val diff = remote.totalChaptersRead - local.totalChaptersRead
+            repeat(diff) { statisticsRepository.incrementChaptersRead() }
+        }
+        if (remote.booksCompleted > local.booksCompleted) {
+            val diff = remote.booksCompleted - local.booksCompleted
+            repeat(diff) { statisticsRepository.incrementBooksCompleted() }
+        }
+        if (remote.readingStreak > local.readingStreak) {
+            val lastReadDate = statisticsRepository.getLastReadDate() ?: currentTimeToLong()
+            statisticsRepository.updateStreak(remote.readingStreak, lastReadDate)
+        }
     }
     
     fun observeLeaderboard(limit: Int = 100): Flow<List<LeaderboardEntry>> {

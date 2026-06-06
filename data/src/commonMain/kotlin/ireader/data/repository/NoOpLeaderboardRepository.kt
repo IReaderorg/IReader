@@ -32,4 +32,7 @@ object NoOpLeaderboardRepository : NoOpRepositoryBase(), LeaderboardRepository {
     
     override suspend fun getUsersAroundRank(rank: Int, range: Int): Result<List<LeaderboardEntry>> =
         emptyListResult()
+
+    override suspend fun getUserLeaderboardEntry(userId: String): Result<UserLeaderboardStats?> =
+        emptyResult()
 }

@@ -34,4 +34,10 @@ interface LeaderboardRepository {
      * Get users around a specific rank
      */
     suspend fun getUsersAroundRank(rank: Int, range: Int = 5): Result<List<LeaderboardEntry>>
+
+    /**
+     * Get the current user's leaderboard entry for sync merging.
+     * Returns null if the user has no entry on the leaderboard yet.
+     */
+    suspend fun getUserLeaderboardEntry(userId: String): Result<UserLeaderboardStats?>
 }

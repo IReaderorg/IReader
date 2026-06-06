@@ -146,6 +146,34 @@ class LeaderboardRepositoryImpl(
         return getLeaderboard(limit = limit, offset = offset)
     }
     
+    override suspend fun getUserLeaderboardEntry(userId: String): Result<UserLeaderboardStats?> =
+        RemoteErrorMapper.withErrorMapping {
+            val queryResult = backendService.query(
+                table = "leaderboard",
+                filters = mapOf("user_id" to userId)
+            ).getOrThrow()
+
+            val dto = queryResult.firstOrNull()?.let {
+                json.decodeFromJsonElement(LeaderboardDto.serializer(), it)
+            } ?: return@withErrorMapping null
+
+            dto.toUserLeaderboardStats()
+        }
+
+    private fun LeaderboardDto.toUserLeaderboardStats(): UserLeaderboardStats {
+        return UserLeaderboardStats(
+            userId = user_id,
+            username = username,
+            totalReadingTimeMinutes = total_reading_time_minutes,
+            totalChaptersRead = total_chapters_read,
+            booksCompleted = books_completed,
+            readingStreak = reading_streak,
+            hasBadge = has_badge,
+            badgeType = badge_type,
+            lastSyncedAt = parseTimestamp(updated_at)
+        )
+    }
+
     private fun LeaderboardDto.toDomain(rank: Int): LeaderboardEntry {
         return LeaderboardEntry(
             id = id,
