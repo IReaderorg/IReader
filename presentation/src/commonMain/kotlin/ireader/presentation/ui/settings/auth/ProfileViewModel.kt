@@ -6,7 +6,15 @@ import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.User
 import ireader.domain.usecases.remote.RemoteBackendUseCases
 import ireader.domain.data.repository.BadgeRepository
+import ireader.domain.data.repository.GamificationRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
+import ireader.domain.data.repository.SocialRepository
+import ireader.domain.models.entities.ReaderLevel
+import ireader.domain.models.gamification.AchievementView
+import ireader.domain.models.gamification.OwnedTitle
+import ireader.domain.models.gamification.ReadingActivityItem
+import ireader.domain.models.gamification.ReadingStatsSnapshot
+import ireader.domain.models.gamification.UnlockedAchievement
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -15,15 +23,18 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(
     private val remoteUseCases: RemoteBackendUseCases?,
     private val badgeRepository: BadgeRepository?,
-    private val readingStatisticsRepository: ReadingStatisticsRepository?
+    private val readingStatisticsRepository: ReadingStatisticsRepository?,
+    private val gamificationRepository: GamificationRepository? = null,
+    private val socialRepository: SocialRepository? = null,
 ) : StateViewModel<ProfileState>(ProfileState()) {
-    
+
     init {
         loadCurrentUser()
         observeConnectionStatus()
         loadFeaturedBadges()
         loadAchievementBadges()
         loadReadingStatistics()
+        loadGamification()
     }
     
     private fun loadCurrentUser() {
@@ -304,6 +315,92 @@ class ProfileViewModel(
         loadFeaturedBadges()
         loadAchievementBadges()
     }
+
+    // ---- Gamification (local-first; cloud when signed in) ----
+
+    private fun loadGamification() {
+        scope.launch {
+            // Local-first: derive level/XP from local reading time so signed-out users see progress.
+            val stats = runCatching { readingStatisticsRepository?.getStatistics() }.getOrNull()
+            val minutes = stats?.totalReadingTimeMinutes ?: 0L
+            val rl = ReaderLevel.fromMinutes(minutes)
+            updateState {
+                it.copy(
+                    level = rl.level,
+                    xp = rl.currentXp,
+                    levelTitle = rl.title,
+                    levelProgress = if (rl.xpToNextLevel <= 0) 1f
+                    else (rl.currentXp.toFloat() / (rl.currentXp + rl.xpToNextLevel).toFloat()).coerceIn(0f, 1f),
+                    genresExplored = stats?.favoriteGenres?.size ?: 0,
+                    longestStreak = stats?.longestStreak ?: 0,
+                )
+            }
+
+            val userId = currentState.currentUser?.id ?: return@launch
+            val repo = gamificationRepository ?: return@launch
+
+            // Push local stats up; server is canonical once signed in.
+            stats?.let { s ->
+                repo.syncReadingStats(
+                    ReadingStatsSnapshot(
+                        minutes = s.totalReadingTimeMinutes,
+                        chapters = s.totalChaptersRead.toLong(),
+                        books = s.booksCompleted.toLong(),
+                        streak = s.readingStreak.toLong(),
+                        longestStreak = s.longestStreak.toLong(),
+                        avgWpm = s.averageReadingSpeedWPM.toLong(),
+                        genresExplored = s.favoriteGenres.size.toLong(),
+                    )
+                ).onSuccess { unlocked -> if (unlocked.isNotEmpty()) updateState { it.copy(newlyUnlocked = unlocked) } }
+            }
+
+            repo.getProfile(userId).onSuccess { p ->
+                updateState {
+                    it.copy(
+                        level = p.level, xp = p.xp, levelTitle = p.levelTitle,
+                        levelProgress = p.levelProgress, spiritStones = p.spiritStones,
+                        checkinStreak = p.checkinStreak, activeTitleId = p.activeTitleId,
+                        discordLinked = p.discordLinked, discordUsername = p.discordUsername,
+                    )
+                }
+            }
+            repo.getAchievements(userId).onSuccess { a -> updateState { it.copy(achievements = a) } }
+            repo.getOwnedTitles(userId).onSuccess { t -> updateState { it.copy(ownedTitles = t) } }
+
+            socialRepository?.getFollowCounts(userId)?.onSuccess { (followers, following) ->
+                updateState { it.copy(followers = followers, following = following) }
+            }
+            socialRepository?.getActivity(userId)?.onSuccess { act ->
+                updateState { it.copy(recentActivity = act) }
+            }
+        }
+    }
+
+    fun checkIn() {
+        scope.launch {
+            val repo = gamificationRepository ?: return@launch
+            repo.checkinDaily().onSuccess { result ->
+                if (!result.already) {
+                    updateState { it.copy(checkinStreak = result.streakDay, lastCheckinReward = result.reward) }
+                    currentState.currentUser?.id?.let { id -> repo.getProfile(id).onSuccess { p ->
+                        updateState { it.copy(spiritStones = p.spiritStones) } } }
+                }
+            }
+        }
+    }
+
+    fun setActiveTitle(titleId: String?) {
+        scope.launch {
+            gamificationRepository?.setActiveTitle(titleId)?.onSuccess {
+                updateState { st -> st.copy(
+                    activeTitleId = titleId,
+                    ownedTitles = st.ownedTitles.map { it.copy(isActive = it.titleId == titleId) },
+                ) }
+            }
+        }
+    }
+
+    fun consumeUnlocks() = updateState { it.copy(newlyUnlocked = emptyList()) }
 }
 
 @Stable
@@ -326,5 +423,24 @@ data class ProfileState(
     val booksCompleted: Int = 0,
     val reviewsWritten: Int = 0,
     val readingStreak: Int = 0,
-    val isStatsLoading: Boolean = false
+    val isStatsLoading: Boolean = false,
+    // Gamification
+    val level: Int = 1,
+    val xp: Long = 0,
+    val levelTitle: String = "Novice Reader",
+    val levelProgress: Float = 0f,
+    val spiritStones: Long = 0,
+    val checkinStreak: Int = 0,
+    val lastCheckinReward: Int = 0,
+    val activeTitleId: String? = null,
+    val genresExplored: Int = 0,
+    val longestStreak: Int = 0,
+    val discordLinked: Boolean = false,
+    val discordUsername: String? = null,
+    val achievements: List<AchievementView> = emptyList(),
+    val ownedTitles: List<OwnedTitle> = emptyList(),
+    val followers: Int = 0,
+    val following: Int = 0,
+    val recentActivity: List<ReadingActivityItem> = emptyList(),
+    val newlyUnlocked: List<UnlockedAchievement> = emptyList(),
 )

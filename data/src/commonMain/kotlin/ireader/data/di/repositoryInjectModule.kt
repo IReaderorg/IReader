@@ -294,7 +294,7 @@ val repositoryInjectModule = module {
     // Character Art Gallery repository - Discord only
     single<ireader.domain.data.repository.CharacterArtRepository> {
         val discordWebhookUrl = ireader.domain.config.PlatformConfig.getDiscordCharacterArtWebhookUrl()
-        
+
         if (discordWebhookUrl.isNotBlank()) {
             // Use Discord webhook integration
             val discordService = ireader.domain.services.discord.DiscordWebhookService(
@@ -306,5 +306,72 @@ val repositoryInjectModule = module {
             // No Discord configured, use no-op implementation
             ireader.data.repository.NoOpCharacterArtRepository
         }
+    }
+
+    // ---- Profile & community gamification (No-Money edition) ----
+    // All four degrade to NoOp when Supabase isn't configured; otherwise they ride the
+    // shared BackendService (PostgREST/RPC) and resolve the current user lazily.
+    single<ireader.domain.data.repository.GamificationRepository> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        val getCurrentUser: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.repository.NoOpGamificationRepository
+        } else runCatching {
+            ireader.data.gamification.GamificationRepositoryImpl(
+                backend = get(),
+                getCurrentUserId = { getCurrentUser().getOrNull()?.id },
+            )
+        }.getOrElse { ireader.data.repository.NoOpGamificationRepository }
+    }
+
+    single<ireader.domain.data.repository.SocialRepository> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        val getCurrentUser: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.repository.NoOpSocialRepository
+        } else runCatching {
+            ireader.data.gamification.SocialRepositoryImpl(
+                backend = get(),
+                getCurrentUserId = { getCurrentUser().getOrNull()?.id },
+            )
+        }.getOrElse { ireader.data.repository.NoOpSocialRepository }
+    }
+
+    single<ireader.domain.data.repository.CommunityVotesRepository> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        val getCurrentUser: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.repository.NoOpCommunityVotesRepository
+        } else runCatching {
+            ireader.data.gamification.CommunityVotesRepositoryImpl(
+                backend = get(),
+                getCurrentUserId = { getCurrentUser().getOrNull()?.id },
+            )
+        }.getOrElse { ireader.data.repository.NoOpCommunityVotesRepository }
+    }
+
+    single<ireader.domain.data.repository.AnnouncementsRepository> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        val getCurrentUser: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.repository.NoOpAnnouncementsRepository
+        } else runCatching {
+            ireader.data.gamification.AnnouncementsRepositoryImpl(
+                backend = get(),
+                getCurrentUserId = { getCurrentUser().getOrNull()?.id },
+            )
+        }.getOrElse { ireader.data.repository.NoOpAnnouncementsRepository }
+    }
+
+    // Share-to-Discord (achievements / level-ups / streaks / reviews) — reuses the quote webhook.
+    single<ireader.domain.data.repository.DiscordShareRepository> {
+        val webhookUrl = ireader.domain.config.PlatformConfig.getDiscordQuoteWebhookUrl()
+        ireader.data.gamification.DiscordShareRepositoryImpl(
+            webhookUrl = webhookUrl,
+            service = ireader.domain.services.discord.DiscordWebhookService(
+                httpClient = get<ireader.core.http.HttpClients>().default,
+                webhookUrl = webhookUrl,
+            ),
+        )
     }
 }

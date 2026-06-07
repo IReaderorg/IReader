@@ -101,12 +101,34 @@ class DiscordWebhookService(
                     }
                 ))
             }
-            
+
             if (response.status.isSuccess()) {
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("Webhook test failed: ${response.status}"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Post a plain text message to the webhook channel.
+     * Used by the generic share repository (achievements, level-ups, streaks, reviews).
+     */
+    suspend fun postMessage(content: String, username: String = "IReader"): Result<Unit> {
+        if (webhookUrl.isBlank()) return Result.failure(Exception("Discord webhook URL not configured"))
+        return try {
+            val response = httpClient.post(webhookUrl) {
+                setBody(MultiPartFormDataContent(
+                    formData {
+                        append("content", content.take(1900))
+                        append("username", username)
+                    }
+                ))
+            }
+            if (response.status.isSuccess()) Result.success(Unit)
+            else Result.failure(Exception("Discord webhook failed: ${response.status}"))
         } catch (e: Exception) {
             Result.failure(e)
         }
