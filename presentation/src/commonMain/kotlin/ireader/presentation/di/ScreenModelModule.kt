@@ -57,13 +57,7 @@ val screenModelModule = module {
             bookRepository = get()
         )
     }
-    
-    factory {
-        ireader.presentation.ui.community.AllReviewsViewModel(
-            allReviewsRepository = get()
-        )
-    }
-    
+
     // Glossary ViewModel - Community feature for managing book glossaries
     // Supports both local book glossaries and global glossaries with cloud sync
     factory {
@@ -311,22 +305,5 @@ val screenModelModule = module {
         ireader.presentation.ui.settings.textreplacement.TextReplacementViewModel(
             textReplacementUseCase = get()
         )
-    }
-    
-    // ==================== Gamification Features ====================
-    
-    // Rewards ViewModel - Level, XP, achievements
-    factory {
-        ireader.presentation.ui.reward.RewardViewModel()
-    }
-    
-    // Spirit Stone ViewModel - Virtual currency and shop
-    factory {
-        ireader.presentation.ui.spiritstone.SpiritStoneViewModel()
-    }
-    
-    // User Title ViewModel - Title collection and activation
-    factory {
-        ireader.presentation.ui.title.UserTitleViewModel()
     }
 }

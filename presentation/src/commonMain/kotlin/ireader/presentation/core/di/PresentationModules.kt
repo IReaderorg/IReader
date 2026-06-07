@@ -209,22 +209,6 @@ val PresentationModules = module {
     // Cloudflare Bypass Settings ViewModel
     factory { ireader.presentation.ui.settings.cloudflare.CloudflareBypassSettingsViewModel(get(), get(), get()) }
     
-    // Badge ViewModels
-    factory { ireader.presentation.ui.settings.badges.store.BadgeStoreViewModel(get(), get()) }
-    factory { ireader.presentation.ui.settings.badges.manage.BadgeManagementViewModel(get(), get(), get()) }
-    
-    // Admin ViewModels
-    factory { 
-        ireader.presentation.ui.settings.admin.AdminBadgeVerificationViewModel(
-            getPendingPaymentProofsUseCase = get(),
-            verifyPaymentProofUseCase = get(),
-            getCurrentUser = {
-                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
-                getCurrentUserUseCase().getOrNull()
-            }
-        )
-    }
-    
     // Admin User Panel ViewModel
     factory {
         ireader.presentation.ui.settings.admin.AdminUserPanelViewModel(

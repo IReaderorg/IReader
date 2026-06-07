@@ -119,7 +119,23 @@ class ProfileScreen  {
                                 onUpdatePassword = { viewModel.showPasswordDialog() }
                             )
                         }
-                        
+
+                        item {
+                            LevelProgressCard(
+                                level = state.level,
+                                levelTitle = state.levelTitle,
+                                levelProgress = state.levelProgress,
+                                spiritStones = state.spiritStones,
+                                checkinStreak = state.checkinStreak,
+                                signedIn = true,
+                                onCheckIn = { viewModel.checkIn() },
+                            )
+                        }
+
+                        item { AchievementShowcaseSection(state.achievements) }
+                        item { TitlesSection(state.ownedTitles, onActivate = { viewModel.setActiveTitle(it) }) }
+                        item { SocialActivitySection(state.followers, state.following, state.recentActivity) }
+
                         item {
                             BadgesSection(
                                 badges = state.featuredBadges,
@@ -157,12 +173,34 @@ class ProfileScreen  {
                     }
                     
                     else -> {
+                        // Local-first: show level/XP from local reading stats even when signed-out.
+                        item {
+                            LevelProgressCard(
+                                level = state.level,
+                                levelTitle = state.levelTitle,
+                                levelProgress = state.levelProgress,
+                                spiritStones = state.spiritStones,
+                                checkinStreak = state.checkinStreak,
+                                signedIn = false,
+                                onCheckIn = {},
+                            )
+                        }
+                        item { AchievementShowcaseSection(state.achievements) }
+                        item {
+                            ReadingStatisticsSection(
+                                chaptersRead = state.chaptersRead,
+                                booksCompleted = state.booksCompleted,
+                                reviewsWritten = state.reviewsWritten,
+                                readingStreak = state.readingStreak,
+                                isLoading = state.isStatsLoading
+                            )
+                        }
                         item {
                             LoginPromptCard(
                                 onLogin = { navController.navigate(NavigationRoutes.auth) }
                             )
                         }
-                        
+
                         item {
                             BenefitsCard()
                         }
