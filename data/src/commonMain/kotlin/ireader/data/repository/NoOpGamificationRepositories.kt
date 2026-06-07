@@ -23,6 +23,7 @@ object NoOpGamificationRepository : GamificationRepository {
     override suspend fun syncReadingStats(snapshot: ReadingStatsSnapshot) = Result.success(emptyList<UnlockedAchievement>())
     override suspend fun evaluate() = Result.success(emptyList<UnlockedAchievement>())
     override suspend fun getProfile(userId: String) = Result.success(GamificationProfile(userId = userId))
+    override suspend fun updateProfile(displayName: String?, bio: String?, avatarUrl: String?, coverUrl: String?) = Result.success(Unit)
     override suspend fun getAchievementCatalog() = Result.success(emptyList<AchievementDef>())
     override suspend fun getAchievements(userId: String) = Result.success(emptyList<AchievementView>())
     override suspend fun getOwnedTitles(userId: String) = Result.success(emptyList<OwnedTitle>())

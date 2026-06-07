@@ -24,6 +24,14 @@ interface GamificationRepository {
 
     suspend fun getProfile(userId: String): Result<GamificationProfile>
 
+    /** Update editable profile fields (null = leave unchanged). */
+    suspend fun updateProfile(
+        displayName: String? = null,
+        bio: String? = null,
+        avatarUrl: String? = null,
+        coverUrl: String? = null,
+    ): Result<Unit>
+
     /** Full catalog (public read). */
     suspend fun getAchievementCatalog(): Result<List<AchievementDef>>
 

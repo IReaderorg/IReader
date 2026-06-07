@@ -344,6 +344,7 @@ RETURNS TABLE (
     reward_stones  INT
 )
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+#variable_conflict use_column
 DECLARE
     d           RECORD;
     v_value     BIGINT;

@@ -54,6 +54,11 @@ class GamificationRepositoryImpl(
         @SerialName("active_title_id") val activeTitleId: String? = null,
         @SerialName("discord_id") val discordId: String? = null,
         @SerialName("discord_username") val discordUsername: String? = null,
+        @SerialName("avatar_url") val avatarUrl: String? = null,
+        @SerialName("cover_image_url") val coverUrl: String? = null,
+        @SerialName("bio") val bio: String? = null,
+        @SerialName("display_name") val displayName: String? = null,
+        @SerialName("created_at") val createdAt: String? = null,
     )
 
     @Serializable
@@ -137,7 +142,29 @@ class GamificationRepositoryImpl(
             activeTitleId = dto.activeTitleId,
             discordLinked = dto.discordId != null,
             discordUsername = dto.discordUsername,
+            avatarUrl = dto.avatarUrl,
+            coverUrl = dto.coverUrl,
+            bio = dto.bio ?: "",
+            displayName = dto.displayName,
+            joinedAt = dto.createdAt,
         )
+    }
+
+    override suspend fun updateProfile(
+        displayName: String?,
+        bio: String?,
+        avatarUrl: String?,
+        coverUrl: String?,
+    ): Result<Unit> = runCatching {
+        val uid = getCurrentUserId() ?: error("Not signed in")
+        val data = buildJsonObject {
+            if (displayName != null) put("display_name", displayName)
+            if (bio != null) put("bio", bio)
+            if (avatarUrl != null) put("avatar_url", avatarUrl)
+            if (coverUrl != null) put("cover_image_url", coverUrl)
+        }
+        backend.update("users", filters = mapOf("id" to uid), data = data, returning = false).getOrThrow()
+        Unit
     }
 
     override suspend fun getAchievementCatalog(): Result<List<AchievementDef>> = runCatching {

@@ -16,6 +16,11 @@ data class GamificationProfile(
     val activeTitleId: String? = null,
     val discordLinked: Boolean = false,
     val discordUsername: String? = null,
+    val avatarUrl: String? = null,
+    val coverUrl: String? = null,
+    val bio: String = "",
+    val displayName: String? = null,
+    val joinedAt: String? = null,
 ) {
     /** Cumulative XP required to reach a given level: 50 * L * (L-1). */
     fun xpForLevel(level: Int): Long = (50L * level * (level - 1))

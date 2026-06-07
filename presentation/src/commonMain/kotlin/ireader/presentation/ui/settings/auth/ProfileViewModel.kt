@@ -7,12 +7,15 @@ import ireader.domain.models.remote.User
 import ireader.domain.usecases.remote.RemoteBackendUseCases
 import ireader.domain.data.repository.BadgeRepository
 import ireader.domain.data.repository.DiscordShareRepository
+import ireader.domain.data.repository.DiscordWidgetRepository
 import ireader.domain.data.repository.GamificationRepository
+import ireader.domain.data.repository.LeaderboardRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.SocialRepository
 import ireader.domain.models.entities.ReaderLevel
 import ireader.domain.models.gamification.AchievementView
 import ireader.domain.models.gamification.OwnedTitle
+import ireader.domain.models.gamification.ProfileComment
 import ireader.domain.models.gamification.ReadingActivityItem
 import ireader.domain.models.gamification.ReadingStatsSnapshot
 import ireader.domain.models.gamification.UnlockedAchievement
@@ -28,6 +31,8 @@ class ProfileViewModel(
     private val gamificationRepository: GamificationRepository? = null,
     private val socialRepository: SocialRepository? = null,
     private val discordShareRepository: DiscordShareRepository? = null,
+    private val discordWidgetRepository: DiscordWidgetRepository? = null,
+    private val leaderboardRepository: LeaderboardRepository? = null,
 ) : StateViewModel<ProfileState>(ProfileState()) {
 
     init {
@@ -37,6 +42,15 @@ class ProfileViewModel(
         loadAchievementBadges()
         loadReadingStatistics()
         loadGamification()
+        loadDiscordPresence()
+    }
+
+    private fun loadDiscordPresence() {
+        val repo = discordWidgetRepository ?: return
+        scope.launch {
+            val count = repo.getOnlineCount()
+            if (count != null) updateState { it.copy(discordOnline = count) }
+        }
     }
     
     private fun loadCurrentUser() {
@@ -364,6 +378,8 @@ class ProfileViewModel(
                         levelProgress = p.levelProgress, spiritStones = p.spiritStones,
                         checkinStreak = p.checkinStreak, activeTitleId = p.activeTitleId,
                         discordLinked = p.discordLinked, discordUsername = p.discordUsername,
+                        avatarUrl = p.avatarUrl, coverUrl = p.coverUrl, bio = p.bio,
+                        joinedAt = p.joinedAt,
                     )
                 }
             }
@@ -375,6 +391,40 @@ class ProfileViewModel(
             }
             socialRepository?.getActivity(userId)?.onSuccess { act ->
                 updateState { it.copy(recentActivity = act) }
+            }
+            socialRepository?.getComments(userId)?.onSuccess { c ->
+                updateState { it.copy(comments = c) }
+            }
+            leaderboardRepository?.getUserRank(userId)?.onSuccess { entry ->
+                updateState { it.copy(leaderboardRank = entry?.rank ?: 0) }
+            }
+        }
+    }
+
+    // ---- Edit profile + comments wall ----
+
+    fun showEditProfile() = updateState { it.copy(showEditProfileDialog = true) }
+    fun hideEditProfile() = updateState { it.copy(showEditProfileDialog = false) }
+
+    fun saveProfile(bio: String, avatarUrl: String, coverUrl: String) {
+        scope.launch {
+            updateState { it.copy(showEditProfileDialog = false) }
+            gamificationRepository?.updateProfile(
+                bio = bio,
+                avatarUrl = avatarUrl.ifBlank { null },
+                coverUrl = coverUrl.ifBlank { null },
+            )?.onSuccess {
+                updateState { it.copy(bio = bio, avatarUrl = avatarUrl.ifBlank { null }, coverUrl = coverUrl.ifBlank { null }) }
+            }
+        }
+    }
+
+    fun postComment(text: String) {
+        val userId = currentState.currentUser?.id ?: return
+        val repo = socialRepository ?: return
+        scope.launch {
+            repo.postComment(userId, text).onSuccess {
+                repo.getComments(userId).onSuccess { c -> updateState { it.copy(comments = c) } }
             }
         }
     }
@@ -449,6 +499,14 @@ data class ProfileState(
     val readingTimeMinutes: Long = 0,
     val discordLinked: Boolean = false,
     val discordUsername: String? = null,
+    val discordOnline: Int? = null,
+    val leaderboardRank: Int = 0,
+    val avatarUrl: String? = null,
+    val coverUrl: String? = null,
+    val bio: String = "",
+    val joinedAt: String? = null,
+    val showEditProfileDialog: Boolean = false,
+    val comments: List<ProfileComment> = emptyList(),
     val achievements: List<AchievementView> = emptyList(),
     val ownedTitles: List<OwnedTitle> = emptyList(),
     val followers: Int = 0,
