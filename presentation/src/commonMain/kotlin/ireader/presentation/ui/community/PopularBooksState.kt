@@ -19,7 +19,8 @@ data class PopularBooksScreenState(
     val error: String? = null,
     val loadingBookIds: Set<String> = emptySet(),
     val votedBookIds: Set<String> = emptySet(),
-    val announcements: List<CommunityAnnouncement> = emptyList()
+    val announcements: List<CommunityAnnouncement> = emptyList(),
+    val discordOnline: Int? = null
 ) {
     @Stable
     val isEmpty: Boolean get() = books.isEmpty() && !isInitialLoading

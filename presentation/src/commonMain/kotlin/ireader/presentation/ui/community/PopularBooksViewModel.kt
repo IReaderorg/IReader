@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.AnnouncementsRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CommunityVotesRepository
+import ireader.domain.data.repository.DiscordWidgetRepository
 import ireader.domain.data.repository.PopularBooksRepository
 import ireader.domain.models.remote.PopularBook
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -29,7 +30,8 @@ class PopularBooksViewModel(
     private val popularBooksRepository: PopularBooksRepository,
     private val bookRepository: BookRepository,
     private val communityVotesRepository: CommunityVotesRepository? = null,
-    private val announcementsRepository: AnnouncementsRepository? = null
+    private val announcementsRepository: AnnouncementsRepository? = null,
+    private val discordWidgetRepository: DiscordWidgetRepository? = null
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(PopularBooksScreenState())
@@ -42,6 +44,15 @@ class PopularBooksViewModel(
     init {
         loadInitialBooks()
         loadAnnouncements()
+        loadDiscordPresence()
+    }
+
+    private fun loadDiscordPresence() {
+        val repo = discordWidgetRepository ?: return
+        scope.launch {
+            val count = repo.getOnlineCount()
+            if (count != null) _state.update { it.copy(discordOnline = count) }
+        }
     }
 
     private fun loadAnnouncements() {

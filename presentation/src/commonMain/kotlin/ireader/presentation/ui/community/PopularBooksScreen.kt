@@ -103,7 +103,7 @@ fun PopularBooksScreen(
             contentPadding = PaddingValues(bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item { DiscoverHeader(onBack = onBackPressed, onRefresh = { vm.refresh() }) }
+            item { DiscoverHeader(onBack = onBackPressed, onRefresh = { vm.refresh() }, discordOnline = state.discordOnline) }
 
             when {
                 state.isInitialLoading && state.books.isEmpty() -> item {
@@ -151,7 +151,7 @@ fun PopularBooksScreen(
 }
 
 @Composable
-private fun DiscoverHeader(onBack: () -> Unit, onRefresh: () -> Unit) {
+private fun DiscoverHeader(onBack: () -> Unit, onRefresh: () -> Unit, discordOnline: Int?) {
     Box(Modifier.fillMaxWidth().background(DiscoverGradient).padding(bottom = 14.dp)) {
         Column(Modifier.statusBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
@@ -171,14 +171,25 @@ private fun DiscoverHeader(onBack: () -> Unit, onRefresh: () -> Unit) {
             Text("What the community is reading", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
             val uriHandler = LocalUriHandler.current
-            Box(
-                Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                    .clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.16f))
-                    .clickable { uriHandler.openUri(ireader.i18n.discord) }
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-            ) {
-                Text("💬  Join the community on Discord", color = Color.White, fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold)
+            Row(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.16f))
+                        .clickable { uriHandler.openUri(ireader.i18n.discord) }
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                ) {
+                    Text("💬  Join the community on Discord", color = Color.White, fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold)
+                }
+                if (discordOnline != null) {
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.16f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Text("🟢 $discordOnline online", color = Color.White, fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold)
+                    }
+                }
             }
         }
     }

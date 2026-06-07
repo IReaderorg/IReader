@@ -374,4 +374,12 @@ val repositoryInjectModule = module {
             ),
         )
     }
+
+    // Discord live widget (public guild widget JSON — no bot/token).
+    single<ireader.domain.data.repository.DiscordWidgetRepository> {
+        ireader.data.gamification.DiscordWidgetRepositoryImpl(
+            widgetUrl = "https://discord.com/api/guilds/924642990314627143/widget.json",
+            httpClient = get<ireader.core.http.HttpClients>().default,
+        )
+    }
 }

@@ -56,7 +56,8 @@ val screenModelModule = module {
             popularBooksRepository = get(),
             bookRepository = get(),
             communityVotesRepository = getOrNull(),
-            announcementsRepository = getOrNull()
+            announcementsRepository = getOrNull(),
+            discordWidgetRepository = getOrNull()
         )
     }
 

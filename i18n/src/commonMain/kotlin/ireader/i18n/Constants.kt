@@ -51,6 +51,8 @@ const val repo_url = "/repos/ireaderorg/IReader/releases/latest"
 const val github_api_url = "https://api.github.com"
 
 const val discord = "https://discord.gg/HBU6zD8c5v"
+const val discordGuildId = "924642990314627143"
+const val discordWidgetUrl = "https://discord.com/api/guilds/$discordGuildId/widget.json"
 
 const val NULL_VALUE = -1L
 const val LAST_CHAPTER = -2L
