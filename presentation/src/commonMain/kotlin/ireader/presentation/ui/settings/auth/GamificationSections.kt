@@ -40,6 +40,49 @@ import ireader.domain.models.gamification.AchievementView
 import ireader.domain.models.gamification.OwnedTitle
 import ireader.domain.models.gamification.ReadingActivityItem
 
+/** Celebration dialog shown when achievements are freshly unlocked, with a Share-to-Discord CTA. */
+@Composable
+fun AchievementUnlockDialog(
+    unlocks: List<ireader.domain.models.gamification.UnlockedAchievement>,
+    shareEnabled: Boolean,
+    onShare: (name: String, tier: String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    if (unlocks.isEmpty()) return
+    val first = unlocks.first()
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Awesome!") }
+        },
+        dismissButton = if (shareEnabled) {
+            { TextButton(onClick = { onShare(first.name, first.tier); onDismiss() }) { Text("Share to Discord") } }
+        } else null,
+        icon = { Text(first.icon, fontSize = 40.sp) },
+        title = {
+            Text(
+                if (unlocks.size == 1) "Achievement Unlocked!" else "${unlocks.size} Achievements Unlocked!",
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Column {
+                unlocks.take(5).forEach { u ->
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                        Text(u.icon, fontSize = 22.sp)
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            Text(u.name, fontWeight = FontWeight.SemiBold)
+                            Text("+${u.rewardXp} XP · +${u.rewardStones} 💎", fontSize = 12.sp,
+                                color = rarityColor(u.tier))
+                        }
+                    }
+                }
+            }
+        },
+    )
+}
+
 private fun rarityColor(rarity: String): Color = when (rarity.uppercase()) {
     "LEGENDARY" -> Color(0xFFFFB300)
     "PLATINUM" -> Color(0xFF00BCD4)

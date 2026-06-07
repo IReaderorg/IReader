@@ -1,7 +1,9 @@
 package ireader.presentation.ui.community
 
 import androidx.compose.runtime.Stable
+import ireader.domain.data.repository.AnnouncementsRepository
 import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.CommunityVotesRepository
 import ireader.domain.data.repository.PopularBooksRepository
 import ireader.domain.models.remote.PopularBook
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -25,18 +27,30 @@ import ireader.domain.utils.extensions.currentTimeToLong
 @Stable
 class PopularBooksViewModel(
     private val popularBooksRepository: PopularBooksRepository,
-    private val bookRepository: BookRepository
+    private val bookRepository: BookRepository,
+    private val communityVotesRepository: CommunityVotesRepository? = null,
+    private val announcementsRepository: AnnouncementsRepository? = null
 ) : BaseViewModel() {
-    
+
     private val _state = MutableStateFlow(PopularBooksScreenState())
     val state: StateFlow<PopularBooksScreenState> = _state.asStateFlow()
-    
+
     private var lastLoadTime = 0L
     private val minLoadInterval = 2000L // 2 seconds rate limit
     private val pageSize = 10
-    
+
     init {
         loadInitialBooks()
+        loadAnnouncements()
+    }
+
+    private fun loadAnnouncements() {
+        val repo = announcementsRepository ?: return
+        scope.launch {
+            repo.getAnnouncements(limit = 5).onSuccess { list ->
+                _state.update { it.copy(announcements = list) }
+            }
+        }
     }
     
     private fun loadInitialBooks() {
@@ -187,6 +201,17 @@ class PopularBooksViewModel(
         }
     }
     
+    /** Cast a free daily Power-Stone vote for a community book (drives Trending). */
+    fun vote(bookId: String) {
+        val repo = communityVotesRepository ?: return
+        if (_state.value.votedBookIds.contains(bookId)) return
+        scope.launch {
+            repo.vote(bookId).onSuccess { recorded ->
+                if (recorded) _state.update { it.copy(votedBookIds = it.votedBookIds + bookId) }
+            }
+        }
+    }
+
     fun clearError() {
         _state.update { it.copy(error = null) }
     }

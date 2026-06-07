@@ -6,6 +6,7 @@ import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.User
 import ireader.domain.usecases.remote.RemoteBackendUseCases
 import ireader.domain.data.repository.BadgeRepository
+import ireader.domain.data.repository.DiscordShareRepository
 import ireader.domain.data.repository.GamificationRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.data.repository.SocialRepository
@@ -26,6 +27,7 @@ class ProfileViewModel(
     private val readingStatisticsRepository: ReadingStatisticsRepository?,
     private val gamificationRepository: GamificationRepository? = null,
     private val socialRepository: SocialRepository? = null,
+    private val discordShareRepository: DiscordShareRepository? = null,
 ) : StateViewModel<ProfileState>(ProfileState()) {
 
     init {
@@ -402,6 +404,14 @@ class ProfileViewModel(
     }
 
     fun consumeUnlocks() = updateState { it.copy(newlyUnlocked = emptyList()) }
+
+    val discordShareEnabled: Boolean get() = discordShareRepository?.isConfigured == true
+
+    fun shareUnlock(achievementName: String, tier: String) {
+        val repo = discordShareRepository ?: return
+        val name = currentState.currentUser?.username ?: "A reader"
+        scope.launch { repo.shareAchievement(name, achievementName, tier) }
+    }
 }
 
 @Stable

@@ -119,6 +119,9 @@ fun PopularBooksScreen(
                     }
                 }
                 else -> {
+                    if (state.announcements.isNotEmpty()) {
+                        item { CommunityNewsCard(state.announcements.first()) }
+                    }
                     ranked.firstOrNull()?.let { hero ->
                         item { FeaturedHero(hero, onOpen = openBook) }
                     }
@@ -128,7 +131,13 @@ fun PopularBooksScreen(
                     }
                     item { SectionTitle("🏆 Top Most Read") }
                     itemsIndexed(ranked, key = { _, b -> b.bookId }) { index, book ->
-                        RankedBookRow(index + 1, book, onOpen = openBook)
+                        RankedBookRow(
+                            rank = index + 1,
+                            book = book,
+                            voted = state.votedBookIds.contains(book.bookId),
+                            onOpen = openBook,
+                            onVote = { vm.vote(book.bookId) },
+                        )
                     }
                     if (state.isLoadingMore) item {
                         Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
@@ -161,6 +170,42 @@ private fun DiscoverHeader(onBack: () -> Unit, onRefresh: () -> Unit) {
                 modifier = Modifier.padding(horizontal = 16.dp))
             Text("What the community is reading", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
+            val uriHandler = LocalUriHandler.current
+            Box(
+                Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                    .clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.16f))
+                    .clickable { uriHandler.openUri(ireader.i18n.discord) }
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+            ) {
+                Text("💬  Join the community on Discord", color = Color.White, fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CommunityNewsCard(ann: ireader.domain.models.gamification.CommunityAnnouncement) {
+    val uriHandler = LocalUriHandler.current
+    Box(
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .clickable(enabled = ann.discordUrl != null) { ann.discordUrl?.let { uriHandler.openUri(it) } }
+            .padding(16.dp),
+    ) {
+        Column {
+            Text("📣  Community News", fontSize = 12.sp, fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer)
+            Spacer(Modifier.height(4.dp))
+            ann.title?.let {
+                Text(it, fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            ann.body?.let {
+                Text(it, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f),
+                    maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
         }
     }
 }
@@ -238,7 +283,13 @@ private fun TrendingRail(books: List<PopularBook>, onOpen: (PopularBook) -> Unit
 }
 
 @Composable
-private fun RankedBookRow(rank: Int, book: PopularBook, onOpen: (PopularBook) -> Unit) {
+private fun RankedBookRow(
+    rank: Int,
+    book: PopularBook,
+    voted: Boolean,
+    onOpen: (PopularBook) -> Unit,
+    onVote: () -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable { onOpen(book) },
         verticalAlignment = Alignment.CenterVertically,
@@ -269,5 +320,23 @@ private fun RankedBookRow(rank: Int, book: PopularBook, onOpen: (PopularBook) ->
                     color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
             }
         }
+        Spacer(Modifier.width(8.dp))
+        PowerStoneVoteButton(voted = voted, onVote = onVote)
+    }
+}
+
+/** Free daily Power-Stone vote — a "like with a budget" that drives the Trending list. */
+@Composable
+private fun PowerStoneVoteButton(voted: Boolean, onVote: () -> Unit) {
+    val bg = if (voted) Gold.copy(alpha = 0.18f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+    val tint = if (voted) Gold else MaterialTheme.colorScheme.primary
+    Column(
+        Modifier.clip(RoundedCornerShape(12.dp)).background(bg)
+            .clickable(enabled = !voted, onClick = onVote)
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(if (voted) "💎" else "⚡", fontSize = 16.sp)
+        Text(if (voted) "Voted" else "Vote", fontSize = 10.sp, color = tint, fontWeight = FontWeight.Bold)
     }
 }

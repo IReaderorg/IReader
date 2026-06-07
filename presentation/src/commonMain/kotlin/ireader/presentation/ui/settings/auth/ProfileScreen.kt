@@ -166,6 +166,13 @@ class ProfileScreen  {
             }
         }
 
+        AchievementUnlockDialog(
+            unlocks = state.newlyUnlocked,
+            shareEnabled = viewModel.discordShareEnabled,
+            onShare = { name, tier -> viewModel.shareUnlock(name, tier) },
+            onDismiss = { viewModel.consumeUnlocks() },
+        )
+
         if (state.showUsernameDialog) {
             UsernameDialog(
                 currentUsername = state.currentUser?.username,

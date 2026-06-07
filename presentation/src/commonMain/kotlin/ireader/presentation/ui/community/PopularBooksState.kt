@@ -2,6 +2,7 @@ package ireader.presentation.ui.community
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
+import ireader.domain.models.gamification.CommunityAnnouncement
 import ireader.domain.models.remote.PopularBook
 
 /**
@@ -16,7 +17,9 @@ data class PopularBooksScreenState(
     val hasMore: Boolean = true,
     val currentPage: Int = 0,
     val error: String? = null,
-    val loadingBookIds: Set<String> = emptySet()
+    val loadingBookIds: Set<String> = emptySet(),
+    val votedBookIds: Set<String> = emptySet(),
+    val announcements: List<CommunityAnnouncement> = emptyList()
 ) {
     @Stable
     val isEmpty: Boolean get() = books.isEmpty() && !isInitialLoading
