@@ -43,7 +43,17 @@ fun LeaderboardScreen(
 ) {
     val state by vm.state.collectAsState()
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
-    
+    var selectedEntry by remember { mutableStateOf<LeaderboardEntry?>(null) }
+
+    // Show user profile dialog when an entry is selected
+    selectedEntry?.let { entry ->
+        UserProfileDialog(
+            entry = entry,
+            onDismiss = { selectedEntry = null },
+            onViewRewards = { /* TODO: Navigate to rewards with user filter */ }
+        )
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -205,7 +215,7 @@ fun LeaderboardScreen(
                         EnhancedLeaderboardEntryCard(
                             entry = entry,
                             isCurrentUser = entry.userId == state.userRank?.userId,
-                            animationDelay = index * 50
+                            onClick = { selectedEntry = entry }
                         )
                     }
                     

@@ -51,6 +51,9 @@ fun CommunityHubScreen(
     onDeveloperPortal: () -> Unit = {},
     onBadgeStore: () -> Unit,
     onBadgeManagement: () -> Unit,
+    onRewards: () -> Unit = {},
+    onSpiritStones: () -> Unit = {},
+    onUserTitles: () -> Unit = {},
     isAdmin: Boolean = false,
     onAdminBadgeVerification: () -> Unit = {},
     onAdminUserPanel: () -> Unit = {},
@@ -272,6 +275,41 @@ fun CommunityHubScreen(
                 )
             }
             
+            // Gamification Section
+            item {
+                SettingsSectionHeader(
+                    title = "Gamification",
+                    icon = Icons.Filled.EmojiEvents
+                )
+            }
+
+            item {
+                SettingsItem(
+                    title = "Rewards",
+                    description = "Track your level, XP, and achievements",
+                    icon = Icons.Filled.EmojiEvents,
+                    onClick = onRewards
+                )
+            }
+
+            item {
+                SettingsItem(
+                    title = "Spirit Stones",
+                    description = "Earn and spend virtual currency in the shop",
+                    icon = Icons.Filled.Diamond,
+                    onClick = onSpiritStones
+                )
+            }
+
+            item {
+                SettingsItem(
+                    title = "Titles",
+                    description = "Collect and activate titles with XP boosts",
+                    icon = Icons.Filled.WorkspacePremium,
+                    onClick = onUserTitles
+                )
+            }
+
             // Badges & Customization Section
             item {
                 SettingsSectionHeader(

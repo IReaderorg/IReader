@@ -75,6 +75,15 @@ class CommunityHubScreenSpec {
             onBadgeManagement = {
                 navController.navigate(NavigationRoutes.badgeManagement)
             },
+            onRewards = {
+                navController.navigate(NavigationRoutes.rewards)
+            },
+            onSpiritStones = {
+                navController.navigate(NavigationRoutes.spiritStones)
+            },
+            onUserTitles = {
+                navController.navigate(NavigationRoutes.userTitles)
+            },
             isAdmin = vm.isAdmin.value,
             onAdminBadgeVerification = {
                 navController.navigate(NavigationRoutes.adminBadgeVerification)
