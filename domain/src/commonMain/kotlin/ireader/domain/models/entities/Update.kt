@@ -13,7 +13,6 @@ data class UpdatesWithRelations(
     val read: Boolean,
     val bookmark: Boolean,
     val sourceId: Long,
-    val sourceName: String = "",
     val dateFetch: Long,
     val coverData: BookCover,
     val downloaded: Boolean

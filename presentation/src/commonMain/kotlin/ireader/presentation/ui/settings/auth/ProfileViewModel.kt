@@ -226,8 +226,8 @@ class ProfileViewModel(
                 onSuccess = { userBadges ->
                     // Filter only achievement badges
                     val achievementBadges = userBadges
-                        .filter { badge -> 
-                            badge.badgeType?.uppercase() == "ACHIEVEMENT" 
+                        .filter { badge ->
+                            badge.badgeCategory.equals("achievement", ignoreCase = true)
                         }
                         .map { userBadge ->
                             Badge(

@@ -7,7 +7,6 @@ import okio.Path
 
 data class CatalogRemote(
     override val sourceId: Long,
-    val sourceName: String = "",
     val source: Long,
     override val name: String,
     override val description: String,
@@ -39,7 +38,6 @@ sealed class Catalog {
     abstract val name: String
     abstract val description: String
     abstract val sourceId: Long
-    open val sourceName: String = ""
 }
 
 sealed class CatalogLocal : Catalog() {
@@ -100,7 +98,6 @@ sealed class CatalogInstalled : CatalogLocal() {
 data class UserSourceCatalog(
     override val name: String,
     override val sourceId: Long,
-    override val sourceName: String = "",
     override val source: Source?,
     val userSource: ireader.domain.usersource.model.UserSource,
     override val description: String = userSource.comment,

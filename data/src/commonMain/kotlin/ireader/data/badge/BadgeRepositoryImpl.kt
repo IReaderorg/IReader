@@ -127,7 +127,6 @@ class BadgeRepositoryImpl(
                         earnedAt = it.earnedAt,
                         metadata = it.metadata,
                         imageUrl = it.badgeImageUrl,
-                        badgeType = it.badgeType,
                         isPrimary = it.isPrimary ?: false,
                         isFeatured = it.isFeatured ?: false
                     )
@@ -174,7 +173,6 @@ class BadgeRepositoryImpl(
                         earnedAt = userBadge.earned_at ?: "",
                         metadata = null,
                         imageUrl = userBadge.badges.imageUrl,
-                        badgeType = userBadge.badges.type,
                         isPrimary = userBadge.is_primary ?: false,
                         isFeatured = userBadge.is_featured ?: false
                     )
@@ -208,7 +206,6 @@ class BadgeRepositoryImpl(
                     icon = dto.icon ?: dto.imageUrl ?: "",
                     category = dto.category ?: "general",
                     rarity = dto.rarity,
-                    price = dto.price,
                     type = parseBadgeType(dto.type),
                     badgeRarity = parseBadgeRarity(dto.rarity),
                     imageUrl = dto.imageUrl ?:"",
@@ -345,7 +342,6 @@ class BadgeRepositoryImpl(
                     icon = dto.badgeIcon,
                     category = "general",
                     rarity = dto.rarity ?: "COMMON",
-                    price = dto.price,
                     type = parseBadgeType(dto.type ?: "ACHIEVEMENT"),
                     badgeRarity = parseBadgeRarity(dto.rarity ?: "COMMON"),
                     imageUrl = dto.imageUrl ?: dto.badgeIcon,
@@ -353,7 +349,7 @@ class BadgeRepositoryImpl(
                 )
             }
         }
-    
+
     override suspend fun getFeaturedBadges(): Result<List<Badge>> = 
         RemoteErrorMapper.withErrorMapping {
             val userId = supabaseClient.auth.currentUserOrNull()?.id 
@@ -378,7 +374,6 @@ class BadgeRepositoryImpl(
                         icon = dto.badgeIcon,
                         category = "general",
                         rarity = dto.rarity ?: "COMMON",
-                        price = dto.price,
                         type = parseBadgeType(dto.type ?: "ACHIEVEMENT"),
                         badgeRarity = parseBadgeRarity(dto.rarity ?: "COMMON"),
                         imageUrl = dto.imageUrl ?: dto.badgeIcon,

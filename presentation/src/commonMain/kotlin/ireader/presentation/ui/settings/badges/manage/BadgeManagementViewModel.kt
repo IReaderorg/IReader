@@ -65,11 +65,7 @@ class BadgeManagementViewModel(
                             category = userBadge.badgeCategory,
                             rarity = userBadge.badgeRarity,
                             imageUrl = userBadge.imageUrl ?: userBadge.badgeIcon,  // Use image_url from database, fallback to icon
-                            type = when (userBadge.badgeType?.uppercase()) {
-                                "PURCHASABLE" -> BadgeType.PURCHASABLE
-                                "ACHIEVEMENT" -> BadgeType.ACHIEVEMENT
-                                else -> BadgeType.ACHIEVEMENT
-                            },
+                            type = BadgeType.ACHIEVEMENT,
                             badgeRarity = when (userBadge.badgeRarity.lowercase()) {
                                 "common" -> BadgeRarity.COMMON
                                 "rare" -> BadgeRarity.RARE

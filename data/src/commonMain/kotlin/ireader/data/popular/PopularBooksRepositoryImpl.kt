@@ -28,6 +28,7 @@ class PopularBooksRepositoryImpl(
         @SerialName("book_url") val bookUrl: String,
         @SerialName("source_id") val sourceId: Long,
         @SerialName("source_name") val sourceName: String? = null,
+        @SerialName("description") val description: String? = null,
         @SerialName("reader_count") val readerCount: Int,
         @SerialName("last_read") val lastRead: Long
     )
@@ -66,7 +67,7 @@ class PopularBooksRepositoryImpl(
                 // Fallback to client-side grouping if SQL function doesn't exist
                 val queryResult = backendService.query(
                     table = "synced_books",
-                    columns = "book_id, title, book_url, source_id, source_name, last_read",
+                    columns = "book_id, title, book_url, source_id, source_name, description, last_read",
                     orderBy = "last_read",
                     ascending = false,
                     limit = limit * 3  // Get more to account for grouping
@@ -85,6 +86,7 @@ class PopularBooksRepositoryImpl(
                             sourceId = first.sourceId,
                             sourceName = first.sourceName ?: "",
                             sourceGroup = SourceGroup.fromSourceName(first.sourceName ?: ""),
+                            description = first.description,
                             readerCount = books.size,
                             lastRead = books.maxOf { it.lastRead }
                         )

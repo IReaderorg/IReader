@@ -476,10 +476,11 @@ private fun TopBookCard(
                         )
 
                         // Description (if available)
-                        if (!book.description.isNullOrBlank()) {
+                        val desc = book.description
+                        if (!desc.isNullOrBlank()) {
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = book.description,
+                                text = desc,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 2,
@@ -681,9 +682,10 @@ private fun PopularBookCard(
                     )
                     
                     // Description (if available)
-                    if (!book.description.isNullOrBlank()) {
+                    val desc = book.description
+                    if (!desc.isNullOrBlank()) {
                         Text(
-                            text = book.description,
+                            text = desc,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 2,

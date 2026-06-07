@@ -23,9 +23,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ChapterSyncData(
-    val globalId: String, // sourceName + "|" + key
+    val globalId: String, // sourceId + "|" + key
     val bookGlobalId: String,
-    val sourceName: String = "",
     val key: String,
     val name: String,
     val read: Boolean,

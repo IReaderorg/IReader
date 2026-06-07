@@ -10,7 +10,6 @@ data class DownloadItem(
     val chapterId: Long,
     val bookId: Long,
     val sourceId: Long,
-    val sourceName: String = "",
     val bookTitle: String,
     val chapterTitle: String,
     val chapterUrl: String,

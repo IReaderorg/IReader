@@ -87,7 +87,6 @@ data class UpcomingRelease(
     val bookTitle: String,
     val bookCover: String,
     val sourceId: Long,
-    val sourceName: String = "",
     val expectedReleaseDate: Long?,
     val lastChapterDate: Long,
     val estimatedNextRelease: Long?,
@@ -115,7 +114,6 @@ data class BookRecommendation(
     val author: String,
     val genres: List<String>,
     val sourceId: Long,
-    val sourceName: String = "",
     val score: Float,
     val reason: RecommendationReason
 )

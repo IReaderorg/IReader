@@ -22,12 +22,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class BookSyncData(
-    val globalId: String, // sourceName + "|" + key
+    val globalId: String, // sourceId + "|" + key
     val title: String,
     val author: String,
     val coverUrl: String?,
     val sourceId: String,
-    val sourceName: String = "",
     val key: String,
     val favorite: Boolean,
     val addedAt: Long,

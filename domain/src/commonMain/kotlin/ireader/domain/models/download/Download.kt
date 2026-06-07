@@ -14,7 +14,6 @@ data class Download(
     val chapterId: Long,
     val bookId: Long,
     val sourceId: Long,
-    val sourceName: String = "",
     val chapterName: String = "",
     val bookTitle: String = "",
     val coverUrl: String = "",

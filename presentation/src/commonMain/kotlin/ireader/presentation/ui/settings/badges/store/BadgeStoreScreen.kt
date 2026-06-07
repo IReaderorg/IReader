@@ -610,34 +610,7 @@ private fun FeaturedBadgeCard(
 
                 Spacer(modifier = Modifier.height(if (isCompact) 8.dp else 12.dp))
 
-                badge.price?.let { price ->
-                    Surface(
-                        shape = RoundedCornerShape(if (isCompact) 12.dp else 16.dp),
-                        color = Color.White
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                horizontal = if (isCompact) 12.dp else 20.dp,
-                                vertical = if (isCompact) 6.dp else 10.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ShoppingCart,
-                                contentDescription = null,
-                                tint = gradientColors.first(),
-                                modifier = Modifier.size(if (isCompact) 14.dp else 18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(if (isCompact) 4.dp else 8.dp))
-                            Text(
-                                text = "${ireader.presentation.ui.core.utils.toDecimalString(price, 2)} USD",
-                                style = if (isCompact) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = gradientColors.first()
-                            )
-                        }
-                    }
-                }
+
             }
         }
     }
@@ -787,38 +760,36 @@ private fun ModernBadgeCard(
 
                 Spacer(modifier = Modifier.height(if (isLargeScreen) 8.dp else 4.dp))
 
-                // Price Button
-                badge.price?.let { price ->
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(if (isLargeScreen) 14.dp else 12.dp),
-                        color = gradientColors.first()
+                // Purchase Button
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(if (isLargeScreen) 14.dp else 12.dp),
+                    color = gradientColors.first()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(
+                            horizontal = if (isLargeScreen) 16.dp else 12.dp,
+                            vertical = if (isLargeScreen) 10.dp else 8.dp
+                        ),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                horizontal = if (isLargeScreen) 16.dp else 12.dp,
-                                vertical = if (isLargeScreen) 10.dp else 8.dp
-                            ),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ShoppingCart,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(if (isLargeScreen) 18.dp else 14.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = ireader.presentation.ui.core.utils.toDecimalString(price, 2),
-                                style = if (isLargeScreen) 
-                                    MaterialTheme.typography.titleSmall 
-                                else 
-                                    MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Filled.ShoppingCart,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(if (isLargeScreen) 18.dp else 14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Get Badge",
+                            style = if (isLargeScreen)
+                                MaterialTheme.typography.titleSmall
+                            else
+                                MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     }
                 }
             }
@@ -1096,14 +1067,14 @@ private fun ModernPurchaseDialog(
 
                             RarityBadge(rarity = badge.badgeRarity, compact = isCompactDialog)
 
-                            badge.price?.let { price ->
+                            run {
                                 Spacer(modifier = Modifier.height(if (isCompactDialog) 12.dp else 16.dp))
                                 Surface(
                                     shape = RoundedCornerShape(if (isCompactDialog) 14.dp else 20.dp),
                                     color = Color.White
                                 ) {
                                     Text(
-                                        text = "${ireader.presentation.ui.core.utils.toDecimalString(price, 2)} USD",
+                                        text = "Achievement Badge",
                                         modifier = Modifier.padding(
                                             horizontal = if (isCompactDialog) 16.dp else 24.dp,
                                             vertical = if (isCompactDialog) 8.dp else 12.dp

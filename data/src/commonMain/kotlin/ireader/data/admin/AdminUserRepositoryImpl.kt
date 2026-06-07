@@ -173,7 +173,6 @@ class AdminUserRepositoryImpl(
                     icon = dto.icon ?: dto.imageUrl ?: "",
                     category = dto.category ?: "general",
                     rarity = dto.rarity,
-                    price = dto.price,
                     type = parseBadgeType(dto.type),
                     badgeRarity = parseBadgeRarity(dto.rarity),
                     imageUrl = dto.imageUrl ?: "",
