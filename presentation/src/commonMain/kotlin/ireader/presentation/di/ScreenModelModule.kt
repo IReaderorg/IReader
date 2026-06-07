@@ -312,4 +312,21 @@ val screenModelModule = module {
             textReplacementUseCase = get()
         )
     }
+    
+    // ==================== Gamification Features ====================
+    
+    // Rewards ViewModel - Level, XP, achievements
+    factory {
+        ireader.presentation.ui.reward.RewardViewModel()
+    }
+    
+    // Spirit Stone ViewModel - Virtual currency and shop
+    factory {
+        ireader.presentation.ui.spiritstone.SpiritStoneViewModel()
+    }
+    
+    // User Title ViewModel - Title collection and activation
+    factory {
+        ireader.presentation.ui.title.UserTitleViewModel()
+    }
 }
