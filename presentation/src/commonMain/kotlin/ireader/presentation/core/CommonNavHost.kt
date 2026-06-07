@@ -145,6 +145,18 @@ fun CommonNavHost(
         composable(NavigationRoutes.popularBooks) {
             ireader.presentation.core.ui.PopularBooksScreenSpec().Content()
         }
+
+        composable(NavigationRoutes.rewards) {
+            ireader.presentation.core.ui.RewardScreenSpec().Content()
+        }
+
+        composable(NavigationRoutes.spiritStones) {
+            ireader.presentation.core.ui.SpiritStoneScreenSpec().Content()
+        }
+
+        composable(NavigationRoutes.userTitles) {
+            ireader.presentation.core.ui.UserTitleScreenSpec().Content()
+        }
         
         composable(NavigationRoutes.allReviews) {
             ireader.presentation.core.ui.AllReviewsScreenSpec().Content()
