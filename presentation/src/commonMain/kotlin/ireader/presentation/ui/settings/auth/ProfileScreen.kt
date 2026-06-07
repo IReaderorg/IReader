@@ -78,65 +78,72 @@ class ProfileScreen  {
         val viewModel: ProfileViewModel = koinInject()
         val state by viewModel.state.collectAsState()
         
-        Scaffold(
-            topBar = {
-                Toolbar(
-                    title = { Text(localizeHelper.localize(Res.string.profile)) },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.safePopBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
-                        }
-                    }
-                )
-            }
-        ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            val signedIn = state.currentUser != null
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 28.dp),
             ) {
-                when {
-                    state.isLoading -> {
-                        item {
-                            Box(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
+                // Immersive Webnovel header (full-bleed gradient)
+                item {
+                    WebnovelProfileHeader(
+                        username = state.currentUser?.username ?: "Guest Reader",
+                        levelTitle = state.levelTitle,
+                        level = state.level,
+                        spiritStones = state.spiritStones,
+                        checkinStreak = state.checkinStreak,
+                        discordUsername = state.discordUsername,
+                        followers = state.followers,
+                        following = state.following,
+                        signedIn = signedIn,
+                        onBack = { navController.safePopBackStack() },
+                        onEdit = { viewModel.showUsernameDialog() },
+                        onSignIn = { navController.navigate(NavigationRoutes.auth) },
+                    )
+                }
+
+                // Stat tiles pulled up over the header bottom
+                item {
+                    WebnovelStatTiles(
+                        readingMinutes = state.readingTimeMinutes,
+                        books = state.booksCompleted,
+                        chapters = state.chaptersRead,
+                        streak = state.readingStreak,
+                    )
+                }
+
+                if (signedIn) {
+                    item {
+                        WebnovelCheckinBanner(
+                            checkinStreak = state.checkinStreak,
+                            lastReward = state.lastCheckinReward,
+                            signedIn = true,
+                            onCheckIn = { viewModel.checkIn() },
+                        )
                     }
-                    
-                    state.currentUser != null -> {
-                        item {
-                            UserProfileCard(
-                                user = state.currentUser!!,
-                                onSignOut = { viewModel.signOut() },
-                                onUpdateUsername = { viewModel.showUsernameDialog() },
-                                onUpdateWallet = { viewModel.showWalletDialog() },
-                                onUpdatePassword = { viewModel.showPasswordDialog() }
-                            )
-                        }
+                }
 
-                        item {
-                            LevelProgressCard(
-                                level = state.level,
-                                levelTitle = state.levelTitle,
-                                levelProgress = state.levelProgress,
-                                spiritStones = state.spiritStones,
-                                checkinStreak = state.checkinStreak,
-                                signedIn = true,
-                                onCheckIn = { viewModel.checkIn() },
-                            )
-                        }
+                item {
+                    Box(Modifier.padding(horizontal = 12.dp)) {
+                        LevelProgressCard(
+                            level = state.level,
+                            levelTitle = state.levelTitle,
+                            levelProgress = state.levelProgress,
+                            spiritStones = state.spiritStones,
+                            checkinStreak = state.checkinStreak,
+                            signedIn = false, // check-in surfaced by the banner above
+                            onCheckIn = {},
+                        )
+                    }
+                }
 
-                        item { AchievementShowcaseSection(state.achievements) }
-                        item { TitlesSection(state.ownedTitles, onActivate = { viewModel.setActiveTitle(it) }) }
-                        item { SocialActivitySection(state.followers, state.following, state.recentActivity) }
-
-                        item {
+                item { Box(Modifier.padding(horizontal = 12.dp)) { AchievementShowcaseSection(state.achievements) } }
+                if (signedIn) {
+                    item { Box(Modifier.padding(horizontal = 12.dp)) { TitlesSection(state.ownedTitles, onActivate = { viewModel.setActiveTitle(it) }) } }
+                    item { Box(Modifier.padding(horizontal = 12.dp)) { SocialActivitySection(state.followers, state.following, state.recentActivity) } }
+                    item {
+                        Box(Modifier.padding(horizontal = 12.dp)) {
                             BadgesSection(
                                 badges = state.featuredBadges,
                                 isLoading = state.isBadgesLoading,
@@ -144,71 +151,21 @@ class ProfileScreen  {
                                 onRetry = { viewModel.retryLoadBadges() }
                             )
                         }
-                        
-                        item {
-                            AchievementBadgesSection(
-                                badges = state.achievementBadges,
-                                isLoading = state.isBadgesLoading,
-                                error = state.badgesError,
-                                onRetry = { viewModel.retryLoadBadges() }
-                            )
-                        }
-                        
-                        item {
-                            ReadingStatisticsSection(
-                                chaptersRead = state.chaptersRead,
-                                booksCompleted = state.booksCompleted,
-                                reviewsWritten = state.reviewsWritten,
-                                readingStreak = state.readingStreak,
-                                isLoading = state.isStatsLoading
-                            )
-                        }
-                        
-                        item {
+                    }
+                    item {
+                        Box(Modifier.padding(horizontal = 12.dp)) {
                             SyncStatusCard(
                                 connectionStatus = state.connectionStatus,
                                 lastSyncTime = state.lastSyncTime
                             )
                         }
                     }
-                    
-                    else -> {
-                        // Local-first: show level/XP from local reading stats even when signed-out.
-                        item {
-                            LevelProgressCard(
-                                level = state.level,
-                                levelTitle = state.levelTitle,
-                                levelProgress = state.levelProgress,
-                                spiritStones = state.spiritStones,
-                                checkinStreak = state.checkinStreak,
-                                signedIn = false,
-                                onCheckIn = {},
-                            )
-                        }
-                        item { AchievementShowcaseSection(state.achievements) }
-                        item {
-                            ReadingStatisticsSection(
-                                chaptersRead = state.chaptersRead,
-                                booksCompleted = state.booksCompleted,
-                                reviewsWritten = state.reviewsWritten,
-                                readingStreak = state.readingStreak,
-                                isLoading = state.isStatsLoading
-                            )
-                        }
-                        item {
-                            LoginPromptCard(
-                                onLogin = { navController.navigate(NavigationRoutes.auth) }
-                            )
-                        }
-
-                        item {
-                            BenefitsCard()
-                        }
-                    }
+                } else {
+                    item { Box(Modifier.padding(horizontal = 12.dp)) { BenefitsCard() } }
                 }
             }
         }
-        
+
         if (state.showUsernameDialog) {
             UsernameDialog(
                 currentUsername = state.currentUser?.username,

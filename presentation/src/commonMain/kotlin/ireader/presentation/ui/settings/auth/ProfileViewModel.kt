@@ -333,6 +333,7 @@ class ProfileViewModel(
                     else (rl.currentXp.toFloat() / (rl.currentXp + rl.xpToNextLevel).toFloat()).coerceIn(0f, 1f),
                     genresExplored = stats?.favoriteGenres?.size ?: 0,
                     longestStreak = stats?.longestStreak ?: 0,
+                    readingTimeMinutes = stats?.totalReadingTimeMinutes ?: 0L,
                 )
             }
 
@@ -435,6 +436,7 @@ data class ProfileState(
     val activeTitleId: String? = null,
     val genresExplored: Int = 0,
     val longestStreak: Int = 0,
+    val readingTimeMinutes: Long = 0,
     val discordLinked: Boolean = false,
     val discordUsername: String? = null,
     val achievements: List<AchievementView> = emptyList(),
