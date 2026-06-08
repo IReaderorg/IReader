@@ -1,6 +1,7 @@
 package ireader.presentation.ui.community
 
 import androidx.compose.runtime.Stable
+import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.AnnouncementsRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CommunityVotesRepository
@@ -31,7 +32,8 @@ class PopularBooksViewModel(
     private val bookRepository: BookRepository,
     private val communityVotesRepository: CommunityVotesRepository? = null,
     private val announcementsRepository: AnnouncementsRepository? = null,
-    private val discordWidgetRepository: DiscordWidgetRepository? = null
+    private val discordWidgetRepository: DiscordWidgetRepository? = null,
+    private val catalogStore: CatalogStore? = null
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(PopularBooksScreenState())
@@ -79,6 +81,7 @@ class PopularBooksViewModel(
                         )
                     }
                     lastLoadTime = currentTimeToLong()
+                    rebuildGroups()
                     // Lookup local books for covers
                     lookupLocalBooks(books)
                 }
@@ -131,6 +134,8 @@ class PopularBooksViewModel(
                         )
                     }
                     lastLoadTime = currentTimeToLong()
+                    rebuildGroups()
+                    lookupLocalBooks(newBooks)
                 }
                 .onFailure { error ->
                     _state.update { current ->
@@ -147,6 +152,7 @@ class PopularBooksViewModel(
         _state.update { current ->
             current.copy(
                 books = emptyList(),
+                groups = emptyList(),
                 currentPage = 0,
                 hasMore = true,
                 error = null
@@ -209,9 +215,69 @@ class PopularBooksViewModel(
                     // Ignore lookup errors
                 }
             }
+            rebuildGroups()
         }
     }
     
+    /** Collapse duplicate titles (across sources) into single grouped entries. */
+    private fun rebuildGroups() {
+        _state.update { current ->
+            val groups = current.books
+                .groupBy { normalizeTitle(it.title) }
+                .map { (key, variants) ->
+                    val byReaders = variants.sortedByDescending { it.readerCount }
+                    val withLocal = variants.firstOrNull { it.localBookId != null }
+                    val cover = variants.firstNotNullOfOrNull { it.coverUrl }
+                    PopularBookGroup(
+                        key = key,
+                        title = byReaders.first().title,
+                        coverUrl = cover,
+                        description = variants.firstNotNullOfOrNull { it.description },
+                        totalReaders = variants.sumOf { it.readerCount },
+                        lastRead = variants.maxOf { it.lastRead },
+                        localBookId = withLocal?.localBookId,
+                        sources = byReaders.map {
+                            BookSourceVariant(
+                                sourceId = it.sourceId,
+                                sourceName = it.sourceName.ifBlank { "Source ${it.sourceId}" },
+                                bookId = it.bookId,
+                                bookUrl = it.bookUrl,
+                                readers = it.readerCount,
+                            )
+                        }.distinctBy { it.sourceId },
+                    )
+                }
+                .sortedByDescending { it.totalReaders }
+            current.copy(groups = groups)
+        }
+    }
+
+    fun openBookDetail(group: PopularBookGroup) {
+        _state.update { it.copy(selectedBook = group) }
+    }
+
+    fun dismissBookDetail() {
+        _state.update { it.copy(selectedBook = null) }
+    }
+
+    /** Open a specific source variant: local book if owned, else if source installed
+     *  go to global search, else prompt to install the source. */
+    fun openSource(group: PopularBookGroup, variant: BookSourceVariant, onResult: (BookNavigationAction) -> Unit) {
+        scope.launch {
+            _state.update { it.copy(resolvingSourceFor = group.key) }
+            try {
+                val local = runCatching { bookRepository.findDuplicateBook(group.title, variant.sourceId) }.getOrNull()
+                when {
+                    local != null -> onResult(BookNavigationAction.OpenLocalBook(local.id))
+                    catalogStore?.get(variant.sourceId) != null -> onResult(BookNavigationAction.OpenGlobalSearch(group.title))
+                    else -> onResult(BookNavigationAction.SourceMissing(variant.sourceName))
+                }
+            } finally {
+                _state.update { it.copy(resolvingSourceFor = null) }
+            }
+        }
+    }
+
     /** Cast a free daily Power-Stone vote for a community book (drives Trending). */
     fun vote(bookId: String) {
         val repo = communityVotesRepository ?: return

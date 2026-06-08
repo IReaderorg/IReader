@@ -23,13 +23,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -43,25 +46,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.domain.models.remote.PopularBook
 import ireader.presentation.ui.core.ui.AsyncImage
 
-private val DiscoverGradient = Brush.verticalGradient(listOf(Color(0xFF7B2FF7), Color(0xFF4A1FB0)))
 private val Gold = Color(0xFFFFC73C)
 private val Silver = Color(0xFFC6CCD6)
 private val Bronze = Color(0xFFD08B4B)
-
 private fun rankColor(rank: Int): Color = when (rank) { 1 -> Gold; 2 -> Silver; 3 -> Bronze; else -> Color(0xFF8C7BAE) }
-
-private fun formatReaders(n: Int): String = when {
-    n >= 1_000_000 -> "${(n / 100_000) / 10.0}M"
-    n >= 1_000 -> "${(n / 100) / 10.0}k"
-    else -> "$n"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,30 +64,20 @@ fun PopularBooksScreen(
     onNavigateToBook: (Long) -> Unit = {},
     onNavigateToGlobalSearch: (String) -> Unit = {},
     onOpenExternalUrl: (String) -> Unit = {},
+    onAddSources: () -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val listState = rememberLazyListState()
-    val uriHandler = LocalUriHandler.current
 
-    val openBook: (PopularBook) -> Unit = { book ->
-        vm.checkBookInLibrary(book.bookId, book.title, book.sourceId, book.sourceName) { action ->
-            when (action) {
-                is BookNavigationAction.OpenLocalBook -> onNavigateToBook(action.bookId)
-                is BookNavigationAction.OpenGlobalSearch -> onNavigateToGlobalSearch(action.query)
-                is BookNavigationAction.OpenExternalUrl -> uriHandler.openUri(action.url)
-            }
-        }
-    }
+    val groups = state.groups
 
     val shouldLoadMore by remember {
         derivedStateOf {
             val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-            last != null && last.index >= state.books.size - 3 && !state.isLoadingMore && state.hasMore
+            last != null && last.index >= groups.size - 3 && !state.isLoadingMore && state.hasMore
         }
     }
     androidx.compose.runtime.LaunchedEffect(shouldLoadMore) { if (shouldLoadMore) vm.loadMore() }
-
-    val ranked = remember(state.books) { state.books.sortedByDescending { it.readerCount } }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LazyColumn(
@@ -106,12 +89,12 @@ fun PopularBooksScreen(
             item { DiscoverHeader(onBack = onBackPressed, onRefresh = { vm.refresh() }, discordOnline = state.discordOnline) }
 
             when {
-                state.isInitialLoading && state.books.isEmpty() -> item {
+                state.isInitialLoading && groups.isEmpty() -> item {
                     Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
-                state.books.isEmpty() -> item {
+                groups.isEmpty() -> item {
                     Column(Modifier.fillMaxWidth().padding(48.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("📚", fontSize = 56.sp)
                         Spacer(Modifier.height(12.dp))
@@ -122,21 +105,21 @@ fun PopularBooksScreen(
                     if (state.announcements.isNotEmpty()) {
                         item { CommunityNewsCard(state.announcements.first()) }
                     }
-                    ranked.firstOrNull()?.let { hero ->
-                        item { FeaturedHero(hero, onOpen = openBook) }
+                    groups.firstOrNull()?.let { hero ->
+                        item { FeaturedHero(hero, onOpen = { vm.openBookDetail(it) }) }
                     }
-                    if (ranked.size > 1) {
+                    if (groups.size > 1) {
                         item { SectionTitle("🔥 Trending Now") }
-                        item { TrendingRail(ranked.take(10), onOpen = openBook) }
+                        item { TrendingRail(groups.take(10), onOpen = { vm.openBookDetail(it) }) }
                     }
                     item { SectionTitle("🏆 Top Most Read") }
-                    itemsIndexed(ranked, key = { _, b -> b.bookId }) { index, book ->
+                    itemsIndexed(groups, key = { _, g -> g.key }) { index, g ->
                         RankedBookRow(
                             rank = index + 1,
-                            book = book,
-                            voted = state.votedBookIds.contains(book.bookId),
-                            onOpen = openBook,
-                            onVote = { vm.vote(book.bookId) },
+                            group = g,
+                            voted = state.votedBookIds.contains(g.primary.bookId),
+                            onOpen = { vm.openBookDetail(g) },
+                            onVote = { vm.vote(g.primary.bookId) },
                         )
                     }
                     if (state.isLoadingMore) item {
@@ -148,46 +131,66 @@ fun PopularBooksScreen(
             }
         }
     }
+
+    // Book detail sheet: pick a source variant, see how popular each is.
+    state.selectedBook?.let { group ->
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(onDismissRequest = { vm.dismissBookDetail() }, sheetState = sheetState) {
+            BookDetailSheet(
+                group = group,
+                resolving = state.resolvingSourceFor == group.key,
+                voted = state.votedBookIds.contains(group.primary.bookId),
+                onVote = { vm.vote(group.primary.bookId) },
+                onPickSource = { variant ->
+                    vm.openSource(group, variant) { action ->
+                        when (action) {
+                            is BookNavigationAction.OpenLocalBook -> { vm.dismissBookDetail(); onNavigateToBook(action.bookId) }
+                            is BookNavigationAction.OpenGlobalSearch -> { vm.dismissBookDetail(); onNavigateToGlobalSearch(action.query) }
+                            is BookNavigationAction.OpenExternalUrl -> onOpenExternalUrl(action.url)
+                            is BookNavigationAction.SourceMissing -> { vm.dismissBookDetail(); onAddSources() }
+                        }
+                    }
+                },
+            )
+        }
+    }
 }
 
 @Composable
 private fun DiscoverHeader(onBack: () -> Unit, onRefresh: () -> Unit, discordOnline: Int?) {
-    Box(Modifier.fillMaxWidth().background(DiscoverGradient).padding(bottom = 14.dp)) {
+    val cs = MaterialTheme.colorScheme
+    Box(Modifier.fillMaxWidth()
+        .background(Brush.verticalGradient(listOf(cs.primary, cs.primaryContainer)))
+        .padding(bottom = 14.dp)) {
         Column(Modifier.statusBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(40.dp).clip(RoundedCornerShape(50)).clickable(onClick = onBack),
                     contentAlignment = Alignment.Center) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = cs.onPrimary)
                 }
                 Spacer(Modifier.weight(1f))
                 Box(Modifier.size(40.dp).clip(RoundedCornerShape(50)).clickable(onClick = onRefresh),
                     contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Refresh, "Refresh", tint = Color.White)
+                    Icon(Icons.Filled.Refresh, "Refresh", tint = cs.onPrimary)
                 }
             }
-            Text("Discover", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold,
+            Text("Discover", color = cs.onPrimary, fontSize = 24.sp, fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 16.dp))
-            Text("What the community is reading", color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp,
+            Text("What the community is reading", color = cs.onPrimary.copy(alpha = 0.8f), fontSize = 13.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
             val uriHandler = LocalUriHandler.current
             Row(Modifier.padding(horizontal = 16.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.16f))
-                        .clickable { uriHandler.openUri(ireader.i18n.discord) }
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                ) {
-                    Text("💬  Join the community on Discord", color = Color.White, fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold)
+                Box(Modifier.clip(RoundedCornerShape(20.dp)).background(cs.onPrimary.copy(alpha = 0.16f))
+                    .clickable { uriHandler.openUri(ireader.i18n.discord) }
+                    .padding(horizontal = 12.dp, vertical = 6.dp)) {
+                    Text("💬  Join the community on Discord", color = cs.onPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
                 if (discordOnline != null) {
                     Spacer(Modifier.width(8.dp))
-                    Box(
-                        Modifier.clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.16f))
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                    ) {
-                        Text("🟢 $discordOnline online", color = Color.White, fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold)
+                    Box(Modifier.clip(RoundedCornerShape(20.dp)).background(cs.onPrimary.copy(alpha = 0.16f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)) {
+                        Text("🟢 $discordOnline online", color = cs.onPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -197,26 +200,17 @@ private fun DiscoverHeader(onBack: () -> Unit, onRefresh: () -> Unit, discordOnl
 
 @Composable
 private fun CommunityNewsCard(ann: ireader.domain.models.gamification.CommunityAnnouncement) {
+    val cs = MaterialTheme.colorScheme
     val uriHandler = LocalUriHandler.current
-    Box(
-        Modifier.fillMaxWidth().padding(horizontal = 12.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-            .clickable(enabled = ann.discordUrl != null) { ann.discordUrl?.let { uriHandler.openUri(it) } }
-            .padding(16.dp),
-    ) {
+    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(16.dp))
+        .background(cs.secondaryContainer)
+        .clickable(enabled = ann.discordUrl != null) { ann.discordUrl?.let { uriHandler.openUri(it) } }
+        .padding(16.dp)) {
         Column {
-            Text("📣  Community News", fontSize = 12.sp, fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSecondaryContainer)
+            Text("📣  Community News", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = cs.onSecondaryContainer)
             Spacer(Modifier.height(4.dp))
-            ann.title?.let {
-                Text(it, fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            ann.body?.let {
-                Text(it, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f),
-                    maxLines = 2, overflow = TextOverflow.Ellipsis)
-            }
+            ann.title?.let { Text(it, fontWeight = FontWeight.SemiBold, color = cs.onSecondaryContainer, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            ann.body?.let { Text(it, fontSize = 13.sp, color = cs.onSecondaryContainer.copy(alpha = 0.85f), maxLines = 2, overflow = TextOverflow.Ellipsis) }
         }
     }
 }
@@ -228,24 +222,18 @@ private fun SectionTitle(title: String) {
 }
 
 @Composable
-private fun FeaturedHero(book: PopularBook, onOpen: (PopularBook) -> Unit) {
-    Box(
-        Modifier.fillMaxWidth().padding(horizontal = 12.dp).height(190.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable { onOpen(book) },
-    ) {
-        if (book.coverUrl != null) {
-            AsyncImage(model = book.coverUrl, contentDescription = book.title,
-                modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+private fun FeaturedHero(group: PopularBookGroup, onOpen: (PopularBookGroup) -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).height(190.dp)
+        .clip(RoundedCornerShape(20.dp)).background(cs.surfaceVariant).clickable { onOpen(group) }) {
+        group.coverUrl?.let {
+            AsyncImage(model = it, contentDescription = group.title, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         }
-        Box(Modifier.fillMaxSize().background(
-            Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)))))
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)))))
         Row(Modifier.align(Alignment.BottomStart).padding(16.dp), verticalAlignment = Alignment.Bottom) {
-            if (book.coverUrl != null) {
-                AsyncImage(model = book.coverUrl, contentDescription = null,
-                    modifier = Modifier.width(72.dp).height(104.dp).clip(RoundedCornerShape(10.dp)),
-                    contentScale = ContentScale.Crop)
+            group.coverUrl?.let {
+                AsyncImage(model = it, contentDescription = null,
+                    modifier = Modifier.width(72.dp).height(104.dp).clip(RoundedCornerShape(10.dp)), contentScale = ContentScale.Crop)
                 Spacer(Modifier.width(14.dp))
             }
             Column(Modifier.weight(1f)) {
@@ -253,40 +241,32 @@ private fun FeaturedHero(book: PopularBook, onOpen: (PopularBook) -> Unit) {
                     Text("🔥 #1 this week", color = Color(0xFF3A1C9E), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(Modifier.height(6.dp))
-                Text(book.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("${formatReaders(book.readerCount)} reading", color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
+                Text(group.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text("${formatCount(group.totalReaders)} reading · ${group.sourceCount} source${if (group.sourceCount > 1) "s" else ""}",
+                    color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
             }
         }
     }
 }
 
 @Composable
-private fun TrendingRail(books: List<PopularBook>, onOpen: (PopularBook) -> Unit) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        itemsIndexed(books, key = { _, b -> b.bookId }) { index, book ->
-            Column(Modifier.width(108.dp).clickable { onOpen(book) }) {
-                Box(Modifier.fillMaxWidth().aspectRatio(0.7f).clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)) {
-                    if (book.coverUrl != null) {
-                        AsyncImage(model = book.coverUrl, contentDescription = book.title,
-                            modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                    }
-                    Box(Modifier.padding(6.dp).size(22.dp).clip(RoundedCornerShape(50))
-                        .background(rankColor(index + 1)), contentAlignment = Alignment.Center) {
+private fun TrendingRail(groups: List<PopularBookGroup>, onOpen: (PopularBookGroup) -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        itemsIndexed(groups, key = { _, g -> g.key }) { index, g ->
+            Column(Modifier.width(108.dp).clickable { onOpen(g) }) {
+                Box(Modifier.fillMaxWidth().aspectRatio(0.7f).clip(RoundedCornerShape(12.dp)).background(cs.surfaceVariant)) {
+                    g.coverUrl?.let { AsyncImage(model = it, contentDescription = g.title, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+                    Box(Modifier.padding(6.dp).size(22.dp).clip(RoundedCornerShape(50)).background(rankColor(index + 1)),
+                        contentAlignment = Alignment.Center) {
                         Text("${index + 1}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     }
                 }
                 Spacer(Modifier.height(4.dp))
-                Text(book.title, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.SemiBold)
+                Text(g.title, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold, color = cs.onSurface)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.LocalFireDepartment, null, tint = Color(0xFFFF7043), modifier = Modifier.size(12.dp))
-                    Text(" ${formatReaders(book.readerCount)}", fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(" ${formatCount(g.totalReaders)}", fontSize = 11.sp, color = cs.onSurfaceVariant)
                 }
             }
         }
@@ -294,41 +274,26 @@ private fun TrendingRail(books: List<PopularBook>, onOpen: (PopularBook) -> Unit
 }
 
 @Composable
-private fun RankedBookRow(
-    rank: Int,
-    book: PopularBook,
-    voted: Boolean,
-    onOpen: (PopularBook) -> Unit,
-    onVote: () -> Unit,
-) {
-    Row(
-        Modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable { onOpen(book) },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+private fun RankedBookRow(rank: Int, group: PopularBookGroup, voted: Boolean, onOpen: () -> Unit, onVote: () -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable { onOpen() }, verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.width(34.dp), contentAlignment = Alignment.Center) {
             Text("$rank", fontWeight = FontWeight.Bold, fontSize = if (rank <= 3) 22.sp else 16.sp,
-                color = if (rank <= 3) rankColor(rank) else MaterialTheme.colorScheme.onSurfaceVariant)
+                color = if (rank <= 3) rankColor(rank) else cs.onSurfaceVariant)
         }
         Spacer(Modifier.width(8.dp))
-        Box(Modifier.width(54.dp).height(78.dp).clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)) {
-            if (book.coverUrl != null) {
-                AsyncImage(model = book.coverUrl, contentDescription = book.title,
-                    modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            }
+        Box(Modifier.width(54.dp).height(78.dp).clip(RoundedCornerShape(8.dp)).background(cs.surfaceVariant)) {
+            group.coverUrl?.let { AsyncImage(model = it, contentDescription = group.title, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(book.title, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(group.title, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis, color = cs.onSurface)
             Spacer(Modifier.height(4.dp))
-            if (book.sourceName.isNotBlank()) {
-                Text(book.sourceName, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
+            Text("${group.sourceCount} source${if (group.sourceCount > 1) "s" else ""} · top: ${group.primary.sourceName}",
+                fontSize = 12.sp, color = cs.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.LocalFireDepartment, null, tint = Color(0xFFFF7043), modifier = Modifier.size(13.dp))
-                Text(" ${formatReaders(book.readerCount)} reading", fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                Text(" ${formatCount(group.totalReaders)} reading", fontSize = 12.sp, color = cs.primary, fontWeight = FontWeight.Medium)
             }
         }
         Spacer(Modifier.width(8.dp))
@@ -336,18 +301,73 @@ private fun RankedBookRow(
     }
 }
 
-/** Free daily Power-Stone vote — a "like with a budget" that drives the Trending list. */
 @Composable
 private fun PowerStoneVoteButton(voted: Boolean, onVote: () -> Unit) {
-    val bg = if (voted) Gold.copy(alpha = 0.18f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-    val tint = if (voted) Gold else MaterialTheme.colorScheme.primary
-    Column(
-        Modifier.clip(RoundedCornerShape(12.dp)).background(bg)
-            .clickable(enabled = !voted, onClick = onVote)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    val cs = MaterialTheme.colorScheme
+    val bg = if (voted) Gold.copy(alpha = 0.18f) else cs.primary.copy(alpha = 0.12f)
+    val tint = if (voted) Gold else cs.primary
+    Column(Modifier.clip(RoundedCornerShape(12.dp)).background(bg).clickable(enabled = !voted, onClick = onVote)
+        .padding(horizontal = 10.dp, vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(if (voted) "💎" else "⚡", fontSize = 16.sp)
         Text(if (voted) "Voted" else "Vote", fontSize = 10.sp, color = tint, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun BookDetailSheet(
+    group: PopularBookGroup,
+    resolving: Boolean,
+    voted: Boolean,
+    onVote: () -> Unit,
+    onPickSource: (BookSourceVariant) -> Unit,
+) {
+    val cs = MaterialTheme.colorScheme
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 28.dp)) {
+        Row {
+            Box(Modifier.width(92.dp).height(132.dp).clip(RoundedCornerShape(12.dp)).background(cs.surfaceVariant)) {
+                group.coverUrl?.let { AsyncImage(model = it, contentDescription = group.title, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(group.title, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = cs.onSurface, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.LocalFireDepartment, null, tint = Color(0xFFFF7043), modifier = Modifier.size(14.dp))
+                    Text(" ${formatCount(group.totalReaders)} reading", fontSize = 13.sp, color = cs.primary, fontWeight = FontWeight.SemiBold)
+                }
+                Text("Available on ${group.sourceCount} source${if (group.sourceCount > 1) "s" else ""}", fontSize = 12.sp, color = cs.onSurfaceVariant)
+                Spacer(Modifier.height(8.dp))
+                PowerStoneVoteButton(voted = voted, onVote = onVote)
+            }
+        }
+
+        group.description?.takeIf { it.isNotBlank() }?.let {
+            Spacer(Modifier.height(14.dp))
+            Text(it, fontSize = 13.sp, color = cs.onSurfaceVariant, maxLines = 4, overflow = TextOverflow.Ellipsis)
+        }
+
+        Spacer(Modifier.height(18.dp))
+        Text("Read on", fontWeight = FontWeight.Bold, color = cs.onSurface)
+        Text("Sources ranked by how many readers use them", fontSize = 12.sp, color = cs.onSurfaceVariant)
+        Spacer(Modifier.height(10.dp))
+
+        group.sources.forEachIndexed { i, v ->
+            if (i > 0) Spacer(Modifier.height(8.dp))
+            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(cs.surfaceVariant)
+                .clickable(enabled = !resolving) { onPickSource(v) }.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(cs.primary.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center) {
+                    if (i == 0) Text("👑", fontSize = 16.sp) else Icon(Icons.Filled.Extension, null, tint = cs.primary, modifier = Modifier.size(18.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(v.sourceName, fontWeight = FontWeight.SemiBold, color = cs.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("${formatCount(v.readers)} readers" + if (i == 0) " · most popular" else "", fontSize = 12.sp, color = cs.onSurfaceVariant)
+                }
+                if (resolving) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text("Open →", color = cs.primary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+        }
     }
 }

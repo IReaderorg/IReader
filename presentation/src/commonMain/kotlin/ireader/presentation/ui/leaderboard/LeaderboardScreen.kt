@@ -61,15 +61,8 @@ private fun medalColor(rank: Int): Color = when (rank) {
     1 -> Gold; 2 -> Silver; 3 -> Bronze; else -> Color(0xFF8C7BAE)
 }
 
-private fun formatHrs(minutes: Long): String {
-    val h = minutes / 60
-    val m = minutes % 60
-    return when {
-        h > 0 && m > 0 -> "${h}h ${m}m"
-        h > 0 -> "${h}h"
-        else -> "${m}m"
-    }
-}
+private fun formatHrs(minutes: Long): String =
+    ireader.presentation.ui.community.formatReadingTimeCompact(minutes)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +75,7 @@ fun LeaderboardScreen(
     var selected by remember { mutableStateOf<LeaderboardEntry?>(null) }
 
     selected?.let { entry ->
-        UserProfileDialog(entry = entry, onDismiss = { selected = null }, onViewRewards = {})
+        UserProfileSheet(entry = entry, onDismiss = { selected = null })
     }
 
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {

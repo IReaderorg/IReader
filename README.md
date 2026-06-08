@@ -104,8 +104,10 @@ Imported sources appear immediately in your sources list.
 ## 📖 Documentation
 
 - **[📚 Full Documentation Index](docs/README.md)** - Start here for all guides
+- **[❓ Frequently Asked Questions](docs/guides/faq.md)** ⭐ NEW - Common questions and answers
 - [Text-to-Speech Guide](docs/guides/tts.md)
 - [Sources & Extensions](docs/guides/sources.md)
+- [Extension Repository Guide](docs/guides/extension_repository_guide.md) - How to add repositories
 - [Sync & Backup](docs/guides/sync_backup.md)
 - [Developer Documentation](docs/developer/README.md)
 

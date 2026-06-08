@@ -26,6 +26,11 @@ class PopularBooksScreenSpec {
             },
             onOpenExternalUrl = { url ->
                 // URL is handled by LocalUriHandler in the screen
+            },
+            onAddSources = {
+                // Source for this book isn't installed — take the user to global search
+                // where they can pick an installed source or be prompted to add more.
+                navController.navigateTo(GlobalSearchScreenSpec(query = null))
             }
         )
     }

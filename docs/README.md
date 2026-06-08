@@ -4,6 +4,14 @@ Welcome to the IReader User Guide! Here you will find everything you need to kno
 
 ## 📚 Guides
 
+### ❓ [Frequently Asked Questions (FAQ)](guides/faq.md) ⭐ NEW
+Common questions and answers about IReader.
+*   **[About IReader](guides/faq.md#-about-ireader)**: What is IReader, where to download, platforms supported.
+*   **[Repositories](guides/faq.md#-repositories)**: How to add and manage extension repositories.
+*   **[Installing Sources](guides/faq.md#-installing-sources)**: How to install and update extensions.
+*   **[Adding & Reading Books](guides/faq.md#-adding--reading-books)**: Search, add to library, download chapters.
+*   **[Troubleshooting](guides/faq.md#-troubleshooting)**: Fix common issues.
+
 ### 🎧 [Text-to-Speech (TTS)](guides/tts.md)
 Learn how to listen to your novels using various TTS engines.
 *   **[Piper TTS](guides/tts.md#piper-tts-setup)**: Fast, offline, and lightweight.
