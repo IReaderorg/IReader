@@ -34,7 +34,7 @@ class LeaderboardRepositoryImpl(
     private data class LeaderboardDto(
         @SerialName("id") val id: String? = null,
         @SerialName("user_id") val user_id: String,
-        @SerialName("username") val username: String,
+        @SerialName("username") val username: String = "Reader",
         @SerialName("total_reading_time_minutes") val total_reading_time_minutes: Long,
         @SerialName("total_chapters_read") val total_chapters_read: Int = 0,
         @SerialName("books_completed") val books_completed: Int = 0,
