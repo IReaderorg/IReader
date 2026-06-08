@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,6 +55,7 @@ import ireader.domain.models.gamification.AchievementView
 import ireader.domain.models.gamification.OwnedTitle
 import ireader.domain.models.gamification.ProfileComment
 import ireader.domain.models.gamification.ReadingActivityItem
+import ireader.domain.models.remote.Badge
 import ireader.presentation.ui.core.ui.AsyncImage
 
 /** Rarity accents — the only non-theme colors (Material has no rarity palette). */
@@ -84,9 +86,14 @@ fun WebnovelProfileScreen(
     onActivateTitle: (String?) -> Unit,
     onOpenDiscord: () -> Unit,
     onPostComment: (String) -> Unit,
+    onOpenBook: (Long) -> Unit,
 ) {
     val signedIn = state.currentUser != null
     val username = state.currentUser?.username ?: "Guest Reader"
+    val ownedBadges = remember(state.featuredBadges, state.achievementBadges) {
+        (state.featuredBadges + state.achievementBadges).distinctBy { it.id }
+    }
+    val activeTitle = state.ownedTitles.firstOrNull { it.isActive }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LazyColumn(
@@ -128,10 +135,13 @@ fun WebnovelProfileScreen(
                     streak = state.readingStreak,
                 )
             }
-            item { XpPanel(level = state.level, progress = state.levelProgress, xp = state.xp) }
+            item { XpPanel(level = state.level, progress = state.levelProgress, xp = state.xp, rank = state.leaderboardRank) }
             if (signedIn) item { CheckinPanel(streak = state.checkinStreak, onCheckIn = onCheckIn) }
-            if (state.achievements.isNotEmpty()) item { AchievementsPanel(state.achievements) }
+            if (activeTitle != null) item { ActiveTitlePanel(activeTitle) }
+            if (ownedBadges.isNotEmpty()) item { BadgesShowcase(ownedBadges) }
+            if (state.achievements.isNotEmpty()) item { AchievementsShowcase(state.achievements) }
             if (state.ownedTitles.isNotEmpty()) item { TitlesPanel(state.ownedTitles, onActivate = onActivateTitle) }
+            if (state.favoriteBooks.isNotEmpty()) item { FavoriteBooksPanel(state.favoriteBooks, onOpenBook) }
             if (state.recentActivity.isNotEmpty()) item { ActivityPanel(state.recentActivity) }
             if (signedIn) item { CommentsPanel(state.comments, onPostComment) }
             item { DiscordPanel(onOpenDiscord) }
@@ -167,7 +177,6 @@ private fun ProfileHeader(
     val cs = MaterialTheme.colorScheme
     val onHeader = cs.onPrimaryContainer
     Box(Modifier.fillMaxWidth()) {
-        // Backdrop fills the whole header so every text sits on the scrim (readable contrast).
         Box(Modifier.matchParentSize()) {
             if (coverUrl != null) {
                 AsyncImage(model = coverUrl, contentDescription = "Cover",
@@ -203,7 +212,6 @@ private fun ProfileHeader(
 
             Spacer(Modifier.height(70.dp))
 
-            // Avatar with level ring + level badge
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Box(contentAlignment = Alignment.BottomCenter) {
                     Box(
@@ -231,12 +239,13 @@ private fun ProfileHeader(
             Text(levelTitle, color = onHeader.copy(alpha = 0.8f), fontSize = 13.sp,
                 modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
 
-            if (bio.isNotBlank()) {
-                Spacer(Modifier.height(6.dp))
-                Text(bio, color = onHeader.copy(alpha = 0.9f), fontSize = 13.sp, maxLines = 3,
-                    overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp))
-            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                bio.ifBlank { if (signedIn) "Tap ⋮ → Edit profile to add a bio" else "" },
+                color = onHeader.copy(alpha = if (bio.isBlank()) 0.55f else 0.9f),
+                fontSize = 13.sp, maxLines = 3, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp),
+            )
 
             formatJoined(joinedAt)?.let { joined ->
                 Spacer(Modifier.height(6.dp))
@@ -310,12 +319,23 @@ private fun CountCol(value: Int, label: String, onHeader: Color) {
 }
 
 @Composable
+private fun PanelBox(content: @Composable () -> Unit) {
+    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(18.dp))
+        .background(MaterialTheme.colorScheme.surfaceVariant).padding(16.dp)) { content() }
+}
+
+@Composable
+private fun SectionTitle(title: String) {
+    Text(title, color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+}
+
+@Composable
 private fun StatStrip(readingMinutes: Long, chapters: Int, books: Int, streak: Int) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         StatCell("⏱", fmtHours(readingMinutes), "Time", Modifier.weight(1f))
-        StatCell("📖", "$chapters", "Chapters", Modifier.weight(1f))
         StatCell("📚", "$books", "Books", Modifier.weight(1f))
         StatCell("🔥", "$streak", "Streak", Modifier.weight(1f))
+        StatCell("📖", "$chapters", "Chapters", Modifier.weight(1f))
     }
 }
 
@@ -332,19 +352,17 @@ private fun StatCell(emoji: String, value: String, label: String, modifier: Modi
 }
 
 @Composable
-private fun PanelBox(content: @Composable () -> Unit) {
-    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(18.dp))
-        .background(MaterialTheme.colorScheme.surfaceVariant).padding(16.dp)) { content() }
-}
-
-@Composable
-private fun XpPanel(level: Int, progress: Float, xp: Long) {
+private fun XpPanel(level: Int, progress: Float, xp: Long, rank: Int) {
     val cs = MaterialTheme.colorScheme
     PanelBox {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Level $level", color = cs.onSurface, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.weight(1f))
+                if (rank > 0) {
+                    Text("🏆 Rank #$rank", color = cs.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.width(10.dp))
+                }
                 Text("$xp XP", color = cs.onSurfaceVariant, fontSize = 12.sp)
             }
             Spacer(Modifier.height(8.dp))
@@ -378,30 +396,96 @@ private fun CheckinPanel(streak: Int, onCheckIn: () -> Unit) {
     }
 }
 
+/** Prominent active-title banner with rarity glow. */
 @Composable
-private fun AchievementsPanel(achievements: List<AchievementView>) {
+private fun ActiveTitlePanel(title: OwnedTitle) {
+    val cs = MaterialTheme.colorScheme
+    val tint = rarityTint(title.rarity)
+    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(18.dp))
+        .background(Brush.horizontalGradient(listOf(tint.copy(alpha = 0.28f), cs.surfaceVariant)))
+        .border(1.dp, tint.copy(alpha = 0.6f), RoundedCornerShape(18.dp)).padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(44.dp).clip(CircleShape).background(tint.copy(alpha = 0.25f))
+                .border(2.dp, tint, CircleShape), contentAlignment = Alignment.Center) { Text("📛", fontSize = 22.sp) }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Active Title", color = cs.onSurfaceVariant, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                Text(title.titleName, color = cs.onSurface, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            }
+            Box(Modifier.clip(RoundedCornerShape(14.dp)).background(tint).padding(horizontal = 10.dp, vertical = 4.dp)) {
+                Text(title.rarity.lowercase().replaceFirstChar { it.uppercase() }, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+/** Earned badges rendered from their Supabase image URLs, with rarity glow rings. */
+@Composable
+private fun BadgesShowcase(badges: List<Badge>) {
+    val cs = MaterialTheme.colorScheme
+    PanelBox {
+        Column {
+            SectionTitle("Badges")
+            Spacer(Modifier.height(12.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                items(badges) { b ->
+                    val tint = rarityTint(b.rarity)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(74.dp)) {
+                        Box(Modifier.size(66.dp), contentAlignment = Alignment.Center) {
+                            Box(Modifier.matchParentSize().clip(CircleShape)
+                                .background(Brush.radialGradient(listOf(tint.copy(alpha = 0.45f), Color.Transparent))))
+                            Box(Modifier.size(56.dp).clip(CircleShape).border(2.dp, tint, CircleShape)
+                                .background(cs.surface), contentAlignment = Alignment.Center) {
+                                AsyncImage(model = b.imageUrl, contentDescription = b.name,
+                                    modifier = Modifier.size(56.dp).clip(CircleShape), contentScale = ContentScale.Crop)
+                            }
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        Text(b.name, color = cs.onSurface, fontSize = 10.sp, maxLines = 2,
+                            overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Premium achievement medallions: rarity radial glow + ring, not flat circles. */
+@Composable
+private fun AchievementsShowcase(achievements: List<AchievementView>) {
     val cs = MaterialTheme.colorScheme
     val sorted = achievements.sortedWith(compareByDescending<AchievementView> { it.isCompleted }.thenByDescending { it.fraction })
     PanelBox {
         Column {
-            Text("Achievements", color = cs.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            SectionTitle("Achievements")
             Spacer(Modifier.height(12.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 items(sorted) { a ->
                     val tint = rarityTint(a.def.tier)
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
-                        Box(Modifier.size(56.dp).clip(CircleShape)
-                            .background(if (a.isCompleted) tint.copy(alpha = 0.22f) else cs.surface)
-                            .border(2.dp, tint.copy(alpha = if (a.isCompleted) 1f else 0.3f), CircleShape),
-                            contentAlignment = Alignment.Center) { Text(a.def.icon, fontSize = 24.sp) }
-                        Spacer(Modifier.height(4.dp))
-                        Text(a.def.name, color = cs.onSurface, fontSize = 10.sp, maxLines = 2,
-                            overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-                        if (!a.isCompleted) {
-                            Spacer(Modifier.height(2.dp))
-                            Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).background(cs.onSurface.copy(alpha = 0.12f))) {
-                                Box(Modifier.fillMaxWidth(a.fraction).height(4.dp).clip(RoundedCornerShape(2.dp)).background(tint))
+                    val on = a.isCompleted
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(74.dp)) {
+                        Box(Modifier.size(66.dp), contentAlignment = Alignment.Center) {
+                            if (on) Box(Modifier.matchParentSize().clip(CircleShape)
+                                .background(Brush.radialGradient(listOf(tint.copy(alpha = 0.5f), Color.Transparent))))
+                            Box(Modifier.size(56.dp).clip(CircleShape)
+                                .background(if (on) Brush.verticalGradient(listOf(tint.copy(alpha = 0.4f), tint.copy(alpha = 0.15f)))
+                                            else Brush.verticalGradient(listOf(cs.surface, cs.surface)))
+                                .border(2.dp, if (on) tint else cs.onSurface.copy(alpha = 0.2f), CircleShape),
+                                contentAlignment = Alignment.Center) {
+                                Text(a.def.icon, fontSize = 26.sp)
                             }
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        // Fixed 2-line name slot so every column is the same height.
+                        Box(Modifier.height(28.dp), contentAlignment = Alignment.TopCenter) {
+                            Text(a.def.name, color = if (on) cs.onSurface else cs.onSurfaceVariant, fontSize = 10.sp,
+                                maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        // Always render the strip → bars align across completed & locked items.
+                        Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).background(cs.onSurface.copy(alpha = 0.12f))) {
+                            Box(Modifier.fillMaxWidth(if (on) 1f else a.fraction).height(4.dp)
+                                .clip(RoundedCornerShape(2.dp)).background(tint))
                         }
                     }
                 }
@@ -415,7 +499,7 @@ private fun TitlesPanel(titles: List<OwnedTitle>, onActivate: (String?) -> Unit)
     val cs = MaterialTheme.colorScheme
     PanelBox {
         Column {
-            Text("Titles", color = cs.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            SectionTitle("Titles")
             Spacer(Modifier.height(12.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(titles) { t ->
@@ -436,16 +520,72 @@ private fun TitlesPanel(titles: List<OwnedTitle>, onActivate: (String?) -> Unit)
 }
 
 @Composable
+private fun FavoriteBooksPanel(books: List<FavoriteBook>, onOpen: (Long) -> Unit) {
+    val cs = MaterialTheme.colorScheme
+    PanelBox {
+        Column {
+            SectionTitle("Favorite Books")
+            Spacer(Modifier.height(12.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(books) { b ->
+                    Column(Modifier.width(96.dp).clickable { onOpen(b.id) }) {
+                        Box(Modifier.fillMaxWidth().aspectRatio(0.7f).clip(RoundedCornerShape(12.dp)).background(cs.surface)) {
+                            if (b.cover.isNotBlank()) {
+                                AsyncImage(model = b.cover, contentDescription = b.title,
+                                    modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                            }
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        Text(b.title, color = cs.onSurface, fontSize = 11.sp, maxLines = 2,
+                            overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class ActivityStyle(val emoji: String, val accent: Color, val verb: String)
+private fun activityStyle(type: String): ActivityStyle = when (type) {
+    "ACHIEVEMENT" -> ActivityStyle("🏅", Color(0xFFFFB300), "Unlocked")
+    "REVIEW" -> ActivityStyle("⭐", Color(0xFFFF8F00), "Reviewed")
+    "VOTE" -> ActivityStyle("🗳", Color(0xFF7E57C2), "Voted for")
+    else -> ActivityStyle("📖", Color(0xFF42A5F5), "Read")
+}
+
+/** Rich activity feed — colored medallion + accent stripe + book chip. */
+@Composable
 private fun ActivityPanel(activity: List<ReadingActivityItem>) {
     val cs = MaterialTheme.colorScheme
     PanelBox {
         Column {
-            Text("Recent Activity", color = cs.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(8.dp))
-            activity.take(10).forEach { a ->
-                val emoji = when (a.type) { "ACHIEVEMENT" -> "🏅"; "REVIEW" -> "⭐"; "VOTE" -> "🗳"; else -> "📖" }
-                Text("$emoji  ${a.description.ifBlank { a.bookTitle ?: a.type }}",
-                    color = cs.onSurfaceVariant, fontSize = 13.sp, modifier = Modifier.padding(vertical = 3.dp))
+            SectionTitle("Recent Activity")
+            Spacer(Modifier.height(12.dp))
+            activity.take(12).forEachIndexed { i, a ->
+                val s = activityStyle(a.type)
+                if (i > 0) Spacer(Modifier.height(8.dp))
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(cs.surface),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.width(4.dp).height(52.dp).background(s.accent))
+                    Spacer(Modifier.width(10.dp))
+                    Box(Modifier.size(40.dp).clip(CircleShape).background(s.accent.copy(alpha = 0.18f)),
+                        contentAlignment = Alignment.Center) { Text(s.emoji, fontSize = 20.sp) }
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+                        Text(a.description.ifBlank { "${s.verb} ${a.bookTitle ?: ""}".trim() },
+                            color = cs.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        val sub = when {
+                            a.chapterNumber != null && a.bookTitle != null -> "${a.bookTitle} · Ch ${a.chapterNumber}"
+                            a.bookTitle != null -> a.bookTitle!!
+                            else -> s.verb
+                        }
+                        Text(sub, color = cs.onSurfaceVariant, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                }
             }
         }
     }
@@ -456,7 +596,7 @@ private fun CommentsPanel(comments: List<ProfileComment>, onPost: (String) -> Un
     val cs = MaterialTheme.colorScheme
     PanelBox {
         Column {
-            Text("Comments", color = cs.onSurface, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            SectionTitle("Comments")
             Spacer(Modifier.height(10.dp))
             if (comments.isEmpty()) {
                 Text("No comments yet — be the first.", color = cs.onSurfaceVariant, fontSize = 13.sp)
@@ -477,19 +617,15 @@ private fun CommentsPanel(comments: List<ProfileComment>, onPost: (String) -> Un
                 }
             }
             Spacer(Modifier.height(10.dp))
-            // Composer
             var draft by remember { mutableStateOf("") }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f).clip(RoundedCornerShape(20.dp)).background(cs.surface)
                     .padding(horizontal = 14.dp, vertical = 10.dp)) {
                     if (draft.isEmpty()) Text("Write a public comment…", color = cs.onSurfaceVariant, fontSize = 13.sp)
                     BasicTextField(
-                        value = draft,
-                        onValueChange = { draft = it },
-                        singleLine = true,
+                        value = draft, onValueChange = { draft = it }, singleLine = true,
                         textStyle = TextStyle(color = cs.onSurface, fontSize = 13.sp),
-                        cursorBrush = SolidColor(cs.primary),
-                        modifier = Modifier.fillMaxWidth(),
+                        cursorBrush = SolidColor(cs.primary), modifier = Modifier.fillMaxWidth(),
                     )
                 }
                 Spacer(Modifier.width(8.dp))

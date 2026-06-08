@@ -38,6 +38,14 @@ import ireader.presentation.ui.core.theme.themes.EmeraldForestLightThemeColors
 import ireader.presentation.ui.core.theme.themes.EmeraldForestDarkThemeColors
 import ireader.presentation.ui.core.theme.themes.RoseGoldLightThemeColors
 import ireader.presentation.ui.core.theme.themes.RoseGoldDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.WebnovelRoyalLightThemeColors
+import ireader.presentation.ui.core.theme.themes.WebnovelRoyalDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.CrimsonPhoenixLightThemeColors
+import ireader.presentation.ui.core.theme.themes.CrimsonPhoenixDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.AzureCultivatorLightThemeColors
+import ireader.presentation.ui.core.theme.themes.AzureCultivatorDarkThemeColors
+import ireader.presentation.ui.core.theme.themes.GoldenEmpireLightThemeColors
+import ireader.presentation.ui.core.theme.themes.GoldenEmpireDarkThemeColors
 import ireader.presentation.ui.core.ui.Colour
 
 
@@ -360,12 +368,85 @@ val themes = listOf<Theme>(
         isDark = false
     ),
     Theme(
-        id = -32, 
+        id = -32,
         materialColors = RoseGoldDarkThemeColors.toDomainColorScheme(),
         extraColors = ExtraColors(
             bars = RoseGoldDarkThemeColors.surface.toDomainColor(),
             onBars = RoseGoldDarkThemeColors.onSurface.toDomainColor()
-        ), 
+        ),
+        isDark = true
+    ),
+    // ---- Webnovel vibrant themes ----
+    Theme(
+        id = -33,
+        materialColors = WebnovelRoyalLightThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = WebnovelRoyalLightThemeColors.surface.toDomainColor(),
+            onBars = WebnovelRoyalLightThemeColors.onSurface.toDomainColor()
+        ),
+        isDark = false
+    ),
+    Theme(
+        id = -34,
+        materialColors = WebnovelRoyalDarkThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = WebnovelRoyalDarkThemeColors.surface.toDomainColor(),
+            onBars = WebnovelRoyalDarkThemeColors.onSurface.toDomainColor()
+        ),
+        isDark = true
+    ),
+    Theme(
+        id = -35,
+        materialColors = CrimsonPhoenixLightThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = CrimsonPhoenixLightThemeColors.surface.toDomainColor(),
+            onBars = CrimsonPhoenixLightThemeColors.onSurface.toDomainColor()
+        ),
+        isDark = false
+    ),
+    Theme(
+        id = -36,
+        materialColors = CrimsonPhoenixDarkThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = CrimsonPhoenixDarkThemeColors.surface.toDomainColor(),
+            onBars = CrimsonPhoenixDarkThemeColors.onSurface.toDomainColor()
+        ),
+        isDark = true
+    ),
+    Theme(
+        id = -37,
+        materialColors = AzureCultivatorLightThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = AzureCultivatorLightThemeColors.surface.toDomainColor(),
+            onBars = AzureCultivatorLightThemeColors.onSurface.toDomainColor()
+        ),
+        isDark = false
+    ),
+    Theme(
+        id = -38,
+        materialColors = AzureCultivatorDarkThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = AzureCultivatorDarkThemeColors.surface.toDomainColor(),
+            onBars = AzureCultivatorDarkThemeColors.onSurface.toDomainColor()
+        ),
+        isDark = true
+    ),
+    Theme(
+        id = -39,
+        materialColors = GoldenEmpireLightThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = GoldenEmpireLightThemeColors.surface.toDomainColor(),
+            onBars = GoldenEmpireLightThemeColors.onSurface.toDomainColor()
+        ),
+        isDark = false
+    ),
+    Theme(
+        id = -40,
+        materialColors = GoldenEmpireDarkThemeColors.toDomainColorScheme(),
+        extraColors = ExtraColors(
+            bars = GoldenEmpireDarkThemeColors.surface.toDomainColor(),
+            onBars = GoldenEmpireDarkThemeColors.onSurface.toDomainColor()
+        ),
         isDark = true
     ),
 ).toMutableList()

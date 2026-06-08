@@ -57,6 +57,7 @@ class ProfileScreen {
             onActivateTitle = { viewModel.setActiveTitle(it) },
             onOpenDiscord = { uriHandler.openUri(ireader.i18n.discord) },
             onPostComment = { viewModel.postComment(it) },
+            onOpenBook = { bookId -> navController.navigate("bookDetail/$bookId") },
         )
 
         AchievementUnlockDialog(

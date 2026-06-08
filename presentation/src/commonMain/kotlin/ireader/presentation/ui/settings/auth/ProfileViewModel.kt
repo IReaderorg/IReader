@@ -6,6 +6,7 @@ import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.User
 import ireader.domain.usecases.remote.RemoteBackendUseCases
 import ireader.domain.data.repository.BadgeRepository
+import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.DiscordShareRepository
 import ireader.domain.data.repository.DiscordWidgetRepository
 import ireader.domain.data.repository.GamificationRepository
@@ -33,6 +34,7 @@ class ProfileViewModel(
     private val discordShareRepository: DiscordShareRepository? = null,
     private val discordWidgetRepository: DiscordWidgetRepository? = null,
     private val leaderboardRepository: LeaderboardRepository? = null,
+    private val bookRepository: BookRepository? = null,
 ) : StateViewModel<ProfileState>(ProfileState()) {
 
     init {
@@ -43,6 +45,18 @@ class ProfileViewModel(
         loadReadingStatistics()
         loadGamification()
         loadDiscordPresence()
+        loadFavoriteBooks()
+    }
+
+    private fun loadFavoriteBooks() {
+        val repo = bookRepository ?: return
+        scope.launch {
+            runCatching { repo.findAllBooks().filter { it.favorite } }
+                .getOrNull()?.let { books ->
+                    val favs = books.take(12).map { FavoriteBook(it.id, it.title, it.cover) }
+                    updateState { it.copy(favoriteBooks = favs) }
+                }
+        }
     }
 
     private fun loadDiscordPresence() {
@@ -507,6 +521,7 @@ data class ProfileState(
     val joinedAt: String? = null,
     val showEditProfileDialog: Boolean = false,
     val comments: List<ProfileComment> = emptyList(),
+    val favoriteBooks: List<FavoriteBook> = emptyList(),
     val achievements: List<AchievementView> = emptyList(),
     val ownedTitles: List<OwnedTitle> = emptyList(),
     val followers: Int = 0,
@@ -514,3 +529,5 @@ data class ProfileState(
     val recentActivity: List<ReadingActivityItem> = emptyList(),
     val newlyUnlocked: List<UnlockedAchievement> = emptyList(),
 )
+
+data class FavoriteBook(val id: Long, val title: String, val cover: String)
