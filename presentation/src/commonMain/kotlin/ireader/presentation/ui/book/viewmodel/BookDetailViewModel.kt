@@ -1451,9 +1451,28 @@ class BookDetailViewModel(
     
     fun startDownloadService(book: Book) {
         scope.launch {
+            // queueBooks filters out chapters whose content column is already populated.
+            // For sources whose chapters get their content saved on read (like local HTML
+            // extensions), every chapter the user has opened is "already downloaded",
+            // which makes "Download all" look like it did nothing: Success snackbar but no
+            // rows appear in the Downloads screen. Pre-check here so the feedback matches
+            // reality.
+            val currentChapters = chapters
+            val needsDownload = currentChapters.count {
+                it.content.joinToString("").let { c -> c.isEmpty() || c.length < 50 }
+            }
+            if (currentChapters.isNotEmpty() && needsDownload == 0) {
+                showSnackBar(UiText.DynamicString("All ${currentChapters.size} chapters already downloaded"))
+                return@launch
+            }
             when (val result = downloadService.queueBooks(listOf(book.id))) {
                 is ServiceResult.Success -> {
-                    showSnackBar(UiText.DynamicString("Book queued for download"))
+                    val msg = if (needsDownload > 0) {
+                        "Queued $needsDownload chapter${if (needsDownload == 1) "" else "s"} for download"
+                    } else {
+                        "Book queued for download"
+                    }
+                    showSnackBar(UiText.DynamicString(msg))
                 }
                 is ServiceResult.Error -> {
                     showSnackBar(UiText.DynamicString("Download failed: ${result.message ?: "Unknown error"}"))
