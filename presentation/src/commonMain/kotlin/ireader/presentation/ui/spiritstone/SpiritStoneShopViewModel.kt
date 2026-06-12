@@ -1,6 +1,7 @@
 package ireader.presentation.ui.spiritstone
 
 import androidx.compose.runtime.Stable
+import ireader.domain.data.repository.BadgeRepository
 import ireader.domain.data.repository.GamificationRepository
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,9 @@ data class ShopBadge(
     val description: String,
     val rarity: String,
     val cost: Int,
-    val isOwned: Boolean
+    val isOwned: Boolean,
+    val imageUrl: String? = null,
+    val category: String = ""
 )
 
 @Stable
@@ -40,6 +43,7 @@ data class SpiritStoneShopState(
 @Stable
 class SpiritStoneShopViewModel(
     private val gamificationRepository: GamificationRepository,
+    private val badgeRepository: BadgeRepository,
     private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
 ) : BaseViewModel() {
 
@@ -80,14 +84,36 @@ class SpiritStoneShopViewModel(
                     ShopTitle("title_genre_explorer", "Genre Explorer", "COMMON", 75, ownedTitles.any { it.titleId == "title_genre_explorer" }, ownedTitles.any { it.titleId == "title_genre_explorer" && it.isActive }),
                 )
 
-                // Available badges for purchase
-                val badges = listOf(
-                    ShopBadge("badge_golden_book", "Golden Book", "A shiny golden book badge", "EPIC", 250, false),
-                    ShopBadge("badge_flame_reader", "Flame Reader", "Badge for dedicated readers", "RARE", 150, false),
-                    ShopBadge("badge_diamond_streak", "Diamond Streak", "For legendary streaks", "LEGENDARY", 800, false),
-                    ShopBadge("badge_chapter_master", "Chapter Master", "Master of chapters", "RARE", 120, false),
-                    ShopBadge("badge_speed_demon", "Speed Demon", "For fast readers", "EPIC", 300, false),
-                )
+                // Load available badges from Supabase (achievement badges with spirit stone costs)
+                val allBadges = badgeRepository.getAvailableBadges().getOrDefault(emptyList())
+                val userBadges = badgeRepository.getUserBadges(userId).getOrDefault(emptyList())
+                val ownedBadgeIds = userBadges.map { it.badgeId }.toSet()
+
+                // Filter to ACHIEVEMENT type badges that have spirit stone costs
+                val badges = allBadges
+                    .filter { it.type == ireader.domain.models.remote.BadgeType.ACHIEVEMENT }
+                    .map { badge ->
+                        val cost = when (badge.rarity) {
+                            "COMMON" -> 50
+                            "RARE" -> 150
+                            "EPIC" -> 300
+                            "LEGENDARY" -> 800
+                            else -> 100
+                        }
+                        ShopBadge(
+                            id = badge.id,
+                            name = badge.name,
+                            description = badge.description,
+                            rarity = badge.rarity,
+                            cost = cost,
+                            isOwned = badge.id in ownedBadgeIds,
+                            imageUrl = badge.imageUrl,
+                            category = badge.category
+                        )
+                    }
+                    .sortedWith(compareByDescending<ShopBadge> { it.rarity == "LEGENDARY" }
+                        .thenByDescending { it.rarity == "EPIC" }
+                        .thenByDescending { it.rarity == "RARE" })
 
                 _state.update {
                     it.copy(

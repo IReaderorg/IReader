@@ -1,6 +1,5 @@
 package ireader.domain.data.repository
 
-import ireader.domain.models.gamification.Milestone
 import ireader.domain.models.gamification.ReadingChallenge
 import ireader.domain.models.gamification.ReadingChallengeState
 import kotlinx.coroutines.flow.Flow
@@ -17,5 +16,4 @@ interface ReadingChallengeRepository {
     suspend fun updateChallengeProgress(minutesRead: Long)
     suspend fun getSeenMilestones(): Set<String>
     suspend fun markMilestoneSeen(milestoneId: String)
-    suspend fun getUnseenMilestones(currentStats: ReadingChallengeState): List<Milestone>
 }

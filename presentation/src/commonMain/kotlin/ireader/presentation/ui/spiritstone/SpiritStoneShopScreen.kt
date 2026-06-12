@@ -43,12 +43,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.core.ui.AsyncImage
 
 private val GoldColor = Color(0xFFFFD700)
 private val DiamondColor = Color(0xFFE91E63)
@@ -165,6 +168,7 @@ fun SpiritStoneShopScreen(
                     cost = badge.cost,
                     isOwned = badge.isOwned,
                     canAfford = state.spiritStones >= badge.cost,
+                    imageUrl = badge.imageUrl,
                     onBuy = {
                         selectedItem = Pair(badge.id, badge.cost)
                         showConfirmDialog = true
@@ -323,6 +327,7 @@ private fun BadgeShopItem(
     cost: Int,
     isOwned: Boolean,
     canAfford: Boolean,
+    imageUrl: String?,
     onBuy: () -> Unit
 ) {
     val rarityColor = getRarityColor(rarity)
@@ -341,19 +346,34 @@ private fun BadgeShopItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Badge icon
+            // Badge image from URL
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(56.dp)
+                    .shadow(4.dp, CircleShape)
                     .clip(CircleShape)
                     .background(
                         Brush.radialGradient(
-                            listOf(rarityColor.copy(alpha = 0.3f), rarityColor.copy(alpha = 0.1f))
+                            listOf(rarityColor.copy(alpha = 0.4f), rarityColor.copy(alpha = 0.1f))
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text("🏅", fontSize = 24.sp)
+                if (!imageUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = name,
+                        modifier = Modifier.size(48.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Filled.Star,
+                        contentDescription = null,
+                        tint = rarityColor,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
 
             Spacer(Modifier.width(12.dp))

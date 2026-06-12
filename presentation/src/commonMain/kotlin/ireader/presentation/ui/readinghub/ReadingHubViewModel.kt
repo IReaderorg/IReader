@@ -91,7 +91,11 @@ class ReadingHubViewModel(
         scope.launch {
             getReadingStatistics().collect { stats ->
                 val buddyState = createBuddyStateFromStats(stats)
-                val achievements = readingBuddyUseCases.getUnlockedAchievements()
+                val achievements = try {
+                    readingBuddyUseCases.getUnlockedAchievements()
+                } catch (e: Exception) {
+                    emptyList()
+                }
                 val levelProgress = calculateLevelProgress(stats.buddyExperience, stats.buddyLevel)
                 
                 _state.update { current ->
@@ -104,7 +108,7 @@ class ReadingHubViewModel(
                 }
                 
                 // Update challenge progress when stats change
-                challengeRepository?.updateChallengeProgress(0) // Trigger progress check
+                challengeRepository?.updateChallengeProgress(0)
                 
                 // Check for milestones
                 checkMilestones(stats)
@@ -257,12 +261,17 @@ class ReadingHubViewModel(
     }
     
     fun createChallenge(type: ChallengeType, minutes: Long) {
+        val repo = challengeRepository
+        if (repo == null) {
+            _state.update { it.copy(error = "Challenges not available") }
+            return
+        }
         scope.launch {
             try {
                 when (type) {
-                    ChallengeType.DAILY -> challengeRepository?.createDailyGoal(minutes)
-                    ChallengeType.WEEKLY -> challengeRepository?.createWeeklyGoal(minutes)
-                    ChallengeType.MONTHLY -> challengeRepository?.createMonthlyGoal(minutes)
+                    ChallengeType.DAILY -> repo.createDailyGoal(minutes)
+                    ChallengeType.WEEKLY -> repo.createWeeklyGoal(minutes)
+                    ChallengeType.MONTHLY -> repo.createMonthlyGoal(minutes)
                 }
                 _state.update { it.copy(successMessage = "${type.label} goal set! 🎯") }
             } catch (e: Exception) {

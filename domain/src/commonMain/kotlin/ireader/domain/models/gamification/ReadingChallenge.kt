@@ -17,9 +17,6 @@ data class ReadingChallenge(
 ) {
     val progress: Float
         get() = if (goalMinutes > 0) (currentMinutes.toFloat() / goalMinutes.toFloat()).coerceIn(0f, 1f) else 0f
-
-    val remainingMinutes: Long
-        get() = (goalMinutes - currentMinutes).coerceAtLeast(0)
 }
 
 enum class ChallengeType(val label: String, val emoji: String) {
@@ -80,7 +77,4 @@ object Milestones {
         Milestone("time_10000", "Eternal Reader", "Read for 10,000 minutes", "🌌", 500, 10000, MilestoneMetric.READING_MINUTES),
         Milestone("time_50000", "Reading Immortal", "Read for 50,000 minutes", "🏆", 2000, 50000, MilestoneMetric.READING_MINUTES),
     )
-
-    fun getMilestonesForMetric(metric: MilestoneMetric): List<Milestone> =
-        ALL.filter { it.metric == metric }
 }
