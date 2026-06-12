@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS public.synced_books (
     title TEXT NOT NULL,
     book_url TEXT NOT NULL,
     last_read BIGINT NOT NULL DEFAULT 0,
+    cover_url TEXT DEFAULT '',
     
     PRIMARY KEY (user_id, book_id),
     CONSTRAINT book_id_synced_not_empty CHECK (LENGTH(book_id) > 0),
@@ -943,16 +944,17 @@ $ LANGUAGE plpgsql SECURITY DEFINER;
 -- Function: Get popular books
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION get_popular_books(p_limit INTEGER DEFAULT 50)
-RETURNS TABLE (book_id TEXT, title TEXT, book_url TEXT, source_id BIGINT, reader_count INTEGER, last_read BIGINT) AS $
+RETURNS TABLE (book_id TEXT, title TEXT, book_url TEXT, source_id BIGINT, reader_count INTEGER, last_read BIGINT, cover_url TEXT) AS $$
 BEGIN
     RETURN QUERY
     SELECT sb.book_id, sb.title, sb.book_url, sb.source_id,
-           COUNT(DISTINCT sb.user_id)::INTEGER as reader_count, MAX(sb.last_read) as last_read
+           COUNT(DISTINCT sb.user_id)::INTEGER as reader_count, MAX(sb.last_read) as last_read,
+           COALESCE(MAX(sb.cover_url), '') as cover_url
     FROM public.synced_books sb
     GROUP BY sb.book_id, sb.title, sb.book_url, sb.source_id
     ORDER BY reader_count DESC, last_read DESC LIMIT p_limit;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_popular_books(INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_popular_books(INTEGER) TO anon;

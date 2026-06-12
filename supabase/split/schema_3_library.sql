@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS public.synced_books (
     title TEXT NOT NULL,
     book_url TEXT NOT NULL,
     last_read BIGINT NOT NULL DEFAULT 0,
+    cover_url TEXT DEFAULT '',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     -- Constraints
@@ -51,6 +52,7 @@ COMMENT ON COLUMN public.synced_books.source_id IS 'Source/catalog ID where book
 COMMENT ON COLUMN public.synced_books.title IS 'Book title';
 COMMENT ON COLUMN public.synced_books.book_url IS 'Book URL/link on the source';
 COMMENT ON COLUMN public.synced_books.last_read IS 'Last read timestamp (milliseconds)';
+COMMENT ON COLUMN public.synced_books.cover_url IS 'Cover image URL for the book';
 
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS)

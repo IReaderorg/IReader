@@ -30,7 +30,8 @@ class PopularBooksRepositoryImpl(
         @SerialName("source_name") val sourceName: String? = null,
         @SerialName("description") val description: String? = null,
         @SerialName("reader_count") val readerCount: Int,
-        @SerialName("last_read") val lastRead: Long
+        @SerialName("last_read") val lastRead: Long,
+        @SerialName("cover_url") val coverUrl: String? = null
     )
     
     override suspend fun getPopularBooks(limit: Int): Result<List<PopularBook>> =
@@ -60,7 +61,8 @@ class PopularBooksRepositoryImpl(
                         sourceGroup = SourceGroup.fromSourceName(it.sourceName ?: ""),
                         description = it.description,
                         readerCount = it.readerCount,
-                        lastRead = it.lastRead
+                        lastRead = it.lastRead,
+                        coverUrl = it.coverUrl?.takeIf { url -> url.isNotEmpty() }
                     )
                 }
             } catch (e: Exception) {
@@ -88,7 +90,8 @@ class PopularBooksRepositoryImpl(
                             sourceGroup = SourceGroup.fromSourceName(first.sourceName ?: ""),
                             description = first.description,
                             readerCount = books.size,
-                            lastRead = books.maxOf { it.lastRead }
+                            lastRead = books.maxOf { it.lastRead },
+                            coverUrl = first.coverUrl?.takeIf { url -> url.isNotEmpty() }
                         )
                     }
                     .sortedByDescending { it.readerCount }

@@ -1,4 +1,4 @@
-﻿package ireader.data.remote
+package ireader.data.remote
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -73,7 +73,8 @@ class SupabaseRemoteRepository(
         @SerialName("source_id") val source_id: Long,
         @SerialName("title") val title: String,
         @SerialName("book_url") val book_url: String,
-        @SerialName("last_read") val last_read: Long
+        @SerialName("last_read") val last_read: Long,
+        @SerialName("cover_url") val cover_url: String = ""
     )
     
     init {
@@ -474,6 +475,7 @@ class SupabaseRemoteRepository(
                     put("title", book.title)
                     put("book_url", book.bookUrl)
                     put("last_read", book.lastRead)
+                    put("cover_url", book.coverUrl)
                 }
                 
                 backendService.upsert(
@@ -522,7 +524,8 @@ class SupabaseRemoteRepository(
             source_id = sourceId,
             title = title,
             book_url = bookUrl,
-            last_read = lastRead
+            last_read = lastRead,
+            cover_url = coverUrl
         )
     }
     
@@ -533,7 +536,8 @@ class SupabaseRemoteRepository(
             sourceId = source_id,
             title = title,
             bookUrl = book_url,
-            lastRead = last_read
+            lastRead = last_read,
+            coverUrl = cover_url
         )
     }
 }
