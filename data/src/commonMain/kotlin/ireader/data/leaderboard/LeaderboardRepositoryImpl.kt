@@ -1,4 +1,4 @@
-﻿package ireader.data.leaderboard
+package ireader.data.leaderboard
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.realtime.PostgresAction
@@ -9,6 +9,7 @@ import ireader.data.backend.BackendService
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.data.repository.LeaderboardRepository
 import ireader.domain.models.entities.LeaderboardEntry
+import ireader.domain.models.entities.SyncedBookSummary
 import ireader.domain.models.entities.UserLeaderboardStats
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -193,10 +194,47 @@ class LeaderboardRepositoryImpl(
             level = readerLevel.level,
             levelTitle = readerLevel.title,
             xp = readerLevel.currentXp,
-            xpToNextLevel = readerLevel.xpToNextLevel
+            xpToNextLevel = readerLevel.xpToNextLevel,
+            totalChaptersRead = total_chapters_read,
+            booksCompleted = books_completed,
+            readingStreak = reading_streak
         )
     }
     
+    @Serializable
+    private data class SyncedBookDto(
+        @SerialName("title") val title: String = "",
+        @SerialName("cover_url") val cover_url: String = "",
+        @SerialName("source_name") val source_name: String = "",
+        @SerialName("source_id") val source_id: Long = 0,
+        @SerialName("book_url") val book_url: String = "",
+        @SerialName("last_read") val last_read: Long = 0,
+    )
+
+    private fun SyncedBookDto.toDomain(): SyncedBookSummary {
+        return SyncedBookSummary(
+            title = title,
+            coverUrl = cover_url,
+            sourceName = source_name,
+            sourceId = source_id,
+            bookUrl = book_url
+        )
+    }
+
+    override suspend fun getUserSyncedBooks(userId: String): Result<List<SyncedBookSummary>> =
+        RemoteErrorMapper.withErrorMapping {
+            val queryResult = backendService.query(
+                table = "synced_books",
+                filters = mapOf("user_id" to userId),
+                orderBy = "last_read",
+                ascending = false,
+                limit = 6
+            ).getOrThrow()
+
+            queryResult.map { json.decodeFromJsonElement(SyncedBookDto.serializer(), it) }
+                .map { it.toDomain() }
+        }
+
     private fun parseTimestamp(timestamp: String?): Long {
         if (timestamp == null) return currentTimeToLong()
         return try {

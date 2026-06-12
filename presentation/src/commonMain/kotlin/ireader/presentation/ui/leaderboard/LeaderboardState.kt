@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import ireader.domain.models.entities.DonationLeaderboardEntry
 import ireader.domain.models.entities.LeaderboardEntry
+import ireader.domain.models.entities.SyncedBookSummary
 
 /**
  * Immutable state for the Reading Leaderboard screen following Mihon's StateScreenModel pattern.
@@ -17,7 +18,9 @@ data class LeaderboardScreenState(
     val error: String? = null,
     val syncError: String? = null,
     val lastSyncTime: Long = 0,
-    val isRealtimeEnabled: Boolean = false
+    val isRealtimeEnabled: Boolean = false,
+    val selectedUserBooks: List<SyncedBookSummary> = emptyList(),
+    val isLoadingBooks: Boolean = false,
 ) {
     @Stable
     val isEmpty: Boolean get() = leaderboard.isEmpty() && !isLoading

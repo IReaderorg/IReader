@@ -128,6 +128,28 @@ fun CommonNavHost(
             ireader.presentation.core.ui.LeaderboardScreenSpec().Content()
         }
 
+        composable(
+            route = NavigationRoutes.userProfile,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = remember(backStackEntry) {
+                backStackEntry.getStringArg("userId")
+            } ?: return@composable
+            ireader.presentation.core.ui.UserProfileScreenSpec().Content(userId = userId)
+        }
+
+        composable(
+            route = NavigationRoutes.userProfile,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val userId = remember(backStackEntry) {
+                backStackEntry.getStringArg("userId")
+            } ?: return@composable
+            ireader.presentation.core.ui.UserProfileScreenSpec().Content(userId = userId)
+        }
+
         composable(NavigationRoutes.popularBooks) {
             ireader.presentation.core.ui.PopularBooksScreenSpec().Content()
         }

@@ -1,6 +1,10 @@
 package ireader.presentation.ui.leaderboard
 
 import androidx.compose.runtime.Stable
+import ireader.domain.catalogs.CatalogStore
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.SyncedBookSummary
 import ireader.domain.usecases.leaderboard.LeaderboardUseCases
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
@@ -24,7 +28,9 @@ import ireader.domain.utils.extensions.currentTimeToLong
  */
 @Stable
 class LeaderboardViewModel(
-    private val leaderboardUseCases: LeaderboardUseCases
+    private val leaderboardUseCases: LeaderboardUseCases,
+    private val bookRepository: BookRepository? = null,
+    private val catalogStore: CatalogStore? = null,
 ) : BaseViewModel() {
     
     private val _state = MutableStateFlow(LeaderboardScreenState())
@@ -180,7 +186,73 @@ class LeaderboardViewModel(
     fun clearError() {
         _state.update { it.copy(error = null, syncError = null) }
     }
-    
+
+    fun loadUserBooks(userId: String) {
+        scope.launch {
+            _state.update { it.copy(isLoadingBooks = true) }
+            leaderboardUseCases.getUserSyncedBooks(userId)
+                .onSuccess { books ->
+                    _state.update { it.copy(selectedUserBooks = books, isLoadingBooks = false) }
+                }
+                .onFailure {
+                    _state.update { it.copy(selectedUserBooks = emptyList(), isLoadingBooks = false) }
+                }
+        }
+    }
+
+    fun clearSelectedBooks() {
+        _state.update { it.copy(selectedUserBooks = emptyList()) }
+    }
+
+    /** Action result from opening a book — UI handles navigation. */
+    sealed class BookNavigationAction {
+        data class OpenLocalBook(val bookId: Long) : BookNavigationAction()
+        data class OpenGlobalSearch(val query: String) : BookNavigationAction()
+        object ShowSourceInstallDialog : BookNavigationAction()
+    }
+
+    /**
+     * Attempt to open a synced book: local book if owned, else if source installed
+     * fetch from source and save, else notify caller to show install dialog.
+     */
+    fun openBook(book: SyncedBookSummary, onResult: (BookNavigationAction) -> Unit) {
+        scope.launch {
+            try {
+                val repo = bookRepository ?: run {
+                    onResult(BookNavigationAction.OpenGlobalSearch(book.title))
+                    return@launch
+                }
+                val local = runCatching { repo.findDuplicateBook(book.title, book.sourceId) }.getOrNull()
+                when {
+                    local != null -> onResult(BookNavigationAction.OpenLocalBook(local.id))
+                    catalogStore?.get(book.sourceId) != null -> {
+                        val catalog = catalogStore.get(book.sourceId)!!
+                        val source = catalog.source
+                        if (source != null) {
+                            val newBook = Book(
+                                sourceId = book.sourceId,
+                                title = book.title,
+                                key = book.bookUrl,
+                                cover = book.coverUrl
+                            )
+                            val bookId = repo.upsert(newBook)
+                            if (bookId > 0) {
+                                onResult(BookNavigationAction.OpenLocalBook(bookId))
+                            } else {
+                                onResult(BookNavigationAction.OpenGlobalSearch(book.title))
+                            }
+                        } else {
+                            onResult(BookNavigationAction.OpenGlobalSearch(book.title))
+                        }
+                    }
+                    else -> onResult(BookNavigationAction.ShowSourceInstallDialog)
+                }
+            } catch (e: Exception) {
+                onResult(BookNavigationAction.OpenGlobalSearch(book.title))
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         stopRealtimeUpdates()

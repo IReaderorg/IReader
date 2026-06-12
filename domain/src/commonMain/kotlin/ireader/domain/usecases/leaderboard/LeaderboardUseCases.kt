@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.leaderboard
+package ireader.domain.usecases.leaderboard
 
 import ireader.domain.data.repository.LeaderboardRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
@@ -136,5 +136,9 @@ class LeaderboardUseCases(
      */
     fun getReaderLevel(totalMinutes: Long): ReaderLevel {
         return ReaderLevel.fromMinutes(totalMinutes)
+    }
+
+    suspend fun getUserSyncedBooks(userId: String): Result<List<ireader.domain.models.entities.SyncedBookSummary>> {
+        return leaderboardRepository.getUserSyncedBooks(userId)
     }
 }

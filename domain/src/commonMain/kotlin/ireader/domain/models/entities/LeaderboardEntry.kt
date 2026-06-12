@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.entities
+package ireader.domain.models.entities
 
 import kotlinx.serialization.Serializable
 import ireader.domain.utils.extensions.currentTimeToLong
@@ -17,7 +17,20 @@ data class LeaderboardEntry(
     val level: Int = 1,
     val levelTitle: String = "Novice Reader",
     val xp: Long = 0,
-    val xpToNextLevel: Long = 60
+    val xpToNextLevel: Long = 60,
+    val totalChaptersRead: Int = 0,
+    val booksCompleted: Int = 0,
+    val readingStreak: Int = 0,
+    val syncedBooks: List<SyncedBookSummary> = emptyList(),
+)
+
+@Serializable
+data class SyncedBookSummary(
+    val title: String,
+    val coverUrl: String,
+    val sourceName: String,
+    val sourceId: Long,
+    val bookUrl: String,
 )
 
 @Serializable

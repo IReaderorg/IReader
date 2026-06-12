@@ -23,8 +23,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,9 +37,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,14 +69,10 @@ private fun formatHrs(minutes: Long): String =
 fun LeaderboardScreen(
     vm: LeaderboardViewModel,
     onBack: () -> Unit,
+    onNavigateToProfile: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val state by vm.state.collectAsState()
-    var selected by remember { mutableStateOf<LeaderboardEntry?>(null) }
-
-    selected?.let { entry ->
-        UserProfileSheet(entry = entry, onDismiss = { selected = null })
-    }
 
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LazyColumn(
@@ -114,7 +110,7 @@ fun LeaderboardScreen(
                         RankRow(
                             entry = entry,
                             isMe = entry.userId == state.userRank?.userId,
-                            onClick = { selected = entry },
+                            onClick = { onNavigateToProfile(entry.userId) },
                         )
                     }
                 }
@@ -145,7 +141,7 @@ private fun HallHeader(onBack: () -> Unit, onSync: () -> Unit, isSyncing: Boolea
                     else Icon(Icons.Filled.Sync, "Sync", tint = Color.White)
                 }
             }
-            Text("🏆  Hall of Readers", color = Color.White, fontSize = 22.sp,
+            Text("Hall of Readers", color = Color.White, fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth().padding(top = 2.dp), textAlign = TextAlign.Center)
             Text("Ranked by total reading time", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp,
@@ -172,7 +168,7 @@ private fun Podium(top: List<LeaderboardEntry>) {
 private fun PodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) {
     val color = medalColor(place)
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(104.dp)) {
-        if (place == 1) Text("👑", fontSize = 22.sp)
+        if (place == 1) Icon(Icons.Filled.EmojiEvents, contentDescription = null, tint = Gold, modifier = Modifier.size(24.dp))
         Box(
             Modifier.size(if (place == 1) 64.dp else 52.dp).clip(CircleShape)
                 .border(3.dp, color, CircleShape)
@@ -234,11 +230,23 @@ private fun RankRow(entry: LeaderboardEntry, isMe: Boolean, onClick: () -> Unit)
                             fontWeight = FontWeight.Bold)
                     }
                 }
-                Text("Lv ${entry.level} · ${entry.levelTitle}", fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Lv ${entry.level} · ${entry.levelTitle}", fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (entry.readingStreak > 0) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(Icons.Filled.LocalFireDepartment, contentDescription = null,
+                            tint = Color(0xFFFF6B35), modifier = Modifier.size(12.dp))
+                        Text("${entry.readingStreak}d", fontSize = 10.sp, color = Color(0xFFFF6B35))
+                    }
+                }
             }
-            Text(formatHrs(entry.totalReadingTimeMinutes), fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary)
+            Column(horizontalAlignment = Alignment.End) {
+                Text(formatHrs(entry.totalReadingTimeMinutes), fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary)
+                Text("${entry.totalChaptersRead} ch", fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }
@@ -275,7 +283,7 @@ private fun EmptyHall(onSync: () -> Unit, isSyncing: Boolean) {
         Modifier.fillMaxWidth().padding(40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("🏆", fontSize = 56.sp)
+        Icon(Icons.Filled.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
         Spacer(Modifier.height(12.dp))
         Text("No rankings yet", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(6.dp))

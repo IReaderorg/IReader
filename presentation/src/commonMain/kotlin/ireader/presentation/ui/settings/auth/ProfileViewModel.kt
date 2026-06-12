@@ -397,6 +397,13 @@ class ProfileViewModel(
                     )
                 }
             }
+
+            // Check if user already checked in today (idempotent — won't double-reward)
+            repo.checkinDaily().onSuccess { result ->
+                if (result.already) {
+                    updateState { it.copy(hasCheckedInToday = true) }
+                }
+            }
             repo.getAchievements(userId).onSuccess { a -> updateState { it.copy(achievements = a) } }
             repo.getOwnedTitles(userId).onSuccess { t -> updateState { it.copy(ownedTitles = t) } }
 

@@ -31,7 +31,9 @@ val screenModelModule = module {
     // Leaderboard screen model
     factory {
         ireader.presentation.ui.leaderboard.LeaderboardViewModel(
-            leaderboardUseCases = get()
+            leaderboardUseCases = get(),
+            bookRepository = get(),
+            catalogStore = get()
         )
     }
     

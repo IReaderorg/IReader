@@ -1,6 +1,7 @@
 package ireader.domain.data.repository
 
 import ireader.domain.models.entities.LeaderboardEntry
+import ireader.domain.models.entities.SyncedBookSummary
 import ireader.domain.models.entities.UserLeaderboardStats
 import kotlinx.coroutines.flow.Flow
 
@@ -40,4 +41,9 @@ interface LeaderboardRepository {
      * Returns null if the user has no entry on the leaderboard yet.
      */
     suspend fun getUserLeaderboardEntry(userId: String): Result<UserLeaderboardStats?>
+
+    /**
+     * Get a user's synced books from the synced_books table
+     */
+    suspend fun getUserSyncedBooks(userId: String): Result<List<SyncedBookSummary>>
 }

@@ -21,6 +21,9 @@ class LeaderboardScreenSpec {
             vm = readingViewModel,
             onBack = {
                 navController.safePopBackStack()
+            },
+            onNavigateToProfile = { userId: String ->
+                navController.navigate("userProfile/$userId")
             }
         )
     }
