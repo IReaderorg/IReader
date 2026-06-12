@@ -39,7 +39,16 @@ class TTSController(
     private val nativeEngineFactory: () -> TTSEngine,
     private val gradioEngineFactory: ((GradioConfig) -> TTSEngine?)? = null,
     initialGradioConfig: GradioConfig? = null,
-    private val cacheUseCase: TTSCacheUseCase? = null
+    private val cacheUseCase: TTSCacheUseCase? = null,
+    // Produces a Kokoro engine on desktop when the user has installed it; returns null
+    // on platforms or configurations where Kokoro isn't available. When null, selecting
+    // `EngineType.KOKORO` falls back to the native engine with a warning.
+    private val kokoroEngineFactory: (() -> TTSEngine?)? = null,
+    // Optional persistence hooks so the user's selected engine survives app restarts.
+    // When provided, the controller loads the saved engine on first `initialize()` and
+    // writes the new value whenever `setEngine` actually switches.
+    private val persistedEngineType: (() -> EngineType?)? = null,
+    private val saveEngineType: ((EngineType) -> Unit)? = null
 ) {
     // Mutable Gradio config that can be updated at runtime
     private var gradioConfig: GradioConfig? = initialGradioConfig
@@ -87,8 +96,12 @@ class TTSController(
     // Mutex to ensure commands are processed sequentially
     private val commandMutex = Mutex()
     
-    // State - single source of truth
-    private val _state = MutableStateFlow(TTSState())
+    // State - single source of truth. Seeded from the persisted engine-type pref so
+    // the UI immediately reflects the user's last choice instead of defaulting to
+    // NATIVE and requiring a play() to hydrate via initialize().
+    private val _state = MutableStateFlow(
+        TTSState(engineType = persistedEngineType?.invoke() ?: EngineType.NATIVE)
+    )
     val state: StateFlow<TTSState> = _state.asStateFlow()
     
     // Events - one-time occurrences
@@ -170,13 +183,31 @@ class TTSController(
     
     private fun initialize() {
         Log.debug { "$TAG: initialize()" }
-        
+
+        // On first init, hydrate the engineType from persisted prefs (if available).
+        // We do this lazily inside initialize() rather than the constructor so we don't
+        // risk Koin/DI not-yet-ready access from a secondary thread.
+        if (engine == null) {
+            val saved = persistedEngineType?.invoke()
+            if (saved != null && saved != _state.value.engineType) {
+                _state.update { it.copy(engineType = saved) }
+            }
+        }
+
         if (engine == null) {
             val currentEngineType = _state.value.engineType
             engine = when (currentEngineType) {
                 EngineType.NATIVE -> {
                     Log.debug { "$TAG: Creating native engine" }
                     nativeEngineFactory()
+                }
+                EngineType.KOKORO -> {
+                    Log.warn { "$TAG: Creating Kokoro engine" }
+                    kokoroEngineFactory?.invoke() ?: run {
+                        Log.warn { "$TAG: Kokoro unavailable, falling back to native" }
+                        _state.update { it.copy(engineType = EngineType.NATIVE) }
+                        nativeEngineFactory()
+                    }
                 }
                 EngineType.GRADIO -> {
                     Log.debug { "$TAG: Creating Gradio engine" }
@@ -800,17 +831,20 @@ class TTSController(
     private fun setEngine(type: EngineType) {
         val currentState = _state.value
         if (currentState.engineType == type) return
-        
+
         Log.debug { "$TAG: setEngine($type) - switching from ${currentState.engineType}" }
-        
+
         // Stop current engine
         engine?.stop()
         engine?.release()
         engine = null
-        
+
         // Update state with new engine type
         _state.update { it.copy(engineType = type, isEngineReady = false) }
-        
+
+        // Persist the selection so it survives relaunches.
+        saveEngineType?.invoke(type)
+
         // Create new engine will happen on next play() call via initialize()
         // Or we can initialize immediately
         initialize()

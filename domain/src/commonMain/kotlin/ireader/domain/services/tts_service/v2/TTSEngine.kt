@@ -135,6 +135,12 @@ sealed class EngineEvent {
 expect object TTSEngineFactory {
     fun createNativeEngine(): TTSEngine
     fun createGradioEngine(config: GradioConfig): TTSEngine?
+    /**
+     * Create a Kokoro TTS engine. Returns null if Kokoro is unavailable on this platform
+     * (e.g. Android) or not yet installed. The TTSController falls back to the native
+     * engine when this returns null.
+     */
+    fun createKokoroEngine(): TTSEngine?
 }
 
 /**

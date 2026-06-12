@@ -62,9 +62,15 @@ class DesktopTTSService : KoinComponent {
         }
     }
     
-    // TTS Engine selection
+    // TTS Engine selection. In-memory value is loaded from preferences in initialize()
+    // and written back to preferences in setEngine() so the selection persists across launches.
     private var currentEngine: TTSEngine = TTSEngine.PIPER
-    var kokoroAvailable = false
+
+    // Backed by preferences so the install state persists across app launches.
+    // Once Kokoro has been verified as installed, the user shouldn't have to click Install again.
+    var kokoroAvailable: Boolean
+        get() = appPrefs.kokoroAvailable().get()
+        set(value) { appPrefs.kokoroAvailable().set(value) }
 
     lateinit var state: DesktopTTSState
     private var serviceJob: Job? = null
@@ -114,6 +120,10 @@ class DesktopTTSService : KoinComponent {
     fun initialize() {
         state = DesktopTTSState()
         readPrefs()
+
+        // Load persisted engine selection so the user's choice survives a relaunch.
+        currentEngine = runCatching { TTSEngine.valueOf(appPrefs.selectedTTSEngine().get()) }
+            .getOrDefault(TTSEngine.PIPER)
         
         // Record session start for analytics
         usageAnalytics.recordSessionStart()
@@ -143,30 +153,49 @@ class DesktopTTSService : KoinComponent {
             // Check if Kokoro is already installed (don't auto-install)
             try {
                 val kokoroDir = java.io.File(ireader.core.storage.AppDir, "kokoro/kokoro-tts")
-                
-                // Only initialize if FULLY installed (repo exists AND dependencies installed)
-                if (kokoroDir.exists() && kokoroDir.listFiles()?.isNotEmpty() == true) {
-                    Log.info { "Found Kokoro repository, checking if fully installed..." }
-                    
-                    // Check if dependencies are installed without triggering installation
-                    // Try to run kokoro --help to verify it's working
-                    val pythonCheck = ProcessBuilder(
-                        "python", "-m", "kokoro", "--help"
-                    ).directory(kokoroDir)
-                        .redirectErrorStream(true)
-                        .start()
-                    
-                    val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
-                    val output = pythonCheck.inputStream.bufferedReader().readText()
-                    
-                    if (checkCompleted && pythonCheck.exitValue() == 0 && output.contains("--voice")) {
-                        kokoroAvailable = true
-                        Log.info { "Kokoro TTS available (fully installed)" }
-                    } else {
-                        Log.info { "Kokoro repository found but not fully installed (user can complete installation from TTS Manager)" }
+                val persistedAvailable = kokoroAvailable
+                val repoPresent = kokoroDir.exists() && kokoroDir.listFiles()?.isNotEmpty() == true
+
+                when {
+                    // Pref says it's installed and the repo still exists on disk: trust the pref.
+                    // Skip the expensive 5-second python subprocess check at startup so the
+                    // user isn't forced to click Install again after every launch.
+                    persistedAvailable && repoPresent -> {
+                        Log.info { "Kokoro TTS available (persisted from previous install)" }
                     }
-                } else {
-                    Log.info { "Kokoro not installed (user must install from TTS Manager)" }
+                    // Pref said installed but the repo is gone — user nuked ~/.cache. Reset flag.
+                    persistedAvailable && !repoPresent -> {
+                        Log.warn { "Kokoro marked installed but repository missing — resetting flag" }
+                        kokoroAvailable = false
+                    }
+                    // No prior install recorded: do the classic verify-on-launch dance.
+                    repoPresent -> {
+                        Log.info { "Found Kokoro repository, checking if fully installed..." }
+
+                        // Try to run kokoro --help to verify it's working. Use `python3` so
+                        // the check honours the same PATH shim mechanism Kokoro's own
+                        // findPythonExecutable() uses (it prefers `python3` over `python`).
+                        // On Arch, /usr/bin/python is the system 3.13 interpreter, and going
+                        // through `python` would bypass any venv shim the user has set up.
+                        val pythonCheck = ProcessBuilder(
+                            "python3", "-m", "kokoro", "--help"
+                        ).directory(kokoroDir)
+                            .redirectErrorStream(true)
+                            .start()
+
+                        val checkCompleted = pythonCheck.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+                        val output = pythonCheck.inputStream.bufferedReader().readText()
+
+                        if (checkCompleted && pythonCheck.exitValue() == 0 && output.contains("--voice")) {
+                            kokoroAvailable = true
+                            Log.info { "Kokoro TTS available (verified at startup, flag persisted)" }
+                        } else {
+                            Log.info { "Kokoro repository found but not fully installed (user can complete installation from TTS Manager)" }
+                        }
+                    }
+                    else -> {
+                        Log.info { "Kokoro not installed (user must install from TTS Manager)" }
+                    }
                 }
             } catch (e: Exception) {
                 Log.debug { "Kokoro check: ${e.message}" }
@@ -1944,6 +1973,7 @@ class DesktopTTSService : KoinComponent {
      * Set TTS engine
      */
     fun setEngine(engine: TTSEngine) {
+        val previous = currentEngine
         when (engine) {
             TTSEngine.PIPER -> {
                 if (synthesizer.isInitialized()) {
@@ -1969,7 +1999,7 @@ class DesktopTTSService : KoinComponent {
                     Log.info { "Gradio not available, trying to configure from preferences..." }
                     configureGradioFromPreferences()
                 }
-                
+
                 if (gradioAvailable && gradioPlayer != null) {
                     currentEngine = TTSEngine.GRADIO
                     isSimulationMode = false
@@ -1983,6 +2013,11 @@ class DesktopTTSService : KoinComponent {
                 isSimulationMode = true
                 Log.info { "Switched to Simulation mode" }
             }
+        }
+        // Persist the selection only if the switch actually took effect (i.e. the engine was
+        // available). Refusing an unavailable engine leaves the previous selection untouched.
+        if (currentEngine != previous) {
+            appPrefs.selectedTTSEngine().set(currentEngine.name)
         }
     }
     
@@ -2088,9 +2123,9 @@ class DesktopTTSService : KoinComponent {
             if (kokoroDir.exists() && kokoroDir.listFiles()?.isNotEmpty() == true) {
                 Log.info { "Found Kokoro repository, checking if fully installed..." }
                 
-                // Check if dependencies are installed
+                // Check if dependencies are installed (use python3 to honour PATH shim)
                 val pythonCheck = ProcessBuilder(
-                    "python", "-m", "kokoro", "--help"
+                    "python3", "-m", "kokoro", "--help"
                 ).directory(kokoroDir)
                     .redirectErrorStream(true)
                     .start()

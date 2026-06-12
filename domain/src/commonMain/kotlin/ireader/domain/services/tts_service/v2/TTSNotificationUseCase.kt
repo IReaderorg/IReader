@@ -145,6 +145,7 @@ class TTSNotificationUseCase(
             speed = state.speed,
             ttsProvider = when (state.engineType) {
                 EngineType.NATIVE -> "Native TTS"
+                EngineType.KOKORO -> "Kokoro TTS"
                 EngineType.GRADIO -> "Gradio TTS"
             }
         )

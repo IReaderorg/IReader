@@ -192,6 +192,32 @@ class AppPreferences(
     fun selectedKokoroVoice(): Preference<String> {
         return preferenceStore.getString("selected_kokoro_voice", "af_bella")
     }
+
+    /**
+     * Whether Kokoro TTS is installed and verified. Persists across launches so the user
+     * doesn't re-run Install every time. True after a successful install/verify; false
+     * only on uninstall or failed verification.
+     */
+    fun kokoroAvailable(): Preference<Boolean> {
+        return preferenceStore.getBoolean("kokoro_available", false)
+    }
+
+    /**
+     * User's preferred TTS engine for reading. Values: "PIPER", "KOKORO", "GRADIO",
+     * "SIMULATION" (matches DesktopTTSService.TTSEngine and v2 EngineType names).
+     */
+    fun selectedTTSEngine(): Preference<String> {
+        return preferenceStore.getString("selected_tts_engine", "PIPER")
+    }
+
+    /**
+     * Optional override for the Python interpreter Kokoro TTS uses. Empty = auto-discover
+     * (PATH + common install locations). Set from Settings -> TTS if Python lives somewhere
+     * non-standard (pyenv, conda, a venv, a system package). Must be Python 3.8-3.12.
+     */
+    fun kokoroPythonPath(): Preference<String> {
+        return preferenceStore.getString("kokoro_python_path", "")
+    }
     
     /**
      * Selected AI TTS provider

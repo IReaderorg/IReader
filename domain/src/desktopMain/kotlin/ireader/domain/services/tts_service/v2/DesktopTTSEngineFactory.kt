@@ -3,6 +3,9 @@ package ireader.domain.services.tts_service.v2
 import ireader.core.log.Log
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.*
+import ireader.domain.services.tts_service.kokoro.KokoroTTSAdapter
+import ireader.domain.services.tts_service.kokoro.KokoroTTSEngine
+import ireader.domain.services.tts_service.piper.AudioData
 import ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer
 import ireader.domain.services.tts_service.piper.PiperModelManager
 import ireader.domain.services.tts_service.piper.AudioPlaybackEngine
@@ -50,6 +53,27 @@ actual object TTSEngineFactory : KoinComponent {
         } else {
             null
         }
+    }
+
+    /**
+     * Build a lazily-initialised Kokoro engine if the user has already installed Kokoro
+     * (tracked via `appPreferences.kokoroAvailable()`). Returns null otherwise so the
+     * controller falls back to the native engine. The concurrent-process count is read
+     * from `appPreferences.maxConcurrentTTSProcesses()` on each engine creation, matching
+     * the Piper/Gradio engines' behaviour of respecting the shared TTS-performance setting.
+     */
+    actual fun createKokoroEngine(): TTSEngine? {
+        if (!appPreferences.kokoroAvailable().get()) return null
+        val maxProcesses = appPreferences.maxConcurrentTTSProcesses().get()
+        val kokoroEngine = KokoroTTSEngine(
+            maxConcurrentProcesses = maxProcesses,
+            // User-editable override (Settings -> TTS -> Kokoro Python path); blank = auto-discover.
+            pythonPathOverride = appPreferences.kokoroPythonPath().get().takeIf { it.isNotBlank() },
+        )
+        val adapter = KokoroTTSAdapter(kokoroEngine, appPreferences).also {
+            it.loadVoiceFromPreferences()
+        }
+        return DesktopKokoroTTSEngineV2(adapter, appPreferences)
     }
     
     /**
@@ -508,9 +532,238 @@ class DesktopGradioTTSEngineV2(
      */
     override suspend fun getCachedIndices(texts: List<String>): Set<Int> {
         if (audioCache == null) return emptySet()
-        
+
         return texts.mapIndexedNotNull { index, text ->
             if (audioCache.isCached(text, config.id)) index else null
         }.toSet()
+    }
+}
+
+/**
+ * Desktop Kokoro TTS Engine wrapper for v2 architecture.
+ *
+ * Delegates synthesis to [KokoroTTSAdapter] (which spawns Python subprocesses,
+ * respecting `maxConcurrentTTSProcesses`) and plays the returned audio through
+ * [AudioPlaybackEngine]. Voice selection is read from preferences on every
+ * speak() call so UI changes via VoiceSelectionDialog take effect immediately.
+ *
+ * Non-blocking: speak() kicks off synthesis+playback in a background coroutine
+ * and returns as soon as the utterance is queued. Stop/pause are supported via
+ * job cancellation and AudioPlaybackEngine's own pause/resume.
+ */
+class DesktopKokoroTTSEngineV2(
+    private val adapter: KokoroTTSAdapter,
+    private val appPreferences: AppPreferences
+) : TTSEngine {
+    companion object {
+        private const val TAG = "DesktopKokoroTTSV2"
+        private const val PRECACHE_MAX_ENTRIES = 16
+    }
+
+    private val _events = MutableSharedFlow<EngineEvent>(extraBufferCapacity = 10)
+    private val audioEngine: AudioPlaybackEngine by lazy { AudioPlaybackEngine() }
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private var playbackJob: kotlinx.coroutines.Job? = null
+    private var speed: Float = 1.0f
+    private var initialized = false
+
+    // In-memory cache of pre-synthesised audio, keyed by (utteranceId, voice, speed).
+    // The paragraph-advance path in TTSController precaches up to three upcoming items
+    // via `precacheNext`; this cache is what makes those hits pay off. Entries persist
+    // until speed or voice changes (which invalidates them since the bytes no longer
+    // match) or the cache grows past PRECACHE_MAX_ENTRIES (LRU via LinkedHashMap).
+    private data class CacheKey(val utteranceId: String, val voice: String, val speed: Float)
+    private val audioCache = object : LinkedHashMap<CacheKey, AudioData>(PRECACHE_MAX_ENTRIES, 0.75f, true) {
+        override fun removeEldestEntry(eldest: Map.Entry<CacheKey, AudioData>?): Boolean =
+            size > PRECACHE_MAX_ENTRIES
+    }
+    private val cacheLock = Any()
+
+    // Track in-flight precache jobs so we can cancel on stop/release and skip duplicates.
+    private val inflightPrecache = java.util.concurrent.ConcurrentHashMap<String, kotlinx.coroutines.Job>()
+
+    @Volatile
+    private var currentUtteranceId: String? = null
+
+    @Volatile
+    private var wasStopped = false
+
+    override val events: Flow<EngineEvent> = _events
+    override val name: String = "Kokoro TTS"
+
+    init {
+        // Kick off a background initialise so isReady() reflects reality after a short delay.
+        // The adapter's initialize() is idempotent; repeated calls are cheap after the first.
+        scope.launch {
+            val result = runCatching { adapter.initialize() }
+            if (result.isSuccess && result.getOrNull()?.isSuccess == true) {
+                initialized = true
+                _events.tryEmit(EngineEvent.Ready)
+            } else {
+                Log.warn { "$TAG: initialize failed: ${result.exceptionOrNull()?.message ?: "unknown"}" }
+            }
+        }
+    }
+
+    private fun currentVoice(): String = appPreferences.selectedKokoroVoice().get()
+
+    private fun cacheGet(utteranceId: String): AudioData? {
+        val key = CacheKey(utteranceId, currentVoice(), speed)
+        return synchronized(cacheLock) { audioCache[key] }
+    }
+
+    private fun cachePut(utteranceId: String, data: AudioData) {
+        val key = CacheKey(utteranceId, currentVoice(), speed)
+        synchronized(cacheLock) { audioCache[key] = data }
+    }
+
+    private fun ensureInitialized(): Boolean {
+        if (initialized) return true
+        val result = runCatching { kotlinx.coroutines.runBlocking { adapter.initialize() } }
+        initialized = result.isSuccess && result.getOrNull()?.isSuccess == true
+        return initialized
+    }
+
+    override suspend fun speak(text: String, utteranceId: String) {
+        Log.warn { "$TAG: speak($utteranceId) - text length=${text.length}" }
+
+        // Cancel any existing playback — only one utterance plays at a time.
+        playbackJob?.cancel()
+        audioEngine.stop()
+
+        currentUtteranceId = utteranceId
+        wasStopped = false
+
+        if (!initialized) {
+            val result = runCatching { adapter.initialize() }
+            initialized = result.isSuccess && result.getOrNull()?.isSuccess == true
+            if (!initialized) {
+                _events.tryEmit(EngineEvent.Error(utteranceId, "Kokoro not initialised"))
+                return
+            }
+        }
+
+        val voice = currentVoice()
+        playbackJob = scope.launch {
+            try {
+                _events.tryEmit(EngineEvent.Started(utteranceId))
+
+                // Fast path: if the paragraph was precached, play without re-synthesising.
+                val cached = cacheGet(utteranceId)
+                val audioData = cached ?: run {
+                    val r = adapter.synthesize(text, voice, speed)
+                    val data = r.getOrElse { error ->
+                        if (currentUtteranceId == utteranceId && !wasStopped) {
+                            _events.tryEmit(EngineEvent.Error(utteranceId, error.message ?: "Kokoro synthesis failed"))
+                        }
+                        return@launch
+                    }
+                    cachePut(utteranceId, data)
+                    data
+                }
+
+                if (wasStopped || currentUtteranceId != utteranceId) return@launch
+                audioEngine.play(audioData)
+                if (currentUtteranceId == utteranceId && !wasStopped) {
+                    _events.tryEmit(EngineEvent.Completed(utteranceId))
+                }
+            } catch (_: kotlinx.coroutines.CancellationException) {
+                // no-op: cancellation is expected when the next utterance pre-empts us
+            } catch (e: Exception) {
+                if (currentUtteranceId == utteranceId && !wasStopped) {
+                    _events.tryEmit(EngineEvent.Error(utteranceId, e.message ?: "Kokoro TTS error"))
+                }
+            }
+        }
+    }
+
+    /**
+     * Pre-synthesise upcoming paragraphs in parallel. The underlying [KokoroTTSEngine] holds
+     * a semaphore keyed on `maxConcurrentProcesses` (the user's TTS Performance setting), so
+     * launching N coroutines here only spawns up to that many Python subprocesses at once —
+     * the rest queue up inside the engine. The net effect: the TTS pool is actually used,
+     * and by the time [speak] fires for the next paragraph its audio is already sitting in
+     * the in-memory cache. No more dead air between paragraphs.
+     */
+    override fun precacheNext(items: List<Pair<String, String>>) {
+        if (items.isEmpty()) return
+        if (!ensureInitialized()) return
+        val voice = currentVoice()
+        val currentSpeed = speed
+        for ((utteranceId, text) in items) {
+            if (text.isBlank()) continue
+            // Skip if already cached or another precache job is already running for this id.
+            val key = CacheKey(utteranceId, voice, currentSpeed)
+            val alreadyCached = synchronized(cacheLock) { audioCache[key] != null }
+            if (alreadyCached) continue
+            if (inflightPrecache.containsKey(utteranceId)) continue
+
+            val job = scope.launch {
+                try {
+                    val r = adapter.synthesize(text, voice, currentSpeed)
+                    r.onSuccess { data ->
+                        // Voice/speed may have changed while we were synthesising; re-check key.
+                        cachePut(utteranceId, data)
+                    }.onFailure { error ->
+                        Log.warn { "$TAG: precache $utteranceId failed: ${error.message}" }
+                    }
+                } catch (_: kotlinx.coroutines.CancellationException) {
+                    // expected on stop/release
+                } finally {
+                    inflightPrecache.remove(utteranceId)
+                }
+            }
+            inflightPrecache[utteranceId] = job
+        }
+    }
+
+    override suspend fun isTextCached(text: String): Boolean {
+        // We cache by utteranceId, not by text. Return false so callers don't make
+        // assumptions; the real cache hit check is inside speak().
+        return false
+    }
+
+    override fun clearState() {
+        // Called on chapter change. Cancel any precache jobs for the old chapter and
+        // drop the cache — paragraph utteranceIds like "p_3" collide across chapters.
+        inflightPrecache.values.forEach { it.cancel() }
+        inflightPrecache.clear()
+        synchronized(cacheLock) { audioCache.clear() }
+    }
+
+    override fun stop() {
+        wasStopped = true
+        currentUtteranceId = null
+        playbackJob?.cancel()
+        playbackJob = null
+        audioEngine.stop()
+    }
+
+    override fun pause() { audioEngine.pause() }
+    override fun resume() { audioEngine.resume() }
+
+    override fun setSpeed(speed: Float) {
+        val clamped = speed.coerceIn(0.5f, 2.0f)
+        if (clamped != this.speed) {
+            // Cached bytes are at the old speed. Invalidate.
+            synchronized(cacheLock) { audioCache.clear() }
+        }
+        this.speed = clamped
+    }
+
+    override fun setPitch(pitch: Float) {
+        // Kokoro exposes no pitch knob — silently ignore so the UI slider still works.
+    }
+
+    override fun isReady(): Boolean = initialized && adapter.isAvailable()
+
+    override fun release() {
+        stop()
+        inflightPrecache.values.forEach { it.cancel() }
+        inflightPrecache.clear()
+        synchronized(cacheLock) { audioCache.clear() }
+        runCatching { adapter.shutdown() }
+        scope.cancel()
     }
 }

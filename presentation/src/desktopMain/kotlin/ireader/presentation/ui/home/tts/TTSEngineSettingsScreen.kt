@@ -207,6 +207,30 @@ actual fun TTSEngineSettingsScreen(
                         }
                     )
                     
+                    // Kokoro Python interpreter override (editable; blank = auto-discover).
+                    // Lets users with a non-standard Python (pyenv/conda/venv/system) point
+                    // Kokoro at it without code changes. Read back in createKokoroEngine().
+                    val kokoroPrefs = koinInject<ireader.domain.preferences.prefs.AppPreferences>()
+                    var kokoroPythonPath by remember { mutableStateOf(kokoroPrefs.kokoroPythonPath().get()) }
+                    OutlinedTextField(
+                        value = kokoroPythonPath,
+                        onValueChange = {
+                            kokoroPythonPath = it
+                            kokoroPrefs.kokoroPythonPath().set(it.trim())
+                        },
+                        label = { Text("Kokoro Python path (optional)") },
+                        placeholder = { Text("Leave blank to auto-detect (Python 3.8-3.12)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                    )
+                    Text(
+                        text = "Point Kokoro at a specific Python interpreter (pyenv, conda, a venv, or a " +
+                            "system install). Takes effect the next time the Kokoro engine is created.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+                    )
+
                     // Gradio TTS (Online - Generic)
                     var gradioAvailable by remember { mutableStateOf(ttsService.gradioAvailable) }
                     var showGradioConfig by remember { mutableStateOf(false) }
@@ -497,6 +521,17 @@ actual fun TTSVoiceSelectionScreen(
     onDismiss: () -> Unit
 ) {
     val ttsService: DesktopTTSService = koinInject()
+    // When the active engine is Kokoro, delegate to the Kokoro-aware
+    // VoiceSelectionDialog — the Piper content below has no concept of Kokoro voices.
+    // We branch once at entry rather than interleaving inside the Dialog so the Piper
+    // and Kokoro flows stay clearly separated.
+    if (ttsService.getCurrentEngine() == DesktopTTSService.TTSEngine.KOKORO) {
+        ireader.presentation.ui.reader.components.VoiceSelectionDialog(
+            ttsService = ttsService,
+            onDismiss = onDismiss
+        )
+        return
+    }
     val voiceService: ireader.domain.services.tts_service.PiperVoiceService = koinInject()
     val voiceDownloader: PiperVoiceDownloader = koinInject()
     val appPrefs: ireader.domain.preferences.prefs.AppPreferences = koinInject()

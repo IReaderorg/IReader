@@ -104,9 +104,10 @@ fun rememberTTSV2StateAdapter(
                 sleepModeEnabled = sleepTimerState?.isEnabled == true,
                 currentEngine = when (engineType) {
                     EngineType.NATIVE -> "Native TTS"
+                    EngineType.KOKORO -> "Kokoro TTS"
                     EngineType.GRADIO -> "Gradio TTS"
                 },
-                availableEngines = listOf("Native TTS", "Gradio TTS"),
+                availableEngines = listOf("Native TTS", "Kokoro TTS", "Gradio TTS"),
                 isTTSReady = isEngineReady,
                 // Sentence highlighting
                 paragraphStartTime = paragraphStartTime,
@@ -166,6 +167,7 @@ fun rememberTTSV2Actions(
             override fun onSelectEngine(engine: String) {
                 when (engine) {
                     "Native TTS" -> adapter.useNativeTTS()
+                    "Kokoro TTS" -> adapter.setEngine(EngineType.KOKORO)
                     "Gradio TTS" -> adapter.setEngine(EngineType.GRADIO)
                 }
             }

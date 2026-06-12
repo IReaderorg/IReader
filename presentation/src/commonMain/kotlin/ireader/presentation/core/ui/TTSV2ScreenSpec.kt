@@ -912,9 +912,10 @@ class TTSV2ScreenSpec(
                     selectedVoiceModel = selectedPiperModel.takeIf { it.isNotEmpty() },
                     currentEngine = when (state.engineType) {
                         EngineType.NATIVE -> "Native TTS"
+                        EngineType.KOKORO -> "Kokoro TTS"
                         EngineType.GRADIO -> "Gradio TTS"
                     },
-                    availableEngines = listOf("Native TTS", "Gradio TTS"),
+                    availableEngines = listOf("Native TTS", "Kokoro TTS", "Gradio TTS"),
                     isTTSReady = state.isEngineReady,
                     paragraphStartTime = paragraphStartTime,
                     sentenceHighlightEnabled = sentenceHighlightEnabled,
@@ -1008,6 +1009,7 @@ class TTSV2ScreenSpec(
             useGradioTTS = useGradioTTS,
             currentEngineName = when (state.engineType) {
                 EngineType.NATIVE -> "Native TTS"
+                EngineType.KOKORO -> "Kokoro TTS"
                 EngineType.GRADIO -> "Gradio TTS"
             },
             readTranslatedText = readTranslatedText,
