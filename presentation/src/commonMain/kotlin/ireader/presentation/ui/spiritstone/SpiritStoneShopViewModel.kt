@@ -61,63 +61,62 @@ class SpiritStoneShopViewModel(
                 val user = getCurrentUser()
                 val userId = user?.id ?: ""
 
-                if (userId.isEmpty()) {
-                    _state.update { it.copy(isLoading = false, error = "Please sign in to use the shop") }
-                    return@launch
-                }
-
-                // Load profile for spirit stones
-                val profile = gamificationRepository.getProfile(userId).getOrNull()
-
-                // Load owned titles
-                val ownedTitles = gamificationRepository.getOwnedTitles(userId).getOrDefault(emptyList())
-
-                // Available titles for purchase
+                // Available titles for purchase (always shown, auth not required)
                 val titles = listOf(
-                    ShopTitle("title_bookworm", "Bookworm", "RARE", 100, ownedTitles.any { it.titleId == "title_bookworm" }, ownedTitles.any { it.titleId == "title_bookworm" && it.isActive }),
-                    ShopTitle("title_night_owl", "Night Owl", "RARE", 150, ownedTitles.any { it.titleId == "title_night_owl" }, ownedTitles.any { it.titleId == "title_night_owl" && it.isActive }),
-                    ShopTitle("title_speed_reader", "Speed Reader", "EPIC", 300, ownedTitles.any { it.titleId == "title_speed_reader" }, ownedTitles.any { it.titleId == "title_speed_reader" && it.isActive }),
-                    ShopTitle("titleLiterary_legend", "Literary Legend", "EPIC", 500, ownedTitles.any { it.titleId == "title_literary_legend" }, ownedTitles.any { it.titleId == "title_literary_legend" && it.isActive }),
-                    ShopTitle("title_reading_deity", "Reading Deity", "LEGENDARY", 1000, ownedTitles.any { it.titleId == "title_reading_deity" }, ownedTitles.any { it.titleId == "title_reading_deity" && it.isActive }),
-                    ShopTitle("title_streak_master", "Streak Master", "RARE", 200, ownedTitles.any { it.titleId == "title_streak_master" }, ownedTitles.any { it.titleId == "title_streak_master" && it.isActive }),
-                    ShopTitle("title_chapter_hunter", "Chapter Hunter", "COMMON", 50, ownedTitles.any { it.titleId == "title_chapter_hunter" }, ownedTitles.any { it.titleId == "title_chapter_hunter" && it.isActive }),
-                    ShopTitle("title_genre_explorer", "Genre Explorer", "COMMON", 75, ownedTitles.any { it.titleId == "title_genre_explorer" }, ownedTitles.any { it.titleId == "title_genre_explorer" && it.isActive }),
+                    ShopTitle("title_bookworm", "Bookworm", "RARE", 100, false, false),
+                    ShopTitle("title_night_owl", "Night Owl", "RARE", 150, false, false),
+                    ShopTitle("title_speed_reader", "Speed Reader", "EPIC", 300, false, false),
+                    ShopTitle("title_literary_legend", "Literary Legend", "EPIC", 500, false, false),
+                    ShopTitle("title_reading_deity", "Reading Deity", "LEGENDARY", 1000, false, false),
+                    ShopTitle("title_streak_master", "Streak Master", "RARE", 200, false, false),
+                    ShopTitle("title_chapter_hunter", "Chapter Hunter", "COMMON", 50, false, false),
+                    ShopTitle("title_genre_explorer", "Genre Explorer", "COMMON", 75, false, false),
                 )
 
-                // Load available badges from Supabase (achievement badges with spirit stone costs)
-                val allBadges = badgeRepository.getAvailableBadges().getOrDefault(emptyList())
-                val userBadges = badgeRepository.getUserBadges(userId).getOrDefault(emptyList())
-                val ownedBadgeIds = userBadges.map { it.badgeId }.toSet()
+                // Load profile and badges only if signed in
+                var spiritStones = 0L
+                var badges = emptyList<ShopBadge>()
 
-                // Filter to ACHIEVEMENT type badges that have spirit stone costs
-                val badges = allBadges
-                    .filter { it.type == ireader.domain.models.remote.BadgeType.ACHIEVEMENT }
-                    .map { badge ->
-                        val cost = when (badge.rarity) {
-                            "COMMON" -> 50
-                            "RARE" -> 150
-                            "EPIC" -> 300
-                            "LEGENDARY" -> 800
-                            else -> 100
-                        }
-                        ShopBadge(
-                            id = badge.id,
-                            name = badge.name,
-                            description = badge.description,
-                            rarity = badge.rarity,
-                            cost = cost,
-                            isOwned = badge.id in ownedBadgeIds,
-                            imageUrl = badge.imageUrl,
-                            category = badge.category
-                        )
-                    }
-                    .sortedWith(compareByDescending<ShopBadge> { it.rarity == "LEGENDARY" }
-                        .thenByDescending { it.rarity == "EPIC" }
-                        .thenByDescending { it.rarity == "RARE" })
+                if (userId.isNotEmpty()) {
+                    try {
+                        spiritStones = gamificationRepository.getProfile(userId).getOrNull()?.spiritStones ?: 0
+                    } catch (_: Exception) {}
+
+                    try {
+                        val allBadges = badgeRepository.getAvailableBadges().getOrDefault(emptyList())
+                        val userBadges = badgeRepository.getUserBadges(userId).getOrDefault(emptyList())
+                        val ownedBadgeIds = userBadges.map { it.badgeId }.toSet()
+
+                        badges = allBadges
+                            .filter { it.type == ireader.domain.models.remote.BadgeType.ACHIEVEMENT }
+                            .map { badge ->
+                                val cost = when (badge.rarity) {
+                                    "LEGENDARY" -> 800
+                                    "EPIC" -> 300
+                                    "RARE" -> 150
+                                    "COMMON" -> 50
+                                    else -> 100
+                                }
+                                ShopBadge(
+                                    id = badge.id,
+                                    name = badge.name,
+                                    description = badge.description,
+                                    rarity = badge.rarity,
+                                    cost = cost,
+                                    isOwned = badge.id in ownedBadgeIds,
+                                    imageUrl = badge.imageUrl,
+                                    category = badge.category
+                                )
+                            }
+                            .sortedWith(compareByDescending<ShopBadge> { it.rarity == "LEGENDARY" }
+                                .thenByDescending { it.rarity == "EPIC" }
+                                .thenByDescending { it.rarity == "RARE" })
+                    } catch (_: Exception) {}
+                }
 
                 _state.update {
                     it.copy(
-                        spiritStones = profile?.spiritStones ?: 0,
+                        spiritStones = spiritStones,
                         availableTitles = titles,
                         availableBadges = badges,
                         isLoading = false
@@ -138,6 +137,12 @@ class SpiritStoneShopViewModel(
         scope.launch {
             try {
                 val currentState = _state.value
+                val user = getCurrentUser()
+                if (user == null) {
+                    _state.update { it.copy(error = "Please sign in to purchase") }
+                    return@launch
+                }
+
                 val title = currentState.availableTitles.find { it.id == itemId }
                 val badge = currentState.availableBadges.find { it.id == itemId }
 
@@ -163,7 +168,7 @@ class SpiritStoneShopViewModel(
                             availableBadges = it.availableBadges.map { b ->
                                 if (b.id == itemId) b.copy(isOwned = true) else b
                             },
-                            successMessage = "Purchase successful! 🎉"
+                            successMessage = "Purchase successful!"
                         )
                     }
                 } else {

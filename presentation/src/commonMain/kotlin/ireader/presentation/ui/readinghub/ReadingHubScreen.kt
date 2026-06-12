@@ -130,21 +130,11 @@ private fun ModernReadingHubTopBar(
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.bounce))
-                val bounce by infiniteTransition.animateFloat(
-                    initialValue = 0f,
-                    targetValue = -4f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(600, easing = FastOutSlowInEasing),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = localizeHelper.localize(Res.string.bounce)
-                )
-                
-                Text(
-                    text = "📚",
-                    fontSize = 28.sp,
-                    modifier = Modifier.offset { IntOffset(0, bounce.dp.roundToPx()) }
+                Icon(
+                    Icons.AutoMirrored.Filled.MenuBook,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(28.dp)
                 )
                 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -153,12 +143,13 @@ private fun ModernReadingHubTopBar(
                     Text(
                         text = localizeHelper.localize(Res.string.reading_hub),
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         text = localizeHelper.localize(Res.string.track_your_reading_journey),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                     )
                 }
             }
@@ -374,7 +365,12 @@ private fun StreakCard(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "🔥", fontSize = 36.sp)
+            Icon(
+                Icons.Filled.LocalFireDepartment,
+                contentDescription = null,
+                tint = Color(0xFFFF6B35),
+                modifier = Modifier.size(36.dp)
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "$currentStreak",
@@ -426,7 +422,12 @@ private fun LevelCard(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "⭐", fontSize = 36.sp)
+            Icon(
+                Icons.Filled.Star,
+                contentDescription = null,
+                tint = Color(0xFFFFD700),
+                modifier = Modifier.size(36.dp)
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Level $level",
@@ -475,7 +476,12 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "📊", fontSize = 22.sp)
+                Icon(
+                    Icons.Filled.BarChart,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
+                )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = localizeHelper.localize(Res.string.detailed_statistics),
@@ -493,13 +499,13 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     DetailStatItem(
-                        emoji = "⏱️",
+                        icon = Icons.Filled.Schedule,
                         label = localizeHelper.localize(Res.string.total_time),
                         value = formatDetailedTime(statistics.totalReadingTimeMinutes),
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
-                        emoji = "📖",
+                        icon = Icons.Filled.MenuBook,
                         label = localizeHelper.localize(Res.string.currently_reading),
                         value = statistics.currentlyReading.toString(),
                         modifier = Modifier.weight(1f)
@@ -511,13 +517,13 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     DetailStatItem(
-                        emoji = "⚡",
+                        icon = Icons.Filled.Speed,
                         label = localizeHelper.localize(Res.string.reading_speed),
                         value = "${statistics.averageReadingSpeedWPM} WPM",
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
-                        emoji = "📅",
+                        icon = Icons.Filled.CalendarToday,
                         label = localizeHelper.localize(Res.string.last_read),
                         value = formatLastRead(statistics.lastReadDate),
                         modifier = Modifier.weight(1f)
@@ -529,7 +535,7 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     DetailStatItem(
-                        emoji = "📚",
+                        icon = Icons.Filled.TrendingUp,
                         label = localizeHelper.localize(Res.string.avgday),
                         value = formatDetailedTime(
                             if (statistics.readingStreak > 0) statistics.totalReadingTimeMinutes / statistics.readingStreak else 0
@@ -537,7 +543,7 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
-                        emoji = "🏆",
+                        icon = Icons.Filled.EmojiEvents,
                         label = localizeHelper.localize(Res.string.longest_streak),
                         value = "${statistics.longestStreak} days",
                         modifier = Modifier.weight(1f)
@@ -550,7 +556,8 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
 
 @Composable
 private fun DetailStatItem(
-    emoji: String,
+    icon: ImageVector,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -564,7 +571,7 @@ private fun DetailStatItem(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = emoji, fontSize = 20.sp)
+            Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
@@ -601,7 +608,12 @@ private fun AchievementsSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🏆", fontSize = 22.sp)
+                    Icon(
+                        Icons.Filled.EmojiEvents,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = localizeHelper.localize(Res.string.achievements),
@@ -632,7 +644,12 @@ private fun AchievementsSection(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("🎯", fontSize = 40.sp)
+                        Icon(
+                            Icons.Filled.EmojiEvents,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(48.dp)
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = localizeHelper.localize(Res.string.start_reading_to_unlock),
@@ -678,7 +695,7 @@ private fun AchievementsSection(
 
 @Composable
 private fun AchievementBadge(achievement: BuddyAchievement, isUnlocked: Boolean) {
-    val emoji = getAchievementEmoji(achievement.name)
+    val icon = getAchievementIcon(achievement.name)
     
     Surface(
         shape = RoundedCornerShape(16.dp),
@@ -693,9 +710,12 @@ private fun AchievementBadge(achievement: BuddyAchievement, isUnlocked: Boolean)
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = if (isUnlocked) emoji else "🔒",
-                fontSize = 28.sp
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = if (isUnlocked) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
@@ -862,17 +882,17 @@ private fun formatLastRead(timestamp: Long): String {
     }
 }
 
-private fun getAchievementEmoji(name: String): String {
+private fun getAchievementIcon(name: String): ImageVector {
     return when {
-        name.contains("BOOK", ignoreCase = true) -> "📚"
-        name.contains("CHAPTER", ignoreCase = true) -> "📖"
-        name.contains("STREAK", ignoreCase = true) -> "🔥"
-        name.contains("NIGHT", ignoreCase = true) -> "🌙"
-        name.contains("EARLY", ignoreCase = true) -> "🌅"
-        name.contains("MARATHON", ignoreCase = true) -> "🏃"
-        name.contains("QUOTE", ignoreCase = true) -> "💬"
-        name.contains("SPEED", ignoreCase = true) -> "⚡"
-        name.contains("TIME", ignoreCase = true) -> "⏰"
-        else -> "🏅"
+        name.contains("BOOK", ignoreCase = true) -> Icons.Filled.MenuBook
+        name.contains("CHAPTER", ignoreCase = true) -> Icons.Filled.ChromeReaderMode
+        name.contains("STREAK", ignoreCase = true) -> Icons.Filled.LocalFireDepartment
+        name.contains("SPEED", ignoreCase = true) -> Icons.Filled.Speed
+        name.contains("REVIEW", ignoreCase = true) -> Icons.Filled.RateReview
+        name.contains("SOCIAL", ignoreCase = true) -> Icons.Filled.People
+        name.contains("VOTE", ignoreCase = true) -> Icons.Filled.HowToVote
+        name.contains("GENRE", ignoreCase = true) -> Icons.Filled.Category
+        name.contains("DISCORD", ignoreCase = true) -> Icons.Filled.Chat
+        else -> Icons.Filled.Star
     }
 }

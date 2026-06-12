@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -136,7 +137,7 @@ fun WebnovelProfileScreen(
                 )
             }
             item { XpPanel(level = state.level, progress = state.levelProgress, xp = state.xp, rank = state.leaderboardRank) }
-            if (signedIn) item { CheckinPanel(streak = state.checkinStreak, onCheckIn = onCheckIn) }
+            if (signedIn) item { CheckinPanel(streak = state.checkinStreak, hasCheckedInToday = state.hasCheckedInToday, onCheckIn = onCheckIn) }
             if (activeTitle != null) item { ActiveTitlePanel(activeTitle) }
             if (ownedBadges.isNotEmpty()) item { BadgesShowcase(ownedBadges) }
             if (state.achievements.isNotEmpty()) item { AchievementsShowcase(state.achievements) }
@@ -377,20 +378,38 @@ private fun XpPanel(level: Int, progress: Float, xp: Long, rank: Int) {
 }
 
 @Composable
-private fun CheckinPanel(streak: Int, onCheckIn: () -> Unit) {
+private fun CheckinPanel(streak: Int, hasCheckedInToday: Boolean, onCheckIn: () -> Unit) {
     val cs = MaterialTheme.colorScheme
+    val isCheckedIn = hasCheckedInToday
     Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(18.dp))
-        .background(cs.tertiaryContainer).clickable(onClick = onCheckIn).padding(16.dp)) {
+        .background(if (isCheckedIn) cs.surfaceVariant else cs.tertiaryContainer)
+        .clickable(enabled = !isCheckedIn, onClick = onCheckIn).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("🔥", fontSize = 26.sp)
+            Text(if (isCheckedIn) "✅" else "🔥", fontSize = 26.sp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("Daily Check-in", color = cs.onTertiaryContainer, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(if (streak > 0) "$streak-day streak · tap to claim" else "Start your streak & earn 💎",
-                    color = cs.onTertiaryContainer.copy(alpha = 0.85f), fontSize = 12.sp)
+                Text(
+                    if (isCheckedIn) "Checked in today!" else "Daily Check-in",
+                    color = cs.onTertiaryContainer,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+                Text(
+                    if (isCheckedIn) "Come back tomorrow"
+                    else if (streak > 0) "$streak-day streak · tap to claim"
+                    else "Start your streak & earn stones",
+                    color = cs.onTertiaryContainer.copy(alpha = 0.85f),
+                    fontSize = 12.sp
+                )
             }
-            Box(Modifier.clip(RoundedCornerShape(20.dp)).background(cs.tertiary).padding(horizontal = 16.dp, vertical = 8.dp)) {
-                Text("Claim", color = cs.onTertiary, fontWeight = FontWeight.Bold)
+            Box(Modifier.clip(RoundedCornerShape(20.dp))
+                .background(if (isCheckedIn) cs.surfaceVariant.copy(alpha = 0.5f) else cs.tertiary)
+                .padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Text(
+                    if (isCheckedIn) "Done" else "Claim",
+                    color = if (isCheckedIn) cs.onSurfaceVariant else cs.onTertiary,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -401,16 +420,19 @@ private fun CheckinPanel(streak: Int, onCheckIn: () -> Unit) {
 private fun ActiveTitlePanel(title: OwnedTitle) {
     val cs = MaterialTheme.colorScheme
     val tint = rarityTint(title.rarity)
+    val displayName = formatTitleName(title.titleName)
     Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(18.dp))
         .background(Brush.horizontalGradient(listOf(tint.copy(alpha = 0.28f), cs.surfaceVariant)))
         .border(1.dp, tint.copy(alpha = 0.6f), RoundedCornerShape(18.dp)).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(44.dp).clip(CircleShape).background(tint.copy(alpha = 0.25f))
-                .border(2.dp, tint, CircleShape), contentAlignment = Alignment.Center) { Text("📛", fontSize = 22.sp) }
+                .border(2.dp, tint, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Star, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
+            }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text("Active Title", color = cs.onSurfaceVariant, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                Text(title.titleName, color = cs.onSurface, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                Text(displayName, color = cs.onSurface, fontWeight = FontWeight.Bold, fontSize = 17.sp)
             }
             Box(Modifier.clip(RoundedCornerShape(14.dp)).background(tint).padding(horizontal = 10.dp, vertical = 4.dp)) {
                 Text(title.rarity.lowercase().replaceFirstChar { it.uppercase() }, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -510,7 +532,7 @@ private fun TitlesPanel(titles: List<OwnedTitle>, onActivate: (String?) -> Unit)
                         .border(1.dp, tint, RoundedCornerShape(20.dp))
                         .clickable { onActivate(if (active) null else t.titleId) }
                         .padding(horizontal = 14.dp, vertical = 8.dp)) {
-                        Text("📛 ${t.titleName}", color = cs.onSurface, fontSize = 13.sp,
+                        Text(formatTitleName(t.titleName), color = cs.onSurface, fontSize = 13.sp,
                             fontWeight = if (active) FontWeight.Bold else FontWeight.Normal)
                     }
                 }
@@ -654,4 +676,16 @@ private fun DiscordPanel(onOpen: () -> Unit) {
             Text("Open →", color = cs.onSecondaryContainer, fontWeight = FontWeight.Bold)
         }
     }
+}
+
+/**
+ * Formats a raw title ID like "title_chapter_hunter" into "Chapter Hunter".
+ */
+private fun formatTitleName(raw: String): String {
+    return raw
+        .removePrefix("title_")
+        .split("_")
+        .joinToString(" ") { word ->
+            word.replaceFirstChar { it.uppercase() }
+        }
 }

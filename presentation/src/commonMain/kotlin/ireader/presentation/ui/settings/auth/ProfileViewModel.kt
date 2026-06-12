@@ -446,6 +446,7 @@ class ProfileViewModel(
     fun checkIn() {
         scope.launch {
             val repo = gamificationRepository ?: return@launch
+            updateState { it.copy(hasCheckedInToday = true) }
             repo.checkinDaily().onSuccess { result ->
                 if (!result.already) {
                     updateState { it.copy(checkinStreak = result.streakDay, lastCheckinReward = result.reward) }
@@ -506,6 +507,7 @@ data class ProfileState(
     val levelProgress: Float = 0f,
     val spiritStones: Long = 0,
     val checkinStreak: Int = 0,
+    val hasCheckedInToday: Boolean = false,
     val lastCheckinReward: Int = 0,
     val activeTitleId: String? = null,
     val genresExplored: Int = 0,
