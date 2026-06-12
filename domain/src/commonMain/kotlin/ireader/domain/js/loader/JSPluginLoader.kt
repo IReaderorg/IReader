@@ -334,6 +334,7 @@ class JSPluginLoader(
         
         // If we have saved stubs, use them
         if (stubs.isNotEmpty()) {
+            val cachedPluginIds = stubs.keys
             val stubCatalogs = stubs.mapNotNull { (pluginId, stubData) ->
                 val file = pluginFiles[stubData.fileName]
                 if (file != null) {
@@ -343,6 +344,38 @@ class JSPluginLoader(
                     stubManager.removePluginStub(pluginId)
                     null
                 }
+            }.toMutableList()
+            
+            // Also scan for newly installed plugins not yet in cache
+            val newPluginFiles = pluginFiles.filter { (pluginId, _) -> pluginId !in cachedPluginIds }
+            if (newPluginFiles.isNotEmpty()) {
+                Log.info { "JSPluginLoader: Found ${newPluginFiles.size} new plugin files not in cache" }
+                val newStubs = newPluginFiles.mapNotNull { (pluginId, file) ->
+                    try {
+                        val metadataFile = file.parent!! / "${pluginId}.meta.json"
+                        val metadata = if (fileSystem.exists(metadataFile)) {
+                            try {
+                                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                                val content = fileSystem.source(metadataFile).buffer().use { it.readUtf8() }
+                                json.decodeFromString<PluginMetadata>(content)
+                            } catch (e: Exception) { null }
+                        } else { null }
+                        
+                        val finalMetadata = metadata ?: run {
+                            val jsCode = fileSystem.source(file).buffer().use { it.readUtf8() }
+                            extractMetadataFromCode(jsCode, pluginId)
+                        }
+                        
+                        if (finalMetadata != null) {
+                            stubManager.savePluginStub(finalMetadata, pluginId)
+                            createStubCatalog(finalMetadata, file)
+                        } else { null }
+                    } catch (e: Exception) {
+                        Log.warn { "JSPluginLoader: Failed to create stub for new plugin ${file.name}: ${e.message}" }
+                        null
+                    }
+                }
+                stubCatalogs.addAll(newStubs)
             }
             
             val loadTime = currentTimeToLong() - startTime

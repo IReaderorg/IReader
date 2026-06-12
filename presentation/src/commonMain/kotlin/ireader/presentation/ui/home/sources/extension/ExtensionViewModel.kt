@@ -492,18 +492,11 @@ class ExtensionViewModel(
                 
                 updateState { state ->
                     state.copy(
-                        installSteps = if (step != InstallStep.Success) {
-                            state.installSteps + (pkgName to step)
-                        } else {
-                            // Use targeted reload instead of full reload
-                            scope.launch {
-                                try {
-                                    catalogStore.reloadCatalog(pkgName)
-                                } catch (e: Exception) {
-                                    Log.error("Failed to reload catalog after install", e)
-                                }
-                            }
+                        installSteps = if (step is InstallStep.Success) {
+                            refreshCatalogsQuietly()
                             state.installSteps - pkgName
+                        } else {
+                            state.installSteps + (pkgName to step)
                         }
                     )
                 }

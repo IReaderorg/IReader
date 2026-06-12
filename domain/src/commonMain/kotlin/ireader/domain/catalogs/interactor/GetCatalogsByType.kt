@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.combine
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.models.entities.JSPluginCatalog
 import ireader.domain.catalogs.model.CatalogSort
 
 class GetCatalogsByType(
@@ -31,6 +32,10 @@ class GetCatalogsByType(
                 val installedPkgs = local
                     .asSequence()
                     .filterIsInstance<CatalogInstalled>()
+                    .map { it.pkgName }
+                    .toSet() + local
+                    .asSequence()
+                    .filterIsInstance<JSPluginCatalog>()
                     .map { it.pkgName }
                     .toSet()
 

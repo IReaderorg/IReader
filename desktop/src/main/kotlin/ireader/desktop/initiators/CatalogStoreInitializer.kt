@@ -17,14 +17,13 @@ class CatalogStoreInitializer(
 
     init {
         kotlinx.coroutines.MainScope().launchIO {
-            // Load plugins first so they're available for other components
             pluginManager?.loadPlugins()
             
-            // Then sync remote catalogs
+            catalogStore?.ensureInitialized()
+            
             syncRemoteCatalogs.await(forceRefresh = false)
         }
         
-        // Observe JS engine missing status from CatalogStore
         if (catalogStore != null && requiredPluginChecker != null) {
             requiredPluginChecker.observeCatalogStoreJSEngineStatus(catalogStore.jsEngineMissing)
         }

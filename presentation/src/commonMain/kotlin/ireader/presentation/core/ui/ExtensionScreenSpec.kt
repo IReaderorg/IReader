@@ -159,7 +159,14 @@ object ExtensionScreenSpec {
                             )
                         }
                     },
-                    onClickInstall = { vm.installCatalog(it) },
+                    onClickInstall = { catalog ->
+                        val isJSSource = catalog is ireader.domain.models.entities.CatalogRemote && catalog.pkgUrl.endsWith(".js")
+                        if (isJSSource && !requiredPluginChecker.isJSEngineAvailable()) {
+                            requiredPluginChecker.requestJSEngine()
+                        } else {
+                            vm.installCatalog(catalog)
+                        }
+                    },
                     onClickTogglePinned = { vm.togglePinnedCatalog(it) },
                     onClickUninstall = { vm.uninstallCatalog(it) },
                     snackBarHostState = snackBarHostState,

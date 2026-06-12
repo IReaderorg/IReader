@@ -229,13 +229,10 @@ class ExtensionController(
                     
                     if (step is InstallStep.Success) {
                         _events.emit(ExtensionEvent.InstallComplete(catalog))
-                        // Use targeted reload instead of full reload for better performance
-                        scope.launch {
-                            try {
-                                catalogStore.reloadCatalog(catalog.pkgName)
-                            } catch (e: Exception) {
-                                Log.error(e, "$TAG: Failed to reload catalog after install")
-                            }
+                        try {
+                            catalogStore.reloadCatalogs()
+                        } catch (e: Exception) {
+                            Log.error(e, "$TAG: Failed to reload catalogs after install")
                         }
                     }
                 }
@@ -331,10 +328,10 @@ class ExtensionController(
         
         _state.update { state ->
             state.copy(
-                installSteps = if (step != InstallStep.Success) {
-                    state.installSteps + (pkgName to step)
-                } else {
+                installSteps = if (step is InstallStep.Success) {
                     state.installSteps - pkgName
+                } else {
+                    state.installSteps + (pkgName to step)
                 }
             )
         }
