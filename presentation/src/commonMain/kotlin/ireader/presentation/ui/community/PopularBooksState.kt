@@ -3,6 +3,7 @@ package ireader.presentation.ui.community
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import ireader.domain.models.gamification.CommunityAnnouncement
+import ireader.domain.models.entities.SourceGroup
 import ireader.domain.models.remote.PopularBook
 
 /**
@@ -55,6 +56,9 @@ data class PopularBooksScreenState(
     val discordOnline: Int? = null,
     val selectedBook: PopularBookGroup? = null,        // book detail sheet
     val resolvingSourceFor: String? = null,            // group key currently resolving
+    val showSourceInstallDialog: Boolean = false,
+    val pendingInstallSourceName: String = "",
+    val pendingInstallSourceGroup: SourceGroup? = null,
 ) {
     @Stable
     val isEmpty: Boolean get() = groups.isEmpty() && !isInitialLoading

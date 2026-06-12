@@ -74,7 +74,8 @@ class SupabaseRemoteRepository(
         @SerialName("title") val title: String,
         @SerialName("book_url") val book_url: String,
         @SerialName("last_read") val last_read: Long,
-        @SerialName("cover_url") val cover_url: String = ""
+        @SerialName("cover_url") val cover_url: String = "",
+        @SerialName("source_name") val source_name: String = ""
     )
     
     init {
@@ -476,6 +477,7 @@ class SupabaseRemoteRepository(
                     put("book_url", book.bookUrl)
                     put("last_read", book.lastRead)
                     put("cover_url", book.coverUrl)
+                    put("source_name", book.sourceName)
                 }
                 
                 backendService.upsert(
@@ -525,7 +527,8 @@ class SupabaseRemoteRepository(
             title = title,
             book_url = bookUrl,
             last_read = lastRead,
-            cover_url = coverUrl
+            cover_url = coverUrl,
+            source_name = sourceName
         )
     }
     
@@ -537,7 +540,8 @@ class SupabaseRemoteRepository(
             title = title,
             bookUrl = book_url,
             lastRead = last_read,
-            coverUrl = cover_url
+            coverUrl = cover_url,
+            sourceName = source_name
         )
     }
 }

@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.core.ui.AsyncImage
+import ireader.presentation.ui.popular.SourceInstallDialog
 
 private val Gold = Color(0xFFFFC73C)
 private val Silver = Color(0xFFC6CCD6)
@@ -65,6 +66,7 @@ fun PopularBooksScreen(
     onNavigateToGlobalSearch: (String) -> Unit = {},
     onOpenExternalUrl: (String) -> Unit = {},
     onAddSources: () -> Unit = {},
+    onNavigateToExtensions: () -> Unit = {},
 ) {
     val state by vm.state.collectAsState()
     val listState = rememberLazyListState()
@@ -153,6 +155,19 @@ fun PopularBooksScreen(
                 },
             )
         }
+    }
+
+    // Source install dialog
+    if (state.showSourceInstallDialog) {
+        SourceInstallDialog(
+            sourceName = state.pendingInstallSourceName,
+            sourceGroup = state.pendingInstallSourceGroup,
+            onDismiss = { vm.dismissSourceInstallDialog() },
+            onInstall = {
+                vm.dismissSourceInstallDialog()
+                onNavigateToExtensions()
+            }
+        )
     }
 }
 

@@ -7,6 +7,8 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CommunityVotesRepository
 import ireader.domain.data.repository.DiscordWidgetRepository
 import ireader.domain.data.repository.PopularBooksRepository
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.SourceGroup
 import ireader.domain.models.remote.PopularBook
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.delay
@@ -261,7 +263,7 @@ class PopularBooksViewModel(
     }
 
     /** Open a specific source variant: local book if owned, else if source installed
-     *  go to global search, else prompt to install the source. */
+     *  fetch from source and save, else prompt to install the source. */
     fun openSource(group: PopularBookGroup, variant: BookSourceVariant, onResult: (BookNavigationAction) -> Unit) {
         scope.launch {
             _state.update { it.copy(resolvingSourceFor = group.key) }
@@ -269,13 +271,49 @@ class PopularBooksViewModel(
                 val local = runCatching { bookRepository.findDuplicateBook(group.title, variant.sourceId) }.getOrNull()
                 when {
                     local != null -> onResult(BookNavigationAction.OpenLocalBook(local.id))
-                    catalogStore?.get(variant.sourceId) != null -> onResult(BookNavigationAction.OpenGlobalSearch(group.title))
-                    else -> onResult(BookNavigationAction.SourceMissing(variant.sourceName))
+                    catalogStore?.get(variant.sourceId) != null -> {
+                        val catalog = catalogStore.get(variant.sourceId)!!
+                        val source = catalog.source
+                        if (source != null) {
+                            val book = Book(
+                                sourceId = variant.sourceId,
+                                title = group.title,
+                                key = variant.bookUrl,
+                                cover = group.coverUrl ?: "",
+                                description = group.description ?: ""
+                            )
+                            val bookId = bookRepository.upsert(book)
+                            if (bookId > 0) {
+                                onResult(BookNavigationAction.OpenLocalBook(bookId))
+                            } else {
+                                onResult(BookNavigationAction.OpenGlobalSearch(group.title))
+                            }
+                        } else {
+                            onResult(BookNavigationAction.OpenGlobalSearch(group.title))
+                        }
+                    }
+                    else -> {
+                        val sourceGroup = SourceGroup.fromSourceName(variant.sourceName)
+                        _state.update {
+                            it.copy(
+                                showSourceInstallDialog = true,
+                                pendingInstallSourceName = variant.sourceName,
+                                pendingInstallSourceGroup = sourceGroup,
+                                resolvingSourceFor = null
+                            )
+                        }
+                    }
                 }
+            } catch (e: Exception) {
+                onResult(BookNavigationAction.OpenGlobalSearch(group.title))
             } finally {
                 _state.update { it.copy(resolvingSourceFor = null) }
             }
         }
+    }
+
+    fun dismissSourceInstallDialog() {
+        _state.update { it.copy(showSourceInstallDialog = false, pendingInstallSourceName = "", pendingInstallSourceGroup = null) }
     }
 
     /** Cast a free daily Power-Stone vote for a community book (drives Trending). */

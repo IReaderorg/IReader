@@ -250,7 +250,7 @@ val DomainServices = module {
     factory  { ireader.domain.usecases.updates.DeleteAllUpdates(get()) }
 
     // Sync Use Cases
-    factory  { ireader.domain.usecases.sync.SyncBooksUseCase(get()) }
+    factory  { ireader.domain.usecases.sync.SyncBooksUseCase(get(), getOrNull()) }
     factory  { ireader.domain.usecases.sync.GetSyncedDataUseCase(get()) }
     factory  { ireader.domain.usecases.sync.FetchAndMergeSyncedBooksUseCase(get(), get(), get()) }
     factory  { ireader.domain.usecases.sync.RefreshLibraryFromRemoteUseCase(get(), get()) }

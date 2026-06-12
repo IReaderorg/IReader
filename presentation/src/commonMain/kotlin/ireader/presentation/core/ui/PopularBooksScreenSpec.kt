@@ -31,6 +31,12 @@ class PopularBooksScreenSpec {
                 // Source for this book isn't installed — take the user to global search
                 // where they can pick an installed source or be prompted to add more.
                 navController.navigateTo(GlobalSearchScreenSpec(query = null))
+            },
+            onNavigateToExtensions = {
+                // Navigate to extensions tab (index 3 in bottom nav)
+                navController.navigate("main") {
+                    popUpTo("main") { inclusive = true }
+                }
             }
         )
     }

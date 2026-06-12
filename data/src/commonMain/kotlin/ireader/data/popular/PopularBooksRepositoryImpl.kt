@@ -69,7 +69,7 @@ class PopularBooksRepositoryImpl(
                 // Fallback to client-side grouping if SQL function doesn't exist
                 val queryResult = backendService.query(
                     table = "synced_books",
-                    columns = "book_id, title, book_url, source_id, source_name, description, last_read",
+                    columns = "book_id, title, book_url, source_id, source_name, description, last_read, cover_url",
                     orderBy = "last_read",
                     ascending = false,
                     limit = limit * 3  // Get more to account for grouping

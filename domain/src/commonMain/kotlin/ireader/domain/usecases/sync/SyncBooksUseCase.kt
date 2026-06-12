@@ -4,12 +4,14 @@ import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.remote.SyncedBook
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.catalogs.CatalogStore
 
 /**
  * Use case for syncing books to remote backend
  */
 class SyncBooksUseCase(
-    private val remoteRepository: RemoteRepository
+    private val remoteRepository: RemoteRepository,
+    private val catalogStore: CatalogStore? = null
 ) {
     
     suspend operator fun invoke(userId: String, books: List<Book>): Result<Unit> {
@@ -27,7 +29,8 @@ class SyncBooksUseCase(
                     title = book.title,
                     bookUrl = book.key,
                     sourceId = book.sourceId,
-                    coverUrl = book.cover
+                    coverUrl = book.cover,
+                    sourceName = catalogStore?.get(book.sourceId)?.name ?: ""
                 )
             }
             
@@ -79,7 +82,8 @@ class SyncBooksUseCase(
                     title = book.title,
                     bookUrl = book.key,
                     lastRead = currentTimeToLong(),
-                    coverUrl = book.cover
+                    coverUrl = book.cover,
+                    sourceName = catalogStore?.get(book.sourceId)?.name ?: ""
                 )
                 
                 remoteRepository.syncBook(syncedBook)
