@@ -137,6 +137,17 @@ fun CommonNavHost(
             ireader.presentation.core.ui.ReadingHubScreenSpec().Content()
         }
         
+        // Spirit Stone Shop - spend stones on titles and badges
+        composable(NavigationRoutes.spiritStones) {
+            val vm: ireader.presentation.ui.spiritstone.SpiritStoneShopViewModel = getIViewModel()
+            val navController = requireNotNull(LocalNavigator.current)
+            
+            ireader.presentation.ui.spiritstone.SpiritStoneShopScreen(
+                vm = vm,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        
         // My Quotes Screen - View and manage saved quotes (replaces old quotes/submit screens)
         composable(NavigationRoutes.myQuotes) {
             val vm: ireader.presentation.ui.quote.MyQuotesViewModel = getIViewModel()

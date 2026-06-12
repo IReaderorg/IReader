@@ -105,9 +105,18 @@ fun ReadingHubScreen(
         UnifiedHubContent(
             state = state,
             isWideScreen = isWideScreen,
+            onCreateChallenge = { type, minutes -> vm.createChallenge(type, minutes) },
+            onDismissMilestone = { vm.dismissMilestoneCelebration() },
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+        )
+        
+        // Milestone Celebration Overlay
+        MilestoneCelebrationOverlay(
+            milestone = state.currentMilestone,
+            visible = state.showMilestoneCelebration,
+            onDismiss = { vm.dismissMilestoneCelebration() }
         )
     }
 }
@@ -182,6 +191,8 @@ private fun ModernReadingHubTopBar(
 private fun UnifiedHubContent(
     state: ReadingHubState,
     isWideScreen: Boolean,
+    onCreateChallenge: (ireader.domain.models.gamification.ChallengeType, Long) -> Unit,
+    onDismissMilestone: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val contentPadding = if (isWideScreen) 24.dp else 16.dp
@@ -215,6 +226,16 @@ private fun UnifiedHubContent(
                     modifier = Modifier.weight(1f)
                 )
             }
+        }
+        
+        // Reading Challenges Section
+        item {
+            ReadingChallengeCard(
+                dailyChallenge = state.challengeState.dailyChallenge,
+                weeklyChallenge = state.challengeState.weeklyChallenge,
+                monthlyChallenge = state.challengeState.monthlyChallenge,
+                onCreateChallenge = onCreateChallenge
+            )
         }
         
         // Detailed Stats Section

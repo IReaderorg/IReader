@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.*
@@ -59,6 +60,7 @@ fun MoreScreen(
     onWeb3Profile: () -> Unit = {},
     onCommunityHub: () -> Unit = {},
     onReadingBuddy: () -> Unit = {},
+    onSpiritStoneShop: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
@@ -244,6 +246,18 @@ fun MoreScreen(
                 icon = Icons.Filled.Pets,
                 onClick = onReadingBuddy
             )
+        }
+        
+        // Spirit Stone Shop
+        if (vm.supabaseEnabled.value) {
+            item {
+                SettingsItem(
+                    title = "Spirit Stone Shop",
+                    description = "Spend stones on titles, badges & cosmetics",
+                    icon = Icons.Filled.Star,
+                    onClick = onSpiritStoneShop
+                )
+            }
         }
         
         // Library Management Section

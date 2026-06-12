@@ -2,8 +2,15 @@ package ireader.presentation.ui.readinghub
 
 import androidx.compose.runtime.Stable
 import ireader.core.log.Log
+import ireader.domain.data.repository.ReadingChallengeRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.models.entities.ReadingStatisticsType1
+import ireader.domain.models.gamification.ChallengeType
+import ireader.domain.models.gamification.Milestone
+import ireader.domain.models.gamification.MilestoneMetric
+import ireader.domain.models.gamification.Milestones
+import ireader.domain.models.gamification.ReadingChallenge
+import ireader.domain.models.gamification.ReadingChallengeState
 import ireader.domain.models.quote.*
 import ireader.domain.preferences.prefs.ReadingBuddyPreferences
 import ireader.domain.usecases.quote.ReadingBuddyUseCases
@@ -30,6 +37,14 @@ data class ReadingHubState(
     val allAchievements: List<BuddyAchievement> = BuddyAchievement.ALL_ACHIEVEMENTS,
     val levelProgress: Float = 0f,
     
+    // Reading Challenges
+    val challengeState: ReadingChallengeState = ReadingChallengeState(),
+    
+    // Milestones
+    val currentMilestone: Milestone? = null,
+    val showMilestoneCelebration: Boolean = false,
+    val unseenMilestones: List<Milestone> = emptyList(),
+    
     // Quote card style preference
     val selectedCardStyle: QuoteCardStyle = QuoteCardStyle.GRADIENT_SUNSET,
     
@@ -55,7 +70,8 @@ class ReadingHubViewModel(
     private val getReadingStatistics: GetReadingStatisticsUseCase,
     private val readingBuddyUseCases: ReadingBuddyUseCases,
     private val preferences: ReadingBuddyPreferences,
-    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
+    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?,
+    private val challengeRepository: ReadingChallengeRepository? = null
 ) : BaseViewModel() {
     
     private val _state = MutableStateFlow(ReadingHubState())
@@ -64,6 +80,7 @@ class ReadingHubViewModel(
     init {
         loadInitialData()
         observeStatistics()
+        observeChallenges()
     }
     
     /**
@@ -83,6 +100,55 @@ class ReadingHubViewModel(
                         buddyState = buddyState,
                         unlockedAchievements = achievements,
                         levelProgress = levelProgress
+                    )
+                }
+                
+                // Update challenge progress when stats change
+                challengeRepository?.updateChallengeProgress(0) // Trigger progress check
+                
+                // Check for milestones
+                checkMilestones(stats)
+            }
+        }
+    }
+    
+    private fun observeChallenges() {
+        val repo = challengeRepository ?: return
+        scope.launch {
+            repo.observeChallenges().collect { challengeState ->
+                _state.update { it.copy(challengeState = challengeState) }
+            }
+        }
+    }
+    
+    private fun checkMilestones(stats: ReadingStatisticsType1) {
+        scope.launch {
+            val repo = challengeRepository ?: return@launch
+            val seen = repo.getSeenMilestones()
+            val newMilestones = mutableListOf<Milestone>()
+            
+            Milestones.ALL.forEach { milestone ->
+                if (milestone.id !in seen) {
+                    val currentValue = when (milestone.metric) {
+                        MilestoneMetric.BOOKS_READ -> stats.booksCompleted.toLong()
+                        MilestoneMetric.CHAPTERS_READ -> stats.totalChaptersRead.toLong()
+                        MilestoneMetric.READING_MINUTES -> stats.totalReadingTimeMinutes.toLong()
+                        MilestoneMetric.STREAK_DAYS -> stats.readingStreak.toLong()
+                    }
+                    if (currentValue >= milestone.threshold) {
+                        newMilestones.add(milestone)
+                    }
+                }
+            }
+            
+            if (newMilestones.isNotEmpty()) {
+                val firstMilestone = newMilestones.first()
+                repo.markMilestoneSeen(firstMilestone.id)
+                _state.update {
+                    it.copy(
+                        currentMilestone = firstMilestone,
+                        showMilestoneCelebration = true,
+                        unseenMilestones = newMilestones
                     )
                 }
             }
@@ -188,6 +254,34 @@ class ReadingHubViewModel(
     
     fun dismissResetConfirmDialog() {
         _state.update { it.copy(showResetConfirmDialog = false) }
+    }
+    
+    fun createChallenge(type: ChallengeType, minutes: Long) {
+        scope.launch {
+            try {
+                when (type) {
+                    ChallengeType.DAILY -> challengeRepository?.createDailyGoal(minutes)
+                    ChallengeType.WEEKLY -> challengeRepository?.createWeeklyGoal(minutes)
+                    ChallengeType.MONTHLY -> challengeRepository?.createMonthlyGoal(minutes)
+                }
+                _state.update { it.copy(successMessage = "${type.label} goal set! 🎯") }
+            } catch (e: Exception) {
+                Log.error(e, "Failed to create challenge")
+                _state.update { it.copy(error = "Failed to create goal: ${e.message}") }
+            }
+        }
+    }
+    
+    fun dismissMilestoneCelebration() {
+        _state.update {
+            val remaining = it.unseenMilestones.drop(1)
+            val next = remaining.firstOrNull()
+            it.copy(
+                showMilestoneCelebration = false,
+                currentMilestone = next,
+                unseenMilestones = remaining
+            )
+        }
     }
     
     fun resetStatistics() {

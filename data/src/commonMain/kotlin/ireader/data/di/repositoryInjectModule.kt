@@ -382,4 +382,11 @@ val repositoryInjectModule = module {
             httpClient = get<ireader.core.http.HttpClients>().default,
         )
     }
+
+    // Reading Challenge Repository (cross-platform, uses PreferenceStore)
+    single<ireader.domain.data.repository.ReadingChallengeRepository> {
+        ireader.data.challenge.ReadingChallengeRepositoryImpl(
+            prefs = get<ireader.core.prefs.PreferenceStoreFactory>().create("reading_challenges")
+        )
+    }
 }

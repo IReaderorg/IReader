@@ -221,6 +221,18 @@ val screenModelModule = module {
             getCurrentUser = {
                 val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
                 getCurrentUserUseCase().getOrNull()
+            },
+            challengeRepository = getOrNull()
+        )
+    }
+    
+    // Spirit Stone Shop ViewModel
+    factory {
+        ireader.presentation.ui.spiritstone.SpiritStoneShopViewModel(
+            gamificationRepository = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
             }
         )
     }

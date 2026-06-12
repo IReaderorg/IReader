@@ -71,6 +71,9 @@ object MoreScreenSpec {
                 onReadingBuddy = {
                     navController.navigate(NavigationRoutes.readingHub)
                 },
+                onSpiritStoneShop = {
+                    navController.navigate(NavigationRoutes.spiritStones)
+                },
             )
         }
     }
