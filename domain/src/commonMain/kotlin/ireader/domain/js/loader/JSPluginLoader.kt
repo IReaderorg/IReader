@@ -1,4 +1,4 @@
-﻿package ireader.domain.js.loader
+package ireader.domain.js.loader
 
 import io.ktor.client.HttpClient
 import ireader.core.log.Log
@@ -420,6 +420,17 @@ class JSPluginLoader(
             metadata = metadata,
             pluginFile = file
         )
+    }
+    
+    /**
+     * Find a single plugin file by package name.
+     * @param pkgName The package name of the plugin to find
+     * @return The plugin file path, or null if not found
+     */
+    fun findPluginFile(pkgName: String): Path? {
+        if (!fileSystem.exists(pluginsDirectory)) return null
+        val pluginFile = pluginsDirectory / "$pkgName.js"
+        return if (fileSystem.exists(pluginFile)) pluginFile else null
     }
     
     /**

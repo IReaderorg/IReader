@@ -24,6 +24,14 @@ interface AsyncPluginLoader {
     suspend fun loadJSPluginsAsync(onPluginLoaded: (JSPluginCatalog) -> Unit)
     
     /**
+     * Load a single JS plugin by package name.
+     * This is much more efficient than loading ALL plugins for a single installation event.
+     * @param pkgName The package name of the plugin to load
+     * @return The loaded catalog, or null if not found or loading failed
+     */
+    suspend fun loadSingleJSPlugin(pkgName: String): JSPluginCatalog? = null
+    
+    /**
      * Check if JS engine is missing (plugins installed but can't be loaded).
      * Returns true if there are JS plugin files but no JS engine to run them.
      */

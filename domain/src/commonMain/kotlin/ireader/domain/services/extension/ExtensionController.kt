@@ -229,7 +229,14 @@ class ExtensionController(
                     
                     if (step is InstallStep.Success) {
                         _events.emit(ExtensionEvent.InstallComplete(catalog))
-                        refreshCatalogsQuietly()
+                        // Use targeted reload instead of full reload for better performance
+                        scope.launch {
+                            try {
+                                catalogStore.reloadCatalog(catalog.pkgName)
+                            } catch (e: Exception) {
+                                Log.error(e, "$TAG: Failed to reload catalog after install")
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -257,9 +264,9 @@ class ExtensionController(
             
             _events.emit(ExtensionEvent.UninstallComplete(catalog.pkgName))
             
-            // Delay and refresh to allow system to process uninstall
-            kotlinx.coroutines.delay(1000)
-            refreshCatalogsQuietly()
+            // Delay to allow system to process uninstall
+            // The CatalogStore.onUninstalled() handler removes the catalog via catalogUpdateChannel
+            kotlinx.coroutines.delay(500)
             
         } catch (e: Exception) {
             Log.error(e, "$TAG: Failed to uninstall ${catalog.pkgName}")

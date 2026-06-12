@@ -1,4 +1,4 @@
-﻿package ireader.domain.catalogs
+package ireader.domain.catalogs
 
 import ireader.core.log.Log
 import ireader.core.source.LocalCatalogSource
@@ -150,7 +150,7 @@ class CatalogStore(
                     scope.launch {
                         val isPinned = catalog.sourceId.toString() in cachedPinnedIds
                         val updated = catalog.copy(isPinned = isPinned)
-                        catalogUpdateChannel.trySend(CatalogUpdate.Add(updated))
+                        catalogUpdateChannel.send(CatalogUpdate.Add(updated))
                     }
                 }
                 
@@ -171,9 +171,29 @@ class CatalogStore(
      * Trigger lazy initialization - call this when catalogs are first needed.
      * This is safe to call multiple times - only the first call will initialize.
      * Uses double-checked locking pattern with coroutine mutex.
+     * 
+     * If initialization was started but failed (catalogs still empty after timeout),
+     * allows retry by resetting the initialization flag.
      */
     fun ensureInitialized() {
-        if (initializationStarted) return
+        if (initializationStarted && _isInitialized.value) return
+        
+        // Allow retry if initialization was started but never completed
+        if (initializationStarted && !_isInitialized.value) {
+            scope.launch {
+                kotlinx.coroutines.delay(3000)
+                if (!_isInitialized.value) {
+                    lock.withLock {
+                        if (!_isInitialized.value) {
+                            Log.warn { "CatalogStore: Initialization timed out, allowing retry" }
+                            initializationStarted = false
+                        }
+                    }
+                    ensureInitialized()
+                }
+            }
+            return
+        }
         
         // Use scope.launch to handle the mutex-based initialization
         scope.launch {
@@ -183,7 +203,13 @@ class CatalogStore(
                 
                 // Load catalogs with optimized initialization
                 launch {
-                    initializeCatalogs()
+                    try {
+                        initializeCatalogs()
+                    } catch (e: Exception) {
+                        Log.error("CatalogStore: Initialization failed", e)
+                        // Don't set initializationStarted back to false here to prevent races
+                        // The retry mechanism above will handle it
+                    }
                 }
                 
                 // Listen for installation changes
@@ -490,41 +516,41 @@ class CatalogStore(
                     }
 
                     if (catalog == null) {
-                        // Try loading as JS plugin
-                        loadJSPluginAsync(pkgName)
+                        // Try loading as JS plugin - load ONLY this specific plugin
+                        loadSingleJSPlugin(pkgName)
                         return@launch
                     }
 
-                    // Use batch update channel
-                    catalogUpdateChannel.trySend(CatalogUpdate.Add(catalog))
+                    // Use batch update channel (suspending to prevent dropped updates)
+                    catalogUpdateChannel.send(CatalogUpdate.Add(catalog))
                 }
             }
         }
     }
     
     /**
-     * Load a JS plugin asynchronously.
+     * Load a single JS plugin by package name.
+     * This is much more efficient than loading ALL plugins for each installation event.
      */
-    private fun loadJSPluginAsync(pkgName: String) {
-        val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader ?: return
-        
-        scope.launch {
-            loadingSemaphore.withPermit {
-                try {
-                    asyncLoader.loadJSPluginsAsync { newCatalog ->
-                        if (newCatalog.pkgName == pkgName) {
-                            scope.launch {
-                                val isPinned = newCatalog.sourceId.toString() in cachedPinnedIds
-                                val updated = newCatalog.copy(isPinned = isPinned)
-                                catalogUpdateChannel.trySend(CatalogUpdate.Add(updated))
-                                stubSourceIds.remove(newCatalog.sourceId)
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.error("CatalogStore: Failed to load JS plugin $pkgName", e)
-                }
+    private suspend fun loadSingleJSPlugin(pkgName: String) {
+        try {
+            val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader ?: run {
+                Log.warn { "CatalogStore: Cannot load single JS plugin - loader not an AsyncPluginLoader" }
+                return
             }
+            
+            val catalog = asyncLoader.loadSingleJSPlugin(pkgName)
+            if (catalog != null) {
+                val isPinned = catalog.sourceId.toString() in cachedPinnedIds
+                val updated = catalog.copy(isPinned = isPinned)
+                catalogUpdateChannel.send(CatalogUpdate.Add(updated))
+                stubSourceIds.remove(catalog.sourceId)
+                Log.info("CatalogStore: Loaded single JS plugin $pkgName")
+            } else {
+                Log.warn { "CatalogStore: JS plugin $pkgName returned null from loader" }
+            }
+        } catch (e: Exception) {
+            Log.error("CatalogStore: Failed to load single JS plugin $pkgName", e)
         }
     }
 
@@ -542,7 +568,7 @@ class CatalogStore(
                 }
 
                 if (shouldRemove) {
-                    catalogUpdateChannel.trySend(CatalogUpdate.Remove(installedCatalog.sourceId))
+                    catalogUpdateChannel.send(CatalogUpdate.Remove(installedCatalog.sourceId))
                 }
             }
         }
@@ -618,7 +644,7 @@ class CatalogStore(
                 } else false
 
                 val updatedCatalog = catalog.copy(isPinned = isPinned, hasUpdate = hasUpdate)
-                catalogUpdateChannel.trySend(CatalogUpdate.Replace(updatedCatalog))
+                catalogUpdateChannel.send(CatalogUpdate.Replace(updatedCatalog))
                 stubSourceIds.remove(catalog.sourceId)
             }
         }
@@ -656,7 +682,7 @@ class CatalogStore(
                 if (catalog != null) {
                     // Process and update the catalog
                     val processed = processCatalog(catalog)
-                    catalogUpdateChannel.trySend(CatalogUpdate.Add(processed))
+                    catalogUpdateChannel.send(CatalogUpdate.Add(processed))
                     Log.info("CatalogStore: Catalog $pkgName reloaded successfully")
                     processed
                 } else {
@@ -720,7 +746,7 @@ class CatalogStore(
                         scope.launch {
                             val isPinned = catalog.sourceId.toString() in cachedPinnedIds
                             val updated = catalog.copy(isPinned = isPinned)
-                            catalogUpdateChannel.trySend(CatalogUpdate.Add(updated))
+                            catalogUpdateChannel.send(CatalogUpdate.Add(updated))
                         }
                     }
                 }

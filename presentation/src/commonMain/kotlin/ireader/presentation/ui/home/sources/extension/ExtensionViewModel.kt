@@ -186,8 +186,12 @@ class ExtensionViewModel(
     /**
      * After a crash recovery, the catalog flow subscription can lose the race
      * against the ExtensionController's subscription. This method schedules a
-     * delayed check: if userSources is still empty after catalogs should have
-     * been loaded, it triggers a re-dispatch to recover.
+     * delayed check: if catalogs are still in a bad state, it triggers a
+     * re-dispatch to recover.
+     * 
+     * Retries when:
+     * 1. Both installed AND remote lists are empty (total data loss)
+     * 2. Installed catalogs are empty but remote catalogs are loaded (stale local state)
      */
     private fun scheduleEmptySourcesRetry() {
         scope.launch(ioDispatcher) {
@@ -196,11 +200,22 @@ class ExtensionViewModel(
             val state = _state.value
             val hasEmptyInstalledLists = state.allPinnedCatalogs.isEmpty() && state.allUnpinnedCatalogs.isEmpty()
             val hasEmptyRemoteLists = state.allRemoteCatalogs.isEmpty()
-            // If all catalog lists are empty after the retry delay, the initial
-            // subscription race was likely lost. Re-dispatch to recover.
-            if (hasEmptyInstalledLists && hasEmptyRemoteLists) {
-                Log.debug { "ExtensionViewModel: All catalog lists empty after retry delay, re-dispatching LoadExtensions" }
+            // If installed is empty (either both empty, or local stale while remote loaded),
+            // re-dispatch to recover
+            if (hasEmptyInstalledLists) {
+                Log.debug { "ExtensionViewModel: Installed catalogs empty after retry delay (remote empty=$hasEmptyRemoteLists), re-dispatching LoadExtensions" }
                 extensionController?.dispatch(ExtensionCommand.LoadExtensions)
+            }
+            
+            // Second retry at longer interval for edge cases
+            if (hasEmptyInstalledLists) {
+                delay(EMPTY_SOURCES_RETRY_DELAY_MS * 3)
+                val currentState = _state.value
+                val stillEmpty = currentState.allPinnedCatalogs.isEmpty() && currentState.allUnpinnedCatalogs.isEmpty()
+                if (stillEmpty) {
+                    Log.debug { "ExtensionViewModel: Installed catalogs still empty after second retry, re-dispatching" }
+                    extensionController?.dispatch(ExtensionCommand.LoadExtensions)
+                }
             }
         }
     }
@@ -480,7 +495,14 @@ class ExtensionViewModel(
                         installSteps = if (step != InstallStep.Success) {
                             state.installSteps + (pkgName to step)
                         } else {
-                            refreshCatalogsQuietly()
+                            // Use targeted reload instead of full reload
+                            scope.launch {
+                                try {
+                                    catalogStore.reloadCatalog(pkgName)
+                                } catch (e: Exception) {
+                                    Log.error("Failed to reload catalog after install", e)
+                                }
+                            }
                             state.installSteps - pkgName
                         }
                     )

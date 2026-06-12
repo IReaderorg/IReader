@@ -492,6 +492,20 @@ class AndroidCatalogLoader(
     fun getJSPluginLoader(): JSPluginLoader = jsPluginLoader
     
     /**
+     * Load a single JS plugin by package name.
+     * This is much more efficient than loading ALL plugins for a single installation event.
+     */
+    override suspend fun loadSingleJSPlugin(pkgName: String): ireader.domain.models.entities.JSPluginCatalog? {
+        return try {
+            val pluginFile = jsPluginLoader.findPluginFile(pkgName) ?: return null
+            jsPluginLoader.loadPlugin(pluginFile)
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to load single JS plugin $pkgName", e)
+            null
+        }
+    }
+    
+    /**
      * Check if JS engine is missing (plugins installed but can't be loaded).
      * Returns true if there are JS plugin files but no JS engine to run them.
      */
