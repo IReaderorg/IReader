@@ -135,7 +135,18 @@ object MainStarterScreen {
                 currentTabIndex = pending
             }
         }
-        
+
+        // Discord Rich Presence: publish which main tab is visible. The holder's setter
+        // is idempotent so recomposition doesn't thrash; the key fires on first
+        // composition and on every real tab change (covers deep-link initial tab too).
+        val activityHolder = org.koin.compose.koinInject<ireader.domain.services.discord.ActivityStateHolder>()
+        LaunchedEffect(currentTabIndex) {
+            activityHolder.setBrowsing(
+                tab = ireader.presentation.core.ui.AppTab.fromIndex(currentTabIndex).displayName,
+                subTab = null,
+            )
+        }
+
         // Track visited tabs - start EMPTY to defer all tab initialization
         // This improves startup time by not loading Library data until after first frame
         var visitedTabs by rememberSaveable { mutableStateOf(emptySet<Int>()) }

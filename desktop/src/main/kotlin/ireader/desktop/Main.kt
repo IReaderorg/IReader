@@ -136,6 +136,20 @@ fun main() {
             // Silently ignore auto-sync service errors
         }
 
+        // Discord Rich Presence: eagerly start the state publisher + TTS bridge so they
+        // begin observing activity and writing ~/.cache/IReader/discord_state.json, which
+        // the standalone ireader-discord bridge reads and pushes as RPC. Koin singles are
+        // lazy, so without this nothing instantiates them. Gated on a user preference.
+        try {
+            val appPrefs = koinApp.koin.get<ireader.domain.preferences.prefs.AppPreferences>()
+            if (appPrefs.discordRichPresenceEnabled().get()) {
+                koinApp.koin.getOrNull<ireader.domain.services.discord.DiscordStatePublisher>()
+                koinApp.koin.getOrNull<ireader.domain.services.discord.TTSActivityBridge>()
+            }
+        } catch (_: Exception) {
+            // A missing/failed RPC publisher must never break app startup.
+        }
+
         //Dispatchers.setMain(StandardTestDispatcher())
         application {
             val state = rememberWindowState()
