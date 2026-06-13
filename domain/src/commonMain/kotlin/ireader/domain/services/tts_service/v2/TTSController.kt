@@ -402,7 +402,7 @@ class TTSController(
             it.copy(
                 cachedParagraphs = it.cachedParagraphs + completedIndex,
                 loadingParagraphs = it.loadingParagraphs - completedIndex
-            )
+            ) 
         }
         
         // Handle chunk mode completion
@@ -425,7 +425,11 @@ class TTSController(
             _events.emit(TTSEvent.ChapterCompleted)
             
             if (currentState.autoNextChapter) {
-                nextChapter()
+                // Dispatch through commandMutex to prevent races with user-initiated commands.
+                // Calling nextChapter() directly here bypasses the mutex, which can cause
+                // the engine to receive concurrent speak() calls during the chapter transition,
+                // resulting in TTS reading only the first syllable then stopping.
+                dispatch(TTSCommand.NextChapter)
             } else {
                 _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
             }
@@ -457,7 +461,8 @@ class TTSController(
             _events.emit(TTSEvent.ChapterCompleted)
             
             if (currentState.autoNextChapter) {
-                nextChapter()
+                // Dispatch through commandMutex to prevent races with user-initiated commands
+                dispatch(TTSCommand.NextChapter)
             } else {
                 _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
             }
@@ -562,6 +567,11 @@ class TTSController(
         val wasPlaying = _state.value.isPlaying
         engine?.stop()
 
+        // Yield to let the native TTS engine fully process the stop command.
+        // On some Android OEMs, stop() is not fully synchronous and the engine
+        // needs a brief moment to settle before a new speak() call.
+        kotlinx.coroutines.yield()
+
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
 
         try {
@@ -588,6 +598,9 @@ class TTSController(
 
         val wasPlaying = _state.value.isPlaying
         engine?.stop()
+
+        // Yield to let the native TTS engine fully process the stop command
+        kotlinx.coroutines.yield()
 
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
 
