@@ -5,12 +5,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.readBytes
 import ireader.core.log.Log
+import ireader.core.source.model.ImageBase64
+import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Text
 import ireader.core.util.IO
 import ireader.core.util.randomUUID
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.epub.EpubChapter
+import ireader.domain.models.epub.EmbeddedImage
 import ireader.domain.models.epub.EpubMetadata
 import ireader.domain.models.epub.ExportOptions
 import ireader.domain.usecases.epub.HtmlContentCleaner
@@ -64,22 +67,36 @@ class EpubBuilder(
             createMimetypeFile(tempDir)
             createContainerXml(tempDir)
             
-            // Process chapters (with optional translated content)
+            // Process chapters (with optional translated content) - includes image download
             val epubChapters = processChapters(chapters, options, translationsMap)
+            
+            // Download cover image first to determine actual format
+            var coverExtension = "jpg"
+            var coverMediaType = "image/jpeg"
+            if (options.includeCover && book.cover.isNotEmpty()) {
+                val coverResult = downloadAndEmbedCover(tempDir, book.cover)
+                if (coverResult != null) {
+                    coverExtension = coverResult.first
+                    coverMediaType = coverResult.second
+                }
+            }
+            
+            // Save embedded chapter images
+            epubChapters.forEach { chapter ->
+                chapter.images.forEach { image ->
+                    val imageFile = tempDir / "OEBPS" / "Images" / image.fileName
+                    fileSystem.sink(imageFile).buffer().use { it.write(image.data) }
+                }
+            }
             
             // Generate metadata
             val metadata = createMetadata(book)
             
             // Create EPUB files
-            createContentOpf(tempDir, book, metadata, epubChapters, options)
+            createContentOpf(tempDir, book, metadata, epubChapters, options, coverExtension, coverMediaType)
             createTocNcx(tempDir, metadata, epubChapters)
             createNavDocument(tempDir, epubChapters)
             createChapterFiles(tempDir, epubChapters, options)
-            
-            // Download and embed cover image if requested
-            if (options.includeCover && book.cover.isNotEmpty()) {
-                downloadAndEmbedCover(tempDir, book.cover)
-            }
             
             // Package as ZIP
             val epubFile = packageAsEpub(tempDir, outputUri)
@@ -136,7 +153,7 @@ class EpubBuilder(
         )
     }
     
-    private fun processChapters(
+    private suspend fun processChapters(
         chapters: List<Chapter>, 
         options: ExportOptions,
         translationsMap: Map<Long, ireader.domain.models.entities.TranslatedChapter> = emptyMap()
@@ -147,7 +164,9 @@ class EpubBuilder(
             chapters.filter { it.id in options.selectedChapters }
         }
         
-        return selectedChapters.mapIndexed { index, chapter ->
+        val result = mutableListOf<EpubChapter>()
+        
+        for ((index, chapter) in selectedChapters.withIndex()) {
             // Use translated content if available and requested
             val contentPages = if (options.useTranslatedContent && translationsMap.containsKey(chapter.id)) {
                 translationsMap[chapter.id]?.translatedContent ?: chapter.content
@@ -155,21 +174,59 @@ class EpubBuilder(
                 chapter.content
             }
             
-            val content = contentPages.mapNotNull {
-                when (it) {
-                    is Text -> it.text
-                    else -> null
-                }
-            }.joinToString("\n\n")
+            val images = mutableListOf<EmbeddedImage>()
+            var imageCounter = 0
             
-            EpubChapter(
+            val contentParts = mutableListOf<String>()
+            for (page in contentPages) {
+                when (page) {
+                    is Text -> contentParts.add(page.text)
+                    is ImageUrl -> {
+                        if (options.includeImages) {
+                            imageCounter++
+                            val fileName = "chapter${index}_img${imageCounter}"
+                            try {
+                                val response = httpClient.get(page.url)
+                                val imageBytes = response.readBytes()
+                                val (extension, mediaType) = detectImageFormat(imageBytes)
+                                val actualFileName = "$fileName.$extension"
+                                images.add(EmbeddedImage(actualFileName, mediaType, imageBytes))
+                                contentParts.add("""<img src="../Images/$actualFileName" alt="Image"/>""")
+                            } catch (e: Exception) {
+                                Log.warn { "Failed to download image from ${page.url}: ${e.message}" }
+                            }
+                        }
+                    }
+                    is ImageBase64 -> {
+                        if (options.includeImages) {
+                            imageCounter++
+                            val fileName = "chapter${index}_img${imageCounter}"
+                            try {
+                                val imageBytes = java.util.Base64.getDecoder().decode(page.data)
+                                val (extension, mediaType) = detectImageFormat(imageBytes)
+                                val actualFileName = "$fileName.$extension"
+                                images.add(EmbeddedImage(actualFileName, mediaType, imageBytes))
+                                contentParts.add("""<img src="../Images/$actualFileName" alt="Image"/>""")
+                            } catch (e: Exception) {
+                                Log.warn { "Failed to decode base64 image: ${e.message}" }
+                            }
+                        }
+                    }
+                    else -> {}
+                }
+            }
+            
+            result.add(EpubChapter(
                 id = "chapter${index}",
                 title = chapter.name,
-                content = content,
+                content = contentParts.joinToString("\n\n"),
                 order = index,
-                fileName = "Text/chapter${index}.xhtml"
-            )
+                fileName = "Text/chapter${index}.xhtml",
+                images = images
+            ))
         }
+        
+        return result
     }
     
     private fun createContentOpf(
@@ -177,7 +234,9 @@ class EpubBuilder(
         book: Book,
         metadata: EpubMetadata,
         chapters: List<EpubChapter>,
-        options: ExportOptions
+        options: ExportOptions,
+        coverExtension: String = "jpg",
+        coverMediaType: String = "image/jpeg"
     ) {
         val currentDate = currentTimeToLong().formatIsoDateTime()
         
@@ -228,16 +287,12 @@ class EpubBuilder(
                 appendLine("    <item id=\"${chapter.id}\" href=\"${chapter.fileName}\" media-type=\"application/xhtml+xml\"/>")
             }
             if (options.includeCover && book.cover.isNotEmpty()) {
-                // Determine media type from cover URL
-                val (extension, mediaType) = when {
-                    book.cover.contains(".png", ignoreCase = true) -> "png" to "image/png"
-                    book.cover.contains(".jpeg", ignoreCase = true) -> "jpeg" to "image/jpeg"
-                    book.cover.contains(".jpg", ignoreCase = true) -> "jpg" to "image/jpeg"
-                    book.cover.contains(".gif", ignoreCase = true) -> "gif" to "image/gif"
-                    book.cover.contains(".webp", ignoreCase = true) -> "webp" to "image/webp"
-                    else -> "jpg" to "image/jpeg"
-                }
-                appendLine("    <item id=\"cover-image\" href=\"Images/cover.$extension\" media-type=\"$mediaType\" properties=\"cover-image\"/>")
+                appendLine("    <item id=\"cover-image\" href=\"Images/cover.$coverExtension\" media-type=\"$coverMediaType\" properties=\"cover-image\"/>")
+            }
+            // Embed chapter images in manifest
+            val allImages = chapters.flatMap { it.images }
+            allImages.forEach { image ->
+                appendLine("    <item id=\"${image.fileName}\" href=\"Images/${image.fileName}\" media-type=\"${image.mediaType}\"/>")
             }
             appendLine("  </manifest>")
             
@@ -391,21 +446,26 @@ img {
     }
     
     private fun processChapterContent(content: String, options: ExportOptions): String {
-        // Clean HTML content if needed
+        // Clean HTML content if needed, but preserve <img> tags
         val cleanedContent = if (HtmlContentCleaner.isHtml(content)) {
-            HtmlContentCleaner.extractPlainText(content)
+            HtmlContentCleaner.clean(content)
         } else {
             content
         }
         
-        // Split into paragraphs and wrap in <p> tags
+        // Split into paragraphs and wrap in <p> tags, preserving <img> tags
         return cleanedContent
             .split("\n\n")
             .filter { it.isNotBlank() }
             .joinToString("\n") { paragraph ->
                 val trimmed = paragraph.trim()
                 if (trimmed.isNotBlank()) {
-                    "    <p>${trimmed.escapeXml()}</p>"
+                    // Don't wrap <img> tags in <p> - they're block-level in EPUB
+                    if (trimmed.startsWith("<img")) {
+                        "    $trimmed"
+                    } else {
+                        "    <p>${trimmed}</p>"
+                    }
                 } else {
                     ""
                 }
@@ -484,14 +544,18 @@ img {
         val compressed: Boolean = true
     )
     
-    private suspend fun downloadAndEmbedCover(baseDir: Path, coverUrl: String) {
+    /**
+     * Downloads and embeds the cover image.
+     * @return Pair of (extension, mediaType) if successful, null otherwise
+     */
+    private suspend fun downloadAndEmbedCover(baseDir: Path, coverUrl: String): Pair<String, String>? {
         try {
             Log.info { "Downloading cover image from: $coverUrl" }
             
             // Validate URL
             if (coverUrl.isBlank() || !coverUrl.startsWith("http", ignoreCase = true)) {
                 Log.warn { "Invalid cover URL: $coverUrl" }
-                return
+                return null
             }
             
             // Download the cover image with timeout
@@ -501,7 +565,7 @@ img {
             // Validate image size (max 10MB for compatibility)
             if (imageBytes.size > 10 * 1024 * 1024) {
                 Log.warn { "Cover image too large: ${imageBytes.size} bytes, skipping" }
-                return
+                return null
             }
             
             // Validate minimum size (at least 1KB)
@@ -509,33 +573,62 @@ img {
                 Log.warn { "Cover image too small: ${imageBytes.size} bytes, might be invalid" }
             }
             
-            // Determine file extension from URL or content type
-            val extension = when {
-                coverUrl.contains(".png", ignoreCase = true) -> "png"
-                coverUrl.contains(".jpeg", ignoreCase = true) -> "jpeg"
-                coverUrl.contains(".jpg", ignoreCase = true) -> "jpg"
-                coverUrl.contains(".gif", ignoreCase = true) -> "gif"
-                coverUrl.contains(".webp", ignoreCase = true) -> "webp"
-                // Check magic bytes for image type
-                imageBytes.size >= 4 && imageBytes[0] == 0xFF.toByte() && imageBytes[1] == 0xD8.toByte() -> "jpg"
-                imageBytes.size >= 4 && imageBytes[0] == 0x89.toByte() && imageBytes[1] == 0x50.toByte() -> "png"
-                else -> "jpg"
-            }
+            // Determine file extension from actual image bytes (magic bytes)
+            val (extension, mediaType) = detectImageFormat(imageBytes)
             
             // Save the cover image
             val coverFile = baseDir / "OEBPS" / "Images" / "cover.$extension"
             fileSystem.sink(coverFile).buffer().use { it.write(imageBytes) }
             
             Log.info { "Cover image downloaded successfully: ${imageBytes.size} bytes as $extension" }
+            return extension to mediaType
         } catch (e: Exception) {
             Log.warn { "Failed to download cover image from $coverUrl: ${e.message}" }
             // Don't fail the entire export if cover download fails
             // This ensures export works even with broken cover URLs
+            return null
         }
     }
     
     private fun cleanupTempDirectory(tempDir: Path) {
         fileSystem.deleteRecursively(tempDir)
+    }
+    
+    /**
+     * Detect image format from byte array magic bytes.
+     * Returns (extension, mimeType) tuple.
+     */
+    private fun detectImageFormat(data: ByteArray): Pair<String, String> {
+        if (data.size < 4) return "jpg" to "image/jpeg"
+        
+        // JPEG: FF D8 FF
+        if (data[0] == 0xFF.toByte() && data[1] == 0xD8.toByte() && data[2] == 0xFF.toByte()) {
+            return "jpg" to "image/jpeg"
+        }
+        
+        // PNG: 89 50 4E 47
+        if (data[0] == 0x89.toByte() && data[1] == 0x50.toByte() && 
+            data[2] == 0x4E.toByte() && data[3] == 0x47.toByte()) {
+            return "png" to "image/png"
+        }
+        
+        // GIF: 47 49 46 38
+        if (data[0] == 0x47.toByte() && data[1] == 0x49.toByte() && 
+            data[2] == 0x46.toByte() && data[3] == 0x38.toByte()) {
+            return "gif" to "image/gif"
+        }
+        
+        // WebP: RIFF....WEBP
+        if (data.size >= 12 && 
+            data[0] == 0x52.toByte() && data[1] == 0x49.toByte() && 
+            data[2] == 0x46.toByte() && data[3] == 0x46.toByte() &&
+            data[8] == 0x57.toByte() && data[9] == 0x45.toByte() &&
+            data[10] == 0x42.toByte() && data[11] == 0x50.toByte()) {
+            return "webp" to "image/webp"
+        }
+        
+        // Default to JPEG
+        return "jpg" to "image/jpeg"
     }
     
     private fun String.escapeXml(): String {

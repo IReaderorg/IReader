@@ -1,4 +1,4 @@
-﻿package ireader.data.epub
+package ireader.data.epub
 
 import ireader.core.log.Log
 import ireader.core.source.model.ImageUrl
@@ -162,7 +162,20 @@ class EpubExportServiceImpl(
         }
         
         // 5. OEBPS/content.opf (metadata and manifest) - after images so hasCover is known
-        entries.add(EpubZipEntry("OEBPS/content.opf", generateContentOpf(book, chapters, options, hasCover).encodeToByteArray()))
+        val coverFormat = if (hasCover) {
+            // Find the cover image entry to get its actual format
+            entries.firstOrNull { it.path.contains("cover.") }?.let { coverEntry ->
+                val ext = coverEntry.path.substringAfterLast(".")
+                val mime = when (ext) {
+                    "png" -> "image/png"
+                    "gif" -> "image/gif"
+                    "webp" -> "image/webp"
+                    else -> "image/jpeg"
+                }
+                ext to mime
+            }
+        } else null
+        entries.add(EpubZipEntry("OEBPS/content.opf", generateContentOpf(book, chapters, options, hasCover, coverFormat).encodeToByteArray()))
         
         // 6. OEBPS/toc.ncx (table of contents)
         entries.add(EpubZipEntry("OEBPS/toc.ncx", generateTocNcx(book, chapters).encodeToByteArray()))
@@ -210,7 +223,7 @@ class EpubExportServiceImpl(
      * Generate OEBPS/content.opf (metadata and manifest)
      */
     @OptIn(ExperimentalTime::class)
-    private fun generateContentOpf(book: Book, chapters: List<Chapter>, options: EpubExportOptions, hasCover: Boolean = false): String {
+    private fun generateContentOpf(book: Book, chapters: List<Chapter>, options: EpubExportOptions, hasCover: Boolean = false, coverFormat: Pair<String, String>? = null): String {
         val uuid = randomUUID()
         val chapterManifest = chapters.indices.joinToString("\n") { index ->
             """        <item id="chapter${index + 1}" href="chapter${index + 1}.xhtml" media-type="application/xhtml+xml"/>"""
@@ -218,7 +231,11 @@ class EpubExportServiceImpl(
         val chapterSpine = chapters.indices.joinToString("\n") { index ->
             """        <itemref idref="chapter${index + 1}"/>"""
         }
-        val coverItem = if (hasCover) {
+        val coverItem = if (hasCover && coverFormat != null) {
+            val (ext, mime) = coverFormat
+            """        <item id="cover-image" href="images/cover.$ext" media-type="$mime"/>"""
+        } else if (hasCover) {
+            // Fallback for backward compatibility
             """        <item id="cover-image" href="images/cover.jpg" media-type="image/jpeg"/>"""
         } else ""
         val coverMeta = if (hasCover) {
@@ -331,6 +348,13 @@ $chapterSpine
         .chapter-content {
             margin: 0 auto;
             max-width: 40em;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1em auto;
         }
     """.trimIndent()
     

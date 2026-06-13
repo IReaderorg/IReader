@@ -31,6 +31,22 @@ data class EpubMetadata(
 )
 
 /**
+ * Represents an image embedded in an EPUB chapter
+ */
+data class EmbeddedImage(
+    val fileName: String,
+    val mediaType: String,
+    val data: ByteArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is EmbeddedImage) return false
+        return fileName == other.fileName
+    }
+    override fun hashCode(): Int = fileName.hashCode()
+}
+
+/**
  * Represents a chapter in the EPUB structure
  */
 data class EpubChapter(
@@ -38,7 +54,8 @@ data class EpubChapter(
     val title: String,
     val content: String,
     val order: Int,
-    val fileName: String = "chapter_${order}.xhtml"
+    val fileName: String = "chapter_${order}.xhtml",
+    val images: List<EmbeddedImage> = emptyList()
 )
 
 /**
