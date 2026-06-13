@@ -47,7 +47,7 @@ okhttp = "5.3.2"
 jsoup = "1.22.2"
 ksoup = "0.2.6"
 dex2jar = "2.4.36"
-coil = "3.4.0"
+coil = "3.5.0"
 uiText = "1.11.2"
 workTesting = "2.11.2"
 # Removed readium version - not used
