@@ -781,6 +781,32 @@ object DatabaseMigrations {
         return exists
     }
 
+    private fun addColumnIfNotExists(driver: SqlDriver, tableName: String, columnName: String, columnDef: String) {
+        var columnExists = false
+        try {
+            driver.executeQuery(
+                identifier = null,
+                sql = "PRAGMA table_info($tableName)",
+                mapper = { cursor ->
+                    var result = cursor.next()
+                    while (result.value) {
+                        if (cursor.getString(1) == columnName) {
+                            columnExists = true
+                        }
+                        result = cursor.next()
+                    }
+                    result
+                },
+                parameters = 0
+            )
+        } catch (_: Exception) {
+        }
+        if (!columnExists) {
+            driver.execute(null, "ALTER TABLE $tableName ADD COLUMN $columnName $columnDef;", 0)
+            Logger.logColumnAdded(tableName, columnName)
+        }
+    }
+
     fun forceViewReinit(driver: SqlDriver) {
         try {
             // First ensure all required columns exist
@@ -1957,20 +1983,11 @@ object DatabaseMigrations {
         try {
             Logger.logMigrationStart(25, 26)
             
-            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN longest_streak INTEGER NOT NULL DEFAULT 0;", 0)
-            Logger.logColumnAdded("reading_statistics", "longest_streak")
-            
-            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN buddy_level INTEGER NOT NULL DEFAULT 1;", 0)
-            Logger.logColumnAdded("reading_statistics", "buddy_level")
-            
-            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN buddy_experience INTEGER NOT NULL DEFAULT 0;", 0)
-            Logger.logColumnAdded("reading_statistics", "buddy_experience")
-            
-            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN unlocked_achievements TEXT NOT NULL DEFAULT '';", 0)
-            Logger.logColumnAdded("reading_statistics", "unlocked_achievements")
-            
-            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN last_interaction_time INTEGER NOT NULL DEFAULT 0;", 0)
-            Logger.logColumnAdded("reading_statistics", "last_interaction_time")
+            addColumnIfNotExists(driver, "reading_statistics", "longest_streak", "INTEGER NOT NULL DEFAULT 0")
+            addColumnIfNotExists(driver, "reading_statistics", "buddy_level", "INTEGER NOT NULL DEFAULT 1")
+            addColumnIfNotExists(driver, "reading_statistics", "buddy_experience", "INTEGER NOT NULL DEFAULT 0")
+            addColumnIfNotExists(driver, "reading_statistics", "unlocked_achievements", "TEXT NOT NULL DEFAULT ''")
+            addColumnIfNotExists(driver, "reading_statistics", "last_interaction_time", "INTEGER NOT NULL DEFAULT 0")
             
             Logger.logMigrationSuccess(26)
             
@@ -1988,8 +2005,7 @@ object DatabaseMigrations {
         try {
             Logger.logMigrationStart(26, 27)
             
-            driver.execute(null, "ALTER TABLE book ADD COLUMN custom_cover TEXT NOT NULL DEFAULT '';", 0)
-            Logger.logColumnAdded("book", "custom_cover")
+            addColumnIfNotExists(driver, "book", "custom_cover", "TEXT NOT NULL DEFAULT ''")
             
             // Drop and recreate views to include custom_cover
             driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)

@@ -100,8 +100,8 @@ class AndroidDatabaseHandler(
             val requiredTables = listOf(
                 "book",
                 "chapter",
-                "category",
-                "category_book",
+                "categories",
+                "bookcategories",
                 "extension_source",  // Sources table
                 "plugin"             // Plugins table
             )

@@ -89,7 +89,7 @@ internal class IosDatabaseHandler(
     
     override fun verifyDatabaseIntegrity(): Boolean {
         return try {
-            val requiredTables = listOf("book", "chapter", "category", "category_book", "extension_source", "plugin")
+            val requiredTables = listOf("book", "chapter", "categories", "bookcategories", "extension_source", "plugin")
             for (table in requiredTables) {
                 driver.executeQuery(
                     identifier = null,
