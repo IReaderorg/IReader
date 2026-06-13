@@ -86,7 +86,7 @@ internal class JvmDatabaseHandler constructor(
     
     override fun verifyDatabaseIntegrity(): Boolean {
         return try {
-            val requiredTables = listOf("book", "chapter", "categories", "bookcategories", "extension_source", "plugin")
+            val requiredTables = listOf("book", "chapter", "categories", "bookcategories", "catalog", "plugin")
             for (table in requiredTables) {
                 driver.executeQuery(
                     identifier = null,

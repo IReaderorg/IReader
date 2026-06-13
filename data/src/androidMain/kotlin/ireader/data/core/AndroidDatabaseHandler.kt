@@ -102,7 +102,7 @@ class AndroidDatabaseHandler(
                 "chapter",
                 "categories",
                 "bookcategories",
-                "extension_source",  // Sources table
+                "catalog",           // Sources table
                 "plugin"             // Plugins table
             )
             

@@ -1,5 +1,6 @@
 package ireader.domain.js.loader
 
+import android.os.Build
 import ireader.core.log.Log
 import ireader.domain.js.bridge.ChapterPage
 import ireader.domain.js.bridge.FetchOptions
@@ -107,7 +108,15 @@ object J2V8EngineHelper : KoinComponent {
             return true
             
         } catch (e: Exception) {
-            Log.error { "J2V8EngineHelper: Failed to initialize: ${e.message}" }
+            val cause = e.cause ?: e
+            val isPageSizeError = cause.message?.contains("page size") == true ||
+                cause.message?.contains("alignment") == true ||
+                cause is UnsatisfiedLinkError
+            if (isPageSizeError && Build.VERSION.SDK_INT >= 35) {
+                Log.error { "J2V8EngineHelper: Native library incompatible with Android ${Build.VERSION.SDK_INT} (16KB page size). The J2V8 plugin must be rebuilt with 16KB page alignment support (-Wl,-z,max-page-size=16384)." }
+            } else {
+                Log.error { "J2V8EngineHelper: Failed to initialize: ${cause.message}" }
+            }
             initAttempted = true
             return false
         }
