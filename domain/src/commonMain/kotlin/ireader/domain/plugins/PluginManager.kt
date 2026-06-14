@@ -575,6 +575,18 @@ class PluginManager(
             val fileName = "${pluginInfo.id}-${pluginInfo.manifest.version}.iplugin"
             val destination = pluginsDir.resolve(fileName)
             
+            // Delete old .iplugin files for this plugin to prevent version conflicts
+            try {
+                val oldFiles = fileSystem.getFile(pluginsDir.toString()).listFiles()
+                    .filter { it.name.startsWith(pluginInfo.id) && it.extension == "iplugin" && it.name != fileName }
+                for (oldFile in oldFiles) {
+                    println("[PluginManager] Removing old version: ${oldFile.name}")
+                    oldFile.delete()
+                }
+            } catch (e: Exception) {
+                println("[PluginManager] Warning: Could not clean old versions: ${e.message}")
+            }
+            
             println("[PluginManager] Destination: $destination")
             
             // Download the plugin
@@ -666,6 +678,18 @@ class PluginManager(
             val pluginsDir = getPluginsDirectory()
             val fileName = "${pluginInfo.id}-${pluginInfo.manifest.version}.iplugin"
             val destination = pluginsDir.resolve(fileName)
+            
+            // Delete old .iplugin files for this plugin to prevent version conflicts
+            try {
+                val oldFiles = fileSystem.getFile(pluginsDir.toString()).listFiles()
+                    .filter { it.name.startsWith(pluginId) && it.extension == "iplugin" && it.name != fileName }
+                for (oldFile in oldFiles) {
+                    println("[PluginManager] Removing old version: ${oldFile.name}")
+                    oldFile.delete()
+                }
+            } catch (e: Exception) {
+                println("[PluginManager] Warning: Could not clean old versions: ${e.message}")
+            }
             
             // Update to downloading stage
             onProgress(PluginInstallProgress(

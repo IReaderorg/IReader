@@ -134,6 +134,7 @@ class PluginLoader(
         println("[PluginLoader] Found ${allFiles.size} files in ${dir.path}")
         
         val ipluginFiles = allFiles.filter { it.isFile() && it.extension == "iplugin" }
+            .sortedByDescending { it.name } // Sort newest version first
         println("[PluginLoader] Found ${ipluginFiles.size} .iplugin files: ${ipluginFiles.map { it.name }}")
         
         for (file in ipluginFiles) {

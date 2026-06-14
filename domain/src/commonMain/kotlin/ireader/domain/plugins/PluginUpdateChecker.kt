@@ -1,4 +1,4 @@
-﻿package ireader.domain.plugins
+package ireader.domain.plugins
 
 import ireader.core.io.VirtualFile
 import ireader.core.util.createICoroutineScope
@@ -174,6 +174,22 @@ class PluginUpdateChecker(
             // Disable the plugin before updating
             if (wasEnabled) {
                 pluginManager.disablePlugin(pluginId)
+            }
+            
+            // Delete old .iplugin files for this plugin to prevent version conflicts
+            try {
+                val pluginsDir = pluginManager.getPluginsDirectory()
+                val dir = java.io.File(pluginsDir.toString())
+                if (dir.isDirectory) {
+                    dir.listFiles()
+                        ?.filter { it.name.startsWith(pluginId) && it.extension == "iplugin" }
+                        ?.forEach { oldFile ->
+                            println("[PluginUpdateChecker] Removing old version: ${oldFile.name}")
+                            oldFile.delete()
+                        }
+                }
+            } catch (e: Exception) {
+                println("[PluginUpdateChecker] Warning: Could not clean old versions: ${e.message}")
             }
             
             // Load the new plugin to validate it
