@@ -219,7 +219,7 @@ class AndroidCatalogLoader(
         // Try to load as traditional APK extension
         val file = File(simpleStorage.extensionDirectory().toFile(), "${pkgName}/${pkgName}.apk")
         val cacheFile = File(simpleStorage.cacheExtensionDir().toFile(), "${pkgName}/${pkgName}.apk")
-        val finalFile = if (file.canRead() && file.canRead()) {
+        val finalFile = if (file.exists() && file.canRead()) {
             file
         } else {
             cacheFile
@@ -353,11 +353,17 @@ class AndroidCatalogLoader(
         // Make sure the permissions are correct (readable but not writable)
         secureApkFile.setReadOnly()
         
-        // Use the code cache directory for dex output
-        val dexOutputDir = File(secureDexCacheDir, pkgName).apply { mkdirs() }.absolutePath
+        // Clean the DEX output directory to prevent stale cached DEX from being reused.
+        // DexClassLoader caches optimized DEX files here — if the directory already has
+        // files from a previous version, the old code will be loaded even after APK update.
+        val dexCacheDir = File(secureDexCacheDir, pkgName)
+        if (dexCacheDir.exists()) {
+            dexCacheDir.deleteRecursively()
+        }
+        dexCacheDir.mkdirs()
         
         // Now load from the secure location
-        return DexClassLoader(secureApkFile.absolutePath, dexOutputDir, null, context.classLoader)
+        return DexClassLoader(secureApkFile.absolutePath, dexCacheDir.absolutePath, null, context.classLoader)
     }
 
     /**
