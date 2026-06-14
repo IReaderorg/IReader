@@ -437,6 +437,38 @@ class CatalogStore(
     }
     
     /**
+     * Check for package updates when app comes to foreground.
+     * Compares installed packages with loaded sources and reloads any that changed.
+     */
+    suspend fun checkForPackageUpdates() {
+        if (!_isInitialized.value) return
+        
+        try {
+            val installedPkgs = loader.getInstalledExtensionPackages()
+            val currentPkgNames = catalogsByPkgName.keys.toSet()
+            
+            // Check for new packages
+            val newPkgs = installedPkgs.filter { it !in currentPkgNames }
+            for (pkgName in newPkgs) {
+                android.util.Log.i("CatalogStore", "checkForPackageUpdates: New package found: $pkgName")
+                onInstalled(pkgName, false)
+            }
+            
+            // Check for updated packages (by comparing version codes)
+            for (pkgName in currentPkgNames) {
+                val installedVersion = loader.getPackageVersion(pkgName)
+                val loadedCatalog = catalogsByPkgName[pkgName] as? CatalogInstalled.SystemWide
+                if (installedVersion != null && loadedCatalog != null && installedVersion > loadedCatalog.versionCode) {
+                    android.util.Log.i("CatalogStore", "checkForPackageUpdates: Package updated: $pkgName (installed=$installedVersion, loaded=${loadedCatalog.versionCode})")
+                    onInstalled(pkgName, false)
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("CatalogStore", "checkForPackageUpdates failed: ${e.message}", e)
+        }
+    }
+    
+    /**
      * Get catalog by package name - O(1) lookup.
      */
     fun getByPkgName(pkgName: String): CatalogLocal? {

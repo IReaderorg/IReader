@@ -339,7 +339,11 @@ class AndroidCatalogLoader(
      * @param pkgInfo The package info of the application.
      */
     private fun isPackageAnExtension(pkgInfo: PackageInfo): Boolean {
-        return pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
+        val hasFeature = pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
+        if (!hasFeature) {
+            android.util.Log.d("AndroidCatalogLoader", "Package ${pkgInfo.packageName} is NOT an extension (reqFeatures: ${pkgInfo.reqFeatures?.map { it.name }})")
+        }
+        return hasFeature
     }
 
     private fun validateMetadata(pkgName: String, pkgInfo: PackageInfo): ValidatedData? {
