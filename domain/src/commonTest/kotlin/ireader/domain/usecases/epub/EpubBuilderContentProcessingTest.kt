@@ -465,6 +465,60 @@ class EpubBuilderContentProcessingTest {
         }
     }
 
+    // ==================== Cover Page Wiring ====================
+
+    /**
+     * Mirrors the spine generation in EpubBuilder.createContentOpf so the
+     * intended ordering is guarded: when a cover image is embedded, a dedicated
+     * cover page must be the first spine itemref (before nav), which is what
+     * Google Play Books / Kindle use to render the book cover. See issue #220.
+     */
+    private fun buildSpineItemrefs(coverEmbedded: Boolean, chapterIds: List<String>): List<String> {
+        val spine = mutableListOf<String>()
+        if (coverEmbedded) {
+            spine.add("cover-page")
+        }
+        spine.add("nav")
+        spine.addAll(chapterIds)
+        return spine
+    }
+
+    /**
+     * Mirrors the cover-related manifest items in EpubBuilder.createContentOpf.
+     */
+    private fun buildCoverManifestItems(coverEmbedded: Boolean): List<String> {
+        return if (coverEmbedded) listOf("cover-image", "cover-page") else emptyList()
+    }
+
+    @Test
+    fun `cover page is first in spine when cover is embedded`() {
+        val spine = buildSpineItemrefs(coverEmbedded = true, chapterIds = listOf("chapter0", "chapter1"))
+
+        assertEquals("cover-page", spine.first())
+        assertTrue(spine.indexOf("cover-page") < spine.indexOf("nav"))
+        assertEquals(listOf("cover-page", "nav", "chapter0", "chapter1"), spine)
+    }
+
+    @Test
+    fun `cover page is absent from spine when no cover is embedded`() {
+        val spine = buildSpineItemrefs(coverEmbedded = false, chapterIds = listOf("chapter0", "chapter1"))
+
+        assertFalse(spine.contains("cover-page"))
+        assertEquals("nav", spine.first())
+        assertEquals(listOf("nav", "chapter0", "chapter1"), spine)
+    }
+
+    @Test
+    fun `cover page manifest item accompanies cover image only when embedded`() {
+        val embedded = buildCoverManifestItems(coverEmbedded = true)
+        assertTrue(embedded.contains("cover-image"))
+        assertTrue(embedded.contains("cover-page"))
+
+        val notEmbedded = buildCoverManifestItems(coverEmbedded = false)
+        assertFalse(notEmbedded.contains("cover-page"))
+        assertTrue(notEmbedded.isEmpty())
+    }
+
     // ==================== Helper Classes and Functions ====================
 
     data class ProcessedChapter(
