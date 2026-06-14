@@ -11,6 +11,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import ireader.core.http.fingerprint.FingerprintEvasionScripts
 import ireader.core.log.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,7 +19,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import java.util.UUID
 import java.util.concurrent.TimeoutException
 import kotlin.coroutines.resumeWithException
 
@@ -63,7 +63,6 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
         contentExtracted.value = false
         
         var html = ""
-        val uniqueId = UUID.randomUUID().toString()
         
         try {
             withContext(Dispatchers.Main) {
@@ -72,7 +71,7 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
                 val webView = manager.webView ?: throw IllegalStateException("WebView initialization failed")
                 
                 // Configure WebView
-                configureWebView(webView, userAgent, uniqueId, manager)
+                configureWebView(webView, userAgent, manager)
                 
                 // Set up javascript interface for AJAX detection
                 webView.addJavascriptInterface(object : Any() {
@@ -174,9 +173,19 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
     
     private fun createWebViewClient(selector: String?): WebViewClientCompat {
         return object : WebViewClientCompat() {
+            override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                
+                // Inject fingerprint evasion BEFORE page JS runs
+                view.evaluateJavascript(FingerprintEvasionScripts.fullEvasion, null)
+            }
+            
             override fun onPageFinished(view: WebView, loadedUrl: String) {
                 super.onPageFinished(view, loadedUrl)
                 pageLoadComplete.value = true
+                
+                // Re-inject evasion (some sites reset properties after load)
+                view.evaluateJavascript(FingerprintEvasionScripts.webdriverEvasion, null)
                 
                 val ajaxDetectionScript = """
                     (function() {
@@ -263,7 +272,7 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
     }
     
     @SuppressLint("SetJavaScriptEnabled")
-    private fun configureWebView(webView: WebView, userAgent: String, uniqueId: String, manager: WebViewManger) {
+    private fun configureWebView(webView: WebView, userAgent: String, manager: WebViewManger) {
         if (userAgent != manager.userAgent) {
             manager.userAgent = userAgent
             try {
@@ -288,7 +297,7 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
                 offscreenPreRaster = true
             }
             
-            userAgentString = userAgent + " ($uniqueId)"
+            userAgentString = userAgent
             mediaPlaybackRequiresUserGesture = false
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             cacheMode = WebSettings.LOAD_DEFAULT

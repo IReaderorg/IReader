@@ -7,6 +7,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
+import ireader.core.http.fingerprint.FingerprintEvasionScripts
+import ireader.core.log.Log
 import ireader.core.util.DefaultDispatcher
 import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.delay
@@ -27,6 +29,11 @@ actual class WebViewManger(private val context: Context) {
     var isBackgroundMode: Boolean = false
     var onContentReady: ((String) -> Unit)? = null
     var lastError: String? = null
+    
+    // Cloudflare handling
+    private var isShowingChallenge = false
+    private var challengeWebView: WebView? = null
+    private var onChallengeComplete: ((String) -> Unit)? = null
 
     val scope = createICoroutineScope(DefaultDispatcher)
     
@@ -45,7 +52,10 @@ actual class WebViewManger(private val context: Context) {
                                                            title.contains("Just a moment", true) ||
                                                            title.contains("Checking your browser", true)
                                 
-                                if (!isCloudflareChallenge) {
+                                if (isCloudflareChallenge && !isShowingChallenge) {
+                                    // Show WebView to user for manual Cloudflare completion
+                                    showChallengeWebView(url)
+                                } else if (!isCloudflareChallenge) {
                                     if (!selector.isNullOrBlank()) {
                                         val htmlContent = view?.getHtml() ?: ""
                                         html = Ksoup.parse(htmlContent)
@@ -57,12 +67,14 @@ actual class WebViewManger(private val context: Context) {
                                             html = null
                                             inProgress = false
                                             lastError = null
+                                            hideChallengeWebView()
                                         }
                                     } else {
                                         val content = view?.getHtml() ?: ""
                                         onContentReady?.invoke(content)
                                         inProgress = false
                                         lastError = null
+                                        hideChallengeWebView()
                                     }
                                 }
                             }
@@ -96,6 +108,73 @@ actual class WebViewManger(private val context: Context) {
         } else {
             return webView as WebView
         }
+    }
+    
+    /**
+     * Show a visible WebView for the user to complete Cloudflare challenge manually
+     */
+    private fun showChallengeWebView(url: String?) {
+        isShowingChallenge = true
+        
+        // Create a visible WebView for the user to interact with
+        challengeWebView = WebView(context).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.databaseEnabled = true
+            settings.userAgentString = DEFAULT_USER_AGENT
+            
+            webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, startedUrl: String?, favicon: android.graphics.Bitmap?) {
+                    super.onPageStarted(view, startedUrl, favicon)
+                    // Inject evasion before page JS runs
+                    view?.evaluateJavascript(FingerprintEvasionScripts.fullEvasion, null)
+                }
+                
+                override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                    super.onPageFinished(view, finishedUrl)
+                    // Re-inject webdriver evasion
+                    view?.evaluateJavascript(FingerprintEvasionScripts.webdriverEvasion, null)
+                    
+                    // Check if challenge is completed
+                    val title = view?.title ?: ""
+                    val isStillChallenge = title.contains("Cloudflare", true) || 
+                                          title.contains("Just a moment", true) ||
+                                          title.contains("Checking your browser", true)
+                    
+                    if (!isStillChallenge && isShowingChallenge) {
+                        // Challenge completed! Copy cookies and reload in main WebView
+                        scope.launch {
+                            delay(500) // Wait for cookies to settle
+                            val cookies = android.webkit.CookieManager.getInstance().getCookie(finishedUrl)
+                            Log.info("Cloudflare challenge completed, cookies: $cookies")
+                            
+                            // Reload the original URL in the main WebView
+                            webView?.loadUrl(url ?: finishedUrl ?: "")
+                            hideChallengeWebView()
+                        }
+                    }
+                }
+            }
+            
+            webChromeClient = WebChromeClient()
+            
+            // Load the URL
+            loadUrl(url ?: "")
+        }
+        
+        Log.info("Showing Cloudflare challenge WebView for user to complete")
+    }
+    
+    /**
+     * Hide the challenge WebView
+     */
+    private fun hideChallengeWebView() {
+        isShowingChallenge = false
+        challengeWebView?.let { webView ->
+            webView.stopLoading()
+            webView.destroy()
+        }
+        challengeWebView = null
     }
     
     actual fun isAvailable(): Boolean = true

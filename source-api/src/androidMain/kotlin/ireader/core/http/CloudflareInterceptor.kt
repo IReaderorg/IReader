@@ -280,7 +280,7 @@ class CloudflareInterceptor(
         private val COOKIE_NAMES = listOf("cf_clearance")
         private const val CF_CLEARANCE_COOKIE = "cf_clearance"
         private const val CLOUDFLARE_TIMEOUT_SECONDS = 30L
-        private const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+        private const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.6478.71 Mobile Safari/537.36"
     }
 }
 
