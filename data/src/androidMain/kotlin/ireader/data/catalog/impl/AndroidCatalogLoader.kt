@@ -56,9 +56,8 @@ class AndroidCatalogLoader(
     private val pkgManager = context.packageManager
     private val catalogPreferences = preferenceStore.create("catalogs_data")
     
-    // Create secure directories for extension loading
-    private val secureExtensionsDir = File(context.codeCacheDir, "secure_extensions").apply { mkdirs() }
-    private val secureDexCacheDir = File(context.codeCacheDir, "dex-cache").apply { mkdirs() }
+    // Directory for fresh APK copies (ensures PathClassLoader doesn't reuse cached classes)
+    private val freshApksDir = File(context.codeCacheDir, "fresh_apks").apply { mkdirs() }
     
     // JavaScript plugin loader - uses converter approach (no JS engine needed!)
     // Uses a lambda to get the directory dynamically, so it picks up storage folder changes
@@ -87,24 +86,8 @@ class AndroidCatalogLoader(
      * Creates secure directories for extension loading
      */
     private fun createSecureDirectories() {
-        try {
-            // Ensure secure directories exist
-            secureExtensionsDir.mkdirs()
-            secureDexCacheDir.mkdirs()
-            
-            // Clean any stale extension files
-            secureExtensionsDir.listFiles()?.forEach { file ->
-                if (file.isFile && file.name.endsWith(".apk")) {
-                    try {
-                        file.delete()
-                    } catch (e: Exception) {
-                        // Ignore errors
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            // Ignore errors
-        }
+        // No manual DEX cache directories needed with PathClassLoader.
+        // Android handles DEX optimization automatically via dexopt.
     }
 
     /**
@@ -183,6 +166,15 @@ class AndroidCatalogLoader(
             deferred.awaitAll()
         }.filterNotNull()
 
+        // Deduplicate: prefer system-installed packages over local files
+        // (adb sideload updates system package but not local file)
+        val systemPkgNames = systemPkgs.map { it.packageName }.toSet()
+        val deduplicated = installedCatalogs.filter { catalog ->
+            val isLocal = catalog is CatalogInstalled.Locally
+            val isDuplicate = isLocal && catalog.pkgName in systemPkgNames
+            !isDuplicate
+        }
+
         // Load JavaScript plugins if enabled
         val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
@@ -200,7 +192,7 @@ class AndroidCatalogLoader(
             emptyList()
         }
 
-        return (bundled + installedCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        return (bundled + deduplicated + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
     }
 
     /**
@@ -274,6 +266,7 @@ class AndroidCatalogLoader(
         pkgInfo: PackageInfo,
         file: File,
     ): CatalogInstalled.Locally? {
+        android.util.Log.i("AndroidCatalogLoader", "loadLocalCatalog: $pkgName from ${file.absolutePath} (exists=${file.exists()}, length=${file.length()})")
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
         
         try {
@@ -298,72 +291,13 @@ class AndroidCatalogLoader(
     }
     
     /**
-     * Creates the appropriate ClassLoader based on Android version.
-     * - Android 15+ (API 35+): Uses InMemoryDexClassLoader for better security
-     * - Android 14+ (API 34+): Uses DexClassLoader with secure codeCacheDir
-     * - Older versions: Uses DexClassLoader with standard approach
+     * Creates a ClassLoader for loading an extension from an APK file.
+     * Uses DexClassLoader with a fresh output directory each time to force DEX recompilation.
+     * PathClassLoader caches DEX - same content = stale DEX.
      */
     private fun createClassLoader(file: File, pkgName: String): ClassLoader {
-        // Android 15+ (API 35): Use InMemoryDexClassLoader for enhanced security
-        if (Build.VERSION.SDK_INT >= 35) {
-            return try {
-                createInMemoryClassLoader(file, pkgName)
-            } catch (e: Exception) {
-                Log.warn("InMemoryDexClassLoader failed, falling back to DexClassLoader", e)
-                createSecureDexClassLoader(file, pkgName)
-            }
-        }
-        
-        // Android 14+ (API 34): Use secure DexClassLoader
-        return createSecureDexClassLoader(file, pkgName)
-    }
-    
-    /**
-     * Creates an InMemoryDexClassLoader for Android 15+.
-     * This loads the DEX directly into memory without writing to disk,
-     * which is more secure and avoids file permission issues.
-     */
-    @Suppress("NewApi")
-    private fun createInMemoryClassLoader(file: File, pkgName: String): ClassLoader {
-        // APK files are ZIP archives containing classes.dex - we need to extract it
-        val dexBytes = java.util.zip.ZipFile(file).use { zip ->
-            val dexEntry = zip.getEntry("classes.dex")
-                ?: throw IllegalStateException("No classes.dex found in APK: ${file.name}")
-            zip.getInputStream(dexEntry).readBytes()
-        }
-        val buffer = ByteBuffer.wrap(dexBytes)
-        
-        return InMemoryDexClassLoader(buffer, context.classLoader)
-    }
-    
-    /**
-     * Creates a secure DexClassLoader for Android 14+.
-     * Copies the APK to codeCacheDir and sets read-only permissions.
-     */
-    private fun createSecureDexClassLoader(file: File, pkgName: String): ClassLoader {
-        // Create a fresh copy to avoid any "writable dex file" issues
-        val secureApkFile = File(secureExtensionsDir, "${pkgName}.apk")
-        if (secureApkFile.exists()) {
-            secureApkFile.delete()
-        }
-        
-        // Copy the APK to the code cache directory which is allowed for DEX loading
-        file.copyTo(secureApkFile, overwrite = true)
-        
-        // Make sure the permissions are correct (readable but not writable)
-        secureApkFile.setReadOnly()
-        
-        // Clean the DEX output directory to prevent stale cached DEX from being reused.
-        // DexClassLoader caches optimized DEX files here — if the directory already has
-        // files from a previous version, the old code will be loaded even after APK update.
-        val dexCacheDir = File(secureDexCacheDir, pkgName)
-        if (dexCacheDir.exists()) {
-            dexCacheDir.deleteRecursively()
-        }
-        dexCacheDir.mkdirs()
-        
-        // Now load from the secure location
-        return DexClassLoader(secureApkFile.absolutePath, dexCacheDir.absolutePath, null, context.classLoader)
+        val dexOutputDir = File(context.codeCacheDir, "dex_out/${pkgName}_${System.currentTimeMillis()}").apply { mkdirs() }
+        return DexClassLoader(file.absolutePath, dexOutputDir.absolutePath, null, context.classLoader)
     }
 
     /**
@@ -377,9 +311,13 @@ class AndroidCatalogLoader(
         pkgInfo: PackageInfo,
         iconFile: File? = null
     ): CatalogInstalled.SystemWide? {
+        val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: "unknown"
+        android.util.Log.i("AndroidCatalogLoader", "loadSystemCatalog: $pkgName from $sourceDir")
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
 
-        val loader = PathClassLoader(pkgInfo.applicationInfo!!.sourceDir, null, context.classLoader)
+        // Use DexClassLoader with fresh output dir to avoid stale DEX cache
+        val dexOutputDir = File(context.codeCacheDir, "dex_out/${pkgName}_${System.currentTimeMillis()}").apply { mkdirs() }
+        val loader = DexClassLoader(sourceDir, dexOutputDir.absolutePath, null, context.classLoader)
         val source = loadSource(pkgName, loader, data)
 
         return CatalogInstalled.SystemWide(
@@ -458,12 +396,16 @@ class AndroidCatalogLoader(
 
     private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
         return try {
+            android.util.Log.i("AndroidCatalogLoader", "Loading source class: ${data.classToLoad} from ${loader.javaClass.simpleName}")
             val obj = Class.forName(data.classToLoad, false, loader)
                 .getConstructor(ireader.core.source.Dependencies::class.java)
                 .newInstance(data.dependencies)
 
-            obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
+            val source = obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
+            android.util.Log.i("AndroidCatalogLoader", "Loaded source: ${source.name}")
+            source
         } catch (e: Throwable) {
+            android.util.Log.e("AndroidCatalogLoader", "Failed to load source $pkgName: ${e.message}", e)
             return null
         }
     }
@@ -549,39 +491,13 @@ class AndroidCatalogLoader(
     }
 
     /**
-     * Clear the cached DEX/class data for a specific catalog.
-     * This clears both the secure APK copy and the compiled DEX cache,
-     * ensuring the next load will use the fresh APK file.
-     * 
-     * @param pkgName The package name of the catalog to clear cache for
+     * Clears the cached data for a specific catalog.
+     * With PathClassLoader, no manual DEX cache cleanup is needed.
+     * Android handles DEX optimization automatically.
      */
     override fun clearCatalogCache(pkgName: String) {
         try {
-            Log.info("AndroidCatalogLoader: Clearing cache for $pkgName")
-            
-            // Clear the secure APK copy
-            val secureApkFile = File(secureExtensionsDir, "${pkgName}.apk")
-            if (secureApkFile.exists()) {
-                secureApkFile.delete()
-                Log.debug { "AndroidCatalogLoader: Deleted secure APK: ${secureApkFile.absolutePath}" }
-            }
-            
-            // Clear the DEX cache directory for this package
-            val dexCacheDir = File(secureDexCacheDir, pkgName)
-            if (dexCacheDir.exists() && dexCacheDir.isDirectory) {
-                dexCacheDir.deleteRecursively()
-                Log.debug { "AndroidCatalogLoader: Deleted DEX cache: ${dexCacheDir.absolutePath}" }
-            }
-            
-            // Also clear any .dex files that might be directly in the cache dir
-            secureDexCacheDir.listFiles()?.filter { 
-                it.name.startsWith(pkgName) && it.name.endsWith(".dex") 
-            }?.forEach { 
-                it.delete()
-                Log.debug { "AndroidCatalogLoader: Deleted DEX file: ${it.absolutePath}" }
-            }
-            
-            Log.info("AndroidCatalogLoader: Cache cleared for $pkgName")
+            Log.info("AndroidCatalogLoader: Clearing cache for $pkgName (PathClassLoader - no manual DEX cache)")
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to clear cache for $pkgName", e)
         }

@@ -64,6 +64,7 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import ireader.presentation.core.safePopBackStack
@@ -83,22 +84,23 @@ data class ReaderScreenSpec(
     fun Content() {
         val scope = rememberCoroutineScope()
 
+        val koin = getKoin()
         val vm: ReaderScreenViewModel =
-            getIViewModel(parameters = {
-                parametersOf(
-                    ReaderScreenViewModel.Param(
-                        chapterId,
-                        bookId
+            remember(chapterId, bookId) {
+                koin.get<ReaderScreenViewModel>(parameters = {
+                    parametersOf(
+                        ReaderScreenViewModel.Param(
+                            chapterId,
+                            bookId
+                        )
                     )
-                )
-            })
+                })
+            }
         val platformReader: PlatformReaderSettingReader = koinInject()
         val processStateManager: ProcessStateManager = koinInject()
         val readerState by vm.state.collectAsState()
 
         // Plugin integration for reader menu items
-        // Use getKoin().getOrNull() instead of try-catch around koinInject (composable)
-        val koin = org.koin.compose.getKoin()
         val featurePluginIntegration: FeaturePluginIntegration? = remember {
             koin.getOrNull<FeaturePluginIntegration>()
         }

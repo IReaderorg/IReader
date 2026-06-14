@@ -23,12 +23,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Optimized CatalogStore with improved performance for catalog and JS plugin loading.
@@ -215,6 +217,7 @@ class CatalogStore(
                 // Listen for installation changes
                 launch {
                     installationChanges.flow.collect { change ->
+                        android.util.Log.i("CatalogStore", "Installation change received: $change")
                         handleInstallationChange(change)
                     }
                 }
@@ -349,9 +352,11 @@ class CatalogStore(
             
             for (update in catalogUpdateChannel) {
                 pendingUpdates.add(update)
+                android.util.Log.i("CatalogStore", "Batch processor: received ${update::class.simpleName}, pending=${pendingUpdates.size}")
                 
                 // Process batch when size threshold reached or channel is empty
                 if (pendingUpdates.size >= BATCH_UPDATE_SIZE || catalogUpdateChannel.isEmpty) {
+                    android.util.Log.i("CatalogStore", "Batch processor: processing ${pendingUpdates.size} updates")
                     processBatchUpdates(pendingUpdates.toList())
                     pendingUpdates.clear()
                 }
@@ -485,27 +490,36 @@ class CatalogStore(
         }
     }
 
+    private val installJobs = ConcurrentHashMap<String, Job>()
+    
     private fun onInstalled(pkgName: String, isLocalInstall: Boolean) {
-        scope.launch(Dispatchers.Default) {
-            // Use semaphore to limit concurrent loads
+        android.util.Log.i("CatalogStore", "onInstalled: pkgName=$pkgName, isLocal=$isLocalInstall")
+        
+        // Cancel any previous pending install for the same package
+        installJobs[pkgName]?.cancel()
+        
+        // Debounce: wait a bit for all install events to arrive
+        installJobs[pkgName] = scope.launch(Dispatchers.Default) {
+            kotlinx.coroutines.delay(500) // Wait for PACKAGE_REMOVED + PACKAGE_ADDED + PACKAGE_REPLACED
+            
             loadingSemaphore.withPermit {
                 lock.withLock {
                     val previousCatalog = catalogsByPkgName[pkgName]
+                    android.util.Log.i("CatalogStore", "onInstalled: previousCatalog=${previousCatalog?.name}")
 
-                    // Don't replace system catalogs with local catalogs
-                    if (!isLocalInstall && previousCatalog is CatalogInstalled.Locally) {
-                        return@launch
-                    }
+                    // Remove old catalog from in-memory cache
+                    catalogsByPkgName.remove(pkgName)
 
                     // Clear the DEX cache before loading to ensure fresh code is used
-                    // This is critical for reinstallation scenarios where the source code changed
                     loader.clearCatalogCache(pkgName)
 
+                    android.util.Log.i("CatalogStore", "onInstalled: Loading catalog (isLocal=$isLocalInstall)")
                     val catalog = if (isLocalInstall) {
                         loader.loadLocalCatalog(pkgName)
                     } else {
                         loader.loadSystemCatalog(pkgName)
                     }?.let { loadedCatalog ->
+                        android.util.Log.i("CatalogStore", "onInstalled: Loaded ${loadedCatalog.name}")
                         val isPinned = loadedCatalog.sourceId.toString() in cachedPinnedIds
                         val hasUpdate = checkHasUpdate(loadedCatalog)
                         if (isPinned || hasUpdate) {
@@ -516,12 +530,12 @@ class CatalogStore(
                     }
 
                     if (catalog == null) {
-                        // Try loading as JS plugin - load ONLY this specific plugin
+                        android.util.Log.w("CatalogStore", "onInstalled: catalog is null, trying JS plugin")
                         loadSingleJSPlugin(pkgName)
                         return@launch
                     }
 
-                    // Use batch update channel (suspending to prevent dropped updates)
+                    android.util.Log.i("CatalogStore", "onInstalled: Sending catalog update for ${catalog.name}")
                     catalogUpdateChannel.send(CatalogUpdate.Add(catalog))
                 }
             }

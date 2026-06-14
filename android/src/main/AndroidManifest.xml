@@ -237,6 +237,17 @@
             </intent-filter>
         </receiver>
         
+        <receiver
+            android:name="ireader.data.catalog.impl.PackageInstallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
         <!-- TTS V2 actions are handled by TTSV2Service's internal receiver -->
     </application>
 

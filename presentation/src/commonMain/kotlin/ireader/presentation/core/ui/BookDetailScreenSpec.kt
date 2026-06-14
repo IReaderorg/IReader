@@ -73,6 +73,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -108,10 +109,10 @@ data class BookDetailScreenSpec constructor(
             }
         }
         
-        val vm: BookDetailViewModel = getIViewModel(
-            key = bookId,
-            parameters = { parametersOf(BookDetailViewModel.Param(bookId)) }
-        )
+        val koin = getKoin()
+        val vm: BookDetailViewModel = remember(bookId) {
+            koin.get<BookDetailViewModel>(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
+        }
         
         // Inject process state manager for process death handling
         val processStateManager: ProcessStateManager = koinInject()
