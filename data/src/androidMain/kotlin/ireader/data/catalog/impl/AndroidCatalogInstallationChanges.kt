@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.util.Log as AndroidLog
 import kotlinx.coroutines.flow.MutableSharedFlow
 import ireader.domain.catalogs.service.CatalogInstallationChange
 import ireader.domain.catalogs.service.CatalogInstallationChanges
@@ -48,18 +47,12 @@ class AndroidCatalogInstallationChanges(
 
             val pkgName = intent.data?.encodedSchemeSpecificPart ?: return
 
-            AndroidLog.i("ExtensionInstallReceiver", "RECEIVED: action=${intent.action} pkg=$pkgName")
-
             when (intent.action) {
                 Intent.ACTION_PACKAGE_ADDED, Intent.ACTION_PACKAGE_REPLACED -> {
-                    AndroidLog.i("ExtensionInstallReceiver", "Package INSTALLED/UPDATED: $pkgName")
-                    val emitted = flow.tryEmit(CatalogInstallationChange.SystemInstall(pkgName))
-                    AndroidLog.i("ExtensionInstallReceiver", "Flow emit result: $emitted")
+                    flow.tryEmit(CatalogInstallationChange.SystemInstall(pkgName))
                 }
                 Intent.ACTION_PACKAGE_REMOVED -> {
-                    AndroidLog.i("ExtensionInstallReceiver", "Package REMOVED: $pkgName")
-                    val emitted = flow.tryEmit(CatalogInstallationChange.SystemUninstall(pkgName))
-                    AndroidLog.i("ExtensionInstallReceiver", "Flow emit result: $emitted")
+                    flow.tryEmit(CatalogInstallationChange.SystemUninstall(pkgName))
                 }
             }
         }

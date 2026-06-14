@@ -266,7 +266,6 @@ class AndroidCatalogLoader(
         pkgInfo: PackageInfo,
         file: File,
     ): CatalogInstalled.Locally? {
-        android.util.Log.i("AndroidCatalogLoader", "loadLocalCatalog: $pkgName from ${file.absolutePath} (exists=${file.exists()}, length=${file.length()})")
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
         
         try {
@@ -312,7 +311,6 @@ class AndroidCatalogLoader(
         iconFile: File? = null
     ): CatalogInstalled.SystemWide? {
         val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: "unknown"
-        android.util.Log.i("AndroidCatalogLoader", "loadSystemCatalog: $pkgName from $sourceDir")
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
 
         // Use DexClassLoader with fresh output dir to avoid stale DEX cache
@@ -339,11 +337,7 @@ class AndroidCatalogLoader(
      * @param pkgInfo The package info of the application.
      */
     private fun isPackageAnExtension(pkgInfo: PackageInfo): Boolean {
-        val hasFeature = pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
-        if (!hasFeature) {
-            android.util.Log.d("AndroidCatalogLoader", "Package ${pkgInfo.packageName} is NOT an extension (reqFeatures: ${pkgInfo.reqFeatures?.map { it.name }})")
-        }
-        return hasFeature
+        return pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
     }
 
     private fun validateMetadata(pkgName: String, pkgInfo: PackageInfo): ValidatedData? {
@@ -400,16 +394,12 @@ class AndroidCatalogLoader(
 
     private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
         return try {
-            android.util.Log.i("AndroidCatalogLoader", "Loading source class: ${data.classToLoad} from ${loader.javaClass.simpleName}")
             val obj = Class.forName(data.classToLoad, false, loader)
                 .getConstructor(ireader.core.source.Dependencies::class.java)
                 .newInstance(data.dependencies)
 
-            val source = obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
-            android.util.Log.i("AndroidCatalogLoader", "Loaded source: ${source.name}")
-            source
+            obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
         } catch (e: Throwable) {
-            android.util.Log.e("AndroidCatalogLoader", "Failed to load source $pkgName: ${e.message}", e)
             return null
         }
     }
@@ -500,11 +490,7 @@ class AndroidCatalogLoader(
      * Android handles DEX optimization automatically.
      */
     override fun clearCatalogCache(pkgName: String) {
-        try {
-            Log.info("AndroidCatalogLoader: Clearing cache for $pkgName (PathClassLoader - no manual DEX cache)")
-        } catch (e: Exception) {
-            Log.error("AndroidCatalogLoader: Failed to clear cache for $pkgName", e)
-        }
+        // With DexClassLoader using fresh output dirs, no manual cache cleanup needed.
     }
 
     private companion object {

@@ -217,7 +217,6 @@ class CatalogStore(
                 // Listen for installation changes
                 launch {
                     installationChanges.flow.collect { change ->
-                        android.util.Log.i("CatalogStore", "Installation change received: $change")
                         handleInstallationChange(change)
                     }
                 }
@@ -352,11 +351,8 @@ class CatalogStore(
             
             for (update in catalogUpdateChannel) {
                 pendingUpdates.add(update)
-                android.util.Log.i("CatalogStore", "Batch processor: received ${update::class.simpleName}, pending=${pendingUpdates.size}")
                 
-                // Process batch when size threshold reached or channel is empty
                 if (pendingUpdates.size >= BATCH_UPDATE_SIZE || catalogUpdateChannel.isEmpty) {
-                    android.util.Log.i("CatalogStore", "Batch processor: processing ${pendingUpdates.size} updates")
                     processBatchUpdates(pendingUpdates.toList())
                     pendingUpdates.clear()
                 }
@@ -437,38 +433,6 @@ class CatalogStore(
     }
     
     /**
-     * Check for package updates when app comes to foreground.
-     * Compares installed packages with loaded sources and reloads any that changed.
-     */
-    suspend fun checkForPackageUpdates() {
-        if (!_isInitialized.value) return
-        
-        try {
-            val installedPkgs = loader.getInstalledExtensionPackages()
-            val currentPkgNames = catalogsByPkgName.keys.toSet()
-            
-            // Check for new packages
-            val newPkgs = installedPkgs.filter { it !in currentPkgNames }
-            for (pkgName in newPkgs) {
-                android.util.Log.i("CatalogStore", "checkForPackageUpdates: New package found: $pkgName")
-                onInstalled(pkgName, false)
-            }
-            
-            // Check for updated packages (by comparing version codes)
-            for (pkgName in currentPkgNames) {
-                val installedVersion = loader.getPackageVersion(pkgName)
-                val loadedCatalog = catalogsByPkgName[pkgName] as? CatalogInstalled.SystemWide
-                if (installedVersion != null && loadedCatalog != null && installedVersion > loadedCatalog.versionCode) {
-                    android.util.Log.i("CatalogStore", "checkForPackageUpdates: Package updated: $pkgName (installed=$installedVersion, loaded=${loadedCatalog.versionCode})")
-                    onInstalled(pkgName, false)
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("CatalogStore", "checkForPackageUpdates failed: ${e.message}", e)
-        }
-    }
-    
-    /**
      * Get catalog by package name - O(1) lookup.
      */
     fun getByPkgName(pkgName: String): CatalogLocal? {
@@ -525,33 +489,26 @@ class CatalogStore(
     private val installJobs = ConcurrentHashMap<String, Job>()
     
     private fun onInstalled(pkgName: String, isLocalInstall: Boolean) {
-        android.util.Log.i("CatalogStore", "onInstalled: pkgName=$pkgName, isLocal=$isLocalInstall")
-        
         // Cancel any previous pending install for the same package
         installJobs[pkgName]?.cancel()
         
         // Debounce: wait a bit for all install events to arrive
         installJobs[pkgName] = scope.launch(Dispatchers.Default) {
-            kotlinx.coroutines.delay(500) // Wait for PACKAGE_REMOVED + PACKAGE_ADDED + PACKAGE_REPLACED
+            kotlinx.coroutines.delay(500)
             
             loadingSemaphore.withPermit {
                 lock.withLock {
-                    val previousCatalog = catalogsByPkgName[pkgName]
-                    android.util.Log.i("CatalogStore", "onInstalled: previousCatalog=${previousCatalog?.name}")
-
                     // Remove old catalog from in-memory cache
                     catalogsByPkgName.remove(pkgName)
 
                     // Clear the DEX cache before loading to ensure fresh code is used
                     loader.clearCatalogCache(pkgName)
 
-                    android.util.Log.i("CatalogStore", "onInstalled: Loading catalog (isLocal=$isLocalInstall)")
                     val catalog = if (isLocalInstall) {
                         loader.loadLocalCatalog(pkgName)
                     } else {
                         loader.loadSystemCatalog(pkgName)
                     }?.let { loadedCatalog ->
-                        android.util.Log.i("CatalogStore", "onInstalled: Loaded ${loadedCatalog.name}")
                         val isPinned = loadedCatalog.sourceId.toString() in cachedPinnedIds
                         val hasUpdate = checkHasUpdate(loadedCatalog)
                         if (isPinned || hasUpdate) {
@@ -562,12 +519,10 @@ class CatalogStore(
                     }
 
                     if (catalog == null) {
-                        android.util.Log.w("CatalogStore", "onInstalled: catalog is null, trying JS plugin")
                         loadSingleJSPlugin(pkgName)
                         return@launch
                     }
 
-                    android.util.Log.i("CatalogStore", "onInstalled: Sending catalog update for ${catalog.name}")
                     catalogUpdateChannel.send(CatalogUpdate.Add(catalog))
                 }
             }
