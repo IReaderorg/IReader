@@ -24,13 +24,6 @@ val communityTranslationModule = module {
             r2SecretAccessKey = prefs.getEffectiveR2SecretAccessKey(),
             enableCompression = prefs.cloudflareCompressionEnabled().get()
         )
-        println("[CommunityTranslationModule] CloudflareConfig created:")
-        println("[CommunityTranslationModule]   accountId = ${config.accountId.take(10)}...")
-        println("[CommunityTranslationModule]   apiToken = ${config.apiToken.take(10)}...")
-        println("[CommunityTranslationModule]   d1DatabaseId = ${config.d1DatabaseId.take(10)}...")
-        println("[CommunityTranslationModule]   r2BucketName = ${config.r2BucketName}")
-        println("[CommunityTranslationModule]   isValid = ${config.isValid()}")
-        println("[CommunityTranslationModule]   isR2Configured = ${config.isR2Configured()}")
         config
     }
     

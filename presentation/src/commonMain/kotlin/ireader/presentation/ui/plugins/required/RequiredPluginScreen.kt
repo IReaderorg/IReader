@@ -618,7 +618,7 @@ private fun getPluginConfig(type: RequiredPluginType): PluginConfig {
         RequiredPluginType.JS_ENGINE -> PluginConfig(
             name = "J2V8 JavaScript Engine",
             description = "V8 JavaScript engine for running LNReader-compatible sources",
-            version = "6.2.1",
+            version = "6.3.4",
             estimatedSize = 33 * 1024 * 1024L, // ~33 MB
             whyNeeded = "This plugin provides the JavaScript engine needed to run web-based novel sources. Without it, sources that use JavaScript for content loading won't work.",
             pluginId = "io.github.ireaderorg.plugins.j2v8-engine"

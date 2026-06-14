@@ -161,7 +161,7 @@ fun RequiredPluginCard(
             RequiredPluginType.JS_ENGINE -> PluginConfig(
                 name = "J2V8 JavaScript Engine",
                 description = "Required for JavaScript-based sources",
-                version = "6.2.1",
+                version = "6.3.4",
                 estimatedSize = 33 * 1024 * 1024L,
                 whyNeeded = "This plugin provides the JavaScript engine needed to run web-based novel sources.",
                 pluginId = "io.github.ireaderorg.plugins.j2v8-engine"
