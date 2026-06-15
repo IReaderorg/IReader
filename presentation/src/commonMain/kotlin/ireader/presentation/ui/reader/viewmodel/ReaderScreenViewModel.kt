@@ -105,10 +105,15 @@ class ReaderScreenViewModel(
     val statisticsViewModel: ReaderStatisticsViewModel,
 ) : BaseViewModel() {
 
-    /** Scroll manager for handling scroll position persistence */
-    private val scrollManager = ReaderScrollManager(
+    /** Scroll VM for scroll state, auto-scroll, reading time estimation, and reading break */
+    val scrollVM = ReaderScrollViewModel(
         scope = scope,
-        chapterRepository = readerUseCasesAggregate.chapterRepository
+        readerUseCasesAggregate = readerUseCasesAggregate,
+        statisticsViewModel = statisticsViewModel,
+        readerPreferences = readerPreferences,
+        settingsViewModel = settingsViewModel,
+        getState = { _state.value },
+        updateSuccessState = { update -> updateSuccessState(update) },
     )
 
     /** Content VM for chapter loading, navigation, and health */
@@ -322,39 +327,21 @@ class ReaderScreenViewModel(
     
     /**
      * Saves the current scroll position for the current chapter.
-     * This is called periodically as the user scrolls to prevent data loss.
-     * Uses a dedicated update query that only modifies lastPageRead field.
-     * Also updates the in-memory state so the value is available if ViewModel is cached.
-     * 
-     * @param scrollPosition The scroll position (LazyColumn item index) to save
+     * Delegates to scrollVM.
      */
     fun saveScrollPosition(scrollPosition: Long) {
-        val chapter = stateChapter ?: return
-
-        // Update in-memory state immediately
-        scrollManager.updatePosition(scrollPosition)
-
-        // Also update the state's currentChapter.lastPageRead so it's reflected in the cached ViewModel
-        updateSuccessState { state ->
-            state.copy(
-                currentChapter = state.currentChapter.copy(lastPageRead = scrollPosition)
-            )
-        }
-
-        // Save to database asynchronously via scroll manager
-        scrollManager.saveScrollPosition(chapter.id, scrollPosition)
+        scrollVM.saveScrollPosition(scrollPosition)
     }
 
-    /** Current scroll position (delegated to scrollManager) */
-    val currentScrollPosition: Long get() = scrollManager.currentScrollPosition
+    /** Current scroll position (delegated to scrollVM) */
+    val currentScrollPosition: Long get() = scrollVM.currentScrollPosition
 
     /**
      * Force save the current scroll position to the database immediately.
-     * This should be called before navigating to a new chapter.
+     * Delegates to scrollVM.
      */
     fun saveCurrentScrollPositionToDatabase() {
-        val chapter = stateChapter ?: return
-        scrollManager.forceSaveScrollPosition(chapter.id)
+        scrollVM.saveCurrentScrollPositionToDatabase()
     }
     
     /**
@@ -995,21 +982,21 @@ class ReaderScreenViewModel(
     val webViewIntegration get() = settingsViewModel.webViewIntegration
     val webViewBackgroundMode get() = settingsViewModel.webViewBackgroundMode
     
-    // Auto-scroll delegations
+    // Auto-scroll delegations (via scrollVM)
     var autoScrollMode: Boolean
-        get() = settingsViewModel.autoScrollMode
-        set(value) { settingsViewModel.autoScrollMode = value }
-    val autoScrollOffset get() = settingsViewModel.autoScrollOffset
-    val autoScrollInterval get() = settingsViewModel.autoScrollInterval
+        get() = scrollVM.autoScrollMode
+        set(value) { scrollVM.autoScrollMode = value }
+    val autoScrollOffset get() = scrollVM.autoScrollOffset
+    val autoScrollInterval get() = scrollVM.autoScrollInterval
     
     // UI state from sealed state
     val isReaderModeEnable: Boolean
         get() = (_state.value as? ReaderState.Success)?.isReaderModeEnabled ?: true
     
-    // Scroll target when chapter changes (true = scroll to end, false = scroll to start)
+    // Scroll target when chapter changes (true = scroll to end, false = scroll to start) - delegated to scrollVM
     var scrollToEndOnChapterChange: Boolean
-        get() = (_state.value as? ReaderState.Success)?.scrollToEndOnChapterChange ?: false
-        set(value) { updateSuccessState { it.copy(scrollToEndOnChapterChange = value) } }
+        get() = scrollVM.scrollToEndOnChapterChange
+        set(value) { scrollVM.scrollToEndOnChapterChange = value }
     
     var showSettingsBottomSheet: Boolean
         get() = (_state.value as? ReaderState.Success)?.showSettingsBottomSheet ?: false
@@ -1043,14 +1030,14 @@ class ReaderScreenViewModel(
         get() = (_state.value as? ReaderState.Success)?.currentFindMatchIndex ?: 0
     
     var showReadingTime: Boolean
-        get() = (_state.value as? ReaderState.Success)?.showReadingTime ?: false
-        set(value) { updateSuccessState { it.copy(showReadingTime = value) } }
+        get() = scrollVM.showReadingTime
+        set(value) { scrollVM.showReadingTime = value }
     
     val estimatedReadingMinutes: Int
-        get() = (_state.value as? ReaderState.Success)?.estimatedReadingMinutes ?: 0
+        get() = scrollVM.estimatedReadingMinutes
     
     val wordsRemaining: Int
-        get() = (_state.value as? ReaderState.Success)?.wordsRemaining ?: 0
+        get() = scrollVM.wordsRemaining
     
     val showReportDialog: Boolean
         get() = (_state.value as? ReaderState.Success)?.showReportDialog ?: false
@@ -1074,7 +1061,7 @@ class ReaderScreenViewModel(
         get() = (_state.value as? ReaderState.Success)?.showTranslationApiKeyPrompt ?: false
     
     val showReadingBreakDialog: Boolean
-        get() = (_state.value as? ReaderState.Success)?.showReadingBreakDialog ?: false
+        get() = scrollVM.showReadingBreakDialog
     
     // Expand top menu state
     var expandTopMenu by mutableStateOf(false)
@@ -1133,8 +1120,8 @@ class ReaderScreenViewModel(
         )
     }
     
-    // Reading time preference
-    val readingBreakInterval = readerPreferences.readingBreakInterval().asState()
+    // Reading time preference (delegated to scrollVM)
+    val readingBreakInterval get() = scrollVM.readingBreakInterval
     
     // Paragraph translation preference
     val paragraphTranslationEnabled = readerPreferences.paragraphTranslationEnabled().asState()
@@ -1142,8 +1129,8 @@ class ReaderScreenViewModel(
     // TTS with translated text preference
     val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().asState()
     
-    // Show reading time indicator preference
-    val showReadingTimeIndicator = readerPreferences.showReadingTimeIndicator().asState()
+    // Show reading time indicator preference (delegated to scrollVM)
+    val showReadingTimeIndicator get() = scrollVM.showReadingTimeIndicator
     
     // Note: customFonts and selectedFontId are declared before init block
     
@@ -1162,15 +1149,15 @@ class ReaderScreenViewModel(
     }
     
     fun increaseAutoScrollSpeed() {
-        settingsViewModel.increaseAutoScrollSpeed()
+        scrollVM.increaseAutoScrollSpeed()
     }
     
     fun decreaseAutoScrollSpeed() {
-        settingsViewModel.decreaseAutoScrollSpeed()
+        scrollVM.decreaseAutoScrollSpeed()
     }
     
     fun toggleAutoScroll() {
-        settingsViewModel.toggleAutoScroll()
+        scrollVM.toggleAutoScroll()
     }
     
     fun changeBackgroundColor(themeId: Long) {
@@ -1202,19 +1189,19 @@ class ReaderScreenViewModel(
     }
     
     fun onTakeBreak() {
-        updateSuccessState { it.copy(showReadingBreakDialog = false) }
+        scrollVM.onTakeBreak()
     }
     
     fun onContinueReading() {
-        updateSuccessState { it.copy(showReadingBreakDialog = false) }
+        scrollVM.onContinueReading()
     }
     
     fun onSnoozeReadingBreak(minutes: Int) {
-        updateSuccessState { it.copy(showReadingBreakDialog = false) }
+        scrollVM.onSnoozeReadingBreak(minutes)
     }
     
     fun dismissReadingBreakDialog() {
-        updateSuccessState { it.copy(showReadingBreakDialog = false) }
+        scrollVM.dismissReadingBreakDialog()
     }
     
     fun showParagraphTranslation(paragraph: String) {
@@ -1227,19 +1214,7 @@ class ReaderScreenViewModel(
     }
     
     fun updateReadingTimeEstimation(scrollProgress: Float) {
-        val successState = _state.value as? ReaderState.Success ?: return
-        val totalWords = successState.totalWords
-        statisticsViewModel.updateProgress(scrollProgress, totalWords)
-        
-        // Update state with estimated reading time
-        val estimatedMinutes = (statisticsViewModel.estimatedTimeRemaining ?: 0L) / 60000
-        val wordsRemaining = if (totalWords > 0) ((1f - scrollProgress) * totalWords).toInt() else 0
-        updateSuccessState { 
-            it.copy(
-                estimatedReadingMinutes = estimatedMinutes.toInt(),
-                wordsRemaining = wordsRemaining
-            )
-        }
+        scrollVM.updateReadingTimeEstimation(scrollProgress)
     }
     
     fun getCurrentContent(): List<Page> {
