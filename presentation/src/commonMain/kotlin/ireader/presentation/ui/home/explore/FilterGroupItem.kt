@@ -126,6 +126,30 @@ fun FilterGroupItem(
                         isExpandable = true,
                     )
                 }
+                is Filter.Select -> {
+                    var state by remember {
+                        mutableStateOf(filter.value)
+                    }
+                    LaunchedEffect(key1 = filter.value) {
+                        state = filter.value
+                    }
+                    DropDownMenu(
+                        text = filter.name,
+                        onSelected = { value ->
+                            onUpdate(
+                                filters.replace(
+                                    index,
+                                    filter.apply {
+                                        this.value = value
+                                    }
+                                )
+                            )
+                            state = value
+                        },
+                        currentValue = filter.options.getOrElse(state) { filter.options[0] },
+                        items = filter.options
+                    )
+                }
                 else -> {}
             }
         }
