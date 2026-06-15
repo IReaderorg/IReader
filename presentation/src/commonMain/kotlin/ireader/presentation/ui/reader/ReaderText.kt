@@ -14,7 +14,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -53,7 +51,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.core.source.model.Page
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.ReadingMode
@@ -64,7 +61,6 @@ import ireader.i18n.resources.bounceoffset
 import ireader.i18n.resources.first_chapter
 import ireader.i18n.resources.release_for_previous
 import ireader.presentation.core.toComposeColor
-import ireader.presentation.ui.component.list.scrollbars.IColumnScrollbar
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -556,14 +552,11 @@ fun ReaderText(
                     TextSelectionContainer(selectable = vm.copyModeActive || vm.selectableMode.value) {
                         when (vm.readingMode.value) {
                             ReadingMode.Page -> {
-                                PagedReaderText(
-                                    interactionSource = interactionSource,
-                                    scrollState = scrollState,
-                                    lazyListState = lazyListState,
+                                PagedReaderContent(
                                     vm = vm,
-                                    maxHeight = maxHeight,
-                                    onNext = onNext,
+                                    lazyListState = lazyListState,
                                     onPrev = onPrev,
+                                    onNext = onNext,
                                     toggleReaderMode = debouncedToggleReaderMode,
                                     onShowComments = onShowComments
                                 )
@@ -628,262 +621,6 @@ private fun TextSelectionContainer(
 
         else -> {
             content()
-        }
-    }
-}
-
-@Composable
-private fun PagedReaderText(
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource,
-    scrollState: ScrollState,
-    lazyListState: LazyListState,
-    vm: ReaderScreenViewModel,
-    maxHeight: Float,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
-    toggleReaderMode: () -> Unit,
-    onShowComments: (chapter: Chapter) -> Unit,
-) {
-    // Use optimized LazyColumn-based implementation for better performance
-    OptimizedPagedReaderText(
-        modifier = modifier,
-        interactionSource = interactionSource,
-        lazyListState = lazyListState,
-        vm = vm,
-        maxHeight = maxHeight,
-        onPrev = onPrev,
-        onNext = onNext,
-        toggleReaderMode = toggleReaderMode,
-        onShowComments = onShowComments
-    )
-}
-
-/**
- * Optimized paged reader that uses LazyColumn instead of Column with verticalScroll.
- * This provides significant performance improvements for long chapters by:
- * 1. Only composing visible paragraphs (lazy loading)
- * 2. Recycling paragraph composables as user scrolls
- * 3. Reducing memory usage for chapters with many paragraphs
- * 4. Chapter end UI with navigation and comments section
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun OptimizedPagedReaderText(
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource,
-    lazyListState: LazyListState,
-    vm: ReaderScreenViewModel,
-    maxHeight: Float,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
-    toggleReaderMode: () -> Unit,
-    onShowComments: (chapter: Chapter) -> Unit,
-) {
-    val scope = rememberCoroutineScope()
-
-    // NOTE: Scroll position restoration is now handled in the parent ReaderText composable
-    // This ensures it works for both Page and Continues reading modes
-
-    // Collect state from ViewModel's StateFlow for reliable observation
-    val readerState by vm.state.collectAsState()
-    val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
-
-    // Track scroll progress for reading time estimation
-    val visibleItemInfo = remember { derivedStateOf { lazyListState.layoutInfo } }
-    LaunchedEffect(key1 = visibleItemInfo.value, key2 = vm.stateChapter?.id) {
-        val layoutInfo = lazyListState.layoutInfo
-        val totalItems = layoutInfo.totalItemsCount
-        val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-
-        if (totalItems > 0 && !vm.isLoading) {
-            val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
-            vm.updateReadingTimeEstimation(scrollProgress)
-        }
-    }
-
-    // Auto-scroll logic for optimized Page mode
-    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
-        if (vm.autoScrollMode) {
-            while (vm.autoScrollMode) {
-                val scrollAmount = vm.autoScrollOffset.value.toFloat()
-
-                // Check if we've reached the end before scrolling
-                val layoutInfo = lazyListState.layoutInfo
-                val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-                val isAtEnd = lastVisibleItem?.index == layoutInfo.totalItemsCount - 1
-
-                if (isAtEnd) {
-                    // Stop auto-scroll before advancing to prevent double-advance
-                    vm.autoScrollMode = false
-                    // Auto-advance to next chapter
-                    onNext()
-                    break
-                }
-
-                lazyListState.scrollBy(scrollAmount)
-
-                // Delay based on interval (smooth scrolling)
-                kotlinx.coroutines.delay(16L) // ~60fps
-            }
-        }
-    }
-    // Content is already filtered at the data layer
-    val content = successState?.currentContent ?: emptyList()
-
-    // Check chapter navigation availability
-    val currentIndex = vm.currentChapterIndex
-    val chapters = vm.stateChapters
-    val hasPrevChapter = currentIndex > 0
-    val hasNextChapter = currentIndex < chapters.lastIndex
-    val prevChapterName = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1)?.name else null
-    val nextChapterName = if (hasNextChapter) chapters.getOrNull(currentIndex + 1)?.name else null
-
-    val prevChapter = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1) else null
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        ILazyColumnScrollbar(
-            listState = lazyListState,
-            padding = if (vm.scrollIndicatorPadding.lazyValue < 0) 0.dp else vm.scrollIndicatorPadding.lazyValue.dp,
-            thickness = if (vm.scrollIndicatorWith.lazyValue < 0) 0.dp else vm.scrollIndicatorWith.lazyValue.dp,
-            enable = vm.showScrollIndicator.value,
-            thumbColor = vm.unselectedScrollBarColor.value.toComposeColor(),
-            thumbSelectedColor = vm.selectedScrollBarColor.value.toComposeColor(),
-            selectionMode = vm.isScrollIndicatorDraggable.value,
-            rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right,
-        ) {
-            LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                state = lazyListState,
-            ) {
-
-
-                // Chapter content items
-                items(
-                    count = content.size,
-                    key = { index ->
-                        // Stable key combining chapter ID and paragraph index for better item reuse
-                        "${vm.stateChapter?.id ?: 0}-content-$index"
-                    }
-                ) { index ->
-                    // Use remember to cache the page reference
-                    val page = remember(content, index) { content.getOrNull(index) }
-                    if (page != null) {
-                        MainText(
-                            modifier = modifier,
-                            index = index,
-                            page = page,
-                            vm = vm
-                        )
-                    }
-                }
-
-                // Void space at end of chapter with comments (only shown when content exists)
-                // Users must read the chapter before seeing the "chapter complete" section
-                if (content.isNotEmpty()) {
-                    item(key = "${vm.stateChapter?.id ?: 0}-chapter-void") {
-                        ChapterVoidSpace(
-                            chapter = vm.stateChapter ?: return@item,
-                            isLast = !hasNextChapter,
-                            textColor = vm.textColor.value.toComposeColor(),
-                            backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                            onShowComments = { vm.stateChapter?.let { onShowComments(it) } },
-                            onNextChapter = onNext,
-                            isLoading = vm.isLoading
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-
-}
-
-/**
- * Legacy paged reader using Column with verticalScroll.
- * Kept for compatibility - use OptimizedPagedReaderText for better performance.
- */
-@Composable
-private fun LegacyPagedReaderText(
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource,
-    scrollState: ScrollState,
-    vm: ReaderScreenViewModel,
-    maxHeight: Float,
-    onPrev: () -> Unit,
-    onNext: () -> Unit,
-    toggleReaderMode: () -> Unit
-) {
-    val scope = rememberCoroutineScope()
-
-    // Track scroll progress for reading time estimation in Page mode
-    LaunchedEffect(key1 = scrollState.value, key2 = scrollState.maxValue, key3 = vm.stateChapter?.id) {
-        if (scrollState.maxValue > 0 && !vm.isLoading) {
-            val scrollProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat()
-            vm.updateReadingTimeEstimation(scrollProgress)
-        }
-    }
-
-    // Auto-scroll logic for Page mode
-    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
-        if (vm.autoScrollMode) {
-            while (vm.autoScrollMode) {
-                val scrollAmount = vm.autoScrollOffset.value.toFloat()
-
-                // Check if we've reached the end before scrolling
-                if (scrollState.value >= scrollState.maxValue) {
-                    // Stop auto-scroll before advancing to prevent double-advance
-                    vm.autoScrollMode = false
-                    // Auto-advance to next chapter
-                    onNext()
-                    break
-                }
-
-                scrollState.scrollBy(scrollAmount)
-
-                // Delay based on interval (smooth scrolling)
-                kotlinx.coroutines.delay(16L) // ~60fps
-            }
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Use lazyValue for immediate UI updates during slider drag
-        IColumnScrollbar(
-            state = scrollState,
-            padding = if (vm.scrollIndicatorPadding.lazyValue < 0) 0.dp else vm.scrollIndicatorPadding.lazyValue.dp,
-            thickness = if (vm.scrollIndicatorWith.lazyValue < 0) 0.dp else vm.scrollIndicatorWith.lazyValue.dp,
-            enabled = vm.showScrollIndicator.value,
-            thumbColor = vm.unselectedScrollBarColor.value.toComposeColor(),
-            thumbSelectedColor = vm.selectedScrollBarColor.value.toComposeColor(),
-            selectionMode = vm.isScrollIndicatorDraggable.value,
-            rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
-        ) {
-            // Memoize content to prevent unnecessary recomposition
-            // Observe state directly to get content updates when filter changes
-            val readerState by vm.state.collectAsState()
-            val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
-            val content = successState?.currentContent ?: emptyList()
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(top = 32.dp)
-            ) {
-                content.forEachIndexed { index, text ->
-                    // Use key to help Compose identify items and skip unchanged ones
-                    androidx.compose.runtime.key(index, text) {
-                        MainText(
-                            modifier = modifier,
-                            index = index,
-                            page = text,
-                            vm = vm
-                        )
-                    }
-                }
-            }
         }
     }
 }
