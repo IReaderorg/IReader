@@ -87,6 +87,8 @@ import ireader.domain.models.characterart.ArtStyleFilter
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * Image source mode for upload
@@ -178,6 +180,10 @@ fun UploadCharacterArtScreen(
     val isFormValid = characterName.isNotBlank() && 
                       bookTitle.isNotBlank() && 
                       hasImage
+    
+    // Get platform context for save-to-gallery
+    val platformContext = coil3.compose.LocalPlatformContext.current
+    val saveScope = rememberCoroutineScope()
     
     // Get current API key based on provider
     val currentApiKey = when (currentProvider) {
@@ -288,6 +294,18 @@ fun UploadCharacterArtScreen(
                                         prompt = generationPrompt
                                     }
                                 },
+                                onSaveToGallery = if (generatedImagePreview != null) {
+                                    {
+                                        saveScope.launch {
+                                            val success = saveImageToGallery(platformContext, generatedImagePreview)
+                                            android.widget.Toast.makeText(
+                                                platformContext,
+                                                if (success) "Saved to Pictures/IReader" else "Failed to save",
+                                                android.widget.Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                } else null,
                                 isWideScreen = isWideScreen
                             )
                             
@@ -875,6 +893,7 @@ private fun AIGeneratorSection(
     onModelSelect: (GeminiModelInfo) -> Unit,
     onFetchModels: () -> Unit,
     onGenerate: () -> Unit,
+    onSaveToGallery: (() -> Unit)? = null,
     isWideScreen: Boolean
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -1186,6 +1205,7 @@ private fun AIGeneratorSection(
                 GeneratedImagePreview(
                     imageBytes = generatedPreview,
                     onRegenerate = onGenerate,
+                    onSaveToGallery = onSaveToGallery,
                     isWideScreen = isWideScreen
                 )
             } else {
@@ -1226,6 +1246,7 @@ private fun AIGeneratorSection(
 private fun GeneratedImagePreview(
     imageBytes: ByteArray,
     onRegenerate: () -> Unit,
+    onSaveToGallery: (() -> Unit)? = null,
     isWideScreen: Boolean
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -1309,26 +1330,56 @@ private fun GeneratedImagePreview(
                     }
                 }
                 
-                // Regenerate button
-                Surface(
-                    onClick = onRegenerate,
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                // Action buttons
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Save to gallery button
+                    if (onSaveToGallery != null) {
+                        Surface(
+                            onClick = onSaveToGallery,
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFF4CAF50)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Image,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.White
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    "Save",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Regenerate button
+                    Surface(
+                        onClick = onRegenerate,
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
                     ) {
-                        Icon(
-                            Icons.Default.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            "Regenerate",
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                "Regenerate",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
                     }
                 }
             }
@@ -1585,6 +1636,41 @@ private fun ProviderSelectorDialog(
             }
         }
     )
+}
+
+/**
+ * Save image bytes to the device gallery using MediaStore
+ */
+private suspend fun saveImageToGallery(context: android.content.Context, imageBytes: ByteArray): Boolean {
+    return try {
+        val resolver = context.applicationContext.contentResolver
+        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(java.util.Date())
+        val fileName = "IReader_$timestamp.png"
+
+        val contentValues = android.content.ContentValues().apply {
+            put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, fileName)
+            put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png")
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, "Pictures/IReader")
+                put(android.provider.MediaStore.Images.Media.IS_PENDING, 1)
+            }
+        }
+
+        val uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        if (uri != null) {
+            resolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(imageBytes)
+            }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                contentValues.clear()
+                contentValues.put(android.provider.MediaStore.Images.Media.IS_PENDING, 0)
+                resolver.update(uri, contentValues, null, null)
+            }
+            true
+        } else false
+    } catch (e: Exception) {
+        false
+    }
 }
 
 /**

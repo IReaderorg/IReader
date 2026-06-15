@@ -39,6 +39,28 @@ class CharacterArtUploadScreenSpec(
         // Track if we've applied prefilled values
         var hasAppliedPrefill by remember { mutableStateOf(false) }
         
+        val context = coil3.compose.LocalPlatformContext.current
+        
+        // Navigate back on successful upload
+        LaunchedEffect(state.successMessage) {
+            if (state.successMessage != null) {
+                vm.clearSuccessMessage()
+                navController.safePopBackStack()
+            }
+        }
+        
+        // Show error as toast
+        LaunchedEffect(state.error) {
+            if (state.error != null) {
+                android.widget.Toast.makeText(
+                    context,
+                    state.error,
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                vm.clearError()
+            }
+        }
+        
         val imagePicker = rememberImagePicker()
         
         // Convert ImageModel to GeminiModelInfo for UI
@@ -105,7 +127,6 @@ class CharacterArtUploadScreenSpec(
                         ),
                         imageBytes = imageBytes
                     )
-                    navController.safePopBackStack()
                 }
             },
             selectedImagePath = selectedImagePath,
