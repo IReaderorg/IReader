@@ -802,6 +802,54 @@ class ReaderContentViewModel(
 
     // ==================== Cleanup ====================
 
+    /**
+     * Fetch chapter content for infinite scroll mode.
+     * Returns the pages for a chapter, fetching from remote if not cached.
+     * Does NOT update any state flows — caller manages its own state.
+     */
+    suspend fun fetchChapterContentForInfiniteScroll(chapter: Chapter): List<Page> {
+        // Try local DB first
+        val dbChapter = getChapterUseCase.findChapterById(chapter.id)
+        if (dbChapter != null && !dbChapter.isEmpty()) {
+            return dbChapter.content
+        }
+
+        // Fetch from remote if available
+        val currentState = getState()
+        val catalog = (currentState as? ReaderState.Success)?.catalog ?: return emptyList()
+
+        // Use a CompletableDeferred to wait for the fetch result
+        val result = kotlinx.coroutines.CompletableDeferred<List<Page>>()
+        remoteUseCases.fetchAndSaveChapterContent(
+            chapter = chapter,
+            catalog = catalog,
+            onSuccess = { filteredChapter ->
+                result.complete(filteredChapter.content)
+            },
+            onError = { _ ->
+                result.complete(emptyList())
+            }
+        )
+        return result.await()
+    }
+
+    /**
+     * Track the currently visible chapter in infinite scroll mode WITHOUT
+     * triggering scroll restoration. Updates only the display-level state.
+     * 
+     * IMPORTANT: Must NOT call updateSuccessState — that triggers the scroll
+     * restoration logic in ReaderText.kt which would scroll away from the
+     * user's current position.
+     */
+    fun updateCurrentChapterForInfiniteScroll(chapter: Chapter) {
+        // Update the chapter index for display (chapter name in top bar, progress etc.)
+        // but DON'T touch currentChapter — that would trigger scroll restoration
+        _infiniteScrollVisibleChapter.value = chapter
+    }
+
+    private val _infiniteScrollVisibleChapter = MutableStateFlow<Chapter?>(null)
+    val infiniteScrollVisibleChapter: kotlinx.coroutines.flow.StateFlow<Chapter?> = _infiniteScrollVisibleChapter
+
     fun cleanup() {
         preloadJob?.cancel()
         chapterNavigationJob?.cancel()

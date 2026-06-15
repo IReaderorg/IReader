@@ -440,7 +440,7 @@ data class ReaderScreenSpec(
                                         }
                                     }
                                     when (vm.readingMode.value) {
-                                        ReadingMode.Continues -> {}
+                                        ReadingMode.Continues, ReadingMode.InfiniteScroll -> {}
                                         ReadingMode.Page -> {
                                             scope.launch {
                                                 scrollState.scrollTo(0)

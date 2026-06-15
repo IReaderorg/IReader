@@ -598,42 +598,18 @@ fun GeneralScreenTab(
                 preference = listOf(
                     localizeHelper.localize(Res.string.page),
                     localizeHelper.localize(Res.string.continues),
+                    "Infinite",
                 ),
                 selected = vm.readingMode.value.ordinal,
                 onValueChange = {
-                    vm.readingMode.value = ReadingMode.valueOf(it)
+                    val mode = ReadingMode.valueOf(it)
+                    vm.readingMode.value = mode
+                    // Also persist as default for new books
+                    vm.readerPreferences.defaultReadingMode().set(mode)
                 },
                 title = localizeHelper.localize(Res.string.scroll_mode)
             )
         }
-        item {
-            ChipPreference(
-                preference = listOf(
-                    localizeHelper.localize(Res.string.page),
-                    localizeHelper.localize(Res.string.continues),
-                ),
-                selected = vm.readerPreferences.defaultReadingMode().get().ordinal,
-                onValueChange = {
-                    vm.readerPreferences.defaultReadingMode().set(ReadingMode.valueOf(it))
-                },
-                title = localizeHelper.localize(Res.string.default_reading_mode_for_new_books)
-            )
-        }
-        item {
-            ChipPreference(
-                preference = listOf(
-                    localizeHelper.localize(Res.string.horizontal),
-                    localizeHelper.localize(Res.string.vertical),
-                ),
-                selected = vm.verticalScrolling.value.isTrue(),
-                onValueChange = {
-                    vm.verticalScrolling.value = it == 1
-                },
-                title = localizeHelper.localize(Res.string.reading_mode)
-            )
-        }
-        // Orientation is a global app setting, moved to app settings
-        // Keeping only chapter/book-specific settings here
         item {
             Components.Header(
                 "Display Settings"

@@ -7,19 +7,22 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 
+/**
+ * Continuous reader mode — shows ONE chapter as scrollable vertical content.
+ * At the end of the chapter, the user can scroll/go to next chapter.
+ * No multi-chapter concatenation (that's InfiniteScroll).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ContinuousReaderContent(
@@ -29,71 +32,42 @@ internal fun ContinuousReaderContent(
     onPrev: () -> Unit,
     onNext: () -> Unit,
     toggleReaderMode: () -> Unit,
-    onChapterShown: (chapter: Chapter) -> Unit,
-    onShowComments: (chapter: Chapter) -> Unit,
+    onChapterShown: (ireader.domain.models.entities.Chapter) -> Unit,
+    onShowComments: (ireader.domain.models.entities.Chapter) -> Unit,
 ) {
-    var lastChapterId: Chapter? by remember { mutableStateOf(null) }
+    val readerState by vm.state.collectAsState()
+    val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
 
-    LaunchedEffect(key1 = lastChapterId) {
-        lastChapterId?.let { chapter ->
-            onChapterShown(chapter)
-        }
-    }
+    val content = successState?.currentContent ?: emptyList()
+    val chapter = successState?.currentChapter
+    val hasNextChapter = vm.currentChapterIndex < vm.stateChapters.lastIndex
 
-    LaunchedEffect(key1 = vm.stateChapter?.id, key2 = vm.scrollToEndOnChapterChange) {
+    // Scroll to end when entering a new chapter (from "previous chapter" navigation)
+    LaunchedEffect(vm.scrollToEndOnChapterChange) {
         if (vm.scrollToEndOnChapterChange) {
-            val contentSize = vm.stateChapter?.content?.size ?: 0
-            if (contentSize > 0) {
-                val voidIndex = contentSize + 1
-                kotlinx.coroutines.delay(150)
-                val totalItems = lazyListState.layoutInfo.totalItemsCount
-                if (totalItems > voidIndex) {
-                    lazyListState.scrollToItem(voidIndex)
-                } else if (totalItems > 0) {
-                    lazyListState.scrollToItem(totalItems - 1)
-                }
+            kotlinx.coroutines.delay(150)
+            val totalItems = lazyListState.layoutInfo.totalItemsCount
+            if (totalItems > 0) {
+                lazyListState.scrollToItem(totalItems - 1)
             }
             vm.scrollToEndOnChapterChange = false
         }
     }
 
+    // Update reading time estimation
     val visibleItemInfo = remember { derivedStateOf { lazyListState.layoutInfo } }
-
-    LaunchedEffect(key1 = visibleItemInfo.value.visibleItemsInfo.firstOrNull()?.key) {
-        runCatching {
-            val visibleKey = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.key?.toString()
-            if (visibleKey != null) {
-                val chapterId = when {
-                    visibleKey.startsWith("content-") -> visibleKey.split("-").getOrNull(1)?.toLongOrNull()
-                    visibleKey.startsWith("void-") -> visibleKey.substringAfter("void-").toLongOrNull()
-                    visibleKey.startsWith("header-") -> visibleKey.substringAfter("header-").toLongOrNull()
-                    else -> visibleKey.substringAfter("-").toLongOrNull()
-                }
-                if (chapterId != null) {
-                    vm.chapterShell.firstOrNull { it.id == chapterId }?.let { chapter ->
-                        if (chapter.id != lastChapterId?.id) {
-                            lastChapterId = chapter
-                        }
-                    }
-                }
-            }
-        }.onFailure { e ->
-            ireader.core.log.Log.error("Error tracking visible chapter", e)
-        }
-    }
-
-    LaunchedEffect(key1 = visibleItemInfo.value, key2 = vm.stateChapter?.id) {
+    LaunchedEffect(visibleItemInfo.value, vm.stateChapter?.id) {
         val layoutInfo = lazyListState.layoutInfo
         val totalItems = layoutInfo.totalItemsCount
         val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-
         if (totalItems > 0 && !vm.isLoading) {
             val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
             vm.updateReadingTimeEstimation(scrollProgress)
         }
     }
 
-    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
+    // Auto-scroll
+    LaunchedEffect(vm.autoScrollMode, vm.autoScrollOffset.value, vm.stateChapter?.id) {
         if (vm.autoScrollMode) {
             while (vm.autoScrollMode) {
                 val scrollAmount = vm.autoScrollOffset.value.toFloat()
@@ -113,9 +87,9 @@ internal fun ContinuousReaderContent(
         }
     }
 
-    val currentIndex = vm.currentChapterIndex
-    val chapters = vm.stateChapters
-    val hasNextChapter = currentIndex < chapters.lastIndex
+    if (chapter != null) {
+        onChapterShown(chapter)
+    }
 
     ILazyColumnScrollbar(
         listState = lazyListState,
@@ -131,39 +105,36 @@ internal fun ContinuousReaderContent(
             modifier = modifier.fillMaxSize(),
             state = lazyListState,
         ) {
-            vm.chapterShell.forEachIndexed { shellIndex, chapter ->
-                val isLastChapter = shellIndex == vm.chapterShell.lastIndex
-                val content = chapter.content ?: emptyList()
-                items(
-                    count = content.size,
-                    key = { index -> "content-${chapter.id}-$index" }
-                ) { index ->
-                    val page = content.getOrNull(index)
-                    if (page != null) {
-                        MainText(
-                            modifier = modifier,
-                            index = index,
-                            page = page,
-                            vm = vm
-                        )
-                    }
+            // Render ONLY the current chapter's content
+            items(
+                count = content.size,
+                key = { index -> "content-${chapter?.id ?: 0}-$index" }
+            ) { index ->
+                val page = content.getOrNull(index)
+                if (page != null) {
+                    MainText(
+                        modifier = modifier,
+                        index = index,
+                        page = page,
+                        vm = vm
+                    )
                 }
+            }
 
-                if (content.isNotEmpty()) {
-                    item(key = "void-${chapter.id}") {
-                        ChapterVoidSpace(
-                            chapter = chapter,
-                            isLast = isLastChapter && !hasNextChapter,
-                            textColor = vm.textColor.value.toComposeColor(),
-                            backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                            onShowComments = { onShowComments(chapter) },
-                            onNextChapter = onNext,
-                            isLoading = vm.isLoading
-                        )
-                    }
+            // ChapterVoidSpace at the end
+            if (content.isNotEmpty() && chapter != null) {
+                item(key = "void-${chapter.id}") {
+                    ChapterVoidSpace(
+                        chapter = chapter,
+                        isLast = !hasNextChapter,
+                        textColor = vm.textColorCompose.value,
+                        backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                        onShowComments = { onShowComments(chapter) },
+                        onNextChapter = onNext,
+                        isLoading = vm.isLoading
+                    )
                 }
             }
         }
     }
 }
-

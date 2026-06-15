@@ -925,7 +925,14 @@ class ReaderScreenViewModel(
     
     // These properties are required by platform-specific code (ReaderPrefFunctions.kt)
     val stateChapter: Chapter?
-        get() = (_state.value as? ReaderState.Success)?.currentChapter
+        get() {
+            val infiniteScrollChapter = contentVM.infiniteScrollVisibleChapter.value
+            return if (readingMode.value == ReadingMode.InfiniteScroll && infiniteScrollChapter != null) {
+                infiniteScrollChapter
+            } else {
+                (_state.value as? ReaderState.Success)?.currentChapter
+            }
+        }
     
     val stateChapters: List<Chapter>
         get() = (_state.value as? ReaderState.Success)?.chapters ?: emptyList()

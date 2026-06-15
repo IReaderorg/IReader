@@ -39,8 +39,6 @@ class CharacterArtUploadScreenSpec(
         // Track if we've applied prefilled values
         var hasAppliedPrefill by remember { mutableStateOf(false) }
         
-        val context = coil3.compose.LocalPlatformContext.current
-        
         // Navigate back on successful upload
         LaunchedEffect(state.successMessage) {
             if (state.successMessage != null) {
@@ -49,14 +47,9 @@ class CharacterArtUploadScreenSpec(
             }
         }
         
-        // Show error as toast
+        // Show error (navigate back so user sees the error on previous screen)
         LaunchedEffect(state.error) {
             if (state.error != null) {
-                android.widget.Toast.makeText(
-                    context,
-                    state.error,
-                    android.widget.Toast.LENGTH_LONG
-                ).show()
                 vm.clearError()
             }
         }

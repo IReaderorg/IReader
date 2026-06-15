@@ -8,6 +8,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -113,7 +114,9 @@ fun ReadingScreen(
 
     val scope = rememberCoroutineScope()
     val context = LocalPlatformContext.current
-    val chapter = vm.stateChapter
+    val readerState by vm.state.collectAsState()
+    val chapter = (readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success)?.currentChapter
+        ?: vm.stateChapter
     var showChapterReviews =
         androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 

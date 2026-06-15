@@ -801,15 +801,12 @@ Visit.*for more chapters"""
 
 enum class ReadingMode {
     Page,
-    Continues;
+    Continues,
+    InfiniteScroll;
 
     companion object {
         fun valueOf(index: Int): ReadingMode {
-            return when (index) {
-                Page.ordinal -> Page
-                Continues.ordinal -> Continues
-                else -> throw IllegalArgumentException()
-            }
+            return entries.getOrElse(index) { Page }
         }
     }
 }

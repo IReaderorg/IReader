@@ -112,9 +112,9 @@ fun ReaderText(
     }
 
     // Single LaunchedEffect to handle initial scroll position restoration
-    // This runs for BOTH Page and Continues modes
-    // Key: chapter ID change triggers this, scrollToEnd is handled separately
-    LaunchedEffect(key1 = currentChapterId) {
+    // Only active for Continuous mode — Page and InfiniteScroll handle their own scroll
+    LaunchedEffect(key1 = currentChapterId, key2 = vm.readingMode.value) {
+        if (vm.readingMode.value != ReadingMode.Continues) return@LaunchedEffect
         val chapterId = currentChapterId ?: return@LaunchedEffect
 
         // Wait for database refresh to complete (triggered by the Unit LaunchedEffect above)
@@ -188,7 +188,13 @@ fun ReaderText(
     }
 
     // Separate LaunchedEffect for scrollToEnd changes (when navigating to previous chapter)
-    LaunchedEffect(key1 = successState?.scrollToEndOnChapterChange) {
+    // Only active for Continuous mode
+    LaunchedEffect(key1 = successState?.scrollToEndOnChapterChange, key2 = vm.readingMode.value) {
+        if (vm.readingMode.value != ReadingMode.Continues) {
+            // Clear the flag for non-continuous modes so it doesn't interfere
+            vm.scrollToEndOnChapterChange = false
+            return@LaunchedEffect
+        }
         val shouldScrollToEnd = successState?.scrollToEndOnChapterChange ?: false
         if (!shouldScrollToEnd) return@LaunchedEffect
 
@@ -448,17 +454,8 @@ fun ReaderText(
                                                         swipeState.animateOffsetTo(0f)
                                                     }
                                                  } else if (!isDragging && !isHorizontalGesture) {
-                                                     // It was a tap - use zone detection for Page mode
-                                                     if (vm.readingMode.value == ReadingMode.Page) {
-                                                         val tapZone = getTapZone(down.position.x, screenWidth)
-                                                         when (tapZone) {
-                                                             TapZone.LEFT -> onPrev()
-                                                             TapZone.RIGHT -> onNext()
-                                                             TapZone.CENTER -> debouncedToggleReaderMode()
-                                                         }
-                                                     } else {
-                                                         debouncedToggleReaderMode()
-                                                     }
+                                                     // It was a tap — just toggle reader mode
+                                                     debouncedToggleReaderMode()
                                                  }
                                                 break
                                             }
@@ -505,18 +502,19 @@ fun ReaderText(
                                         }
                                     }
                                  } else {
-                                     // Normal case - tap detection with zone support for Page mode
+                                     // Normal case - tap detection
                                      detectTapGestures(
                                          onTap = { offset ->
-                                             if (vm.readingMode.value == ReadingMode.Page) {
-                                                 val tapZone = getTapZone(offset.x, screenWidth)
-                                                 when (tapZone) {
-                                                     TapZone.LEFT -> onPrev()
-                                                     TapZone.RIGHT -> onNext()
-                                                     TapZone.CENTER -> debouncedToggleReaderMode()
+                                             when (vm.readingMode.value) {
+                                                 ReadingMode.Page -> {
+                                                     // In Page mode, tap toggles reader mode
+                                                     // (page scrolling handled by ReaderHorizontalScreen)
+                                                     debouncedToggleReaderMode()
                                                  }
-                                             } else {
-                                                 debouncedToggleReaderMode()
+                                                 ReadingMode.Continues, ReadingMode.InfiniteScroll -> {
+                                                     // In scroll modes, tap toggles reader mode
+                                                     debouncedToggleReaderMode()
+                                                 }
                                              }
                                          }
                                      )
@@ -549,18 +547,21 @@ fun ReaderText(
                                     onShowComments = onShowComments
                                 )
                             }
+
+                            ReadingMode.InfiniteScroll -> {
+                                InfiniteScrollReaderContent(
+                                    vm = vm,
+                                    modifier = Modifier,
+                                    lazyListState = lazyListState,
+                                    onPrev = onPrev,
+                                    onNext = onNext,
+                                    toggleReaderMode = debouncedToggleReaderMode,
+                                    onShowComments = onShowComments
+                                )
+                            }
                         }
                     }
                 }
-                ReaderHorizontalScreen(
-                    interactionSource = interactionSource,
-                    scrollState = scrollState,
-                    vm = vm,
-                    maxHeight = maxHeight,
-                    onNext = onNext,
-                    onPrev = onPrev,
-                    toggleReaderMode = debouncedToggleReaderMode
-                )
             }
 
         }

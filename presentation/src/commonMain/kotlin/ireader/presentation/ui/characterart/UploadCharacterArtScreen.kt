@@ -297,12 +297,7 @@ fun UploadCharacterArtScreen(
                                 onSaveToGallery = if (generatedImagePreview != null) {
                                     {
                                         saveScope.launch {
-                                            val success = saveImageToGallery(platformContext, generatedImagePreview)
-                                            android.widget.Toast.makeText(
-                                                platformContext,
-                                                if (success) "Saved to Pictures/IReader" else "Failed to save",
-                                                android.widget.Toast.LENGTH_SHORT
-                                            ).show()
+                                            saveImageToGallery(platformContext, generatedImagePreview)
                                         }
                                     }
                                 } else null,
