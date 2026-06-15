@@ -31,6 +31,7 @@ import ireader.presentation.core.ui.GlobalSearchScreenSpec
 import ireader.presentation.core.ui.GoogleDriveBackupScreenSpec
 import ireader.presentation.core.ui.LocalNavigationViewModelStore
 import ireader.presentation.core.ui.NavigationViewModelStore
+import ireader.presentation.core.ui.RouteScope
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.ReaderSettingSpec
 import ireader.presentation.core.ui.RepositoryAddScreenSpec
@@ -76,8 +77,6 @@ fun CommonNavHost(
     startDestination: String = "main",
     additionalRoutes: (NavGraphBuilder.() -> Unit)? = null
 ) {
-    val viewModelStore = remember { NavigationViewModelStore() }
-    
     // Get FeaturePluginIntegration at composable level for plugin screen registration
     // Use getKoin().getOrNull() instead of try-catch around koinInject (composable)
     val koin = org.koin.compose.getKoin()
@@ -85,14 +84,11 @@ fun CommonNavHost(
         koin.getOrNull<FeaturePluginIntegration>()
     }
     
-    androidx.compose.runtime.CompositionLocalProvider(
-        LocalNavigationViewModelStore provides viewModelStore
+    AnimatedNavHost(
+        navController = navController,
+        startDestination = startDestination,
+        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
     ) {
-        AnimatedNavHost(
-            navController = navController,
-            startDestination = startDestination,
-            backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background
-        ) {
         // Main screen
         composable("main") {
             MainStarterScreen()
@@ -469,7 +465,9 @@ fun CommonNavHost(
                 backStackEntry.getStringArg("bookId")?.toLongOrNull()
             }
             if (bookId != null) {
-                BookDetailScreenSpec(bookId).Content()
+                RouteScope {
+                    BookDetailScreenSpec(bookId).Content()
+                }
             }
         }
         
@@ -491,7 +489,9 @@ fun CommonNavHost(
                 ireader.presentation.core.ui.ModuleLoadingGuard(
                     loadingMessage = "Preparing reader..."
                 ) {
-                    ReaderScreenSpec(bookId, chapterId).Content()
+                    RouteScope {
+                        ReaderScreenSpec(bookId, chapterId).Content()
+                    }
                 }
             }
         }
@@ -506,7 +506,9 @@ fun CommonNavHost(
                 backStackEntry.getStringArg("sourceId")?.toLongOrNull()
             }
             if (sourceId != null) {
+                RouteScope {
                     ExploreScreenSpec(sourceId, null).Content()
+                }
             }
         }
         
@@ -642,7 +644,9 @@ fun CommonNavHost(
                 backStackEntry.getStringArg("readingParagraph")?.toIntOrNull() ?: 0
             }
             if (bookId != null && chapterId != null && sourceId != null) {
-                TTSV2ScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
+                RouteScope {
+                    TTSV2ScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
+                }
             }
         }
         
@@ -699,7 +703,6 @@ fun CommonNavHost(
             }
         }
         }
-    }
 }
 
 /**

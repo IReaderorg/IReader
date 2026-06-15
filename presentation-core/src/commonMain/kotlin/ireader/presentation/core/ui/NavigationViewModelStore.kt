@@ -8,8 +8,11 @@ import org.koin.core.qualifier.Qualifier
 
 /**
  * A store that caches ViewModel instances per navigation route.
- * This ensures ViewModels survive navigation and are only cleared when
- * the navigation entry is removed from the backstack.
+ * 
+ * When a composable screen creates its own store via [rememberRouteViewModelStore],
+ * the store is scoped to that backstack entry. When the entry is popped,
+ * the composable is removed from composition and the store is garbage collected,
+ * along with all ViewModels it holds.
  */
 class NavigationViewModelStore {
     @PublishedApi
@@ -45,6 +48,8 @@ class NavigationViewModelStore {
 }
 
 /**
- * CompositionLocal for providing the NavigationViewModelStore
+ * CompositionLocal for providing the NavigationViewModelStore.
+ * Each composable screen should provide its own store instance via [rememberRouteViewModelStore].
+ * This ensures ViewModels are scoped to the screen's lifecycle.
  */
 val LocalNavigationViewModelStore = staticCompositionLocalOf<NavigationViewModelStore?> { null }
