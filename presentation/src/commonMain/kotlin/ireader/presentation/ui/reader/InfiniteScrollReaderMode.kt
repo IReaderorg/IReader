@@ -1,9 +1,11 @@
 package ireader.presentation.ui.reader
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -230,15 +232,24 @@ fun InfiniteScrollReaderContent(
 
         if (isLoadingNextChapter) {
             item(key = "loading") {
-                Text(
-                    text = "Loading next chapter...",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                androidx.compose.foundation.layout.Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center,
-                )
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        color = vm.textColorCompose.value,
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Loading next chapter...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
 

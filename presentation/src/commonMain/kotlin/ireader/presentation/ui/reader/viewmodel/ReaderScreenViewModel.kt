@@ -957,7 +957,15 @@ class ReaderScreenViewModel(
         get() = (_state.value as? ReaderState.Success)?.chapterShell ?: emptyList()
     
     val currentChapterIndex: Int
-        get() = (_state.value as? ReaderState.Success)?.currentChapterIndex ?: 0
+        get() {
+            val infiniteScrollChapter = contentVM.infiniteScrollVisibleChapter.value
+            return if (readingMode.value == ReadingMode.InfiniteScroll && infiniteScrollChapter != null) {
+                val chapters = (_state.value as? ReaderState.Success)?.chapters ?: emptyList()
+                chapters.indexOfFirst { it.id == infiniteScrollChapter.id }.coerceAtLeast(0)
+            } else {
+                (_state.value as? ReaderState.Success)?.currentChapterIndex ?: 0
+            }
+        }
     
     val book: Book?
         get() = (_state.value as? ReaderState.Success)?.book

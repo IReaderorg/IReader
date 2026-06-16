@@ -85,13 +85,12 @@ internal fun PagedReaderContent(
     LaunchedEffect(pagerState.currentPage) {
         when (pagerState.currentPage) {
             prevNavPage -> {
+                // Swipe right past first page → previous chapter
                 pagerState.scrollToPage(firstContentPage)
                 onPrev()
             }
-            nextNavPage -> {
-                pagerState.scrollToPage(firstContentPage)
-                onNext()
-            }
+            // nextNavPage (void page) is NOT auto-navigated — user sees ChapterVoidSpace
+            // and can tap "Next Chapter" or swipe left past it to go to next chapter
         }
     }
 
