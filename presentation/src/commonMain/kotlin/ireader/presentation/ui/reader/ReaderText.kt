@@ -130,7 +130,7 @@ fun ReaderText(
     // Single LaunchedEffect to handle initial scroll position restoration
     // Only active for Continuous mode — Page and InfiniteScroll handle their own scroll
     LaunchedEffect(key1 = currentChapterId, key2 = vm.readingMode.value) {
-        if (vm.readingMode.value != ReadingMode.Continues) return@LaunchedEffect
+        val mode = vm.readingMode.value
         val chapterId = currentChapterId ?: return@LaunchedEffect
 
         // Check if this is the same chapter we already processed
@@ -142,13 +142,18 @@ fun ReaderText(
         val isFirstChapterOfSession = lastScrolledChapterId == null
         lastScrolledChapterId = chapterId
 
-        // Show loading during transition to prevent flicker
-        isTransitioning = true
+        // Show loading during transition (for Page and Continuous modes only)
+        // Infinite scroll has its own loading indicator at the bottom
+        if (mode != ReadingMode.InfiniteScroll) {
+            isTransitioning = true
+            kotlinx.coroutines.delay(300)
+            isTransitioning = false
+        }
 
-        // Wait for database refresh and content to load
-        kotlinx.coroutines.delay(150)
+        if (mode != ReadingMode.Continues) return@LaunchedEffect
 
-        // Get the fresh state
+        // Rest of scroll restoration only for Continuous mode
+        // Wait for LazyColumn to have items
         val freshState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
         val currentLastPageRead = freshState?.currentChapter?.lastPageRead ?: 0L
         val shouldScrollToEnd = freshState?.scrollToEndOnChapterChange ?: false

@@ -1,10 +1,5 @@
 package ireader.presentation.ui.reader
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -238,17 +233,11 @@ fun InfiniteScrollReaderContent(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    repeat(3) { index ->
-                        androidx.compose.foundation.Canvas(modifier = Modifier.size(8.dp)) {
-                            drawCircle(
-                                color = vm.textColorCompose.value.copy(alpha = 0.6f),
-                                radius = size.minDimension / 2
-                            )
-                        }
-                        if (index < 2) {
-                            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                        }
-                    }
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        color = vm.textColorCompose.value,
+                        trackColor = vm.textColorCompose.value.copy(alpha = 0.2f),
+                    )
                 }
             }
         }
