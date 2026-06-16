@@ -58,6 +58,7 @@ fun SettingsMainScreen(
     onExtensionSettings: () -> Unit,
     onNotificationSettings: () -> Unit,
     onDataSettings: () -> Unit,
+    onNetworkSettings: () -> Unit,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -84,7 +85,8 @@ fun SettingsMainScreen(
             "extensions" to onExtensionSettings,
             "security" to onSecuritySettings,
             "notifications" to onNotificationSettings,
-            "advanced" to onAdvancedSettings
+            "advanced" to onAdvancedSettings,
+            "network" to onNetworkSettings
         )
     }
 
@@ -268,6 +270,15 @@ fun SettingsMainScreen(
                     description = "Developer options and advanced configurations",
                     icon = Icons.Outlined.DeveloperMode,
                     onClick = clickHandlers["advanced"]!!
+                )
+            }
+            
+            item(key = "item_network") {
+                SettingsItem(
+                    title = "Advanced Network",
+                    description = "User agent, cookies, and proxy settings",
+                    icon = Icons.Outlined.Wifi,
+                    onClick = clickHandlers["network"]!!
                 )
             }
         }

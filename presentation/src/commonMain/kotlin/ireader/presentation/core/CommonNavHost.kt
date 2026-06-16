@@ -425,6 +425,13 @@ fun CommonNavHost(
         composable(NavigationRoutes.advanceSettings) {
             AdvanceSettingSpec().Content()
         }
+        composable(NavigationRoutes.networkSettings) {
+            val viewModel: ireader.presentation.ui.settings.network.NetworkSettingsViewModel = getIViewModel()
+            ireader.presentation.ui.settings.network.NetworkSettingsScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable(NavigationRoutes.jsPluginSettings) {
             ireader.presentation.core.ui.JSPluginSettingsScreenSpec().Content()
         }

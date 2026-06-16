@@ -262,6 +262,14 @@ class SettingScreenSpec {
                     onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
                 ))
                 add(SearchableSettingItem(
+                    id = "network",
+                    title = "Advanced Network",
+                    description = "User agent, cookies, and proxy settings",
+                    icon = Icons.Default.Wifi,
+                    section = localizeHelper.localize(Res.string.advanced),
+                    onClick = { navController.navigate(NavigationRoutes.networkSettings) }
+                ))
+                add(SearchableSettingItem(
                     id = "cache",
                     title = localizeHelper.localize(Res.string.clear_all_cache),
                     description = "Clear cached data to free up space",

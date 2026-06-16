@@ -199,6 +199,9 @@ val PresentationModules = module {
     factory  { SettingsTrackingViewModel(get(), get(), OAuthCallbackHandler(), getOrNull()) }
     factory  { SettingsDataViewModel(get(), getOrNull(), getOrNull()) }
     
+    // Network Settings ViewModel
+    factory  { ireader.presentation.ui.settings.network.NetworkSettingsViewModel(get(), get()) }
+    
     // Authentication ViewModels
     factory  { ireader.presentation.ui.settings.auth.AuthViewModel(getOrNull()) }
     factory  { ireader.presentation.ui.settings.auth.ProfileViewModel(getOrNull(), getOrNull(), getOrNull(), getOrNull(), getOrNull(), getOrNull(), getOrNull(), getOrNull(), getOrNull()) }
