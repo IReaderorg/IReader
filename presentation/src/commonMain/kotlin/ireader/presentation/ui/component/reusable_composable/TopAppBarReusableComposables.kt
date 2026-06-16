@@ -2,11 +2,14 @@ package ireader.presentation.ui.component.reusable_composable
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -215,40 +218,46 @@ fun AppIconButton(
     onLongClick: (() -> Unit)? = null,
     tint: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val modifierWithClick = if (onLongClick != null) {
-        modifier
-            .size(48.dp)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-                role = Role.Button,
-            )
-    } else {
-        modifier.size(48.dp)
-    }
-
-    IconButton(
-        modifier = modifierWithClick,
-        onClick = {
-            onClick()
-        },
-    ) {
-        when {
-            painter != null -> {
-                Icon(
-                    modifier = Modifier.size(24.dp), // Icon size separate from touch target
-                    painter = painter,
-                    contentDescription = contentDescription,
-                    tint = tint
+    val finalModifier = modifier
+        .size(48.dp)
+        .then(
+            if (onLongClick != null) {
+                Modifier.combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    role = Role.Button,
                 )
+            } else {
+                Modifier.clickable(onClick = onClick)
             }
-            imageVector != null -> {
-                Icon(
-                    modifier = Modifier.size(24.dp), // Icon size separate from touch target
-                    imageVector = imageVector,
-                    contentDescription = contentDescription,
-                    tint = tint
-                )
+        )
+
+    Surface(
+        modifier = finalModifier,
+        shape = RoundedCornerShape(12.dp),
+        color = Color.Transparent,
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when {
+                painter != null -> {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painter,
+                        contentDescription = contentDescription,
+                        tint = tint
+                    )
+                }
+                imageVector != null -> {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        imageVector = imageVector,
+                        contentDescription = contentDescription,
+                        tint = tint
+                    )
+                }
             }
         }
     }

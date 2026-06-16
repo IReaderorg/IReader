@@ -452,7 +452,7 @@ Visit.*for more chapters"""
 
     // Viewer modes and orientation
     fun defaultReaderMode(): Preference<Int> {
-        return preferenceStore.getInt("pref_default_reading_mode_key", ReaderMode.RIGHT_TO_LEFT.flagValue)
+        return preferenceStore.getInt("pref_default_reading_mode_key", ReaderMode.VERTICAL.flagValue)
     }
 
     fun defaultOrientationType(): Preference<Int> {

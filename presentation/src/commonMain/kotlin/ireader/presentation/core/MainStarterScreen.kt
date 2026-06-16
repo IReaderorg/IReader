@@ -201,18 +201,20 @@ object MainStarterScreen {
             }
         }
         
+        // Use a direct reference to the shared Koin singleton instead of getIViewModel
+        // which creates a new instance outside RouteScope
+        val koinInstance = org.koin.compose.getKoin()
+        val libraryUseCases: ireader.domain.usecases.library.LibraryUseCases? = koinInstance.getOrNull()
+        
         val onHistoryDoubleTap: () -> Unit = {
-            currentTabIndex = 2
             scope.launch {
-                val vm = currentLibraryVm
-                vm?.lastReadInfo?.let { info ->
-                    navController.navigateTo(ReaderScreenSpec(info.novelId, info.chapterId))
-                } ?: run {
-                    // VM not ready yet — retry after a short delay
-                    delay(200)
-                    currentLibraryVm?.lastReadInfo?.let { info ->
+                try {
+                    val info = libraryUseCases?.getLastRead?.invoke()
+                    if (info != null) {
                         navController.navigateTo(ReaderScreenSpec(info.novelId, info.chapterId))
+                    } else {
                     }
+                } catch (e: Exception) {
                 }
             }
             Unit

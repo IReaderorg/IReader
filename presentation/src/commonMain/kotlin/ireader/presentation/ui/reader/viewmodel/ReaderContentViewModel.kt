@@ -359,7 +359,7 @@ class ReaderContentViewModel(
                 content = chapter.content,
                 currentChapterIndex = if (effectiveIndex != -1) effectiveIndex else 0,
                 chapterShell = newChapterShell,
-                isLoadingContent = chapter.isEmpty() && catalog?.source != null,
+                isLoadingContent = forceRemote || (chapter.isEmpty() && catalog?.source != null),
                 isReaderModeEnabled = previousSuccessState?.isReaderModeEnabled ?: true,
                 isSettingModeEnabled = previousSuccessState?.isSettingModeEnabled ?: false,
                 isMainBottomModeEnabled = previousSuccessState?.isMainBottomModeEnabled ?: false,
@@ -568,12 +568,36 @@ class ReaderContentViewModel(
     }
 
     suspend fun fetchChapterFromRemote(chapterId: Long?): Chapter? {
-        if (chapterId == null) return null
-        val currentState = getState()
-        if (currentState !is ReaderState.Success) return null
+        if (chapterId == null) {
+            return null
+        }
+        var currentState = getState()
+        if (currentState !is ReaderState.Success) {
+            return null
+        }
 
-        val book = currentState.book
-        val catalog = currentState.catalog
+        var book = currentState.book
+        var catalog = currentState.catalog
+
+        // Wait for catalog to be available (source loading is async)
+        if (catalog?.source == null) {
+            repeat(20) { attempt ->
+                kotlinx.coroutines.delay(100)
+                currentState = getState()
+                if (currentState is ReaderState.Success) {
+                    catalog = currentState.catalog
+                    book = currentState.book
+                    if (catalog?.source != null) {
+                    }
+                }
+            }
+        }
+
+        if (catalog?.source == null) {
+            updateSuccessState { it.copy(isLoadingContent = false) }
+            showSnackBar(UiText.DynamicString("Source not available — try again"))
+            return null
+        }
 
         updateSuccessState { it.copy(isLoadingContent = true) }
 

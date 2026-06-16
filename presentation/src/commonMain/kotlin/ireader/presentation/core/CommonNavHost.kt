@@ -91,7 +91,9 @@ fun CommonNavHost(
     ) {
         // Main screen
         composable("main") {
-            MainStarterScreen()
+            RouteScope {
+                MainStarterScreen()
+            }
         }
         
         // Settings routes
