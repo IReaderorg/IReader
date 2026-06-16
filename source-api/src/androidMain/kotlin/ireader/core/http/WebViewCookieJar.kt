@@ -20,11 +20,19 @@ import okhttp3.HttpUrl
 
 
 
-class WebViewCookieJar(private val cookiesStorage: CookiesStorage) : CookieJar {
+class WebViewCookieJar(
+  private val cookiesStorage: CookiesStorage
+) : CookieJar {
 
   private val manager: CookieManager = CookieManager.getInstance()
+  private var cookieSynchronizer: CookieSynchronizer? = null
+
+  fun setCookieSynchronizer(synchronizer: CookieSynchronizer) {
+    this.cookieSynchronizer = synchronizer
+  }
 
   override fun loadForRequest(url: HttpUrl): List<Cookie> {
+    cookieSynchronizer?.syncToWebView(url.toString())
     return get(url)
   }
 

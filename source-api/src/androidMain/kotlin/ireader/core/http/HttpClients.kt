@@ -43,7 +43,7 @@ actual class HttpClients(
     private val cookieJar = webViewCookieJar
 
     actual override val sslConfig = SSLConfiguration()
-    actual override val cookieSynchronizer = CookieSynchronizer(webViewCookieJar)
+    actual override val cookieSynchronizer = CookieSynchronizer(webViewCookieJar, cookiesStorage)
 
     private val basicClient = OkHttpClient.Builder()
         .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)

@@ -224,7 +224,9 @@ actual val DomainModule = module {
     }
     
     single<ireader.core.http.CookieSynchronizer> { 
-        ireader.core.http.CookieSynchronizer(get()) 
+        ireader.core.http.CookieSynchronizer(get(), get()).also {
+            get<ireader.core.http.WebViewCookieJar>().setCookieSynchronizer(it)
+        }
     }
     
     single<ireader.core.http.BrowserEngine> { 
