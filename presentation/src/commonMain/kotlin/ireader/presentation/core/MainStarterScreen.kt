@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -121,6 +122,9 @@ object MainStarterScreen {
             libraryVmInitialized = true
         }
         
+        // Always-current reference for double-tap handlers
+        val currentLibraryVm by rememberUpdatedState(libraryVm)
+        
         val scope = rememberCoroutineScope()
         
         // Use Int index for faster comparison
@@ -197,16 +201,21 @@ object MainStarterScreen {
             }
         }
         
-        val onHistoryDoubleTap: () -> Unit = remember(libraryVm) {
-            {
-                currentTabIndex = 2
-                scope.launch {
-                    libraryVm?.lastReadInfo?.let { info ->
+        val onHistoryDoubleTap: () -> Unit = {
+            currentTabIndex = 2
+            scope.launch {
+                val vm = currentLibraryVm
+                vm?.lastReadInfo?.let { info ->
+                    navController.navigateTo(ReaderScreenSpec(info.novelId, info.chapterId))
+                } ?: run {
+                    // VM not ready yet — retry after a short delay
+                    delay(200)
+                    currentLibraryVm?.lastReadInfo?.let { info ->
                         navController.navigateTo(ReaderScreenSpec(info.novelId, info.chapterId))
                     }
                 }
-                Unit
             }
+            Unit
         }
         
         val onExtensionsDoubleTap: () -> Unit = remember {

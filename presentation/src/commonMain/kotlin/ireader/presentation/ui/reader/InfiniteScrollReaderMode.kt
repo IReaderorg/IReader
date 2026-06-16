@@ -1,6 +1,5 @@
 package ireader.presentation.ui.reader
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -226,17 +225,17 @@ fun InfiniteScrollReaderContent(
 
         if (isLoadingNextChapter) {
             item(key = "loading") {
-                androidx.compose.foundation.layout.Row(
+                androidx.compose.foundation.layout.Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     androidx.compose.material3.CircularProgressIndicator(
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(40.dp),
                         color = vm.textColorCompose.value,
-                        trackColor = vm.textColorCompose.value.copy(alpha = 0.2f),
+                        trackColor = vm.textColorCompose.value.copy(alpha = 0.15f),
+                        strokeWidth = 3.dp,
                     )
                 }
             }

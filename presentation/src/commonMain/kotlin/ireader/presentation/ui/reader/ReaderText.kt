@@ -146,7 +146,7 @@ fun ReaderText(
         // Infinite scroll has its own loading indicator at the bottom
         if (mode != ReadingMode.InfiniteScroll) {
             isTransitioning = true
-            kotlinx.coroutines.delay(300)
+            kotlinx.coroutines.delay(500)
             isTransitioning = false
         }
 
@@ -570,7 +570,7 @@ fun ReaderText(
 
         }
 
-        // Loading overlay during chapter transitions — fully opaque with circle
+        // Loading indicator during chapter transitions — shown at center
         if (isTransitioning) {
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier
@@ -579,9 +579,10 @@ fun ReaderText(
                 contentAlignment = Alignment.Center
             ) {
                 androidx.compose.material3.CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(40.dp),
                     color = vm.textColorCompose.value,
-                    trackColor = vm.textColorCompose.value.copy(alpha = 0.2f),
+                    trackColor = vm.textColorCompose.value.copy(alpha = 0.15f),
+                    strokeWidth = 3.dp,
                 )
             }
         }
