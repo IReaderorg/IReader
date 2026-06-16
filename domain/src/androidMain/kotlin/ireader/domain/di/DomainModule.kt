@@ -223,8 +223,12 @@ actual val DomainModule = module {
         ireader.core.http.WebViewManger(androidContext())
     }
     
+    single<ireader.core.http.CookieSynchronizer> { 
+        ireader.core.http.CookieSynchronizer(get()) 
+    }
+    
     single<ireader.core.http.BrowserEngine> { 
-        ireader.core.http.BrowserEngine(get(), get())
+        ireader.core.http.BrowserEngine(get(), get(), get())
     }
     
     single<ireader.core.http.NetworkConfig> { 

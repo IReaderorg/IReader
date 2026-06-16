@@ -26,10 +26,16 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
     
     private var webViewManger: WebViewManger? = null
     private var webViewCookieJar: WebViewCookieJar? = null
+    private var cookieSynchronizer: CookieSynchronizer? = null
     
-    constructor(webViewManger: WebViewManger, webViewCookieJar: WebViewCookieJar) : this() {
+    constructor(
+        webViewManger: WebViewManger,
+        webViewCookieJar: WebViewCookieJar,
+        cookieSynchronizer: CookieSynchronizer
+    ) : this() {
         this.webViewManger = webViewManger
         this.webViewCookieJar = webViewCookieJar
+        this.cookieSynchronizer = cookieSynchronizer
     }
     
     actual override fun isAvailable(): Boolean = webViewManger != null
@@ -132,6 +138,9 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
                 html = webView.getHtml()
                 manager.inProgress = false
             }
+            
+            // Sync cookies from WebView CookieManager to WebViewCookieJar
+            cookieSynchronizer?.syncFromWebView(url)
             
             // Get cookies and convert to common Cookie type
             val cookies = cookieJar?.let { jar ->
