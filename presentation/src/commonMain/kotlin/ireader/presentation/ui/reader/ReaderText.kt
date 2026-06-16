@@ -82,10 +82,14 @@ fun ReaderText(
     toggleReaderMode: () -> Unit,
     onChapterShown: (chapter: Chapter) -> Unit,
     onShowComments: (chapter: Chapter) -> Unit,
+    onOpenDrawer: () -> Unit = {},
     onCopyModeDone: ((ireader.domain.models.quote.QuoteCreationParams) -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
+
+    // Transition loading state — shows loading during chapter navigation flicker
+    var isTransitioning by remember { mutableStateOf(false) }
 
     // ==================== Scroll Position Restoration ====================
     // This logic restores scroll position from lastPageRead when opening a chapter
@@ -117,18 +121,6 @@ fun ReaderText(
         if (vm.readingMode.value != ReadingMode.Continues) return@LaunchedEffect
         val chapterId = currentChapterId ?: return@LaunchedEffect
 
-        // Wait for database refresh to complete (triggered by the Unit LaunchedEffect above)
-        // This ensures we get the fresh lastPageRead from the database
-        kotlinx.coroutines.delay(100)
-
-        // Get the fresh state AFTER the delay (not stale composition capture)
-        val freshState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
-        val currentLastPageRead = freshState?.currentChapter?.lastPageRead ?: 0L
-        val contentSize = freshState?.currentChapter?.content?.size ?: 0
-        val shouldScrollToEnd = freshState?.scrollToEndOnChapterChange ?: false
-
-
-
         // Check if this is the same chapter we already processed
         if (chapterId == lastScrolledChapterId) {
             return@LaunchedEffect
@@ -138,20 +130,27 @@ fun ReaderText(
         val isFirstChapterOfSession = lastScrolledChapterId == null
         lastScrolledChapterId = chapterId
 
+        // Show loading during transition to prevent flicker
+        isTransitioning = true
 
+        // Wait for database refresh and content to load
+        kotlinx.coroutines.delay(1200)
+
+        // Get the fresh state
+        val freshState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+        val currentLastPageRead = freshState?.currentChapter?.lastPageRead ?: 0L
+        val shouldScrollToEnd = freshState?.scrollToEndOnChapterChange ?: false
 
         // Wait for LazyColumn to have items
         var totalItems = 0
-        repeat(50) { // Wait up to ~800ms for content
-            kotlinx.coroutines.delay(16) // ~1 frame
+        repeat(50) {
+            kotlinx.coroutines.delay(16)
             totalItems = lazyListState.layoutInfo.totalItemsCount
             if (totalItems > 0) return@repeat
         }
 
-
-
         if (totalItems == 0) {
-
+            isTransitioning = false
             hasRestoredInitialPosition = true
             return@LaunchedEffect
         }
@@ -159,58 +158,53 @@ fun ReaderText(
         // Decide what scroll action to take
         when {
             shouldScrollToEnd -> {
-                // Previous chapter navigation - scroll to end
                 val targetIndex = (totalItems - 1).coerceAtLeast(0)
-
                 lazyListState.scrollToItem(targetIndex)
                 vm.scrollToEndOnChapterChange = false
             }
             isFirstChapterOfSession && currentLastPageRead > 0 -> {
-                // Initial open with saved position - restore from lastPageRead
                 val targetIndex = currentLastPageRead.toInt().coerceIn(0, totalItems - 1)
-
                 lazyListState.scrollToItem(targetIndex)
             }
             !isFirstChapterOfSession -> {
-                // Next chapter navigation - scroll to top
-
                 lazyListState.scrollToItem(0)
             }
             else -> {
-                // Initial open with no saved position - scroll to top
-
                 lazyListState.scrollToItem(0)
             }
         }
 
         hasRestoredInitialPosition = true
-
+        isTransitioning = false
     }
 
     // Separate LaunchedEffect for scrollToEnd changes (when navigating to previous chapter)
-    // Only active for Continuous mode
     LaunchedEffect(key1 = successState?.scrollToEndOnChapterChange, key2 = vm.readingMode.value) {
-        if (vm.readingMode.value != ReadingMode.Continues) {
-            // Clear the flag for non-continuous modes so it doesn't interfere
+        val mode = vm.readingMode.value
+        if (mode != ReadingMode.Continues && mode != ReadingMode.Page) {
             vm.scrollToEndOnChapterChange = false
             return@LaunchedEffect
         }
         val shouldScrollToEnd = successState?.scrollToEndOnChapterChange ?: false
         if (!shouldScrollToEnd) return@LaunchedEffect
 
-        // Only scroll to end if we've already set up this chapter
-        if (lastScrolledChapterId == currentChapterId && hasRestoredInitialPosition) {
-            repeat(20) {
-                kotlinx.coroutines.delay(16)
-                val totalItems = lazyListState.layoutInfo.totalItemsCount
-                if (totalItems > 0) {
-                    val targetIndex = (totalItems - 1).coerceAtLeast(0)
-
-                    lazyListState.scrollToItem(targetIndex)
-                    vm.scrollToEndOnChapterChange = false
-                    return@LaunchedEffect
+        if (mode == ReadingMode.Continues) {
+            // Continuous mode: scroll LazyColumn to end
+            if (lastScrolledChapterId == currentChapterId && hasRestoredInitialPosition) {
+                repeat(20) {
+                    kotlinx.coroutines.delay(16)
+                    val totalItems = lazyListState.layoutInfo.totalItemsCount
+                    if (totalItems > 0) {
+                        lazyListState.scrollToItem(totalItems - 1)
+                        vm.scrollToEndOnChapterChange = false
+                        return@LaunchedEffect
+                    }
                 }
             }
+        } else {
+            // Page mode: handled by InfiniteScrollReaderContent / PagedReaderContent
+            // Just clear the flag — pager handles its own scroll position
+            vm.scrollToEndOnChapterChange = false
         }
     }
 
@@ -275,7 +269,7 @@ fun ReaderText(
             .supportDesktopScroll(
                 scrollState,
                 scope,
-                enable = vm.readingMode.value == ReadingMode.Page
+                enable = false // Disabled — paged mode uses HorizontalPager only
             )
             .supportDesktopScroll(
                 lazyListState,
@@ -527,10 +521,8 @@ fun ReaderText(
                             ReadingMode.Page -> {
                                 PagedReaderContent(
                                     vm = vm,
-                                    lazyListState = lazyListState,
                                     onPrev = onPrev,
                                     onNext = onNext,
-                                    toggleReaderMode = debouncedToggleReaderMode,
                                     onShowComments = onShowComments
                                 )
                             }
@@ -540,10 +532,7 @@ fun ReaderText(
                                     vm = vm,
                                     modifier = Modifier,
                                     lazyListState = lazyListState,
-                                    onPrev = onPrev,
                                     onNext = onNext,
-                                    toggleReaderMode = debouncedToggleReaderMode,
-                                    onChapterShown = onChapterShown,
                                     onShowComments = onShowComments
                                 )
                             }
@@ -553,9 +542,7 @@ fun ReaderText(
                                     vm = vm,
                                     modifier = Modifier,
                                     lazyListState = lazyListState,
-                                    onPrev = onPrev,
                                     onNext = onNext,
-                                    toggleReaderMode = debouncedToggleReaderMode,
                                     onShowComments = onShowComments
                                 )
                             }
@@ -564,6 +551,20 @@ fun ReaderText(
                 }
             }
 
+        }
+
+        // Loading overlay during chapter transitions
+        if (isTransitioning) {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    color = androidx.compose.ui.graphics.Color.White
+                )
+            }
         }
 
         // Copy Mode Overlay

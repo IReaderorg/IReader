@@ -26,16 +26,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.core.source.model.Page
 import ireader.domain.models.entities.Chapter
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 
 /**
- * Infinite scroll reading mode — loads and concatenates multiple chapters
- * into a single continuous scrollable stream.
+ * Infinite scroll reading mode — concatenates multiple chapters into one stream.
  *
- * Differences from Continuous mode:
- * - Continuous: scrolls within ONE chapter, shows "next chapter" card at the end
- * - InfiniteScroll: concatenates MULTIPLE chapters into one seamless stream,
- *   auto-loads next chapters as user scrolls, chapter headings as separators
+ * Chapter tracking: A pre-computed array maps each flat content index to a chapter index.
+ * When the first visible item changes, we look up which chapter it belongs to.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,27 +41,29 @@ fun InfiniteScrollReaderContent(
     vm: ReaderScreenViewModel,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState,
-    onPrev: () -> Unit,
     onNext: () -> Unit,
-    toggleReaderMode: () -> Unit,
     onShowComments: (chapter: Chapter) -> Unit,
 ) {
     val readerState by vm.state.collectAsState()
     val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
         ?: return
 
-    val loadedChapters = remember(successState.currentChapter.id) {
-        mutableStateListOf(successState.currentChapter to successState.currentContent)
-    }
+    val loadedChapters = remember { mutableStateListOf<Pair<Chapter, List<Page>>>() }
     var isLoadingNextChapter by remember { mutableStateOf(false) }
     var hasMoreChapters by remember { mutableStateOf(true) }
     var lastTrackedChapterIndex by remember { mutableIntStateOf(0) }
 
-    // After initialization, preload next 2 chapters
+    // Initialize with current chapter, then preload next 2
     LaunchedEffect(successState.currentChapter.id) {
+        val currentPages = successState.currentContent
+        loadedChapters.clear()
+        loadedChapters.add(successState.currentChapter to currentPages)
         hasMoreChapters = true
         isLoadingNextChapter = false
         lastTrackedChapterIndex = 0
+
+        // Set initial chapter for UI
+        vm.contentVM.updateCurrentChapterForInfiniteScroll(successState.currentChapter)
 
         val chapters = successState.chapters
         val currentIndex = chapters.indexOfFirst { it.id == successState.currentChapter.id }
@@ -88,36 +88,51 @@ fun InfiniteScrollReaderContent(
         }
     }
 
-    // Build flat content with chapter headings and end dividers
+    // Build flat content
     val flatContent = remember(loadedChapters.toList()) {
         val result = mutableListOf<InfiniteScrollItem>()
         loadedChapters.forEachIndexed { idx, (chapter, pages) ->
             if (idx > 0) {
-                result.add(ChapterEndItem(loadedChapters[idx - 1].first))
+                result.add(ChapterVoidItem(loadedChapters[idx - 1].first))
             }
             result.add(ChapterHeadingItem(chapter.name))
             pages.forEach { result.add(PageItem(it)) }
         }
         if (loadedChapters.isNotEmpty()) {
-            result.add(ChapterEndItem(loadedChapters.last().first))
+            result.add(ChapterVoidItem(loadedChapters.last().first))
         }
         result
     }
 
-    val itemToChapterIndex = remember(flatContent) {
-        val map = IntArray(flatContent.size)
-        var chapterIdx = -1
-        flatContent.forEachIndexed { i, item ->
-            when (item) {
-                is ChapterHeadingItem -> chapterIdx++
-                else -> {}
+    // Pre-compute: for each flatContent index, which chapter index in loadedChapters does it belong to?
+    val flatContentChapterMap = remember(flatContent) {
+        IntArray(flatContent.size).also { map ->
+            var chIdx = 0
+            flatContent.forEachIndexed { i, item ->
+                when (item) {
+                    is ChapterHeadingItem -> chIdx++
+                    else -> {}
+                }
+                map[i] = (chIdx - 1).coerceAtLeast(0)
             }
-            map[i] = chapterIdx.coerceAtLeast(0)
         }
-        map
     }
 
-    // Scroll progress for triggering loads
+    // Track chapter from first visible item
+    val firstVisible by remember {
+        derivedStateOf { lazyListState.firstVisibleItemIndex }
+    }
+    LaunchedEffect(firstVisible) {
+        if (firstVisible < flatContentChapterMap.size) {
+            val chIdx = flatContentChapterMap[firstVisible]
+            if (chIdx != lastTrackedChapterIndex && chIdx < loadedChapters.size) {
+                lastTrackedChapterIndex = chIdx
+                vm.contentVM.updateCurrentChapterForInfiniteScroll(loadedChapters[chIdx].first)
+            }
+        }
+    }
+
+    // Keep loading ahead
     val scrollProgress by remember {
         derivedStateOf {
             val layoutInfo = lazyListState.layoutInfo
@@ -128,7 +143,6 @@ fun InfiniteScrollReaderContent(
         }
     }
 
-    // Keep loading ahead when scrolling near bottom
     LaunchedEffect(scrollProgress) {
         if (scrollProgress > 0.75f && !isLoadingNextChapter && hasMoreChapters) {
             val chapters = successState.chapters
@@ -156,30 +170,12 @@ fun InfiniteScrollReaderContent(
         }
     }
 
-    // Track visible chapter and update VM
-    val firstVisibleItemIndex by remember {
-        derivedStateOf { lazyListState.firstVisibleItemIndex }
-    }
-    LaunchedEffect(firstVisibleItemIndex) {
-        if (firstVisibleItemIndex < itemToChapterIndex.size && loadedChapters.size > 1) {
-            val chapterIdx = itemToChapterIndex[firstVisibleItemIndex]
-            if (chapterIdx != lastTrackedChapterIndex && chapterIdx < loadedChapters.size) {
-                lastTrackedChapterIndex = chapterIdx
-                vm.contentVM.updateCurrentChapterForInfiniteScroll(loadedChapters[chapterIdx].first)
-            }
-        }
-    }
-
     val chapterItems = remember(flatContent) {
-        var pageIdx = 0
-        flatContent.map { item ->
+        flatContent.mapIndexed { index, item ->
             val key = when (item) {
                 is ChapterHeadingItem -> "heading_${item.title}"
-                is ChapterEndItem -> "end_${item.chapter.id}"
-                is PageItem -> {
-                    val idx = pageIdx++
-                    "page_${item.page.hashCode()}_$idx"
-                }
+                is ChapterVoidItem -> "void_${item.chapter.id}"
+                is PageItem -> "page_${item.page.hashCode()}_$index"
             }
             key to item
         }
@@ -207,13 +203,14 @@ fun InfiniteScrollReaderContent(
                             .padding(vertical = 16.dp),
                     )
                 }
-                is ChapterEndItem -> {
+                is ChapterVoidItem -> {
                     ChapterVoidSpace(
                         chapter = item.chapter,
                         isLast = item.chapter.id == loadedChapters.lastOrNull()?.first?.id && !hasMoreChapters,
                         textColor = vm.textColorCompose.value,
+                        backgroundColor = vm.backgroundColor.value.toComposeColor(),
                         onShowComments = { onShowComments(item.chapter) },
-                        onNextChapter = {},
+                        onNextChapter = onNext,
                         isLoading = isLoadingNextChapter,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -263,5 +260,5 @@ fun InfiniteScrollReaderContent(
 
 private sealed class InfiniteScrollItem
 private data class ChapterHeadingItem(val title: String) : InfiniteScrollItem()
-private data class ChapterEndItem(val chapter: Chapter) : InfiniteScrollItem()
+private data class ChapterVoidItem(val chapter: Chapter) : InfiniteScrollItem()
 private data class PageItem(val page: Page) : InfiniteScrollItem()

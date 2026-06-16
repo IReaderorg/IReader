@@ -115,8 +115,12 @@ fun ReadingScreen(
     val scope = rememberCoroutineScope()
     val context = LocalPlatformContext.current
     val readerState by vm.state.collectAsState()
-    val chapter = (readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success)?.currentChapter
-        ?: vm.stateChapter
+    val infiniteScrollChapter by vm.contentVM.infiniteScrollVisibleChapter.collectAsState()
+    val chapter = if (vm.readingMode.value == ireader.domain.preferences.prefs.ReadingMode.InfiniteScroll && infiniteScrollChapter != null) {
+        infiniteScrollChapter
+    } else {
+        (readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success)?.currentChapter ?: vm.stateChapter
+    }
     var showChapterReviews =
         androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
@@ -277,10 +281,11 @@ private fun ReadingScreenContent(
                                 lazyListState = lazyListState,
                                 onChapterShown = onChapterShown,
                                 onShowComments = {
-                                    if (vm.book != null && vm.stateChapter != null) {
+                                    if (vm.book != null && chapter != null) {
                                         showChapterReviews.value = true
                                     }
                                 },
+                                onOpenDrawer = { scope.launch { drawerState.open() } },
                                 onCopyModeDone = onNavigateToQuoteCreation
                             )
 
@@ -305,7 +310,7 @@ private fun ReadingScreenContent(
                             // Chapter Reviews Modal
                             if (showChapterReviews.value) {
                                 val currentBook = vm.book
-                                val currentChapter = vm.stateChapter
+                                val currentChapter = chapter
                                 if (currentBook != null && currentChapter != null) {
                                     androidx.compose.material3.ModalBottomSheet(
                                         onDismissRequest = { showChapterReviews.value = false },
@@ -494,7 +499,7 @@ private fun ReadingScreenContent(
                         // Report broken chapter dialog
                         if (vm.showReportDialog) {
                             ReportBrokenChapterDialog(
-                                chapterName = vm.stateChapter?.name ?: "Unknown Chapter",
+                                chapterName = chapter?.name ?: "Unknown Chapter",
                                 onDismiss = { vm.toggleReportDialog() },
                                 onReport = { category, description ->
                                     vm.reportBrokenChapter(category, description)
@@ -506,7 +511,7 @@ private fun ReadingScreenContent(
                         if (vm.showChapterArtDialog) {
                             ChapterArtFocusDialog(
                                 bookTitle = vm.book?.title ?: "Unknown Book",
-                                chapterTitle = vm.stateChapter?.name ?: "Unknown Chapter",
+                                chapterTitle = chapter?.name ?: "Unknown Chapter",
                                 onDismiss = { vm.dismissChapterArtDialog() },
                                 onGenerate = { focus ->
                                     vm.generateChapterArtPrompt(focus)
@@ -524,7 +529,7 @@ private fun ReadingScreenContent(
                         // Chapter Art Generation - Result dialog
                         vm.generatedArtPrompt?.let { prompt ->
                             val bookTitle = vm.book?.title ?: "Unknown Book"
-                            val chapterTitle = vm.stateChapter?.name ?: "Unknown Chapter"
+                            val chapterTitle = chapter?.name ?: "Unknown Chapter"
                             ChapterArtPromptResultDialog(
                                 prompt = prompt,
                                 bookTitle = bookTitle,

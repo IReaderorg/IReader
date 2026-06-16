@@ -120,7 +120,13 @@ data class ReaderScreenSpec(
         val successState = readerState as? ReaderState.Success
         val currentIndex = successState?.currentChapterIndex ?: 0
         val chapters = successState?.chapters ?: emptyList()
-        val chapter = successState?.currentChapter
+        // Use infiniteScrollVisibleChapter for infinite scroll mode
+        val infiniteScrollChapter by vm.contentVM.infiniteScrollVisibleChapter.collectAsState()
+        val chapter = if (vm.readingMode.value == ireader.domain.preferences.prefs.ReadingMode.InfiniteScroll && infiniteScrollChapter != null) {
+            infiniteScrollChapter
+        } else {
+            successState?.currentChapter
+        }
 
         val context = getContextWrapper()
         val scrollState = rememberScrollState()

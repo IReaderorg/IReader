@@ -29,10 +29,7 @@ internal fun ContinuousReaderContent(
     vm: ReaderScreenViewModel,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState,
-    onPrev: () -> Unit,
     onNext: () -> Unit,
-    toggleReaderMode: () -> Unit,
-    onChapterShown: (ireader.domain.models.entities.Chapter) -> Unit,
     onShowComments: (ireader.domain.models.entities.Chapter) -> Unit,
 ) {
     val readerState by vm.state.collectAsState()
@@ -85,10 +82,6 @@ internal fun ContinuousReaderContent(
                 kotlinx.coroutines.delay(16L)
             }
         }
-    }
-
-    if (chapter != null) {
-        onChapterShown(chapter)
     }
 
     ILazyColumnScrollbar(

@@ -1634,39 +1634,10 @@ private fun ProviderSelectorDialog(
 }
 
 /**
- * Save image bytes to the device gallery using MediaStore
+ * Save image bytes to the device gallery.
+ * On Android: uses MediaStore API. On other platforms: no-op.
  */
-private suspend fun saveImageToGallery(context: android.content.Context, imageBytes: ByteArray): Boolean {
-    return try {
-        val resolver = context.applicationContext.contentResolver
-        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(java.util.Date())
-        val fileName = "IReader_$timestamp.png"
-
-        val contentValues = android.content.ContentValues().apply {
-            put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, fileName)
-            put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/png")
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, "Pictures/IReader")
-                put(android.provider.MediaStore.Images.Media.IS_PENDING, 1)
-            }
-        }
-
-        val uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-        if (uri != null) {
-            resolver.openOutputStream(uri)?.use { outputStream ->
-                outputStream.write(imageBytes)
-            }
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                contentValues.clear()
-                contentValues.put(android.provider.MediaStore.Images.Media.IS_PENDING, 0)
-                resolver.update(uri, contentValues, null, null)
-            }
-            true
-        } else false
-    } catch (e: Exception) {
-        false
-    }
-}
+internal expect suspend fun saveImageToGallery(context: Any, imageBytes: ByteArray): Boolean
 
 /**
  * Overload for backward compatibility (without AI generation features)
