@@ -13,5 +13,5 @@ actual fun createPlatformCookieSynchronizer(): CookieSynchronizer {
     // In a real implementation, this should be injected from DI
     val cookiesStorage = AcceptAllCookiesStorage()
     val webViewCookieJar = WebViewCookieJar(cookiesStorage)
-    return CookieSynchronizer(webViewCookieJar)
+    return CookieSynchronizer(webViewCookieJar, cookiesStorage)
 }
