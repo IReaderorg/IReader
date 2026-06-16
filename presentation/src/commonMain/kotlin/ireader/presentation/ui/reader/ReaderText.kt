@@ -1,6 +1,11 @@
 package ireader.presentation.ui.reader
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -8,11 +13,14 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -31,6 +39,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -134,7 +146,7 @@ fun ReaderText(
         isTransitioning = true
 
         // Wait for database refresh and content to load
-        kotlinx.coroutines.delay(1200)
+        kotlinx.coroutines.delay(150)
 
         // Get the fresh state
         val freshState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
@@ -553,16 +565,18 @@ fun ReaderText(
 
         }
 
-        // Loading overlay during chapter transitions
+        // Loading overlay during chapter transitions — fully opaque with circle
         if (isTransitioning) {
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f)),
+                    .background(vm.backgroundColor.value.toComposeColor()),
                 contentAlignment = Alignment.Center
             ) {
                 androidx.compose.material3.CircularProgressIndicator(
-                    color = androidx.compose.ui.graphics.Color.White
+                    modifier = Modifier.size(48.dp),
+                    color = vm.textColorCompose.value,
+                    trackColor = vm.textColorCompose.value.copy(alpha = 0.2f),
                 )
             }
         }

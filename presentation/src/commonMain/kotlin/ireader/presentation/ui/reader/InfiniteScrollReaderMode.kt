@@ -1,5 +1,11 @@
 package ireader.presentation.ui.reader
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -195,15 +201,8 @@ fun InfiniteScrollReaderContent(
             val (_, item) = chapterItems[index]
             when (item) {
                 is ChapterHeadingItem -> {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 16.dp),
-                    )
+                    // Invisible separator between chapters — only visible in void/scroll context
+                    Spacer(modifier = Modifier.height(0.dp))
                 }
                 is ChapterVoidItem -> {
                     ChapterVoidSpace(
@@ -232,23 +231,24 @@ fun InfiniteScrollReaderContent(
 
         if (isLoadingNextChapter) {
             item(key = "loading") {
-                androidx.compose.foundation.layout.Column(
+                androidx.compose.foundation.layout.Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    androidx.compose.material3.CircularProgressIndicator(
-                        modifier = Modifier.size(32.dp),
-                        color = vm.textColorCompose.value,
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "Loading next chapter...",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
+                    repeat(3) { index ->
+                        androidx.compose.foundation.Canvas(modifier = Modifier.size(8.dp)) {
+                            drawCircle(
+                                color = vm.textColorCompose.value.copy(alpha = 0.6f),
+                                radius = size.minDimension / 2
+                            )
+                        }
+                        if (index < 2) {
+                            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                        }
+                    }
                 }
             }
         }
