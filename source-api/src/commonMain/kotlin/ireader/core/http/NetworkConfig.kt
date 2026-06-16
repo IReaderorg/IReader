@@ -12,5 +12,7 @@ data class NetworkConfig(
     val userAgent: String = DEFAULT_USER_AGENT,
     val enableCaching: Boolean = true,
     val enableCookies: Boolean = true,
-    val enableCompression: Boolean = true
+    val enableCompression: Boolean = true,
+    val proxyHost: String? = null,
+    val proxyPort: Int? = null
 )

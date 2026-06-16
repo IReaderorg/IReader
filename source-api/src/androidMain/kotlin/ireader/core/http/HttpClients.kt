@@ -20,6 +20,8 @@ import ireader.core.prefs.PreferenceStore
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
 actual class HttpClients(
@@ -52,6 +54,10 @@ actual class HttpClients(
         .cookieJar(PersistentCookieJar(preferencesStore))
         .apply {
             sslConfig.applyTo(this)
+            // Apply proxy if configured
+            if (config.proxyHost != null && config.proxyPort != null && config.proxyPort > 0) {
+                proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(config.proxyHost, config.proxyPort)))
+            }
         }
 
     actual override val browser = browseEngine

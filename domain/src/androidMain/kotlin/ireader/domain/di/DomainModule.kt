@@ -234,7 +234,18 @@ actual val DomainModule = module {
     }
     
     single<ireader.core.http.NetworkConfig> { 
-        ireader.core.http.NetworkConfig() 
+        val networkPrefs = get<ireader.domain.preferences.prefs.NetworkPreferences>()
+        val useDefaultUA = networkPrefs.useDefaultUserAgent().get()
+        val customUA = networkPrefs.customUserAgent().get()
+        val proxyEnabled = networkPrefs.proxyEnabled().get()
+        val proxyHost = networkPrefs.proxyHost().get()
+        val proxyPort = networkPrefs.proxyPort().get()
+        
+        ireader.core.http.NetworkConfig(
+            userAgent = if (useDefaultUA) ireader.core.http.DEFAULT_USER_AGENT else customUA,
+            proxyHost = if (proxyEnabled && proxyHost.isNotBlank()) proxyHost else null,
+            proxyPort = if (proxyEnabled && proxyPort > 0) proxyPort else null
+        )
     }
     
     single<ireader.core.http.HttpClients> { 
