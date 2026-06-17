@@ -7,20 +7,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -30,21 +24,16 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.delay
 
-private val IndicatorBg = Color(0xFF1A1A2E)
-private val IndicatorTrack = Color(0xFF2D2D44)
-private val IndicatorFill = Color(0xFF4CAF50)
-private val IndicatorFillHour = Color(0xFFFF9800)
-private val IndicatorFillDay = Color(0xFFE91E63)
-
 /**
- * Animated book-shaped reading time indicator.
- * Shows a circular progress that fills as minutes accumulate (1 fill = 1 minute).
- * After 60 minutes (1 hour), the circle resets and a small hour count appears.
+ * Filled clock reading time indicator.
+ * A clock face that fills clockwise over 60 seconds (1 minute).
+ * The fill grows as a pie wedge from 12 o'clock. Uses the reader's text color.
  */
 @Composable
 fun ReadingTimeIndicator(
     sessionStartTime: Long?,
     isVisible: Boolean,
+    textColor: Color,
     modifier: Modifier = Modifier
 ) {
     var currentTime by remember { mutableStateOf(currentTimeToLong()) }
@@ -60,74 +49,89 @@ fun ReadingTimeIndicator(
         if (sessionStartTime == null) 0L else (currentTime - sessionStartTime) / 1000
     }
 
-    val totalMinutes = elapsedSeconds / 60
-    val currentMinuteSeconds = elapsedSeconds % 60
-    val hours = totalMinutes / 60
-    val minutesInHour = totalMinutes % 60
-
-    // Progress: fills from 0 to 1 over 60 seconds (1 minute)
-    val fillProgress by animateFloatAsState(
-        targetValue = currentMinuteSeconds.toFloat() / 60f,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
-        label = "fill"
-    )
-
-    // Color shifts based on total time
-    val fillColor = when {
-        hours > 0 -> IndicatorFillDay
-        totalMinutes >= 30 -> IndicatorFillHour
-        else -> IndicatorFill
+    val minuteProgress = remember(elapsedSeconds) {
+        (elapsedSeconds % 60).toFloat() / 60f
     }
 
+    val animatedProgress by animateFloatAsState(
+        targetValue = minuteProgress,
+        animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+        label = "clock-fill"
+    )
+
+    val fillColor = textColor.copy(alpha = 0.85f)
+    val bgColor = textColor.copy(alpha = 0.12f)
+    val borderColor = textColor.copy(alpha = 0.4f)
+    val handColor = textColor.copy(alpha = 0.95f)
+
     AnimatedVisibility(
-        visible = elapsedSeconds > 0,
+        visible = isVisible && elapsedSeconds > 0,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = modifier
     ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(IndicatorBg.copy(alpha = 0.85f))
-                .padding(4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Canvas(modifier = Modifier.size(36.dp)) {
-                val stroke = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
-                val sweepAngle = 360f * fillProgress
+        Canvas(modifier = Modifier.size(24.dp)) {
+            val cx = size.width / 2
+            val cy = size.height / 2
+            val radius = minOf(cx, cy) - 1.dp.toPx()
+            val sweepAngle = 360f * animatedProgress
 
-                // Track (empty circle)
+            // Clock body background
+            drawCircle(
+                color = bgColor,
+                radius = radius,
+                center = Offset(cx, cy)
+            )
+
+            // Filled wedge (pie slice from 12 o'clock)
+            if (animatedProgress > 0f) {
                 drawArc(
-                    color = IndicatorTrack,
-                    startAngle = -90f,
-                    sweepAngle = 360f,
-                    useCenter = false,
-                    style = stroke,
-                    topLeft = Offset.Zero,
-                    size = Size(size.width, size.height)
-                )
-
-                // Fill arc
-                if (fillProgress > 0f) {
-                    drawArc(
-                        color = fillColor,
-                        startAngle = -90f,
-                        sweepAngle = sweepAngle,
-                        useCenter = false,
-                        style = stroke,
-                        topLeft = Offset.Zero,
-                        size = Size(size.width, size.height)
-                    )
-                }
-
-                // Center dot
-                drawCircle(
                     color = fillColor,
-                    radius = 3.dp.toPx(),
-                    center = Offset(size.width / 2, size.height / 2)
+                    startAngle = -90f,
+                    sweepAngle = sweepAngle,
+                    useCenter = true,
+                    topLeft = Offset(cx - radius, cy - radius),
+                    size = Size(radius * 2, radius * 2)
                 )
             }
+
+            // Clock border
+            drawCircle(
+                color = borderColor,
+                radius = radius,
+                center = Offset(cx, cy),
+                style = Stroke(width = 1.5.dp.toPx())
+            )
+
+            // Hour hand — always points to 12
+            drawLine(
+                color = handColor,
+                start = Offset(cx, cy),
+                end = Offset(cx, cy - radius * 0.55f),
+                strokeWidth = 1.5.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+
+            // Minute hand — sweeps clockwise with progress
+            val minuteAngle = Math.toRadians((-90f + sweepAngle).toDouble())
+            val minuteLen = radius * 0.75f
+            drawLine(
+                color = handColor,
+                start = Offset(cx, cy),
+                end = Offset(
+                    cx + (minuteLen * kotlin.math.cos(minuteAngle)).toFloat(),
+                    cy + (minuteLen * kotlin.math.sin(minuteAngle)).toFloat()
+                ),
+                strokeWidth = 1.2.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+
+            // Center pin
+            drawCircle(
+                color = handColor,
+                radius = 1.5.dp.toPx(),
+                center = Offset(cx, cy)
+            )
         }
     }
 }
