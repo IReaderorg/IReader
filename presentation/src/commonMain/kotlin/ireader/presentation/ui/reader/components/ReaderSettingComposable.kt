@@ -661,17 +661,47 @@ fun GeneralScreenTab(
             ).Build()
         }
         item {
-            ChipPreference(
-                preference = listOf(
+            val isDesktop = ireader.domain.di.getPlatformType() == ireader.domain.services.platform.PlatformType.DESKTOP
+            val modeChoices = if (isDesktop) {
+                listOf(
+                    localizeHelper.localize(Res.string.continues),
+                    "Infinite",
+                )
+            } else {
+                listOf(
                     localizeHelper.localize(Res.string.page),
                     localizeHelper.localize(Res.string.continues),
                     "Infinite",
-                ),
-                selected = vm.readingMode.value.ordinal,
+                )
+            }
+            val currentMode = vm.readingMode.value
+            val selectedOrdinal = if (isDesktop) {
+                when (currentMode) {
+                    ReadingMode.Page -> 0
+                    ReadingMode.Continues -> 0
+                    ReadingMode.InfiniteScroll -> 1
+                }
+            } else {
+                currentMode.ordinal
+            }
+            if (isDesktop && currentMode == ReadingMode.Page) {
+                vm.readingMode.value = ReadingMode.Continues
+                vm.readerPreferences.defaultReadingMode().set(ReadingMode.Continues)
+            }
+            ChipPreference(
+                preference = modeChoices,
+                selected = selectedOrdinal,
                 onValueChange = {
-                    val mode = ReadingMode.valueOf(it)
+                    val mode = if (isDesktop) {
+                        when (it) {
+                            0 -> ReadingMode.Continues
+                            1 -> ReadingMode.InfiniteScroll
+                            else -> ReadingMode.Continues
+                        }
+                    } else {
+                        ReadingMode.valueOf(it)
+                    }
                     vm.readingMode.value = mode
-                    // Also persist as default for new books
                     vm.readerPreferences.defaultReadingMode().set(mode)
                 },
                 title = localizeHelper.localize(Res.string.scroll_mode)
