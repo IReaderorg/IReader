@@ -1,6 +1,7 @@
 package ireader.presentation.core.ui
 
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 
 
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +35,13 @@ class AdvanceSettingSpec {
                 )
             }, snackbarHostState = host
         ) {padding ->
-            AdvanceSettings(vm = vm, padding = padding)
+            AdvanceSettings(
+                vm = vm, 
+                padding = padding,
+                onNavigateToNetworkSettings = {
+                    navController.navigate(NavigationRoutes.networkSettings)
+                }
+            )
         }
     }
 }

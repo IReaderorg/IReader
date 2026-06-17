@@ -112,7 +112,8 @@ private class AdvanceSettingsDialogState {
 @Composable
 fun AdvanceSettings(
     vm: AdvanceSettingViewModel,
-    padding: PaddingValues
+    padding: PaddingValues,
+    onNavigateToNetworkSettings: () -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
@@ -227,6 +228,22 @@ fun AdvanceSettings(
                 icon = Icons.Default.Construction,
                 onClick = {
                     vm.repairBookCategories()
+                }
+            ),
+            
+            Components.Space,
+            
+            // Network Settings
+            Components.Header(
+                text = "Network",
+                icon = Icons.Default.Storage
+            ),
+            Components.Row(
+                title = "Advanced Network",
+                subtitle = "User agent, cookies, and proxy settings",
+                icon = Icons.Default.Storage,
+                onClick = {
+                    onNavigateToNetworkSettings()
                 }
             ),
             
