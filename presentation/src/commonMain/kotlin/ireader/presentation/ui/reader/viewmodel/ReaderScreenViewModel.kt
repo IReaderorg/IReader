@@ -997,6 +997,14 @@ class ReaderScreenViewModel(
     val webViewIntegration get() = settingsViewModel.webViewIntegration
     val webViewBackgroundMode get() = settingsViewModel.webViewBackgroundMode
     
+    // Reading Presets
+    val presets get() = settingsViewModel.presets
+    fun isPresetActive(preset: ireader.domain.models.reading.ReadingPreset) = settingsViewModel.isPresetActive(preset)
+    fun applyPreset(preset: ireader.domain.models.reading.ReadingPreset) = settingsViewModel.applyPreset(preset)
+    fun decreaseFontSize() = settingsViewModel.decreaseFontSize()
+    fun increaseFontSize() = settingsViewModel.increaseFontSize()
+    fun toggleFontPicker() = settingsViewModel.toggleFontPicker()
+    
     // Auto-scroll delegations (via scrollVM)
     var autoScrollMode: Boolean
         get() = scrollVM.autoScrollMode

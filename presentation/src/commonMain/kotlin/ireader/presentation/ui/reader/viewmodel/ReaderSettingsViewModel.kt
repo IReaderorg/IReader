@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.models.reading.ReadingPreset
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
@@ -258,6 +259,46 @@ class ReaderSettingsViewModel(
      */
     fun toggleFontPicker() {
         showFontPicker = !showFontPicker
+    }
+    
+    // ==================== Reading Presets ====================
+    
+    // Available reading presets based on device type
+    val presets: List<ReadingPreset> = ReadingPreset.getDefaultPresets(systemInteractionService.isTablet())
+    
+    // Currently selected preset (null if custom settings)
+    var selectedPreset by mutableStateOf<ReadingPreset?>(null)
+        private set
+    
+    /**
+     * Apply a reading preset to all reader settings.
+     * This updates font, font size, line height, paragraph settings, etc.
+     */
+    fun applyPreset(preset: ReadingPreset) {
+        selectedPreset = preset
+        
+        // Apply all preset values
+        preferencesController.dispatch(PreferenceCommand.SetFontSize(preset.fontSize))
+        preferencesController.dispatch(PreferenceCommand.SetLineHeight(preset.lineHeight))
+        preferencesController.dispatch(PreferenceCommand.SetParagraphSpacing(preset.paragraphDistance))
+        preferencesController.dispatch(PreferenceCommand.SetParagraphIndent(preset.paragraphIndent))
+        
+        // Set text weight and letter spacing directly via preferences
+        readerPreferences.textWeight().set(preset.textWeight)
+        readerPreferences.betweenLetterSpaces().set(preset.letterSpacing)
+        
+        // Set font
+        font?.value = ireader.domain.preferences.models.FontType(
+            name = preset.fontName,
+            fontFamily = preset.fontFamily
+        )
+    }
+    
+    /**
+     * Check if a preset matches current settings
+     */
+    fun isPresetActive(preset: ReadingPreset): Boolean {
+        return selectedPreset?.id == preset.id
     }
     
     // ==================== Color Settings ====================

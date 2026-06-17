@@ -228,35 +228,102 @@ fun ReaderScreenTab(
         }
 
         item {
-            val font = vm.font
-            if (vm.fontsLoading) {
-                // Show loading indicator while fonts are being fetched
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    androidx.compose.material3.CircularProgressIndicator()
+            // Reading Presets Section
+            Text(
+                text = "Reading Presets",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(vm.presets.size) { index ->
+                    val preset = vm.presets[index]
+                    val isSelected = vm.isPresetActive(preset)
+                    
+                    Button(
+                        onClick = { vm.applyPreset(preset) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isSelected) 
+                                MaterialTheme.colorScheme.primary 
+                            else 
+                                MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = preset.name,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (isSelected) 
+                                    MaterialTheme.colorScheme.onPrimary 
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = preset.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isSelected) 
+                                    MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
                 }
-            } else {
-                // Map font names to FontType with proper FontFamilyModel.Custom
-                val fontChoices = vm.fonts.associate { fontName ->
-                    val fontType = FontType(
-                        name = fontName,
-                        fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
-                    )
-                    fontType to fontName
-                }
-                
-                ChipChoicePreference(
-                    preference = font!!,
-                    choices = fontChoices,
-                    title = localizeHelper.localize(Res.string.font),
-                    onFailToFindElement = vm.font!!.value.name
-                )
             }
         }
+        
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        
+        item {
+            // Font Size Control
+            PreferenceRow(
+                title = localizeHelper.localize(Res.string.font_size),
+                action = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = { vm.decreaseFontSize() },
+                            enabled = vm.fontSize.value > 8
+                        ) {
+                            Text("-")
+                        }
+                        Text(
+                            text = "${vm.fontSize.value}",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Button(
+                            onClick = { vm.increaseFontSize() },
+                            enabled = vm.fontSize.value < 40
+                        ) {
+                            Text("+")
+                        }
+                    }
+                }
+            )
+        }
+        
+        item {
+            // Font Picker Button
+            PreferenceRow(
+                title = localizeHelper.localize(Res.string.font),
+                action = {
+                    TextButton(onClick = { vm.toggleFontPicker() }) {
+                        Text(vm.font?.value?.name ?: "Roboto")
+                    }
+                }
+            )
+        }
+        
         item {
             PreferenceRow(
                 title = localizeHelper.localize(Res.string.text_align),
