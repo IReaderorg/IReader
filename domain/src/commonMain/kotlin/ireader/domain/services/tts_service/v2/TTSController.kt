@@ -86,6 +86,9 @@ class TTSController(
     
     // Mutex to ensure commands are processed sequentially
     private val commandMutex = Mutex()
+
+    // Job for observing chapter DB changes when waiting for next chapter to appear
+    private var nextChapterWatchJob: kotlinx.coroutines.Job? = null
     
     // State - single source of truth
     private val _state = MutableStateFlow(TTSState())
@@ -208,6 +211,8 @@ class TTSController(
         Log.debug { "$TAG: stopAndRelease()" }
         
         pendingPlay = false
+        nextChapterWatchJob?.cancel()
+        nextChapterWatchJob = null
         engine?.stop()
         engine?.release()
         engine = null
@@ -234,6 +239,8 @@ class TTSController(
         Log.debug { "$TAG: cleanup()" }
         
         pendingPlay = false
+        nextChapterWatchJob?.cancel()
+        nextChapterWatchJob = null
         engine?.stop()
         engine?.release()
         engine = null
@@ -374,6 +381,8 @@ class TTSController(
     
     private suspend fun stop() {
         pendingPlay = false
+        nextChapterWatchJob?.cancel()
+        nextChapterWatchJob = null
         engine?.stop()
         _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
         _events.emit(TTSEvent.PlaybackStopped)
@@ -564,6 +573,10 @@ class TTSController(
 
         Log.debug { "$TAG: nextChapter() - current chapter: ${chapter.id}" }
 
+        // Cancel any previous chapter watch
+        nextChapterWatchJob?.cancel()
+        nextChapterWatchJob = null
+
         val wasPlaying = _state.value.isPlaying
         engine?.stop()
 
@@ -581,6 +594,10 @@ class TTSController(
                 Log.debug { "$TAG: Loading next chapter: $nextChapterId" }
                 loadChapter(book.id, nextChapterId, 0)
                 if (wasPlaying) { play() }
+            } else if (_state.value.autoNextChapter) {
+                // Next chapter not in DB yet — watch for new chapters from remote fetch
+                Log.debug { "$TAG: No next chapter in DB, watching for chapter DB changes (autoNext=true)" }
+                startNextChapterWatch(book.id, chapter.id, wasPlaying)
             } else {
                 Log.debug { "$TAG: No next chapter available" }
                 _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
@@ -588,6 +605,46 @@ class TTSController(
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to load next chapter: ${e.message}" }
             handleError(TTSError.ContentLoadFailed(e.message ?: "Failed to load next chapter"))
+        }
+    }
+
+    /**
+     * Watch for new chapters appearing in the DB (e.g. from a remote fetch).
+     * When a next chapter becomes available, load and play it.
+     * Times out after 5 minutes to avoid leaking the coroutine.
+     */
+    private fun startNextChapterWatch(bookId: Long, currentChapterId: Long, wasPlaying: Boolean) {
+        nextChapterWatchJob?.cancel()
+        var found = false
+        nextChapterWatchJob = scope.launch {
+            try {
+                kotlinx.coroutines.withTimeout(5 * 60 * 1000L) {
+                    contentLoader.subscribeChapters(bookId).collect { chapters ->
+                        if (found) return@collect
+
+                        val currentIdx = chapters.indexOfFirst { it.id == currentChapterId }
+                        if (currentIdx == -1) return@collect
+
+                        val nextIdx = currentIdx + 1
+                        if (nextIdx < chapters.size) {
+                            val nextId = chapters[nextIdx].id
+                            Log.debug { "$TAG: Chapter DB changed, found next chapter: $nextId" }
+                            found = true
+                            nextChapterWatchJob = null
+
+                            loadChapter(bookId, nextId, 0)
+                            if (wasPlaying) { play() }
+                        }
+                    }
+                }
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                Log.debug { "$TAG: nextChapterWatch timed out, no new chapter appeared" }
+                nextChapterWatchJob = null
+                _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                nextChapterWatchJob = null
+                throw e
+            }
         }
     }
 
@@ -807,6 +864,10 @@ class TTSController(
     }
     
     private fun setAutoNextChapter(enabled: Boolean) {
+        if (!enabled) {
+            nextChapterWatchJob?.cancel()
+            nextChapterWatchJob = null
+        }
         _state.update { it.copy(autoNextChapter = enabled) }
     }
     
@@ -1160,6 +1221,12 @@ interface TTSContentLoader {
      * @return Previous chapter ID or null if at the beginning
      */
     suspend fun getPreviousChapterId(bookId: Long, currentChapterId: Long): Long?
+    
+    /**
+     * Observe chapter list changes for a book.
+     * Emits whenever chapters are added/updated in the database (e.g. after a remote fetch).
+     */
+    fun subscribeChapters(bookId: Long): kotlinx.coroutines.flow.Flow<List<Chapter>>
     
     data class ChapterContent(
         val book: Book?,

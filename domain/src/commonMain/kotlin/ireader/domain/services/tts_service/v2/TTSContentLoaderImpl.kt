@@ -15,6 +15,8 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.tts.TTSTextSanitizer
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -253,5 +255,10 @@ class TTSContentLoaderImpl(
             Log.error { "$TAG: Failed to get previous chapter: ${e.message}" }
             return null
         }
+    }
+    
+    override fun subscribeChapters(bookId: Long): Flow<List<Chapter>> {
+        return chapterRepository.subscribeChaptersByBookId(bookId)
+            .distinctUntilChangedBy { chapters -> chapters.map { it.id } }
     }
 }

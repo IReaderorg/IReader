@@ -63,6 +63,10 @@ class TTSControllerTest {
         override suspend fun getPreviousChapterId(bookId: Long, currentChapterId: Long): Long? {
             return previousChapterId
         }
+
+        override fun subscribeChapters(bookId: Long): kotlinx.coroutines.flow.Flow<List<ireader.domain.models.entities.Chapter>> {
+            return kotlinx.coroutines.flow.emptyFlow()
+        }
     }
     
     // Mock TTS engine

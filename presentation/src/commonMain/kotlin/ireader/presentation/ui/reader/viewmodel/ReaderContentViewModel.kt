@@ -621,7 +621,28 @@ class ReaderContentViewModel(
 
     suspend fun loadChapterFromLocal(chapterId: Long?): Chapter? {
         if (chapterId == null) return null
-        return getLocalChapter(chapterId, next = true, force = true)
+        val currentState = getState() as? ReaderState.Success ?: return null
+
+        val freshChapter = getChapterUseCase.findChapterById(chapterId)
+        if (freshChapter != null) {
+            val totalWords = calculateTotalWords(freshChapter.content)
+            updateSuccessState { state ->
+                val updatedChapters = state.chapters.map { ch ->
+                    if (ch.id == freshChapter.id) freshChapter else ch
+                }
+                state.copy(
+                    currentChapter = freshChapter,
+                    content = if (freshChapter.content.isNotEmpty()) freshChapter.content else state.content,
+                    chapters = updatedChapters,
+                    isLoadingContent = false,
+                    totalWords = totalWords
+                )
+            }
+            checkChapterHealth(freshChapter)
+            return freshChapter
+        }
+
+        return currentState.currentChapter
     }
 
     // ==================== Chapter Shell Management ====================
