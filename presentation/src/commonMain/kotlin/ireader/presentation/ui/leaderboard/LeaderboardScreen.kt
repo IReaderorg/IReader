@@ -52,17 +52,13 @@ import ireader.domain.models.entities.LeaderboardEntry
 import ireader.domain.models.gamification.ReaderTier
 import kotlin.math.roundToInt
 
-private val HallGradient = Brush.verticalGradient(listOf(Color(0xFF7B2FF7), Color(0xFF4A1FB0)))
 private val Gold = Color(0xFFFFC73C)
 private val Silver = Color(0xFFC6CCD6)
 private val Bronze = Color(0xFFD08B4B)
 
 private fun medalColor(rank: Int): Color = when (rank) {
-    1 -> Gold; 2 -> Silver; 3 -> Bronze; else -> Color(0xFF8C7BAE)
+    1 -> Gold; 2 -> Silver; 3 -> Bronze; else -> Color.Unspecified
 }
-
-private fun formatHrs(minutes: Long): String =
-    ireader.presentation.ui.community.formatReadingTimeCompact(minutes)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +73,7 @@ fun LeaderboardScreen(
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 96.dp),
+            contentPadding = PaddingValues(bottom = 72.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item { HallHeader(onBack = onBack, onSync = { vm.syncUserStats() }, isSyncing = state.isSyncing) }
@@ -126,25 +122,28 @@ fun LeaderboardScreen(
 
 @Composable
 private fun HallHeader(onBack: () -> Unit, onSync: () -> Unit, isSyncing: Boolean) {
-    Box(Modifier.fillMaxWidth().background(HallGradient).padding(bottom = 16.dp)) {
+    val headerGradient = Brush.verticalGradient(
+        listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
+    )
+    Box(Modifier.fillMaxWidth().background(headerGradient).padding(bottom = 16.dp)) {
         Column(Modifier.statusBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(40.dp).clip(CircleShape).clickable(onClick = onBack),
                     contentAlignment = Alignment.Center) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onPrimary)
                 }
                 Spacer(Modifier.weight(1f))
                 Box(Modifier.size(40.dp).clip(CircleShape).clickable(enabled = !isSyncing, onClick = onSync),
                     contentAlignment = Alignment.Center) {
-                    if (isSyncing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
-                    else Icon(Icons.Filled.Sync, "Sync", tint = Color.White)
+                    if (isSyncing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                    else Icon(Icons.Filled.Sync, "Sync", tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
-            Text("Hall of Readers", color = Color.White, fontSize = 22.sp,
+            Text("Hall of Readers", color = MaterialTheme.colorScheme.onPrimary, fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth().padding(top = 2.dp), textAlign = TextAlign.Center)
-            Text("Ranked by total reading time", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp,
+            Text("Ranked by level", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp,
                 modifier = Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 6.dp), textAlign = TextAlign.Center)
         }
     }
@@ -182,7 +181,7 @@ private fun PodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) {
         Spacer(Modifier.height(6.dp))
         Text(entry.username, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis,
             fontSize = 13.sp, modifier = Modifier.widthIn(max = 96.dp), textAlign = TextAlign.Center)
-        Text(formatHrs(entry.totalReadingTimeMinutes), color = color, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+        Text("Lv ${entry.level}", color = color, fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
         Spacer(Modifier.height(6.dp))
         Box(
             Modifier.width(86.dp).height(height)
@@ -212,7 +211,7 @@ private fun RankRow(entry: LeaderboardEntry, isMe: Boolean, onClick: () -> Unit)
             Spacer(Modifier.width(8.dp))
             Box(
                 Modifier.size(40.dp).clip(CircleShape)
-                    .border(2.dp, medalColor(entry.rank).copy(alpha = if (entry.rank <= 3) 1f else 0.3f), CircleShape)
+                    .border(2.dp, if (entry.rank <= 3) medalColor(entry.rank) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -236,13 +235,13 @@ private fun RankRow(entry: LeaderboardEntry, isMe: Boolean, onClick: () -> Unit)
                     if (entry.readingStreak > 0) {
                         Spacer(Modifier.width(6.dp))
                         Icon(Icons.Filled.LocalFireDepartment, contentDescription = null,
-                            tint = Color(0xFFFF6B35), modifier = Modifier.size(12.dp))
-                        Text("${entry.readingStreak}d", fontSize = 10.sp, color = Color(0xFFFF6B35))
+                            tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(12.dp))
+                        Text("${entry.readingStreak}d", fontSize = 10.sp, color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(formatHrs(entry.totalReadingTimeMinutes), fontWeight = FontWeight.Bold,
+                Text("Lv ${entry.level}", fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary)
                 Text("${entry.totalChaptersRead} ch", fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -259,7 +258,7 @@ private fun YouBar(me: LeaderboardEntry, total: Int, modifier: Modifier = Modifi
             verticalAlignment = Alignment.CenterVertically) {
             Text("#${me.rank}", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(Modifier.width(12.dp))
-            Box(Modifier.size(36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.2f)),
+            Box(Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center) {
                 Text(me.username.take(1).uppercase(), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
             }
@@ -272,7 +271,7 @@ private fun YouBar(me: LeaderboardEntry, total: Int, modifier: Modifier = Modifi
                     Text("Top $pct% of readers", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 11.sp)
                 }
             }
-            Text(formatHrs(me.totalReadingTimeMinutes), color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text("Lv ${me.level}", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
         }
     }
 }
