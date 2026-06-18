@@ -94,8 +94,16 @@ class TTSController(
     private val _state = MutableStateFlow(TTSState())
     val state: StateFlow<TTSState> = _state.asStateFlow()
     
-    // Events - one-time occurrences
-    private val _events = MutableSharedFlow<TTSEvent>()
+    // Events - one-time occurrences.
+    // Buffered with DROP_OLDEST so emitting a one-time event can NEVER suspend the
+    // command / engine-event processing coroutines. A zero-capacity (rendezvous) flow
+    // would suspend emit() when a subscriber applies back-pressure, stalling the
+    // controller mid-transition (e.g. chapter-end handler emitting ChapterCompleted right
+    // before dispatching NextChapter).
+    private val _events = MutableSharedFlow<TTSEvent>(
+        extraBufferCapacity = 64,
+        onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
+    )
     val events: SharedFlow<TTSEvent> = _events.asSharedFlow()
     
     // Current engine instance
@@ -265,11 +273,15 @@ class TTSController(
             is EngineEvent.Ready -> {
                 _state.update { it.copy(isEngineReady = true) }
                 
-                // If there's a pending play, execute it now
+                // If there's a pending play, execute it now.
+                // Guard with the command mutex so this engine-driven play() cannot run
+                // concurrently with an in-flight command's speak().
                 if (pendingPlay) {
                     Log.debug { "$TAG: Engine ready, executing pending play" }
                     pendingPlay = false
-                    play()
+                    commandMutex.withLock {
+                        play()
+                    }
                 }
             }
             is EngineEvent.Started -> {
@@ -421,14 +433,21 @@ class TTSController(
         }
         
         if (currentState.canGoNext && currentState.isPlaying) {
-            // Auto-advance to next paragraph
-            _state.update { 
-                it.copy(
-                    previousParagraphIndex = it.currentParagraphIndex,
-                    currentParagraphIndex = it.currentParagraphIndex + 1
-                ) 
+            // Auto-advance to next paragraph.
+            // This runs on the engine-event collector (NOT under commandMutex), so guard it
+            // with the mutex. Otherwise this engine-driven speak() can race a mutex-held
+            // command (e.g. a NextChapter transition or a media-button Resume) and the engine
+            // ends up with two concurrent speak() calls — which makes native TTS read only the
+            // first syllable and then stop.
+            commandMutex.withLock {
+                _state.update {
+                    it.copy(
+                        previousParagraphIndex = it.currentParagraphIndex,
+                        currentParagraphIndex = it.currentParagraphIndex + 1
+                    )
+                }
+                play()
             }
-            play()
         } else if (!currentState.canGoNext) {
             // Chapter finished
             _events.emit(TTSEvent.ChapterCompleted)
@@ -452,19 +471,23 @@ class TTSController(
         Log.debug { "$TAG: handleChunkCompleted() - chunk ${currentState.currentChunkIndex}/${result.chunks.size}" }
         
         if (currentState.canGoNextChunk) {
-            // Auto-advance to next chunk
-            val nextChunkIndex = currentState.currentChunkIndex + 1
-            val nextChunk = result.chunks.getOrNull(nextChunkIndex)
-            
-            _state.update {
-                it.copy(
-                    currentChunkIndex = nextChunkIndex,
-                    currentChunkParagraphs = nextChunk?.paragraphIndices ?: emptyList(),
-                    currentParagraphIndex = nextChunk?.startParagraph ?: it.currentParagraphIndex
-                )
+            // Auto-advance to next chunk.
+            // Guard with the command mutex for the same reason as paragraph auto-advance:
+            // this runs on the engine-event collector and must not issue a concurrent speak().
+            commandMutex.withLock {
+                val nextChunkIndex = currentState.currentChunkIndex + 1
+                val nextChunk = result.chunks.getOrNull(nextChunkIndex)
+
+                _state.update {
+                    it.copy(
+                        currentChunkIndex = nextChunkIndex,
+                        currentChunkParagraphs = nextChunk?.paragraphIndices ?: emptyList(),
+                        currentParagraphIndex = nextChunk?.startParagraph ?: it.currentParagraphIndex
+                    )
+                }
+
+                playChunk()
             }
-            
-            playChunk()
         } else {
             // All chunks finished - chapter complete
             _events.emit(TTSEvent.ChapterCompleted)
@@ -573,6 +596,12 @@ class TTSController(
 
         Log.debug { "$TAG: nextChapter() - current chapter: ${chapter.id}" }
 
+        // If already loading a chapter (e.g., auto-next watch is fetching), skip to avoid race
+        if (_state.value.playbackState == PlaybackState.LOADING) {
+            Log.debug { "$TAG: nextChapter() - already loading, skipping" }
+            return
+        }
+
         // Cancel any previous chapter watch
         nextChapterWatchJob?.cancel()
         nextChapterWatchJob = null
@@ -580,10 +609,11 @@ class TTSController(
         val wasPlaying = _state.value.isPlaying
         engine?.stop()
 
-        // Yield to let the native TTS engine fully process the stop command.
-        // On some Android OEMs, stop() is not fully synchronous and the engine
-        // needs a brief moment to settle before a new speak() call.
-        kotlinx.coroutines.yield()
+        // Give the native TTS engine time to fully process the stop command before the next
+        // speak(). On many Android OEMs stop() is not synchronous; a bare yield() is not
+        // enough and a speak() issued too soon is silently dropped after the first syllable,
+        // leaving playback stuck in LOADING. A short real delay reliably lets it settle.
+        kotlinx.coroutines.delay(150)
 
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
 
@@ -610,7 +640,8 @@ class TTSController(
 
     /**
      * Watch for new chapters appearing in the DB (e.g. from a remote fetch).
-     * When a next chapter becomes available, load and play it.
+     * When a next chapter becomes available, dispatches LoadChapter and Play through the
+     * commandMutex so all state mutations are serialized with user-initiated commands.
      * Times out after 5 minutes to avoid leaking the coroutine.
      */
     private fun startNextChapterWatch(bookId: Long, currentChapterId: Long, wasPlaying: Boolean) {
@@ -630,20 +661,29 @@ class TTSController(
                             val nextId = chapters[nextIdx].id
                             Log.debug { "$TAG: Chapter DB changed, found next chapter: $nextId" }
                             found = true
-                            nextChapterWatchJob = null
 
-                            loadChapter(bookId, nextId, 0)
-                            if (wasPlaying) { play() }
+                            // Dispatch through commandMutex to serialize with user commands.
+                            // Read wasPlaying at resolution time (not watch-start) to respect
+                            // any pause/stop the user issued while waiting.
+                            dispatch(TTSCommand.LoadChapter(bookId, nextId, 0))
+                            if (_state.value.isPlaying) {
+                                dispatch(TTSCommand.Play)
+                            } else if (wasPlaying) {
+                                dispatch(TTSCommand.Play)
+                            }
                         }
                     }
                 }
             } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
                 Log.debug { "$TAG: nextChapterWatch timed out, no new chapter appeared" }
-                nextChapterWatchJob = null
                 _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
             } catch (e: kotlinx.coroutines.CancellationException) {
-                nextChapterWatchJob = null
                 throw e
+            } catch (e: Exception) {
+                Log.error { "$TAG: nextChapterWatch failed: ${e.message}" }
+                handleError(TTSError.ContentLoadFailed(e.message ?: "Chapter watch failed"))
+            } finally {
+                nextChapterWatchJob = null
             }
         }
     }
@@ -656,8 +696,9 @@ class TTSController(
         val wasPlaying = _state.value.isPlaying
         engine?.stop()
 
-        // Yield to let the native TTS engine fully process the stop command
-        kotlinx.coroutines.yield()
+        // Give the native TTS engine time to settle after stop() before the next speak()
+        // (see nextChapter() for the rationale — a bare yield() is not enough on many OEMs).
+        kotlinx.coroutines.delay(150)
 
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
 
@@ -763,6 +804,8 @@ class TTSController(
             
             // Update cached paragraphs state for UI
             updateCachedParagraphsState(content.paragraphs)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to load chapter: ${e.message}" }
             handleError(TTSError.ContentLoadFailed(e.message ?: "Failed to load chapter"))
@@ -877,6 +920,10 @@ class TTSController(
         
         Log.debug { "$TAG: setEngine($type) - switching from ${currentState.engineType}" }
         
+        // Cancel chapter watch — engine is being replaced
+        nextChapterWatchJob?.cancel()
+        nextChapterWatchJob = null
+
         // Stop current engine
         engine?.stop()
         engine?.release()
@@ -897,6 +944,10 @@ class TTSController(
         
         // If currently using Gradio engine, reinitialize with new config
         if (_state.value.engineType == EngineType.GRADIO) {
+            // Cancel chapter watch — engine is being replaced
+            nextChapterWatchJob?.cancel()
+            nextChapterWatchJob = null
+
             engine?.stop()
             engine?.release()
             engine = null
