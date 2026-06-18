@@ -1,7 +1,8 @@
-﻿package ireader.domain.usecases.quote
+package ireader.domain.usecases.quote
 
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.models.entities.ReadingStatisticsType1
+import ireader.domain.models.entities.ReaderLevel
 import ireader.domain.models.quote.*
 import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.flow.Flow
@@ -70,7 +71,7 @@ class ReadingBuddyUseCases(
             mood = mood,
             message = message,
             animation = getAnimationForMood(mood),
-            level = stats.buddyLevel,
+            level = ReaderLevel.fromMinutes(stats.totalReadingTimeMinutes).level,
             experience = stats.buddyExperience,
             totalBooksRead = stats.booksCompleted,
             totalChaptersRead = stats.totalChaptersRead,
@@ -217,11 +218,11 @@ class ReadingBuddyUseCases(
     
     /**
      * Get XP progress to next level (0.0 to 1.0)
+     * Uses unified ReaderLevel system based on reading time.
      */
     suspend fun getLevelProgress(): Float {
         val stats = statisticsRepository.getStatistics()
-        val xpForNextLevel = stats.buddyLevel * 100
-        return (stats.buddyExperience.toFloat() / xpForNextLevel).coerceIn(0f, 1f)
+        return ReaderLevel.fromMinutes(stats.totalReadingTimeMinutes).progress
     }
     
     private fun getMessageForMood(mood: BuddyMood, streak: Int): String {

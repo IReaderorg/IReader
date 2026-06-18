@@ -5,6 +5,7 @@ import ireader.core.log.Log
 import ireader.domain.data.repository.ReadingChallengeRepository
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.models.entities.ReadingStatisticsType1
+import ireader.domain.models.entities.ReaderLevel
 import ireader.domain.models.gamification.ChallengeType
 import ireader.domain.models.gamification.Milestone
 import ireader.domain.models.gamification.MilestoneMetric
@@ -96,7 +97,7 @@ class ReadingHubViewModel(
                 } catch (e: Exception) {
                     emptyList()
                 }
-                val levelProgress = calculateLevelProgress(stats.buddyExperience, stats.buddyLevel)
+                val levelProgress = ReaderLevel.fromMinutes(stats.totalReadingTimeMinutes).progress
                 
                 _state.update { current ->
                     current.copy(
@@ -161,7 +162,7 @@ class ReadingHubViewModel(
     
     private fun createBuddyStateFromStats(stats: ReadingStatisticsType1): ReadingBuddyState {
         return ReadingBuddyState(
-            level = stats.buddyLevel,
+            level = ReaderLevel.fromMinutes(stats.totalReadingTimeMinutes).level,
             experience = stats.buddyExperience,
             currentStreak = stats.readingStreak,
             longestStreak = stats.longestStreak,
@@ -189,11 +190,6 @@ class ReadingHubViewModel(
             stats.totalChaptersRead == 0 -> "Ready to start reading? 📚"
             else -> "Welcome back! Let's read together!"
         }
-    }
-    
-    private fun calculateLevelProgress(experience: Int, level: Int): Float {
-        val xpForNextLevel = level * 100
-        return (experience.toFloat() / xpForNextLevel).coerceIn(0f, 1f)
     }
     
     private fun loadInitialData() {

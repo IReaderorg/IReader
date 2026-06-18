@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.LeaderboardEntry
+import ireader.domain.models.entities.ReaderLevel
 import ireader.presentation.ui.core.ui.AsyncImage
 
 /**
@@ -198,12 +199,7 @@ fun LevelBadge(
     level: Int,
     modifier: Modifier = Modifier
 ) {
-    val color = when {
-        level <= 5 -> Color(0xFF607D8B)
-        level <= 15 -> Color(0xFF1976D2)
-        level <= 30 -> Color(0xFF7B1FA2)
-        else -> Color(0xFFFF8F00)
-    }
+    val color = Color(ReaderLevel.getLevelColor(level))
 
     Surface(
         shape = RoundedCornerShape(6.dp),
