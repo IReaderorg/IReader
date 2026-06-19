@@ -383,7 +383,7 @@ Visit.*for more chapters"""
     
     // Default reading mode for new books
     fun defaultReadingMode(): Preference<ReadingMode> {
-        return preferenceStore.getEnum("default_reading_mode", ReadingMode.Page)
+        return preferenceStore.getEnum("default_reading_mode", ReadingMode.Continues)
     }
     
     // Reading break reminder preferences
