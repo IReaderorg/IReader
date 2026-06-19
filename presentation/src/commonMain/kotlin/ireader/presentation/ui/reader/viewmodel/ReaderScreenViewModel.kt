@@ -1239,6 +1239,17 @@ class ReaderScreenViewModel(
     fun updateReadingTimeEstimation(scrollProgress: Float) {
         scrollVM.updateReadingTimeEstimation(scrollProgress)
     }
+
+    // Paged mode page indicator
+    private val _pagedCurrentPage = kotlinx.coroutines.flow.MutableStateFlow(0)
+    val pagedCurrentPage: kotlinx.coroutines.flow.StateFlow<Int> = _pagedCurrentPage
+    private val _pagedTotalPages = kotlinx.coroutines.flow.MutableStateFlow(0)
+    val pagedTotalPages: kotlinx.coroutines.flow.StateFlow<Int> = _pagedTotalPages
+
+    fun updatePagedPageInfo(current: Int, total: Int) {
+        _pagedCurrentPage.value = current
+        _pagedTotalPages.value = total
+    }
     
     fun getCurrentContent(): List<Page> {
         val successState = _state.value as? ReaderState.Success ?: return emptyList()

@@ -84,16 +84,15 @@ fun SettingsReaderScreen(
             item {
                 SettingsItemWithTrailing(
                     title = localizeHelper.localize(Res.string.default_reading_mode),
-                    description = "Choose between pager and webtoon modes",
+                    description = "Choose between webtoon and continuous modes",
                     icon = Icons.Outlined.ViewColumn,
                     onClick = { viewModel.showReadingModeDialog() }
                 ) {
                     Text(
                         text = when (readingMode) {
-                            "pager" -> "Pager"
                             "webtoon" -> "Webtoon"
                             "continuous_vertical" -> "Continuous Vertical"
-                            else -> "Pager"
+                            else -> "Continuous Vertical"
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
@@ -330,7 +329,6 @@ fun SettingsReaderScreen(
             text = {
                 Column {
                     val modes = listOf(
-                        "pager" to "Pager",
                         "webtoon" to "Webtoon",
                         "continuous_vertical" to "Continuous Vertical"
                     )

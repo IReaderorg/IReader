@@ -106,7 +106,7 @@ Visit.*for more chapters"""
     }
 
     fun readingMode(): Preference<ReadingMode> {
-        return preferenceStore.getEnum(READING_MODE, ReadingMode.Page)
+        return preferenceStore.getEnum(READING_MODE, ReadingMode.Continues)
     }
 
     fun paragraphDistance(): Preference<Int> {

@@ -664,6 +664,8 @@ private fun ReadingScreenContent(
                                             .align(Alignment.CenterHorizontally)
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
+                                    val currentPage by vm.pagedCurrentPage.collectAsState()
+                                    val totalPages by vm.pagedTotalPages.collectAsState()
                                     MainBottomSettingComposable(
                                         scope = scope,
                                         drawerState = drawerState,
@@ -676,7 +678,9 @@ private fun ReadingScreenContent(
                                         onSliderChange = onSliderChange,
                                         onSliderFinished = onSliderFinished,
                                         onPlay = onReaderPlay,
-                                        onAutoScrollToggle = { vm.toggleAutoScroll() }
+                                        onAutoScrollToggle = { vm.toggleAutoScroll() },
+                                        currentPage = currentPage,
+                                        totalPages = totalPages
                                     )
                                 }
                             }
