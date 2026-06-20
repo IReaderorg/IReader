@@ -154,6 +154,31 @@ object GradioTTSPluginLoader {
                         GradioParam.choiceParam(name, choices, default)
                     }
                     
+                    "boolean" -> {
+                        val default = obj["default"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+                        GradioParam(
+                            name = name,
+                            type = GradioParamType.BOOLEAN,
+                            defaultValue = default.toString()
+                        )
+                    }
+                    
+                    "audio" -> {
+                        // Audio parameters are optional, default to null
+                        GradioParam(
+                            name = name,
+                            type = GradioParamType.STRING,
+                            defaultValue = ""
+                        )
+                    }
+                    
+                    "number" -> {
+                        val default = obj["default"]?.jsonPrimitive?.content?.toFloatOrNull() ?: 0f
+                        val min = obj["min"]?.jsonPrimitive?.content?.toFloatOrNull()
+                        val max = obj["max"]?.jsonPrimitive?.content?.toFloatOrNull()
+                        GradioParam.floatParam(name, default, min, max)
+                    }
+                    
                     else -> null
                 }
             }.ifEmpty { listOf(GradioParam.textParam()) }

@@ -1328,8 +1328,21 @@ private fun GradioTTSSectionDesktop(
                             isTesting = true
                             scope.launch {
                                 try {
+                                    // Save the config as active and configure
+                                    appPrefs.activeGradioConfigId().set(config.id)
+                                    appPrefs.activeGradioSpaceUrl().set(config.spaceUrl)
+                                    appPrefs.activeGradioApiKey().set(config.apiKey ?: "")
                                     ttsService.configureGradioFromPreferences()
-                                    kotlinx.coroutines.delay(2000)
+                                    
+                                    // Test the configuration by speaking sample text
+                                    val testResult = gradioTTSManager.testConfig(config.id, "Hello, this is a test.")
+                                    if (testResult.isSuccess) {
+                                        Log.info { "Test successful for config: ${config.id}" }
+                                    } else {
+                                        Log.error { "Test failed for config: ${config.id}: ${testResult.exceptionOrNull()?.message}" }
+                                    }
+                                } catch (e: Exception) {
+                                    Log.error { "Test error: ${e.message}" }
                                 } finally {
                                     isTesting = false
                                     testingConfigId = null
