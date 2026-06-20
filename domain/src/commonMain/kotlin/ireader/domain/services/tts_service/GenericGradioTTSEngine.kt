@@ -718,10 +718,18 @@ class GenericGradioTTSEngine(
     private fun buildRequestBody(text: String): String {
         val dataValues = config.parameters.map { param ->
             when {
-                param.isTextInput -> escapeJsonString(text)
+                param.isTextInput -> "\"${escapeJsonString(text)}\""
                 param.isSpeedInput -> speed.toString()
                 else -> when (param.type) {
-                    GradioParamType.STRING -> "\"${escapeJsonString(param.defaultValue ?: "")}\""
+                    GradioParamType.STRING -> {
+                        val default = param.defaultValue ?: ""
+                        // Send null for empty reference/audio parameters
+                        if (default.isEmpty() && param.name.contains("reference")) {
+                            "null"
+                        } else {
+                            "\"${escapeJsonString(default)}\""
+                        }
+                    }
                     GradioParamType.FLOAT -> (param.defaultValue?.toFloatOrNull() ?: 1.0f).toString()
                     GradioParamType.INT -> (param.defaultValue?.toIntOrNull() ?: 0).toString()
                     GradioParamType.BOOLEAN -> (param.defaultValue?.toBooleanStrictOrNull() ?: false).toString()
@@ -730,18 +738,7 @@ class GenericGradioTTSEngine(
             }
         }
         
-        // Handle text input specially - it needs quotes
-        val formattedValues = config.parameters.mapIndexed { index, param ->
-            if (param.isTextInput) {
-                "\"${escapeJsonString(text)}\""
-            } else if (param.isSpeedInput) {
-                speed.toString()
-            } else {
-                dataValues[index]
-            }
-        }
-        
-        return """{"data": [${formattedValues.joinToString(", ")}]}"""
+        return """{"data": [${dataValues.joinToString(", ")}]}"""
     }
     
     private fun escapeJsonString(text: String): String {
