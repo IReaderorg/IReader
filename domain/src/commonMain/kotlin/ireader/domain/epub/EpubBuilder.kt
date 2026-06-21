@@ -73,11 +73,17 @@ class EpubBuilder(
             // Download cover image first to determine actual format
             var coverExtension = "jpg"
             var coverMediaType = "image/jpeg"
+            var coverEmbedded = false
             if (options.includeCover && book.cover.isNotEmpty()) {
                 val coverResult = downloadAndEmbedCover(tempDir, book.cover)
                 if (coverResult != null) {
                     coverExtension = coverResult.first
                     coverMediaType = coverResult.second
+                    coverEmbedded = true
+                    // Write a dedicated cover XHTML page so readers such as
+                    // Google Play Books and Kindle render the cover from the
+                    // front of the reading order, not just the manifest property.
+                    createCoverPage(tempDir, coverExtension)
                 }
             }
             
@@ -93,7 +99,7 @@ class EpubBuilder(
             val metadata = createMetadata(book)
             
             // Create EPUB files
-            createContentOpf(tempDir, book, metadata, epubChapters, options, coverExtension, coverMediaType)
+            createContentOpf(tempDir, book, metadata, epubChapters, options, coverExtension, coverMediaType, coverEmbedded)
             createTocNcx(tempDir, metadata, epubChapters)
             createNavDocument(tempDir, epubChapters)
             createChapterFiles(tempDir, epubChapters, options)
@@ -236,7 +242,8 @@ class EpubBuilder(
         chapters: List<EpubChapter>,
         options: ExportOptions,
         coverExtension: String = "jpg",
-        coverMediaType: String = "image/jpeg"
+        coverMediaType: String = "image/jpeg",
+        coverEmbedded: Boolean = false
     ) {
         val currentDate = currentTimeToLong().formatIsoDateTime()
         
@@ -271,8 +278,10 @@ class EpubBuilder(
             // Modified date (required for EPUB 3.0)
             appendLine("    <meta property=\"dcterms:modified\">$currentDate</meta>")
             
-            // Cover meta tag for EPUB 2.0 compatibility (required by Google Books)
-            if (options.includeCover && book.cover.isNotEmpty()) {
+            // Cover meta tag for EPUB 2.0 compatibility (required by Google Books).
+            // Only emit when the cover image was actually embedded so the
+            // referenced manifest item always exists.
+            if (coverEmbedded) {
                 appendLine("    <meta name=\"cover\" content=\"cover-image\"/>")
             }
             
@@ -286,8 +295,9 @@ class EpubBuilder(
             chapters.forEach { chapter ->
                 appendLine("    <item id=\"${chapter.id}\" href=\"${chapter.fileName}\" media-type=\"application/xhtml+xml\"/>")
             }
-            if (options.includeCover && book.cover.isNotEmpty()) {
+            if (coverEmbedded) {
                 appendLine("    <item id=\"cover-image\" href=\"Images/cover.$coverExtension\" media-type=\"$coverMediaType\" properties=\"cover-image\"/>")
+                appendLine("    <item id=\"cover-page\" href=\"Text/cover.xhtml\" media-type=\"application/xhtml+xml\"/>")
             }
             // Embed chapter images in manifest
             val allImages = chapters.flatMap { it.images }
@@ -298,6 +308,11 @@ class EpubBuilder(
             
             // Spine section
             appendLine("  <spine toc=\"ncx\">")
+            // Cover page must open the reading order so Google Books / Kindle
+            // display it as the book cover.
+            if (coverEmbedded) {
+                appendLine("    <itemref idref=\"cover-page\" linear=\"yes\"/>")
+            }
             appendLine("    <itemref idref=\"nav\"/>")
             chapters.forEach { chapter ->
                 appendLine("    <itemref idref=\"${chapter.id}\"/>")
@@ -370,6 +385,37 @@ class EpubBuilder(
         fileSystem.sink(baseDir / "OEBPS" / "nav.xhtml").buffer().use { it.writeUtf8(navXhtml) }
     }
     
+    /**
+     * Writes a dedicated cover page (OEBPS/Text/cover.xhtml) that references the
+     * embedded cover image. Many readers (Google Play Books, several Kindle
+     * ingestion paths) derive the displayed cover from a cover page at the front
+     * of the reading order rather than from the `cover-image` manifest property
+     * alone, so this page is wired in as the first spine entry.
+     *
+     * Must only be called after the cover image was successfully embedded so the
+     * referenced image always exists.
+     */
+    private fun createCoverPage(baseDir: Path, coverExtension: String) {
+        val coverXhtml = buildString {
+            appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")
+            appendLine("""<!DOCTYPE html>""")
+            appendLine("""<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">""")
+            appendLine("<head>")
+            appendLine("  <meta charset=\"UTF-8\"/>")
+            appendLine("  <title>Cover</title>")
+            appendLine("  <link rel=\"stylesheet\" type=\"text/css\" href=\"../Styles/style.css\"/>")
+            appendLine("</head>")
+            appendLine("<body>")
+            appendLine("  <section epub:type=\"cover\" id=\"cover\">")
+            appendLine("    <img src=\"../Images/cover.$coverExtension\" alt=\"Cover\"/>")
+            appendLine("  </section>")
+            appendLine("</body>")
+            appendLine("</html>")
+        }
+
+        fileSystem.sink(baseDir / "OEBPS" / "Text" / "cover.xhtml").buffer().use { it.writeUtf8(coverXhtml) }
+    }
+
     private fun createChapterFiles(
         baseDir: Path,
         chapters: List<EpubChapter>,
