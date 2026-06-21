@@ -99,6 +99,13 @@ class ChapterRepositoryImpl(
 
     override suspend fun insertChapter(chapter: Chapter): Long {
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
+        // Defence-in-depth: if the incoming content is the light-mapper placeholder
+        // (happens when a Chapter object fetched via findChaptersByBookIdLight gets
+        // round-tripped through insertChapter — e.g. by ChapterController metadata
+        // updates), strip it to emptyList() so the SQL upsert's COALESCE path preserves
+        // the existing real content. Writing the literal placeholder into the content
+        // column silently corrupts the chapter until the row is manually wiped.
+        val contentForInsert = chapter.content.stripDownloadedPlaceholder()
         val result = handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
@@ -113,7 +120,7 @@ class ChapterRepositoryImpl(
                     chapter.sourceOrder,
                     chapter.dateFetch,
                     chapter.dateUpload,
-                    chapter.content,
+                    contentForInsert,
                     chapter.type,
                 )
              chapterQueries.selectLastInsertedRowId()
@@ -183,7 +190,9 @@ class ChapterRepositoryImpl(
                     chapter.sourceOrder,
                     chapter.dateFetch,
                     chapter.dateUpload,
-                    chapter.content,
+                    // Strip the light-mapper placeholder before writing — see insertChapter
+                    // for full rationale. Preserves existing real content via upsert COALESCE.
+                    chapter.content.stripDownloadedPlaceholder(),
                     chapter.type
                 )
             }
