@@ -9,10 +9,12 @@ import ireader.domain.catalogs.service.CatalogInstaller
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withTimeout
 
 
 class InstallCatalogImpl(
@@ -53,34 +55,40 @@ class InstallCatalogImpl(
         
         Log.info("HybridInstaller: Starting installation of ${catalog.name}, trying local installer first")
         
-        // Try local installer first
+        // Try local installer with 10-second timeout
         try {
-            androidLocalInstaller.install(catalog).onEach { step ->
-                when (step) {
-                    is InstallStep.Error -> {
-                        localFailed = true
-                        lastError = step.error
-                        Log.warn("HybridInstaller: Local installer failed for ${catalog.name}: ${step.error}")
-                    }
-                    is InstallStep.Success -> {
-                        Log.info("HybridInstaller: Local installer succeeded for ${catalog.name}")
-                        send(step)
-                    }
-                    else -> {
-                        // Forward other steps (Downloading, Installing, etc.)
-                        if (!localFailed) {
+            withTimeout(6_000L) {
+                androidLocalInstaller.install(catalog).onEach { step ->
+                    when (step) {
+                        is InstallStep.Error -> {
+                            localFailed = true
+                            lastError = step.error
+                            Log.warn("HybridInstaller: Local installer failed for ${catalog.name}: ${step.error}")
+                        }
+                        is InstallStep.Success -> {
+                            Log.info("HybridInstaller: Local installer succeeded for ${catalog.name}")
                             send(step)
                         }
+                        else -> {
+                            // Forward other steps (Downloading, Installing, etc.)
+                            if (!localFailed) {
+                                send(step)
+                            }
+                        }
                     }
-                }
-            }.collect()
+                }.collect()
+            }
+        } catch (e: TimeoutCancellationException) {
+            localFailed = true
+            lastError = "Local installer timed out after 10 seconds"
+            Log.warn("HybridInstaller: Local installer timed out for ${catalog.name}, falling back to package installer")
         } catch (e: Exception) {
             localFailed = true
             lastError = e.message
             Log.warn("HybridInstaller: Local installer threw exception for ${catalog.name}: ${e.message}")
         }
         
-        // If local installer failed, try package installer
+        // If local installer failed or timed out, try package installer
         if (localFailed) {
             Log.info("HybridInstaller: Falling back to package installer for ${catalog.name}")
             send(InstallStep.Downloading) // Reset state for UI
