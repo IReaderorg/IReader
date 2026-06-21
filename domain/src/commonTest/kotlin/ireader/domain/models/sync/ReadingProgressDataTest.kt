@@ -7,168 +7,146 @@ import kotlin.test.assertFailsWith
 class ReadingProgressDataTest {
 
     @Test
-    fun `ReadingProgressData should be created with valid data`() {
+    fun `HistorySyncData should be created with valid data`() {
         // Arrange
-        val bookId = 123L
-        val chapterId = 456L
-        val chapterIndex = 5
-        val offset = 1024
-        val progress = 0.75f
-        val lastReadAt = System.currentTimeMillis()
+        val chapterGlobalId = "source-1|chapter-key-123"
+        val lastRead = System.currentTimeMillis()
+        val timeRead = 60000L
+        val readingProgress = 0.75
 
         // Act
-        val progressData = ReadingProgressData(
-            bookId = bookId,
-            chapterId = chapterId,
-            chapterIndex = chapterIndex,
-            offset = offset,
-            progress = progress,
-            lastReadAt = lastReadAt
+        val historyData = HistorySyncData(
+            chapterGlobalId = chapterGlobalId,
+            lastRead = lastRead,
+            timeRead = timeRead,
+            readingProgress = readingProgress
         )
 
         // Assert
-        assertEquals(bookId, progressData.bookId)
-        assertEquals(chapterId, progressData.chapterId)
-        assertEquals(chapterIndex, progressData.chapterIndex)
-        assertEquals(offset, progressData.offset)
-        assertEquals(progress, progressData.progress)
-        assertEquals(lastReadAt, progressData.lastReadAt)
+        assertEquals(chapterGlobalId, historyData.chapterGlobalId)
+        assertEquals(lastRead, historyData.lastRead)
+        assertEquals(timeRead, historyData.timeRead)
+        assertEquals(readingProgress, historyData.readingProgress)
     }
 
     @Test
-    fun `ReadingProgressData should reject negative bookId`() {
+    fun `HistorySyncData should reject blank chapterGlobalId`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            ReadingProgressData(
-                bookId = -1L,
-                chapterId = 456L,
-                chapterIndex = 5,
-                offset = 1024,
-                progress = 0.75f,
-                lastReadAt = System.currentTimeMillis()
+            HistorySyncData(
+                chapterGlobalId = "",
+                lastRead = System.currentTimeMillis(),
+                timeRead = 60000L,
+                readingProgress = 0.75
             )
         }
     }
 
     @Test
-    fun `ReadingProgressData should reject negative chapterId`() {
+    fun `HistorySyncData should reject negative lastRead`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            ReadingProgressData(
-                bookId = 123L,
-                chapterId = -1L,
-                chapterIndex = 5,
-                offset = 1024,
-                progress = 0.75f,
-                lastReadAt = System.currentTimeMillis()
+            HistorySyncData(
+                chapterGlobalId = "source-1|chapter-key",
+                lastRead = -1L,
+                timeRead = 60000L,
+                readingProgress = 0.75
             )
         }
     }
 
     @Test
-    fun `ReadingProgressData should reject negative chapterIndex`() {
+    fun `HistorySyncData should reject negative timeRead`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            ReadingProgressData(
-                bookId = 123L,
-                chapterId = 456L,
-                chapterIndex = -1,
-                offset = 1024,
-                progress = 0.75f,
-                lastReadAt = System.currentTimeMillis()
+            HistorySyncData(
+                chapterGlobalId = "source-1|chapter-key",
+                lastRead = System.currentTimeMillis(),
+                timeRead = -1L,
+                readingProgress = 0.75
             )
         }
     }
 
     @Test
-    fun `ReadingProgressData should reject negative offset`() {
+    fun `HistorySyncData should reject readingProgress below 0`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            ReadingProgressData(
-                bookId = 123L,
-                chapterId = 456L,
-                chapterIndex = 5,
-                offset = -1,
-                progress = 0.75f,
-                lastReadAt = System.currentTimeMillis()
+            HistorySyncData(
+                chapterGlobalId = "source-1|chapter-key",
+                lastRead = System.currentTimeMillis(),
+                timeRead = 60000L,
+                readingProgress = -0.1
             )
         }
     }
 
     @Test
-    fun `ReadingProgressData should reject progress below 0`() {
+    fun `HistorySyncData should reject readingProgress above 1`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            ReadingProgressData(
-                bookId = 123L,
-                chapterId = 456L,
-                chapterIndex = 5,
-                offset = 1024,
-                progress = -0.1f,
-                lastReadAt = System.currentTimeMillis()
+            HistorySyncData(
+                chapterGlobalId = "source-1|chapter-key",
+                lastRead = System.currentTimeMillis(),
+                timeRead = 60000L,
+                readingProgress = 1.1
             )
         }
     }
 
     @Test
-    fun `ReadingProgressData should reject progress above 1`() {
-        // Arrange & Act & Assert
-        assertFailsWith<IllegalArgumentException> {
-            ReadingProgressData(
-                bookId = 123L,
-                chapterId = 456L,
-                chapterIndex = 5,
-                offset = 1024,
-                progress = 1.1f,
-                lastReadAt = System.currentTimeMillis()
-            )
-        }
-    }
-
-    @Test
-    fun `ReadingProgressData should accept progress of 0`() {
+    fun `HistorySyncData should accept readingProgress of 0`() {
         // Arrange & Act
-        val progressData = ReadingProgressData(
-            bookId = 123L,
-            chapterId = 456L,
-            chapterIndex = 5,
-            offset = 0,
-            progress = 0.0f,
-            lastReadAt = System.currentTimeMillis()
+        val historyData = HistorySyncData(
+            chapterGlobalId = "source-1|chapter-key",
+            lastRead = System.currentTimeMillis(),
+            timeRead = 0L,
+            readingProgress = 0.0
         )
 
         // Assert
-        assertEquals(0.0f, progressData.progress)
+        assertEquals(0.0, historyData.readingProgress)
     }
 
     @Test
-    fun `ReadingProgressData should accept progress of 1`() {
+    fun `HistorySyncData should accept readingProgress of 1`() {
         // Arrange & Act
-        val progressData = ReadingProgressData(
-            bookId = 123L,
-            chapterId = 456L,
-            chapterIndex = 5,
-            offset = 1024,
-            progress = 1.0f,
-            lastReadAt = System.currentTimeMillis()
+        val historyData = HistorySyncData(
+            chapterGlobalId = "source-1|chapter-key",
+            lastRead = System.currentTimeMillis(),
+            timeRead = 60000L,
+            readingProgress = 1.0
         )
 
         // Assert
-        assertEquals(1.0f, progressData.progress)
+        assertEquals(1.0, historyData.readingProgress)
     }
 
     @Test
-    fun `ReadingProgressData should reject negative lastReadAt timestamp`() {
-        // Arrange & Act & Assert
-        assertFailsWith<IllegalArgumentException> {
-            ReadingProgressData(
-                bookId = 123L,
-                chapterId = 456L,
-                chapterIndex = 5,
-                offset = 1024,
-                progress = 0.75f,
-                lastReadAt = -1L
-            )
-        }
+    fun `HistorySyncData should accept zero timeRead`() {
+        // Arrange & Act
+        val historyData = HistorySyncData(
+            chapterGlobalId = "source-1|chapter-key",
+            lastRead = System.currentTimeMillis(),
+            timeRead = 0L,
+            readingProgress = 0.0
+        )
+
+        // Assert
+        assertEquals(0L, historyData.timeRead)
+    }
+
+    @Test
+    fun `HistorySyncData should accept zero lastRead`() {
+        // Arrange & Act
+        val historyData = HistorySyncData(
+            chapterGlobalId = "source-1|chapter-key",
+            lastRead = 0L,
+            timeRead = 0L,
+            readingProgress = 0.0
+        )
+
+        // Assert
+        assertEquals(0L, historyData.lastRead)
     }
 }

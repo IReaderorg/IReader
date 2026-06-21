@@ -11,10 +11,10 @@ class DataConflictTest {
     @Test
     fun `DataConflict should be created with valid data`() {
         // Arrange
-        val conflictType = ConflictType.READING_PROGRESS
-        val localData = createTestReadingProgressData(lastReadAt = 1000L)
-        val remoteData = createTestReadingProgressData(lastReadAt = 2000L)
-        val conflictField = "chapterIndex"
+        val conflictType = ConflictType.HISTORY
+        val localData = createTestHistorySyncData(lastRead = 1000L)
+        val remoteData = createTestHistorySyncData(lastRead = 2000L)
+        val conflictField = "lastRead"
 
         // Act
         val conflict = DataConflict(
@@ -36,9 +36,9 @@ class DataConflictTest {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
             DataConflict(
-                conflictType = ConflictType.READING_PROGRESS,
-                localData = createTestReadingProgressData(),
-                remoteData = createTestReadingProgressData(),
+                conflictType = ConflictType.HISTORY,
+                localData = createTestHistorySyncData(),
+                remoteData = createTestHistorySyncData(),
                 conflictField = ""
             )
         }
@@ -47,8 +47,8 @@ class DataConflictTest {
     @Test
     fun `ConflictType should have all required types`() {
         // Arrange & Act & Assert
-        assertTrue(ConflictType.values().contains(ConflictType.READING_PROGRESS))
-        assertTrue(ConflictType.values().contains(ConflictType.BOOKMARK))
+        assertTrue(ConflictType.values().contains(ConflictType.HISTORY))
+        assertTrue(ConflictType.values().contains(ConflictType.CHAPTER))
         assertTrue(ConflictType.values().contains(ConflictType.BOOK_METADATA))
     }
 
@@ -62,14 +62,12 @@ class DataConflictTest {
         assertTrue(ConflictResolutionStrategy.values().contains(ConflictResolutionStrategy.MANUAL))
     }
 
-    private fun createTestReadingProgressData(lastReadAt: Long = System.currentTimeMillis()): ReadingProgressData {
-        return ReadingProgressData(
-            bookId = 123L,
-            chapterId = 456L,
-            chapterIndex = 5,
-            offset = 1024,
-            progress = 0.75f,
-            lastReadAt = lastReadAt
+    private fun createTestHistorySyncData(lastRead: Long = System.currentTimeMillis()): HistorySyncData {
+        return HistorySyncData(
+            chapterGlobalId = "source-1|chapter-key-123",
+            lastRead = lastRead,
+            timeRead = 60000L,
+            readingProgress = 0.75
         )
     }
 }

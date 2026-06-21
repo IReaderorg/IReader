@@ -61,8 +61,8 @@ class SyncRepositoryTest {
         assertTrue(repository.observeSyncStatus() is Flow)
         assertTrue(repository.cancelSync().isSuccess)
         assertTrue(repository.getBooksToSync().isSuccess)
-        assertTrue(repository.getReadingProgress().isSuccess)
-        assertTrue(repository.getBookmarks().isSuccess)
+        assertTrue(repository.getChaptersToSync().isSuccess)
+        assertTrue(repository.getHistoryToSync().isSuccess)
         assertTrue(repository.applySync(createTestSyncData()).isSuccess)
         assertTrue(repository.getLastSyncTime("test").isSuccess)
         assertTrue(repository.updateLastSyncTime("test", 1000L).isSuccess)
@@ -95,8 +95,8 @@ class SyncRepositoryTest {
     private fun createTestSyncData(): SyncData {
         return SyncData(
             books = emptyList(),
-            readingProgress = emptyList(),
-            bookmarks = emptyList(),
+            chapters = emptyList(),
+            history = emptyList(),
             metadata = SyncMetadata(
                 deviceId = "test-device-123",
                 timestamp = System.currentTimeMillis(),
@@ -153,22 +153,27 @@ class FakeSyncRepository(
     override suspend fun getBooksToSync(): Result<List<BookSyncData>> = Result.success(
         if (hasConflicts) {
             listOf(
-                BookSyncData(123L, "Book", "Author", null, "src", "url", 1000L, 1000L, "hash1")
+                BookSyncData(
+                    globalId = "1|book1",
+                    title = "Book",
+                    author = "Author",
+                    coverUrl = null,
+                    sourceId = "1",
+                    key = "book1",
+                    favorite = false,
+                    addedAt = 1000L,
+                    updatedAt = 1000L,
+                    description = "desc",
+                    genres = emptyList(),
+                    status = 1L
+                )
             )
         } else {
             emptyList()
         }
     )
-    override suspend fun getReadingProgress(): Result<List<ReadingProgressData>> = Result.success(
-        if (hasConflicts) {
-            listOf(
-                ReadingProgressData(123L, 456L, 5, 1024, 0.5f, 1000L)
-            )
-        } else {
-            emptyList()
-        }
-    )
-    override suspend fun getBookmarks(): Result<List<BookmarkData>> = Result.success(emptyList())
+    override suspend fun getChaptersToSync(): Result<List<ChapterSyncData>> = Result.success(emptyList())
+    override suspend fun getHistoryToSync(): Result<List<HistorySyncData>> = Result.success(emptyList())
     override suspend fun applySync(data: SyncData): Result<Unit> = Result.success(Unit)
     override suspend fun getLastSyncTime(deviceId: String): Result<Long?> = Result.success(null)
     override suspend fun updateLastSyncTime(deviceId: String, timestamp: Long): Result<Unit> = Result.success(Unit)

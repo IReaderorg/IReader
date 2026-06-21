@@ -10,22 +10,22 @@ class SyncDataTest {
     fun `SyncData should be created with valid data`() {
         // Arrange
         val books = listOf(createTestBookSyncData())
-        val readingProgress = listOf(createTestReadingProgressData())
-        val bookmarks = listOf(createTestBookmarkData())
+        val chapters = listOf(createTestChapterSyncData())
+        val history = listOf(createTestHistorySyncData())
         val metadata = createTestSyncMetadata()
 
         // Act
         val syncData = SyncData(
             books = books,
-            readingProgress = readingProgress,
-            bookmarks = bookmarks,
+            chapters = chapters,
+            history = history,
             metadata = metadata
         )
 
         // Assert
         assertEquals(books, syncData.books)
-        assertEquals(readingProgress, syncData.readingProgress)
-        assertEquals(bookmarks, syncData.bookmarks)
+        assertEquals(chapters, syncData.chapters)
+        assertEquals(history, syncData.history)
         assertEquals(metadata, syncData.metadata)
     }
 
@@ -34,8 +34,8 @@ class SyncDataTest {
         // Arrange & Act
         val syncData = SyncData(
             books = emptyList(),
-            readingProgress = listOf(createTestReadingProgressData()),
-            bookmarks = listOf(createTestBookmarkData()),
+            chapters = listOf(createTestChapterSyncData()),
+            history = listOf(createTestHistorySyncData()),
             metadata = createTestSyncMetadata()
         )
 
@@ -44,31 +44,31 @@ class SyncDataTest {
     }
 
     @Test
-    fun `SyncData should allow empty readingProgress list`() {
+    fun `SyncData should allow empty chapters list`() {
         // Arrange & Act
         val syncData = SyncData(
             books = listOf(createTestBookSyncData()),
-            readingProgress = emptyList(),
-            bookmarks = listOf(createTestBookmarkData()),
+            chapters = emptyList(),
+            history = listOf(createTestHistorySyncData()),
             metadata = createTestSyncMetadata()
         )
 
         // Assert
-        assertTrue(syncData.readingProgress.isEmpty())
+        assertTrue(syncData.chapters.isEmpty())
     }
 
     @Test
-    fun `SyncData should allow empty bookmarks list`() {
+    fun `SyncData should allow empty history list`() {
         // Arrange & Act
         val syncData = SyncData(
             books = listOf(createTestBookSyncData()),
-            readingProgress = listOf(createTestReadingProgressData()),
-            bookmarks = emptyList(),
+            chapters = listOf(createTestChapterSyncData()),
+            history = emptyList(),
             metadata = createTestSyncMetadata()
         )
 
         // Assert
-        assertTrue(syncData.bookmarks.isEmpty())
+        assertTrue(syncData.history.isEmpty())
     }
 
     @Test
@@ -76,50 +76,58 @@ class SyncDataTest {
         // Arrange & Act
         val syncData = SyncData(
             books = emptyList(),
-            readingProgress = emptyList(),
-            bookmarks = emptyList(),
+            chapters = emptyList(),
+            history = emptyList(),
             metadata = createTestSyncMetadata()
         )
 
         // Assert
         assertTrue(syncData.books.isEmpty())
-        assertTrue(syncData.readingProgress.isEmpty())
-        assertTrue(syncData.bookmarks.isEmpty())
+        assertTrue(syncData.chapters.isEmpty())
+        assertTrue(syncData.history.isEmpty())
     }
 
     private fun createTestBookSyncData(): BookSyncData {
         return BookSyncData(
-            bookId = 123L,
+            globalId = "1|book1",
             title = "Test Book",
             author = "Test Author",
             coverUrl = "https://example.com/cover.jpg",
-            sourceId = "source-1",
-            sourceUrl = "https://example.com/book/123",
+            sourceId = "1",
+            key = "book1",
+            favorite = false,
             addedAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis(),
-            fileHash = "abc123"
+            description = "Test description",
+            genres = listOf("Test"),
+            status = 1L
         )
     }
 
-    private fun createTestReadingProgressData(): ReadingProgressData {
-        return ReadingProgressData(
-            bookId = 123L,
-            chapterId = 456L,
-            chapterIndex = 5,
-            offset = 1024,
-            progress = 0.75f,
-            lastReadAt = System.currentTimeMillis()
+    private fun createTestChapterSyncData(): ChapterSyncData {
+        return ChapterSyncData(
+            globalId = "1|ch1",
+            bookGlobalId = "1|book1",
+            key = "ch1",
+            name = "Chapter 1",
+            read = false,
+            bookmark = false,
+            lastPageRead = 0,
+            sourceOrder = 1,
+            number = 1.0f,
+            dateUpload = System.currentTimeMillis(),
+            dateFetch = System.currentTimeMillis(),
+            translator = "",
+            content = "[]"
         )
     }
 
-    private fun createTestBookmarkData(): BookmarkData {
-        return BookmarkData(
-            bookmarkId = 789L,
-            bookId = 123L,
-            chapterId = 456L,
-            position = 1024,
-            note = "Test note",
-            createdAt = System.currentTimeMillis()
+    private fun createTestHistorySyncData(): HistorySyncData {
+        return HistorySyncData(
+            chapterGlobalId = "1|ch1",
+            lastRead = System.currentTimeMillis(),
+            timeRead = 5000L,
+            readingProgress = 0.5
         )
     }
 

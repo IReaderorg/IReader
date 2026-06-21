@@ -89,14 +89,6 @@ class TTSColorPreferencesTest {
             throw UnsupportedOperationException("Not needed for these tests")
         }
         
-        override fun <T : Enum<T>> getEnum(
-            key: String,
-            defaultValue: T,
-            serializer: (T) -> String,
-            deserializer: (String) -> T
-        ): Preference<T> {
-            throw UnsupportedOperationException("Not needed for these tests")
-        }
     }
     
     private val preferenceStore = MockPreferenceStore()
