@@ -17,7 +17,7 @@ class DesktopKeyStorageServiceTest {
     @BeforeTest
     fun setup() {
         // Create temporary directory for test keystore
-        tempDir = createTempDir("ireader_test_keystore")
+        tempDir = kotlin.io.path.createTempDirectory("ireader_test_keystore").toFile()
         service = DesktopKeyStorageService()
     }
     
