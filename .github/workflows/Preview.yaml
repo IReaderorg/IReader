@@ -290,7 +290,7 @@ jobs:
       #     bodyFile: release_notes.md
 
       - name: Create Main Repository Pre-Release
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1
         with:
           artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.tar.gz,**/*.sha256"
           allowUpdates: true
