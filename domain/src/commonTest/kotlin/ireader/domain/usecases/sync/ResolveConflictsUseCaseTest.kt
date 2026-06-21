@@ -11,13 +11,13 @@ class ResolveConflictsUseCaseTest {
     fun `invoke with LATEST_TIMESTAMP should choose data with most recent timestamp`() {
         // Arrange
         val useCase = ResolveConflictsUseCase()
-        val localProgress = createReadingProgress(lastReadAt = 1000L, chapterIndex = 5)
-        val remoteProgress = createReadingProgress(lastReadAt = 2000L, chapterIndex = 7)
+        val localHistory = createHistory(lastRead = 1000L, readingProgress = 0.5)
+        val remoteHistory = createHistory(lastRead = 2000L, readingProgress = 0.7)
         val conflict = DataConflict(
-            conflictType = ConflictType.READING_PROGRESS,
-            localData = localProgress,
-            remoteData = remoteProgress,
-            conflictField = "chapterIndex"
+            conflictType = ConflictType.HISTORY,
+            localData = localHistory,
+            remoteData = remoteHistory,
+            conflictField = "readingProgress"
         )
 
         // Act
@@ -27,20 +27,20 @@ class ResolveConflictsUseCaseTest {
         assertTrue(result.isSuccess)
         val resolved = result.getOrThrow()
         assertEquals(1, resolved.size)
-        assertEquals(remoteProgress, resolved[0])
+        assertEquals(remoteHistory, resolved[0])
     }
 
     @Test
     fun `invoke with LOCAL_WINS should always choose local data`() {
         // Arrange
         val useCase = ResolveConflictsUseCase()
-        val localProgress = createReadingProgress(lastReadAt = 1000L, chapterIndex = 5)
-        val remoteProgress = createReadingProgress(lastReadAt = 2000L, chapterIndex = 7)
+        val localHistory = createHistory(lastRead = 1000L, readingProgress = 0.5)
+        val remoteHistory = createHistory(lastRead = 2000L, readingProgress = 0.7)
         val conflict = DataConflict(
-            conflictType = ConflictType.READING_PROGRESS,
-            localData = localProgress,
-            remoteData = remoteProgress,
-            conflictField = "chapterIndex"
+            conflictType = ConflictType.HISTORY,
+            localData = localHistory,
+            remoteData = remoteHistory,
+            conflictField = "readingProgress"
         )
 
         // Act
@@ -50,20 +50,20 @@ class ResolveConflictsUseCaseTest {
         assertTrue(result.isSuccess)
         val resolved = result.getOrThrow()
         assertEquals(1, resolved.size)
-        assertEquals(localProgress, resolved[0])
+        assertEquals(localHistory, resolved[0])
     }
 
     @Test
     fun `invoke with REMOTE_WINS should always choose remote data`() {
         // Arrange
         val useCase = ResolveConflictsUseCase()
-        val localProgress = createReadingProgress(lastReadAt = 2000L, chapterIndex = 7)
-        val remoteProgress = createReadingProgress(lastReadAt = 1000L, chapterIndex = 5)
+        val localHistory = createHistory(lastRead = 2000L, readingProgress = 0.7)
+        val remoteHistory = createHistory(lastRead = 1000L, readingProgress = 0.5)
         val conflict = DataConflict(
-            conflictType = ConflictType.READING_PROGRESS,
-            localData = localProgress,
-            remoteData = remoteProgress,
-            conflictField = "chapterIndex"
+            conflictType = ConflictType.HISTORY,
+            localData = localHistory,
+            remoteData = remoteHistory,
+            conflictField = "readingProgress"
         )
 
         // Act
@@ -73,20 +73,20 @@ class ResolveConflictsUseCaseTest {
         assertTrue(result.isSuccess)
         val resolved = result.getOrThrow()
         assertEquals(1, resolved.size)
-        assertEquals(remoteProgress, resolved[0])
+        assertEquals(remoteHistory, resolved[0])
     }
 
     @Test
-    fun `invoke with MERGE should merge reading progress by choosing furthest chapter`() {
+    fun `invoke with MERGE should merge history by choosing furthest progress`() {
         // Arrange
         val useCase = ResolveConflictsUseCase()
-        val localProgress = createReadingProgress(lastReadAt = 1000L, chapterIndex = 5)
-        val remoteProgress = createReadingProgress(lastReadAt = 2000L, chapterIndex = 7)
+        val localHistory = createHistory(lastRead = 1000L, readingProgress = 0.5)
+        val remoteHistory = createHistory(lastRead = 2000L, readingProgress = 0.7)
         val conflict = DataConflict(
-            conflictType = ConflictType.READING_PROGRESS,
-            localData = localProgress,
-            remoteData = remoteProgress,
-            conflictField = "chapterIndex"
+            conflictType = ConflictType.HISTORY,
+            localData = localHistory,
+            remoteData = remoteHistory,
+            conflictField = "readingProgress"
         )
 
         // Act
@@ -96,21 +96,21 @@ class ResolveConflictsUseCaseTest {
         assertTrue(result.isSuccess)
         val resolved = result.getOrThrow()
         assertEquals(1, resolved.size)
-        val mergedProgress = resolved[0] as ReadingProgressData
-        assertEquals(7, mergedProgress.chapterIndex) // Furthest chapter
+        val mergedHistory = resolved[0] as HistorySyncData
+        assertEquals(0.7, mergedHistory.readingProgress) // Furthest progress
     }
 
     @Test
     fun `invoke with MANUAL should return failure requiring user intervention`() {
         // Arrange
         val useCase = ResolveConflictsUseCase()
-        val localProgress = createReadingProgress(lastReadAt = 1000L, chapterIndex = 5)
-        val remoteProgress = createReadingProgress(lastReadAt = 2000L, chapterIndex = 7)
+        val localHistory = createHistory(lastRead = 1000L, readingProgress = 0.5)
+        val remoteHistory = createHistory(lastRead = 2000L, readingProgress = 0.7)
         val conflict = DataConflict(
-            conflictType = ConflictType.READING_PROGRESS,
-            localData = localProgress,
-            remoteData = remoteProgress,
-            conflictField = "chapterIndex"
+            conflictType = ConflictType.HISTORY,
+            localData = localHistory,
+            remoteData = remoteHistory,
+            conflictField = "readingProgress"
         )
 
         // Act
@@ -139,16 +139,16 @@ class ResolveConflictsUseCaseTest {
         val useCase = ResolveConflictsUseCase()
         val conflicts = listOf(
             DataConflict(
-                conflictType = ConflictType.READING_PROGRESS,
-                localData = createReadingProgress(lastReadAt = 1000L, chapterIndex = 5),
-                remoteData = createReadingProgress(lastReadAt = 2000L, chapterIndex = 7),
-                conflictField = "chapterIndex"
+                conflictType = ConflictType.HISTORY,
+                localData = createHistory(lastRead = 1000L, readingProgress = 0.5),
+                remoteData = createHistory(lastRead = 2000L, readingProgress = 0.7),
+                conflictField = "readingProgress"
             ),
             DataConflict(
-                conflictType = ConflictType.BOOKMARK,
-                localData = createBookmark(createdAt = 1000L, position = 100),
-                remoteData = createBookmark(createdAt = 2000L, position = 200),
-                conflictField = "position"
+                conflictType = ConflictType.CHAPTER,
+                localData = createChapter(dateFetch = 1000L, read = true),
+                remoteData = createChapter(dateFetch = 2000L, read = false),
+                conflictField = "read"
             )
         )
 
@@ -160,25 +160,30 @@ class ResolveConflictsUseCaseTest {
         assertEquals(2, result.getOrThrow().size)
     }
 
-    private fun createReadingProgress(lastReadAt: Long, chapterIndex: Int): ReadingProgressData {
-        return ReadingProgressData(
-            bookId = 123L,
-            chapterId = 456L,
-            chapterIndex = chapterIndex,
-            offset = 1024,
-            progress = 0.75f,
-            lastReadAt = lastReadAt
+    private fun createHistory(lastRead: Long, readingProgress: Double): HistorySyncData {
+        return HistorySyncData(
+            chapterGlobalId = "1|ch1",
+            lastRead = lastRead,
+            timeRead = 5000L,
+            readingProgress = readingProgress
         )
     }
 
-    private fun createBookmark(createdAt: Long, position: Int): BookmarkData {
-        return BookmarkData(
-            bookmarkId = 1L,
-            bookId = 123L,
-            chapterId = 456L,
-            position = position,
-            note = "Test note",
-            createdAt = createdAt
+    private fun createChapter(dateFetch: Long, read: Boolean): ChapterSyncData {
+        return ChapterSyncData(
+            globalId = "1|ch1",
+            bookGlobalId = "1|book1",
+            key = "ch1",
+            name = "Chapter 1",
+            read = read,
+            bookmark = false,
+            lastPageRead = 10,
+            sourceOrder = 1,
+            number = 1.0f,
+            dateUpload = 1000L,
+            dateFetch = dateFetch,
+            translator = "",
+            content = "[]"
         )
     }
 }

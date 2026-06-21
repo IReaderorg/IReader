@@ -17,10 +17,10 @@ import kotlin.test.assertEquals
  * Following TDD methodology: Write tests first, then implement.
  */
 class TTSColorPreferencesUseCaseTest {
-    
+
     private class MockPreferenceStore : PreferenceStore {
         private val longValues = mutableMapOf<String, Long>()
-        
+
         override fun getLong(key: String, defaultValue: Long): Preference<Long> {
             return object : Preference<Long> {
                 override fun key(): String = key
@@ -33,27 +33,27 @@ class TTSColorPreferencesUseCaseTest {
                 override fun stateIn(scope: CoroutineScope): StateFlow<Long> = MutableStateFlow(get())
             }
         }
-        
+
         override fun getBoolean(key: String, defaultValue: Boolean): Preference<Boolean> {
             throw UnsupportedOperationException("Not needed for these tests")
         }
-        
+
         override fun getString(key: String, defaultValue: String): Preference<String> {
             throw UnsupportedOperationException("Not needed for these tests")
         }
-        
+
         override fun getInt(key: String, defaultValue: Int): Preference<Int> {
             throw UnsupportedOperationException("Not needed for these tests")
         }
-        
+
         override fun getFloat(key: String, defaultValue: Float): Preference<Float> {
             throw UnsupportedOperationException("Not needed for these tests")
         }
-        
+
         override fun getStringSet(key: String, defaultValue: Set<String>): Preference<Set<String>> {
             throw UnsupportedOperationException("Not needed for these tests")
         }
-        
+
         override fun <T> getObject(
             key: String,
             defaultValue: T,
@@ -62,7 +62,7 @@ class TTSColorPreferencesUseCaseTest {
         ): Preference<T> {
             throw UnsupportedOperationException("Not needed for these tests")
         }
-        
+
         override fun <T> getJsonObject(
             key: String,
             defaultValue: T,
@@ -71,103 +71,94 @@ class TTSColorPreferencesUseCaseTest {
         ): Preference<T> {
             throw UnsupportedOperationException("Not needed for these tests")
         }
-        
-        override fun <T : Enum<T>> getEnum(
-            key: String,
-            defaultValue: T,
-            serializer: (T) -> String,
-            deserializer: (String) -> T
-        ): Preference<T> {
-            throw UnsupportedOperationException("Not needed for these tests")
-        }
     }
-    
+
     private val preferenceStore = MockPreferenceStore()
     private val readerPreferences = ReaderPreferences(preferenceStore)
-    private val ttsPreferencesUseCase = TTSPreferencesUseCase(readerPreferences, null)
-    
+    private val ttsPreferencesUseCase = TTSPreferencesUseCase(readerPreferences)
+
     @Test
     fun `getCurrentParagraphColor should return default white color`() {
         // Arrange & Act
         val result = ttsPreferencesUseCase.getCurrentParagraphColor()
-        
+
         // Assert
         assertEquals(0xFFFFFFFF, result, "Default current paragraph color should be white")
     }
-    
+
     @Test
     fun `getCurrentParagraphHighlightColor should return default transparent color`() {
         // Arrange & Act
         val result = ttsPreferencesUseCase.getCurrentParagraphHighlightColor()
-        
+
         // Assert
         assertEquals(0x00000000, result, "Default highlight color should be transparent")
     }
-    
+
     @Test
     fun `getOtherTextColor should return default gray color`() {
         // Arrange & Act
         val result = ttsPreferencesUseCase.getOtherTextColor()
-        
+
         // Assert
         assertEquals(0xFF808080, result, "Default other text color should be gray")
     }
-    
+
     @Test
     fun `getCurrentParagraphColor should return custom color after setting`() {
         // Arrange
         val customColor = 0xFF00FF00L // Green
         readerPreferences.ttsCurrentParagraphColor().set(customColor)
-        
+
         // Act
         val result = ttsPreferencesUseCase.getCurrentParagraphColor()
-        
+
         // Assert
         assertEquals(customColor, result, "Should return custom current paragraph color")
     }
-    
+
     @Test
     fun `getCurrentParagraphHighlightColor should return custom color after setting`() {
         // Arrange
         val customColor = 0x80FFFF00L // Semi-transparent yellow
         readerPreferences.ttsCurrentParagraphHighlightColor().set(customColor)
-        
+
         // Act
         val result = ttsPreferencesUseCase.getCurrentParagraphHighlightColor()
-        
+
         // Assert
         assertEquals(customColor, result, "Should return custom highlight color")
     }
-    
+
     @Test
     fun `getOtherTextColor should return custom color after setting`() {
         // Arrange
         val customColor = 0xFF666666L // Darker gray
         readerPreferences.ttsOtherTextColor().set(customColor)
-        
+
         // Act
         val result = ttsPreferencesUseCase.getOtherTextColor()
-        
+
         // Assert
         assertEquals(customColor, result, "Should return custom other text color")
     }
-    
+
     @Test
     fun `all color preferences should work independently`() {
         // Arrange
         val currentColor = 0xFFFFFFFF // White
         val highlightColor = 0x80FFFF00L // Semi-transparent yellow
         val otherColor = 0xFF808080 // Gray
-        
+
         readerPreferences.ttsCurrentParagraphColor().set(currentColor)
         readerPreferences.ttsCurrentParagraphHighlightColor().set(highlightColor)
         readerPreferences.ttsOtherTextColor().set(otherColor)
-        
+
         // Act
         val resultCurrent = ttsPreferencesUseCase.getCurrentParagraphColor()
         val resultHighlight = ttsPreferencesUseCase.getCurrentParagraphHighlightColor()
         val resultOther = ttsPreferencesUseCase.getOtherTextColor()
-        
+
         // Assert
         assertEquals(currentColor, resultCurrent, "Current paragraph color should be white")
         assertEquals(highlightColor, resultHighlight, "Highlight color should be semi-transparent yellow")

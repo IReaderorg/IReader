@@ -9,55 +9,67 @@ class BookSyncDataTest {
     @Test
     fun `BookSyncData should be created with valid data`() {
         // Arrange
-        val bookId = 123L
+        val globalId = "source-1|book-key-123"
         val title = "Test Book"
         val author = "Test Author"
         val coverUrl = "https://example.com/cover.jpg"
         val sourceId = "source-1"
-        val sourceUrl = "https://example.com/book/123"
+        val key = "book-key-123"
+        val favorite = true
         val addedAt = System.currentTimeMillis()
         val updatedAt = System.currentTimeMillis()
-        val fileHash = "abc123def456"
+        val description = "A test book description"
+        val genres = listOf("Fiction", "Adventure")
+        val status = 1L
 
         // Act
         val bookData = BookSyncData(
-            bookId = bookId,
+            globalId = globalId,
             title = title,
             author = author,
             coverUrl = coverUrl,
             sourceId = sourceId,
-            sourceUrl = sourceUrl,
+            key = key,
+            favorite = favorite,
             addedAt = addedAt,
             updatedAt = updatedAt,
-            fileHash = fileHash
+            description = description,
+            genres = genres,
+            status = status
         )
 
         // Assert
-        assertEquals(bookId, bookData.bookId)
+        assertEquals(globalId, bookData.globalId)
         assertEquals(title, bookData.title)
         assertEquals(author, bookData.author)
         assertEquals(coverUrl, bookData.coverUrl)
         assertEquals(sourceId, bookData.sourceId)
-        assertEquals(sourceUrl, bookData.sourceUrl)
+        assertEquals(key, bookData.key)
+        assertEquals(favorite, bookData.favorite)
         assertEquals(addedAt, bookData.addedAt)
         assertEquals(updatedAt, bookData.updatedAt)
-        assertEquals(fileHash, bookData.fileHash)
+        assertEquals(description, bookData.description)
+        assertEquals(genres, bookData.genres)
+        assertEquals(status, bookData.status)
     }
 
     @Test
-    fun `BookSyncData should reject negative bookId`() {
+    fun `BookSyncData should reject blank globalId`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
             BookSyncData(
-                bookId = -1L,
+                globalId = "",
                 title = "Test Book",
                 author = "Test Author",
                 coverUrl = "https://example.com/cover.jpg",
                 sourceId = "source-1",
-                sourceUrl = "https://example.com/book/123",
+                key = "book-key",
+                favorite = false,
                 addedAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis(),
-                fileHash = "abc123"
+                description = "Description",
+                genres = emptyList(),
+                status = 0L
             )
         }
     }
@@ -67,15 +79,60 @@ class BookSyncDataTest {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
             BookSyncData(
-                bookId = 123L,
+                globalId = "source-1|book-key",
                 title = "",
                 author = "Test Author",
                 coverUrl = "https://example.com/cover.jpg",
                 sourceId = "source-1",
-                sourceUrl = "https://example.com/book/123",
+                key = "book-key",
+                favorite = false,
                 addedAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis(),
-                fileHash = "abc123"
+                description = "Description",
+                genres = emptyList(),
+                status = 0L
+            )
+        }
+    }
+
+    @Test
+    fun `BookSyncData should reject blank sourceId`() {
+        // Arrange & Act & Assert
+        assertFailsWith<IllegalArgumentException> {
+            BookSyncData(
+                globalId = "source-1|book-key",
+                title = "Test Book",
+                author = "Test Author",
+                coverUrl = "https://example.com/cover.jpg",
+                sourceId = "",
+                key = "book-key",
+                favorite = false,
+                addedAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+                description = "Description",
+                genres = emptyList(),
+                status = 0L
+            )
+        }
+    }
+
+    @Test
+    fun `BookSyncData should reject blank key`() {
+        // Arrange & Act & Assert
+        assertFailsWith<IllegalArgumentException> {
+            BookSyncData(
+                globalId = "source-1|book-key",
+                title = "Test Book",
+                author = "Test Author",
+                coverUrl = "https://example.com/cover.jpg",
+                sourceId = "source-1",
+                key = "",
+                favorite = false,
+                addedAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+                description = "Description",
+                genres = emptyList(),
+                status = 0L
             )
         }
     }
@@ -85,15 +142,18 @@ class BookSyncDataTest {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
             BookSyncData(
-                bookId = 123L,
+                globalId = "source-1|book-key",
                 title = "Test Book",
                 author = "Test Author",
                 coverUrl = "https://example.com/cover.jpg",
                 sourceId = "source-1",
-                sourceUrl = "https://example.com/book/123",
+                key = "book-key",
+                favorite = false,
                 addedAt = -1L,
                 updatedAt = System.currentTimeMillis(),
-                fileHash = "abc123"
+                description = "Description",
+                genres = emptyList(),
+                status = 0L
             )
         }
     }
@@ -103,15 +163,18 @@ class BookSyncDataTest {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
             BookSyncData(
-                bookId = 123L,
+                globalId = "source-1|book-key",
                 title = "Test Book",
                 author = "Test Author",
                 coverUrl = "https://example.com/cover.jpg",
                 sourceId = "source-1",
-                sourceUrl = "https://example.com/book/123",
+                key = "book-key",
+                favorite = false,
                 addedAt = System.currentTimeMillis(),
                 updatedAt = -1L,
-                fileHash = "abc123"
+                description = "Description",
+                genres = emptyList(),
+                status = 0L
             )
         }
     }
@@ -120,15 +183,18 @@ class BookSyncDataTest {
     fun `BookSyncData should allow null coverUrl`() {
         // Arrange & Act
         val bookData = BookSyncData(
-            bookId = 123L,
+            globalId = "source-1|book-key",
             title = "Test Book",
             author = "Test Author",
             coverUrl = null,
             sourceId = "source-1",
-            sourceUrl = "https://example.com/book/123",
+            key = "book-key",
+            favorite = false,
             addedAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis(),
-            fileHash = "abc123"
+            description = "Description",
+            genres = emptyList(),
+            status = 0L
         )
 
         // Assert
@@ -136,21 +202,24 @@ class BookSyncDataTest {
     }
 
     @Test
-    fun `BookSyncData should allow null fileHash for books without files`() {
+    fun `BookSyncData should allow empty genres list`() {
         // Arrange & Act
         val bookData = BookSyncData(
-            bookId = 123L,
+            globalId = "source-1|book-key",
             title = "Test Book",
             author = "Test Author",
             coverUrl = "https://example.com/cover.jpg",
             sourceId = "source-1",
-            sourceUrl = "https://example.com/book/123",
+            key = "book-key",
+            favorite = false,
             addedAt = System.currentTimeMillis(),
             updatedAt = System.currentTimeMillis(),
-            fileHash = null
+            description = "Description",
+            genres = emptyList(),
+            status = 0L
         )
 
         // Assert
-        assertEquals(null, bookData.fileHash)
+        assertEquals(emptyList(), bookData.genres)
     }
 }

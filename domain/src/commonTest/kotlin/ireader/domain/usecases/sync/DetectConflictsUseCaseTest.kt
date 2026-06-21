@@ -11,8 +11,8 @@ class DetectConflictsUseCaseTest {
     fun `invoke should return empty list when no conflicts exist`() {
         // Arrange
         val useCase = DetectConflictsUseCase()
-        val localData = createSyncData(lastReadAt = 1000L)
-        val remoteData = createSyncData(lastReadAt = 1000L)
+        val localData = createSyncData()
+        val remoteData = createSyncData()
 
         // Act
         val conflicts = useCase(localData, remoteData)
@@ -22,26 +22,62 @@ class DetectConflictsUseCaseTest {
     }
 
     @Test
-    fun `invoke should detect reading progress conflict when timestamps differ`() {
+    fun `invoke should detect history conflict when timestamps and progress differ`() {
         // Arrange
         val useCase = DetectConflictsUseCase()
-        val localData = createSyncData(lastReadAt = 1000L, chapterIndex = 5)
-        val remoteData = createSyncData(lastReadAt = 2000L, chapterIndex = 7)
+        val localData = createSyncData(
+            history = listOf(
+                HistorySyncData(
+                    chapterGlobalId = "1|ch1",
+                    lastRead = 1000L,
+                    timeRead = 5000L,
+                    readingProgress = 0.5
+                )
+            )
+        )
+        val remoteData = createSyncData(
+            history = listOf(
+                HistorySyncData(
+                    chapterGlobalId = "1|ch1",
+                    lastRead = 2000L,
+                    timeRead = 6000L,
+                    readingProgress = 0.7
+                )
+            )
+        )
 
         // Act
         val conflicts = useCase(localData, remoteData)
 
         // Assert
         assertEquals(1, conflicts.size)
-        assertEquals(ConflictType.READING_PROGRESS, conflicts[0].conflictType)
+        assertEquals(ConflictType.HISTORY, conflicts[0].conflictType)
     }
 
     @Test
     fun `invoke should not detect conflict when only timestamps differ but data is same`() {
         // Arrange
         val useCase = DetectConflictsUseCase()
-        val localData = createSyncData(lastReadAt = 1000L, chapterIndex = 5)
-        val remoteData = createSyncData(lastReadAt = 2000L, chapterIndex = 5)
+        val localData = createSyncData(
+            history = listOf(
+                HistorySyncData(
+                    chapterGlobalId = "1|ch1",
+                    lastRead = 1000L,
+                    timeRead = 5000L,
+                    readingProgress = 0.5
+                )
+            )
+        )
+        val remoteData = createSyncData(
+            history = listOf(
+                HistorySyncData(
+                    chapterGlobalId = "1|ch1",
+                    lastRead = 2000L,
+                    timeRead = 6000L,
+                    readingProgress = 0.5
+                )
+            )
+        )
 
         // Act
         val conflicts = useCase(localData, remoteData)
@@ -51,24 +87,46 @@ class DetectConflictsUseCaseTest {
     }
 
     @Test
-    fun `invoke should detect bookmark conflict when positions differ`() {
+    fun `invoke should detect chapter conflict when read status differs`() {
         // Arrange
         val useCase = DetectConflictsUseCase()
-        val localData = SyncData(
-            books = emptyList(),
-            readingProgress = emptyList(),
-            bookmarks = listOf(
-                BookmarkData(1L, 123L, 456L, 1000, "Note 1", 1000L)
-            ),
-            metadata = createMetadata()
+        val localData = createSyncData(
+            chapters = listOf(
+                ChapterSyncData(
+                    globalId = "1|ch1",
+                    bookGlobalId = "1|book1",
+                    key = "ch1",
+                    name = "Chapter 1",
+                    read = true,
+                    bookmark = false,
+                    lastPageRead = 10,
+                    sourceOrder = 1,
+                    number = 1.0f,
+                    dateUpload = 1000L,
+                    dateFetch = 1000L,
+                    translator = "",
+                    content = "[]"
+                )
+            )
         )
-        val remoteData = SyncData(
-            books = emptyList(),
-            readingProgress = emptyList(),
-            bookmarks = listOf(
-                BookmarkData(1L, 123L, 456L, 2000, "Note 1", 2000L)
-            ),
-            metadata = createMetadata()
+        val remoteData = createSyncData(
+            chapters = listOf(
+                ChapterSyncData(
+                    globalId = "1|ch1",
+                    bookGlobalId = "1|book1",
+                    key = "ch1",
+                    name = "Chapter 1",
+                    read = false,
+                    bookmark = false,
+                    lastPageRead = 10,
+                    sourceOrder = 1,
+                    number = 1.0f,
+                    dateUpload = 1000L,
+                    dateFetch = 2000L,
+                    translator = "",
+                    content = "[]"
+                )
+            )
         )
 
         // Act
@@ -76,28 +134,48 @@ class DetectConflictsUseCaseTest {
 
         // Assert
         assertEquals(1, conflicts.size)
-        assertEquals(ConflictType.BOOKMARK, conflicts[0].conflictType)
+        assertEquals(ConflictType.CHAPTER, conflicts[0].conflictType)
     }
 
     @Test
     fun `invoke should detect book metadata conflict when update times differ`() {
         // Arrange
         val useCase = DetectConflictsUseCase()
-        val localData = SyncData(
+        val localData = createSyncData(
             books = listOf(
-                BookSyncData(123L, "Book", "Author", null, "src", "url", 1000L, 1000L, "hash1")
-            ),
-            readingProgress = emptyList(),
-            bookmarks = emptyList(),
-            metadata = createMetadata()
+                BookSyncData(
+                    globalId = "1|book1",
+                    title = "Book",
+                    author = "Author",
+                    coverUrl = null,
+                    sourceId = "1",
+                    key = "book1",
+                    favorite = false,
+                    addedAt = 1000L,
+                    updatedAt = 1000L,
+                    description = "desc",
+                    genres = emptyList(),
+                    status = 1L
+                )
+            )
         )
-        val remoteData = SyncData(
+        val remoteData = createSyncData(
             books = listOf(
-                BookSyncData(123L, "Book Updated", "Author", null, "src", "url", 1000L, 2000L, "hash2")
-            ),
-            readingProgress = emptyList(),
-            bookmarks = emptyList(),
-            metadata = createMetadata()
+                BookSyncData(
+                    globalId = "1|book1",
+                    title = "Book Updated",
+                    author = "Author",
+                    coverUrl = null,
+                    sourceId = "1",
+                    key = "book1",
+                    favorite = false,
+                    addedAt = 1000L,
+                    updatedAt = 2000L,
+                    description = "desc",
+                    genres = emptyList(),
+                    status = 1L
+                )
+            )
         )
 
         // Act
@@ -112,29 +190,91 @@ class DetectConflictsUseCaseTest {
     fun `invoke should detect multiple conflicts across different types`() {
         // Arrange
         val useCase = DetectConflictsUseCase()
-        val localData = SyncData(
+        val localData = createSyncData(
             books = listOf(
-                BookSyncData(123L, "Book", "Author", null, "src", "url", 1000L, 1000L, "hash1")
+                BookSyncData(
+                    globalId = "1|book1",
+                    title = "Book",
+                    author = "Author",
+                    coverUrl = null,
+                    sourceId = "1",
+                    key = "book1",
+                    favorite = false,
+                    addedAt = 1000L,
+                    updatedAt = 1000L,
+                    description = "desc",
+                    genres = emptyList(),
+                    status = 1L
+                )
             ),
-            readingProgress = listOf(
-                ReadingProgressData(123L, 456L, 5, 1024, 0.5f, 1000L)
+            chapters = listOf(
+                ChapterSyncData(
+                    globalId = "1|ch1",
+                    bookGlobalId = "1|book1",
+                    key = "ch1",
+                    name = "Chapter 1",
+                    read = true,
+                    bookmark = false,
+                    lastPageRead = 10,
+                    sourceOrder = 1,
+                    number = 1.0f,
+                    dateUpload = 1000L,
+                    dateFetch = 1000L,
+                    translator = "",
+                    content = "[]"
+                )
             ),
-            bookmarks = listOf(
-                BookmarkData(1L, 123L, 456L, 1000, "Note", 1000L)
-            ),
-            metadata = createMetadata()
+            history = listOf(
+                HistorySyncData(
+                    chapterGlobalId = "1|ch1",
+                    lastRead = 1000L,
+                    timeRead = 5000L,
+                    readingProgress = 0.5
+                )
+            )
         )
-        val remoteData = SyncData(
+        val remoteData = createSyncData(
             books = listOf(
-                BookSyncData(123L, "Book Updated", "Author", null, "src", "url", 1000L, 2000L, "hash2")
+                BookSyncData(
+                    globalId = "1|book1",
+                    title = "Book Updated",
+                    author = "Author",
+                    coverUrl = null,
+                    sourceId = "1",
+                    key = "book1",
+                    favorite = false,
+                    addedAt = 1000L,
+                    updatedAt = 2000L,
+                    description = "desc",
+                    genres = emptyList(),
+                    status = 1L
+                )
             ),
-            readingProgress = listOf(
-                ReadingProgressData(123L, 456L, 7, 2048, 0.7f, 2000L)
+            chapters = listOf(
+                ChapterSyncData(
+                    globalId = "1|ch1",
+                    bookGlobalId = "1|book1",
+                    key = "ch1",
+                    name = "Chapter 1",
+                    read = false,
+                    bookmark = false,
+                    lastPageRead = 10,
+                    sourceOrder = 1,
+                    number = 1.0f,
+                    dateUpload = 1000L,
+                    dateFetch = 2000L,
+                    translator = "",
+                    content = "[]"
+                )
             ),
-            bookmarks = listOf(
-                BookmarkData(1L, 123L, 456L, 2000, "Note Updated", 2000L)
-            ),
-            metadata = createMetadata()
+            history = listOf(
+                HistorySyncData(
+                    chapterGlobalId = "1|ch1",
+                    lastRead = 2000L,
+                    timeRead = 6000L,
+                    readingProgress = 0.7
+                )
+            )
         )
 
         // Act
@@ -143,27 +283,19 @@ class DetectConflictsUseCaseTest {
         // Assert
         assertEquals(3, conflicts.size)
         assertTrue(conflicts.any { it.conflictType == ConflictType.BOOK_METADATA })
-        assertTrue(conflicts.any { it.conflictType == ConflictType.READING_PROGRESS })
-        assertTrue(conflicts.any { it.conflictType == ConflictType.BOOKMARK })
+        assertTrue(conflicts.any { it.conflictType == ConflictType.CHAPTER })
+        assertTrue(conflicts.any { it.conflictType == ConflictType.HISTORY })
     }
 
     private fun createSyncData(
-        lastReadAt: Long,
-        chapterIndex: Int = 5
+        books: List<BookSyncData> = emptyList(),
+        chapters: List<ChapterSyncData> = emptyList(),
+        history: List<HistorySyncData> = emptyList()
     ): SyncData {
         return SyncData(
-            books = emptyList(),
-            readingProgress = listOf(
-                ReadingProgressData(
-                    bookId = 123L,
-                    chapterId = 456L,
-                    chapterIndex = chapterIndex,
-                    offset = 1024,
-                    progress = 0.75f,
-                    lastReadAt = lastReadAt
-                )
-            ),
-            bookmarks = emptyList(),
+            books = books,
+            chapters = chapters,
+            history = history,
             metadata = createMetadata()
         )
     }

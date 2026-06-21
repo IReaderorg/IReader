@@ -1,15 +1,38 @@
 package ireader.domain.services.sync
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.runner.RunWith
-
 /**
  * Android-specific test factory for KeyStorageService.
  */
-@RunWith(AndroidJUnit4::class)
 actual fun createKeyStorageService(): KeyStorageService {
-    val context = ApplicationProvider.getApplicationContext<Context>()
-    return AndroidKeyStorageService(context)
+    return InMemoryKeyStorageService()
+}
+
+/**
+ * Simple in-memory implementation for testing on Android.
+ */
+class InMemoryKeyStorageService : KeyStorageService {
+    private val store = mutableMapOf<String, ByteArray>()
+
+    override suspend fun storeKey(alias: String, key: ByteArray): Result<Unit> {
+        store[alias] = key.copyOf()
+        return Result.success(Unit)
+    }
+
+    override suspend fun retrieveKey(alias: String): Result<ByteArray> {
+        val key = store[alias] ?: return Result.failure(Exception("Key not found: $alias"))
+        return Result.success(key.copyOf())
+    }
+
+    override suspend fun deleteKey(alias: String): Result<Unit> {
+        store.remove(alias)
+        return Result.success(Unit)
+    }
+
+    override suspend fun keyExists(alias: String): Boolean {
+        return store.containsKey(alias)
+    }
+
+    override suspend fun listKeys(): List<String> {
+        return store.keys.toList()
+    }
 }

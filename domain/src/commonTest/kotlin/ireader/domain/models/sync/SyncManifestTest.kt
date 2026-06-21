@@ -142,12 +142,12 @@ class SyncManifestItemTest {
     fun `SyncItemType should have all required types`() {
         // Arrange & Act
         val bookType = SyncItemType.BOOK
-        val progressType = SyncItemType.READING_PROGRESS
-        val bookmarkType = SyncItemType.BOOKMARK
+        val chapterType = SyncItemType.CHAPTER
+        val historyType = SyncItemType.HISTORY
 
         // Assert
         assertTrue(SyncItemType.values().contains(SyncItemType.BOOK))
-        assertTrue(SyncItemType.values().contains(SyncItemType.READING_PROGRESS))
-        assertTrue(SyncItemType.values().contains(SyncItemType.BOOKMARK))
+        assertTrue(SyncItemType.values().contains(SyncItemType.CHAPTER))
+        assertTrue(SyncItemType.values().contains(SyncItemType.HISTORY))
     }
 }

@@ -7,138 +7,274 @@ import kotlin.test.assertFailsWith
 class BookmarkDataTest {
 
     @Test
-    fun `BookmarkData should be created with valid data`() {
+    fun `ChapterSyncData should be created with valid data`() {
         // Arrange
-        val bookmarkId = 789L
-        val bookId = 123L
-        val chapterId = 456L
-        val position = 1024
-        val note = "Important quote"
-        val createdAt = System.currentTimeMillis()
+        val globalId = "source-1|chapter-key-123"
+        val bookGlobalId = "source-1|book-key-456"
+        val key = "chapter-key-123"
+        val name = "Chapter 1"
+        val read = true
+        val bookmark = false
+        val lastPageRead = 5L
+        val sourceOrder = 1L
+        val number = 1.0f
+        val dateUpload = System.currentTimeMillis()
+        val dateFetch = System.currentTimeMillis()
+        val translator = "Translator Name"
+        val content = """[{"type":"text","value":"Page 1 content"}]"""
 
         // Act
-        val bookmarkData = BookmarkData(
-            bookmarkId = bookmarkId,
-            bookId = bookId,
-            chapterId = chapterId,
-            position = position,
-            note = note,
-            createdAt = createdAt
+        val chapterData = ChapterSyncData(
+            globalId = globalId,
+            bookGlobalId = bookGlobalId,
+            key = key,
+            name = name,
+            read = read,
+            bookmark = bookmark,
+            lastPageRead = lastPageRead,
+            sourceOrder = sourceOrder,
+            number = number,
+            dateUpload = dateUpload,
+            dateFetch = dateFetch,
+            translator = translator,
+            content = content
         )
 
         // Assert
-        assertEquals(bookmarkId, bookmarkData.bookmarkId)
-        assertEquals(bookId, bookmarkData.bookId)
-        assertEquals(chapterId, bookmarkData.chapterId)
-        assertEquals(position, bookmarkData.position)
-        assertEquals(note, bookmarkData.note)
-        assertEquals(createdAt, bookmarkData.createdAt)
+        assertEquals(globalId, chapterData.globalId)
+        assertEquals(bookGlobalId, chapterData.bookGlobalId)
+        assertEquals(key, chapterData.key)
+        assertEquals(name, chapterData.name)
+        assertEquals(read, chapterData.read)
+        assertEquals(bookmark, chapterData.bookmark)
+        assertEquals(lastPageRead, chapterData.lastPageRead)
+        assertEquals(sourceOrder, chapterData.sourceOrder)
+        assertEquals(number, chapterData.number)
+        assertEquals(dateUpload, chapterData.dateUpload)
+        assertEquals(dateFetch, chapterData.dateFetch)
+        assertEquals(translator, chapterData.translator)
+        assertEquals(content, chapterData.content)
     }
 
     @Test
-    fun `BookmarkData should reject negative bookmarkId`() {
+    fun `ChapterSyncData should reject blank globalId`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            BookmarkData(
-                bookmarkId = -1L,
-                bookId = 123L,
-                chapterId = 456L,
-                position = 1024,
-                note = "Test note",
-                createdAt = System.currentTimeMillis()
+            ChapterSyncData(
+                globalId = "",
+                bookGlobalId = "source-1|book-key",
+                key = "chapter-key",
+                name = "Chapter 1",
+                read = false,
+                bookmark = false,
+                lastPageRead = 0L,
+                sourceOrder = 0L,
+                number = 1.0f,
+                dateUpload = System.currentTimeMillis(),
+                dateFetch = System.currentTimeMillis(),
+                translator = "",
+                content = ""
             )
         }
     }
 
     @Test
-    fun `BookmarkData should reject negative bookId`() {
+    fun `ChapterSyncData should reject blank bookGlobalId`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            BookmarkData(
-                bookmarkId = 789L,
-                bookId = -1L,
-                chapterId = 456L,
-                position = 1024,
-                note = "Test note",
-                createdAt = System.currentTimeMillis()
+            ChapterSyncData(
+                globalId = "source-1|chapter-key",
+                bookGlobalId = "",
+                key = "chapter-key",
+                name = "Chapter 1",
+                read = false,
+                bookmark = false,
+                lastPageRead = 0L,
+                sourceOrder = 0L,
+                number = 1.0f,
+                dateUpload = System.currentTimeMillis(),
+                dateFetch = System.currentTimeMillis(),
+                translator = "",
+                content = ""
             )
         }
     }
 
     @Test
-    fun `BookmarkData should reject negative chapterId`() {
+    fun `ChapterSyncData should reject blank key`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            BookmarkData(
-                bookmarkId = 789L,
-                bookId = 123L,
-                chapterId = -1L,
-                position = 1024,
-                note = "Test note",
-                createdAt = System.currentTimeMillis()
+            ChapterSyncData(
+                globalId = "source-1|chapter-key",
+                bookGlobalId = "source-1|book-key",
+                key = "",
+                name = "Chapter 1",
+                read = false,
+                bookmark = false,
+                lastPageRead = 0L,
+                sourceOrder = 0L,
+                number = 1.0f,
+                dateUpload = System.currentTimeMillis(),
+                dateFetch = System.currentTimeMillis(),
+                translator = "",
+                content = ""
             )
         }
     }
 
     @Test
-    fun `BookmarkData should reject negative position`() {
+    fun `ChapterSyncData should reject blank name`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            BookmarkData(
-                bookmarkId = 789L,
-                bookId = 123L,
-                chapterId = 456L,
-                position = -1,
-                note = "Test note",
-                createdAt = System.currentTimeMillis()
+            ChapterSyncData(
+                globalId = "source-1|chapter-key",
+                bookGlobalId = "source-1|book-key",
+                key = "chapter-key",
+                name = "",
+                read = false,
+                bookmark = false,
+                lastPageRead = 0L,
+                sourceOrder = 0L,
+                number = 1.0f,
+                dateUpload = System.currentTimeMillis(),
+                dateFetch = System.currentTimeMillis(),
+                translator = "",
+                content = ""
             )
         }
     }
 
     @Test
-    fun `BookmarkData should reject negative createdAt timestamp`() {
+    fun `ChapterSyncData should reject negative lastPageRead`() {
         // Arrange & Act & Assert
         assertFailsWith<IllegalArgumentException> {
-            BookmarkData(
-                bookmarkId = 789L,
-                bookId = 123L,
-                chapterId = 456L,
-                position = 1024,
-                note = "Test note",
-                createdAt = -1L
+            ChapterSyncData(
+                globalId = "source-1|chapter-key",
+                bookGlobalId = "source-1|book-key",
+                key = "chapter-key",
+                name = "Chapter 1",
+                read = false,
+                bookmark = false,
+                lastPageRead = -1L,
+                sourceOrder = 0L,
+                number = 1.0f,
+                dateUpload = System.currentTimeMillis(),
+                dateFetch = System.currentTimeMillis(),
+                translator = "",
+                content = ""
             )
         }
     }
 
     @Test
-    fun `BookmarkData should allow null note`() {
+    fun `ChapterSyncData should reject negative sourceOrder`() {
+        // Arrange & Act & Assert
+        assertFailsWith<IllegalArgumentException> {
+            ChapterSyncData(
+                globalId = "source-1|chapter-key",
+                bookGlobalId = "source-1|book-key",
+                key = "chapter-key",
+                name = "Chapter 1",
+                read = false,
+                bookmark = false,
+                lastPageRead = 0L,
+                sourceOrder = -1L,
+                number = 1.0f,
+                dateUpload = System.currentTimeMillis(),
+                dateFetch = System.currentTimeMillis(),
+                translator = "",
+                content = ""
+            )
+        }
+    }
+
+    @Test
+    fun `ChapterSyncData should reject negative dateUpload`() {
+        // Arrange & Act & Assert
+        assertFailsWith<IllegalArgumentException> {
+            ChapterSyncData(
+                globalId = "source-1|chapter-key",
+                bookGlobalId = "source-1|book-key",
+                key = "chapter-key",
+                name = "Chapter 1",
+                read = false,
+                bookmark = false,
+                lastPageRead = 0L,
+                sourceOrder = 0L,
+                number = 1.0f,
+                dateUpload = -1L,
+                dateFetch = System.currentTimeMillis(),
+                translator = "",
+                content = ""
+            )
+        }
+    }
+
+    @Test
+    fun `ChapterSyncData should reject negative dateFetch`() {
+        // Arrange & Act & Assert
+        assertFailsWith<IllegalArgumentException> {
+            ChapterSyncData(
+                globalId = "source-1|chapter-key",
+                bookGlobalId = "source-1|book-key",
+                key = "chapter-key",
+                name = "Chapter 1",
+                read = false,
+                bookmark = false,
+                lastPageRead = 0L,
+                sourceOrder = 0L,
+                number = 1.0f,
+                dateUpload = System.currentTimeMillis(),
+                dateFetch = -1L,
+                translator = "",
+                content = ""
+            )
+        }
+    }
+
+    @Test
+    fun `ChapterSyncData should allow empty translator`() {
         // Arrange & Act
-        val bookmarkData = BookmarkData(
-            bookmarkId = 789L,
-            bookId = 123L,
-            chapterId = 456L,
-            position = 1024,
-            note = null,
-            createdAt = System.currentTimeMillis()
+        val chapterData = ChapterSyncData(
+            globalId = "source-1|chapter-key",
+            bookGlobalId = "source-1|book-key",
+            key = "chapter-key",
+            name = "Chapter 1",
+            read = false,
+            bookmark = false,
+            lastPageRead = 0L,
+            sourceOrder = 0L,
+            number = 1.0f,
+            dateUpload = System.currentTimeMillis(),
+            dateFetch = System.currentTimeMillis(),
+            translator = "",
+            content = ""
         )
 
         // Assert
-        assertEquals(null, bookmarkData.note)
+        assertEquals("", chapterData.translator)
     }
 
     @Test
-    fun `BookmarkData should allow empty note`() {
+    fun `ChapterSyncData should allow empty content`() {
         // Arrange & Act
-        val bookmarkData = BookmarkData(
-            bookmarkId = 789L,
-            bookId = 123L,
-            chapterId = 456L,
-            position = 1024,
-            note = "",
-            createdAt = System.currentTimeMillis()
+        val chapterData = ChapterSyncData(
+            globalId = "source-1|chapter-key",
+            bookGlobalId = "source-1|book-key",
+            key = "chapter-key",
+            name = "Chapter 1",
+            read = false,
+            bookmark = false,
+            lastPageRead = 0L,
+            sourceOrder = 0L,
+            number = 1.0f,
+            dateUpload = System.currentTimeMillis(),
+            dateFetch = System.currentTimeMillis(),
+            translator = "",
+            content = ""
         )
 
         // Assert
-        assertEquals("", bookmarkData.note)
+        assertEquals("", chapterData.content)
     }
 }
