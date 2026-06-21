@@ -1,10 +1,25 @@
 package ireader.domain.services.tts_service
 
+import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.services.tts_service.v2.EngineEvent
+import ireader.domain.services.tts_service.v2.PlaybackState
+import ireader.domain.services.tts_service.v2.TTSCommand
+import ireader.domain.services.tts_service.v2.TTSContentLoader
+import ireader.domain.services.tts_service.v2.TTSController
+import ireader.domain.services.tts_service.v2.TTSEngine
+import ireader.domain.services.tts_service.v2.TTSError
 import ireader.core.source.model.Text
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -319,6 +334,218 @@ class TTSChapterChangeTest {
         val shouldAutoNext = isAtEnd && state.autoNextChapter.value && hasNextChapter
         
         assertTrue(shouldAutoNext, "Should trigger auto-next chapter")
+    }
+
+    /**
+     * Regression test for issue #236 (and its duplicate #235).
+     *
+     * Auto-next to a chapter that already has content in the DB must play immediately
+     * and must NOT route into the empty-content watch path or emit TTSError.NoContent.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `auto-next with content plays immediately without NoContent`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(dispatcher)
+        try {
+            val loader = ContentAwareLoader()
+            loader.contentByChapter[1L] = listOf("C1 P1", "C1 P2")
+            loader.contentByChapter[2L] = listOf("C2 P1", "C2 P2") // next chapter already has content
+            loader.nextChapterIdValue = 2L
+
+            val engine = RecordingEngine()
+            val controller = TTSController(
+                contentLoader = loader,
+                nativeEngineFactory = { engine }
+            )
+
+            controller.dispatch(TTSCommand.Initialize)
+            controller.dispatch(TTSCommand.LoadChapter(bookId = 1, chapterId = 1, startParagraph = 0))
+            controller.dispatch(TTSCommand.Play)
+            testScheduler.advanceUntilIdle()
+
+            controller.dispatch(TTSCommand.NextChapter)
+            testScheduler.advanceUntilIdle()
+
+            val state = controller.state.value
+            assertEquals(2L, state.chapter?.id, "Should have advanced to chapter 2")
+            assertTrue(state.hasContent, "Chapter 2 content should be loaded")
+            assertFalse(state.error is TTSError.NoContent, "Must not emit NoContent on a chapter with content")
+            assertEquals(2, state.totalParagraphs, "Chapter 2 paragraphs should be loaded")
+
+            controller.destroy()
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    /**
+     * Regression test for issue #236: auto-next where the next chapter row exists in the
+     * DB but its content has not been fetched yet (empty paragraphs after loadChapter).
+     *
+     * Before the fix, nextChapter() unconditionally called play() on the empty chapter,
+     * which short-circuited on TTSError.NoContent and left playback stuck with a
+     * perpetual loading bar. After the fix, the controller must NOT emit NoContent and
+     * must resume playback once the content arrives in the DB.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `auto-next with empty next chapter does not emit NoContent and resumes when content arrives`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(dispatcher)
+        try {
+            val loader = ContentAwareLoader()
+            loader.contentByChapter[1L] = listOf("C1 P1", "C1 P2")
+            // Chapter 2 exists but its content is not fetched yet: the first loadChapter
+            // (from nextChapter) returns empty, then a later poll returns content,
+            // modelling a remote fetch that lands while the watch is waiting.
+            loader.pendingChapterId = 2L
+            loader.emptyCallsBeforeContent = 1
+            loader.pendingContent = listOf("C2 P1", "C2 P2")
+            loader.nextChapterIdValue = 2L
+
+            val engine = RecordingEngine()
+            val controller = TTSController(
+                contentLoader = loader,
+                nativeEngineFactory = { engine }
+            )
+            controller.dispatch(TTSCommand.SetAutoNextChapter(true))
+            controller.dispatch(TTSCommand.Initialize)
+            controller.dispatch(TTSCommand.LoadChapter(bookId = 1, chapterId = 1, startParagraph = 0))
+            controller.dispatch(TTSCommand.Play)
+            testScheduler.advanceUntilIdle()
+
+            controller.dispatch(TTSCommand.NextChapter)
+            // Process the synchronous part of nextChapter (empty loadChapter + start watch)
+            // without advancing virtual time, so we observe the pre-content-arrival state.
+            testScheduler.runCurrent()
+
+            // The next chapter has no content yet: must NOT have errored with NoContent.
+            val watching = controller.state.value
+            assertFalse(watching.error is TTSError.NoContent, "Must not emit NoContent while content is still being fetched")
+            assertFalse(watching.playbackState == PlaybackState.ERROR, "Must not be in ERROR state while content is being fetched")
+
+            // Let the content-watch poll run; content arrives on the next poll.
+            testScheduler.advanceUntilIdle()
+
+            val resumed = controller.state.value
+            assertEquals(2L, resumed.chapter?.id, "Should have advanced to chapter 2 once content arrived")
+            assertTrue(resumed.hasContent, "Chapter 2 content should now be loaded")
+            assertFalse(resumed.error is TTSError.NoContent, "Must never emit NoContent for an auto-advanced chapter")
+
+            controller.destroy()
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    /**
+     * Regression test for issue #236: auto-next disabled with an empty next chapter must
+     * settle cleanly to STOPPED rather than erroring or staying stuck in LOADING.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `next chapter with empty content and autoNext off settles to stopped`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(dispatcher)
+        try {
+            val loader = ContentAwareLoader()
+            loader.contentByChapter[1L] = listOf("C1 P1", "C1 P2")
+            loader.contentByChapter[2L] = emptyList()
+            loader.nextChapterIdValue = 2L
+
+            val engine = RecordingEngine()
+            val controller = TTSController(
+                contentLoader = loader,
+                nativeEngineFactory = { engine }
+            )
+            controller.dispatch(TTSCommand.SetAutoNextChapter(false))
+            controller.dispatch(TTSCommand.Initialize)
+            controller.dispatch(TTSCommand.LoadChapter(bookId = 1, chapterId = 1, startParagraph = 0))
+            controller.dispatch(TTSCommand.Play)
+            testScheduler.advanceUntilIdle()
+
+            controller.dispatch(TTSCommand.NextChapter)
+            testScheduler.advanceUntilIdle()
+
+            val state = controller.state.value
+            assertFalse(state.error is TTSError.NoContent, "Must not emit NoContent with autoNext off")
+            assertEquals(PlaybackState.STOPPED, state.playbackState, "Should settle to STOPPED")
+
+            controller.destroy()
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    /**
+     * Content-aware mock loader: chapter content is looked up from a mutable map so a test
+     * can model a chapter row that exists with empty content and later gains content.
+     * subscribeChapters emits a MutableStateFlow the test can update to simulate a remote
+     * fetch landing in the DB.
+     */
+    private class ContentAwareLoader : TTSContentLoader {
+        val contentByChapter = mutableMapOf<Long, List<String>>()
+        var nextChapterIdValue: Long? = null
+        var previousChapterIdValue: Long? = null
+        val chaptersFlow = MutableStateFlow<List<Chapter>>(emptyList())
+
+        /**
+         * Models a chapter whose remote content fetch is still in flight: loadChapter
+         * for [pendingChapterId] returns empty until it has been called
+         * [emptyCallsBeforeContent] times, then returns [pendingContent]. This mirrors
+         * TTSContentLoaderImpl, where loadChapter itself drives the remote fetch and
+         * eventually returns content once it lands.
+         */
+        var pendingChapterId: Long? = null
+        var emptyCallsBeforeContent: Int = 0
+        var pendingContent: List<String> = emptyList()
+        private var pendingCalls = 0
+
+        override suspend fun loadChapter(bookId: Long, chapterId: Long): TTSContentLoader.ChapterContent {
+            val paragraphs = if (chapterId == pendingChapterId) {
+                pendingCalls++
+                if (pendingCalls > emptyCallsBeforeContent) pendingContent else emptyList()
+            } else {
+                contentByChapter[chapterId] ?: emptyList()
+            }
+            return TTSContentLoader.ChapterContent(
+                book = Book(id = bookId, title = "Test Book", key = "test", sourceId = 1),
+                chapter = Chapter(id = chapterId, bookId = bookId, key = "ch$chapterId", name = "Chapter $chapterId"),
+                paragraphs = paragraphs
+            )
+        }
+
+        override suspend fun getNextChapterId(bookId: Long, currentChapterId: Long): Long? = nextChapterIdValue
+
+        override suspend fun getPreviousChapterId(bookId: Long, currentChapterId: Long): Long? = previousChapterIdValue
+
+        override fun subscribeChapters(bookId: Long): Flow<List<Chapter>> = chaptersFlow
+    }
+
+    /**
+     * Minimal recording TTS engine for controller-level tests. Uses replay = 1 so the
+     * controller's event collector reliably observes the latest Started event regardless
+     * of the order in which the collector subscribes relative to speak() under the test
+     * dispatcher (with replay = 0 the Started could be emitted before the collector
+     * subscribes and be lost, leaving the controller stuck in LOADING).
+     */
+    private class RecordingEngine : TTSEngine {
+        private val _events = MutableSharedFlow<EngineEvent>(replay = 1, extraBufferCapacity = 10)
+        override val events: Flow<EngineEvent> = _events
+        override val name: String = "Recording Engine"
+
+        override suspend fun speak(text: String, utteranceId: String) {
+            _events.emit(EngineEvent.Started(utteranceId))
+        }
+
+        override fun stop() {}
+        override fun pause() {}
+        override fun resume() {}
+        override fun setSpeed(speed: Float) {}
+        override fun setPitch(pitch: Float) {}
+        override fun isReady() = true
+        override fun release() {}
     }
 
     // Helper function to create test chapters

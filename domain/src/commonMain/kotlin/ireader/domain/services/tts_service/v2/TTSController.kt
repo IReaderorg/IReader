@@ -45,6 +45,13 @@ class TTSController(
     private var gradioConfig: GradioConfig? = initialGradioConfig
     companion object {
         private const val TAG = "TTSController"
+
+        // Bounds for the auto-next empty-content watch (issue #236). Poll loadChapter
+        // with exponential backoff until the next chapter's content is fetched, giving
+        // up after the timeout so the coroutine never leaks.
+        private const val CHAPTER_CONTENT_WATCH_TIMEOUT_MS = 5 * 60 * 1000L
+        private const val CHAPTER_CONTENT_WATCH_INITIAL_DELAY_MS = 500L
+        private const val CHAPTER_CONTENT_WATCH_MAX_DELAY_MS = 5_000L
     }
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -623,7 +630,26 @@ class TTSController(
             if (nextChapterId != null) {
                 Log.debug { "$TAG: Loading next chapter: $nextChapterId" }
                 loadChapter(book.id, nextChapterId, 0)
-                if (wasPlaying) { play() }
+
+                if (_state.value.hasContent) {
+                    // Content is present (already in DB or fetched synchronously by
+                    // loadChapter) — resume playback as before.
+                    if (wasPlaying) { play() }
+                } else if (_state.value.autoNextChapter) {
+                    // The next chapter row exists but its content has not been fetched
+                    // yet (empty paragraphs after loadChapter, e.g. the remote fetch is
+                    // still in flight). Calling play() here would short-circuit on
+                    // TTSError.NoContent and leave playback stuck with a perpetual
+                    // loading bar (issue #236). Instead, watch this chapter for content
+                    // and resume once it arrives.
+                    Log.debug { "$TAG: Next chapter $nextChapterId has no content yet, watching for content (autoNext=true)" }
+                    startChapterContentWatch(book.id, nextChapterId, wasPlaying)
+                } else {
+                    // Auto-next disabled and no content — settle cleanly to STOPPED
+                    // rather than erroring or staying stuck in LOADING.
+                    Log.debug { "$TAG: Next chapter $nextChapterId has no content and autoNext is off, stopping" }
+                    _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
+                }
             } else if (_state.value.autoNextChapter) {
                 // Next chapter not in DB yet — watch for new chapters from remote fetch
                 Log.debug { "$TAG: No next chapter in DB, watching for chapter DB changes (autoNext=true)" }
@@ -682,6 +708,95 @@ class TTSController(
             } catch (e: Exception) {
                 Log.error { "$TAG: nextChapterWatch failed: ${e.message}" }
                 handleError(TTSError.ContentLoadFailed(e.message ?: "Chapter watch failed"))
+            } finally {
+                nextChapterWatchJob = null
+            }
+        }
+    }
+
+    /**
+     * Watch a chapter that already exists in the DB but whose content has not been
+     * fetched yet, and resume playback once its content becomes available.
+     *
+     * This covers the auto-next case (issue #236) where getNextChapterId returns a
+     * chapter row but loadChapter produced no paragraphs because the remote fetch is
+     * still in flight. Without this, nextChapter() would call play() on empty content
+     * and short-circuit on TTSError.NoContent, leaving playback stuck in a perpetual
+     * loading state.
+     *
+     * Implementation note: we intentionally poll contentLoader.loadChapter rather than
+     * subscribing to the chapter list. The production subscribeChapters stream is keyed
+     * on chapter IDs (distinctUntilChangedBy { it.id }) and does NOT re-emit when an
+     * existing row simply gains content, so it cannot detect this transition. loadChapter
+     * itself re-attempts the remote fetch on empty content, so re-invoking it with backoff
+     * both drives the fetch and observes when content lands. Resume is dispatched through
+     * the commandMutex (via TTSCommand) so state mutations stay serialized with
+     * user-initiated commands, and the current playback state is re-checked at resolution
+     * time so a pause/stop issued while waiting is respected.
+     */
+    private fun startChapterContentWatch(bookId: Long, chapterId: Long, wasPlaying: Boolean) {
+        nextChapterWatchJob?.cancel()
+        nextChapterWatchJob = scope.launch {
+            try {
+                kotlinx.coroutines.withTimeout(CHAPTER_CONTENT_WATCH_TIMEOUT_MS) {
+                    var delayMs = CHAPTER_CONTENT_WATCH_INITIAL_DELAY_MS
+                    while (true) {
+                        kotlinx.coroutines.delay(delayMs)
+
+                        // If the user navigated elsewhere while waiting, abort the watch.
+                        if (_state.value.chapter?.id != chapterId) {
+                            Log.debug { "$TAG: chapterContentWatch - chapter changed while waiting, aborting" }
+                            return@withTimeout
+                        }
+
+                        val content = contentLoader.loadChapter(bookId, chapterId)
+
+                        // loadChapter suspends while fetching; re-check that the user is
+                        // still on this chapter afterwards. If they navigated elsewhere
+                        // during the fetch, drop the now-stale result instead of yanking
+                        // playback back to the old auto-next chapter.
+                        if (_state.value.chapter?.id != chapterId) {
+                            Log.debug { "$TAG: chapterContentWatch - chapter changed during fetch, dropping stale result" }
+                            return@withTimeout
+                        }
+
+                        if (content.paragraphs.isNotEmpty()) {
+                            Log.debug { "$TAG: Chapter $chapterId content arrived, resuming playback" }
+
+                            // Re-load to pull the now-available content into state, then
+                            // resume only if playback wasn't paused/stopped while waiting.
+                            // Read the live state at resolution time (not watch-start) so a
+                            // pause issued during the wait (e.g. audio-focus loss) is honored.
+                            dispatch(TTSCommand.LoadChapter(bookId, chapterId, 0))
+                            val shouldResume = wasPlaying &&
+                                _state.value.playbackState != PlaybackState.PAUSED &&
+                                _state.value.playbackState != PlaybackState.STOPPED
+                            if (shouldResume) {
+                                dispatch(TTSCommand.Play)
+                            }
+                            return@withTimeout
+                        }
+
+                        // Exponential backoff, capped, to avoid hammering the source.
+                        delayMs = (delayMs * 2).coerceAtMost(CHAPTER_CONTENT_WATCH_MAX_DELAY_MS)
+                    }
+                }
+            } catch (_: kotlinx.coroutines.TimeoutCancellationException) {
+                Log.debug { "$TAG: chapterContentWatch timed out, content never arrived for $chapterId" }
+                // Only settle to STOPPED if the user is still on the watched chapter — a
+                // late timeout must not clobber playback the user has since started elsewhere.
+                if (_state.value.chapter?.id == chapterId) {
+                    _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.error { "$TAG: chapterContentWatch failed: ${e.message}" }
+                // Same guard: don't surface this watch's error onto an unrelated chapter
+                // the user navigated to while the watch was pending.
+                if (_state.value.chapter?.id == chapterId) {
+                    handleError(TTSError.ContentLoadFailed(e.message ?: "Chapter content watch failed"))
+                }
             } finally {
                 nextChapterWatchJob = null
             }
