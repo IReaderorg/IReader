@@ -155,6 +155,7 @@ class AppUpdateDownloadService : Service() {
             try {
                 // Broadcast connecting state
                 val connectingIntent = Intent("ireader.UPDATE_DOWNLOAD_CONNECTING").apply {
+                    setPackage(packageName)
                     putExtra("version", version)
                 }
                 sendBroadcast(connectingIntent)
@@ -190,6 +191,7 @@ class AppUpdateDownloadService : Service() {
                     // Send immediate 0% progress update
                     try {
                         val initialProgressIntent = Intent("ireader.UPDATE_DOWNLOAD_PROGRESS").apply {
+                            setPackage(packageName)
                             putExtra("progress", 0f)
                             putExtra("version", version)
                         }
@@ -244,6 +246,7 @@ class AppUpdateDownloadService : Service() {
                                     // Broadcast progress
                                     try {
                                         val progressIntent = Intent("ireader.UPDATE_DOWNLOAD_PROGRESS").apply {
+                                            setPackage(packageName)
                                             putExtra("progress", downloadedBytes.toFloat() / contentLength.toFloat())
                                             putExtra("version", version)
                                         }
@@ -284,6 +287,7 @@ class AppUpdateDownloadService : Service() {
                     // Send final progress
                     try {
                         val finalProgressIntent = Intent("ireader.UPDATE_DOWNLOAD_PROGRESS").apply {
+                            setPackage(packageName)
                             putExtra("progress", 1.0f)
                             putExtra("version", version)
                         }
@@ -310,6 +314,7 @@ class AppUpdateDownloadService : Service() {
                 // Broadcast completion
                 try {
                     val completionIntent = Intent("ireader.UPDATE_DOWNLOAD_COMPLETE").apply {
+                        setPackage(packageName)
                         putExtra("file_path", outputFile.absolutePath)
                         putExtra("version", version)
                     }
@@ -331,7 +336,9 @@ class AppUpdateDownloadService : Service() {
                 }
                 
                 try {
-                    val cancelIntent = Intent("ireader.UPDATE_DOWNLOAD_CANCELLED")
+                    val cancelIntent = Intent("ireader.UPDATE_DOWNLOAD_CANCELLED").apply {
+                        setPackage(packageName)
+                    }
                     sendBroadcast(cancelIntent)
                 } catch (broadcastError: Exception) {
                     // Continue anyway
@@ -360,6 +367,7 @@ class AppUpdateDownloadService : Service() {
                 
                 try {
                     val errorIntent = Intent("ireader.UPDATE_DOWNLOAD_ERROR").apply {
+                        setPackage(packageName)
                         putExtra("error", errorMessage)
                         putExtra("version", version)
                     }
@@ -381,7 +389,9 @@ class AppUpdateDownloadService : Service() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, cancelNotification)
         
-        val cancelIntent = Intent("ireader.UPDATE_DOWNLOAD_CANCELLED")
+        val cancelIntent = Intent("ireader.UPDATE_DOWNLOAD_CANCELLED").apply {
+            setPackage(packageName)
+        }
         sendBroadcast(cancelIntent)
         
         stopSelf()
