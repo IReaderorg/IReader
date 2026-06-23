@@ -55,6 +55,11 @@ val DomainServices = module {
     // Download state - lightweight, can be singleton
     single<DownloadStateHolder> { DownloadStateHolder() }
 
+    // Activity state holder — current reading activity (browsing / perusing /
+    // reading / TTS / idle) for the Discord Rich Presence pipeline. Desktop wires a
+    // publisher that observes this; platforms without a publisher ignore it.
+    single<ireader.domain.services.discord.ActivityStateHolder> { ireader.domain.services.discord.ActivityStateHolder() }
+
     // Preferences - lightweight
     single { ireader.domain.preferences.prefs.PlayerPreferences(get()) }
     single { ireader.domain.preferences.prefs.DownloadPreferences(get()) }

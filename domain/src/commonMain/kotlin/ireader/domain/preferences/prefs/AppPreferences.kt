@@ -280,4 +280,16 @@ class AppPreferences(
     fun showUpdateDialog(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_update_dialog", true)
     }
+
+    // ==================== Discord Rich Presence ====================
+
+    /**
+     * Whether to publish reading/TTS activity to ~/.cache/IReader/discord_state.json
+     * for the companion ireader-discord bridge to push as Discord Rich Presence.
+     * Editable from Settings. Takes effect on next app start (the publisher is
+     * eager-initialised at startup).
+     */
+    fun discordRichPresenceEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("discord_rich_presence_enabled", true)
+    }
 }

@@ -9,7 +9,13 @@ import androidx.compose.ui.graphics.painter.Painter
  */
 sealed class AppTab(
     val index: Int,
-    val route: String
+    val route: String,
+    /**
+     * Stable, locale-independent English name for external integrations
+     * (Discord Rich Presence, logs) that run outside a Composable scope and
+     * can't read [title]. The user-facing label still flows through [title].
+     */
+    val displayName: String,
 ) {
     abstract val title: String
         @Composable get
@@ -20,7 +26,7 @@ sealed class AppTab(
     @Composable
     abstract fun Content()
     
-    data object Library : AppTab(0, "tab_library") {
+    data object Library : AppTab(0, "tab_library", "Library") {
         override val title: String
             @Composable get() = LibraryScreenSpec.getTitle()
         
@@ -33,7 +39,7 @@ sealed class AppTab(
         }
     }
     
-    data object Updates : AppTab(1, "tab_updates") {
+    data object Updates : AppTab(1, "tab_updates", "Updates") {
         override val title: String
             @Composable get() = UpdateScreenSpec.getTitle()
         
@@ -46,7 +52,7 @@ sealed class AppTab(
         }
     }
     
-    data object History : AppTab(2, "tab_history") {
+    data object History : AppTab(2, "tab_history", "History") {
         override val title: String
             @Composable get() = HistoryScreenSpec.getTitle()
         
@@ -59,7 +65,7 @@ sealed class AppTab(
         }
     }
     
-    data object Extensions : AppTab(3, "tab_extensions") {
+    data object Extensions : AppTab(3, "tab_extensions", "Extensions") {
         override val title: String
             @Composable get() = ExtensionScreenSpec.getTitle()
         
@@ -72,7 +78,7 @@ sealed class AppTab(
         }
     }
     
-    data object More : AppTab(4, "tab_more") {
+    data object More : AppTab(4, "tab_more", "More") {
         override val title: String
             @Composable get() = MoreScreenSpec.getTitle()
         
