@@ -18,14 +18,14 @@ actual class DownloadEventHandler actual constructor(
     private val receiver = AppUpdateDownloadReceiver(updateState)
     
     init {
-        // Register the broadcast receiver
-        // Note: RECEIVER_EXPORTED is required on Android 13+ because the download service
-        // sends implicit broadcasts via sendBroadcast(). RECEIVER_NOT_EXPORTED causes these
-        // broadcasts to be silently dropped on many OEM ROMs (Xiaomi/MIUI, Samsung, etc.),
-        // resulting in the UI showing 0% progress until the download completes.
+        // The download service sends package-explicit broadcasts (Intent.setPackage(packageName)),
+        // so this receiver is registered NOT_EXPORTED — the correct, secure pattern for
+        // app-internal broadcasts on Android 13+. Implicit (action-only) broadcasts were being
+        // dropped on Android 14+ and several OEM ROMs, which left the UI stuck at 0% until the
+        // download completed (issue #228).
         val filter = AppUpdateDownloadReceiver.createIntentFilter()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
+            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
             context.registerReceiver(receiver, filter)
         }
