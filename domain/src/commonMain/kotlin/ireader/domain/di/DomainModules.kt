@@ -93,6 +93,23 @@ val DomainServices = module {
         )
     }
     
+    // ── V2 Backup System (new, coexists with old during migration) ──────
+    factory { ireader.domain.usecases.backup.v2.BackupSerializer() }
+    factory { ireader.domain.usecases.backup.v2.LegacyMigrator() }
+    factory {
+        ireader.domain.usecases.backup.v2.BackupOrchestrator(
+            serializer = get(),
+            legacyMigrator = get(),
+            fileSaver = get(),
+            libraryRepository = get(),
+            bookRepository = get(),
+            chapterRepository = get(),
+            categoryRepository = get(),
+            bookCategoryRepository = get(),
+            transactions = get(),
+        )
+    }
+
     // Cloud Backup Providers - lazy loaded when user accesses backup
     factory<CloudStorageProvider> { createGoogleDriveProvider() }
     

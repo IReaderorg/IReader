@@ -2,13 +2,16 @@ package ireader.presentation.ui.settings.backups
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import ireader.core.util.IO
 import ireader.domain.models.BackUpBook
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.storage.StorageManager
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup
+import ireader.domain.usecases.backup.v2.BackupException
+import ireader.domain.usecases.backup.v2.BackupOrchestrator
+import ireader.domain.usecases.backup.v2.BackupProgress
+import ireader.domain.usecases.backup.v2.RestoreProgress
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LocalizeHelper
@@ -152,7 +155,9 @@ class BackupScreenViewModel(
     private val fileSystemService: ireader.domain.services.platform.FileSystemService,
     private val localizeHelper: LocalizeHelper,
     // LNReader backup import
-    private val importLNReaderBackup: ImportLNReaderBackup? = null
+    private val importLNReaderBackup: ImportLNReaderBackup? = null,
+    // V2 orchestrator — injected alongside old deps during migration
+    private val orchestrator: BackupOrchestrator? = null,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
@@ -202,31 +207,6 @@ class BackupScreenViewModel(
             scheduleAutomaticBackup?.schedule(frequency)
         }
     }
-//    fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
-//        val mimeTypes = arrayOf("application/gzip")
-//        val fn = "IReader_${convertLongToTime(currentTimeToLong())}.gz"
-//        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-//            .addCategory(Intent.CATEGORY_OPENABLE)
-//            .setType("application/gzip")
-//            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-//            .putExtra(
-//                Intent.EXTRA_TITLE, fn
-//            )
-//
-//        onStart(intent)
-//    }
-//
-//    fun onRestoreBackupRequested(onStart: (Intent) -> Unit) {
-//        val mimeTypes = arrayOf("application/gzip")
-//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-//            .addCategory(Intent.CATEGORY_OPENABLE)
-//            .setType("application/*")
-//            .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-//            .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-//            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//
-//        onStart(intent)
-//    }
 
     suspend fun getAllBooks(): String {
         val list = mutableListOf<BackUpBook>()
@@ -269,7 +249,6 @@ class BackupScreenViewModel(
                 title = localizeHelper.localize(Res.string.save_backup)
             )) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
-                    // Create backup to selected location
                     createBackupToLocation(result.data)
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
@@ -290,7 +269,6 @@ class BackupScreenViewModel(
                 title = localizeHelper.localize(Res.string.select_backup_file)
             )) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
-                    // Restore from selected file
                     restoreFromLocation(result.data)
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
@@ -320,31 +298,130 @@ class BackupScreenViewModel(
     }
     
     /**
-     * Create backup to specified location
+     * Create backup using v2 orchestrator (checksummed, verified, single pipeline).
+     * Falls back to legacy path if orchestrator is not injected.
      */
     private suspend fun createBackupToLocation(uri: ireader.domain.models.common.Uri) {
+        val orch = orchestrator
+        if (orch != null) {
+            createBackupV2(orch, uri)
+        } else {
+            createBackupLegacy(uri)
+        }
+    }
+    
+    /**
+     * Restore backup using v2 orchestrator (legacy-aware, partial-failure safe).
+     * Falls back to legacy path if orchestrator is not injected.
+     */
+    private suspend fun restoreFromLocation(uri: ireader.domain.models.common.Uri) {
+        val orch = orchestrator
+        if (orch != null) {
+            restoreBackupV2(orch, uri)
+        } else {
+            restoreBackupLegacy(uri)
+        }
+    }
+
+    // ── V2 backup path ────────────────────────────────────────────────────
+
+    private suspend fun createBackupV2(orch: BackupOrchestrator, uri: ireader.domain.models.common.Uri) {
+        withContext(ireader.domain.utils.extensions.ioDispatcher) {
+            orch.createBackup(uri) { progress ->
+                _backupRestoreProgress.value = when (progress) {
+                    is BackupProgress.Collecting ->
+                        BackupRestoreProgress.BackupStarting()
+                    is BackupProgress.Serializing ->
+                        BackupRestoreProgress.BackupInProgress(
+                            currentBook = progress.bookIndex,
+                            totalBooks = progress.totalBooks,
+                            bookName = progress.bookName,
+                        )
+                    is BackupProgress.Compressing ->
+                        BackupRestoreProgress.BackupCompressing()
+                    is BackupProgress.Writing ->
+                        BackupRestoreProgress.BackupWriting()
+                    is BackupProgress.Verifying ->
+                        BackupRestoreProgress.BackupWriting() // reuse "writing" state for verify step
+                    is BackupProgress.Complete ->
+                        BackupRestoreProgress.BackupComplete()
+                }
+            }.fold(
+                onSuccess = { summary ->
+                    _backupRestoreProgress.value = BackupRestoreProgress.BackupComplete(
+                        message = "Backup completed! ${summary.booksCount} books saved."
+                    )
+                },
+                onFailure = { error ->
+                    _backupRestoreProgress.value = BackupRestoreProgress.BackupError(
+                        error = mapBackupError(error)
+                    )
+                },
+            )
+        }
+    }
+
+    private suspend fun restoreBackupV2(orch: BackupOrchestrator, uri: ireader.domain.models.common.Uri) {
+        withContext(ireader.domain.utils.extensions.ioDispatcher) {
+            orch.restoreBackup(uri) { progress ->
+                _backupRestoreProgress.value = when (progress) {
+                    is RestoreProgress.Reading ->
+                        BackupRestoreProgress.RestoreStarting()
+                    is RestoreProgress.Decompressing ->
+                        BackupRestoreProgress.RestoreDecompressing()
+                    is RestoreProgress.Validating ->
+                        BackupRestoreProgress.RestoreParsing()
+                    is RestoreProgress.Restoring ->
+                        BackupRestoreProgress.RestoreInProgress(
+                            currentBook = progress.bookIndex,
+                            totalBooks = progress.totalBooks,
+                            bookName = progress.bookName,
+                        )
+                    is RestoreProgress.Complete ->
+                        BackupRestoreProgress.RestoreComplete(0, 0, "Restore completed!")
+                }
+            }.fold(
+                onSuccess = { summary ->
+                    val msg = buildString {
+                        append("Restored ${summary.booksRestored} books, ${summary.chaptersRestored} chapters")
+                        if (summary.errors.isNotEmpty()) {
+                            append(" (${summary.errors.size} books had errors)")
+                        }
+                    }
+                    _backupRestoreProgress.value = BackupRestoreProgress.RestoreComplete(
+                        booksRestored = summary.booksRestored,
+                        chaptersRestored = summary.chaptersRestored,
+                        message = msg,
+                    )
+                },
+                onFailure = { error ->
+                    _backupRestoreProgress.value = BackupRestoreProgress.RestoreError(
+                        error = mapBackupError(error)
+                    )
+                },
+            )
+        }
+    }
+
+    // ── Legacy backup path (kept for safety during migration) ─────────────
+
+    private suspend fun createBackupLegacy(uri: ireader.domain.models.common.Uri) {
         try {
             _backupRestoreProgress.value = BackupRestoreProgress.BackupStarting()
             
-            // Run on IO dispatcher to avoid blocking main thread
-            kotlinx.coroutines.withContext(ireader.domain.utils.extensions.ioDispatcher) {
-                // Get all books
+            withContext(ireader.domain.utils.extensions.ioDispatcher) {
                 val books = booksUseCasa.findAllInLibraryBooks()
                 val totalBooks = books.size
                 
                 _backupRestoreProgress.value = BackupRestoreProgress.BackupInProgress(
-                    currentBook = 0,
-                    totalBooks = totalBooks,
-                    bookName = "",
+                    currentBook = 0, totalBooks = totalBooks, bookName = "",
                     message = "Found $totalBooks books to backup..."
                 )
                 
-                // Create backup data with progress updates
                 val backupData = createBackup.createBackupData(books)
                 
                 _backupRestoreProgress.value = BackupRestoreProgress.BackupCompressing()
                 
-                // Compress with gzip
                 val compressedData = okio.Buffer().let { buffer ->
                     okio.GzipSink(buffer).buffer().use { gzipSink ->
                         gzipSink.write(backupData)
@@ -354,7 +431,6 @@ class BackupScreenViewModel(
                 
                 _backupRestoreProgress.value = BackupRestoreProgress.BackupWriting()
                 
-                // Write to file
                 when (val result = fileSystemService.writeFileBytes(uri, compressedData)) {
                     is ireader.domain.services.common.ServiceResult.Success -> {
                         _backupRestoreProgress.value = BackupRestoreProgress.BackupComplete(
@@ -376,43 +452,32 @@ class BackupScreenViewModel(
         }
     }
     
-    /**
-     * Restore backup from specified location
-     */
-    private suspend fun restoreFromLocation(uri: ireader.domain.models.common.Uri) {
+    private suspend fun restoreBackupLegacy(uri: ireader.domain.models.common.Uri) {
         try {
             _backupRestoreProgress.value = BackupRestoreProgress.RestoreStarting()
             
-            // Run on IO dispatcher to avoid blocking main thread
-            kotlinx.coroutines.withContext(ireader.domain.utils.extensions.ioDispatcher) {
-                // Read backup file
+            withContext(ireader.domain.utils.extensions.ioDispatcher) {
                 when (val result = fileSystemService.readFileBytes(uri)) {
                     is ireader.domain.services.common.ServiceResult.Success -> {
                         _backupRestoreProgress.value = BackupRestoreProgress.RestoreDecompressing()
                         
-                        // Decompress gzip if needed (backup files are gzip compressed)
-                        // Use Okio for KMP compatibility
                         val decompressedData = try {
                             okio.Buffer().apply { write(result.data) }
                                 .let { okio.GzipSource(it) }
                                 .let { okio.Buffer().apply { writeAll(it) } }
                                 .readByteArray()
                         } catch (e: Exception) {
-                            // Not gzip compressed, use raw data
                             result.data
                         }
                         
                         _backupRestoreProgress.value = BackupRestoreProgress.RestoreParsing()
                         
-                        // Restore using existing use case with progress callback
                         val restoreResult = restoreBackup.restoreFromBytesWithProgress(
                             decompressedData
                         ) { current, total, bookName ->
                             _backupRestoreProgress.value = BackupRestoreProgress.RestoreInProgress(
-                                currentBook = current,
-                                totalBooks = total,
-                                bookName = bookName,
-                                message = "Restoring: $bookName"
+                                currentBook = current, totalBooks = total,
+                                bookName = bookName, message = "Restoring: $bookName"
                             )
                         }
                         
@@ -445,7 +510,23 @@ class BackupScreenViewModel(
             )
         }
     }
-    
+
+    // ── Error mapping ─────────────────────────────────────────────────────
+
+    private fun mapBackupError(error: Throwable): String {
+        return when (error) {
+            is BackupException.ReadFailed -> "Cannot read backup file"
+            is BackupException.WriteFailed -> "Cannot write backup file"
+            is BackupException.ChecksumMismatch -> "Backup file is corrupted (integrity check failed)"
+            is BackupException.Corrupted -> error.message ?: "Backup file is corrupted"
+            is BackupException.UnsupportedVersion -> "This backup was created with a newer app version"
+            is BackupException.InsufficientSpace -> "Not enough storage space"
+            is BackupException.VerificationFailed -> "Backup verification failed"
+            is BackupException.PartialRestore -> "Some items failed to restore"
+            else -> error.message ?: "Unknown error"
+        }
+    }
+
     // ==================== LNReader Import Progress Dialog ====================
 
     private val _lnReaderImportProgressDialog = MutableStateFlow<LNReaderImportProgress>(LNReaderImportProgress.Idle)
