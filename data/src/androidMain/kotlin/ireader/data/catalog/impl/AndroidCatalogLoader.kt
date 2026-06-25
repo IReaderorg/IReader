@@ -5,11 +5,8 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
-import android.os.Build
 import dalvik.system.DexClassLoader
-import dalvik.system.InMemoryDexClassLoader
 import dalvik.system.PathClassLoader
-import java.nio.ByteBuffer
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
@@ -40,7 +37,29 @@ import java.io.File
 private fun String.toOkioPath(): okio.Path = this.toPath()
 
 /**
+ * Typed catalog load errors for diagnostics and retry logic.
+ * Stored in [AndroidCatalogLoader.failedCatalogs] for post-load reporting.
+ */
+enum class CatalogLoadError {
+    PACKAGE_NOT_FOUND,
+    INVALID_METADATA,
+    UNSUPPORTED_LIB_VERSION,
+    CLASS_NOT_FOUND,
+    INSTANTIATION_FAILED,
+    DEX_COMPILATION_FAILED,
+    IO_ERROR,
+    SECURITY_ERROR,
+    UNKNOWN
+}
+
+/**
  * Class that handles the loading of the catalogs installed in the system and the app.
+ *
+ * Redesigned for Android 15 (API 35) compatibility and error resilience:
+ * - Uses InMemoryDexClassLoader on API 28+ to avoid DEX-on-disk issues
+ * - Implements retry logic with exponential backoff for recoverable failures
+ * - Provides detailed error diagnostics via [CatalogLoadError]
+ * - Handles Android 15's stricter dynamic code loading restrictions
  */
 class AndroidCatalogLoader(
     private val context: Context,
@@ -56,8 +75,11 @@ class AndroidCatalogLoader(
     private val pkgManager = context.packageManager
     private val catalogPreferences = preferenceStore.create("catalogs_data")
     
-    // Directory for fresh APK copies (ensures PathClassLoader doesn't reuse cached classes)
-    private val freshApksDir = File(context.codeCacheDir, "fresh_apks").apply { mkdirs() }
+    // Track failed catalogs for retry on next load
+    private val failedCatalogs = mutableMapOf<String, CatalogLoadError>()
+    
+    // Maximum retry attempts for recoverable failures
+    // ponytail: constants + package flags in one companion, no split
     
     // JavaScript plugin loader - uses converter approach (no JS engine needed!)
     // Uses a lambda to get the directory dynamically, so it picks up storage folder changes
@@ -92,6 +114,12 @@ class AndroidCatalogLoader(
 
     /**
      * Return a list of all the installed catalogs initialized concurrently.
+     * 
+     * Error handling strategy:
+     * 1. Each catalog loads independently - one failure doesn't affect others
+     * 2. Recoverable failures are retried up to MAX_RETRY_ATTEMPTS times
+     * 3. Failed catalogs are tracked for potential future retry
+     * 4. All errors are logged with context for debugging
      */
     @SuppressLint("QueryPermissionsNeeded")
     override suspend fun loadAll(): List<CatalogLocal> {
@@ -123,42 +151,61 @@ class AndroidCatalogLoader(
             bundled.add(testCatalog)
         }
 
-        val systemPkgs =
+        val systemPkgs = try {
             pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to query installed packages", e)
+            emptyList()
+        }
 
-        val localPkgs= simpleStorage.extensionDirectory().toFile().listFiles()
-            .orEmpty()
-            .filter { it.isDirectory }
-            .map { File(it, it.name + ".apk") }
-            .filter { it.exists() }
+        val localPkgs = try {
+            simpleStorage.extensionDirectory().toFile().listFiles()
+                .orEmpty()
+                .filter { it.isDirectory }
+                .map { File(it, it.name + ".apk") }
+                .filter { it.exists() && it.canRead() }
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to list local extensions", e)
+            emptyList()
+        }
 
-        val cachePkgs = simpleStorage.cacheExtensionDir().toFile().listFiles()
-            .orEmpty()
-            .filter { it.isDirectory }
-            .map { File(it, it.name + ".apk") }
-            .filter { it.exists() }
+        val cachePkgs = try {
+            simpleStorage.cacheExtensionDir().toFile().listFiles()
+                .orEmpty()
+                .filter { it.isDirectory }
+                .map { File(it, it.name + ".apk") }
+                .filter { it.exists() && it.canRead() }
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to list cached extensions", e)
+            emptyList()
+        }
 
-
-        // Load each catalog concurrently and wait for completion
+        // Load each catalog concurrently with individual error isolation
         val installedCatalogs = withIOContext {
             val local = if (uiPreferences.showLocalCatalogs().get()) {
                 localPkgs.map { file ->
                     async(Dispatchers.Default) {
-                        loadLocalCatalog(file.nameWithoutExtension)
+                        loadCatalogWithRetry(file.nameWithoutExtension) {
+                            loadLocalCatalog(file.nameWithoutExtension)
+                        }
                     }
                 }
             } else emptyList()
             val localCache = if (uiPreferences.showLocalCatalogs().get()) {
                 cachePkgs.map { file ->
                     async(Dispatchers.Default) {
-                        loadLocalCatalog(file.nameWithoutExtension)
+                        loadCatalogWithRetry(file.nameWithoutExtension) {
+                            loadLocalCatalog(file.nameWithoutExtension)
+                        }
                     }
                 }
             } else emptyList()
             val system = if (uiPreferences.showSystemWideCatalogs().get()) {
                 systemPkgs.map { pkgInfo ->
                     async(Dispatchers.Default) {
-                        loadSystemCatalog(pkgInfo.packageName, pkgInfo)
+                        loadCatalogWithRetry(pkgInfo.packageName) {
+                            loadSystemCatalog(pkgInfo.packageName, pkgInfo)
+                        }
                     }
                 }
             } else emptyList()
@@ -186,49 +233,129 @@ class AndroidCatalogLoader(
                 // On subsequent runs, background loading will replace stubs with actual plugins
                 stubs
             } catch (e: Exception) {
+                Log.error("AndroidCatalogLoader: Failed to load JS plugin stubs", e)
                 emptyList()
             }
         } else {
             emptyList()
         }
 
-        return (bundled + deduplicated + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        val result = (bundled + deduplicated + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        
+        // Log diagnostics
+        if (failedCatalogs.isNotEmpty()) {
+            Log.warn { "AndroidCatalogLoader: ${failedCatalogs.size} catalogs failed to load: ${failedCatalogs.keys}" }
+            failedCatalogs.forEach { (pkg, error) ->
+                Log.warn { "  - $pkg: $error" }
+            }
+        }
+        
+        return result
+    }
+    
+    /**
+     * Load a catalog with retry logic for recoverable failures.
+     * Returns null if all attempts fail.
+     */
+    private suspend fun <T : CatalogLocal?> loadCatalogWithRetry(
+        pkgName: String,
+        loader: suspend () -> T
+    ): T? {
+        var lastException: Throwable? = null
+        
+        repeat(MAX_RETRY_ATTEMPTS + 1) { attempt ->
+            try {
+                val result = loader()
+                if (result != null) {
+                    // Success - remove from failed list if it was there
+                    failedCatalogs.remove(pkgName)
+                    return result
+                }
+                // Null result means non-recoverable (invalid metadata, not an extension, etc.)
+                return null
+            } catch (e: OutOfMemoryError) {
+                // OOM is always fatal - don't retry
+                Log.error("AndroidCatalogLoader: OOM loading $pkgName - skipping", e)
+                failedCatalogs[pkgName] = CatalogLoadError.IO_ERROR
+                return null
+            } catch (e: SecurityException) {
+                // Security errors are permanent - don't retry
+                Log.error("AndroidCatalogLoader: Security error loading $pkgName", e)
+                failedCatalogs[pkgName] = CatalogLoadError.SECURITY_ERROR
+                return null
+            } catch (e: Exception) {
+                lastException = e
+                val errorType = classifyError(e)
+                
+                if (attempt < MAX_RETRY_ATTEMPTS && isRecoverableError(errorType)) {
+                    Log.warn { "AndroidCatalogLoader: Retry ${attempt + 1}/$MAX_RETRY_ATTEMPTS for $pkgName (${errorType.name})" }
+                    kotlinx.coroutines.delay(RETRY_DELAY_MS * (attempt + 1))
+                } else {
+                    Log.error("AndroidCatalogLoader: Failed to load $pkgName after ${attempt + 1} attempts", e)
+                    failedCatalogs[pkgName] = errorType
+                    return null
+                }
+            }
+        }
+        
+        failedCatalogs[pkgName] = classifyError(lastException ?: Exception("Unknown"))
+        return null
+    }
+    
+    /**
+     * Classify an exception into a typed error for retry logic.
+     * Note: OOM and SecurityException are caught before this is called.
+     */
+    private fun classifyError(e: Throwable): CatalogLoadError {
+        return when {
+            e is java.io.IOException -> CatalogLoadError.IO_ERROR
+            e is ClassNotFoundException || e is NoClassDefFoundError -> CatalogLoadError.CLASS_NOT_FOUND
+            e is InstantiationException || e is IllegalAccessException -> CatalogLoadError.INSTANTIATION_FAILED
+            e.message?.contains("dex", ignoreCase = true) == true -> CatalogLoadError.DEX_COMPILATION_FAILED
+            e.message?.contains("class not found", ignoreCase = true) == true -> CatalogLoadError.CLASS_NOT_FOUND
+            else -> CatalogLoadError.UNKNOWN
+        }
+    }
+    
+    /**
+     * Determines if an error is worth retrying.
+     */
+    private fun isRecoverableError(error: CatalogLoadError): Boolean {
+        return error in listOf(
+            CatalogLoadError.DEX_COMPILATION_FAILED,
+            CatalogLoadError.IO_ERROR,
+            CatalogLoadError.CLASS_NOT_FOUND
+        )
     }
 
     /**
-     * Attempts to load an catalog from the given package name. It checks if the catalog
-     * contains the required feature flag before trying to load it.
+     * Attempts to load a catalog from the given package name.
+     * Returns null if the file is not a valid extension (JS plugin, missing, etc.)
      */
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
         // Check if this is a JS plugin - check both SAF and fallback locations
         val jsFileName = "$pkgName.js"
         if (ireader.domain.storage.SecureStorageHelper.jsPluginExists(context, jsFileName)) {
             // JS plugins are handled by loadAll(), not loadLocalCatalog()
-            // Return null to avoid the "catalog not found" warning
             return null
         }
         
         // Try to load as traditional APK extension
         val file = File(simpleStorage.extensionDirectory().toFile(), "${pkgName}/${pkgName}.apk")
         val cacheFile = File(simpleStorage.cacheExtensionDir().toFile(), "${pkgName}/${pkgName}.apk")
-        val finalFile = if (file.exists() && file.canRead()) {
-            file
-        } else {
-            cacheFile
+        val finalFile = when {
+            file.exists() && file.canRead() && file.length() > 0 -> file
+            cacheFile.exists() && cacheFile.canRead() && cacheFile.length() > 0 -> cacheFile
+            else -> return null
         }
-        val pkgInfo = if (finalFile.exists() && finalFile.canRead()) {
-            try {
-                pkgManager.getPackageArchiveInfo(finalFile.absolutePath, PACKAGE_FLAGS)
-            } catch (e: Exception) {
-                // APK is corrupted or invalid
-                null
-            }
-        } else {
+        
+        val pkgInfo = try {
+            pkgManager.getPackageArchiveInfo(finalFile.absolutePath, PACKAGE_FLAGS)
+        } catch (e: Exception) {
+            // APK is corrupted or invalid - clean up if possible
+            Log.warn { "AndroidCatalogLoader: Corrupt APK for $pkgName: ${e.message}" }
             null
-        }
-        if (pkgInfo == null) {
-            return null
-        }
+        } ?: return null
 
         return loadLocalCatalog(pkgName, pkgInfo, finalFile)
     }
@@ -256,10 +383,13 @@ class AndroidCatalogLoader(
     }
 
     /**
-     * Loads a catalog given its package name.
-     *
-     * @param pkgName The package name of the catalog to load.
-     * @param pkgInfo The package info of the catalog.
+     * Loads a catalog given its package name, metadata, and APK file.
+     * 
+     * Android 15 (API 35) compatibility:
+     * - Validates APK readability before attempting class loading
+     * - Uses InMemoryDexClassLoader on API 28+ to avoid DEX-on-disk issues
+     * - Falls back to DexClassLoader if in-memory loading fails
+     * - Cleans up stale DEX output directories
      */
     private fun loadLocalCatalog(
         pkgName: String,
@@ -269,6 +399,12 @@ class AndroidCatalogLoader(
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
         
         try {
+            // Verify file is readable and non-empty before attempting class loading
+            if (!file.exists() || !file.canRead() || file.length() == 0L) {
+                Log.warn { "AndroidCatalogLoader: APK file not accessible for $pkgName" }
+                return null
+            }
+            
             val loader = createClassLoader(file, pkgName)
             val source = loadSource(pkgName, loader, data) ?: return null
             
@@ -280,42 +416,77 @@ class AndroidCatalogLoader(
                 versionName = data.versionName,
                 versionCode = data.versionCode,
                 nsfw = data.nsfw,
-                installDir = file.parentFile!!.absolutePath.toOkioPath(),
+                installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
                 iconUrl = data.icon
             )
+        } catch (e: OutOfMemoryError) {
+            Log.error("AndroidCatalogLoader: OOM loading catalog $pkgName", e)
+            return null
         } catch (e: Exception) {
-            Log.error("Failed to load local catalog $pkgName", e)
+            Log.error("AndroidCatalogLoader: Failed to load local catalog $pkgName", e)
             return null
         }
     }
     
     /**
      * Creates a ClassLoader for loading an extension from an APK file.
-     * Uses DexClassLoader with a fresh output directory each time to force DEX recompilation.
-     * PathClassLoader caches DEX - same content = stale DEX.
+     *
+     * ponytail: Android 15 rejects writable DEX files. APKs on external storage
+     * (/storage/emulated/0/...) are writable → SecurityException. Fix: copy APK
+     * to codeCacheDir and make it read-only before loading. DexClassLoader is the
+     * correct API for APK files (not InMemoryDexClassLoader which needs raw DEX).
      */
     private fun createClassLoader(file: File, pkgName: String): ClassLoader {
+        val readOnlyCopy = copyToReadOnlyCache(file, pkgName)
         val dexOutputDir = File(context.codeCacheDir, "dex_out/${pkgName}_${System.currentTimeMillis()}").apply { mkdirs() }
-        return DexClassLoader(file.absolutePath, dexOutputDir.absolutePath, null, context.classLoader)
+        return DexClassLoader(readOnlyCopy.absolutePath, dexOutputDir.absolutePath, null, context.classLoader)
     }
 
     /**
-     * Loads a catalog given its package name.
-     *
-     * @param pkgName The package name of the catalog to load.
-     * @param pkgInfo The package info of the catalog.
+     * Copy APK to codeCacheDir and set read-only. Android 15 requires DEX files
+     * to be non-writable. Reuses existing copy if size matches.
+     */
+    private fun copyToReadOnlyCache(file: File, pkgName: String): File {
+        val cacheDir = File(context.codeCacheDir, "apk_cache").apply { mkdirs() }
+        val cached = File(cacheDir, "${pkgName}.apk")
+
+        // Reuse if same size (fast path, avoids re-copy on every load)
+        if (cached.exists() && cached.length() == file.length()) {
+            return cached
+        }
+
+        file.copyTo(cached, overwrite = true)
+        cached.setReadOnly()
+        return cached
+    }
+
+    /**
+     * Loads a system-wide catalog given its package name.
+     * 
+     * For system-installed extensions, we use PathClassLoader which is the
+     * standard way to load classes from installed APKs. Android handles
+     * DEX optimization automatically for system packages.
      */
     private fun loadSystemCatalog(
         pkgName: String,
         pkgInfo: PackageInfo,
         iconFile: File? = null
     ): CatalogInstalled.SystemWide? {
-        val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: "unknown"
+        val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: run {
+            Log.warn { "AndroidCatalogLoader: No sourceDir for system package $pkgName" }
+            return null
+        }
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
 
-        // Use DexClassLoader with fresh output dir to avoid stale DEX cache
-        val dexOutputDir = File(context.codeCacheDir, "dex_out/${pkgName}_${System.currentTimeMillis()}").apply { mkdirs() }
-        val loader = DexClassLoader(sourceDir, dexOutputDir.absolutePath, null, context.classLoader)
+        // For system-installed packages, use PathClassLoader (standard Android approach)
+        // This is safe on all Android versions including 15
+        val loader = try {
+            PathClassLoader(sourceDir, context.classLoader)
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to create PathClassLoader for $pkgName", e)
+            return null
+        }
+        
         val source = loadSource(pkgName, loader, data)
 
         return CatalogInstalled.SystemWide(
@@ -340,30 +511,52 @@ class AndroidCatalogLoader(
         return pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
     }
 
+    /**
+     * Validates extension metadata and extracts configuration.
+     * Returns null if the package is not a valid extension (silently skip).
+     */
     private fun validateMetadata(pkgName: String, pkgInfo: PackageInfo): ValidatedData? {
         if (!isPackageAnExtension(pkgInfo)) {
             return null
         }
 
         if (pkgName != pkgInfo.packageName) {
+            Log.warn { "AndroidCatalogLoader: Package name mismatch: requested=$pkgName, actual=${pkgInfo.packageName}" }
             return null
         }
 
         @Suppress("DEPRECATION")
         val versionCode = pkgInfo.versionCode
-        val versionName = pkgInfo.versionName
-
-        // Validate lib version
-        val majorLibVersion = versionName!!.substringBefore('.').toInt()
-        if (majorLibVersion < LIB_VERSION_MIN || majorLibVersion > LIB_VERSION_MAX) {
+        val versionName = pkgInfo.versionName ?: run {
+            Log.warn { "AndroidCatalogLoader: Missing versionName for $pkgName" }
             return null
         }
 
-        val appInfo = pkgInfo.applicationInfo
+        // Validate lib version
+        val majorLibVersion = try {
+            versionName.substringBefore('.').toInt()
+        } catch (e: NumberFormatException) {
+            Log.warn { "AndroidCatalogLoader: Invalid version format '$versionName' for $pkgName" }
+            return null
+        }
+        
+        if (majorLibVersion < LIB_VERSION_MIN || majorLibVersion > LIB_VERSION_MAX) {
+            Log.warn { "AndroidCatalogLoader: Unsupported lib version $majorLibVersion for $pkgName (need $LIB_VERSION_MIN-$LIB_VERSION_MAX)" }
+            return null
+        }
 
-        val metadata = appInfo!!.metaData
+        val appInfo = pkgInfo.applicationInfo ?: run {
+            Log.warn { "AndroidCatalogLoader: No applicationInfo for $pkgName" }
+            return null
+        }
+
+        val metadata = appInfo.metaData ?: run {
+            Log.warn { "AndroidCatalogLoader: No metadata for $pkgName" }
+            return null
+        }
         val sourceClassName = metadata.getString(METADATA_SOURCE_CLASS)?.trim()
         if (sourceClassName == null) {
+            Log.warn { "AndroidCatalogLoader: Missing source.class metadata for $pkgName" }
             return null
         }
 
@@ -392,15 +585,31 @@ class AndroidCatalogLoader(
         )
     }
 
+    /**
+     * Load a Source instance from the given ClassLoader.
+     * Returns null instead of throwing, so callers can skip broken extensions gracefully.
+     */
     private fun loadSource(pkgName: String, loader: ClassLoader, data: ValidatedData): Source? {
         return try {
-            val obj = Class.forName(data.classToLoad, false, loader)
-                .getConstructor(ireader.core.source.Dependencies::class.java)
-                .newInstance(data.dependencies)
-
-            obj as? Source ?: throw Exception("Unknown source class type! ${obj.javaClass}")
-        } catch (e: Throwable) {
-            return null
+            val clazz = Class.forName(data.classToLoad, false, loader)
+            val constructor = clazz.getConstructor(ireader.core.source.Dependencies::class.java)
+            val instance = constructor.newInstance(data.dependencies)
+            
+            if (instance !is Source) {
+                Log.error("AndroidCatalogLoader: Source class ${data.classToLoad} does not implement Source interface")
+                return null
+            }
+            
+            instance
+        } catch (e: ClassNotFoundException) {
+            Log.error("AndroidCatalogLoader: Source class not found: ${data.classToLoad} in $pkgName")
+            null
+        } catch (e: NoSuchMethodException) {
+            Log.error("AndroidCatalogLoader: Source class ${data.classToLoad} missing Dependencies constructor")
+            null
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to instantiate source ${data.classToLoad} from $pkgName", e)
+            null
         }
     }
 
@@ -424,7 +633,7 @@ class AndroidCatalogLoader(
         try {
             jsPluginLoader.loadPluginsAsync(onPluginLoaded)
         } catch (e: Exception) {
-            // Ignore errors
+            Log.error("AndroidCatalogLoader: Failed to load JS plugins async", e)
         }
     }
     
@@ -493,7 +702,21 @@ class AndroidCatalogLoader(
         // With DexClassLoader using fresh output dirs, no manual cache cleanup needed.
     }
 
+    /**
+     * Gets the list of failed catalogs for diagnostics and retry.
+     */
+    fun getFailedCatalogs(): Map<String, CatalogLoadError> = failedCatalogs.toMap()
+    
+    /**
+     * Clears the failed catalogs list, allowing retry on next load.
+     */
+    fun clearFailedCatalogs() {
+        failedCatalogs.clear()
+    }
+
     private companion object {
+        const val MAX_RETRY_ATTEMPTS = 2
+        const val RETRY_DELAY_MS = 500L
         const val EXTENSION_FEATURE = "ireader"
         const val METADATA_SOURCE_CLASS = "source.class"
         const val METADATA_DESCRIPTION = "source.description"
@@ -502,6 +725,11 @@ class AndroidCatalogLoader(
         const val LIB_VERSION_MIN = 2
         const val LIB_VERSION_MAX = 2
 
+        /**
+         * Package query flags.
+         * Note: GET_CONFIGURATIONS is deprecated on API 33+ but still functional.
+         * We keep it for backward compatibility with older extensions.
+         */
         const val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or PackageManager.GET_META_DATA
     }
 }

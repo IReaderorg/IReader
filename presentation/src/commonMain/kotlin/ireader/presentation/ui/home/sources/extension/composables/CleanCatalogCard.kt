@@ -5,7 +5,6 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -51,7 +50,6 @@ fun CleanCatalogCard(
     onLogin: (() -> Unit)? = null,
     onMigrate: (() -> Unit)? = null,
     onDeleteUserSource: (() -> Unit)? = null,
-    isLoading: Boolean = false,
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val lang = when (catalog) {
@@ -66,15 +64,12 @@ fun CleanCatalogCard(
         modifier = modifier
             .fillMaxWidth()
             .then(
-                if ((onClick != null || onShowDetails != null) && !isLoading) {
+                if (onClick != null || onShowDetails != null) {
                     Modifier.combinedClickable(
                         onClick = { onClick?.invoke() },
                         onLongClick = { onShowDetails?.invoke() }
                     )
                 } else Modifier
-            )
-            .then(
-                if (isLoading) Modifier.alpha(0.6f) else Modifier
             )
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -103,23 +98,6 @@ fun CleanCatalogCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                
-                if (isLoading) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp
-                        )
-                        Text(
-                            text = localizeHelper.localize(Res.string.loading_1),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
                 
                 if (sourceStatus != null && catalog is CatalogInstalled) {
                     SourceStatusIndicator(

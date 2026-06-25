@@ -196,4 +196,13 @@ sealed class ExtensionError {
         is CheckUpdatesFailed -> "Failed to check for updates: $message"
         is RefreshFailed -> "Failed to refresh extensions: $message"
     }
+    
+    /** Whether this error is recoverable through retry. */
+    val isRecoverable: Boolean
+        get() = when (this) {
+            is NetworkError -> true
+            is RefreshFailed -> true
+            is LoadFailed -> true
+            else -> false
+        }
 }

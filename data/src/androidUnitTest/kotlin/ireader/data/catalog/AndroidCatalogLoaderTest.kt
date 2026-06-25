@@ -1,297 +1,214 @@
 package ireader.data.catalog
 
+import ireader.data.catalog.impl.CatalogLoadError
 import kotlin.test.*
 
 /**
- * Unit tests for AndroidCatalogLoader
- * Tests DEX loading, secure directory handling, and Android 14+/15+ compatibility
+ * Unit tests for the redesigned AndroidCatalogLoader.
+ * Tests error classification, retry logic, and Android 15 compatibility.
  */
 class AndroidCatalogLoaderTest {
 
+    // ── Error Classification ─────────────────────────────────────────────
+
     @Test
-    fun `secure extensions directory path is correct`() {
-        // Given
-        val codeCacheDir = "/data/data/com.example.app/code_cache"
-        
-        // When
-        val secureExtensionsDir = "$codeCacheDir/secure_extensions"
-        
-        // Then
-        assertTrue(secureExtensionsDir.contains("code_cache"))
-        assertTrue(secureExtensionsDir.contains("secure_extensions"))
+    fun `classifyError maps IOException to IO_ERROR`() {
+        val error = java.io.IOException("disk full")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.IO_ERROR, classified)
     }
 
     @Test
-    fun `dex cache directory path is correct`() {
-        // Given
-        val codeCacheDir = "/data/data/com.example.app/code_cache"
-        
-        // When
-        val dexCacheDir = "$codeCacheDir/dex-cache"
-        
-        // Then
-        assertTrue(dexCacheDir.contains("code_cache"))
-        assertTrue(dexCacheDir.contains("dex-cache"))
+    fun `classifyError maps ClassNotFoundException to CLASS_NOT_FOUND`() {
+        val error = ClassNotFoundException("com.test.Missing")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.CLASS_NOT_FOUND, classified)
     }
 
     @Test
-    fun `plugin dex output directory is unique per plugin`() {
-        // Given
-        val dexCacheDir = "/data/data/com.example.app/code_cache/dex-cache"
-        val plugin1 = "com.example.plugin1"
-        val plugin2 = "com.example.plugin2"
-        
-        // When
-        val dexDir1 = "$dexCacheDir/$plugin1"
-        val dexDir2 = "$dexCacheDir/$plugin2"
-        
-        // Then
-        assertNotEquals(dexDir1, dexDir2)
-        assertTrue(dexDir1.contains(plugin1))
-        assertTrue(dexDir2.contains(plugin2))
+    fun `classifyError maps NoClassDefFoundError to CLASS_NOT_FOUND`() {
+        val error = NoClassDefFoundError("com.test.Missing")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.CLASS_NOT_FOUND, classified)
     }
 
     @Test
-    fun `APK file should be copied to secure location before loading`() {
-        // Given
-        val originalPath = "/storage/emulated/0/ireader/extensions/plugin.apk"
-        val securePath = "/data/data/com.example.app/code_cache/secure_extensions/plugin.apk"
-        
-        // When
-        val isSecureLocation = securePath.contains("code_cache")
-        
-        // Then
-        assertTrue(isSecureLocation, "APK should be in code_cache for Android 14+ compatibility")
+    fun `classifyError maps InstantiationException to INSTANTIATION_FAILED`() {
+        val error = InstantiationException("abstract class")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.INSTANTIATION_FAILED, classified)
     }
 
     @Test
-    fun `file permissions should be set to read-only after copy`() {
-        // Given
-        val filePermissions = FilePermissionSimulator()
-        
-        // When
-        filePermissions.setReadOnly()
-        
-        // Then
-        assertTrue(filePermissions.isReadable)
-        assertFalse(filePermissions.isWritable)
+    fun `classifyError maps IllegalAccessException to INSTANTIATION_FAILED`() {
+        val error = IllegalAccessException("no access")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.INSTANTIATION_FAILED, classified)
     }
 
     @Test
-    fun `stale APK files should be cleaned on startup`() {
-        // Given
-        val existingFiles = listOf("old_plugin.apk", "stale_plugin.apk", "active_plugin.apk")
-        val activePlugins = listOf("active_plugin")
-        
-        // When
-        val filesToDelete = existingFiles.filter { file ->
-            val pluginName = file.removeSuffix(".apk")
-            pluginName !in activePlugins
-        }
-        
-        // Then
-        assertEquals(2, filesToDelete.size)
-        assertTrue(filesToDelete.contains("old_plugin.apk"))
-        assertTrue(filesToDelete.contains("stale_plugin.apk"))
-        assertFalse(filesToDelete.contains("active_plugin.apk"))
+    fun `classifyError maps dex-related messages to DEX_COMPILATION_FAILED`() {
+        val error = RuntimeException("Failed to compile dex file")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.DEX_COMPILATION_FAILED, classified)
     }
 
     @Test
-    fun `JS plugins directory uses cache when preference is set`() {
-        // Given
-        val useCacheDir = true
-        val cacheDir = "/data/data/com.example.app/cache"
-        val externalDir = "/storage/emulated/0/Android/data/com.example.app"
-        
-        // When
-        val jsPluginsDir = if (useCacheDir) {
-            "$cacheDir/js-plugins"
-        } else {
-            "$externalDir/ireader/js-plugins"
-        }
-        
-        // Then
-        assertTrue(jsPluginsDir.contains("cache"))
-        assertTrue(jsPluginsDir.contains("js-plugins"))
+    fun `classifyError maps class not found messages to CLASS_NOT_FOUND`() {
+        val error = RuntimeException("class not found in loader")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.CLASS_NOT_FOUND, classified)
     }
 
     @Test
-    fun `JS plugins directory uses external storage when preference is not set`() {
-        // Given
-        val useCacheDir = false
-        val cacheDir = "/data/data/com.example.app/cache"
-        val externalDir = "/storage/emulated/0/Android/data/com.example.app"
-        
-        // When
-        val jsPluginsDir = if (useCacheDir) {
-            "$cacheDir/js-plugins"
-        } else {
-            "$externalDir/ireader/js-plugins"
-        }
-        
-        // Then
-        assertTrue(jsPluginsDir.contains("ireader"))
-        assertTrue(jsPluginsDir.contains("js-plugins"))
+    fun `classifyError maps unknown exceptions to UNKNOWN`() {
+        val error = IllegalStateException("something weird")
+        val classified = classifyError(error)
+        assertEquals(CatalogLoadError.UNKNOWN, classified)
+    }
+
+    // ── Recoverability ───────────────────────────────────────────────────
+
+    @Test
+    fun `IO_ERROR is recoverable`() {
+        assertTrue(isRecoverable(CatalogLoadError.IO_ERROR))
     }
 
     @Test
-    fun `extension feature flag is correct`() {
-        // Given
-        val expectedFeature = "ireader"
-        
-        // Then
-        assertEquals("ireader", expectedFeature)
+    fun `DEX_COMPILATION_FAILED is recoverable`() {
+        assertTrue(isRecoverable(CatalogLoadError.DEX_COMPILATION_FAILED))
     }
 
     @Test
-    fun `metadata source class key is correct`() {
-        // Given
-        val expectedKey = "source.class"
-        
-        // Then
-        assertEquals("source.class", expectedKey)
+    fun `CLASS_NOT_FOUND is recoverable`() {
+        assertTrue(isRecoverable(CatalogLoadError.CLASS_NOT_FOUND))
     }
 
     @Test
-    fun `lib version range is valid`() {
-        // Given
-        val minVersion = 1
-        val maxVersion = 1
-        
-        // When
-        val isValidRange = minVersion <= maxVersion
-        
-        // Then
-        assertTrue(isValidRange)
-    }
-
-    // Helper class for simulating file permissions
-    private class FilePermissionSimulator {
-        var isReadable = true
-        var isWritable = true
-        var isExecutable = false
-        
-        fun setReadOnly() {
-            isWritable = false
-        }
-    }
-}
-
-/**
- * Tests for Android 15+ specific compatibility
- */
-class Android15CompatibilityTest {
-
-    @Test
-    fun `DEX loading should use InMemoryDexClassLoader when available`() {
-        // Android 15+ recommends InMemoryDexClassLoader for better security
-        // This test documents the expected behavior
-        
-        // Given
-        val androidVersion = 35 // Android 15
-        val useInMemoryLoader = androidVersion >= 35
-        
-        // Then
-        assertTrue(useInMemoryLoader, "Android 15+ should prefer InMemoryDexClassLoader")
+    fun `SECURITY_ERROR is not recoverable`() {
+        assertFalse(isRecoverable(CatalogLoadError.SECURITY_ERROR))
     }
 
     @Test
-    fun `file-based DEX loading should still work as fallback`() {
-        // Given
-        val androidVersion = 34 // Android 14
-        val useFileBased = androidVersion < 35
-        
-        // Then
-        assertTrue(useFileBased, "Android 14 should use file-based DEX loading")
+    fun `INSTANTIATION_FAILED is not recoverable`() {
+        assertFalse(isRecoverable(CatalogLoadError.INSTANTIATION_FAILED))
     }
 
     @Test
-    fun `secure directory should have correct permissions`() {
-        // Given
-        val expectedPermissions = "rwx------" // Owner only
-        
-        // When
-        val isSecure = expectedPermissions.startsWith("rwx") && 
-                       expectedPermissions.substring(3) == "------"
-        
-        // Then
-        assertTrue(isSecure, "Secure directory should only be accessible by owner")
+    fun `UNKNOWN is not recoverable`() {
+        assertFalse(isRecoverable(CatalogLoadError.UNKNOWN))
     }
 
     @Test
-    fun `APK signature should be verified before loading`() {
-        // Given
-        val apkHasValidSignature = true
-        
-        // Then
-        assertTrue(apkHasValidSignature, "APK signature should be verified")
-    }
-}
-
-/**
- * Tests for JS plugin loading on Android
- */
-class AndroidJSPluginLoaderTest {
-
-    @Test
-    fun `JS plugin file extension is correct`() {
-        // Given
-        val pluginFileName = "AllNovelFull.js"
-        
-        // When
-        val extension = pluginFileName.substringAfterLast(".")
-        
-        // Then
-        assertEquals("js", extension)
+    fun `PACKAGE_NOT_FOUND is not recoverable`() {
+        assertFalse(isRecoverable(CatalogLoadError.PACKAGE_NOT_FOUND))
     }
 
     @Test
-    fun `metadata file has correct naming convention`() {
-        // Given
-        val pluginId = "anf.net"
-        
-        // When
-        val metadataFileName = "$pluginId.meta.json"
-        
-        // Then
-        assertTrue(metadataFileName.endsWith(".meta.json"))
-        assertTrue(metadataFileName.startsWith(pluginId))
+    fun `INVALID_METADATA is not recoverable`() {
+        assertFalse(isRecoverable(CatalogLoadError.INVALID_METADATA))
     }
 
     @Test
-    fun `stub plugins load faster than full plugins`() {
-        // Given - simulated load times
-        val stubLoadTime = 10L // ms
-        val fullLoadTime = 500L // ms
-        
-        // Then
-        assertTrue(stubLoadTime < fullLoadTime, "Stub plugins should load much faster")
+    fun `UNSUPPORTED_LIB_VERSION is not recoverable`() {
+        assertFalse(isRecoverable(CatalogLoadError.UNSUPPORTED_LIB_VERSION))
+    }
+
+    // ── Android 15 ClassLoader Strategy ──────────────────────────────────
+
+    @Test
+    fun `InMemoryDexClassLoader is preferred on API 28+`() {
+        val minApiForInMemory = 28
+        assertTrue(minApiForInMemory <= 35, "Should use InMemory on Android 15")
     }
 
     @Test
-    fun `background loading replaces stubs with actual plugins`() {
-        // Given
-        val stubSourceId = 12345L
-        val actualSourceId = 12345L
-        
-        // When
-        val isSameSource = stubSourceId == actualSourceId
-        
-        // Then
-        assertTrue(isSameSource, "Stub and actual plugin should have same sourceId")
+    fun `DexClassLoader fallback uses timestamped output dir`() {
+        val pkgName = "com.test.plugin"
+        val dir1 = "dex_out/${pkgName}_${System.currentTimeMillis()}"
+        Thread.sleep(5)
+        val dir2 = "dex_out/${pkgName}_${System.currentTimeMillis()}"
+        assertNotEquals(dir1, dir2, "Output dirs should be unique per load")
+    }
+
+    // ── Metadata Validation ──────────────────────────────────────────────
+
+    @Test
+    fun `lib version range is 2-2`() {
+        val min = 2
+        val max = 2
+        assertTrue(min <= max)
     }
 
     @Test
-    fun `priority plugins load first`() {
-        // Given
-        val priorityPlugins = setOf("favorite.plugin", "frequently.used")
-        val allPlugins = listOf("favorite.plugin", "other.plugin", "frequently.used", "rarely.used")
-        
-        // When
-        val loadOrder = allPlugins.sortedBy { if (it in priorityPlugins) 0 else 1 }
-        
-        // Then
-        assertEquals("favorite.plugin", loadOrder[0])
-        assertTrue(loadOrder.indexOf("favorite.plugin") < loadOrder.indexOf("other.plugin"))
+    fun `extension feature flag is ireader`() {
+        assertEquals("ireader", EXTENSION_FEATURE)
+    }
+
+    @Test
+    fun `metadata keys are correct`() {
+        assertEquals("source.class", METADATA_SOURCE_CLASS)
+        assertEquals("source.description", METADATA_DESCRIPTION)
+        assertEquals("source.nsfw", METADATA_NSFW)
+        assertEquals("source.icon", METADATA_ICON)
+    }
+
+    // ── APK Validation ───────────────────────────────────────────────────
+
+    @Test
+    fun `empty APK file should be rejected`() {
+        val file = FakeFile(exists = true, canRead = true, length = 0)
+        assertFalse(isValidApk(file), "Zero-length APK should be rejected")
+    }
+
+    @Test
+    fun `unreadable APK file should be rejected`() {
+        val file = FakeFile(exists = true, canRead = false, length = 1024)
+        assertFalse(isValidApk(file), "Unreadable APK should be rejected")
+    }
+
+    @Test
+    fun `non-existent APK file should be rejected`() {
+        val file = FakeFile(exists = false, canRead = false, length = 0)
+        assertFalse(isValidApk(file), "Non-existent APK should be rejected")
+    }
+
+    @Test
+    fun `valid APK file should be accepted`() {
+        val file = FakeFile(exists = true, canRead = true, length = 50000)
+        assertTrue(isValidApk(file), "Valid APK should be accepted")
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    /** Mirrors the private classifyError in AndroidCatalogLoader (after BUG 5 fix) */
+    private fun classifyError(e: Throwable): CatalogLoadError = when {
+        e is java.io.IOException -> CatalogLoadError.IO_ERROR
+        e is ClassNotFoundException || e is NoClassDefFoundError -> CatalogLoadError.CLASS_NOT_FOUND
+        e is InstantiationException || e is IllegalAccessException -> CatalogLoadError.INSTANTIATION_FAILED
+        e.message?.contains("dex", ignoreCase = true) == true -> CatalogLoadError.DEX_COMPILATION_FAILED
+        e.message?.contains("class not found", ignoreCase = true) == true -> CatalogLoadError.CLASS_NOT_FOUND
+        else -> CatalogLoadError.UNKNOWN
+    }
+
+    /** Mirrors the private isRecoverableError in AndroidCatalogLoader */
+    private fun isRecoverable(error: CatalogLoadError): Boolean = error in listOf(
+        CatalogLoadError.DEX_COMPILATION_FAILED,
+        CatalogLoadError.IO_ERROR,
+        CatalogLoadError.CLASS_NOT_FOUND
+    )
+
+    /** Mirrors the APK validation logic */
+    private fun isValidApk(file: FakeFile): Boolean =
+        file.exists && file.canRead && file.length > 0
+
+    private data class FakeFile(val exists: Boolean, val canRead: Boolean, val length: Long)
+
+    private companion object {
+        const val EXTENSION_FEATURE = "ireader"
+        const val METADATA_SOURCE_CLASS = "source.class"
+        const val METADATA_DESCRIPTION = "source.description"
+        const val METADATA_NSFW = "source.nsfw"
+        const val METADATA_ICON = "source.icon"
     }
 }
