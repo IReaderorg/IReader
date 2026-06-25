@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -40,6 +41,13 @@ import kotlinx.coroutines.sync.withLock
  * - Coordinates between catalog store and use cases for data operations
  * - Emits ExtensionEvents for one-time occurrences
  * 
+ * Error Recovery Strategy:
+ * - All commands are wrapped in try-catch with typed error handling
+ * - Failed operations emit ExtensionError events and update state
+ * - State transitions are atomic via StateFlow.update {}
+ * - Critical operations (load, refresh) can be retried via ClearError + re-dispatch
+ * - Installation jobs are tracked and can be cancelled independently
+ * 
  * Requirements: 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
  */
 class ExtensionController(
@@ -53,6 +61,12 @@ class ExtensionController(
 ) {
     companion object {
         private const val TAG = "ExtensionController"
+        
+        /** Maximum retry attempts for recoverable operations */
+        private const val MAX_RETRY_ATTEMPTS = 2
+        
+        /** Delay between retries in milliseconds */
+        private const val RETRY_DELAY_MS = 1000L
     }
     
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -75,7 +89,9 @@ class ExtensionController(
     
     // Installation jobs
     private val installerJobs: MutableMap<Long, Job> = mutableMapOf()
-
+    
+    // Error tracking for diagnostics
+    private val errorHistory = mutableListOf<TimestampedError>()
     
     /**
      * Process a command - ALL interactions go through here.
@@ -89,9 +105,15 @@ class ExtensionController(
             commandMutex.withLock {
                 try {
                     processCommand(command)
+                } catch (e: OutOfMemoryError) {
+                    // OOM is fatal - don't try to recover
+                    Log.error(e, "$TAG: OOM processing command")
+                    _state.update { it.copy(error = ExtensionError.LoadFailed("Out of memory")) }
                 } catch (e: Exception) {
                     Log.error(e, "$TAG: Error processing command")
-                    handleError(ExtensionError.LoadFailed(e.message ?: "Unknown error"))
+                    val error = ExtensionError.LoadFailed(e.message ?: "Unknown error")
+                    recordError(error, e)
+                    handleError(error)
                 }
             }
         }
@@ -129,6 +151,7 @@ class ExtensionController(
     
     /**
      * Load extensions and subscribe to reactive updates.
+     * Includes retry logic for initial load failures.
      * Requirements: 3.2
      */
     private suspend fun loadExtensions() {
@@ -139,59 +162,73 @@ class ExtensionController(
         
         _state.update { it.copy(isLoading = true, error = null) }
         
-        try {
-            // Subscribe to catalog changes
-            catalogSubscriptionJob = scope.launch {
-                getCatalogsByType.subscribe(
-                    excludeRemoteInstalled = true,
-                    repositoryType = _state.value.selectedRepositoryType
-                ).collect { catalogs ->
-                    val availableLanguages = getAvailableLanguages(catalogs.remote, catalogs.pinned + catalogs.unpinned)
-                    val currentState = _state.value
-                    
-                    // Calculate updatable extensions
-                    val updatable = calculateUpdatableExtensions(
-                        catalogs.pinned + catalogs.unpinned,
-                        catalogs.remote
-                    )
-                    
-                    _state.update { state ->
-                        state.copy(
-                            allPinnedCatalogs = catalogs.pinned,
-                            allUnpinnedCatalogs = catalogs.unpinned,
-                            allRemoteCatalogs = catalogs.remote,
-                            pinnedCatalogs = filterLocalByLanguageCodes(
-                                catalogs.pinned.filteredByQuery(currentState.searchQuery),
-                                currentState.selectedLanguageCodes
-                            ),
-                            unpinnedCatalogs = filterLocalByLanguageCodes(
-                                catalogs.unpinned.filteredByQuery(currentState.searchQuery),
-                                currentState.selectedLanguageCodes
-                            ),
-                            remoteCatalogs = filterRemoteByLanguageCodes(
-                                catalogs.remote.filteredByQuery(currentState.searchQuery),
-                                currentState.selectedLanguageCodes
-                            ),
-                            installedExtensions = catalogs.pinned + catalogs.unpinned,
-                            availableExtensions = catalogs.remote,
-                            updatableExtensions = updatable,
-                            availableLanguages = availableLanguages,
-                            isLoading = false
+        var lastException: Exception? = null
+        
+        repeat(MAX_RETRY_ATTEMPTS + 1) { attempt ->
+            try {
+                // Subscribe to catalog changes
+                catalogSubscriptionJob = scope.launch {
+                    getCatalogsByType.subscribe(
+                        excludeRemoteInstalled = true,
+                        repositoryType = _state.value.selectedRepositoryType
+                    ).collect { catalogs ->
+                        val availableLanguages = getAvailableLanguages(catalogs.remote, catalogs.pinned + catalogs.unpinned)
+                        val currentState = _state.value
+                        
+                        // Calculate updatable extensions
+                        val updatable = calculateUpdatableExtensions(
+                            catalogs.pinned + catalogs.unpinned,
+                            catalogs.remote
                         )
+                        
+                        _state.update { state ->
+                            state.copy(
+                                allPinnedCatalogs = catalogs.pinned,
+                                allUnpinnedCatalogs = catalogs.unpinned,
+                                allRemoteCatalogs = catalogs.remote,
+                                pinnedCatalogs = filterLocalByLanguageCodes(
+                                    catalogs.pinned.filteredByQuery(currentState.searchQuery),
+                                    currentState.selectedLanguageCodes
+                                ),
+                                unpinnedCatalogs = filterLocalByLanguageCodes(
+                                    catalogs.unpinned.filteredByQuery(currentState.searchQuery),
+                                    currentState.selectedLanguageCodes
+                                ),
+                                remoteCatalogs = filterRemoteByLanguageCodes(
+                                    catalogs.remote.filteredByQuery(currentState.searchQuery),
+                                    currentState.selectedLanguageCodes
+                                ),
+                                installedExtensions = catalogs.pinned + catalogs.unpinned,
+                                availableExtensions = catalogs.remote,
+                                updatableExtensions = updatable,
+                                availableLanguages = availableLanguages,
+                                isLoading = false
+                            )
+                        }
                     }
                 }
+                
+                val currentState = _state.value
+                _events.emit(ExtensionEvent.ExtensionsLoaded(
+                    installedCount = currentState.installedCount,
+                    availableCount = currentState.availableCount
+                ))
+                
+                // Success - exit retry loop
+                return
+                
+            } catch (e: Exception) {
+                lastException = e
+                if (attempt < MAX_RETRY_ATTEMPTS) {
+                    Log.warn { "$TAG: loadExtensions attempt ${attempt + 1} failed, retrying: ${e.message}" }
+                    delay(RETRY_DELAY_MS * (attempt + 1))
+                }
             }
-            
-            val currentState = _state.value
-            _events.emit(ExtensionEvent.ExtensionsLoaded(
-                installedCount = currentState.installedCount,
-                availableCount = currentState.availableCount
-            ))
-            
-        } catch (e: Exception) {
-            Log.error(e, "$TAG: Failed to load extensions")
-            handleError(ExtensionError.LoadFailed(e.message ?: "Failed to load extensions"))
         }
+        
+        // All attempts failed
+        Log.error(lastException ?: Exception("Unknown"), "$TAG: Failed to load extensions after ${MAX_RETRY_ATTEMPTS + 1} attempts")
+        handleError(ExtensionError.LoadFailed(lastException?.message ?: "Failed to load extensions"))
     }
     
     /**
@@ -213,6 +250,7 @@ class ExtensionController(
     
     /**
      * Install an extension from remote catalog.
+     * Includes error isolation - one failed install doesn't affect others.
      */
     private suspend fun installExtension(catalog: CatalogRemote) {
         Log.debug { "$TAG: installExtension(${catalog.pkgName})" }
@@ -233,12 +271,15 @@ class ExtensionController(
                             catalogStore.reloadCatalogs()
                         } catch (e: Exception) {
                             Log.error(e, "$TAG: Failed to reload catalogs after install")
+                            // Don't fail the whole operation - install was successful
                         }
                     }
                 }
             } catch (e: Exception) {
                 Log.error(e, "$TAG: Failed to install ${catalog.pkgName}")
-                handleError(ExtensionError.InstallFailed(catalog.pkgName, e.message ?: "Unknown error"))
+                val error = ExtensionError.InstallFailed(catalog.pkgName, e.message ?: "Unknown error")
+                recordError(error, e)
+                handleError(error)
             } finally {
                 installerJobs.remove(catalog.sourceId)
             }
@@ -263,11 +304,13 @@ class ExtensionController(
             
             // Delay to allow system to process uninstall
             // The CatalogStore.onUninstalled() handler removes the catalog via catalogUpdateChannel
-            kotlinx.coroutines.delay(500)
+            delay(500)
             
         } catch (e: Exception) {
             Log.error(e, "$TAG: Failed to uninstall ${catalog.pkgName}")
-            handleError(ExtensionError.UninstallFailed(catalog.pkgName, e.message ?: "Unknown error"))
+            val error = ExtensionError.UninstallFailed(catalog.pkgName, e.message ?: "Unknown error")
+            recordError(error, e)
+            handleError(error)
         }
     }
     
@@ -294,7 +337,9 @@ class ExtensionController(
                 }
             } catch (e: Exception) {
                 Log.error(e, "$TAG: Failed to update ${catalog.pkgName}")
-                handleError(ExtensionError.UpdateFailed(catalog.pkgName, e.message ?: "Unknown error"))
+                val error = ExtensionError.UpdateFailed(catalog.pkgName, e.message ?: "Unknown error")
+                recordError(error, e)
+                handleError(error)
             } finally {
                 installerJobs.remove(catalog.sourceId)
             }
@@ -449,35 +494,52 @@ class ExtensionController(
             
         } catch (e: Exception) {
             Log.error(e, "$TAG: Failed to check for updates")
-            handleError(ExtensionError.CheckUpdatesFailed(e.message ?: "Unknown error"))
+            val error = ExtensionError.CheckUpdatesFailed(e.message ?: "Unknown error")
+            recordError(error, e)
+            handleError(error)
         }
     }
 
     
     /**
      * Refresh extensions from remote repositories.
+     * Includes retry logic for network failures.
      */
     private suspend fun refreshExtensions() {
         Log.debug { "$TAG: refreshExtensions()" }
         
         _state.update { it.copy(isRefreshing = true, error = null) }
         
-        try {
-            syncRemoteCatalogs.await(forceRefresh = true, onError = { error ->
-                Log.error(error, "$TAG: Error during sync")
-            })
-            
-            _state.update { it.copy(isRefreshing = false) }
-            _events.emit(ExtensionEvent.RefreshComplete)
-            
-        } catch (e: Exception) {
-            Log.error(e, "$TAG: Failed to refresh extensions")
-            handleError(ExtensionError.RefreshFailed(e.message ?: "Unknown error"))
+        var lastError: Exception? = null
+        
+        repeat(MAX_RETRY_ATTEMPTS + 1) { attempt ->
+            try {
+                syncRemoteCatalogs.await(forceRefresh = true, onError = { error ->
+                    Log.error(error, "$TAG: Error during sync")
+                })
+                
+                _state.update { it.copy(isRefreshing = false) }
+                _events.emit(ExtensionEvent.RefreshComplete)
+                return
+                
+            } catch (e: Exception) {
+                lastError = e
+                if (attempt < MAX_RETRY_ATTEMPTS) {
+                    Log.warn { "$TAG: refreshExtensions attempt ${attempt + 1} failed, retrying: ${e.message}" }
+                    delay(RETRY_DELAY_MS * (attempt + 1))
+                }
+            }
         }
+        
+        Log.error(lastError ?: Exception("Unknown"), "$TAG: Failed to refresh extensions after ${MAX_RETRY_ATTEMPTS + 1} attempts")
+        val error = ExtensionError.RefreshFailed(lastError?.message ?: "Unknown error")
+        recordError(error, lastError ?: Exception("Unknown"))
+        handleError(error)
     }
     
     /**
      * Batch update all extensions with available updates.
+     * Includes per-extension error isolation.
      */
     private suspend fun batchUpdateExtensions() {
         Log.debug { "$TAG: batchUpdateExtensions()" }
@@ -490,6 +552,7 @@ class ExtensionController(
         
         var successCount = 0
         val totalCount = updatable.size
+        val failedExtensions = mutableListOf<String>()
         
         for (catalog in updatable) {
             try {
@@ -501,11 +564,17 @@ class ExtensionController(
                 }
             } catch (e: Exception) {
                 Log.error(e, "$TAG: Failed to update ${catalog.pkgName} during batch update")
+                failedExtensions.add(catalog.pkgName)
+                // Continue with other extensions - don't abort the whole batch
             }
         }
         
         refreshCatalogsQuietly()
         _events.emit(ExtensionEvent.BatchUpdateComplete(successCount, totalCount))
+        
+        if (failedExtensions.isNotEmpty()) {
+            Log.warn { "$TAG: Batch update failed for: ${failedExtensions.joinToString()}" }
+        }
     }
     
     // ========== Catalog Operations ==========
@@ -520,6 +589,7 @@ class ExtensionController(
             togglePinnedCatalog.await(catalog)
         } catch (e: Exception) {
             Log.error(e, "$TAG: Failed to toggle pinned status")
+            // Non-critical - don't update error state
         }
     }
     
@@ -558,12 +628,28 @@ class ExtensionController(
     }
     
     /**
+     * Record an error for diagnostics.
+     */
+    private fun recordError(error: ExtensionError, cause: Throwable) {
+        errorHistory.add(TimestampedError(error, cause))
+        // Keep only last 50 errors
+        if (errorHistory.size > 50) {
+            errorHistory.removeAt(0)
+        }
+    }
+    
+    /**
      * Clear the current error state.
      * Requirements: 4.5
      */
     fun clearError() {
         _state.update { it.copy(error = null) }
     }
+    
+    /**
+     * Get error history for diagnostics.
+     */
+    fun getErrorHistory(): List<TimestampedError> = errorHistory.toList()
     
     /**
      * Release all resources. Call when the controller is no longer needed.
@@ -611,4 +697,13 @@ class ExtensionController(
     private fun filterLocalByLanguageCodes(list: List<CatalogLocal>, codes: Set<String>?): List<CatalogLocal> {
         return if (codes == null || codes.isEmpty()) list else list.filter { it.source?.lang in codes }
     }
+    
+    /**
+     * Data class for error diagnostics with timestamp.
+     */
+    data class TimestampedError(
+        val error: ExtensionError,
+        val cause: Throwable,
+        val timestamp: Long = System.currentTimeMillis()
+    )
 }

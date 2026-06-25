@@ -417,8 +417,7 @@ val DomainServices = module {
     // Requirements: 6.1, 6.2, 6.3, 6.4
     includes(libraryModule)
     
-    // Extension Module - ExtensionController as singleton
-    // Requirements: 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
+    // Extension Module (placeholder for future extension singletons)
     includes(extensionModule)
     
     // BookDetail Module - BookDetailController as factory (each screen gets its own instance)

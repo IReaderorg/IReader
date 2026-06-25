@@ -175,7 +175,7 @@ supabase-functions = { module = "io.github.jan-tennert.supabase:functions-kt", v
 androidx-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
 test-junit4 = "junit:junit:4.13.2"
 test-extJunit = "androidx.test.ext:junit:1.3.0"
-test-espresso = "androidx.test.espresso:espresso-core:3.7.0"
+test-espresso = "androidx.test.espresso:espresso-core:3.5.0"
 test-junitAndroidExt = "androidx.test.ext:junit:1.3.0"
 test-truth = "com.google.truth:truth:1.4.5"
 test-testRunner = "androidx.test:runner:1.7.0"
