@@ -145,6 +145,9 @@ kotlin {
                 // BouncyCastle for X.509 certificate generation (Task 9.2.2) - Android
                 implementation("org.bouncycastle:bcprov-jdk18on:1.78")
                 implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
+                
+                // Jsoup for Tsundoku extension HTML parsing (extensions use compileOnly, host provides)
+                implementation("org.jsoup:jsoup:1.22.1")
             }
         }
         
@@ -172,6 +175,9 @@ kotlin {
                 // BouncyCastle for X.509 certificate generation (Task 9.2.2) - Desktop
                 implementation("org.bouncycastle:bcprov-jdk18on:1.78")
                 implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
+                
+                // Jsoup for Tsundoku extension HTML parsing (extensions use compileOnly, host provides)
+                implementation("org.jsoup:jsoup:1.22.1")
             }
         }
         

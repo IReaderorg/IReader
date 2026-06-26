@@ -59,7 +59,10 @@ internal fun AddingRepositoryScreen(
                 "IReaderorg", "https://github.com/IReaderorg/IReader-extensions", RepositoryType.IREADER),
             QuickAddPreset("LNReader Plugins",
                 "https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/repo/plugins/plugins.min.json",
-                "LNReader", "https://github.com/kazemcodes/lnreader-plugins-unminified", RepositoryType.LNREADER)
+                "LNReader", "https://github.com/kazemcodes/lnreader-plugins-unminified", RepositoryType.LNREADER),
+            QuickAddPreset("Tsundoku Extensions",
+                "https://raw.githubusercontent.com/novelsourcery/extensions/repo/index.min.json",
+                "novelsourcery", "https://github.com/novelsourcery/extensions", RepositoryType.TSUNDOKU)
         )
     }
 
@@ -122,6 +125,9 @@ internal fun AddingRepositoryScreen(
                         RepositoryTypeChip(repositoryType == RepositoryType.LNREADER,
                             { repositoryType = RepositoryType.LNREADER; showJSPluginPrompt = true },
                             localizeHelper.localize(Res.string.lnreader), Modifier.weight(1f))
+                        RepositoryTypeChip(repositoryType == RepositoryType.TSUNDOKU,
+                            { repositoryType = RepositoryType.TSUNDOKU },
+                            "Tsundoku", Modifier.weight(1f))
                     }
                     if (repositoryType == RepositoryType.LNREADER) {
                         Surface(Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
@@ -372,5 +378,6 @@ internal data class QuickAddPreset(
 
 enum class RepositoryType {
     IREADER,
-    LNREADER
+    LNREADER,
+    TSUNDOKU
 }

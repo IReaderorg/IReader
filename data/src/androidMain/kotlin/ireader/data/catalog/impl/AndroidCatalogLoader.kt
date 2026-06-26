@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
+import ireader.data.catalog.impl.tsundoku.ChildFirstDexClassLoader
+import ireader.data.catalog.impl.tsundoku.ChildFirstPathClassLoader
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
@@ -30,6 +32,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import ireader.data.catalog.impl.tsundoku.TsundokuExtensionLoader
+import ireader.data.catalog.impl.tsundoku.TsundokuCatalogSource
+import ireader.data.catalog.impl.tsundoku.TsundokuValidatedData
 import okio.Path.Companion.toPath
 import java.io.File
 
@@ -222,6 +227,9 @@ class AndroidCatalogLoader(
             !isDuplicate
         }
 
+        // Load Tsundoku (Tachiyomi/Mihon) extensions natively
+        val tsundokuCatalogs = loadTsundokuExtensions()
+
         // Load JavaScript plugins if enabled
         val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
@@ -240,7 +248,7 @@ class AndroidCatalogLoader(
             emptyList()
         }
 
-        val result = (bundled + deduplicated + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        val result = (bundled + deduplicated + tsundokuCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
         
         // Log diagnostics
         if (failedCatalogs.isNotEmpty()) {
@@ -396,34 +404,89 @@ class AndroidCatalogLoader(
         pkgInfo: PackageInfo,
         file: File,
     ): CatalogInstalled.Locally? {
-        val data = validateMetadata(pkgName, pkgInfo) ?: return null
-        
-        try {
-            // Verify file is readable and non-empty before attempting class loading
-            if (!file.exists() || !file.canRead() || file.length() == 0L) {
-                Log.warn { "AndroidCatalogLoader: APK file not accessible for $pkgName" }
+        // Try IReader extension first
+        val data = validateMetadata(pkgName, pkgInfo)
+
+        if (data != null) {
+            // Standard IReader extension loading path
+            try {
+                if (!file.exists() || !file.canRead() || file.length() == 0L) {
+                    Log.warn { "AndroidCatalogLoader: APK file not accessible for $pkgName" }
+                    return null
+                }
+
+                val loader = createClassLoader(file, pkgName)
+                val source = loadSource(pkgName, loader, data) ?: return null
+
+                return CatalogInstalled.Locally(
+                    name = source.name,
+                    description = data.description,
+                    source = source,
+                    pkgName = pkgName,
+                    versionName = data.versionName,
+                    versionCode = data.versionCode,
+                    nsfw = data.nsfw,
+                    installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
+                    iconUrl = data.icon
+                )
+            } catch (e: OutOfMemoryError) {
+                Log.error("AndroidCatalogLoader: OOM loading catalog $pkgName", e)
+                return null
+            } catch (e: Exception) {
+                Log.error("AndroidCatalogLoader: Failed to load local catalog $pkgName", e)
                 return null
             }
-            
-            val loader = createClassLoader(file, pkgName)
-            val source = loadSource(pkgName, loader, data) ?: return null
-            
+        }
+
+        // Fallback: try loading as Tsundoku extension
+        val tsundokuData = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo)
+        if (tsundokuData != null) {
+            return loadLocalTsundokuCatalog(pkgName, pkgInfo, file, tsundokuData)
+        }
+
+        return null
+    }
+
+    /**
+     * Load a locally stored Tsundoku extension APK.
+     */
+    private fun loadLocalTsundokuCatalog(
+        pkgName: String,
+        pkgInfo: PackageInfo,
+        file: File,
+        data: TsundokuValidatedData
+    ): CatalogInstalled.Locally? {
+        try {
+            if (!file.exists() || !file.canRead() || file.length() == 0L) {
+                Log.warn { "AndroidCatalogLoader: Tsundoku APK file not accessible for $pkgName" }
+                return null
+            }
+
+            // Use ChildFirstDexClassLoader for local tsundoku APKs
+            val readOnlyCopy = copyToReadOnlyCache(file, pkgName)
+            val dexOutputDir = File(context.codeCacheDir, "dex_out/${pkgName}_${System.currentTimeMillis()}").apply { mkdirs() }
+            val classLoader = ChildFirstDexClassLoader(readOnlyCopy.absolutePath, dexOutputDir.absolutePath, null, context.classLoader)
+            val sources = TsundokuExtensionLoader.loadSources(pkgName, classLoader, data)
+
+            if (sources.isEmpty()) {
+                Log.warn { "AndroidCatalogLoader: No sources from local tsundoku APK $pkgName" }
+                return null
+            }
+
+            val source = sources.first()
             return CatalogInstalled.Locally(
                 name = source.name,
-                description = data.description,
+                description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
                 source = source,
                 pkgName = pkgName,
                 versionName = data.versionName,
                 versionCode = data.versionCode,
                 nsfw = data.nsfw,
                 installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
-                iconUrl = data.icon
+                iconUrl = ""
             )
-        } catch (e: OutOfMemoryError) {
-            Log.error("AndroidCatalogLoader: OOM loading catalog $pkgName", e)
-            return null
         } catch (e: Exception) {
-            Log.error("AndroidCatalogLoader: Failed to load local catalog $pkgName", e)
+            Log.error("AndroidCatalogLoader: Failed to load local tsundoku catalog $pkgName", e)
             return null
         }
     }
@@ -609,6 +672,75 @@ class AndroidCatalogLoader(
             null
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to instantiate source ${data.classToLoad} from $pkgName", e)
+            null
+        }
+    }
+
+    /**
+     * Load all installed Tsundoku (Tachiyomi/Mihon) extensions as IReader catalogs.
+     *
+     * Tsundoku extensions use different feature flags (`tachiyomi.extension` / `tachiyomi.novelextension`)
+     * and metadata keys. They are loaded via reflection and wrapped in [TsundokuCatalogSource].
+     */
+    private fun loadTsundokuExtensions(): List<CatalogLocal> {
+        val tsundokuPkgs = try {
+            TsundokuExtensionLoader.getInstalledTsundokuExtensions(pkgManager)
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to query tsundoku extensions", e)
+            emptyList()
+        }
+
+        if (tsundokuPkgs.isEmpty()) return emptyList()
+
+        Log.info("AndroidCatalogLoader: Found ${tsundokuPkgs.size} tsundoku extensions")
+
+        // Initialize tsundoku DI dependencies (Injekt, NetworkHelper, etc.)
+        TsundokuExtensionLoader.initializeDependencies(context)
+
+        return tsundokuPkgs.mapNotNull { pkgInfo ->
+            loadTsundokuCatalog(pkgInfo)
+        }
+    }
+
+    /**
+     * Load a single Tsundoku extension as an IReader catalog.
+     */
+    private fun loadTsundokuCatalog(pkgInfo: PackageInfo): CatalogInstalled.SystemWide? {
+        val pkgName = pkgInfo.packageName
+        val data = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo) ?: return null
+
+        val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: run {
+            Log.warn { "AndroidCatalogLoader: No sourceDir for tsundoku package $pkgName" }
+            return null
+        }
+
+        return try {
+            // Use ChildFirstPathClassLoader (matches tsundoku's approach)
+            // Extension's own classes load first, shared library classes fall to parent (our shims)
+            val classLoader = ChildFirstPathClassLoader(sourceDir, null, context.classLoader)
+            val sources = TsundokuExtensionLoader.loadSources(pkgName, classLoader, data)
+
+            if (sources.isEmpty()) {
+                Log.warn { "AndroidCatalogLoader: No sources loaded from tsundoku extension $pkgName" }
+                return null
+            }
+
+            // Use the first source (most extensions have one source)
+            val source = sources.first()
+
+            CatalogInstalled.SystemWide(
+                name = source.name,
+                description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
+                source = source,
+                pkgName = pkgName,
+                versionName = data.versionName,
+                versionCode = data.versionCode,
+                nsfw = data.nsfw,
+                iconUrl = "",
+                installDir = sourceDir.toOkioPath()
+            )
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to load tsundoku catalog $pkgName", e)
             null
         }
     }

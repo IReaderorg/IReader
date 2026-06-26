@@ -7,10 +7,14 @@ import com.googlecode.d2j.dex.Dex2jar
 import com.googlecode.d2j.reader.MultiDexFileReader
 import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import ireader.core.http.HttpClients
+import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.storage.ExtensionDir
+import ireader.data.catalog.impl.tsundoku.DesktopTsundokuExtensionLoader
+import ireader.data.catalog.impl.tsundoku.TsundokuCatalogSource
+import ireader.data.catalog.impl.tsundoku.TsundokuValidatedData
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.js.loader.JSPluginLoader
 import ireader.domain.models.entities.CatalogInstalled
@@ -123,6 +127,9 @@ class DesktopCatalogLoader(
             deferred.awaitAll()
         }.filterNotNull()
 
+        // Load Tsundoku (Tachiyomi/Mihon) extensions natively
+        val tsundokuCatalogs = loadTsundokuExtensions()
+
         // Load JavaScript plugins if enabled
         val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
@@ -140,7 +147,7 @@ class DesktopCatalogLoader(
             emptyList()
         }
 
-        return (bundled + installedCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        return (bundled + installedCatalogs + tsundokuCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
     }
 
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
@@ -204,6 +211,72 @@ class DesktopCatalogLoader(
         )
 
 
+    }
+
+    /**
+     * Load all Tsundoku (Tachiyomi/Mihon) extension APKs from the extensions directory.
+     */
+    private fun loadTsundokuExtensions(): List<CatalogLocal> {
+        val tsundokuPkgs = ExtensionDir.listFiles()
+            .orEmpty()
+            .filter { it.isDirectory }
+            .map { File(it, it.name + ".apk") }
+            .filter { it.exists() }
+            .filter { file ->
+                try {
+                    ApkFile(file).use { apkFile ->
+                        DesktopTsundokuExtensionLoader.isTsundokuExtension(apkFile.apkMeta)
+                    }
+                } catch (e: Exception) {
+                    false
+                }
+            }
+
+        if (tsundokuPkgs.isEmpty()) return emptyList()
+
+        Log.info("DesktopCatalogLoader: Found ${tsundokuPkgs.size} tsundoku extensions")
+
+        return tsundokuPkgs.mapNotNull { file ->
+            loadTsundokuCatalog(file)
+        }
+    }
+
+    /**
+     * Load a single Tsundoku extension APK as an IReader catalog.
+     */
+    private fun loadTsundokuCatalog(file: File): CatalogInstalled.Locally? {
+        val pkgName = file.nameWithoutExtension
+        return try {
+            val apkFile = ApkFile(file)
+            val data = DesktopTsundokuExtensionLoader.validateMetadata(pkgName, apkFile)
+            apkFile.close()
+
+            if (data == null) {
+                return null
+            }
+
+            val sources = DesktopTsundokuExtensionLoader.loadSources(pkgName, file, data)
+            if (sources.isEmpty()) {
+                Log.warn { "DesktopCatalogLoader: No sources from tsundoku APK $pkgName" }
+                return null
+            }
+
+            val source = sources.first()
+            CatalogInstalled.Locally(
+                name = source.name,
+                description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
+                source = source,
+                pkgName = pkgName,
+                versionName = data.versionName,
+                versionCode = data.versionCode,
+                nsfw = data.nsfw,
+                installDir = file.parentFile!!.absolutePath.toPath(),
+                iconUrl = ""
+            )
+        } catch (e: Exception) {
+            Log.error("DesktopCatalogLoader: Failed to load tsundoku catalog $pkgName", e)
+            null
+        }
     }
 
     private fun isPackageAnExtension(pkgInfo: ApkMeta): Boolean {
