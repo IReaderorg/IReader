@@ -2,11 +2,9 @@ package ireader.data.catalog.impl.tsundoku
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parser.Parser
-import com.googlecode.d2j.dex.Dex2jar
-import com.googlecode.d2j.reader.MultiDexFileReader
-import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import ireader.core.log.Log
 import ireader.core.source.Source
+import ireader.data.catalog.impl.Dex2JarConverter
 import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.ApkMeta
 import java.io.File
@@ -129,7 +127,7 @@ object DesktopTsundokuExtensionLoader {
         return try {
             // Convert APK DEX to JAR using dex2jar
             val jarFile = File(apkFile.parentFile, "${pkgName}_tsundoku.jar")
-            convertDex2Jar(apkFile, jarFile)
+            Dex2JarConverter.convert(apkFile, jarFile)
 
             if (!jarFile.exists() || jarFile.length() == 0L) {
                 Log.error { "TsundokuDesktopLoader: dex2jar conversion failed for $pkgName" }
@@ -288,26 +286,6 @@ object DesktopTsundokuExtensionLoader {
     }
 
     // ==================== Helpers ====================
-
-    private fun convertDex2Jar(dexFile: File, jarFile: File) {
-        try {
-            val reader = MultiDexFileReader.open(dexFile.inputStream())
-            val handler = BaksmaliBaseDexExceptionHandler()
-            Dex2jar
-                .from(reader)
-                .withExceptionHandler(handler)
-                .reUseReg(false)
-                .topoLogicalSort()
-                .skipDebug(true)
-                .optimizeSynchronized(false)
-                .printIR(false)
-                .noCode(false)
-                .skipExceptions(false)
-                .to(jarFile.toPath())
-        } catch (e: Exception) {
-            Log.error { "TsundokuDesktopLoader: dex2jar error: ${e.message}" }
-        }
-    }
 
     private fun wrapSource(tsundokuSource: Any): Source {
         return TsundokuCatalogSource(tsundokuSource as eu.kanade.tachiyomi.source.CatalogueSource)

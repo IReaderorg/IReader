@@ -3,9 +3,6 @@ package ireader.data.catalog.impl
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parser.Parser
-import com.googlecode.d2j.dex.Dex2jar
-import com.googlecode.d2j.reader.MultiDexFileReader
-import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
@@ -184,7 +181,7 @@ class DesktopCatalogLoader(
                 jarFile.delete()
             }
             
-            dex2jar(file,jarFile,file.name)
+            Dex2JarConverter.convert(file, jarFile)
             
             // Verify JAR was created successfully
             if (!jarFile.exists() || jarFile.length() == 0L) {
@@ -302,8 +299,7 @@ class DesktopCatalogLoader(
 
         val appInfo = Ksoup.parse(apkFile.manifestXml, Parser.xmlParser()).select("application").select("meta-data")
 
-        val meta = appInfo.map {
-            val element = it.select("meta-data")
+        val meta = appInfo.map { element ->
             val name = element.attr("android:name")
             val value = element.attr("android:value")
             name to value
@@ -353,30 +349,6 @@ class DesktopCatalogLoader(
 
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
         return null
-    }
-    @Suppress("NewApi")
-    fun dex2jar(dexFile: File, jarFile: File, fileNameWithoutType: String) {
-        // adopted from com.googlecode.dex2jar.tools.Dex2jarCmd.doCommandLine
-        // source at: https://github.com/DexPatcher/dex2jar/tree/v2.1-20190905-lanchon/dex-tools/src/main/java/com/googlecode/dex2jar/tools/Dex2jarCmd.java
-        try {
-            val jarFilePath = jarFile.toPath()
-            val reader = MultiDexFileReader.open(dexFile.inputStream())
-            val handler = BaksmaliBaseDexExceptionHandler()
-            Dex2jar
-                    .from(reader)
-                    .withExceptionHandler(handler)
-                    .reUseReg(false)
-                    .topoLogicalSort()
-                    .skipDebug(true)
-                    .optimizeSynchronized(false)
-                    .printIR(false)
-                    .noCode(false)
-                    .skipExceptions(false)
-                    .to(jarFilePath)
-        } catch (e: Exception) {
-            // Ignore errors
-        }
-
     }
 
     private data class ValidatedData(

@@ -149,13 +149,13 @@ class TsundokuCatalogSource(
         } else url
         return MangaInfo(
             key = fullUrl,
-            title = try { this.title } catch (_: Exception) { "" },
-            artist = try { this.artist } catch (_: Exception) { null } ?: "",
-            author = try { this.author } catch (_: Exception) { null } ?: "",
-            description = try { this.description } catch (_: Exception) { null } ?: "",
-            genres = try { this.getGenres() } catch (_: Exception) { null } ?: emptyList(),
-            status = try { this.status.toLong() } catch (_: Exception) { 0L },
-            cover = try { this.thumbnail_url } catch (_: Exception) { null } ?: ""
+            title = try { this.title } catch (_: UninitializedPropertyAccessException) { "" },
+            artist = try { this.artist } catch (_: UninitializedPropertyAccessException) { null } ?: "",
+            author = try { this.author } catch (_: UninitializedPropertyAccessException) { null } ?: "",
+            description = try { this.description } catch (_: UninitializedPropertyAccessException) { null } ?: "",
+            genres = try { this.getGenres() } catch (_: UninitializedPropertyAccessException) { null } ?: emptyList(),
+            status = try { this.status.toLong() } catch (_: UninitializedPropertyAccessException) { 0L },
+            cover = try { this.thumbnail_url } catch (_: UninitializedPropertyAccessException) { null } ?: ""
         )
     }
 
