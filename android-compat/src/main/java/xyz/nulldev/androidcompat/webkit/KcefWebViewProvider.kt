@@ -53,6 +53,7 @@ import android.webkit.WebViewRenderProcess
 import android.webkit.WebViewRenderProcessClient
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.cef.CefClient
 import org.cef.CefSettings

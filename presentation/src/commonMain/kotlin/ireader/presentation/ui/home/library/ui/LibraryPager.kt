@@ -42,7 +42,6 @@ import org.koin.compose.koinInject
 /**
  * Stable key generator for book items to ensure efficient list updates
  */
-@Stable
 private fun stableBookKey(book: BookItem): Any = book.id
 
 /**

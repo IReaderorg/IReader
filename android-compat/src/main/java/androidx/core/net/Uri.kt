@@ -33,7 +33,7 @@ public inline fun String.toUri(): Uri = Uri.parse(this)
  *
  * @see Uri.fromFile
  */
-public inline fun File.toUri(): Uri = Uri.fromFile(this)
+public inline fun File.toUri(): Uri = Uri.parse("file://${this.absolutePath}")
 
 /**
  * Creates a [File] from the given [Uri]. Note that this will throw an

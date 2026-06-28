@@ -49,7 +49,6 @@ import kotlinx.coroutines.flow.StateFlow
  * Uses the column (index) to preserve API order while ensuring stability.
  * The column is set when converting books to BookItems and represents the original order.
  */
-@Stable
 private fun stableExploreBookKey(book: BookItem): Any = book.column
 
 @OptIn(ExperimentalMaterial3Api::class)

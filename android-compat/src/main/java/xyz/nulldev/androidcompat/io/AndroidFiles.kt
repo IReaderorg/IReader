@@ -12,7 +12,7 @@ class AndroidFiles(
     val configManager: ConfigManager = GlobalConfigManager,
 ) {
     val filesConfig: FilesConfigModule
-        get() = configManager.module()
+        get() = configManager.module(FilesConfigModule::class.java)
 
     val dataDir: File get() = registerFile(filesConfig.dataDir)
     val filesDir: File get() = registerFile(filesConfig.filesDir)

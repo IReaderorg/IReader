@@ -42,7 +42,6 @@ data class ExploreScreenState(
     /**
      * Derived property for the source from catalog
      */
-    @Stable
     val source: ireader.core.source.CatalogSource?
         get() {
             val src = catalog?.source
@@ -52,21 +51,18 @@ data class ExploreScreenState(
     /**
      * Check if we're in initial loading state (first page)
      */
-    @Stable
     val isInitialLoading: Boolean
         get() = isLoading && page == 1 && books.isEmpty()
     
     /**
      * Check if we have content to display
      */
-    @Stable
     val hasContent: Boolean
         get() = books.isNotEmpty()
     
     /**
      * Check if we're in error state with no content (network error, not broken source)
      */
-    @Stable
     val isErrorWithNoContent: Boolean
         get() = error != null && books.isEmpty() && !isLoading && !isSourceBroken && !isLikelyBrokenSource
     
@@ -82,7 +78,6 @@ data class ExploreScreenState(
      * When browsing (not searching), a source should always return books.
      * Empty results without search mode indicates the source parsing is broken.
      */
-    @Stable
     val isLikelyBrokenSource: Boolean
         get() {
             // Built-in sources should never be marked as broken
@@ -108,7 +103,6 @@ data class ExploreScreenState(
      * Check if the source is broken (parsing error, not network error).
      * Uses isLikelyBrokenSource for detection.
      */
-    @Stable
     val isBrokenSourceError: Boolean
         get() = isLikelyBrokenSource && !isLoading
 }

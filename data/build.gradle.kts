@@ -148,6 +148,9 @@ kotlin {
                 
                 // android-compat for KoinInjektBridge code compilation
                 compileOnly(project(":android-compat"))
+                
+                // Injekt (required by Tsundoku extensions)
+                implementation("com.github.mihonapp:injekt:91edab2317")
             }
         }
         
@@ -156,6 +159,9 @@ kotlin {
             dependencies {
                 // android-compat provides: Android stubs, source-api, Injekt bridge, OkHttp, Jsoup, RxJava
                 implementation(project(":android-compat"))
+                
+                // Injekt (required by Tsundoku desktop loader)
+                implementation("com.github.mihonapp:injekt:91edab2317")
                 
                 // Platform-specific Ktor engine
                 implementation(libs.ktor.okhttp)

@@ -5,6 +5,8 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import ireader.core.log.Log
 import ireader.core.source.Source
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 /**
  * Handles loading and validation of Tsundoku (Tachiyomi/Mihon) extension APKs.

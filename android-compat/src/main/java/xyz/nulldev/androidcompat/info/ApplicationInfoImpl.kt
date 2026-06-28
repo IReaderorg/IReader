@@ -8,7 +8,7 @@ class ApplicationInfoImpl(
     private val configManager: ConfigManager,
 ) : ApplicationInfo() {
     val appInfoConfig: ApplicationInfoConfigModule
-        get() = configManager.module()
+        get() = configManager.module(ApplicationInfoConfigModule::class.java)
 
     val debug: Boolean get() = appInfoConfig.debug
 

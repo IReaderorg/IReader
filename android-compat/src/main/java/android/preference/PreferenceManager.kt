@@ -11,7 +11,7 @@ class PreferenceManager {
         @JvmStatic
         fun getDefaultSharedPreferences(context: Context) =
             context.getSharedPreferences(
-                context.applicationInfo.packageName,
+                context.getPackageName() ?: "",
                 Context.MODE_PRIVATE,
             )!!
     }
