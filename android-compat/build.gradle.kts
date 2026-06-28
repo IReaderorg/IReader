@@ -35,6 +35,7 @@ sourceSets {
             include("android/content/ContextWrapper.java")
             include("android/content/SharedPreferences.java")
             include("android/content/NoOpSharedPreferences.java")
+            include("android/content/ContentResolver.java")
             include("android/os/Parcelable.java")
             include("android/os/Parcel.java")
             include("android/os/IBinder.java")

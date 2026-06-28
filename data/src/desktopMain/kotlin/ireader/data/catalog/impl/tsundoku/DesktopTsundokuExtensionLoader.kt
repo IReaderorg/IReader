@@ -270,7 +270,7 @@ object DesktopTsundokuExtensionLoader {
     }
 
     private fun wrapSource(tsundokuSource: Any): Source {
-        return TsundokuCatalogSource(tsundokuSource)
+        return TsundokuCatalogSource(tsundokuSource as eu.kanade.tachiyomi.source.CatalogueSource)
     }
 
     private fun isTsundokuSource(obj: Any): Boolean {

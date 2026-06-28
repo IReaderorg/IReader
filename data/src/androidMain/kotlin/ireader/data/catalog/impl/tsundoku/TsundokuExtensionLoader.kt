@@ -220,7 +220,7 @@ object TsundokuExtensionLoader {
      * Wrap a tsundoku source instance in an IReader CatalogSource.
      */
     private fun wrapSource(tsundokuSource: Any): Source {
-        return TsundokuCatalogSource(tsundokuSource)
+        return TsundokuCatalogSource(tsundokuSource as eu.kanade.tachiyomi.source.CatalogueSource)
     }
 
     /**
