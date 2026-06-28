@@ -48,19 +48,4 @@ actual val dataPlatformModule: Module = module {
     single<BiometricAuthenticator> { BiometricAuthenticatorImpl() }
     single<MemoryTracker> { DesktopMemoryTracker() }
     single<NotificationRepository> { NotificationRepositoryImpl() }
-
-    // ── Tsundoku Extension Runtime Dependencies ──────────────────────
-    single<android.app.Application> { android.app.Application() }
-    single<eu.kanade.tachiyomi.network.NetworkHelper> {
-        val cacheDir = java.io.File(System.getProperty("java.io.tmpdir"), "ireader-network-cache")
-        cacheDir.mkdirs()
-        eu.kanade.tachiyomi.network.NetworkHelper(cacheDir = cacheDir)
-    }
-    single<kotlinx.serialization.json.Json> {
-        kotlinx.serialization.json.Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            explicitNulls = false
-        }
-    }
 }

@@ -7,10 +7,8 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import ireader.core.log.Log
-import ireader.core.source.CatalogSource
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Command
-import ireader.core.source.model.CommandList
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangaInfo
@@ -23,11 +21,12 @@ import eu.kanade.tachiyomi.source.model.Page as TPage
 
 class TsundokuCatalogSource(
     private val source: CatalogueSource
-) : CatalogSource {
+) : BaseTsundokuCatalogSource() {
 
     override val id: Long get() = source.id
     override val name: String get() = source.name
     override val lang: String get() = source.lang
+    override val supportsLatest: Boolean get() = source.supportsLatest
 
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return try {
@@ -124,79 +123,6 @@ class TsundokuCatalogSource(
         }
     }
 
-    /**
-     * Parse HTML content from a novel source into multiple readable Text pages.
-     * Splits by paragraph tags, headings, and line breaks so the reader
-     * can display content in digestible chunks instead of one giant wall of text.
-     */
-    private fun parseNovelContent(html: String): List<Page> {
-        val doc = Ksoup.parse(html)
-        val contentElement = doc.selectFirst(".chapter-content, .entry-content, .content, article, .text, #content, .chapter_body, .reading-content")
-            ?: doc.body()
-            ?: return listOf(ireader.core.source.model.Text(html))
-
-        val paragraphs = mutableListOf<String>()
-
-        // Extract text from content, preserving paragraph structure
-        for (element in contentElement.children()) {
-            val tag = element.tagName().lowercase()
-            when (tag) {
-                "p", "div", "section" -> {
-                    val text = element.text().trim()
-                    if (text.isNotBlank()) paragraphs.add(text)
-                }
-                "h1", "h2", "h3", "h4", "h5", "h6" -> {
-                    val text = element.text().trim()
-                    if (text.isNotBlank()) paragraphs.add(text)
-                }
-                "br" -> {
-                    // skip bare <br> tags
-                }
-                "img" -> {
-                    val src = element.attr("src")
-                    if (src.isNotBlank()) {
-                        // Image in novel content — skip or handle as needed
-                    }
-                }
-                else -> {
-                    // For any other block elements, try to get their text
-                    val text = element.text().trim()
-                    if (text.isNotBlank()) paragraphs.add(text)
-                }
-            }
-        }
-
-        // If no child elements parsed, fall back to full text extraction
-        if (paragraphs.isEmpty()) {
-            val fullText = contentElement.text().trim()
-            if (fullText.isNotBlank()) {
-                // Split by double newlines or common separators
-                val lines = fullText.split(Regex("\n{2,}|<br\\s*/?>|</?p>"))
-                    .map { it.trim() }
-                    .filter { it.isNotBlank() }
-                return lines.map { ireader.core.source.model.Text(it) }
-            }
-            return listOf(ireader.core.source.model.Text(html))
-        }
-
-        Log.info { "Tsundoku[$name]: Parsed ${paragraphs.size} paragraphs from HTML" }
-        return paragraphs.map { ireader.core.source.model.Text(it) }
-    }
-
-    override fun getFilters(): List<ireader.core.source.model.Filter<*>> = emptyList()
-
-    override fun getListings(): List<Listing> {
-        val listings = mutableListOf<Listing>(PopularListing())
-        if (source.supportsLatest) listings.add(LatestListing())
-        return listings
-    }
-
-    override fun getCommands(): CommandList = emptyList()
-
-    override suspend fun getChapterPageCount(manga: MangaInfo): Int = 1
-    override fun supportsPaginatedChapters(): Boolean = false
-
-    override fun toString(): String = "TsundokuSource($name, $lang, id=$id)"
 
     // ==================== Model Conversions ====================
 
@@ -276,7 +202,4 @@ class TsundokuCatalogSource(
         mangas = this.mangas.map { it.toMangaInfo() },
         hasNextPage = this.hasNextPage
     )
-
-    class PopularListing : Listing("Popular")
-    class LatestListing : Listing("Latest")
 }

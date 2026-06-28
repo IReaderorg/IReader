@@ -7,10 +7,8 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import ireader.core.log.Log
-import ireader.core.source.CatalogSource
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Command
-import ireader.core.source.model.CommandList
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangaInfo
@@ -23,13 +21,12 @@ import eu.kanade.tachiyomi.source.model.Page as TPage
 
 class TsundokuCatalogSource(
     private val source: CatalogueSource
-) : CatalogSource {
+) : BaseTsundokuCatalogSource() {
 
     override val id: Long get() = source.id
     override val name: String get() = source.name
     override val lang: String get() = source.lang
-
-    val supportsLatest: Boolean get() = source.supportsLatest
+    override val supportsLatest: Boolean get() = source.supportsLatest
 
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return try {
@@ -102,42 +99,6 @@ class TsundokuCatalogSource(
         }
     }
 
-    private fun parseNovelContent(html: String): List<Page> {
-        val doc = Ksoup.parse(html)
-        val contentElement = doc.selectFirst(".chapter-content, .entry-content, .content, article, .text, #content, .chapter_body, .reading-content")
-            ?: doc.body()
-            ?: return listOf(ireader.core.source.model.Text(html))
-
-        val paragraphs = mutableListOf<String>()
-        for (element in contentElement.children()) {
-            val tag = element.tagName().lowercase()
-            val text = element.text().trim()
-            if (text.isNotBlank()) paragraphs.add(text)
-        }
-        if (paragraphs.isEmpty()) {
-            val fullText = contentElement.text().trim()
-            if (fullText.isNotBlank()) {
-                return fullText.split(Regex("\n{2,}")).map { ireader.core.source.model.Text(it.trim()) }.filter { it.text.isNotBlank() }
-            }
-            return listOf(ireader.core.source.model.Text(html))
-        }
-        return paragraphs.map { ireader.core.source.model.Text(it) }
-    }
-
-    override fun getFilters(): List<ireader.core.source.model.Filter<*>> = emptyList()
-
-    override suspend fun getChapterPageCount(manga: MangaInfo): Int = 1
-    override fun supportsPaginatedChapters(): Boolean = false
-
-    override fun getListings(): List<Listing> {
-        val listings = mutableListOf<Listing>(PopularListing())
-        if (source.supportsLatest) listings.add(LatestListing())
-        return listings
-    }
-
-    override fun getCommands(): CommandList = emptyList()
-
-    override fun toString(): String = "TsundokuSource($name, $lang, id=$id)"
 
     // ==================== Model Conversions ====================
 
@@ -237,7 +198,4 @@ class TsundokuCatalogSource(
         mangas = this.mangas.map { it.toMangaInfo() },
         hasNextPage = this.hasNextPage
     )
-
-    class PopularListing : Listing("Popular")
-    class LatestListing : Listing("Latest")
 }

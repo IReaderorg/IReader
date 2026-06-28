@@ -150,7 +150,6 @@ class AndroidCatalogLoader(
                 "Source used for testing"
             )
             bundled.add(testCatalog)
-            bundled.add(testCatalog)
         }
 
         val systemPkgs = try {

@@ -116,7 +116,12 @@ object DesktopTsundokuExtensionLoader {
     }
 
     /**
-     * Load a Tsundoku source from an APK file using dex2jar + URLClassLoader.
+     * Load Tsundoku sources from an APK file using dex2jar + URLClassLoader.
+     * Matches the Android TsundokuExtensionLoader.loadSources() logic exactly:
+     * 1. Split source classes by ";" (one APK can have multiple sources)
+     * 2. Prepend package name for relative class names (starting with ".")
+     * 3. Try namespace fallbacks (app.tsundoku ↔ eu.kanade.tachiyomi)
+     * 4. Handle SourceFactory and Source
      */
     fun loadSources(pkgName: String, apkFile: File, data: TsundokuValidatedData): List<Source> {
         initializeDependencies()
@@ -134,76 +139,112 @@ object DesktopTsundokuExtensionLoader {
             // Load the JAR with our shim classes on the parent classpath
             val parentClassLoader = this::class.java.classLoader
             val loader = URLClassLoader(
-                arrayOf(jarFile.toURL()),
+                arrayOf(jarFile.toURI().toURL()),
                 parentClassLoader
             )
 
-            val clazz = try {
-                Class.forName(data.classToLoad, false, loader)
-            } catch (e: ClassNotFoundException) {
-                // Try fallback namespace
-                if (data.classToLoad.startsWith("app.tsundoku.extension.")) {
-                    val fallback = data.classToLoad.replace(
-                        "app.tsundoku.extension.",
-                        "eu.kanade.tachiyomi.extension."
-                    )
-                    Class.forName(fallback, false, loader)
+            // Split source classes by ";" (one APK can have multiple sources)
+            val classNames = data.classToLoad.split(";").map { it.trim() }
+
+            val allSources = mutableListOf<Any>()
+
+            for (rawClassName in classNames) {
+                // Prepend package name for relative class names
+                val className = if (rawClassName.startsWith(".")) {
+                    pkgName + rawClassName
                 } else {
-                    throw e
+                    rawClassName
+                }
+
+                // Build list of class names to try (original + namespace fallbacks)
+                val classesToTry = mutableListOf(className)
+
+                // If uses app.tsundoku namespace, also try eu.kanade.tachiyomi
+                if (className.startsWith("app.tsundoku.extension.")) {
+                    classesToTry.add(className.replace("app.tsundoku.extension.", "eu.kanade.tachiyomi.extension."))
+                }
+                if (className.startsWith("app.tsundoku.novelextension.")) {
+                    classesToTry.add(className.replace("app.tsundoku.novelextension.", "eu.kanade.tachiyomi.novelextension."))
+                }
+                // Reverse: if uses eu.kanade.tachiyomi, also try app.tsundoku
+                if (className.startsWith("eu.kanade.tachiyomi.extension.")) {
+                    classesToTry.add(className.replace("eu.kanade.tachiyomi.extension.", "app.tsundoku.extension."))
+                }
+                if (className.startsWith("eu.kanade.tachiyomi.novelextension.")) {
+                    classesToTry.add(className.replace("eu.kanade.tachiyomi.novelextension.", "app.tsundoku.novelextension."))
+                }
+
+                var lastError: Throwable? = null
+                var found = false
+
+                for (classToTry in classesToTry) {
+                    try {
+                        val clazz = Class.forName(classToTry, false, loader)
+                        val obj = clazz.getDeclaredConstructor().newInstance()
+
+                        // Check what type of source this is
+                        val sources = when {
+                            isTsundokuSource(obj) -> listOf(obj)
+                            isSourceFactory(obj) -> invokeCreateSources(obj)
+                            else -> {
+                                Log.error { "TsundokuDesktopLoader: Unknown source class type: ${obj.javaClass.name}" }
+                                emptyList<Any>()
+                            }
+                        }
+
+                        allSources.addAll(sources)
+                        found = true
+                        break
+                    } catch (e: ClassNotFoundException) {
+                        lastError = e
+                        // Try next class name
+                    } catch (e: NoSuchMethodException) {
+                        Log.error { "TsundokuDesktopLoader: No no-arg constructor for $classToTry" }
+                        lastError = e
+                        break // Don't retry other namespaces, constructor won't exist there either
+                    } catch (e: ExceptionInInitializerError) {
+                        val causeChain = buildString {
+                            append(e.cause?.let { it::class.simpleName } ?: "null")
+                            var cause = e.cause?.cause
+                            var depth = 0
+                            while (cause != null && depth < 3) {
+                                append(" → ${cause::class.simpleName}: ${cause.message}")
+                                cause = cause.cause
+                                depth++
+                            }
+                        }
+                        Log.error { "TsundokuDesktopLoader: Static init failed for $classToTry: $causeChain" }
+                        lastError = e
+                        break
+                    } catch (e: NoClassDefFoundError) {
+                        Log.error { "TsundokuDesktopLoader: Missing class for $classToTry: ${e.message}" }
+                        lastError = e
+                        break
+                    } catch (e: Throwable) {
+                        // Unwrap InvocationTargetException to get the real cause
+                        val realCause = if (e is java.lang.reflect.InvocationTargetException) e.cause ?: e else e
+                        val causeChain = buildString {
+                            append("${realCause::class.simpleName}: ${realCause.message}")
+                            var cause = realCause.cause
+                            var depth = 0
+                            while (cause != null && depth < 5) {
+                                append(" → ${cause::class.simpleName}: ${cause.message}")
+                                cause = cause.cause
+                                depth++
+                            }
+                        }
+                        Log.error { "TsundokuDesktopLoader: Failed to instantiate $classToTry: $causeChain" }
+                        lastError = e
+                        break
+                    }
+                }
+
+                if (!found) {
+                    Log.warn { "TsundokuDesktopLoader: Class not found in any namespace: $classesToTry. Last error: ${lastError?.message}" }
                 }
             }
 
-            val instance = try {
-                clazz.getDeclaredConstructor().newInstance()
-            } catch (e: NoSuchMethodException) {
-                Log.error { "TsundokuDesktopLoader: No no-arg constructor for ${data.classToLoad}" }
-                return emptyList()
-            } catch (e: ExceptionInInitializerError) {
-                val causeChain = buildString {
-                    append(e.cause?.let { it::class.simpleName } ?: "null")
-                    var cause = e.cause?.cause
-                    var depth = 0
-                    while (cause != null && depth < 3) {
-                        append(" → ${cause::class.simpleName}: ${cause.message}")
-                        cause = cause.cause
-                        depth++
-                    }
-                }
-                Log.error { "TsundokuDesktopLoader: Static init failed for ${data.classToLoad}: $causeChain" }
-                return emptyList()
-            } catch (e: NoClassDefFoundError) {
-                Log.error { "TsundokuDesktopLoader: Missing class for ${data.classToLoad}: ${e.message}" }
-                return emptyList()
-            } catch (e: Throwable) {
-                // Unwrap InvocationTargetException to get the real cause
-                val realCause = if (e is java.lang.reflect.InvocationTargetException) e.cause ?: e else e
-                val causeChain = buildString {
-                    append("${realCause::class.simpleName}: ${realCause.message}")
-                    var cause = realCause.cause
-                    var depth = 0
-                    while (cause != null && depth < 5) {
-                        append(" → ${cause::class.simpleName}: ${cause.message}")
-                        cause = cause.cause
-                        depth++
-                    }
-                }
-                Log.error { "TsundokuDesktopLoader: Failed to instantiate ${data.classToLoad}: $causeChain" }
-                return emptyList()
-            }
-
-            when {
-                isSourceFactory(instance) -> {
-                    val sources = invokeCreateSources(instance)
-                    sources.map { wrapSource(it) }
-                }
-                isTsundokuSource(instance) -> {
-                    listOf(wrapSource(instance))
-                }
-                else -> {
-                    Log.error { "TsundokuDesktopLoader: Unknown source type: ${instance.javaClass.name}" }
-                    emptyList()
-                }
-            }
+            allSources.map { wrapSource(it) }
         } catch (e: Throwable) {
             Log.error { "TsundokuDesktopLoader: Failed to load $pkgName: ${e::class.simpleName}: ${e.message}" }
             e.printStackTrace()
