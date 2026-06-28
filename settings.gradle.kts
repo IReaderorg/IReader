@@ -16,6 +16,8 @@ plugins {
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 rootProject.name = "Infinity"
 include(":android")
+include(":android-compat")
+include(":android-compat:Config")
 include(":benchmark")
 include(":data")
 include(":domain")

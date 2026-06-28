@@ -9,10 +9,8 @@ import ireader.core.log.Log
 import ireader.core.source.Source
 import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.ApkMeta
-import okhttp3.OkHttpClient
 import java.io.File
 import java.net.URLClassLoader
-import java.util.concurrent.TimeUnit
 
 /**
  * Desktop-specific loader for Tsundoku (Tachiyomi/Mihon) extension APKs.
@@ -162,29 +160,35 @@ object DesktopTsundokuExtensionLoader {
                 Log.error { "TsundokuDesktopLoader: No no-arg constructor for ${data.classToLoad}" }
                 return emptyList()
             } catch (e: ExceptionInInitializerError) {
-                val cause = e.cause
-                if (cause != null && isAndroidClassError(cause)) {
-                    Log.warn { "TsundokuDesktopLoader: ${data.classToLoad} requires Android APIs (not available on Desktop)" }
-                } else {
-                    Log.error { "TsundokuDesktopLoader: Static init failed for ${data.classToLoad}: ${cause?.message ?: e.message}" }
+                val causeChain = buildString {
+                    append(e.cause?.let { it::class.simpleName } ?: "null")
+                    var cause = e.cause?.cause
+                    var depth = 0
+                    while (cause != null && depth < 3) {
+                        append(" → ${cause::class.simpleName}: ${cause.message}")
+                        cause = cause.cause
+                        depth++
+                    }
                 }
-                return emptyList()
-            } catch (e: TypeNotPresentException) {
-                Log.warn { "TsundokuDesktopLoader: ${data.classToLoad} requires Android type '${e.typeName()}' (not available on Desktop)" }
+                Log.error { "TsundokuDesktopLoader: Static init failed for ${data.classToLoad}: $causeChain" }
                 return emptyList()
             } catch (e: NoClassDefFoundError) {
-                if (isAndroidClassError(e)) {
-                    Log.warn { "TsundokuDesktopLoader: ${data.classToLoad} requires Android APIs (not available on Desktop)" }
-                } else {
-                    Log.error { "TsundokuDesktopLoader: Missing class for ${data.classToLoad}: ${e.message}" }
-                }
+                Log.error { "TsundokuDesktopLoader: Missing class for ${data.classToLoad}: ${e.message}" }
                 return emptyList()
             } catch (e: Throwable) {
-                if (isAndroidClassError(e)) {
-                    Log.warn { "TsundokuDesktopLoader: ${data.classToLoad} requires Android APIs (not available on Desktop)" }
-                } else {
-                    Log.error { "TsundokuDesktopLoader: Failed to instantiate ${data.classToLoad}: ${e::class.simpleName}: ${e.message}" }
+                // Unwrap InvocationTargetException to get the real cause
+                val realCause = if (e is java.lang.reflect.InvocationTargetException) e.cause ?: e else e
+                val causeChain = buildString {
+                    append("${realCause::class.simpleName}: ${realCause.message}")
+                    var cause = realCause.cause
+                    var depth = 0
+                    while (cause != null && depth < 5) {
+                        append(" → ${cause::class.simpleName}: ${cause.message}")
+                        cause = cause.cause
+                        depth++
+                    }
                 }
+                Log.error { "TsundokuDesktopLoader: Failed to instantiate ${data.classToLoad}: $causeChain" }
                 return emptyList()
             }
 
@@ -214,39 +218,36 @@ object DesktopTsundokuExtensionLoader {
         if (dependenciesInitialized) return
 
         try {
-            val okHttpClient = OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .callTimeout(2, TimeUnit.MINUTES)
-                .build()
-
-            val networkHelper = eu.kanade.tachiyomi.network.NetworkHelper(okHttpClient)
-            uy.kohesive.injekt.Injekt.registerValue(
-                eu.kanade.tachiyomi.network.NetworkHelper::class,
-                networkHelper
+            val networkHelper = eu.kanade.tachiyomi.network.NetworkHelper(
+                cacheDir = java.io.File(System.getProperty("java.io.tmpdir"), "ireader-network-cache").apply { mkdirs() }
             )
+            val json = kotlinx.serialization.json.Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                explicitNulls = false
+            }
+            val app = android.app.Application()
+
+            uy.kohesive.injekt.Injekt.addSingletonFactory(
+                object : uy.kohesive.injekt.api.FullTypeReference<eu.kanade.tachiyomi.network.NetworkHelper>() {}
+            ) { networkHelper }
+
+            uy.kohesive.injekt.Injekt.addSingletonFactory(
+                object : uy.kohesive.injekt.api.FullTypeReference<kotlinx.serialization.json.Json>() {}
+            ) { json }
+
+            uy.kohesive.injekt.Injekt.addSingletonFactory(
+                object : uy.kohesive.injekt.api.FullTypeReference<android.app.Application>() {}
+            ) { app }
 
             dependenciesInitialized = true
-            Log.info { "TsundokuDesktopLoader: Dependencies initialized (shim mode)" }
+            Log.info { "TsundokuDesktopLoader: Dependencies initialized" }
         } catch (e: Exception) {
             Log.warn { "TsundokuDesktopLoader: Failed to initialize dependencies: ${e.message}" }
         }
     }
 
     // ==================== Helpers ====================
-
-    /**
-     * Check if an error is caused by missing Android-specific classes.
-     * These errors are expected on Desktop and should be handled gracefully.
-     */
-    private fun isAndroidClassError(error: Throwable): Boolean {
-        val message = (error.message ?: "") + (error.cause?.message ?: "")
-        return message.contains("android.") ||
-            message.contains("androidx.") ||
-            message.contains("Type android.") ||
-            error is TypeNotPresentException && (error.typeName()?.startsWith("android.") == true ||
-                error.typeName()?.startsWith("androidx.") == true)
-    }
 
     private fun convertDex2Jar(dexFile: File, jarFile: File) {
         try {

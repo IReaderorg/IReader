@@ -7,8 +7,6 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
-import ireader.data.catalog.impl.tsundoku.ChildFirstDexClassLoader
-import ireader.data.catalog.impl.tsundoku.ChildFirstPathClassLoader
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
@@ -462,10 +460,10 @@ class AndroidCatalogLoader(
                 return null
             }
 
-            // Use ChildFirstDexClassLoader for local tsundoku APKs
+            // Use DexClassLoader for local tsundoku APKs
             val readOnlyCopy = copyToReadOnlyCache(file, pkgName)
             val dexOutputDir = File(context.codeCacheDir, "dex_out/${pkgName}_${System.currentTimeMillis()}").apply { mkdirs() }
-            val classLoader = ChildFirstDexClassLoader(readOnlyCopy.absolutePath, dexOutputDir.absolutePath, null, context.classLoader)
+            val classLoader = DexClassLoader(readOnlyCopy.absolutePath, dexOutputDir.absolutePath, null, context.classLoader)
             val sources = TsundokuExtensionLoader.loadSources(pkgName, classLoader, data)
 
             if (sources.isEmpty()) {
@@ -715,9 +713,7 @@ class AndroidCatalogLoader(
         }
 
         return try {
-            // Use ChildFirstPathClassLoader (matches tsundoku's approach)
-            // Extension's own classes load first, shared library classes fall to parent (our shims)
-            val classLoader = ChildFirstPathClassLoader(sourceDir, null, context.classLoader)
+            val classLoader = PathClassLoader(sourceDir, context.classLoader)
             val sources = TsundokuExtensionLoader.loadSources(pkgName, classLoader, data)
 
             if (sources.isEmpty()) {

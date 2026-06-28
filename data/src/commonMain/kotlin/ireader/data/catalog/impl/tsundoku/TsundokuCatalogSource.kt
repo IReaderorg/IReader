@@ -2,254 +2,162 @@ package ireader.data.catalog.impl.tsundoku
 
 import ireader.core.source.CatalogSource
 import ireader.core.source.model.ChapterInfo
+import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
 import ireader.core.source.model.FilterList
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.MangasPageInfo
 import ireader.core.source.model.Page
-import ireader.data.catalog.impl.tsundoku.TsundokuFilterAdapter.applyIReaderValuesToTsundokuFilters
-import ireader.data.catalog.impl.tsundoku.TsundokuFilterAdapter.convertTsundokuFiltersToIReader
-import ireader.data.catalog.impl.tsundoku.TsundokuModelAdapter.toChapterInfo
-import ireader.data.catalog.impl.tsundoku.TsundokuModelAdapter.toIReaderPages
-import ireader.data.catalog.impl.tsundoku.TsundokuModelAdapter.toMangaInfo
-import ireader.data.catalog.impl.tsundoku.TsundokuModelAdapter.toMangasPageInfo
-import ireader.data.catalog.impl.tsundoku.TsundokuModelAdapter.toTsundokuSChapter
-import ireader.data.catalog.impl.tsundoku.TsundokuModelAdapter.toTsundokuSManga
-import ireader.core.source.model.Command
 
 /**
- * CatalogSource wrapper that delegates to a Tsundoku CatalogueSource.
+ * CatalogSource wrapper that delegates to a Tsundoku source via reflection.
  *
- * This adapter allows Tsundoku (Tachiyomi/Mihon) extensions to be used
- * natively within IReader's catalog system. It converts between the two
- * source APIs transparently.
- *
- * The wrapped tsundoku source is accessed via reflection since we can't
- * directly reference tsundoku types at compile time (different module).
+ * Tsundoku source-api types (SManga, SChapter, etc.) are accessed via reflection
+ * since they live in the source-api module, not directly importable from data.
  */
 class TsundokuCatalogSource(
     private val tsundokuSource: Any
 ) : CatalogSource {
 
-    // Tsundoku Source interface properties (accessed via reflection)
-    override val id: Long = tsundokuSource.getField("id") as? Long ?: 0L
-    override val name: String = tsundokuSource.getField("name") as? String ?: "Unknown"
-    override val lang: String = tsundokuSource.getField("lang") as? String ?: ""
+    override val id: Long = invokeGetter("id") as? Long ?: 0L
+    override val name: String = invokeGetter("name") as? String ?: "Unknown"
+    override val lang: String = invokeGetter("lang") as? String ?: ""
 
-    /**
-     * Whether this is a novel source (text-based content).
-     */
     val isNovelSource: Boolean = try {
-        tsundokuSource.getField("isNovelSource") as? Boolean ?: false
-    } catch (e: Exception) {
-        false
-    }
+        invokeGetter("isNovelSource") as? Boolean ?: false
+    } catch (e: Exception) { false }
 
-    // ==================== CatalogSource Implementation ====================
-
-    /**
-     * Get manga list by listing (popular/latest).
-     * Maps IReader Listing to Tsundoku getPopularManga/getLatestUpdates.
-     */
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         return try {
             val result = when {
-                sort == null || sort is PopularListing -> {
-                    invokeSuspend("getPopularManga", page)
-                }
-                sort is LatestListing -> {
-                    invokeSuspend("getLatestUpdates", page)
-                }
-                else -> {
-                    invokeSuspend("getPopularManga", page)
-                }
+                sort == null || sort is PopularListing -> invokeSuspend("getPopularManga", page)
+                sort is LatestListing -> invokeSuspend("getLatestUpdates", page)
+                else -> invokeSuspend("getPopularManga", page)
             }
             result?.toMangasPageInfo() ?: MangasPageInfo.empty()
-        } catch (e: Exception) {
-            MangasPageInfo.empty()
-        }
+        } catch (e: Exception) { MangasPageInfo.empty() }
     }
 
-    /**
-     * Get manga list by filters.
-     * Converts IReader filters to Tsundoku filters, then calls getSearchManga.
-     */
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         return try {
-            // Get tsundoku filters and apply IReader filter values
-            val tsundokuFilters = getTsundokuFilterList()
-            applyIReaderValuesToTsundokuFilters(filters, tsundokuFilters)
-
-            // Build search query from active filters
-            val query = extractSearchQuery(filters)
-
-            // Create a Tsundoku FilterList
-            val filterListObj = createTsundokuFilterList(tsundokuFilters)
-
-            // Call getSearchManga(page, query, filters)
-            val result = invokeSuspendWithArgs(
-                "getSearchManga",
-                arrayOf(Int::class.java, String::class.java, filterListObj.javaClass),
-                arrayOf(page, query, filterListObj)
-            )
+            val query = filters.filterIsInstance<ireader.core.source.model.Filter.Text>()
+                .firstOrNull { it.name.equals("Title", ignoreCase = true) || it.name.equals("Search", ignoreCase = true) }
+                ?.value ?: ""
+            val result = invokeSuspend("getSearchManga", page, query, createEmptyTsundokuFilterList())
             result?.toMangasPageInfo() ?: MangasPageInfo.empty()
-        } catch (e: Exception) {
-            MangasPageInfo.empty()
-        }
+        } catch (e: Exception) { MangasPageInfo.empty() }
     }
 
-    /**
-     * Get manga details.
-     * Converts MangaInfo → SManga, calls tsundoku, converts back.
-     */
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         return try {
             val smanga = manga.toTsundokuSManga()
             val result = invokeSuspend("getMangaDetails", smanga)
             result?.toMangaInfo() ?: manga
-        } catch (e: Exception) {
-            manga
-        }
+        } catch (e: Exception) { manga }
     }
 
-    /**
-     * Get chapter list.
-     * Converts MangaInfo → SManga, calls tsundoku, converts back.
-     */
     override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
         return try {
             val smanga = manga.toTsundokuSManga()
             @Suppress("UNCHECKED_CAST")
             val result = invokeSuspend("getChapterList", smanga) as? List<Any> ?: emptyList()
             result.map { it.toChapterInfo() }
-        } catch (e: Exception) {
-            emptyList()
-        }
+        } catch (e: Exception) { emptyList() }
     }
 
-    /**
-     * Get page list.
-     * Converts ChapterInfo → SChapter, calls tsundoku, converts back.
-     */
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         return try {
             val schapter = chapter.toTsundokuSChapter()
             @Suppress("UNCHECKED_CAST")
             val result = invokeSuspend("getPageList", schapter) as? List<Any> ?: emptyList()
             result.flatMap { it.toIReaderPages() }
-        } catch (e: Exception) {
-            emptyList()
-        }
+        } catch (e: Exception) { emptyList() }
     }
 
-    // ==================== Filter & Listing ====================
-
-    /**
-     * Get IReader-compatible filters by converting from tsundoku filters.
-     */
-    override fun getFilters(): FilterList {
-        return try {
-            val tsundokuFilters = getTsundokuFilterList()
-            convertTsundokuFiltersToIReader(tsundokuFilters)
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
-
-    /**
-     * Get available listings (popular + latest).
-     */
+    override fun getFilters(): FilterList = emptyList()
     override fun getListings(): List<Listing> {
-        val listings = mutableListOf<Listing>()
-
-        // Tsundoku sources always support popular
-        listings.add(PopularListing())
-
-        // Check if source supports latest
-        val supportsLatest = try {
-            tsundokuSource.getField("supportsLatest") as? Boolean ?: false
-        } catch (e: Exception) {
-            false
-        }
-        if (supportsLatest) {
-            listings.add(LatestListing())
-        }
-
+        val listings = mutableListOf<Listing>(PopularListing())
+        val supportsLatest = invokeGetter("supportsLatest") as? Boolean ?: false
+        if (supportsLatest) listings.add(LatestListing())
         return listings
     }
-
-    /**
-     * Get commands (IReader-specific, not supported by tsundoku sources).
-     */
     override fun getCommands(): CommandList = emptyList()
 
     override fun toString(): String = "TsundokuCatalogSource(name=$name, lang=$lang, id=$id)"
 
-    // ==================== Internal Helpers ====================
+    // ==================== Model Conversions ====================
 
-    /**
-     * Get the tsundoku filter list via getFilterList() method.
-     */
-    private fun getTsundokuFilterList(): List<Any> {
-        return try {
-            val method = tsundokuSource.javaClass.getMethod("getFilterList")
-            val filterList = method.invoke(tsundokuSource)
-            // FilterList implements List<Filter<*>>
-            @Suppress("UNCHECKED_CAST")
-            (filterList as? List<Any>) ?: emptyList()
-        } catch (e: Exception) {
-            emptyList()
-        }
+    private fun Any.toMangaInfo(): MangaInfo {
+        return MangaInfo(
+            key = getField("url") as? String ?: "",
+            title = getField("title") as? String ?: "",
+            artist = getField("artist") as? String ?: "",
+            author = getField("author") as? String ?: "",
+            description = getField("description") as? String ?: "",
+            genres = (getField("genre") as? String)
+                ?.split(Regex("[,;|]+"))?.map { it.trim() }?.filter { it.isNotBlank() }?.distinct()
+                ?: emptyList(),
+            status = (getField("status") as? Int ?: 0).toLong(),
+            cover = getField("thumbnail_url") as? String ?: ""
+        )
     }
 
-    /**
-     * Create a Tsundoku FilterList object from a list of filters.
-     */
-    private fun createTsundokuFilterList(filters: List<Any>): Any {
+    private fun MangaInfo.toTsundokuSManga(): Any {
+        val smanga = Class.forName("eu.kanade.tachiyomi.source.model.SManga").getMethod("create").invoke(null)
+        smanga.setField("url", this.key)
+        smanga.setField("title", this.title)
+        smanga.setField("thumbnail_url", this.cover.ifBlank { null })
+        smanga.setField("artist", this.artist)
+        smanga.setField("author", this.author)
+        smanga.setField("description", this.description)
+        smanga.setField("genre", this.genres.joinToString(", "))
+        smanga.setField("status", this.status.toInt())
+        smanga.setField("initialized", true)
+        return smanga
+    }
+
+    private fun Any.toChapterInfo(): ChapterInfo {
+        return ChapterInfo(
+            key = getField("url") as? String ?: "",
+            name = getField("name") as? String ?: "",
+            dateUpload = getField("date_upload") as? Long ?: 0L,
+            number = getField("chapter_number") as? Float ?: -1f,
+            scanlator = getField("scanlator") as? String ?: ""
+        )
+    }
+
+    private fun ChapterInfo.toTsundokuSChapter(): Any {
+        val schapter = Class.forName("eu.kanade.tachiyomi.source.model.SChapter").getMethod("create").invoke(null)
+        schapter.setField("url", this.key)
+        schapter.setField("name", this.name)
+        schapter.setField("chapter_number", this.number)
+        schapter.setField("date_upload", this.dateUpload)
+        schapter.setField("scanlator", this.scanlator.ifBlank { null })
+        return schapter
+    }
+
+    private fun Any.toIReaderPages(): List<Page> {
+        val imageUrl = getField("imageUrl") as? String
+        val url = getField("url") as? String ?: ""
+        val text = getField("text") as? String
+        val pages = mutableListOf<Page>()
+        if (!text.isNullOrBlank()) pages.add(ireader.core.source.model.Text(text))
+        if (!imageUrl.isNullOrBlank()) pages.add(ireader.core.source.model.ImageUrl(imageUrl))
+        else if (url.isNotBlank()) pages.add(ireader.core.source.model.PageUrl(url))
+        return pages
+    }
+
+    private fun Any.toMangasPageInfo(): MangasPageInfo {
+        @Suppress("UNCHECKED_CAST")
+        val mangas = getField("mangas") as? List<Any> ?: emptyList()
+        val hasNextPage = getField("hasNextPage") as? Boolean ?: false
+        return MangasPageInfo(mangas = mangas.map { it.toMangaInfo() }, hasNextPage = hasNextPage)
+    }
+
+    private fun createEmptyTsundokuFilterList(): Any {
         val filterListClass = Class.forName("eu.kanade.tachiyomi.source.model.FilterList")
-        return filterListClass.getDeclaredConstructor(List::class.java).newInstance(filters)
-    }
-
-    /**
-     * Extract a search query from IReader filters (looks for Title filter).
-     */
-    private fun extractSearchQuery(filters: FilterList): String {
-        val titleFilter = filters.filterIsInstance<ireader.core.source.model.Filter.Text>()
-            .firstOrNull { it.name.equals("Title", ignoreCase = true) || it.name.equals("Search", ignoreCase = true) }
-        return titleFilter?.value ?: ""
-    }
-
-    /**
-     * Invoke a suspend method on the tsundoku source by name.
-     * Uses reflection to find and call the method.
-     */
-    private suspend fun invokeSuspend(methodName: String, vararg args: Any?): Any? {
-        val methods = tsundokuSource.javaClass.methods
-        val method = methods.firstOrNull {
-            it.name == methodName && it.parameterCount == args.size
-        } ?: throw NoSuchMethodException("$methodName not found on ${tsundokuSource.javaClass.name}")
-
-        return method.invoke(tsundokuSource, *args)
-    }
-
-    /**
-     * Invoke a suspend method with specific argument types.
-     */
-    private suspend fun invokeSuspendWithArgs(
-        methodName: String,
-        paramTypes: Array<Class<*>>,
-        args: Array<Any?>
-    ): Any? {
-        val method = try {
-            tsundokuSource.javaClass.getMethod(methodName, *paramTypes)
-        } catch (e: NoSuchMethodException) {
-            // Try superclass methods
-            tsundokuSource.javaClass.methods.firstOrNull {
-                it.name == methodName && it.parameterCount == args.size
-            } ?: throw e
-        }
-        return method.invoke(tsundokuSource, *args)
+        return filterListClass.getDeclaredConstructor(List::class.java).newInstance(emptyList<Any>())
     }
 
     // ==================== Reflection Helpers ====================
@@ -262,17 +170,41 @@ class TsundokuCatalogSource(
                     val field = clazz.getDeclaredField(name)
                     field.isAccessible = true
                     return field.get(this)
-                } catch (e: NoSuchFieldException) {
-                    clazz = clazz.superclass
-                }
+                } catch (e: NoSuchFieldException) { clazz = clazz.superclass }
             }
             null
-        } catch (e: Exception) {
-            null
-        }
+        } catch (e: Exception) { null }
     }
 
-    // ==================== Listing Types ====================
+    private fun Any.setField(name: String, value: Any?) {
+        try {
+            var clazz: Class<*>? = this.javaClass
+            while (clazz != null) {
+                try {
+                    val field = clazz.getDeclaredField(name)
+                    field.isAccessible = true
+                    field.set(this, value)
+                    return
+                } catch (e: NoSuchFieldException) { clazz = clazz.superclass }
+            }
+        } catch (e: Exception) { }
+    }
+
+    private fun invokeGetter(name: String): Any? {
+        return try {
+            val method = tsundokuSource.javaClass.methods.firstOrNull {
+                it.name == "get${name.replaceFirstChar { it.uppercase() }}" && it.parameterCount == 0
+            }
+            method?.invoke(tsundokuSource)
+        } catch (e: Exception) { null }
+    }
+
+    private suspend fun invokeSuspend(methodName: String, vararg args: Any?): Any? {
+        val method = tsundokuSource.javaClass.methods.firstOrNull {
+            it.name == methodName && it.parameterCount == args.size
+        } ?: throw NoSuchMethodException("$methodName not found")
+        return method.invoke(tsundokuSource, *args)
+    }
 
     class PopularListing : Listing("Popular")
     class LatestListing : Listing("Latest")

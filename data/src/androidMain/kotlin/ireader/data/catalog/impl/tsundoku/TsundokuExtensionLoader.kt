@@ -5,8 +5,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import ireader.core.log.Log
 import ireader.core.source.Source
-import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
 
 /**
  * Handles loading and validation of Tsundoku (Tachiyomi/Mihon) extension APKs.
@@ -189,9 +187,11 @@ object TsundokuExtensionLoader {
                     lastError = e
                     // Try next class name
                 } catch (e: Throwable) {
+                    // Unwrap InvocationTargetException to get the real cause
+                    val realCause = if (e is java.lang.reflect.InvocationTargetException) e.cause ?: e else e
                     val causeChain = buildString {
-                        append(e::class.simpleName)
-                        var cause = e.cause
+                        append("${realCause::class.simpleName}: ${realCause.message}")
+                        var cause = realCause.cause
                         var depth = 0
                         while (cause != null && depth < 5) {
                             append(" → ${cause::class.simpleName}: ${cause.message}")
@@ -274,13 +274,7 @@ object TsundokuExtensionLoader {
 
     /**
      * Initialize dependencies required by Tsundoku extensions.
-     *
-     * Uses shim classes compiled into the app:
-     * - uy.kohesive.injekt.Injekt (shim) — service locator
-     * - eu.kanade.tachiyomi.network.NetworkHelper (shim) — provides OkHttpClient
-     * - rx.Observable (shim) — minimal RxJava for deprecated methods
-     *
-     * No external dependencies needed (no real Injekt/RxJava).
+     * Registers NetworkHelper and Json directly in Injekt.
      */
     fun initializeDependencies(context: Context) {
         if (dependenciesInitialized) return
@@ -292,26 +286,34 @@ object TsundokuExtensionLoader {
                 .callTimeout(2, TimeUnit.MINUTES)
                 .build()
 
-            // Register NetworkHelper in our Injekt shim
-            val networkHelper = eu.kanade.tachiyomi.network.NetworkHelper(okHttpClient)
-            uy.kohesive.injekt.Injekt.registerValue(
-                eu.kanade.tachiyomi.network.NetworkHelper::class,
-                networkHelper
+            val networkHelper = eu.kanade.tachiyomi.network.NetworkHelper(
+                cacheDir = context.cacheDir
             )
+            val json = kotlinx.serialization.json.Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                explicitNulls = false
+            }
 
-            // Register Application — many extensions use it for SharedPreferences
-            try {
-                val appClass = Class.forName("android.app.Application")
-                uy.kohesive.injekt.Injekt.registerValue(
-                    appClass as Class<Any>,
-                    context.applicationContext
-                )
-            } catch (_: Exception) {
-                // Not on Android or Application not available
+            // Register directly in Injekt using addSingletonFactory
+            uy.kohesive.injekt.Injekt.addSingletonFactory(
+                object : uy.kohesive.injekt.api.FullTypeReference<eu.kanade.tachiyomi.network.NetworkHelper>() {}
+            ) { networkHelper }
+
+            uy.kohesive.injekt.Injekt.addSingletonFactory(
+                object : uy.kohesive.injekt.api.FullTypeReference<kotlinx.serialization.json.Json>() {}
+            ) { json }
+
+            // Register Application for ConfigurableSource
+            val app = context.applicationContext as? android.app.Application
+            if (app != null) {
+                uy.kohesive.injekt.Injekt.addSingletonFactory(
+                    object : uy.kohesive.injekt.api.FullTypeReference<android.app.Application>() {}
+                ) { app }
             }
 
             dependenciesInitialized = true
-            Log.info { "TsundokuLoader: Dependencies initialized (shim mode)" }
+            Log.info { "TsundokuLoader: Dependencies initialized" }
         } catch (e: Exception) {
             Log.warn { "TsundokuLoader: Failed to initialize dependencies: ${e.message}" }
         }

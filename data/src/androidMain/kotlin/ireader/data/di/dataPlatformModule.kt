@@ -97,4 +97,16 @@ actual val dataPlatformModule = module {
     single<BiometricAuthenticator>(createdAtStart = false) { BiometricAuthenticatorImpl(get()) }
     single<MemoryTracker>(createdAtStart = false) { AndroidMemoryTracker(get()) }
     single<NotificationRepository>(createdAtStart = false) { NotificationRepositoryImpl(get()) }
+
+    // ── Tsundoku Extension Runtime Dependencies ──────────────────────
+    single<eu.kanade.tachiyomi.network.NetworkHelper> {
+        eu.kanade.tachiyomi.network.NetworkHelper(cacheDir = get<android.app.Application>().cacheDir)
+    }
+    single<kotlinx.serialization.json.Json> {
+        kotlinx.serialization.json.Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            explicitNulls = false
+        }
+    }
 }
