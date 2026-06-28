@@ -1,22 +1,25 @@
 package ireader.data.catalog.impl.tsundoku
 
+import com.fleeksoft.ksoup.Ksoup
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.model.MangasPage
-import eu.kanade.tachiyomi.source.model.Page as TPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.HttpSource
 import ireader.core.log.Log
 import ireader.core.source.CatalogSource
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
-import ireader.core.source.model.FilterList as IReaderFilterList
+import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Listing
 import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.MangasPageInfo
 import ireader.core.source.model.Page
-import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.PageUrl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import eu.kanade.tachiyomi.source.model.Page as TPage
 
 class TsundokuCatalogSource(
     private val source: CatalogueSource
@@ -44,12 +47,14 @@ class TsundokuCatalogSource(
         }
     }
 
-    override suspend fun getMangaList(filters: IReaderFilterList, page: Int): MangasPageInfo {
+    override suspend fun getMangaList(filters: List<ireader.core.source.model.Filter<*>>, page: Int): MangasPageInfo {
         return try {
             val query = filters.filterIsInstance<ireader.core.source.model.Filter.Text>()
                 .firstOrNull { it.name.equals("Title", ignoreCase = true) || it.name.equals("Search", ignoreCase = true) }
                 ?.value ?: ""
-            val result = source.getSearchManga(page, query, source.getFilterList())
+            val result = withContext(Dispatchers.IO) {
+                source.getSearchManga(page, query, source.getFilterList())
+            }
             result.toMangasPageInfo()
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getMangaList(filters) failed", e)
@@ -59,7 +64,7 @@ class TsundokuCatalogSource(
 
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         return try {
-            val result = source.getMangaDetails(manga.toSManga())
+            val result = withContext(Dispatchers.IO) { source.getMangaDetails(manga.toSManga()) }
             result.toMangaInfo()
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getMangaDetails failed", e)
@@ -69,7 +74,7 @@ class TsundokuCatalogSource(
 
     override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
         return try {
-            val result = source.getChapterList(manga.toSManga())
+            val result = withContext(Dispatchers.IO) { source.getChapterList(manga.toSManga()) }
             Log.info { "Tsundoku[$name]: got ${result.size} chapters" }
             result.map { it.toChapterInfo() }
         } catch (e: Exception) {
@@ -80,8 +85,16 @@ class TsundokuCatalogSource(
 
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
         return try {
-            val result = source.getPageList(chapter.toSChapter())
+            val result = withContext(Dispatchers.IO) { source.getPageList(chapter.toSChapter()) }
             Log.info { "Tsundoku[$name]: got ${result.size} pages" }
+
+            val isNovel = try { source.isNovelSource } catch (_: Exception) { false }
+            if (isNovel && result.isNotEmpty()) {
+                val html = withContext(Dispatchers.IO) { source.fetchPageText(result.first()) }
+                if (html.isNotBlank()) return parseNovelContent(html)
+                return emptyList()
+            }
+
             result.map { it.toPage() }
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getPageList failed", e)
@@ -89,7 +102,32 @@ class TsundokuCatalogSource(
         }
     }
 
-    override fun getFilters(): IReaderFilterList = emptyList()
+    private fun parseNovelContent(html: String): List<Page> {
+        val doc = Ksoup.parse(html)
+        val contentElement = doc.selectFirst(".chapter-content, .entry-content, .content, article, .text, #content, .chapter_body, .reading-content")
+            ?: doc.body()
+            ?: return listOf(ireader.core.source.model.Text(html))
+
+        val paragraphs = mutableListOf<String>()
+        for (element in contentElement.children()) {
+            val tag = element.tagName().lowercase()
+            val text = element.text().trim()
+            if (text.isNotBlank()) paragraphs.add(text)
+        }
+        if (paragraphs.isEmpty()) {
+            val fullText = contentElement.text().trim()
+            if (fullText.isNotBlank()) {
+                return fullText.split(Regex("\n{2,}")).map { ireader.core.source.model.Text(it.trim()) }.filter { it.text.isNotBlank() }
+            }
+            return listOf(ireader.core.source.model.Text(html))
+        }
+        return paragraphs.map { ireader.core.source.model.Text(it) }
+    }
+
+    override fun getFilters(): List<ireader.core.source.model.Filter<*>> = emptyList()
+
+    override suspend fun getChapterPageCount(manga: MangaInfo): Int = 1
+    override fun supportsPaginatedChapters(): Boolean = false
 
     override fun getListings(): List<Listing> {
         val listings = mutableListOf<Listing>(PopularListing())
@@ -103,47 +141,93 @@ class TsundokuCatalogSource(
 
     // ==================== Model Conversions ====================
 
-    private fun MangaInfo.toSManga(): SManga = SManga.create().also {
-        it.url = this.key
-        it.title = this.title
-        it.artist = this.artist
-        it.author = this.author
-        it.description = this.description
-        it.genre = this.genres.joinToString(", ")
-        it.status = this.status.toInt()
-        it.thumbnail_url = this.cover.ifBlank { null }
-        it.initialized = true
+    private fun MangaInfo.toSManga(): SManga {
+        val url = this.key
+        val relativeUrl = if (baseUrl.isNotBlank() && url.startsWith(baseUrl)) {
+            url.removePrefix(baseUrl)
+        } else {
+            url
+        }
+        return SManga.create().also {
+            it.url = relativeUrl
+            it.title = this.title
+            it.artist = this.artist
+            it.author = this.author
+            it.description = this.description
+            it.genre = this.genres.joinToString(", ")
+            it.status = this.status.toInt()
+            it.thumbnail_url = this.cover.ifBlank { null }
+            it.initialized = true
+        }
     }
 
-    private fun SManga.toMangaInfo(): MangaInfo = MangaInfo(
-        key = this.url,
-        title = this.title,
-        artist = this.artist ?: "",
-        author = this.author ?: "",
-        description = this.description ?: "",
-        genres = this.getGenres() ?: emptyList(),
-        status = this.status.toLong(),
-        cover = this.thumbnail_url ?: ""
-    )
-
-    private fun ChapterInfo.toSChapter(): SChapter = SChapter.create().also {
-        it.url = this.key
-        it.name = this.name
-        it.chapter_number = this.number
-        it.date_upload = this.dateUpload
-        it.scanlator = this.scanlator.ifBlank { null }
+    private fun SManga.toMangaInfo(): MangaInfo {
+        val url = try { this.url } catch (_: UninitializedPropertyAccessException) { "" }
+        val fullUrl = if (url.isNotBlank() && !url.startsWith("http") && baseUrl.isNotBlank()) {
+            baseUrl.trimEnd('/') + "/" + url.trimStart('/')
+        } else {
+            url
+        }
+        val title = try { this.title } catch (_: UninitializedPropertyAccessException) { "" }
+        val artist = try { this.artist } catch (_: UninitializedPropertyAccessException) { null }
+        val author = try { this.author } catch (_: UninitializedPropertyAccessException) { null }
+        val description = try { this.description } catch (_: UninitializedPropertyAccessException) { null }
+        val genre = try { this.genre } catch (_: UninitializedPropertyAccessException) { null }
+        val status = try { this.status } catch (_: UninitializedPropertyAccessException) { 0 }
+        val thumbnail = try { this.thumbnail_url } catch (_: UninitializedPropertyAccessException) { null }
+        return MangaInfo(
+            key = fullUrl,
+            title = title,
+            artist = artist ?: "",
+            author = author ?: "",
+            description = description ?: "",
+            genres = this.getGenres() ?: emptyList(),
+            status = status.toLong(),
+            cover = thumbnail ?: ""
+        )
     }
 
-    private fun SChapter.toChapterInfo(): ChapterInfo = ChapterInfo(
-        key = this.url,
-        name = this.name,
-        number = this.chapter_number.toFloat(),
-        dateUpload = this.date_upload,
-        scanlator = this.scanlator ?: ""
-    )
+    private fun ChapterInfo.toSChapter(): SChapter {
+        val url = this.key
+        // Strip baseUrl prefix since HttpSource.pageListRequest() prepends it internally
+        val relativeUrl = if (baseUrl.isNotBlank() && url.startsWith(baseUrl)) {
+            url.removePrefix(baseUrl)
+        } else {
+            url
+        }
+        return SChapter.create().also {
+            it.url = relativeUrl
+            it.name = this.name
+            it.chapter_number = this.number
+            it.date_upload = this.dateUpload
+            it.scanlator = this.scanlator.ifBlank { null }
+        }
+    }
+
+    private val baseUrl: String
+        get() = (source as? HttpSource)?.baseUrl ?: ""
+
+    private fun SChapter.toChapterInfo(): ChapterInfo {
+        val url = this.url
+        val fullUrl = if (url.isNotBlank() && !url.startsWith("http")) {
+            baseUrl.trimEnd('/') + "/" + url.trimStart('/')
+        } else {
+            url
+        }
+        return ChapterInfo(
+            key = fullUrl,
+            name = this.name,
+            number = this.chapter_number.toFloat(),
+            dateUpload = this.date_upload,
+            scanlator = this.scanlator ?: ""
+        )
+    }
 
     private fun TPage.toPage(): Page = when {
-        !this.text.isNullOrBlank() -> ireader.core.source.model.Text(this.text!!)
+        !this.text.isNullOrBlank() -> {
+            val textRes = Ksoup.parse(this.text ?: "").text()
+            ireader.core.source.model.Text(textRes)
+        }
         !this.imageUrl.isNullOrBlank() -> ImageUrl(this.imageUrl!!)
         this.url.isNotBlank() -> PageUrl(this.url)
         else -> PageUrl("")
