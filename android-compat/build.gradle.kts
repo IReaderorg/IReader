@@ -42,7 +42,7 @@ sourceSets {
             include("android/os/UserHandle.java")
             include("android/net/Uri.java")
             include("android/annotation/*.java")
-            // AndroidX preference stubs needed by tsundoku extensions at runtime
+            include("android/util/Log.java")
             include("androidx/preference/*.java")
         }
     }

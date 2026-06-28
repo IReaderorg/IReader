@@ -236,46 +236,48 @@ class DesktopCatalogLoader(
 
         Log.info("DesktopCatalogLoader: Found ${tsundokuPkgs.size} tsundoku extensions")
 
-        return tsundokuPkgs.mapNotNull { file ->
+        return tsundokuPkgs.flatMap { file ->
             loadTsundokuCatalog(file)
         }
     }
 
     /**
-     * Load a single Tsundoku extension APK as an IReader catalog.
+     * Load a single Tsundoku extension APK as IReader catalogs.
+     * Returns a list because one extension APK can contain multiple sources.
      */
-    private fun loadTsundokuCatalog(file: File): CatalogInstalled.Locally? {
+    private fun loadTsundokuCatalog(file: File): List<CatalogInstalled.Locally> {
         val pkgName = file.nameWithoutExtension
         return try {
             val apkFile = ApkFile(file)
             val data = DesktopTsundokuExtensionLoader.validateMetadata(pkgName, apkFile)
             apkFile.close()
 
-            if (data == null) {
-                return null
-            }
+            if (data == null) return emptyList()
 
             val sources = DesktopTsundokuExtensionLoader.loadSources(pkgName, file, data)
             if (sources.isEmpty()) {
                 Log.warn { "DesktopCatalogLoader: No sources from tsundoku APK $pkgName" }
-                return null
+                return emptyList()
             }
 
-            val source = sources.first()
-            CatalogInstalled.Locally(
-                name = source.name,
-                description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
-                source = source,
-                pkgName = pkgName,
-                versionName = data.versionName,
-                versionCode = data.versionCode,
-                nsfw = data.nsfw,
-                installDir = file.parentFile!!.absolutePath.toPath(),
-                iconUrl = ""
-            )
+            Log.info { "DesktopCatalogLoader: Loaded ${sources.size} source(s) from tsundoku APK $pkgName" }
+
+            sources.map { source ->
+                CatalogInstalled.Locally(
+                    name = source.name,
+                    description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
+                    source = source,
+                    pkgName = pkgName,
+                    versionName = data.versionName,
+                    versionCode = data.versionCode,
+                    nsfw = data.nsfw,
+                    installDir = file.parentFile!!.absolutePath.toPath(),
+                    iconUrl = ""
+                )
+            }
         } catch (e: Exception) {
             Log.error("DesktopCatalogLoader: Failed to load tsundoku catalog $pkgName", e)
-            null
+            emptyList()
         }
     }
 
