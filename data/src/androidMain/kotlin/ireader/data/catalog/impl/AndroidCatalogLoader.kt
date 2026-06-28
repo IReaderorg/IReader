@@ -13,9 +13,12 @@ import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.source.TestSource
+import ireader.data.catalog.impl.tsundoku.ChildFirstPathClassLoader
+import ireader.data.catalog.impl.tsundoku.TsundokuCatalogSource
+import ireader.data.catalog.impl.tsundoku.TsundokuExtensionLoader
+import ireader.data.catalog.impl.tsundoku.TsundokuValidatedData
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.js.loader.JSPluginLoader
-import ireader.domain.js.util.JSPluginLogger
 import ireader.domain.models.entities.CatalogBundled
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
@@ -25,14 +28,10 @@ import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.BuildKonfig
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.unknown
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import ireader.data.catalog.impl.tsundoku.TsundokuExtensionLoader
-import ireader.data.catalog.impl.tsundoku.TsundokuCatalogSource
-import ireader.data.catalog.impl.tsundoku.TsundokuValidatedData
 import okio.Path.Companion.toPath
 import java.io.File
 
@@ -695,49 +694,54 @@ class AndroidCatalogLoader(
         // Initialize tsundoku DI dependencies (Injekt, NetworkHelper, etc.)
         TsundokuExtensionLoader.initializeDependencies(context)
 
-        return tsundokuPkgs.mapNotNull { pkgInfo ->
+        return tsundokuPkgs.flatMap { pkgInfo ->
             loadTsundokuCatalog(pkgInfo)
         }
     }
 
     /**
-     * Load a single Tsundoku extension as an IReader catalog.
+     * Load a single Tsundoku extension as IReader catalogs.
+     * Returns a list because one extension APK can contain multiple sources.
      */
-    private fun loadTsundokuCatalog(pkgInfo: PackageInfo): CatalogInstalled.SystemWide? {
+    private fun loadTsundokuCatalog(pkgInfo: PackageInfo): List<CatalogInstalled.SystemWide> {
         val pkgName = pkgInfo.packageName
-        val data = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo) ?: return null
+        val data = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo) ?: return emptyList()
 
         val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: run {
             Log.warn { "AndroidCatalogLoader: No sourceDir for tsundoku package $pkgName" }
-            return null
+            return emptyList()
         }
 
+        // Load icon from APK package info
+        val iconUrl = pkgInfo.applicationInfo?.icon?.toString() ?: ""
+
         return try {
-            val classLoader = PathClassLoader(sourceDir, context.classLoader)
+            val classLoader = ChildFirstPathClassLoader(sourceDir, null, context.classLoader)
             val sources = TsundokuExtensionLoader.loadSources(pkgName, classLoader, data)
 
             if (sources.isEmpty()) {
                 Log.warn { "AndroidCatalogLoader: No sources loaded from tsundoku extension $pkgName" }
-                return null
+                return emptyList()
             }
 
-            // Use the first source (most extensions have one source)
-            val source = sources.first()
+            Log.info { "AndroidCatalogLoader: Loaded ${sources.size} source(s) from tsundoku extension $pkgName" }
 
-            CatalogInstalled.SystemWide(
-                name = source.name,
-                description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
-                source = source,
-                pkgName = pkgName,
-                versionName = data.versionName,
-                versionCode = data.versionCode,
-                nsfw = data.nsfw,
-                iconUrl = "",
-                installDir = sourceDir.toOkioPath()
-            )
+            sources.map { source ->
+                CatalogInstalled.SystemWide(
+                    name = source.name,
+                    description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
+                    source = source,
+                    pkgName = pkgName,
+                    versionName = data.versionName,
+                    versionCode = data.versionCode,
+                    nsfw = data.nsfw,
+                    iconUrl = iconUrl,
+                    installDir = sourceDir.toOkioPath()
+                )
+            }
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to load tsundoku catalog $pkgName", e)
-            null
+            emptyList()
         }
     }
 

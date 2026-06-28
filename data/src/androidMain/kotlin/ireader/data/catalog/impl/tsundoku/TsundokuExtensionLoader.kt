@@ -36,8 +36,8 @@ object TsundokuExtensionLoader {
     private const val METADATA_FACTORY = "tachiyomi.extension.factory"
 
     // Tsundoku supported lib versions
-    private const val LIB_VERSION_MIN = 1.4
-    private const val LIB_VERSION_MAX = 1.6
+    private const val LIB_VERSION_MIN = 1.3
+    private const val LIB_VERSION_MAX = 2.0
 
     /**
      * Check if a package is a Tsundoku extension (has tachiyomi.extension or tachiyomi.novelextension feature).
@@ -74,13 +74,12 @@ object TsundokuExtensionLoader {
         val libVersion = try {
             versionName.substringBeforeLast('.').toDouble()
         } catch (e: NumberFormatException) {
-            Log.warn { "TsundokuLoader: Invalid version format '$versionName' for $pkgName" }
-            return null
+            Log.warn { "TsundokuLoader: Invalid version format '$versionName' for $pkgName, trying anyway" }
+            0.0 // Default to 0 so loading still proceeds
         }
 
         if (libVersion < LIB_VERSION_MIN || libVersion > LIB_VERSION_MAX) {
-            Log.warn { "TsundokuLoader: Unsupported lib version $libVersion for $pkgName (need $LIB_VERSION_MIN-$LIB_VERSION_MAX)" }
-            return null
+            Log.warn { "TsundokuLoader: lib version $libVersion for $pkgName outside range $LIB_VERSION_MIN-$LIB_VERSION_MAX, trying anyway" }
         }
 
         val appInfo = pkgInfo.applicationInfo ?: run {

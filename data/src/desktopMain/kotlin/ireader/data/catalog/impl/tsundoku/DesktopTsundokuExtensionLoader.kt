@@ -32,8 +32,8 @@ object DesktopTsundokuExtensionLoader {
     private const val METADATA_NOVEL = "tachiyomi.extension.novel"
 
     // Tsundoku supported lib versions
-    private const val LIB_VERSION_MIN = 1.4
-    private const val LIB_VERSION_MAX = 1.6
+    private const val LIB_VERSION_MIN = 1.3
+    private const val LIB_VERSION_MAX = 2.0
 
     private var dependenciesInitialized = false
 
@@ -64,13 +64,12 @@ object DesktopTsundokuExtensionLoader {
         val libVersion = try {
             versionName.substringBeforeLast('.').toDouble()
         } catch (e: NumberFormatException) {
-            Log.warn { "TsundokuDesktopLoader: Invalid version format '$versionName' for $pkgName" }
-            return null
+            Log.warn { "TsundokuDesktopLoader: Invalid version format '$versionName' for $pkgName, trying anyway" }
+            0.0
         }
 
         if (libVersion < LIB_VERSION_MIN || libVersion > LIB_VERSION_MAX) {
-            Log.warn { "TsundokuDesktopLoader: Unsupported lib version $libVersion for $pkgName" }
-            return null
+            Log.warn { "TsundokuDesktopLoader: lib version $libVersion for $pkgName outside range, trying anyway" }
         }
 
         // Parse metadata from AndroidManifest.xml using Ksoup

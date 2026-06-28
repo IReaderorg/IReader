@@ -1,21 +1,18 @@
 package ireader.data.catalog
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import ireader.core.http.HttpClients
 import ireader.domain.catalogs.service.CatalogRemoteApi
+import ireader.domain.data.repository.CatalogSourceRepository
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
-import ireader.domain.data.repository.CatalogSourceRepository
-import kotlinx.coroutines.flow.first
 import ireader.domain.utils.CatalogNotFoundException
 import ireader.i18n.REPO_URL
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
 
 
 class CatalogGithubApi(
@@ -184,10 +181,12 @@ class CatalogGithubApi(
         return catalogs.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
             val appUrl = "$repoUrl/apk/${catalog.apk}"
+            // Use the first source's id as unique identifier, fallback to pkg hash
+
             CatalogRemote(
                 name = catalog.name,
                 description = catalog.description ?: if (catalog.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
-                sourceId = catalog.code.toLong(),
+                sourceId = catalog.sources?.firstOrNull()?.id ?: 0L,
                 pkgName = catalog.pkg,
                 versionName = catalog.version,
                 versionCode = catalog.code,
@@ -442,12 +441,14 @@ class CatalogGithubApi(
         @SerialName("isNovel") val isNovel: Boolean = false,
         @SerialName("sources") val sources: List<TsundokuSourceModel>? = null,
         @SerialName("description") val description: String? = null,
+
     )
 
     @Serializable
     private data class TsundokuSourceModel(
         @SerialName("name") val name: String,
         @SerialName("lang") val lang: String,
+        @SerialName("id") val id: Long,
         @SerialName("baseUrl") val baseUrl: String? = null,
     )
 }
