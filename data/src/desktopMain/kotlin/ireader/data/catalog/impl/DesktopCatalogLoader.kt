@@ -27,6 +27,7 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import java.io.File
 import java.net.URLClassLoader
+import javax.imageio.ImageIO
 
 class DesktopCatalogLoader(
     private val httpClients: HttpClients,
@@ -259,6 +260,9 @@ class DesktopCatalogLoader(
 
             Log.info { "DesktopCatalogLoader: Loaded ${sources.size} source(s) from tsundoku APK $pkgName" }
 
+            // Extract and save the APK icon
+            val iconUrl = extractAndSaveIcon(file, pkgName)
+
             sources.map { source ->
                 CatalogInstalled.Locally(
                     name = source.name,
@@ -269,7 +273,7 @@ class DesktopCatalogLoader(
                     versionCode = data.versionCode,
                     nsfw = data.nsfw,
                     installDir = file.parentFile!!.absolutePath.toPath(),
-                    iconUrl = ""
+                    iconUrl = iconUrl
                 )
             }
         } catch (e: Exception) {
@@ -360,6 +364,38 @@ class DesktopCatalogLoader(
         val classToLoad: String,
         val dependencies: ireader.core.source.Dependencies,
     )
+
+    /**
+     * Extract the largest icon from an APK and save it as a PNG file.
+     * Returns a file:// URI string or empty string on failure.
+     */
+    private fun extractAndSaveIcon(apkFile: File, pkgName: String): String {
+        try {
+            ApkFile(apkFile).use { apk ->
+                val icons = apk.allIcons
+                val largestIcon = icons
+                    .filter { it.isFile }
+                    .mapNotNull { entry ->
+                        try {
+                            val image = ImageIO.read(entry.data.inputStream())
+                            image to (image.width * image.height)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    .sortedByDescending { it.second }
+                    .firstOrNull()?.first ?: return ""
+
+                val iconFile = File(ExtensionDir, "${pkgName}/${pkgName}.png")
+                iconFile.parentFile?.mkdirs()
+                ImageIO.write(largestIcon, "png", iconFile)
+                return iconFile.toURI().toString()
+            }
+        } catch (e: Exception) {
+            Log.warn { "DesktopCatalogLoader: Failed to extract icon for $pkgName: ${e.message}" }
+            return ""
+        }
+    }
 
     private companion object {
         const val EXTENSION_FEATURE = "ireader"

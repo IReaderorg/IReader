@@ -124,6 +124,9 @@ kotlin {
                 implementation("io.ktor:ktor-server-websockets:3.3.2")
                 implementation("io.ktor:ktor-server-compression:3.3.2")
                 
+                // APK parser (for Tsundoku icon extraction from local APKs)
+                implementation(libs.apk.parser)
+                
                 implementation(androidx.core)
                 implementation(libs.requerySqlite)
                 implementation(libs.sqldelight.android)

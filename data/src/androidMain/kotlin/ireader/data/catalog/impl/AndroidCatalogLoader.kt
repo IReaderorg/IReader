@@ -5,6 +5,11 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
 import ireader.core.http.HttpClients
@@ -470,6 +475,9 @@ class AndroidCatalogLoader(
             }
 
             val source = sources.first()
+            // Extract and save the APK icon
+            val iconUrl = extractAndSaveLocalIcon(file, pkgName)
+
             return CatalogInstalled.Locally(
                 name = source.name,
                 description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
@@ -479,7 +487,7 @@ class AndroidCatalogLoader(
                 versionCode = data.versionCode,
                 nsfw = data.nsfw,
                 installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
-                iconUrl = ""
+                iconUrl = iconUrl
             )
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to load local tsundoku catalog $pkgName", e)
@@ -711,8 +719,8 @@ class AndroidCatalogLoader(
             return emptyList()
         }
 
-        // Load icon from APK package info
-        val iconUrl = pkgInfo.applicationInfo?.icon?.toString() ?: ""
+        // Extract and save the APK icon as PNG
+        val iconUrl = extractAndSaveSystemIcon(pkgName, pkgInfo)
 
         return try {
             val classLoader = ChildFirstPathClassLoader(sourceDir, null, context.classLoader)
@@ -725,6 +733,10 @@ class AndroidCatalogLoader(
 
             Log.info { "AndroidCatalogLoader: Loaded ${sources.size} source(s) from tsundoku extension $pkgName" }
 
+            val installDir = simpleStorage.extensionDirectory().toFile().let {
+                File(it, pkgName).apply { mkdirs() }
+            }
+
             sources.map { source ->
                 CatalogInstalled.SystemWide(
                     name = source.name,
@@ -735,7 +747,7 @@ class AndroidCatalogLoader(
                     versionCode = data.versionCode,
                     nsfw = data.nsfw,
                     iconUrl = iconUrl,
-                    installDir = sourceDir.toOkioPath()
+                    installDir = installDir.absolutePath.toOkioPath()
                 )
             }
         } catch (e: Exception) {
@@ -822,6 +834,97 @@ class AndroidCatalogLoader(
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to load engine plugins", e)
         }
+    }
+
+    /**
+     * Extract the app icon for a system-wide Tsundoku extension.
+     * Uses PackageManager to get the icon, saves as PNG.
+     * Returns a file:// URI or empty string on failure.
+     */
+    private fun extractAndSaveSystemIcon(pkgName: String, pkgInfo: PackageInfo): String {
+        try {
+            val drawable = pkgManager.getApplicationIcon(pkgName)
+            val bitmap = drawableToBitmap(drawable)
+            if (bitmap == null) return ""
+
+            val extDir = simpleStorage.extensionDirectory().toFile()
+            val pkgDir = File(extDir, pkgName).apply { mkdirs() }
+            val iconFile = File(pkgDir, "$pkgName.png")
+            iconFile.outputStream().use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            return iconFile.toURI().toString()
+        } catch (e: Exception) {
+            Log.warn { "AndroidCatalogLoader: Failed to extract system icon for $pkgName: ${e.message}" }
+            return ""
+        }
+    }
+
+    /**
+     * Extract the largest icon from a local APK file and save as PNG.
+     * Uses apk-parser to read embedded icon resources, selecting by resolution.
+     * Returns a file:// URI or empty string on failure.
+     */
+    private fun extractAndSaveLocalIcon(apkFile: File, pkgName: String): String {
+        val apk = net.dongliu.apk.parser.ApkFile(apkFile)
+        return try {
+            val icons = apk.allIcons
+
+            // Decode bounds to find the largest icon by resolution
+            var bestIconBytes: ByteArray? = null
+            var maxPixels = 0
+            val opts = BitmapFactory.Options()
+
+            for (entry in icons) {
+                if (!entry.isFile) continue
+                try {
+                    val data = entry.data
+                    opts.inJustDecodeBounds = true
+                    BitmapFactory.decodeByteArray(data, 0, data.size, opts)
+                    val pixels = opts.outWidth * opts.outHeight
+                    if (pixels > maxPixels) {
+                        maxPixels = pixels
+                        bestIconBytes = data
+                    }
+                } catch (_: Exception) {
+                    // Skip invalid icon entries
+                }
+            }
+
+            if (bestIconBytes == null) return ""
+
+            val bitmap = BitmapFactory.decodeByteArray(bestIconBytes, 0, bestIconBytes.size)
+            if (bitmap == null) return ""
+
+            val extDir = simpleStorage.extensionDirectory().toFile()
+            val pkgDir = File(extDir, pkgName).apply { mkdirs() }
+            val iconFile = File(pkgDir, "$pkgName.png")
+            iconFile.outputStream().use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            iconFile.toURI().toString()
+        } catch (e: Exception) {
+            Log.warn { "AndroidCatalogLoader: Failed to extract local icon for $pkgName: ${e.message}" }
+            ""
+        } finally {
+            apk.close()
+        }
+    }
+
+    /**
+     * Convert an Android Drawable to a Bitmap.
+     */
+    private fun drawableToBitmap(drawable: Drawable): Bitmap? {
+        if (drawable is BitmapDrawable) {
+            return drawable.bitmap
+        }
+        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 512
+        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 512
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     /**
