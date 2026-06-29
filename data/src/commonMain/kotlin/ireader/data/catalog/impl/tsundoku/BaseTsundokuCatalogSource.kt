@@ -41,57 +41,50 @@ abstract class BaseTsundokuCatalogSource : CatalogSource {
 
     /**
      * Parse HTML content from a novel source into multiple readable [Text] pages.
-     * Splits by paragraph tags, headings, and line breaks so the reader
-     * can display content in digestible chunks instead of one giant wall of text.
+     *
+     * Strategy: inject unique break markers into the DOM at block boundaries,
+     * then let Ksoup's recursive [org.jsoup.nodes.Element.text] do all the heavy
+     * lifting of whitespace normalization and nested-text extraction. Finally split
+     * on the markers to recover clean, standalone paragraphs.
+     *
+     * This works regardless of HTML nesting depth because [org.jsoup.nodes.Element.text]
+     * walks the entire subtree — no `children()`-only iteration like the old approach.
      */
     protected fun parseNovelContent(html: String): List<Page> {
         val doc = Ksoup.parse(html)
+
+        // 1. Strip noise elements that never contain chapter text
+        doc.select("script, style, noscript, nav, footer, header, aside, form, iframe, pre, code, .comments, #comments").remove()
+
+        // 2. Find the main content container — try common selectors, fall back to body.
+        //    Even body is fine now because step 1 already removed the junk.
         val contentElement = doc.selectFirst(
             ".chapter-content, .entry-content, .content, article, .text, #content, .chapter_body, .reading-content"
         ) ?: doc.body()
         ?: return listOf(Text(html))
 
-        val paragraphs = mutableListOf<String>()
-
-        // Extract text from content, preserving paragraph structure
-        for (element in contentElement.children()) {
-            val tag = element.tagName().lowercase()
-            when (tag) {
-                "p", "div", "section" -> {
-                    val text = element.text().trim()
-                    if (text.isNotBlank()) paragraphs.add(text)
-                }
-                "h1", "h2", "h3", "h4", "h5", "h6" -> {
-                    val text = element.text().trim()
-                    if (text.isNotBlank()) paragraphs.add(text)
-                }
-                "br" -> {
-                    // skip bare <br> tags
-                }
-                "img" -> {
-                    // Image in novel content — skip or handle as needed
-                    val src = element.attr("src")
-                    if (src.isNotBlank()) {
-                        // future: could create ImageUrl pages here
-                    }
-                }
-                else -> {
-                    // For any other block elements, try to get their text
-                    val text = element.text().trim()
-                    if (text.isNotBlank()) paragraphs.add(text)
-                }
-            }
+        // 3. Inject a unique textual break marker at every block boundary.
+        //    Ksoup's .text() collapses newlines to spaces but does NOT touch our marker.
+        //    Single pass: br only gets .append(), block elements get both .prepend() and .append().
+        val marker = "§¶§"
+        val allBlocks = contentElement.select("p, div, section, article, li, h1, h2, h3, h4, h5, h6")
+        allBlocks.prepend(" $marker ")
+        allBlocks.append(" $marker ")
+        contentElement.select("br").let { brs ->
+            // brs already covered by the block selector above if br was in it, but it's not.
+            // Only append — br is an empty void element.
+            brs.append(" $marker ")
         }
 
-        // If no child elements parsed, fall back to full text extraction
+        // 4. Extract recursively-normalised text (handles arbitrarily deep nesting)
+        val normalized = contentElement.text()
+
+        // 5. Split on the marker and clean each paragraph
+        val paragraphs = normalized.split(marker)
+            .map { it.trim().replace(Regex("\\s+"), " ") }
+            .filter { it.isNotBlank() }
+
         if (paragraphs.isEmpty()) {
-            val fullText = contentElement.text().trim()
-            if (fullText.isNotBlank()) {
-                val lines = fullText.split(Regex("\n{2,}|<br\\s*/?>|</?p>"))
-                    .map { it.trim() }
-                    .filter { it.isNotBlank() }
-                return lines.map { Text(it) }
-            }
             return listOf(Text(html))
         }
 
