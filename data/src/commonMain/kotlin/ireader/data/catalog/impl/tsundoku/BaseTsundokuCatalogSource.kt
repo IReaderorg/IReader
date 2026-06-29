@@ -24,13 +24,17 @@ abstract class BaseTsundokuCatalogSource : CatalogSource {
 
     // ── Trivial overrides (no eu.kanade dependency) ─────────────────
 
-    override fun getFilters(): List<Filter<*>> = emptyList()
+    /**
+     * Filters are provided by the platform-specific subclass which has access
+     * to the Tsundoku source's [eu.kanade.tachiyomi.source.CatalogueSource.getFilterList].
+     */
+    abstract override fun getFilters(): List<Filter<*>>
     override fun getCommands(): CommandList = emptyList()
     override suspend fun getChapterPageCount(manga: MangaInfo): Int = 1
     override fun supportsPaginatedChapters(): Boolean = false
 
     override fun getListings(): List<Listing> {
-        val listings = mutableListOf<Listing>(PopularListing())
+        val listings = mutableListOf<Listing>(PopularListing(), SearchListing())
         if (supportsLatest) listings.add(LatestListing())
         return listings
     }
@@ -96,4 +100,5 @@ abstract class BaseTsundokuCatalogSource : CatalogSource {
 
     class PopularListing : Listing("Popular")
     class LatestListing : Listing("Latest")
+    class SearchListing : Listing("Search")
 }
