@@ -16,7 +16,6 @@ import ireader.i18n.UiText
  * 
  * Requirements: 5.1 - @Stable annotation for Compose optimization
  */
-@Stable
 sealed interface ReaderState {
     
     @Immutable
@@ -108,21 +107,18 @@ sealed interface ReaderState {
         /**
          * Get the source from catalog
          */
-        @Stable
         val source: Source?
             get() = catalog?.source
         
         /**
          * Check if chapter has actual content (not just placeholder)
          */
-        @Stable
         val isChapterLoaded: Boolean
             get() = currentContent.isNotEmpty()
         
         /**
          * Get drawer chapters (respects sort order)
          */
-        @Stable
         val drawerChapters: List<Chapter>
             get() = if (isDrawerAsc) chapters else chapters.reversed()
         
@@ -130,7 +126,6 @@ sealed interface ReaderState {
          * Get current content (original or translated based on preference).
          * Filters out any placeholder content that should never be displayed to users.
          */
-        @Stable
         val currentContent: List<Page>
             get() {
                 val baseContent = if (showTranslatedContent && hasTranslation && translatedContent.isNotEmpty()) {
@@ -152,7 +147,6 @@ sealed interface ReaderState {
         /**
          * Check if initial loading (no content yet)
          */
-        @Stable
         val isInitialLoading: Boolean
             get() = isLoadingContent && content.isEmpty()
     }

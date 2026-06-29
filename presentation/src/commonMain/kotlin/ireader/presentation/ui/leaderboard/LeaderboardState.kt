@@ -22,16 +22,12 @@ data class LeaderboardScreenState(
     val selectedUserBooks: List<SyncedBookSummary> = emptyList(),
     val isLoadingBooks: Boolean = false,
 ) {
-    @Stable
     val isEmpty: Boolean get() = leaderboard.isEmpty() && !isLoading
     
-    @Stable
     val isInitialLoading: Boolean get() = isLoading && leaderboard.isEmpty()
     
-    @Stable
     val hasContent: Boolean get() = leaderboard.isNotEmpty()
     
-    @Stable
     val hasUserRank: Boolean get() = userRank != null
 }
 
@@ -46,15 +42,11 @@ data class DonationLeaderboardScreenState(
     val error: String? = null,
     val isRealtimeEnabled: Boolean = false
 ) {
-    @Stable
     val isEmpty: Boolean get() = leaderboard.isEmpty() && !isLoading
     
-    @Stable
     val isInitialLoading: Boolean get() = isLoading && leaderboard.isEmpty()
     
-    @Stable
     val hasContent: Boolean get() = leaderboard.isNotEmpty()
     
-    @Stable
     val hasUserRank: Boolean get() = userRank != null
 }

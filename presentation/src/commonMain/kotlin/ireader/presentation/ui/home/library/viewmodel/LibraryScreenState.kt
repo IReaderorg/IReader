@@ -78,7 +78,6 @@ data class PaginationState(
         const val PAGE_SIZE = 15
     }
     
-    @Stable
     val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore
 }
 
@@ -196,28 +195,21 @@ data class LibraryScreenState(
     
 
 ) {
-    @Stable
     val selectionMode: Boolean get() = selectedBookIds.isNotEmpty()
     
-    @Stable
     val selectedCount: Int get() = selectedBookIds.size
     
-    @Stable
     val isEmpty: Boolean get() = books.isEmpty() && !isLoading
     
-    @Stable
     val selectedCategory: CategoryWithCount? get() = categories.getOrNull(selectedCategoryIndex)
     
-    @Stable
     val isInitialLoading: Boolean get() = isLoading && books.isEmpty()
     
-    @Stable
     val hasContent: Boolean get() = books.isNotEmpty()
     
     /**
      * Get pagination state for the current category.
      */
-    @Stable
     fun getPaginationState(categoryId: Long): PaginationState {
         return categoryPaginationState[categoryId] ?: PaginationState(totalItems = books.size)
     }

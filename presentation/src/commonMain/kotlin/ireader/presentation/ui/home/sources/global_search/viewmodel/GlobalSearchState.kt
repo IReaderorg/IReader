@@ -29,18 +29,13 @@ data class GlobalSearchScreenState(
     val numberOfTries: Int = 0,
     val error: String? = null
 ) {
-    @Stable
     val isEmpty: Boolean get() = withResult.isEmpty() && noResult.isEmpty() && inProgress.isEmpty() && !isLoading
     
-    @Stable
     val isInitialLoading: Boolean get() = isLoading && withResult.isEmpty() && inProgress.isEmpty()
     
-    @Stable
     val hasContent: Boolean get() = withResult.isNotEmpty()
     
-    @Stable
     val totalSourcesSearched: Int get() = withResult.size + noResult.size
     
-    @Stable
     val totalResultsFound: Int get() = withResult.sumOf { it.items.size }
 }

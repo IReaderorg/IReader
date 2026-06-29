@@ -5,6 +5,11 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import dalvik.system.DexClassLoader
 import dalvik.system.PathClassLoader
 import ireader.core.http.HttpClients
@@ -13,9 +18,12 @@ import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.source.TestSource
+import ireader.data.catalog.impl.tsundoku.ChildFirstPathClassLoader
+import ireader.data.catalog.impl.tsundoku.TsundokuCatalogSource
+import ireader.data.catalog.impl.tsundoku.TsundokuExtensionLoader
+import ireader.data.catalog.impl.tsundoku.TsundokuValidatedData
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.js.loader.JSPluginLoader
-import ireader.domain.js.util.JSPluginLogger
 import ireader.domain.models.entities.CatalogBundled
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
@@ -25,9 +33,8 @@ import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.BuildKonfig
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.unknown
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import okio.Path.Companion.toPath
@@ -148,7 +155,6 @@ class AndroidCatalogLoader(
                 "Source used for testing"
             )
             bundled.add(testCatalog)
-            bundled.add(testCatalog)
         }
 
         val systemPkgs = try {
@@ -222,6 +228,9 @@ class AndroidCatalogLoader(
             !isDuplicate
         }
 
+        // Load Tsundoku (Tachiyomi/Mihon) extensions natively
+        val tsundokuCatalogs = loadTsundokuExtensions()
+
         // Load JavaScript plugins if enabled
         val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
@@ -240,7 +249,7 @@ class AndroidCatalogLoader(
             emptyList()
         }
 
-        val result = (bundled + deduplicated + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        val result = (bundled + deduplicated + tsundokuCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
         
         // Log diagnostics
         if (failedCatalogs.isNotEmpty()) {
@@ -396,34 +405,92 @@ class AndroidCatalogLoader(
         pkgInfo: PackageInfo,
         file: File,
     ): CatalogInstalled.Locally? {
-        val data = validateMetadata(pkgName, pkgInfo) ?: return null
-        
-        try {
-            // Verify file is readable and non-empty before attempting class loading
-            if (!file.exists() || !file.canRead() || file.length() == 0L) {
-                Log.warn { "AndroidCatalogLoader: APK file not accessible for $pkgName" }
+        // Try IReader extension first
+        val data = validateMetadata(pkgName, pkgInfo)
+
+        if (data != null) {
+            // Standard IReader extension loading path
+            try {
+                if (!file.exists() || !file.canRead() || file.length() == 0L) {
+                    Log.warn { "AndroidCatalogLoader: APK file not accessible for $pkgName" }
+                    return null
+                }
+
+                val loader = createClassLoader(file, pkgName)
+                val source = loadSource(pkgName, loader, data) ?: return null
+
+                return CatalogInstalled.Locally(
+                    name = source.name,
+                    description = data.description,
+                    source = source,
+                    pkgName = pkgName,
+                    versionName = data.versionName,
+                    versionCode = data.versionCode,
+                    nsfw = data.nsfw,
+                    installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
+                    iconUrl = data.icon
+                )
+            } catch (e: OutOfMemoryError) {
+                Log.error("AndroidCatalogLoader: OOM loading catalog $pkgName", e)
+                return null
+            } catch (e: Exception) {
+                Log.error("AndroidCatalogLoader: Failed to load local catalog $pkgName", e)
                 return null
             }
-            
-            val loader = createClassLoader(file, pkgName)
-            val source = loadSource(pkgName, loader, data) ?: return null
-            
+        }
+
+        // Fallback: try loading as Tsundoku extension
+        val tsundokuData = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo)
+        if (tsundokuData != null) {
+            return loadLocalTsundokuCatalog(pkgName, pkgInfo, file, tsundokuData)
+        }
+
+        return null
+    }
+
+    /**
+     * Load a locally stored Tsundoku extension APK.
+     */
+    private fun loadLocalTsundokuCatalog(
+        pkgName: String,
+        pkgInfo: PackageInfo,
+        file: File,
+        data: TsundokuValidatedData
+    ): CatalogInstalled.Locally? {
+        try {
+            if (!file.exists() || !file.canRead() || file.length() == 0L) {
+                Log.warn { "AndroidCatalogLoader: Tsundoku APK file not accessible for $pkgName" }
+                return null
+            }
+
+            // Use DexClassLoader for local tsundoku APKs
+            val readOnlyCopy = copyToReadOnlyCache(file, pkgName)
+            val dexOutputDir = File(context.codeCacheDir, "dex_out/${pkgName}_${System.currentTimeMillis()}").apply { mkdirs() }
+            val classLoader = DexClassLoader(readOnlyCopy.absolutePath, dexOutputDir.absolutePath, null, context.classLoader)
+            val sources = TsundokuExtensionLoader.loadSources(pkgName, classLoader, data)
+
+            if (sources.isEmpty()) {
+                Log.warn { "AndroidCatalogLoader: No sources from local tsundoku APK $pkgName" }
+                return null
+            }
+
+            val source = sources.first()
+            // Extract and save the APK icon
+            val iconUrl = extractAndSaveLocalIcon(file, pkgName)
+
             return CatalogInstalled.Locally(
                 name = source.name,
-                description = data.description,
+                description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
                 source = source,
                 pkgName = pkgName,
                 versionName = data.versionName,
                 versionCode = data.versionCode,
                 nsfw = data.nsfw,
                 installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
-                iconUrl = data.icon
+                iconUrl = iconUrl
             )
-        } catch (e: OutOfMemoryError) {
-            Log.error("AndroidCatalogLoader: OOM loading catalog $pkgName", e)
-            return null
         } catch (e: Exception) {
-            Log.error("AndroidCatalogLoader: Failed to load local catalog $pkgName", e)
+            Log.error("AndroidCatalogLoader: Failed to load local tsundoku catalog $pkgName", e)
             return null
         }
     }
@@ -613,6 +680,82 @@ class AndroidCatalogLoader(
         }
     }
 
+    /**
+     * Load all installed Tsundoku (Tachiyomi/Mihon) extensions as IReader catalogs.
+     *
+     * Tsundoku extensions use different feature flags (`tachiyomi.extension` / `tachiyomi.novelextension`)
+     * and metadata keys. They are loaded via reflection and wrapped in [TsundokuCatalogSource].
+     */
+    private fun loadTsundokuExtensions(): List<CatalogLocal> {
+        val tsundokuPkgs = try {
+            TsundokuExtensionLoader.getInstalledTsundokuExtensions(pkgManager)
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to query tsundoku extensions", e)
+            emptyList()
+        }
+
+        if (tsundokuPkgs.isEmpty()) return emptyList()
+
+        Log.info("AndroidCatalogLoader: Found ${tsundokuPkgs.size} tsundoku extensions")
+
+        // Initialize tsundoku DI dependencies (Injekt, NetworkHelper, etc.)
+        TsundokuExtensionLoader.initializeDependencies(context)
+
+        return tsundokuPkgs.flatMap { pkgInfo ->
+            loadTsundokuCatalog(pkgInfo)
+        }
+    }
+
+    /**
+     * Load a single Tsundoku extension as IReader catalogs.
+     * Returns a list because one extension APK can contain multiple sources.
+     */
+    private fun loadTsundokuCatalog(pkgInfo: PackageInfo): List<CatalogInstalled.SystemWide> {
+        val pkgName = pkgInfo.packageName
+        val data = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo) ?: return emptyList()
+
+        val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: run {
+            Log.warn { "AndroidCatalogLoader: No sourceDir for tsundoku package $pkgName" }
+            return emptyList()
+        }
+
+        // Extract and save the APK icon as PNG
+        val iconUrl = extractAndSaveSystemIcon(pkgName, pkgInfo)
+
+        return try {
+            val classLoader = ChildFirstPathClassLoader(sourceDir, null, context.classLoader)
+            val sources = TsundokuExtensionLoader.loadSources(pkgName, classLoader, data)
+
+            if (sources.isEmpty()) {
+                Log.warn { "AndroidCatalogLoader: No sources loaded from tsundoku extension $pkgName" }
+                return emptyList()
+            }
+
+            Log.info { "AndroidCatalogLoader: Loaded ${sources.size} source(s) from tsundoku extension $pkgName" }
+
+            val installDir = simpleStorage.extensionDirectory().toFile().let {
+                File(it, pkgName).apply { mkdirs() }
+            }
+
+            sources.map { source ->
+                CatalogInstalled.SystemWide(
+                    name = source.name,
+                    description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
+                    source = source,
+                    pkgName = pkgName,
+                    versionName = data.versionName,
+                    versionCode = data.versionCode,
+                    nsfw = data.nsfw,
+                    iconUrl = iconUrl,
+                    installDir = installDir.absolutePath.toOkioPath()
+                )
+            }
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to load tsundoku catalog $pkgName", e)
+            emptyList()
+        }
+    }
+
     private data class ValidatedData(
         val versionCode: Int,
         val versionName: String,
@@ -691,6 +834,97 @@ class AndroidCatalogLoader(
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to load engine plugins", e)
         }
+    }
+
+    /**
+     * Extract the app icon for a system-wide Tsundoku extension.
+     * Uses PackageManager to get the icon, saves as PNG.
+     * Returns a file:// URI or empty string on failure.
+     */
+    private fun extractAndSaveSystemIcon(pkgName: String, pkgInfo: PackageInfo): String {
+        try {
+            val drawable = pkgManager.getApplicationIcon(pkgName)
+            val bitmap = drawableToBitmap(drawable)
+            if (bitmap == null) return ""
+
+            val extDir = simpleStorage.extensionDirectory().toFile()
+            val pkgDir = File(extDir, pkgName).apply { mkdirs() }
+            val iconFile = File(pkgDir, "$pkgName.png")
+            iconFile.outputStream().use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            return iconFile.toURI().toString()
+        } catch (e: Exception) {
+            Log.warn { "AndroidCatalogLoader: Failed to extract system icon for $pkgName: ${e.message}" }
+            return ""
+        }
+    }
+
+    /**
+     * Extract the largest icon from a local APK file and save as PNG.
+     * Uses apk-parser to read embedded icon resources, selecting by resolution.
+     * Returns a file:// URI or empty string on failure.
+     */
+    private fun extractAndSaveLocalIcon(apkFile: File, pkgName: String): String {
+        val apk = net.dongliu.apk.parser.ApkFile(apkFile)
+        return try {
+            val icons = apk.allIcons
+
+            // Decode bounds to find the largest icon by resolution
+            var bestIconBytes: ByteArray? = null
+            var maxPixels = 0
+            val opts = BitmapFactory.Options()
+
+            for (entry in icons) {
+                if (!entry.isFile) continue
+                try {
+                    val data = entry.data
+                    opts.inJustDecodeBounds = true
+                    BitmapFactory.decodeByteArray(data, 0, data.size, opts)
+                    val pixels = opts.outWidth * opts.outHeight
+                    if (pixels > maxPixels) {
+                        maxPixels = pixels
+                        bestIconBytes = data
+                    }
+                } catch (_: Exception) {
+                    // Skip invalid icon entries
+                }
+            }
+
+            if (bestIconBytes == null) return ""
+
+            val bitmap = BitmapFactory.decodeByteArray(bestIconBytes, 0, bestIconBytes.size)
+            if (bitmap == null) return ""
+
+            val extDir = simpleStorage.extensionDirectory().toFile()
+            val pkgDir = File(extDir, pkgName).apply { mkdirs() }
+            val iconFile = File(pkgDir, "$pkgName.png")
+            iconFile.outputStream().use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            iconFile.toURI().toString()
+        } catch (e: Exception) {
+            Log.warn { "AndroidCatalogLoader: Failed to extract local icon for $pkgName: ${e.message}" }
+            ""
+        } finally {
+            apk.close()
+        }
+    }
+
+    /**
+     * Convert an Android Drawable to a Bitmap.
+     */
+    private fun drawableToBitmap(drawable: Drawable): Bitmap? {
+        if (drawable is BitmapDrawable) {
+            return drawable.bitmap
+        }
+        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 512
+        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 512
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     /**

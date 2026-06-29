@@ -1,21 +1,18 @@
 package ireader.data.catalog
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import ireader.core.http.HttpClients
 import ireader.domain.catalogs.service.CatalogRemoteApi
+import ireader.domain.data.repository.CatalogSourceRepository
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
-import ireader.domain.data.repository.CatalogSourceRepository
-import kotlinx.coroutines.flow.first
 import ireader.domain.utils.CatalogNotFoundException
 import ireader.i18n.REPO_URL
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
 
 
 class CatalogGithubApi(
@@ -81,6 +78,9 @@ class CatalogGithubApi(
             return when {
                 repo.isLNReaderRepository() || repo.key.contains("lnreader-plugins") || repo.key.contains("plugins.min.json") -> {
                     parseLNReaderFormat(response, repo)
+                }
+                repo.isTsundokuRepository() || repo.key.contains("novelsourcery") || repo.key.contains("tsundoku") -> {
+                    parseTsundokuFormat(response, repo)
                 }
                 else -> {
                     parseIReaderFormat(response, repo)
@@ -159,6 +159,45 @@ class CatalogGithubApi(
                 jarUrl = plugin.url, // For LNReader, the URL is the plugin file itself
                 repositoryId = repo.id,
                 repositoryType = "LNREADER" // Mark as LNReader repository
+            )
+        }
+    }
+
+    /**
+     * Parse Tsundoku extension repository format.
+     * Tsundoku's index.min.json has different field types than IReader:
+     * - nsfw: Int (0/1) instead of Boolean
+     * - isNovel: Boolean (tsundoku-specific)
+     * - sources: List (tsundoku-specific)
+     */
+    private fun parseTsundokuFormat(response: String, repo: ireader.domain.models.entities.ExtensionSource): List<CatalogRemote> {
+        val catalogs = json.decodeFromString<List<TsundokuRemoteApiModel>>(response)
+        if (catalogs.isEmpty()) {
+            throw CatalogNotFoundException("No catalogs found in Tsundoku repository")
+        }
+
+        val repoUrl = repo.key.substringBefore("index.min.json", "").takeIf { it.isNotBlank() }
+            ?: "https://raw.githubusercontent.com/novelsourcery/extensions/repo/"
+        return catalogs.filter {catalog -> catalog.isNovel == true }.map { catalog ->
+            val iconUrl = "$repoUrl/icon/${catalog.pkg}.png"
+            val appUrl = "$repoUrl/apk/${catalog.apk}"
+            // Use the first source's id as unique identifier, fallback to pkg hash
+
+            CatalogRemote(
+                name = catalog.name,
+                description = catalog.description ?: if (catalog.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
+                sourceId = catalog.sources?.firstOrNull()?.id ?: 0L,
+                pkgName = catalog.pkg,
+                versionName = catalog.version,
+                versionCode = catalog.code,
+                lang = catalog.lang,
+                pkgUrl = appUrl,
+                iconUrl = iconUrl,
+                nsfw = catalog.nsfw == 1,
+                source = CatalogRemote.DEFAULT_ID,
+                jarUrl = "", // Tsundoku uses APKs, not JARs
+                repositoryId = repo.id,
+                repositoryType = "TSUNDOKU"
             )
         }
     }
@@ -381,5 +420,35 @@ class CatalogGithubApi(
         @SerialName("description") val description: String? = null,
         @SerialName("lang") val lang: String? = null,
         @SerialName("iconUrl") val iconUrl: String? = null
+    )
+
+    /**
+     * Tsundoku extension model for index.min.json.
+     * Key differences from IReader format:
+     * - nsfw: Int (0/1) instead of Boolean
+     * - isNovel: Boolean (identifies novel vs manga extensions)
+     * - sources: List (embedded source definitions)
+     */
+    @Serializable
+    private data class TsundokuRemoteApiModel(
+        @SerialName("name") val name: String,
+        @SerialName("pkg") val pkg: String,
+        @SerialName("apk") val apk: String,
+        @SerialName("lang") val lang: String,
+        @SerialName("code") val code: Int,
+        @SerialName("version") val version: String,
+        @SerialName("nsfw") val nsfw: Int = 0,
+        @SerialName("isNovel") val isNovel: Boolean = false,
+        @SerialName("sources") val sources: List<TsundokuSourceModel>? = null,
+        @SerialName("description") val description: String? = null,
+
+    )
+
+    @Serializable
+    private data class TsundokuSourceModel(
+        @SerialName("name") val name: String,
+        @SerialName("lang") val lang: String,
+        @SerialName("id") val id: Long,
+        @SerialName("baseUrl") val baseUrl: String? = null,
     )
 }

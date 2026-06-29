@@ -32,7 +32,6 @@ data class HistoryPaginationState(
         const val PAGE_SIZE = 30
     }
     
-    @Stable
     val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore
 }
 
@@ -77,16 +76,12 @@ data class HistoryScreenState(
     // Pagination state
     val paginationState: HistoryPaginationState = HistoryPaginationState()
 ) {
-    @Stable
     val isEmpty: Boolean get() = histories.isEmpty() && !isLoading
     
-    @Stable
     val isInitialLoading: Boolean get() = isLoading && histories.isEmpty()
     
-    @Stable
     val hasContent: Boolean get() = histories.isNotEmpty()
     
-    @Stable
     val totalCount: Int get() = histories.values.sumOf { it.size }
 }
 

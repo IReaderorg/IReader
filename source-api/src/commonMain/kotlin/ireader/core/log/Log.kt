@@ -30,7 +30,7 @@ object Log {
      * Default to Warn for production to reduce log noise.
      * Set to Severity.Verbose or Severity.Debug for development.
      */
-    var minSeverity: Severity = Severity.Warn
+    var minSeverity: Severity = Severity.Info
     
     /**
      * Whether to also print to stdout (useful for desktop where Kermit might not show logs)
