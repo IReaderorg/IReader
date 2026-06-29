@@ -259,6 +259,21 @@ private fun EnhancedCatalogIcon(
                             model = catalog,
                             contentDescription = catalog.name,
                             modifier = Modifier.fillMaxSize(),
+                            onError = {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Text(
+                                        text = catalog.name.take(2).uppercase(),
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 22.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
                         )
                     }
                 }

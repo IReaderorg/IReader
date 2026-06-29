@@ -194,6 +194,19 @@ private fun ModernCatalogIcon(
                     model = catalog,
                     contentDescription = catalog.name,
                     modifier = Modifier.fillMaxSize(),
+                    onError = {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(
+                                text = catalog.name.take(2).uppercase(),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 )
             }
         }

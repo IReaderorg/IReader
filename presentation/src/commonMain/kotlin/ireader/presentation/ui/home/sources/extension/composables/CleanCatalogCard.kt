@@ -161,6 +161,19 @@ private fun CleanSourceIcon(
                     model = catalog,
                     contentDescription = catalog.name,
                     modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+                    onError = {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(
+                                text = catalog.name.take(2).uppercase(),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 )
             }
         }

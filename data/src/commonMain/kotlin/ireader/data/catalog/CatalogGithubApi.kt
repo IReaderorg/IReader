@@ -178,8 +178,8 @@ class CatalogGithubApi(
 
         val repoUrl = repo.key.substringBefore("index.min.json", "").takeIf { it.isNotBlank() }
             ?: "https://raw.githubusercontent.com/novelsourcery/extensions/repo/"
-        return catalogs.map { catalog ->
-            val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
+        return catalogs.filter {catalog -> catalog.isNovel == true }.map { catalog ->
+            val iconUrl = "$repoUrl/icon/${catalog.pkg}.png"
             val appUrl = "$repoUrl/apk/${catalog.apk}"
             // Use the first source's id as unique identifier, fallback to pkg hash
 
