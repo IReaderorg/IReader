@@ -86,13 +86,6 @@ dependencies {
     // ICU4J for SimpleDateFormat (Android-compatible)
     implementation("com.ibm.icu:icu4j:73.1")
 
-    // Image codecs for Desktop (OpenJDK lacks native JPEG/WEBP)
-    implementation("com.twelvemonkeys.imageio:imageio-core:3.9.4")
-    implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.9.4")
-    implementation("com.twelvemonkeys.imageio:imageio-webp:3.9.4")
-
-    // OkHttp (for NetworkHelper)
-    implementation("com.squareup.okhttp3:okhttp:5.3.2")
 
     // Jsoup (for HTML parsing in extensions)
     implementation("org.jsoup:jsoup:1.22.1")
