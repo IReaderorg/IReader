@@ -11,6 +11,10 @@ plugins {
     id("com.gradleup.nmcp")
 }
 
+configurations.configureEach {
+    exclude(group = "androidx.compose.runtime")
+}
+
 kotlin {
     androidLibrary {
         namespace = "ireader.source.api"
