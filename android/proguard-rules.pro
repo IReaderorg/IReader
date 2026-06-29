@@ -28,6 +28,24 @@
 -keep,allowoptimization class okio.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }
 
+##---------------Begin: proguard configuration for RE2J (Jsoup dependency)  ----------
+# RE2J - Google's RE2 regular expression library used by Jsoup
+# Keep all RE2J classes to prevent R8 from stripping them
+-keep class com.google.re2j.** { *; }
+-keepclassmembers class com.google.re2j.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Specifically keep Matcher and Pattern classes referenced by Jsoup
+-keep class com.google.re2j.Matcher { *; }
+-keep class com.google.re2j.Pattern { *; }
+
+# Prevent R8 from warning about missing classes
+-dontwarn com.google.re2j.**
+##---------------End: proguard configuration for RE2J (Jsoup dependency)  ----------
+
 # Ksoup - Kotlin Multiplatform HTML parser (keep all classes to prevent method stripping)
 -keep class com.fleeksoft.ksoup.** { *; }
 -keepclassmembers class com.fleeksoft.ksoup.** {
