@@ -91,7 +91,11 @@ kotlin {
                 implementation(libs.ktor.contentNegotiation.gson)
                 
                 implementation(androidx.core)
-//                implementation(libs.quickjs.android)
+                
+                // Tsundoku extension support
+                implementation("io.reactivex:rxjava:1.3.8")
+                implementation("com.github.mihonapp:injekt:91edab2317")
+                implementation("org.jsoup:jsoup:1.22.1")
             }
         }
         
@@ -102,7 +106,13 @@ kotlin {
                 api(libs.ktor.okhttp)
                 implementation(libs.ktor.contentNegotiation.gson)
                 
-//                implementation(libs.quickjs.jvm)
+                // android-compat provides Android API stubs for Desktop
+                implementation(project(":android-compat"))
+                
+                // Tsundoku extension support
+                implementation("io.reactivex:rxjava:1.3.8")
+                implementation("com.github.mihonapp:injekt:91edab2317")
+                implementation("org.jsoup:jsoup:1.22.1")
             }
         }
         

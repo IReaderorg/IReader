@@ -141,7 +141,6 @@ import kotlinx.coroutines.launch
 /**
  * Stable holder for history item click handlers to prevent recomposition
  */
-@Stable
 private class HistoryClickHandlers(
     val onClickItem: (HistoryWithRelations) -> Unit,
     val onClickDelete: (HistoryWithRelations) -> Unit,
@@ -153,7 +152,6 @@ private class HistoryClickHandlers(
 /**
  * Stable key generator for history items
  */
-@Stable
 private fun stableHistoryKey(history: HistoryWithRelations): Any = history.id
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1185,7 +1183,6 @@ private enum class HistoryScreenState {
 /**
  * Stable data class for grouped history items
  */
-@Stable
 private data class GroupedHistoryItems(
     val todayItems: List<HistoryWithRelations>,
     val yesterdayItems: List<HistoryWithRelations>,

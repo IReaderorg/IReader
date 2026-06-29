@@ -56,70 +56,60 @@ sealed interface TTSState {
         /**
          * Check if TTS is currently playing
          */
-        @Stable
         val isPlaying: Boolean
             get() = playbackState == TTSPlaybackState.PLAYING
         
         /**
          * Check if TTS is paused
          */
-        @Stable
         val isPaused: Boolean
             get() = playbackState == TTSPlaybackState.PAUSED
         
         /**
          * Check if TTS is stopped/idle
          */
-        @Stable
         val isStopped: Boolean
             get() = playbackState == TTSPlaybackState.IDLE
         
         /**
          * Check if TTS is initializing
          */
-        @Stable
         val isInitializing: Boolean
             get() = playbackState == TTSPlaybackState.INITIALIZING
         
         /**
          * Check if there are available voices
          */
-        @Stable
         val hasVoices: Boolean
             get() = availableVoices.isNotEmpty()
         
         /**
          * Get the currently selected voice
          */
-        @Stable
         val selectedVoice: TTSVoiceInfo?
             get() = availableVoices.find { it.id == selectedVoiceId }
         
         /**
          * Check if can skip to next sentence
          */
-        @Stable
         val canSkipNext: Boolean
             get() = currentSentenceIndex < totalSentences - 1
         
         /**
          * Check if can skip to previous sentence
          */
-        @Stable
         val canSkipPrevious: Boolean
             get() = currentSentenceIndex > 0
         
         /**
          * Get formatted progress text (e.g., "5 / 20")
          */
-        @Stable
         val progressText: String
             get() = "${currentSentenceIndex + 1} / $totalSentences"
         
         /**
          * Get formatted speed text (e.g., "1.0x")
          */
-        @Stable
         val speedText: String
             get() = "${speed}x"
     }

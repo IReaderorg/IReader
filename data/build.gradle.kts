@@ -124,6 +124,9 @@ kotlin {
                 implementation("io.ktor:ktor-server-websockets:3.3.2")
                 implementation("io.ktor:ktor-server-compression:3.3.2")
                 
+                // APK parser (for Tsundoku icon extraction from local APKs)
+                implementation(libs.apk.parser)
+                
                 implementation(androidx.core)
                 implementation(libs.requerySqlite)
                 implementation(libs.sqldelight.android)
@@ -145,12 +148,24 @@ kotlin {
                 // BouncyCastle for X.509 certificate generation (Task 9.2.2) - Android
                 implementation("org.bouncycastle:bcprov-jdk18on:1.78")
                 implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
+                
+                // android-compat for KoinInjektBridge code compilation
+                compileOnly(project(":android-compat"))
+                
+                // Injekt (required by Tsundoku extensions)
+                implementation("com.github.mihonapp:injekt:91edab2317")
             }
         }
         
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
+                // android-compat provides: Android stubs, source-api, Injekt bridge, OkHttp, Jsoup, RxJava
+                implementation(project(":android-compat"))
+                
+                // Injekt (required by Tsundoku desktop loader)
+                implementation("com.github.mihonapp:injekt:91edab2317")
+                
                 // Platform-specific Ktor engine
                 implementation(libs.ktor.okhttp)
                 

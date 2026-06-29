@@ -50,35 +50,30 @@ data class ExtensionScreenState(
     /**
      * All installed catalogs (pinned + unpinned)
      */
-    @Stable
     val allCatalogs: List<CatalogLocal>
         get() = pinnedCatalogs + unpinnedCatalogs
     
     /**
      * Check if there are any installed catalogs
      */
-    @Stable
     val hasInstalledCatalogs: Boolean
         get() = pinnedCatalogs.isNotEmpty() || unpinnedCatalogs.isNotEmpty()
     
     /**
      * Check if there are any remote catalogs available
      */
-    @Stable
     val hasRemoteCatalogs: Boolean
         get() = remoteCatalogs.isNotEmpty()
     
     /**
      * Check if any installation is in progress
      */
-    @Stable
     val hasActiveInstallation: Boolean
         get() = installSteps.any { it.value != InstallStep.Idle && it.value != InstallStep.Success }
     
     /**
      * Get the number of pending updates
      */
-    @Stable
     val pendingUpdatesCount: Int
         get() = remoteCatalogs.count { remote ->
             allCatalogs.filterIsInstance<CatalogInstalled>().any { local ->

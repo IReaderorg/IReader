@@ -15,7 +15,10 @@ buildSrc/.kotlin/
 .externalNativeBuild
 .cxx
 local.properties
-
+.codegraph/
+.claude/
+.mimocode/
+agents/
 github.properties
 .kiro
 .kilocode

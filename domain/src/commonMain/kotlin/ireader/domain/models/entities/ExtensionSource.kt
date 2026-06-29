@@ -12,7 +12,7 @@ data class ExtensionSource(
     val password:String? = null,
     val lastUpdate:Long = 0,
     val isEnable:Boolean = true,
-    val repositoryType: String = "IREADER", // "IREADER" or "LNREADER"
+    val repositoryType: String = "IREADER", // "IREADER", "LNREADER", or "TSUNDOKU"
 ) {
 
     fun visibleName(): String {
@@ -28,6 +28,10 @@ data class ExtensionSource(
     
     fun isIReaderRepository(): Boolean {
         return repositoryType.equals("IREADER", ignoreCase = true)
+    }
+    
+    fun isTsundokuRepository(): Boolean {
+        return repositoryType.equals("TSUNDOKU", ignoreCase = true)
     }
 
     companion object {

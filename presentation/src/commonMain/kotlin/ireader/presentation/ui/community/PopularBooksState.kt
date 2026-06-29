@@ -60,13 +60,10 @@ data class PopularBooksScreenState(
     val pendingInstallSourceName: String = "",
     val pendingInstallSourceGroup: SourceGroup? = null,
 ) {
-    @Stable
     val isEmpty: Boolean get() = groups.isEmpty() && !isInitialLoading
 
-    @Stable
     val isInitialLoadingState: Boolean get() = isInitialLoading && groups.isEmpty()
 
-    @Stable
     val hasContent: Boolean get() = groups.isNotEmpty()
 }
 

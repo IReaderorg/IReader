@@ -42,7 +42,6 @@ data class UpdatesPaginationState(
         const val PAGE_SIZE = 30
     }
     
-    @Stable
     val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore
 }
 
@@ -91,22 +90,16 @@ data class UpdatesScreenState(
     // Pagination state
     val paginationState: UpdatesPaginationState = UpdatesPaginationState()
 ) {
-    @Stable
     val hasSelection: Boolean get() = selectedChapterIds.isNotEmpty()
     
-    @Stable
     val selectedCount: Int get() = selectedChapterIds.size
     
-    @Stable
     val isEmpty: Boolean get() = updates.isEmpty() && !isLoading
     
-    @Stable
     val isInitialLoading: Boolean get() = isLoading && updates.isEmpty()
     
-    @Stable
     val hasContent: Boolean get() = updates.isNotEmpty()
     
-    @Stable
     val totalCount: Int get() = updates.values.sumOf { it.size }
     
 }

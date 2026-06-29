@@ -3,14 +3,15 @@ package ireader.data.catalog.impl
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parser.Parser
-import com.googlecode.d2j.dex.Dex2jar
-import com.googlecode.d2j.reader.MultiDexFileReader
-import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import ireader.core.http.HttpClients
+import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.storage.ExtensionDir
+import ireader.data.catalog.impl.tsundoku.DesktopTsundokuExtensionLoader
+import ireader.data.catalog.impl.tsundoku.TsundokuCatalogSource
+import ireader.data.catalog.impl.tsundoku.TsundokuValidatedData
 import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.js.loader.JSPluginLoader
 import ireader.domain.models.entities.CatalogInstalled
@@ -26,6 +27,7 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import java.io.File
 import java.net.URLClassLoader
+import javax.imageio.ImageIO
 
 class DesktopCatalogLoader(
     private val httpClients: HttpClients,
@@ -123,6 +125,9 @@ class DesktopCatalogLoader(
             deferred.awaitAll()
         }.filterNotNull()
 
+        // Load Tsundoku (Tachiyomi/Mihon) extensions natively
+        val tsundokuCatalogs = loadTsundokuExtensions()
+
         // Load JavaScript plugins if enabled
         val jsPlugins = if (uiPreferences.enableJSPlugins().get()) {
             try {
@@ -140,7 +145,7 @@ class DesktopCatalogLoader(
             emptyList()
         }
 
-        return (bundled + installedCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        return (bundled + installedCatalogs + tsundokuCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
     }
 
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
@@ -177,7 +182,7 @@ class DesktopCatalogLoader(
                 jarFile.delete()
             }
             
-            dex2jar(file,jarFile,file.name)
+            Dex2JarConverter.convert(file, jarFile)
             
             // Verify JAR was created successfully
             if (!jarFile.exists() || jarFile.length() == 0L) {
@@ -206,6 +211,77 @@ class DesktopCatalogLoader(
 
     }
 
+    /**
+     * Load all Tsundoku (Tachiyomi/Mihon) extension APKs from the extensions directory.
+     */
+    private fun loadTsundokuExtensions(): List<CatalogLocal> {
+        val tsundokuPkgs = ExtensionDir.listFiles()
+            .orEmpty()
+            .filter { it.isDirectory }
+            .map { File(it, it.name + ".apk") }
+            .filter { it.exists() }
+            .filter { file ->
+                try {
+                    ApkFile(file).use { apkFile ->
+                        DesktopTsundokuExtensionLoader.isTsundokuExtension(apkFile.apkMeta)
+                    }
+                } catch (e: Exception) {
+                    false
+                }
+            }
+
+        if (tsundokuPkgs.isEmpty()) return emptyList()
+
+        Log.info("DesktopCatalogLoader: Found ${tsundokuPkgs.size} tsundoku extensions")
+
+        return tsundokuPkgs.flatMap { file ->
+            loadTsundokuCatalog(file)
+        }
+    }
+
+    /**
+     * Load a single Tsundoku extension APK as IReader catalogs.
+     * Returns a list because one extension APK can contain multiple sources.
+     */
+    private fun loadTsundokuCatalog(file: File): List<CatalogInstalled.Locally> {
+        val pkgName = file.nameWithoutExtension
+        return try {
+            val apkFile = ApkFile(file)
+            val data = DesktopTsundokuExtensionLoader.validateMetadata(pkgName, apkFile)
+            apkFile.close()
+
+            if (data == null) return emptyList()
+
+            val sources = DesktopTsundokuExtensionLoader.loadSources(pkgName, file, data)
+            if (sources.isEmpty()) {
+                Log.warn { "DesktopCatalogLoader: No sources from tsundoku APK $pkgName" }
+                return emptyList()
+            }
+
+            Log.info { "DesktopCatalogLoader: Loaded ${sources.size} source(s) from tsundoku APK $pkgName" }
+
+            // Extract and save the APK icon
+            val iconUrl = extractAndSaveIcon(file, pkgName)
+
+            sources.map { source ->
+                CatalogInstalled.Locally(
+                    name = source.name,
+                    description = if (data.isNovel) "Tsundoku novel extension" else "Tsundoku manga extension",
+                    source = source,
+                    pkgName = pkgName,
+                    versionName = data.versionName,
+                    versionCode = data.versionCode,
+                    nsfw = data.nsfw,
+                    installDir = file.parentFile!!.absolutePath.toPath(),
+                    iconUrl = iconUrl
+                )
+            }
+        } catch (e: Exception) {
+            Log.error("DesktopCatalogLoader: Failed to load tsundoku catalog $pkgName", e)
+            emptyList()
+        }
+    }
+
     private fun isPackageAnExtension(pkgInfo: ApkMeta): Boolean {
         return pkgInfo.usesFeatures.orEmpty().any { it.name == EXTENSION_FEATURE }
     }
@@ -227,8 +303,7 @@ class DesktopCatalogLoader(
 
         val appInfo = Ksoup.parse(apkFile.manifestXml, Parser.xmlParser()).select("application").select("meta-data")
 
-        val meta = appInfo.map {
-            val element = it.select("meta-data")
+        val meta = appInfo.map { element ->
             val name = element.attr("android:name")
             val value = element.attr("android:value")
             name to value
@@ -279,30 +354,6 @@ class DesktopCatalogLoader(
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
         return null
     }
-    @Suppress("NewApi")
-    fun dex2jar(dexFile: File, jarFile: File, fileNameWithoutType: String) {
-        // adopted from com.googlecode.dex2jar.tools.Dex2jarCmd.doCommandLine
-        // source at: https://github.com/DexPatcher/dex2jar/tree/v2.1-20190905-lanchon/dex-tools/src/main/java/com/googlecode/dex2jar/tools/Dex2jarCmd.java
-        try {
-            val jarFilePath = jarFile.toPath()
-            val reader = MultiDexFileReader.open(dexFile.inputStream())
-            val handler = BaksmaliBaseDexExceptionHandler()
-            Dex2jar
-                    .from(reader)
-                    .withExceptionHandler(handler)
-                    .reUseReg(false)
-                    .topoLogicalSort()
-                    .skipDebug(true)
-                    .optimizeSynchronized(false)
-                    .printIR(false)
-                    .noCode(false)
-                    .skipExceptions(false)
-                    .to(jarFilePath)
-        } catch (e: Exception) {
-            // Ignore errors
-        }
-
-    }
 
     private data class ValidatedData(
         val versionCode: Int,
@@ -313,6 +364,38 @@ class DesktopCatalogLoader(
         val classToLoad: String,
         val dependencies: ireader.core.source.Dependencies,
     )
+
+    /**
+     * Extract the largest icon from an APK and save it as a PNG file.
+     * Returns a file:// URI string or empty string on failure.
+     */
+    private fun extractAndSaveIcon(apkFile: File, pkgName: String): String {
+        try {
+            ApkFile(apkFile).use { apk ->
+                val icons = apk.allIcons
+                val largestIcon = icons
+                    .filter { it.isFile }
+                    .mapNotNull { entry ->
+                        try {
+                            val image = ImageIO.read(entry.data.inputStream())
+                            image to (image.width * image.height)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    .sortedByDescending { it.second }
+                    .firstOrNull()?.first ?: return ""
+
+                val iconFile = File(ExtensionDir, "${pkgName}/${pkgName}.png")
+                iconFile.parentFile?.mkdirs()
+                ImageIO.write(largestIcon, "png", iconFile)
+                return iconFile.toURI().toString()
+            }
+        } catch (e: Exception) {
+            Log.warn { "DesktopCatalogLoader: Failed to extract icon for $pkgName: ${e.message}" }
+            return ""
+        }
+    }
 
     private companion object {
         const val EXTENSION_FEATURE = "ireader"
