@@ -104,6 +104,8 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.sqldelight.runtime)
                 implementation(libs.coroutines.test)
+                implementation(libs.test.truth)
+                implementation(libs.mock)
                 implementation(project(Modules.coreApi))
                 // REMOVED: napier - not used in tests
             }

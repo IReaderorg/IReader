@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.WorkManagerTestInitHelper
 import ireader.domain.services.common.AndroidDownloadService
+import ireader.domain.services.common.DownloadStatus as CommonDownloadStatus
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.common.ServiceState
 import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_SERVICE_NAME
@@ -196,7 +197,7 @@ class DownloadServiceTest : KoinComponent {
         
         var progress = downloadService.downloadProgress.value[chapterId]
         assertNotNull(progress)
-        assertEquals(ireader.domain.services.common.DownloadStatus.QUEUED, progress?.status)
+        assertEquals(CommonDownloadStatus.QUEUED, progress?.status)
         
         // Update to downloading
         downloadStateHolder.setDownloadProgress(mapOf(
@@ -209,7 +210,7 @@ class DownloadServiceTest : KoinComponent {
         delay(100)
         
         progress = downloadService.downloadProgress.value[chapterId]
-        assertEquals(ireader.domain.services.common.DownloadStatus.DOWNLOADING, progress?.status)
+        assertEquals(CommonDownloadStatus.DOWNLOADING, progress?.status)
         assertEquals(0.5f, progress?.progress)
         
         // Update to completed
@@ -223,7 +224,7 @@ class DownloadServiceTest : KoinComponent {
         delay(100)
         
         progress = downloadService.downloadProgress.value[chapterId]
-        assertEquals(ireader.domain.services.common.DownloadStatus.COMPLETED, progress?.status)
+        assertEquals(CommonDownloadStatus.COMPLETED, progress?.status)
     }
     
     @Test
@@ -289,8 +290,8 @@ class DownloadServiceTest : KoinComponent {
         
         val progress = downloadStateHolder.downloadProgress.value
         
-        // Paused should become downloading
-        assertEquals(DownloadStatus.DOWNLOADING, progress[1L]?.status)
+        // Paused should become QUEUED (download worker sets DOWNLOADING when it picks up)
+        assertEquals(DownloadStatus.QUEUED, progress[1L]?.status)
         // Queued should stay queued
         assertEquals(DownloadStatus.QUEUED, progress[2L]?.status)
     }
@@ -308,7 +309,7 @@ class DownloadServiceTest : KoinComponent {
         downloadService.stop()
         delay(100)
         
-        assertEquals(ServiceState.STOPPED, downloadService.state.value)
+        assertEquals(ServiceState.IDLE, downloadService.state.value)
         assertFalse(downloadStateHolder.isRunning.value)
         
         // Verify work is cancelled

@@ -1,25 +1,18 @@
 package org.ireader.app
 
 import android.content.Context
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import ireader.domain.models.entities.Book
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.local.book_usecases.FindDuplicateBook
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.koin.core.context.GlobalContext
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -61,9 +54,7 @@ class ExploreScreenIntegrationTest {
         author = "Test Author",
         status = 0,
         genres = emptyList(),
-        customCover = null,
-        lastRead = null,
-        tableId = 0L
+        customCover = "",
     )
     
     private var insertedBookId: Long = 0L
