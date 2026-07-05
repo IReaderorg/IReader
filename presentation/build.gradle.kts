@@ -114,6 +114,8 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.coroutines.test)
+                implementation(libs.test.truth)
             }
         }
         androidMain {

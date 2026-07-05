@@ -68,15 +68,12 @@ class ExploreNavigationFlowTest {
         
         // Try to find and click on Browse/Sources tab
         try {
-            composeTestRule.onNodeWithText("Browse").performClick()
+            composeTestRule.onNodeWithText("Sources").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(1000) }
         } catch (e: Exception) {
             // Tab might have different name or not exist
         }
-        
-        try {
-            composeTestRule.onNodeWithText("Sources").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(1000) }
         } catch (e: Exception) {

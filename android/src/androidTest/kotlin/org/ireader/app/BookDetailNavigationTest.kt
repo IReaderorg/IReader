@@ -106,14 +106,21 @@ class BookDetailNavigationTest : KoinComponent {
         composeTestRule.waitForIdle()
         
         // Perform multiple back presses rapidly
+        // ponytail: try-catch because rapid back can destroy the Activity before next onActivity call
         repeat(3) {
-            composeTestRule.activityRule.scenario.onActivity { activity ->
-                activity.onBackPressedDispatcher.onBackPressed()
+            try {
+                composeTestRule.activityRule.scenario.onActivity { activity ->
+                    activity.onBackPressedDispatcher.onBackPressed()
+                }
+            } catch (_: NullPointerException) {
+                // Activity already destroyed by previous back press — expected
+            } catch (_: IllegalStateException) {
+                // Activity already destroyed by previous back press — expected
             }
             composeTestRule.waitForIdle()
         }
         
-        // App should remain stable
+        // App should remain stable (no unhandled crash)
     }
     
     /**

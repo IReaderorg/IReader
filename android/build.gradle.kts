@@ -308,6 +308,17 @@ android {
 }
 
 
+// Force consistent androidx.test versions to avoid resolution conflicts
+// between runtime and androidTest classpaths (needed for API 34+ espresso fix)
+configurations.all {
+    resolutionStrategy {
+        force("androidx.test:runner:1.6.1")
+        force("androidx.test:core:1.6.1")
+        force("androidx.test.espresso:espresso-core:3.6.1")
+        force("androidx.test.ext:junit:1.2.1")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.ui.text)
     implementation(libs.androidx.work.testing)
@@ -369,13 +380,15 @@ dependencies {
     implementation(libs.koin.workManager)
     // REMOVED: napier - not used, using custom Log implementation
     implementation(libs.kermit)
-
+    androidTestImplementation(kotlinx.test)
     androidTestImplementation(libs.test.extJunit)
     androidTestImplementation(libs.test.espresso)
+    androidTestImplementation(libs.test.testRunner)
+    androidTestImplementation(libs.uiautomator)
+    androidTestImplementation(libs.test.truth)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
 }
-
 composeCompiler {
     // Use stability configuration file for marking external classes as stable
     stabilityConfigurationFile.set(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
