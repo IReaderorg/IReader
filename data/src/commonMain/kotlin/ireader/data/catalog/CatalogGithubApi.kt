@@ -3,6 +3,7 @@ package ireader.data.catalog
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import ireader.core.http.HttpClients
+import ireader.core.http.forceRefresh
 import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.data.repository.CatalogSourceRepository
 import ireader.domain.models.entities.CatalogRemote
@@ -60,7 +61,11 @@ class CatalogGithubApi(
     private suspend fun fetchFromRepository(repo: ireader.domain.models.entities.ExtensionSource): List<CatalogRemote> {
         try {
             val response: String = httpClient.default
-                .get(repo.key)
+                .get(repo.key) {
+                    // Bypass all cache layers (OkHttp disk cache + Ktor in-memory cache)
+                    // so we always get fresh index.json from remote repositories
+                    forceRefresh()
+                }
                 .bodyAsText()
 
             // Check if response is an error (like 404)
@@ -101,7 +106,7 @@ class CatalogGithubApi(
             throw CatalogNotFoundException("No catalogs found in repository")
         }
         
-        val repoUrl = repo.key.substringBefore("index.min.json","").takeIf { it.isNotBlank() } ?: REPO_URL
+        val repoUrl = repo.key.substringBefore("index.min.json","").takeIf { it.isNotBlank() }?.trimEnd('/') ?: REPO_URL.trimEnd('/')
         return catalogs.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.apk.replace(".apk", ".png")}"
             val appUrl = "$repoUrl/apk/${catalog.apk}"
@@ -176,8 +181,8 @@ class CatalogGithubApi(
             throw CatalogNotFoundException("No catalogs found in Tsundoku repository")
         }
 
-        val repoUrl = repo.key.substringBefore("index.min.json", "").takeIf { it.isNotBlank() }
-            ?: "https://raw.githubusercontent.com/novelsourcery/extensions/repo/"
+        val repoUrl = repo.key.substringBefore("index.min.json", "").takeIf { it.isNotBlank() }?.trimEnd('/')
+            ?: "https://raw.githubusercontent.com/novelsourcery/extensions/repo"
         return catalogs.filter {catalog -> catalog.isNovel == true }.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.pkg}.png"
             val appUrl = "$repoUrl/apk/${catalog.apk}"
