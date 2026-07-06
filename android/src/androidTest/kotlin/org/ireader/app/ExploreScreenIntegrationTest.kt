@@ -4,9 +4,18 @@ import android.content.Context
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.data.repository.HistoryRepository
+import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.History
+import ireader.domain.models.library.LibrarySort
+import ireader.domain.preferences.prefs.LibraryPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.models.entities.Book
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.local.book_usecases.FindDuplicateBook
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -36,6 +45,11 @@ class ExploreScreenIntegrationTest {
     private val context: Context
         get() = ApplicationProvider.getApplicationContext()
     
+    private val uiPreferences: UiPreferences by inject(UiPreferences::class.java)
+    private val libraryPreferences: LibraryPreferences by inject(LibraryPreferences::class.java)
+    private val bookRepository: BookRepository by inject(BookRepository::class.java)
+    private val chapterRepository: ChapterRepository by inject(ChapterRepository::class.java)
+    private val historyRepository: HistoryRepository by inject(HistoryRepository::class.java)
     private val insertUseCases: LocalInsertUseCases by inject(LocalInsertUseCases::class.java)
     private val findDuplicateBook: FindDuplicateBook by inject(FindDuplicateBook::class.java)
     
@@ -59,15 +73,52 @@ class ExploreScreenIntegrationTest {
     
     private var insertedBookId: Long = 0L
     
+    private val seededKeys = listOf("e2e-explore-seed-1", "e2e-explore-seed-2", "e2e-explore-seed-3")
+    
     @Before
     fun setup() {
-        // Wait for app to initialize
+        uiPreferences.hasCompletedOnboarding().set(true)
+        uiPreferences.hasCompletedFirstLaunch().set(true)
+        // Seed favorite books + chapters + history
+        runBlocking {
+            for ((i, key) in seededKeys.withIndex()) {
+                val id = 850_001L + i
+                val bookId = bookRepository.upsert(Book(
+                    id = id, sourceId = 1L, title = "Explore Test Novel ${i + 1}",
+                    key = key, author = "Demo Author",
+                    description = "Seeded for explore test", genres = listOf("Fantasy"),
+                    status = 1, cover = "", customCover = "", favorite = true,
+                    lastUpdate = System.currentTimeMillis(), initialized = true,
+                    dateAdded = System.currentTimeMillis(), viewer = 0, flags = 0
+                )) ?: continue
+                val chapters = (1..4).map { c ->
+                    Chapter(
+                        id = bookId * 1000 + c, bookId = bookId, key = "$key-ch-$c",
+                        name = "Chapter $c", read = c <= 2, bookmark = false,
+                        lastPageRead = 0L, dateFetch = System.currentTimeMillis(),
+                        dateUpload = System.currentTimeMillis(), sourceOrder = c.toLong(),
+                        number = c.toFloat(), translator = "", content = emptyList()
+                    )
+                }
+                chapterRepository.insertChapters(chapters)
+                historyRepository.insertHistory(History(
+                    id = -1L, // auto-generated
+                    chapterId = bookId * 1000 + 1,
+                    readAt = System.currentTimeMillis() - 60_000L,
+                    readDuration = 300_000L, progress = 0.5f
+                ))
+            }
+        }
         composeTestRule.waitForIdle()
+        // Force Library VM reload by toggling sort
+        val sort = libraryPreferences.sorting().get()
+        libraryPreferences.sorting().set(sort.copy(isAscending = !sort.isAscending))
+        libraryPreferences.sorting().set(sort)
     }
     
     @After
-    fun cleanup() {
-        // Clean up test data if needed
+    fun cleanup() = runBlocking {
+        for (key in seededKeys) { try { bookRepository.delete(key) } catch (_: Exception) {} }
         // Note: In real tests, you might want to delete test books
     }
     

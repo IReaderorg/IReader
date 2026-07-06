@@ -30,6 +30,12 @@ class SafFolderChecker(
             return true
         }
         
+        // If no storage folder was ever selected, there's nothing to lose
+        val selectedUri = uiPreferences.selectedStorageFolderUri().get()
+        if (selectedUri.isNullOrEmpty()) {
+            return true
+        }
+        
         // Check if SAF folder is accessible
         return safStorageManager.isSafStorageAvailable()
     }

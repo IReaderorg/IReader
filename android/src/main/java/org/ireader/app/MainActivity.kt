@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -158,11 +159,10 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             color = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.onSurface,
                         ) {
-                        // Check if we need to show onboarding screen
-                        var hasCompletedOnboarding by remember { 
-                            mutableStateOf(uiPreferences.hasCompletedOnboarding().get()) 
-                        }
-                        var showOnboarding by remember { mutableStateOf(!hasCompletedOnboarding) }
+                        // Observe onboarding state reactively so tests can dismiss it by setting the pref
+                        val hasCompletedOnboarding by uiPreferences.hasCompletedOnboarding().changes()
+                            .collectAsState(initial = uiPreferences.hasCompletedOnboarding().get())
+                        val showOnboarding = !hasCompletedOnboarding
                         
                         if (showOnboarding) {
                             // Show unified onboarding screen (language + storage + cloud setup)
@@ -179,8 +179,8 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                     android.util.Log.d("MainActivity", "SecureStorageHelper cache cleared")
                                 },
                                 onComplete = {
-                                    hasCompletedOnboarding = true
-                                    showOnboarding = false
+                                    // Onboarding screen sets hasCompletedOnboarding pref;
+                                    // reactive observation auto-dismisses this screen
                                 }
                             )
                         } else {

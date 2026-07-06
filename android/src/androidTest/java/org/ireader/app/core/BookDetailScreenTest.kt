@@ -35,16 +35,35 @@ class BookDetailScreenTest : BaseComposeTest() {
 
     /**
      * Attempt to navigate to a book detail screen.
-     * Clicks the first available book in the library or resume card.
+     * First tries clicking a seeded book title directly in the Library grid.
+     * Falls back to clicking "Continue Reading" card if available.
      */
     private fun navigateToBookDetail() {
-        // Try "Continue Reading" card first
-        composeTestRule.waitUntil(waitTimeoutMs) {
-            try {
-                composeTestRule.onNodeWithText("Continue Reading").performClick()
-                true
-            } catch (_: AssertionError) {
-                false
+        // Try clicking the first seeded book title directly (more reliable)
+        val clickedBookTitle = try {
+            composeTestRule.waitUntil(waitTimeoutMs) {
+                try {
+                    composeTestRule.onNodeWithText("E2E Demo Book").assertExists()
+                    true
+                } catch (_: AssertionError) {
+                    false
+                }
+            }
+            composeTestRule.onNodeWithText("E2E Demo Book").performClick()
+            true
+        } catch (_: AssertionError) {
+            false
+        }
+
+        if (!clickedBookTitle) {
+            // Fallback: try "Continue Reading" card
+            composeTestRule.waitUntil(waitTimeoutMs) {
+                try {
+                    composeTestRule.onNodeWithText("Continue Reading").performClick()
+                    true
+                } catch (_: AssertionError) {
+                    false
+                }
             }
         }
     }

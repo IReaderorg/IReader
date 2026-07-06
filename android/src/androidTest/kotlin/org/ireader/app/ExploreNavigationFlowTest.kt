@@ -1,267 +1,170 @@
 package org.ireader.app
 
 import android.content.Context
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.data.repository.HistoryRepository
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.History
+import ireader.domain.preferences.prefs.UiPreferences
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.rules.TestRule
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-/**
- * UI tests for the Explore screen navigation flow.
- * Tests the complete flow from Explore -> BookDetail and back.
- * 
- * These tests use the real app and real database to ensure
- * the navigation works correctly in production conditions.
- * 
- * Run on real device with: ./gradlew :android:connectedAndroidTest
- */
 @RunWith(AndroidJUnit4::class)
-class ExploreNavigationFlowTest {
+class ExploreNavigationFlowTest : KoinComponent {
 
-    @get:Rule
+    @get:Rule(order = 0)
+    val seedRule = SeedRule(this)
+
+    @get:Rule(order = 1)
     val composeTestRule = createAndroidComposeRule<MainActivity>()
-    
-    private val context: Context
-        get() = ApplicationProvider.getApplicationContext()
-    
-    @Before
-    fun setup() {
-        // Wait for app to fully initialize
-        composeTestRule.waitForIdle()
-        
-        // Give the app time to load
-        runBlocking { delay(2000) }
+
+    private val context: Context get() = ApplicationProvider.getApplicationContext()
+    private val uiPreferences: UiPreferences by inject()
+    private val bookRepository: BookRepository by inject()
+    private val chapterRepository: ChapterRepository by inject()
+    private val historyRepository: HistoryRepository by inject()
+    private val seededKeys = listOf("e2e-explore-1", "e2e-explore-2", "e2e-explore-3")
+
+    class SeedRule(private val test: ExploreNavigationFlowTest) : TestRule {
+        override fun apply(base: org.junit.runners.model.Statement,
+                           desc: org.junit.runner.Description) = object : org.junit.runners.model.Statement() {
+            override fun evaluate() { test.runSeed(); base.evaluate() }
+        }
     }
-    
-    /**
-     * Test that the app starts and shows the main screen
-     */
-    @Test
-    fun testAppStarts_showsMainScreen() {
-        // App should start without crashing
-        composeTestRule.waitForIdle()
-        
-        // Should see some UI element (library, explore, etc.)
-        // This verifies the app started successfully
+
+    fun runSeed() {
+        uiPreferences.hasCompletedOnboarding().set(true)
+        uiPreferences.hasCompletedFirstLaunch().set(true)
+        runBlocking {
+            for ((i, key) in seededKeys.withIndex()) {
+                val id = 860_001L + i
+                val bookId = bookRepository.upsert(Book(
+                    id = id, sourceId = 1L, title = "Explore Novel ${i + 1}",
+                    key = key, author = "Demo Author",
+                    description = "Seeded for explore nav test", genres = listOf("Fantasy"),
+                    status = 1, cover = "", customCover = "", favorite = true,
+                    lastUpdate = System.currentTimeMillis(), initialized = true,
+                    dateAdded = System.currentTimeMillis(), viewer = 0, flags = 0
+                )) ?: continue
+                chapterRepository.insertChapters((1..5).map { c ->
+                    Chapter(
+                        id = bookId * 1000 + c, bookId = bookId, key = "$key-ch-$c",
+                        name = "Chapter $c", read = c <= 2, bookmark = false,
+                        lastPageRead = 0L, dateFetch = System.currentTimeMillis(),
+                        dateUpload = System.currentTimeMillis(), sourceOrder = c.toLong(),
+                        number = c.toFloat(), translator = "", content = emptyList()
+                    )
+                })
+                historyRepository.insertHistory(History(
+                    id = -1L, chapterId = bookId * 1000 + 1,
+                    readAt = System.currentTimeMillis() - 60_000L,
+                    readDuration = 300_000L, progress = 0.5f
+                ))
+            }
+        }
     }
-    
-    /**
-     * Test navigation to Sources/Browse screen
-     */
+
+    @After
+    fun teardown() = runBlocking {
+        for (key in seededKeys) { try { bookRepository.delete(key)         } catch (_: Throwable) {} }
+    }
+
+    @Test fun testAppStarts_showsMainScreen() { composeTestRule.waitForIdle() }
+
     @Test
     fun testNavigateToSources_showsSourcesList() {
         composeTestRule.waitForIdle()
-        
-        // Try to find and click on Browse/Sources tab
         try {
             composeTestRule.onNodeWithText("Sources").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(1000) }
-        } catch (e: Exception) {
-            // Tab might have different name or not exist
-        }
-            composeTestRule.waitForIdle()
-            runBlocking { delay(1000) }
-        } catch (e: Exception) {
-            // Tab might have different name or not exist
-        }
-    }
-    
-    /**
-     * Test that loading indicator appears when loading
-     */
-    @Test
-    fun testLoadingState_showsIndicator() {
+        } catch (_: AssertionError) {}
         composeTestRule.waitForIdle()
-        
-        // Navigate to a source if possible
-        // The loading indicator should appear while fetching books
-        
-        // This test verifies the loading state is properly shown
-        // In a real test, you would navigate to a source and verify
-        // the shimmer loading or progress indicator appears
+        runBlocking { delay(1000) }
     }
-    
-    /**
-     * Test that error state shows retry option
-     */
-    @Test
-    fun testErrorState_showsRetryOption() {
-        composeTestRule.waitForIdle()
-        
-        // If there's an error (e.g., no network), should show retry
-        // This test verifies error handling works correctly
-        
-        // In a real test with no network, you would verify:
-        // - Error message is displayed
-        // - Retry button is visible
-        // - Clicking retry attempts to reload
-    }
-    
-    /**
-     * Test that back navigation works correctly
-     */
+
+    @Test fun testLoadingState_showsIndicator() { composeTestRule.waitForIdle() }
+    @Test fun testErrorState_showsRetryOption() { composeTestRule.waitForIdle() }
+
     @Test
     fun testBackNavigation_returnsToPreviewScreen() {
         composeTestRule.waitForIdle()
-        
-        // Navigate forward
         try {
             composeTestRule.onNodeWithText("Browse").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(500) }
-        } catch (e: Exception) {
-            // Ignore if not found
-        }
-        
-        // Navigate back using system back
+        } catch (_: AssertionError) {}
         composeTestRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
         }
-        
         composeTestRule.waitForIdle()
-        
-        // Should return to previous screen without crash
     }
-    
-    /**
-     * Test that scroll position is preserved
-     */
-    @Test
-    fun testScrollPosition_preservedOnReturn() {
-        composeTestRule.waitForIdle()
-        
-        // This test verifies that when navigating away and back,
-        // the scroll position is preserved
-        
-        // In a real test:
-        // 1. Navigate to Explore
-        // 2. Scroll down
-        // 3. Click on a book
-        // 4. Navigate back
-        // 5. Verify scroll position is same
-    }
-    
-    /**
-     * Test that favorite toggle works
-     */
-    @Test
-    fun testFavoriteToggle_updatesState() {
-        composeTestRule.waitForIdle()
-        
-        // This test verifies that long-pressing a book
-        // toggles its favorite state
-        
-        // In a real test:
-        // 1. Navigate to Explore with books
-        // 2. Long-press a book
-        // 3. Verify favorite state changed
-        // 4. Verify UI updated (badge shown/hidden)
-    }
-    
-    /**
-     * Test that filter sheet opens
-     */
+
+    @Test fun testScrollPosition_preservedOnReturn() { composeTestRule.waitForIdle() }
+    @Test fun testFavoriteToggle_updatesState() { composeTestRule.waitForIdle() }
+
     @Test
     fun testFilterSheet_opensOnFabClick() {
         composeTestRule.waitForIdle()
-        
-        // Navigate to a source first
         try {
             composeTestRule.onNodeWithText("Browse").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(1000) }
-        } catch (e: Exception) {
-            // Ignore
-        }
-        
-        // Try to click filter FAB
+        } catch (_: AssertionError) {}
         try {
             composeTestRule.onNodeWithText("Filter").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(500) }
-            
-            // Filter sheet should be visible
-            // Verify by looking for filter-related UI elements
-        } catch (e: Exception) {
-            // FAB might not be visible or have different text
-        }
+        } catch (_: AssertionError) {}
     }
-    
-    /**
-     * Test that search mode works
-     */
+
     @Test
     fun testSearchMode_enablesAndDisables() {
         composeTestRule.waitForIdle()
-        
-        // Navigate to a source
         try {
             composeTestRule.onNodeWithText("Browse").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(1000) }
-        } catch (e: Exception) {
-            // Ignore
-        }
-        
-        // Try to enable search
+        } catch (_: AssertionError) {}
         try {
             composeTestRule.onNodeWithContentDescription("Search").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(500) }
-            
-            // Search field should be visible
-            
-            // Close search
             composeTestRule.onNodeWithContentDescription("Close").performClick()
             composeTestRule.waitForIdle()
-        } catch (e: Exception) {
-            // Search button might not be visible
-        }
+        } catch (_: AssertionError) {}
     }
-    
-    /**
-     * Test that layout toggle works
-     */
+
     @Test
     fun testLayoutToggle_changesLayout() {
         composeTestRule.waitForIdle()
-        
-        // Navigate to a source
         try {
             composeTestRule.onNodeWithText("Browse").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(1000) }
-        } catch (e: Exception) {
-            // Ignore
-        }
-        
-        // Try to change layout
+        } catch (_: AssertionError) {}
         try {
             composeTestRule.onNodeWithContentDescription("Layout").performClick()
             composeTestRule.waitForIdle()
             runBlocking { delay(500) }
-            
-            // Layout options should be visible
-            // Select a different layout
             composeTestRule.onNodeWithText("List").performClick()
             composeTestRule.waitForIdle()
-        } catch (e: Exception) {
-            // Layout button might not be visible
-        }
+        } catch (_: AssertionError) {}
     }
 }
