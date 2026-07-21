@@ -1490,7 +1490,7 @@ private fun DesktopTTSControls(
     
     // Memoize speed text to avoid String.format on every recomposition
     val speedText = remember(state.speechSpeed) {
-        ireader.presentation.ui.core.utils.formatMultiplier(state.speechSpeed)
+        ireader.domain.utils.formatMultiplier(state.speechSpeed)
     }
     
     Column(
@@ -1650,7 +1650,7 @@ private fun MobileTTSControls(
     
     // Memoize speed text to avoid String.format on every recomposition
     val speedText = remember(state.speechSpeed) {
-        ireader.presentation.ui.core.utils.formatMultiplier(state.speechSpeed)
+        ireader.domain.utils.formatMultiplier(state.speechSpeed)
     }
     
     Row(
@@ -1897,7 +1897,7 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Speed Control
-                SettingSectionCommon(title = "Speech Speed: ${ireader.presentation.ui.core.utils.formatMultiplier(speechSpeed)}") {
+                SettingSectionCommon(title = "Speech Speed: ${ireader.domain.utils.formatMultiplier(speechSpeed)}") {
                     Slider(
                         value = speechSpeed,
                         onValueChange = onSpeedChange,
@@ -1908,7 +1908,7 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Pitch Control
-                SettingSectionCommon(title = "Speech Pitch: ${ireader.presentation.ui.core.utils.formatMultiplier(speechPitch)}") {
+                SettingSectionCommon(title = "Speech Pitch: ${ireader.domain.utils.formatMultiplier(speechPitch)}") {
                     Slider(
                         value = speechPitch,
                         onValueChange = onPitchChange,

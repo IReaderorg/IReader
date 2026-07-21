@@ -722,7 +722,7 @@ class GeneralSettingScreenViewModel(
                 if (seconds % 1.0 == 0.0) {
                     "${seconds.toInt()}s"
                 } else {
-                    "${ireader.presentation.ui.core.utils.formatSeconds(seconds)}"
+                    "${ireader.domain.utils.formatSeconds(seconds)}"
                 }
             }
             else -> "${delayMs}ms"

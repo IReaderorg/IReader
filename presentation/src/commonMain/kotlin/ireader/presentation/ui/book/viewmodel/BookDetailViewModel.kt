@@ -55,7 +55,7 @@ import ireader.i18n.asString
 import ireader.presentation.ui.book.components.ExportOptions
 import ireader.presentation.ui.book.components.EpubExportProgress
 import ireader.presentation.ui.book.helpers.PlatformHelper
-import ireader.presentation.ui.core.utils.formatDecimal
+import ireader.domain.utils.formatDecimal
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf

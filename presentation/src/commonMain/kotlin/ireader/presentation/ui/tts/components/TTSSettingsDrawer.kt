@@ -61,7 +61,7 @@ import ireader.i18n.resources.use_custom_colors
 import ireader.i18n.resources.voice
 import ireader.presentation.ui.component.components.ColorPickerDialog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.formatMultiplier
+import ireader.domain.utils.formatMultiplier
 
 /**
  * TTS Settings Drawer - Right-side drawer containing all TTS settings

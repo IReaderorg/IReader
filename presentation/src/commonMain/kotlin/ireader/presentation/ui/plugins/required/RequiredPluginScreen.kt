@@ -643,5 +643,5 @@ private fun getPluginConfig(type: RequiredPluginType): PluginConfig {
 }
 
 private fun formatFileSize(bytes: Long): String {
-    return ireader.presentation.ui.core.utils.formatBytesKmp(bytes)
+    return ireader.domain.utils.formatBytesKmp(bytes)
 }

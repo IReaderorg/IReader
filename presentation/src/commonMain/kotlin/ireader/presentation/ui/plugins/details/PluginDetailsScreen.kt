@@ -543,7 +543,7 @@ private fun ModernHeroSection(plugin: PluginInfo) {
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = ireader.presentation.ui.core.utils.toDecimalString(rating.toDouble(), 1),
+                        text = ireader.domain.utils.toDecimalString(rating.toDouble(), 1),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -565,7 +565,7 @@ private fun QuickStatsRow(plugin: PluginInfo, reviewCount: Int, modifier: Modifi
         )
         StatCard(
             icon = Icons.Default.Star,
-            value = plugin.rating?.let { ireader.presentation.ui.core.utils.toDecimalString(it.toDouble(), 1) } ?: "N/A",
+            value = plugin.rating?.let { ireader.domain.utils.toDecimalString(it.toDouble(), 1) } ?: "N/A",
             label = localizeHelper.localize(Res.string.rating),
             modifier = Modifier.weight(1f)
         )
@@ -850,11 +850,11 @@ private fun getPermissionDescription(permission: ireader.plugin.api.PluginPermis
 
 private fun formatPrice(price: Double, currency: String): String {
     val symbol = when (currency.uppercase()) { "USD" -> "$"; "EUR" -> "€"; "GBP" -> "£"; "JPY" -> "¥"; else -> currency }
-    return "$symbol${ireader.presentation.ui.core.utils.toDecimalString(price, 2)}"
+    return "$symbol${ireader.domain.utils.toDecimalString(price, 2)}"
 }
 
 private fun formatFileSize(bytes: Long): String = when {
-    bytes >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(bytes / 1_000_000.0, 1)} MB"
-    bytes >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(bytes / 1_000.0, 1)} KB"
+    bytes >= 1_000_000 -> "${ireader.domain.utils.toDecimalString(bytes / 1_000_000.0, 1)} MB"
+    bytes >= 1_000 -> "${ireader.domain.utils.toDecimalString(bytes / 1_000.0, 1)} KB"
     else -> "$bytes B"
 }

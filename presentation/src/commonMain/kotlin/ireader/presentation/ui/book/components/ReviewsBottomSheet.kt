@@ -61,7 +61,7 @@ fun ReviewsBottomSheet(
                     ) {
                         RatingStars(rating = averageRating.toInt(), size = 18.dp)
                         Text(
-                            text = ireader.presentation.ui.core.utils.formatRatingWithReviews(averageRating, reviews.size),
+                            text = ireader.domain.utils.formatRatingWithReviews(averageRating, reviews.size),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

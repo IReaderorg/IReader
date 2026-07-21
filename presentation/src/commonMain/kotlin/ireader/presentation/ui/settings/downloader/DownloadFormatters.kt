@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.downloader
 
-import ireader.presentation.ui.core.utils.formatDecimal
+import ireader.domain.utils.formatDecimal
 
 /**
  * Format download speed in bytes per second to human-readable format

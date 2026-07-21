@@ -12,7 +12,7 @@ import ireader.domain.models.entities.TrackerCredentials
 import ireader.domain.models.entities.TrackerService
 import ireader.domain.usecases.tracking.OAuthCallbackHandler
 import ireader.domain.utils.extensions.currentTimeToLong
-import ireader.presentation.ui.core.utils.formatDecimal
+import ireader.domain.utils.formatDecimal
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

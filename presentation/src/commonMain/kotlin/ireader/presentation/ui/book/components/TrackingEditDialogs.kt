@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.TrackStatus
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.formatDecimal
+import ireader.domain.utils.formatDecimal
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 

@@ -7,25 +7,34 @@
 # ============================================
 
 # JVM Memory Settings
-# Adjust based on your available RAM:
-# - 8GB RAM system: -Xmx4096m
-# - 16GB RAM system: -Xmx8192m
-# - 32GB+ RAM system: -Xmx12288m
-org.gradle.jvmargs=-Xmx8192m -XX:+UseG1GC -XX:MaxMetaspaceSize=1536m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:ReservedCodeCacheSize=512m
+# The defaults in gradle.properties work for most machines (16-32GB).
+# Only override if you have specific needs:
+#
+# Low-end (8GB RAM, 4 cores):
+#   org.gradle.jvmargs=-Xmx2048m -XX:+UseG1GC -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+#   kotlin.daemon.jvmargs=-Xmx1024m -XX:+UseG1GC
+#   org.gradle.workers.max=3
+#
+# Mid-range (16GB RAM, 8 cores):
+#   org.gradle.jvmargs=-Xmx4096m -XX:+UseG1GC -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8
+#   kotlin.daemon.jvmargs=-Xmx2048m -XX:+UseG1GC
+#   org.gradle.workers.max=6
+#
+# High-end (32GB+ RAM, 10+ cores):
+#   org.gradle.jvmargs=-Xmx6144m -XX:+UseG1GC -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8
+#   kotlin.daemon.jvmargs=-Xmx3072m -XX:+UseG1GC
+#   org.gradle.workers.max=8
 
-# Kotlin daemon memory
-kotlin.daemon.jvmargs=-Xmx4096m -XX:+UseG1GC
+# Worker count (set to CPU cores - 2 for background builds)
+# Check your cores with: nproc (Linux/Mac) or WMIC (Windows)
+# org.gradle.workers.max=6
 
-# Worker count (set to CPU cores - 1)
-# Check your cores with: nproc
-# org.gradle.workers.max=7
-
-# File system watching (disable if you have issues)
-# org.gradle.vfs.watch=false
+# File system watching (enable for faster incremental builds)
+# org.gradle.vfs.watch=true
 
 # ============================================
-# OPTIONAL: CUSTOM CACHE LOCATIONS
+# OPTIONAL: SKIP EXPENSIVE TASKS DURING DEV
 # ============================================
 
-# Uncomment to use custom cache directory (not recommended with vfs.watch=true)
-# org.gradle.projectcachedir=/path/to/custom/cache
+# Skip i18n git commands (avoids slow git rev-list on every config)
+# skipI18n=true

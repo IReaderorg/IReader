@@ -266,7 +266,7 @@ fun EpubExportDialog(
                     item {
                         Column {
                             Text(
-                                text = "${localize(Res.string.paragraph_spacing)}: ${ireader.presentation.ui.core.utils.toDecimalString(paragraphSpacing.toDouble(), 1)}em",
+                                text = "${localize(Res.string.paragraph_spacing)}: ${ireader.domain.utils.toDecimalString(paragraphSpacing.toDouble(), 1)}em",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Slider(
@@ -282,7 +282,7 @@ fun EpubExportDialog(
                     item {
                         Column {
                             Text(
-                                text = "${localize(Res.string.chapter_heading_size)}: ${ireader.presentation.ui.core.utils.toDecimalString(chapterHeadingSize.toDouble(), 1)}em",
+                                text = "${localize(Res.string.chapter_heading_size)}: ${ireader.domain.utils.toDecimalString(chapterHeadingSize.toDouble(), 1)}em",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Slider(

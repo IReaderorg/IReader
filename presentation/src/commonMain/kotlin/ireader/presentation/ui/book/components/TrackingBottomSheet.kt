@@ -21,7 +21,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.formatDecimal
+import ireader.domain.utils.formatDecimal
 import org.jetbrains.compose.resources.painterResource
 
 /**

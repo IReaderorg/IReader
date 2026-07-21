@@ -16,7 +16,7 @@ import ireader.domain.models.remote.UserBadge
 import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.ReviewCard
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.formatRatingWithReviews
+import ireader.domain.utils.formatRatingWithReviews
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
