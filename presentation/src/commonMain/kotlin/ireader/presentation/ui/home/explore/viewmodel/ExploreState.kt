@@ -29,6 +29,8 @@ data class ExploreScreenState(
     val page: Int = 1,
     val endReached: Boolean = false,
     val books: List<Book> = emptyList(),
+    // Pre-search state for restoring when search is cancelled
+    val preSearchState: PreSearchState? = null,
     // Scroll position state for preserving scroll when returning
     val savedScrollIndex: Int = 0,
     val savedScrollOffset: Int = 0,
@@ -106,6 +108,18 @@ data class ExploreScreenState(
     val isBrokenSourceError: Boolean
         get() = isLikelyBrokenSource && !isLoading
 }
+
+/**
+ * Saved state before entering search mode, used to restore when search is cancelled.
+ */
+@Immutable
+data class PreSearchState(
+    val books: List<Book>,
+    val currentListing: Listing?,
+    val appliedFilters: List<Filter<*>>?,
+    val page: Int,
+    val endReached: Boolean
+)
 
 /**
  * Sealed interface for explore screen dialogs
