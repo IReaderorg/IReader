@@ -1,84 +1,91 @@
-*.iml
-.gradle
-/local.properties
-gradle.properties.local
-buildSrc/.kotlin/
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
-.codegraph/
-.claude/
-.mimocode/
-agents/
-github.properties
-.kiro
-.kilocode
-mihon-main
-lnreader-master
-IReader-extensions
-# Gradle files
+# ============================================
+# Android / Gradle
+# ============================================
 .gradle/
 build/
-CONTINUITY.md
+buildSrc/.kotlin/
+local.properties
+gradle.properties.local
 
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
-captures/
+# Native builds
 .externalNativeBuild/
 .cxx/
-*.apk
-output.json
+native/build/
+native/cmake-build-*/
 
-# IntelliJ
+# ============================================
+# IntelliJ / Android Studio
+# ============================================
 .idea/
+*.iml
 misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
 
-# Keystore files
+# ============================================
+# Keystore & Signing
+# ============================================
 *.jks
 *.keystore
 
-# Android Profiling
+# ============================================
+# Binary files & compiled outputs
+# ============================================
+*.apk
+*.aab
+*.class
+*.dex
+*.ap_
 *.hprof
-/.kotlin
-
-# Native libraries (should be downloaded/built by developers)
-native/libs/
-native/piper/
 *.dll
 *.so
 *.dylib
+bin/
+output.json
 
-# Downloaded voice models
+# ============================================
+# Native libraries (downloaded/built by devs)
+# ============================================
+native/libs/
+native/piper/
+
+# ============================================
+# Voice models
+# ============================================
 voice_models/
 *.onnx
 *.onnx.json
 
-# Build artifacts
-native/build/
-native/cmake-build-*/
+# ============================================
+# Log / OS files
+# ============================================
+*.log
+.DS_Store
 
-# Binary files and compiled outputs
-bin/
-*.class
-*.dex
-*.ap_
-*.aab
-
-# Supabase configuration files (contain sensitive credentials)
+# ============================================
+# Sensitive config (contain credentials)
+# ============================================
 config.properties
+github.properties
+
+# ============================================
+# Agent / AI tool configs
+# ============================================
+.claude/
+.mimocode/
+.codegraph/
+.kiro/
+.kilocode/
+.kotlin/
+agents/
+test_local_novel/
+
+# ============================================
+# Cloned repos (not part of this project)
+# ============================================
+mihon-main
+lnreader-master
+IReader-extensions
 IReader-plugins
 legado-master
 ksuop
