@@ -96,6 +96,9 @@ class TTSController(
 
     // Job for observing chapter DB changes when waiting for next chapter to appear
     private var nextChapterWatchJob: kotlinx.coroutines.Job? = null
+
+    // Track whether next chapter pre-fetch has been triggered for the current chapter
+    private var nextChapterFetched: Boolean = false
     
     // State - single source of truth
     private val _state = MutableStateFlow(TTSState())
@@ -226,6 +229,7 @@ class TTSController(
         Log.debug { "$TAG: stopAndRelease()" }
         
         pendingPlay = false
+        nextChapterFetched = false
         nextChapterWatchJob?.cancel()
         nextChapterWatchJob = null
         engine?.stop()
@@ -254,6 +258,7 @@ class TTSController(
         Log.debug { "$TAG: cleanup()" }
         
         pendingPlay = false
+        nextChapterFetched = false
         nextChapterWatchJob?.cancel()
         nextChapterWatchJob = null
         engine?.stop()
@@ -358,6 +363,9 @@ class TTSController(
             
             // Pre-cache next paragraphs in background
             precacheUpcomingParagraphs(paragraphIndex)
+
+            // Pre-fetch next chapter when approaching end of current chapter
+            prefetchNextChapter()
             
             engine?.speak(text, utteranceId)
         }
@@ -388,6 +396,50 @@ class TTSController(
         if (itemsToPrecache.isNotEmpty()) {
             Log.debug { "$TAG: Precaching ${itemsToPrecache.size} upcoming paragraphs" }
             engine?.precacheNext(itemsToPrecache)
+        }
+    }
+
+    /**
+     * Pre-fetch the next chapter's content from the remote source when approaching
+     * the end of the current chapter (last 1/3). This avoids the gap between chapters
+     * where the user hears silence while the next chapter's content is being fetched.
+     *
+     * Runs in a background coroutine so it never blocks playback.
+     */
+    private fun prefetchNextChapter() {
+        if (nextChapterFetched) return
+
+        val currentState = _state.value
+        val book = currentState.book ?: return
+        val chapter = currentState.chapter ?: return
+        val totalParagraphs = currentState.totalParagraphs
+        if (totalParagraphs == 0) return
+
+        // Check if we're in the last 1/3 of the chapter
+        val progress = (currentState.currentParagraphIndex + 1).toFloat() / totalParagraphs
+        if (progress < 2f / 3f) return
+
+        nextChapterFetched = true
+        Log.debug { "$TAG: prefetchNextChapter - reached last 1/3 (${String.format("%.1f", progress * 100)}%), starting background fetch" }
+
+        scope.launch {
+            try {
+                val nextChapterId = contentLoader.getNextChapterId(book.id, chapter.id)
+                if (nextChapterId == null) {
+                    Log.debug { "$TAG: prefetchNextChapter - no next chapter exists" }
+                    return@launch
+                }
+
+                // loadChapter will trigger remote fetch if content is empty
+                val content = contentLoader.loadChapter(book.id, nextChapterId)
+                if (content.paragraphs.isEmpty()) {
+                    Log.debug { "$TAG: prefetchNextChapter - next chapter $nextChapterId has no content after fetch attempt" }
+                } else {
+                    Log.debug { "$TAG: prefetchNextChapter - next chapter $nextChapterId fetched: ${content.paragraphs.size} paragraphs" }
+                }
+            } catch (e: Exception) {
+                Log.error { "$TAG: prefetchNextChapter failed: ${e.message}" }
+            }
         }
     }
     
@@ -838,6 +890,9 @@ class TTSController(
     
     private suspend fun loadChapter(bookId: Long, chapterId: Long, startParagraph: Int) {
         Log.debug { "$TAG: loadChapter(bookId=$bookId, chapterId=$chapterId, startParagraph=$startParagraph)" }
+
+        // Reset next chapter pre-fetch flag when loading a new chapter
+        nextChapterFetched = false
         
         // Check if this EXACT chapter is already loaded with content - skip reload to preserve chunk mode
         // IMPORTANT: Must check BOTH bookId AND chapterId to avoid showing stale data from different book
@@ -1038,6 +1093,7 @@ class TTSController(
         // Cancel chapter watch — engine is being replaced
         nextChapterWatchJob?.cancel()
         nextChapterWatchJob = null
+        nextChapterFetched = false
 
         // Stop current engine
         engine?.stop()
@@ -1062,6 +1118,7 @@ class TTSController(
             // Cancel chapter watch — engine is being replaced
             nextChapterWatchJob?.cancel()
             nextChapterWatchJob = null
+            nextChapterFetched = false
 
             engine?.stop()
             engine?.release()

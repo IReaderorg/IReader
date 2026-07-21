@@ -72,6 +72,7 @@ github.properties
 # Agent / AI tool configs
 # ============================================
 .claude/
+.opencode/
 .mimocode/
 .codegraph/
 .kiro/
