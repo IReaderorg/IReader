@@ -81,7 +81,8 @@ github.properties
 .vscode/
 agents/
 test_local_novel/
-
+graphify-out/
+.codegraph/
 # ============================================
 # Cloned repos (not part of this project)
 # ============================================

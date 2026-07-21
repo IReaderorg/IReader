@@ -6,7 +6,6 @@ object Modules {
     const val coreApi = ":core"
     const val commonResources = ":i18n"
     const val presentation = ":presentation"
-    const val presentationCore = ":presentation-core"
     const val sourceApi = ":source-api"
     const val pluginApi = ":plugin-api"
     const val server = ":server"
