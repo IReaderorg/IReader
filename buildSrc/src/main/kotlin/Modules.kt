@@ -3,7 +3,7 @@ object Modules {
     const val benchmark = ":benchmark"
     const val data = ":data"
     const val domain = ":domain"
-    const val coreApi = ":core"
+    const val coreApi = ":core-utils"
     const val commonResources = ":i18n"
     const val presentation = ":presentation"
     const val sourceApi = ":source-api"
