@@ -40,6 +40,8 @@ fun HttpRequestBuilder.noCache() {
  */
 fun HttpRequestBuilder.forceRefresh() {
     attributes.put(CacheControlAttribute, CacheControl(forceRefresh = true))
+    // Also tell OkHttp's disk cache to bypass
+    header("Cache-Control", "no-cache")
 }
 
 /**

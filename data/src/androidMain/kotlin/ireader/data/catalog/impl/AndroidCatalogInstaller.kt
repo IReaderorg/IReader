@@ -3,9 +3,9 @@ package ireader.data.catalog.impl
 import android.app.Application
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 import io.ktor.utils.io.*
 import ireader.core.http.HttpClients
+import ireader.core.http.forceRefresh
 import ireader.core.io.saveTo
 import ireader.core.log.Log
 import ireader.core.os.InstallStep
@@ -66,10 +66,10 @@ class AndroidCatalogInstaller(
             val tmpIconFile = File(secureCache, "${catalog.pkgName}.png")
             try {
                     val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
-                        headers.append(HttpHeaders.CacheControl, "no-store")
+                        forceRefresh()
                     }.body()
                     val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
-                        headers.append(HttpHeaders.CacheControl, "no-store")
+                        forceRefresh()
                     }.body()
                     apkResponse.saveTo(tmpApkFile.absolutePath.toPath(), okio.FileSystem.SYSTEM)
                     

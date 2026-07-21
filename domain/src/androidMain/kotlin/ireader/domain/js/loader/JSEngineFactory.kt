@@ -52,6 +52,7 @@ object J2V8EngineHelper : KoinComponent {
     
     private var j2v8Ready = false
     private var initAttempted = false
+    private var nativeLibPermanentlyBroken = false
     private var j2v8ClassLoader: ClassLoader? = null
     
     // Cached method references for performance
@@ -77,17 +78,21 @@ object J2V8EngineHelper : KoinComponent {
     @Synchronized
     fun tryInitializeJ2V8(): Boolean {
         if (j2v8Ready) return true
-        
+
         val pluginClassLoader = PluginClassLoader.getClassLoader(J2V8_PLUGIN_ID)
         if (pluginClassLoader == null) {
             Log.info { "J2V8EngineHelper: Plugin ClassLoader not available yet" }
             return false
         }
-        
-        if (initAttempted) return false
-        
+
+        // Only short-circuit permanently when the native library is definitively
+        // incompatible (e.g. 16KB page size on Android 15+). Transient failures
+        // (class not yet loaded, one-off reflection error) should remain retryable
+        // so the engine can recover once the plugin finishes loading.
+        if (initAttempted && nativeLibPermanentlyBroken) return false
+
         Log.info { "J2V8EngineHelper: Initializing J2V8..." }
-        
+
         try {
             // Load and cache V8 class and methods
             val v8Class = pluginClassLoader.loadClass("com.eclipsesource.v8.V8")
@@ -96,34 +101,40 @@ object J2V8EngineHelper : KoinComponent {
             cachedExecuteVoidScriptMethod = v8Class.getMethod("executeVoidScript", String::class.java)
             cachedExecuteStringScriptMethod = v8Class.getMethod("executeStringScript", String::class.java)
             cachedReleaseMethod = v8Class.getMethod("release")
-            
+
             // Test creating a runtime
             val runtime = cachedCreateRuntimeMethod?.invoke(null)
             cachedReleaseMethod?.invoke(runtime)
-            
+
             j2v8ClassLoader = pluginClassLoader
             j2v8Ready = true
             initAttempted = true
+            nativeLibPermanentlyBroken = false
             Log.info { "J2V8EngineHelper: J2V8 initialized successfully!" }
             return true
-            
+
         } catch (e: Exception) {
             val cause = e.cause ?: e
             val isPageSizeError = cause.message?.contains("page size") == true ||
                 cause.message?.contains("alignment") == true ||
                 cause is UnsatisfiedLinkError
             if (isPageSizeError && Build.VERSION.SDK_INT >= 35) {
+                // Native lib can never work on this device — don't keep retrying.
+                nativeLibPermanentlyBroken = true
+                initAttempted = true
                 Log.error { "J2V8EngineHelper: Native library incompatible with Android ${Build.VERSION.SDK_INT} (16KB page size). The J2V8 plugin must be rebuilt with 16KB page alignment support (-Wl,-z,max-page-size=16384)." }
             } else {
+                // Transient failure — leave the retry door open for next time.
+                initAttempted = true
                 Log.error { "J2V8EngineHelper: Failed to initialize: ${cause.message}" }
             }
-            initAttempted = true
             return false
         }
     }
-    
+
     fun reset() {
         initAttempted = false
+        nativeLibPermanentlyBroken = false
         j2v8Ready = false
         j2v8ClassLoader = null
         cachedV8Class = null

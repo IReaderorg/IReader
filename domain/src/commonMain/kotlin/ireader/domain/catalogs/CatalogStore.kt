@@ -532,6 +532,10 @@ class CatalogStore(
     /**
      * Load a single JS plugin by package name.
      * This is much more efficient than loading ALL plugins for each installation event.
+     *
+     * If the JS engine is unavailable (e.g. J2V8 can't load on Android 15+ due to 16KB page
+     * size), the loader returns a *pending* catalog built from the plugin's metadata so the
+     * source still appears in the list instead of leaving a stub source spinning forever.
      */
     private suspend fun loadSingleJSPlugin(pkgName: String) {
         try {
@@ -539,19 +543,36 @@ class CatalogStore(
                 Log.warn { "CatalogStore: Cannot load single JS plugin - loader not an AsyncPluginLoader" }
                 return
             }
-            
+
             val catalog = asyncLoader.loadSingleJSPlugin(pkgName)
             if (catalog != null) {
                 val isPinned = catalog.sourceId.toString() in cachedPinnedIds
-                val updated = catalog.copy(isPinned = isPinned)
+                val hasUpdate = checkHasUpdate(catalog)
+                val updated = catalog.copy(isPinned = isPinned, hasUpdate = hasUpdate)
                 catalogUpdateChannel.send(CatalogUpdate.Add(updated))
                 stubSourceIds.remove(catalog.sourceId)
+                loadingSourceIds.remove(catalog.sourceId)
+                loadingSourcesFlow.value = loadingSourceIds.toSet()
                 Log.info("CatalogStore: Loaded single JS plugin $pkgName")
             } else {
+                // Plugin file not found or metadata couldn't be extracted.
+                // Remove any stale stub/loading entry for this package so the UI doesn't spin.
+                val stale = catalogsByPkgName[pkgName]
+                if (stale != null) {
+                    stubSourceIds.remove(stale.sourceId)
+                    loadingSourceIds.remove(stale.sourceId)
+                    loadingSourcesFlow.value = loadingSourceIds.toSet()
+                }
                 Log.warn { "CatalogStore: JS plugin $pkgName returned null from loader" }
             }
         } catch (e: Exception) {
             Log.error("CatalogStore: Failed to load single JS plugin $pkgName", e)
+            // On failure, make sure we don't leave a perpetual loading indicator.
+            val stale = catalogsByPkgName[pkgName]
+            if (stale != null) {
+                loadingSourceIds.remove(stale.sourceId)
+                loadingSourcesFlow.value = loadingSourceIds.toSet()
+            }
         }
     }
 

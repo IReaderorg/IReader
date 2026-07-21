@@ -41,6 +41,6 @@ class SyncRemoteCatalogs(
         return false
     }
     internal companion object {
-        val minTimeApiCheck = 5.minutes
+        val minTimeApiCheck = 1.minutes
     }
 }

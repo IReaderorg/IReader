@@ -52,7 +52,7 @@ val CatalogModule = module {
     factory<GetRemoteCatalogs> { GetRemoteCatalogs(get()) }
     factory<GetLocalCatalogs> { GetLocalCatalogs(get(),get()) }
     factory<GetLocalCatalog> { GetLocalCatalog(get()) }
-    factory<UpdateCatalog> { UpdateCatalog(get(),get()) }
+    factory<UpdateCatalog> { UpdateCatalog(get(),get(),get()) }
     factory<TogglePinnedCatalog> { TogglePinnedCatalog(get()) }
     
     factory<LoadJSPluginsInBackgroundUseCase> {
