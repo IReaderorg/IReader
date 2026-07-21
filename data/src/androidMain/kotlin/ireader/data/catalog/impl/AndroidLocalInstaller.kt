@@ -3,9 +3,9 @@ package ireader.data.catalog.impl
 import android.app.Application
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 import io.ktor.utils.io.*
 import ireader.core.http.HttpClients
+import ireader.core.http.forceRefresh
 import ireader.core.io.saveTo
 import ireader.core.log.Log
 import ireader.core.os.InstallStep
@@ -69,7 +69,7 @@ class AndroidLocalInstaller(
         val tmpApkFile = File(context.codeCacheDir, "${catalog.pkgName}.apk")
         try {
             val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
-                headers.append(HttpHeaders.CacheControl, "no-store")
+                forceRefresh()
             }.body()
             apkResponse.saveTo(tmpApkFile.absolutePath.toPath(), FileSystem.SYSTEM)
 
@@ -106,10 +106,12 @@ class AndroidLocalInstaller(
             send(InstallStep.Downloading)
             
             Log.info("AndroidLocalInstaller: Installing JS plugin ${catalog.name}")
-            
-            // Download the JS plugin content first
+
+            // Download the JS plugin content first.
+            // forceRefresh() bypasses both the Ktor in-memory cache and the OkHttp disk
+            // cache, otherwise an updated plugin would silently install stale content.
             val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
-                headers.append(HttpHeaders.CacheControl, "no-store")
+                forceRefresh()
             }.body()
             
             // Read content into memory

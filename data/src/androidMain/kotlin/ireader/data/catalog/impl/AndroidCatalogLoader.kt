@@ -788,14 +788,22 @@ class AndroidCatalogLoader(
     /**
      * Load a single JS plugin by package name.
      * This is much more efficient than loading ALL plugins for a single installation event.
+     *
+     * If the JS engine cannot run the plugin (e.g. J2V8 native lib is incompatible with
+     * Android 15+ 16KB page size), we still return a *pending* catalog built from the
+     * plugin's metadata so the source shows up in the list instead of disappearing.
      */
     override suspend fun loadSingleJSPlugin(pkgName: String): ireader.domain.models.entities.JSPluginCatalog? {
+        val pluginFile = jsPluginLoader.findPluginFile(pkgName) ?: run {
+            Log.warn { "AndroidCatalogLoader: JS plugin file not found for $pkgName" }
+            return null
+        }
         return try {
-            val pluginFile = jsPluginLoader.findPluginFile(pkgName) ?: return null
             jsPluginLoader.loadPlugin(pluginFile)
         } catch (e: Exception) {
-            Log.error("AndroidCatalogLoader: Failed to load single JS plugin $pkgName", e)
-            null
+            Log.error("AndroidCatalogLoader: Failed to load single JS plugin $pkgName, falling back to pending catalog", e)
+            // Fall back to a metadata-only pending catalog so the source is still visible.
+            jsPluginLoader.createPendingCatalogFromFile(pluginFile)
         }
     }
     

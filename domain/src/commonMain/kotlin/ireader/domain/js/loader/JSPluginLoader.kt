@@ -132,6 +132,13 @@ class JSPluginLoader(
     }
     
     /**
+     * Public entry point for creating a pending (metadata-only) catalog from a plugin file.
+     * Used when the JS engine cannot execute the plugin (e.g. J2V8 incompatible with
+     * Android 15+ 16KB page size) so the source is still shown in the catalog list.
+     */
+    suspend fun createPendingCatalogFromFile(file: Path): JSPluginCatalog? = createPendingCatalog(file)
+
+    /**
      * Creates a pending catalog from a plugin file by extracting metadata without JS engine.
      * This allows showing the source in the list even when JS engine is not available.
      */
