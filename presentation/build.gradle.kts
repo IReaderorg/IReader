@@ -81,7 +81,6 @@ kotlin {
                 api(project(Modules.sourceApi))
                 api(project(Modules.data))
                 api(project(Modules.commonResources))
-                api(project(Modules.presentationCore))
 
                 api(compose.foundation)
                 api(compose.runtime)
@@ -103,6 +102,9 @@ kotlin {
                 api(libs.coil.core)
                 api(libs.coil.compose)
                 api(libs.coil.network.ktor)
+
+                // Logging (was in presentation-core)
+                implementation(libs.kermit)
                 
                 // FileKit - Modern KMP file picker
                 api(libs.bundles.filekit)
