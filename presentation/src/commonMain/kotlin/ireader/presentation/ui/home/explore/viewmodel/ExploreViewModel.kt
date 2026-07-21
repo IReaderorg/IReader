@@ -622,35 +622,74 @@ class ExploreViewModel(
      * Toggle search mode
      */
     fun toggleSearchMode(enabled: Boolean) {
-        _state.update { it.copy(isSearchModeEnabled = enabled) }
-        
-        if (!enabled && source != null) {
-            exitSearchMode()
+        val currentState = _state.value
+
+        if (enabled) {
+            // Save pre-search state before entering search mode
+            val preSearchState = PreSearchState(
+                books = currentState.books,
+                currentListing = currentState.currentListing,
+                appliedFilters = currentState.appliedFilters,
+                page = currentState.page,
+                endReached = currentState.endReached
+            )
+            _state.update {
+                it.copy(
+                    isSearchModeEnabled = true,
+                    preSearchState = preSearchState
+                )
+            }
+        } else {
+            _state.update { it.copy(isSearchModeEnabled = false) }
+            if (source != null) {
+                exitSearchMode()
+            }
         }
     }
-    
+
     private fun exitSearchMode() {
-        // Clear search state and reset to default listing
-        seenBooks.clear()
-        
-        // Get the default listing from source
-        val defaultListing = source?.getListings()?.firstOrNull()
-        
-        _state.update { 
-            it.copy(
-                searchQuery = "",
-                appliedFilters = null,
-                currentListing = defaultListing,
-                isLoading = false,
-                error = null,
-                endReached = false,
-                page = 1,
-                books = emptyList()
-            )
+        val currentState = _state.value
+        val preSearchState = currentState.preSearchState
+
+        if (preSearchState != null) {
+            // Restore pre-search state without refetching
+            seenBooks.clear()
+            preSearchState.books.forEach { seenBooks.add(it.key) }
+
+            _state.update {
+                it.copy(
+                    searchQuery = null,
+                    appliedFilters = preSearchState.appliedFilters,
+                    currentListing = preSearchState.currentListing,
+                    isLoading = false,
+                    error = null,
+                    endReached = preSearchState.endReached,
+                    page = preSearchState.page,
+                    books = preSearchState.books,
+                    preSearchState = null
+                )
+            }
+        } else {
+            // Fallback: reload from default listing if no pre-search state saved
+            seenBooks.clear()
+            val defaultListing = source?.getListings()?.firstOrNull()
+
+            _state.update {
+                it.copy(
+                    searchQuery = null,
+                    appliedFilters = null,
+                    currentListing = defaultListing,
+                    isLoading = false,
+                    error = null,
+                    endReached = false,
+                    page = 1,
+                    books = emptyList(),
+                    preSearchState = null
+                )
+            }
+
+            loadItems(reset = true)
         }
-        
-        // Reload with default listing
-        loadItems(reset = true)
     }
     
     /**

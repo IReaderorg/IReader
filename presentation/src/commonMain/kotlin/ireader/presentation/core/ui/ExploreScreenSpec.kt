@@ -127,8 +127,6 @@ data class ExploreScreenSpec(
                         },
                         onSearchDisable = {
                             vm.toggleSearchMode(false)
-                            vm.searchQuery = null
-                            vm.loadItems(true)
                         },
                         onSearchEnable = {
                             vm.toggleSearchMode(true)
