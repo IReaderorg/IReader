@@ -86,6 +86,18 @@ fun ChapterInfo.toChapter(bookId: Long): Chapter {
 fun Chapter.isLockedChapter(): Boolean {
     if (name.isEmpty()) return false
     
-    return name.contains("🔒") || 
-           name.contains("locked", ignoreCase = true)
+    // Check for lock emoji
+    if (name.contains("🔒")) return true
+    
+    // Check for "locked" but not when part of "unlocked"
+    val lowerName = name.lowercase()
+    val lockedIndex = lowerName.indexOf("locked")
+    if (lockedIndex == -1) return false
+    
+    // Check if preceded by "un" to exclude "unlocked"
+    if (lockedIndex >= 2 && lowerName.substring(lockedIndex - 2, lockedIndex) == "un") {
+        return false
+    }
+    
+    return true
 }
