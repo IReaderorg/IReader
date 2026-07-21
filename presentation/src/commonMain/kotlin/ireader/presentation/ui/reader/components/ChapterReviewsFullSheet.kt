@@ -48,7 +48,7 @@ import ireader.presentation.ui.component.getDisplayName
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.formatRatingWithReviews
+import ireader.domain.utils.formatRatingWithReviews
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 

@@ -33,7 +33,7 @@ import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.ReviewCard
 import ireader.presentation.ui.component.WriteReviewDialog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.formatRatingShort
+import ireader.domain.utils.formatRatingShort
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 

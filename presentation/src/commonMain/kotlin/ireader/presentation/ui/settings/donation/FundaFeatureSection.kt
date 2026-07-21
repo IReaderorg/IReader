@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.FundingGoal
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.formatDecimal
+import ireader.domain.utils.formatDecimal
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 

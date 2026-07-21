@@ -489,7 +489,7 @@ private fun ModernFeaturedCard(
                             )
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
-                                text = ireader.presentation.ui.core.utils.toDecimalString(rating.toDouble(), 1),
+                                text = ireader.domain.utils.toDecimalString(rating.toDouble(), 1),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Medium
                             )
@@ -669,7 +669,7 @@ private fun ModernPluginCard(
                             )
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
-                                text = ireader.presentation.ui.core.utils.toDecimalString(rating.toDouble(), 1),
+                                text = ireader.domain.utils.toDecimalString(rating.toDouble(), 1),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Medium
                             )
@@ -975,8 +975,8 @@ private fun getCategoryColor(type: PluginType): Color = when (type) {
 }
 
 private fun formatDownloadCount(count: Int): String = when {
-    count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000_000.0, 1)}M"
-    count >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000.0, 1)}K"
+    count >= 1_000_000 -> "${ireader.domain.utils.toDecimalString(count / 1_000_000.0, 1)}M"
+    count >= 1_000 -> "${ireader.domain.utils.toDecimalString(count / 1_000.0, 1)}K"
     else -> count.toString()
 }
 
@@ -988,5 +988,5 @@ private fun formatPrice(price: Double, currency: String): String {
         "JPY" -> "¥"
         else -> currency
     }
-    return "$symbol${ireader.presentation.ui.core.utils.toDecimalString(price, 2)}"
+    return "$symbol${ireader.domain.utils.toDecimalString(price, 2)}"
 }

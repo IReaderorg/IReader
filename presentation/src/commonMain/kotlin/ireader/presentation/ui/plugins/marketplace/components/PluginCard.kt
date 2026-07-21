@@ -113,7 +113,7 @@ fun PluginCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = ireader.presentation.ui.core.utils.toDecimalString(rating.toDouble(), 1),
+                            text = ireader.domain.utils.toDecimalString(rating.toDouble(), 1),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium
                         )
@@ -232,7 +232,7 @@ private fun DownloadProgressIndicator(
 private fun formatBytes(downloaded: Long, total: Long): String {
     val downloadedMB = downloaded / (1024.0 * 1024.0)
     val totalMB = total / (1024.0 * 1024.0)
-    return "${ireader.presentation.ui.core.utils.toDecimalString(downloadedMB, 1)}/${ireader.presentation.ui.core.utils.toDecimalString(totalMB, 1)} MB"
+    return "${ireader.domain.utils.toDecimalString(downloadedMB, 1)}/${ireader.domain.utils.toDecimalString(totalMB, 1)} MB"
 }
 
 /**
@@ -404,8 +404,8 @@ private fun PriceBadge(
  */
 private fun formatDownloadCount(count: Int): String {
     return when {
-        count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000_000.0, 1)}M"
-        count >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000.0, 1)}K"
+        count >= 1_000_000 -> "${ireader.domain.utils.toDecimalString(count / 1_000_000.0, 1)}M"
+        count >= 1_000 -> "${ireader.domain.utils.toDecimalString(count / 1_000.0, 1)}K"
         else -> count.toString()
     }
 }
@@ -421,5 +421,5 @@ private fun formatPrice(price: Double, currency: String): String {
         "JPY" -> "¥"
         else -> currency
     }
-    return "$symbol${ireader.presentation.ui.core.utils.toDecimalString(price, 2)}"
+    return "$symbol${ireader.domain.utils.toDecimalString(price, 2)}"
 }

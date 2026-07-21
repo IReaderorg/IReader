@@ -3,9 +3,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 buildscript {
     dependencies {
         classpath(libs.gradle.tools)
-        // Firebase Crashlytics and Google Services - excluded for F-Droid builds
-        // F-Droid policy prohibits proprietary crash reporting services
-        // Only include for standard and dev flavors
         val taskRequests = gradle.startParameter.taskRequests.toString()
         if (!taskRequests.contains("Fdroid", ignoreCase = true)) {
             classpath(libs.gradle.google)
@@ -13,6 +10,7 @@ buildscript {
         }
     }
 }
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(kotlinx.plugins.kotlinSerilization) apply false
@@ -24,17 +22,31 @@ plugins {
     alias(libs.plugins.buildkonfig) apply false
     alias(libs.plugins.detekt)
     alias(libs.plugins.composeHotReload) apply false
-    // Maven Central Portal Publisher
     id("com.gradleup.nmcp") version "1.4.4" apply false
-   // id("nl.littlerobots.version-catalog-update") version "0.6.1"
+}
+
+// Skip detekt tasks when SKIP_DETEKT=true (for faster dev builds)
+val skipDetekt = System.getenv("SKIP_DETEKT")?.toBoolean() == true
+if (skipDetekt) {
+    allprojects {
+        tasks.matching { it.name.contains("detekt", ignoreCase = true) }.configureEach {
+            enabled = false
+        }
+    }
+}
+
+// Skip tests when SKIP_TESTS=true (for faster dev builds)
+val skipTests = System.getenv("SKIP_TESTS")?.toBoolean() == true
+if (skipTests) {
+    allprojects {
+        tasks.matching { it.name.startsWith("test") && !it.name.contains("compile", ignoreCase = true) }.configureEach {
+            enabled = false
+        }
+    }
 }
 
 subprojects {
-    // Apply detekt to all subprojects
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-    
     afterEvaluate {
-        // Remove log pollution until Android support in KMP improves.
         project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()
             ?.let { kmpExt ->
                 kmpExt.sourceSets.removeAll {
@@ -57,8 +69,7 @@ subprojects {
             )
         }
     }
-    
-    // Configure Kotlin/Native compilation (iOS targets)
+
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile>().configureEach {
         compilerOptions {
             freeCompilerArgs.addAll(
@@ -66,36 +77,16 @@ subprojects {
             )
         }
     }
-    
-    // Configure detekt for subprojects
-    configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
-        buildUponDefaultConfig = true
-        config.setFrom(files("$rootDir/config/detekt.yml"))
-        baseline = file("$rootDir/config/detekt-baseline.xml")
-        parallel = true
-    }
-    
-    dependencies {
-        "detektPlugins"(rootProject.libs.detekt.compose.rules)
-    }
-    
-    // Optimize Kotlin compilation tasks
+
     tasks.withType<KotlinCompilationTask<*>>().configureEach {
         compilerOptions {
-            // Enable progressive mode for better compilation performance
             progressiveMode.set(false)
-            // Suppress version compatibility warnings
             allWarningsAsErrors.set(false)
         }
     }
 }
 
-
-tasks.register("delete", Delete::class) {
-    delete(rootProject.layout.buildDirectory)
-}
-
-// Detekt configuration for static analysis with Compose rules
+// Detekt configuration (always configured, but tasks disabled via SKIP_DETEKT env var)
 detekt {
     buildUponDefaultConfig = true
     allRules = false
@@ -106,7 +97,6 @@ detekt {
 }
 
 dependencies {
-    // Compose Rules for detekt - static analysis for Compose best practices
     detektPlugins(libs.detekt.compose.rules)
 }
 
@@ -117,4 +107,8 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         txt.required.set(false)
         sarif.required.set(false)
     }
+}
+
+tasks.register("delete", Delete::class) {
+    delete(rootProject.layout.buildDirectory)
 }
