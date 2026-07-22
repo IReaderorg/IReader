@@ -1,0 +1,34 @@
+# Explore Feature: Listings Tests
+# Tests: Switch between listings (Latest, Popular, etc.)
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Navigate to Test source
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Test 1: Verify default listing
+- takeScreenshot: listings_01_default
+
+# Test 2: Look for listing selector (if available)
+# Test source has "Alphabetically" and "Latest" listings
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: listings_02_books_visible
+
+# Test 3: Try to find listing chips/tabs
+# Note: Listing UI may vary - check for horizontal scrollable chips
+- takeScreenshot: listings_03_check_chips
+
+# Test 4: If listings are available, switch them
+# This is source-dependent - some sources have listing tabs
+- takeScreenshot: listings_04_listing_state

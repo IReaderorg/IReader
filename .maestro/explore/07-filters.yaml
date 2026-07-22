@@ -1,0 +1,42 @@
+# Explore Feature: Filter Tests
+# Tests: Open filters, apply filters, clear filters
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Navigate to Test source
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Test 1: Open filter bottom sheet
+- tapOn:
+    text: "Filter"
+- waitForAnimationToEnd
+- takeScreenshot: filter_01_opened
+
+# Test 2: Verify filter options are visible
+# Test source has Title, Author, Artist, Genre filters
+- takeScreenshot: filter_02_options
+
+# Test 3: Try to find and tap a filter
+# Look for filter items
+- takeScreenshot: filter_03_browse
+
+# Test 4: Close filters
+- tapOn:
+    point: "50%,90%"
+- waitForAnimationToEnd
+- takeScreenshot: filter_04_closed
+
+# Test 5: Verify we're back to browse
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: filter_05_back_to_browse

@@ -1,0 +1,58 @@
+# Explore Feature: Book Interaction Tests
+# Tests: Tap on book, book details, long press menu
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Navigate to Test source
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Test 1: Tap on a book to open details
+- tapOn:
+    text: "Fantasy Adventure"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: book_01_details
+
+# Verify book details screen
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: book_02_details_verified
+
+# Test 2: Go back to explore
+- tapOn:
+    point: "8%,8%"
+- waitForAnimationToEnd
+- takeScreenshot: book_03_back_to_explore
+
+# Test 3: Long press on book (if supported)
+- longPressOn:
+    text: "Sci-Fi Explorer"
+- waitForAnimationToEnd
+- takeScreenshot: book_04_long_press
+
+# Test 4: Dismiss any menu
+- pressKey: Back
+- waitForAnimationToEnd
+- takeScreenshot: book_05_menu_dismissed
+
+# Test 5: Tap on different book
+- tapOn:
+    text: "Romance in Paris"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: book_06_second_book
+
+# Verify second book details
+- assertVisible:
+    text: "Romance in Paris"
+- takeScreenshot: book_07_second_book_verified

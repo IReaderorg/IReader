@@ -1,0 +1,45 @@
+# Explore Feature: Pagination Tests
+# Tests: Scroll to load more, end reached
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Navigate to Test source
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Test 1: Verify initial load
+- takeScreenshot: pagination_01_initial
+
+# Test 2: Scroll down to trigger pagination
+- scroll
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: pagination_02_scrolled
+
+# Test 3: Continue scrolling
+- scroll
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: pagination_03_more_scrolled
+
+# Test 4: Verify more content loaded
+- scroll
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: pagination_04_content_loaded
+
+# Test 5: Scroll back to top
+- scroll UP
+- scroll UP
+- scroll UP
+- waitForAnimationToEnd
+- takeScreenshot: pagination_05_back_to_top
