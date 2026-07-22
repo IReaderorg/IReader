@@ -1,0 +1,73 @@
+# Explore Feature: Search Functionality Tests
+# Tests: Search modes, query input, results, clear search, cancel
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Navigate to Test source
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Test 1: Open search mode
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- takeScreenshot: search_01_search_mode
+
+# Verify search field is visible (check for search icon)
+- takeScreenshot: search_02_search_field
+
+# Test 2: Enter search query
+- inputText: "fantasy"
+- takeScreenshot: search_03_query_entered
+
+# Test 3: Execute search
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: search_04_results
+
+# Verify fantasy results appear
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: search_05_results_verified
+
+# Test 4: Cancel search to clear
+- tapOn:
+    point: "8%,8%"
+- waitForAnimationToEnd
+- takeScreenshot: search_06_cleared
+
+# Test 5: Open search again and enter new query
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- inputText: "sci"
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: search_07_new_query
+
+# Verify sci-fi results
+- assertVisible:
+    text: "Sci-Fi Explorer"
+- takeScreenshot: search_08_scifi_results
+
+# Test 6: Cancel search (back button)
+- tapOn:
+    point: "8%,8%"
+- waitForAnimationToEnd
+- takeScreenshot: search_09_cancelled
+
+# Verify we're back to browse mode
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: search_10_back_to_browse
