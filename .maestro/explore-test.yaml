@@ -1,5 +1,5 @@
 # Explore Feature - Comprehensive Test
-# Tests: Source selection, browse mode, search, book interactions, navigation
+# Tests: Source selection, browse mode, search, listings, layouts, book interactions, navigation
 
 appId: ir.kazemcodes.infinityreader.debug
 ---
@@ -35,18 +35,92 @@ appId: ir.kazemcodes.infinityreader.debug
 - takeScreenshot: explore_04_browse_mode
 
 # ============================================================
-# SECTION 2: Search Functionality
+# SECTION 2: Listings (Sort Options)
+# ============================================================
+
+# Verify listing chips are visible
+- assertVisible:
+    text: "Alphabetically"
+- assertVisible:
+    text: "Latest"
+- takeScreenshot: explore_05_listings_visible
+
+# Tap on Latest listing
+- tapOn:
+    text: "Latest"
+- waitForAnimationToEnd
+- takeScreenshot: explore_06_latest_selected
+
+# Verify books still visible after listing change
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_07_latest_books
+
+# Tap on Alphabetically listing
+- tapOn:
+    text: "Alphabetically"
+- waitForAnimationToEnd
+- takeScreenshot: explore_08_alphabetically_selected
+
+# ============================================================
+# SECTION 3: Layout Selector
+# ============================================================
+
+# Open layout selector
+- tapOn:
+    text: "Layout"
+- waitForAnimationToEnd
+- takeScreenshot: explore_09_layout_selector
+
+# Verify layout options are visible
+- assertVisible:
+    text: "Comfortable Grid"
+- assertVisible:
+    text: "Compact Layout"
+- assertVisible:
+    text: "List Layout"
+- takeScreenshot: explore_10_layout_options
+
+# Select List Layout
+- tapOn:
+    text: "List Layout"
+- waitForAnimationToEnd
+- takeScreenshot: explore_11_list_layout
+
+# Verify books still visible in list layout
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_12_list_layout_books
+
+# Open layout selector again
+- tapOn:
+    text: "Layout"
+- waitForAnimationToEnd
+
+# Select Comfortable Grid
+- tapOn:
+    text: "Comfortable Grid"
+- waitForAnimationToEnd
+- takeScreenshot: explore_13_comfortable_grid
+
+# Verify books visible in grid
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_14_grid_books
+
+# ============================================================
+# SECTION 4: Search Functionality
 # ============================================================
 
 # Open search mode
 - tapOn:
     text: "Search"
 - waitForAnimationToEnd
-- takeScreenshot: explore_05_search_mode
+- takeScreenshot: explore_15_search_mode
 
 # Enter search query
 - inputText: "fantasy"
-- takeScreenshot: explore_06_query_entered
+- takeScreenshot: explore_16_query_entered
 
 # Execute search
 - pressKey: Enter
@@ -56,7 +130,7 @@ appId: ir.kazemcodes.infinityreader.debug
 # Verify fantasy results appear
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_07_search_results
+- takeScreenshot: explore_17_search_results
 
 # Cancel search using accessibility text
 - tapOn:
@@ -66,10 +140,10 @@ appId: ir.kazemcodes.infinityreader.debug
 # Verify back to browse mode
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_08_back_to_browse
+- takeScreenshot: explore_18_back_to_browse
 
 # ============================================================
-# SECTION 3: Book Interactions
+# SECTION 5: Book Interactions
 # ============================================================
 
 # Tap on a book to open details
@@ -81,7 +155,7 @@ appId: ir.kazemcodes.infinityreader.debug
 # Verify book details screen
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_09_book_details
+- takeScreenshot: explore_19_book_details
 
 # Go back to explore using pressKey
 - pressKey: Back
@@ -90,25 +164,10 @@ appId: ir.kazemcodes.infinityreader.debug
 # Verify back at explore
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_10_back_to_explore
+- takeScreenshot: explore_20_back_to_explore
 
 # ============================================================
-# SECTION 4: Layout Selector
-# ============================================================
-
-# Open layout selector
-- tapOn:
-    text: "Layout"
-- waitForAnimationToEnd
-- takeScreenshot: explore_11_layout_selector
-
-# Dismiss layout selector by pressing back
-- pressKey: Back
-- waitForAnimationToEnd
-- takeScreenshot: explore_12_layout_closed
-
-# ============================================================
-# SECTION 5: Back Navigation
+# SECTION 6: Back Navigation
 # ============================================================
 
 # Go back to sources list using pressKey
@@ -118,18 +177,18 @@ appId: ir.kazemcodes.infinityreader.debug
 # Verify back at sources
 - assertVisible:
     text: "Test source"
-- takeScreenshot: explore_13_back_to_sources
+- takeScreenshot: explore_21_back_to_sources
 
 # Navigate to different tab
 - tapOn:
     text: "Library"
 - waitForAnimationToEnd
-- takeScreenshot: explore_14_library_tab
+- takeScreenshot: explore_22_library_tab
 
 # Return to Sources
 - tapOn:
     text: "Sources"
 - waitForAnimationToEnd
-- takeScreenshot: explore_15_return_to_sources
+- takeScreenshot: explore_23_return_to_sources
 
-- takeScreenshot: explore_16_complete
+- takeScreenshot: explore_24_complete
