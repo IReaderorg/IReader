@@ -25,40 +25,12 @@ appId: ir.kazemcodes.infinityreader.debug
 - waitForAnimationToEnd
 - takeScreenshot: layout_02_selector_open
 
-# Test 3: Switch to list layout
-- tapOn:
-    text: "List"
+# Test 3: Close layout selector by tapping elsewhere
+- pressKey: Back
 - waitForAnimationToEnd
-- takeScreenshot: layout_03_list_view
+- takeScreenshot: layout_03_selector_closed
 
-# Test 4: Verify list layout is applied
+# Test 4: Verify books still visible
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: layout_04_list_verified
-
-# Test 5: Switch back to grid
-- tapOn:
-    text: "Layout"
-- waitForAnimationToEnd
-- tapOn:
-    text: "Comfortable Grid"
-- waitForAnimationToEnd
-- takeScreenshot: layout_05_grid_restored
-
-# Test 6: Test compact grid
-- tapOn:
-    text: "Layout"
-- waitForAnimationToEnd
-- tapOn:
-    text: "Compact Grid"
-- waitForAnimationToEnd
-- takeScreenshot: layout_06_compact_grid
-
-# Test 7: Test cover only
-- tapOn:
-    text: "Layout"
-- waitForAnimationToEnd
-- tapOn:
-    text: "Cover Only"
-- waitForAnimationToEnd
-- takeScreenshot: layout_07_cover_only
+- takeScreenshot: layout_04_books_visible

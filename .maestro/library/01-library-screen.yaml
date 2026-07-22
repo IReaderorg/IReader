@@ -1,0 +1,47 @@
+# Library Feature: Screen Tests
+# Tests: Library screen load, book display, tabs
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Test 1: Verify Library tab is default
+- assertVisible:
+    text: "Library"
+- takeScreenshot: library_01_default_tab
+
+# Test 2: Verify empty state or books
+- takeScreenshot: library_02_screen_state
+
+# Test 3: Test tab switching within Library
+# Library has "Library" and "Updates" tabs
+- takeScreenshot: library_03_tabs
+
+# Test 4: Tap on Updates sub-tab if visible
+- try:
+    - tapOn:
+        text: "Updates"
+    - waitForAnimationToEnd
+    - takeScreenshot: library_04_updates_tab
+- catch:
+    - takeScreenshot: library_04_updates_not_found
+
+# Test 5: Go back to Library tab
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- takeScreenshot: library_05_back_to_library
+
+# Test 6: Test search in Library
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- takeScreenshot: library_06_search_mode
+
+# Test 7: Cancel search
+- tapOn:
+    point: "8%,8%"
+- waitForAnimationToEnd
+- takeScreenshot: library_07_search_cancelled

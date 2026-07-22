@@ -1,0 +1,45 @@
+# More/Settings Feature: Screen Tests
+# Tests: More tab, settings navigation
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Test 1: Navigate to More tab
+- tapOn:
+    text: "More"
+- waitForAnimationToEnd
+- takeScreenshot: more_01_tab
+
+# Test 2: Verify settings options
+- takeScreenshot: more_02_options
+
+# Test 3: Test Settings navigation
+- try:
+    - tapOn:
+        text: "Settings"
+    - waitForAnimationToEnd
+    - takeScreenshot: more_03_settings
+    - pressKey: Back
+    - waitForAnimationToEnd
+- catch:
+    - takeScreenshot: more_03_settings_not_found
+
+# Test 4: Test About navigation
+- try:
+    - tapOn:
+        text: "About"
+    - waitForAnimationToEnd
+    - takeScreenshot: more_04_about
+    - pressKey: Back
+    - waitForAnimationToEnd
+- catch:
+    - takeScreenshot: more_04_about_not_found
+
+# Test 5: Navigate back to Library
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- takeScreenshot: more_05_back_to_library

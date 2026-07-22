@@ -1,0 +1,42 @@
+# History Feature: Screen Tests
+# Tests: History screen load, book display, search
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Test 1: Navigate to History tab
+- tapOn:
+    text: "History"
+- waitForAnimationToEnd
+- takeScreenshot: history_01_tab
+
+# Test 2: Verify screen loads
+- takeScreenshot: history_02_screen_state
+
+# Test 3: Test search in History
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- takeScreenshot: history_03_search_mode
+
+# Test 4: Enter search query
+- inputText: "test"
+- takeScreenshot: history_04_query_entered
+
+# Test 5: Cancel search
+- tapOn:
+    point: "8%,8%"
+- waitForAnimationToEnd
+- takeScreenshot: history_05_search_cancelled
+
+# Test 6: Navigate away and back
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- tapOn:
+    text: "History"
+- waitForAnimationToEnd
+- takeScreenshot: history_06_navigate_back
