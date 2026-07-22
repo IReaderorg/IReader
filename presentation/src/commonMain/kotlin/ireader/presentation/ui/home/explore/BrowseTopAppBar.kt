@@ -44,6 +44,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.graphicsLayer
@@ -285,7 +286,9 @@ private fun NormalBrowseToolbar(
                     exit = fadeOut() + scaleOut()
                 ) {
                     Surface(
-                        modifier = Modifier.padding(horizontal = 4.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .testTag("search_icon"),
                         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
