@@ -1,0 +1,52 @@
+# Smoke Test - App Launch and Navigation
+# Verifies: App launches, bottom nav works, screens load
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Take screenshot of initial state
+- takeScreenshot: smoke_01_app_loaded
+
+# Test bottom navigation - Library (default)
+- assertVisible:
+    text: "Library"
+- takeScreenshot: smoke_02_library_tab
+
+# Test Updates tab
+- tapOn:
+    text: "Updates"
+- waitForAnimationToEnd
+- takeScreenshot: smoke_03_updates_tab
+
+# Test History tab
+- tapOn:
+    text: "History"
+- waitForAnimationToEnd
+- takeScreenshot: smoke_04_history_tab
+
+# Test Sources tab
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- takeScreenshot: smoke_05_sources_tab
+
+# Test More tab
+- tapOn:
+    text: "More"
+- waitForAnimationToEnd
+- takeScreenshot: smoke_06_more_tab
+
+# Return to Library
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- takeScreenshot: smoke_07_back_to_library
+
+# Test back button
+- pressKey: Back
+- waitForAnimationToEnd
+
+- takeScreenshot: smoke_08_complete

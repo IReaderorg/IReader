@@ -1,0 +1,45 @@
+# Explore Screen Search Test
+# Tests: Navigate to source, search, cancel search
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Navigate to Sources
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- takeScreenshot: explore_01_sources
+
+# Tap on a source to enter browse mode
+- tapOn:
+    text: "FreeWebNovel"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: explore_02_source_selected
+
+# Tap search icon (magnifying glass in top right)
+- tapOn:
+    id: "search"
+- waitForAnimationToEnd
+- takeScreenshot: explore_03_search_mode
+
+# Type search query
+- inputText: "fantasy"
+- takeScreenshot: explore_04_query_entered
+
+# Execute search
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: explore_05_search_results
+
+# Cancel search (tap X or back)
+- tapOn:
+    id: "close"
+- waitForAnimationToEnd
+- takeScreenshot: explore_06_search_cancelled
+
+- takeScreenshot: explore_07_complete

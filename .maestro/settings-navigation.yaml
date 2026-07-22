@@ -1,0 +1,37 @@
+# Settings Navigation Test
+# Tests: Access settings from More tab
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Navigate to More tab
+- tapOn:
+    text: "More"
+- waitForAnimationToEnd
+- takeScreenshot: settings_01_more_tab
+
+# Scroll down to find Settings
+- swipe:
+    direction: UP
+- waitForAnimationToEnd
+- takeScreenshot: settings_02_scrolled
+
+# Tap on Settings
+- tapOn:
+    text: "Settings"
+- waitForAnimationToEnd
+- takeScreenshot: settings_03_settings_open
+
+# Test back navigation
+- pressKey: Back
+- waitForAnimationToEnd
+- takeScreenshot: settings_04_back
+
+# Return to Library
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- takeScreenshot: settings_05_complete
