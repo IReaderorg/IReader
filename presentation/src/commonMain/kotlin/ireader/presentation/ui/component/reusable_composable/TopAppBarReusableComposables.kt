@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
@@ -290,9 +291,10 @@ fun TopAppBarBackButton(tint: Color = MaterialTheme.colorScheme.onSurface, onCli
     val isLeftToRight = remember {
         derivedStateOf { layoutDirection == LayoutDirection.Ltr }
     }
-    IconButton(onClick = {
-        onClick()
-    }) {
+    IconButton(
+        onClick = { onClick() },
+        modifier = Modifier.testTag("back_button")
+    ) {
         Icon(
             imageVector = if (isLeftToRight.value) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.ArrowForward,
             contentDescription = localize(Res.string.return_to_previous_screen),
