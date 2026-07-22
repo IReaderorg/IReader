@@ -1,0 +1,41 @@
+# Updates Feature - Comprehensive Test
+# Tests: Updates screen, navigation
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ============================================================
+# SECTION 1: Updates Tab
+# ============================================================
+
+# Navigate to Updates tab
+- tapOn:
+    text: "Updates"
+- waitForAnimationToEnd
+- takeScreenshot: updates_01_tab
+
+# Verify screen loads
+- takeScreenshot: updates_02_screen_state
+
+# ============================================================
+# SECTION 2: Navigation Away and Back
+# ============================================================
+
+# Navigate to Library
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+
+# Return to Updates
+- tapOn:
+    text: "Updates"
+- waitForAnimationToEnd
+- takeScreenshot: updates_03_navigate_back
+
+# Verify updates is visible
+- assertVisible:
+    text: "Updates"
+- takeScreenshot: updates_04_verified

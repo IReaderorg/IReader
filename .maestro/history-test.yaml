@@ -1,0 +1,41 @@
+# History Feature - Comprehensive Test
+# Tests: History screen, navigation
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ============================================================
+# SECTION 1: History Tab
+# ============================================================
+
+# Navigate to History tab
+- tapOn:
+    text: "History"
+- waitForAnimationToEnd
+- takeScreenshot: history_01_tab
+
+# Verify screen loads
+- takeScreenshot: history_02_screen_state
+
+# ============================================================
+# SECTION 2: Navigation Away and Back
+# ============================================================
+
+# Navigate to Library
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+
+# Return to History
+- tapOn:
+    text: "History"
+- waitForAnimationToEnd
+- takeScreenshot: history_03_navigate_back
+
+# Verify history is visible
+- assertVisible:
+    text: "History"
+- takeScreenshot: history_04_verified

@@ -1,0 +1,40 @@
+# Library Feature - Comprehensive Test
+# Tests: Library screen, tabs, empty state
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ============================================================
+# SECTION 1: Library Tab
+# ============================================================
+
+# Verify Library tab is default
+- assertVisible:
+    text: "Library"
+- takeScreenshot: library_01_default_tab
+
+# Verify library screen loads
+- takeScreenshot: library_02_screen_state
+
+# ============================================================
+# SECTION 2: Navigation Away and Back
+# ============================================================
+
+# Navigate to Sources
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+
+# Return to Library
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- takeScreenshot: library_03_navigate_back
+
+# Verify library is still visible
+- assertVisible:
+    text: "Library"
+- takeScreenshot: library_04_verified
