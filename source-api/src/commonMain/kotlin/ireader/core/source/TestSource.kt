@@ -37,7 +37,8 @@ class TestSource : ireader.core.source.CatalogSource {
 
         filters.forEach { filter ->
             if (filter is Filter.Title) {
-                mangaList = mangaList.filter { filter.value in it.title }
+                val query = filter.value.lowercase()
+                mangaList = mangaList.filter { it.title.lowercase().contains(query) }
             }
         }
 
@@ -167,20 +168,39 @@ class TestSource : ireader.core.source.CatalogSource {
     private fun getTestManga(page: Int): List<MangaInfo> {
         val list = mutableListOf<MangaInfo>()
         val id = (page - 1) * 20 + 1
-        val manga1 = MangaInfo(
-            "$id",
-            "Manga $id",
-            "Artist $id",
-            "Author $id",
-            "Lorem ipsum",
-            listOf("Foo", "Bar"),
-            0,
-            ""
-        )
-        list += manga1
 
-        for (i in 1..19) {
-            list += manga1.copy(key = "${id + i}", title = "Manga ${id + i}")
+        // First page has diverse test data for search testing
+        if (page == 1) {
+            val testMangas = listOf(
+                MangaInfo("1", "Fantasy Adventure", "Artist 1", "Author 1", "A fantasy adventure story", listOf("Fantasy", "Adventure"), 0, ""),
+                MangaInfo("2", "Sci-Fi Explorer", "Artist 2", "Author 2", "Exploring the cosmos", listOf("Sci-Fi", "Space"), 0, ""),
+                MangaInfo("3", "Romance in Paris", "Artist 3", "Author 3", "Love in the city of lights", listOf("Romance", "Drama"), 0, ""),
+                MangaInfo("4", "Horror Night", "Artist 4", "Author 4", "Tales of terror", listOf("Horror", "Thriller"), 0, ""),
+                MangaInfo("5", "Fantasy Kingdom", "Artist 5", "Author 5", "A kingdom of magic", listOf("Fantasy", "Magic"), 0, ""),
+                MangaInfo("6", "Action Hero", "Artist 6", "Author 6", "The rise of a hero", listOf("Action", "Superhero"), 0, ""),
+                MangaInfo("7", "Comedy Central", "Artist 7", "Author 7", "Laughs for everyone", listOf("Comedy", "Slice of Life"), 0, ""),
+                MangaInfo("8", "Mystery Manor", "Artist 8", "Author 8", "Secrets in the manor", listOf("Mystery", "Detective"), 0, ""),
+                MangaInfo("9", "Fantasy Warriors", "Artist 9", "Author 9", "Battle for the realm", listOf("Fantasy", "Action"), 0, ""),
+                MangaInfo("10", "Drama Queens", "Artist 10", "Author 10", "Life on stage", listOf("Drama", "Theater"), 0, ""),
+            )
+            list.addAll(testMangas)
+        } else {
+            // Subsequent pages use generic test data
+            val manga1 = MangaInfo(
+                "$id",
+                "Manga $id",
+                "Artist $id",
+                "Author $id",
+                "Lorem ipsum",
+                listOf("Foo", "Bar"),
+                0,
+                ""
+            )
+            list += manga1
+
+            for (i in 1..19) {
+                list += manga1.copy(key = "${id + i}", title = "Manga ${id + i}")
+            }
         }
 
         return list
