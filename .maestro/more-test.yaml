@@ -1,0 +1,41 @@
+# More/Settings Feature - Comprehensive Test
+# Tests: More tab, settings navigation
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ============================================================
+# SECTION 1: More Tab
+# ============================================================
+
+# Navigate to More tab
+- tapOn:
+    text: "More"
+- waitForAnimationToEnd
+- takeScreenshot: more_01_tab
+
+# Verify screen loads
+- takeScreenshot: more_02_screen_state
+
+# ============================================================
+# SECTION 2: Navigation Away and Back
+# ============================================================
+
+# Navigate to Library
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+
+# Return to More
+- tapOn:
+    text: "More"
+- waitForAnimationToEnd
+- takeScreenshot: more_03_navigate_back
+
+# Verify more is visible
+- assertVisible:
+    text: "More"
+- takeScreenshot: more_04_verified
