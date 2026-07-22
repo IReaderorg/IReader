@@ -13,13 +13,16 @@ appId: ir.kazemcodes.infinityreader.debug
 - waitForAnimationToEnd
 - takeScreenshot: settings_01_more_tab
 
-# Scroll down to find Settings
+# Scroll down multiple times to find Settings
+- swipe:
+    direction: UP
+- waitForAnimationToEnd
 - swipe:
     direction: UP
 - waitForAnimationToEnd
 - takeScreenshot: settings_02_scrolled
 
-# Tap on Settings
+# Tap on Settings (under Appearance & Settings)
 - tapOn:
     text: "Settings"
 - waitForAnimationToEnd
