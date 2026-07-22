@@ -309,13 +309,13 @@ android {
 
 
 // Force consistent androidx.test versions to avoid resolution conflicts
-// between runtime and androidTest classpaths (needed for API 34+ espresso fix)
+// between runtime and androidTest classpaths (needed for API 35+ espresso fix)
 configurations.all {
     resolutionStrategy {
-        force("androidx.test:runner:1.6.1")
-        force("androidx.test:core:1.6.1")
-        force("androidx.test.espresso:espresso-core:3.6.1")
-        force("androidx.test.ext:junit:1.2.1")
+        force("androidx.test:runner:1.7.0")
+        force("androidx.test:core:1.7.0")
+        force("androidx.test.espresso:espresso-core:3.7.0")
+        force("androidx.test.ext:junit:1.3.0")
     }
 }
 
