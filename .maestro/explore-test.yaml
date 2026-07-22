@@ -1,0 +1,135 @@
+# Explore Feature - Comprehensive Test
+# Tests: Source selection, browse mode, search, book interactions, navigation
+
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ============================================================
+# SECTION 1: Source Navigation
+# ============================================================
+
+# Navigate to Sources tab
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- takeScreenshot: explore_01_sources_tab
+
+# Verify sources list loads
+- assertVisible:
+    text: "Test source"
+- takeScreenshot: explore_02_sources_visible
+
+# Select Test source
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: explore_03_source_selected
+
+# Verify browse mode - books should be visible
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_04_browse_mode
+
+# ============================================================
+# SECTION 2: Search Functionality
+# ============================================================
+
+# Open search mode
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- takeScreenshot: explore_05_search_mode
+
+# Enter search query
+- inputText: "fantasy"
+- takeScreenshot: explore_06_query_entered
+
+# Execute search
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# Verify fantasy results appear
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_07_search_results
+
+# Cancel search using accessibility text
+- tapOn:
+    text: "Close"
+- waitForAnimationToEnd
+
+# Verify back to browse mode
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_08_back_to_browse
+
+# ============================================================
+# SECTION 3: Book Interactions
+# ============================================================
+
+# Tap on a book to open details
+- tapOn:
+    text: "Fantasy Adventure"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Verify book details screen
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_09_book_details
+
+# Go back to explore using pressKey
+- pressKey: Back
+- waitForAnimationToEnd
+
+# Verify back at explore
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: explore_10_back_to_explore
+
+# ============================================================
+# SECTION 4: Layout Selector
+# ============================================================
+
+# Open layout selector
+- tapOn:
+    text: "Layout"
+- waitForAnimationToEnd
+- takeScreenshot: explore_11_layout_selector
+
+# Dismiss layout selector by pressing back
+- pressKey: Back
+- waitForAnimationToEnd
+- takeScreenshot: explore_12_layout_closed
+
+# ============================================================
+# SECTION 5: Back Navigation
+# ============================================================
+
+# Go back to sources list using pressKey
+- pressKey: Back
+- waitForAnimationToEnd
+
+# Verify back at sources
+- assertVisible:
+    text: "Test source"
+- takeScreenshot: explore_13_back_to_sources
+
+# Navigate to different tab
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- takeScreenshot: explore_14_library_tab
+
+# Return to Sources
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- takeScreenshot: explore_15_return_to_sources
+
+- takeScreenshot: explore_16_complete

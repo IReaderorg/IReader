@@ -18,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.core.source.HttpSource
@@ -201,6 +202,7 @@ fun ExploreScreen(
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
             ExtendedFloatingActionButton(
+                modifier = Modifier.testTag("filter_button"),
                 text = {
                     Text(
                         text = localize(Res.string.filter),

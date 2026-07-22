@@ -200,7 +200,9 @@ private fun FullWidthSearchToolbar(
             ) {
                 IconButton(
                     onClick = onClose,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .testTag("close_search")
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
