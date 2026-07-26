@@ -123,7 +123,7 @@ class BackupOrchestrator(
         // 2. Parse: try current format first, then legacy
         onProgress(RestoreProgress.Decompressing)
         val decompressed = try {
-            serializer.decompress(raw)
+            serializer.decompressFully(raw)
         } catch (e: BackupException.Corrupted) {
             // Might be raw (uncompressed) legacy data — try as-is
             raw
@@ -208,7 +208,7 @@ class BackupOrchestrator(
         } catch (e: Exception) {
             // Try legacy
             try {
-                val decompressed = try { serializer.decompress(raw) } catch (_: Exception) { raw }
+                val decompressed = try { serializer.decompressFully(raw) } catch (_: Exception) { raw }
                 val payload = legacyMigrator.migrate(decompressed)
                 ValidationResult(
                     isValid = true,
@@ -231,8 +231,12 @@ class BackupOrchestrator(
         val books = libraryRepository.findFavorites()
         return books.map { book ->
             val chapters = if (options.includeChapters) {
-                chapterRepository.findChaptersByBookId(book.id).map {
-                    ChapterSnapshot.fromChapter(it)
+                // findChaptersByBookId uses the light mapper (no content / placeholder text),
+                // so fetch each chapter individually to get real content — same as legacy path.
+                chapterRepository.findChaptersByBookId(book.id).mapNotNull { light ->
+                    chapterRepository.findChapterById(light.id)?.let {
+                        ChapterSnapshot.fromChapter(it)
+                    }
                 }
             } else {
                 emptyList()

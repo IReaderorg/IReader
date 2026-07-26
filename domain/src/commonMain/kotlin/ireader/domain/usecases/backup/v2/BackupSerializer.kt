@@ -40,8 +40,10 @@ class BackupSerializer {
 
     @OptIn(ExperimentalSerializationApi::class)
     fun deserialize(raw: ByteArray): BackupPayload {
-        // 1. Decompress
-        val decompressed = decompress(raw)
+        // 1. Decompress — strip every GZIP layer.  Platform FileSavers may add
+        // (Android) or omit (Desktop) their own gzip layer, so files can arrive
+        // with 0, 1, or 2 layers depending on where they were created/read.
+        val decompressed = decompressFully(raw)
 
         // 2. Decode
         val payload = try {
@@ -75,7 +77,7 @@ class BackupSerializer {
     @OptIn(ExperimentalSerializationApi::class)
     fun detectVersion(raw: ByteArray): Int {
         return try {
-            val decompressed = decompress(raw)
+            val decompressed = decompressFully(raw)
             val payload = ProtoBuf.decodeFromByteArray<BackupPayload>(decompressed)
             payload.version
         } catch (_: Exception) {
@@ -104,6 +106,21 @@ class BackupSerializer {
             throw BackupException.Corrupted("GZIP decompression failed", e)
         }
     }
+
+    /**
+     * Decompress repeatedly until the bytes are no longer GZIP (magic 0x1f 0x8b).
+     * Handles files with 0, 1, or 2 gzip layers (platform FileSavers may add one).
+     */
+    fun decompressFully(data: ByteArray): ByteArray {
+        var current = data
+        while (isGzip(current)) {
+            current = decompress(current)
+        }
+        return current
+    }
+
+    private fun isGzip(data: ByteArray): Boolean =
+        data.size > 2 && data[0] == 0x1f.toByte() && data[1] == 0x8b.toByte()
 
     // ── Hashing ───────────────────────────────────────────────────────────
 
