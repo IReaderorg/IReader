@@ -1425,7 +1425,14 @@ private class GraalVMReflectionEngine(
                 // Setup bridge for fetch
                 setupBridge(ctx)
                 
-                // Initialize module system
+                // Initialize module system + require() shim (must come after fetch bridge)
+                try {
+                    evalMethod?.invoke(ctx, "js", RequireShimJs.CODE)
+                } catch (e: Exception) {
+                    val cause = if (e is java.lang.reflect.InvocationTargetException) e.targetException else e
+                    Log.error { "GraalVM: Failed to load require() shim: ${cause.message}" }
+                    throw cause
+                }
                 evalMethod?.invoke(ctx, "js", "var exports = {}; var module = { exports: exports };")
                 
                 Log.info { "GraalVMReflectionEngine: Loading plugin code (${jsCode.length} chars)..." }

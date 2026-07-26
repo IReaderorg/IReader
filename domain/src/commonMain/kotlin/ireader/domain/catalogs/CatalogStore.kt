@@ -779,9 +779,37 @@ class CatalogStore(
                 
                 if (_jsEngineMissing.value && _pendingJSPluginsCount.value > 0) {
                     Log.info("CatalogStore: ${_pendingJSPluginsCount.value} JS plugins require JS engine installation")
+                    autoRetryJSPluginLoading()
                 }
             } catch (e: Exception) {
                 Log.error("CatalogStore: Failed to load plugins in background", e)
+            }
+        }
+    }
+
+    // Guard so only one auto-retry loop runs at a time
+    @kotlin.concurrent.Volatile
+    private var autoRetryRunning = false
+
+    /**
+     * Auto-retry loading JS plugins while the engine plugin is still starting up.
+     * Fixes the startup race where JS sources load before the engine plugin's
+     * classloader is registered, leaving all sources stuck as "pending".
+     * ponytail: fixed 5x3s backoff; upgrade to event-driven via PluginManager.pluginsFlow if needed.
+     */
+    private fun autoRetryJSPluginLoading() {
+        if (autoRetryRunning) return
+        autoRetryRunning = true
+        scope.launch {
+            try {
+                repeat(5) { attempt ->
+                    kotlinx.coroutines.delay(3000)
+                    if (!_jsEngineMissing.value || _pendingJSPluginsCount.value == 0) return@launch
+                    Log.info("CatalogStore: Auto-retrying JS plugin loading (attempt ${attempt + 1})")
+                    retryJSPluginLoading()
+                }
+            } finally {
+                autoRetryRunning = false
             }
         }
     }
