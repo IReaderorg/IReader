@@ -4,6 +4,7 @@ import ireader.data.core.DatabaseHandler
 import ireader.data.tracking.anilist.AniListRepositoryImpl
 import ireader.data.tracking.kitsu.KitsuRepositoryImpl
 import ireader.data.tracking.mal.MyAnimeListRepositoryImpl
+import ireader.data.tracking.mangabaka.MangaBakaRepositoryImpl
 import ireader.data.tracking.mangaupdates.MangaUpdatesRepositoryImpl
 import ireader.data.tracking.mynovellist.MyNovelListRepositoryImpl
 import ireader.domain.data.repository.TrackingRepository
@@ -27,7 +28,8 @@ class TrackingRepositoryImpl(
     private val malRepository: MyAnimeListRepositoryImpl? = null,
     private val kitsuRepository: KitsuRepositoryImpl? = null,
     private val mangaUpdatesRepository: MangaUpdatesRepositoryImpl? = null,
-    private val myNovelListRepository: MyNovelListRepositoryImpl? = null
+    private val myNovelListRepository: MyNovelListRepositoryImpl? = null,
+    private val mangaBakaRepository: MangaBakaRepositoryImpl? = null
 ) : TrackingRepository {
     
     private val _syncStatusFlows = mutableMapOf<Long, MutableStateFlow<List<TrackingSyncStatus>>>()
@@ -44,6 +46,7 @@ class TrackingRepositoryImpl(
                 TrackerService.KITSU -> kitsuRepository?.isAuthenticated() == true
                 TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.isAuthenticated() == true
                 TrackerService.MYNOVELLIST -> myNovelListRepository?.isAuthenticated() == true
+                TrackerService.MANGABAKA -> mangaBakaRepository != null
                 else -> false
             }
         }
@@ -148,6 +151,7 @@ class TrackingRepositoryImpl(
             TrackerService.KITSU -> kitsuRepository?.isAuthenticated() == true
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.isAuthenticated() == true
             TrackerService.MYNOVELLIST -> myNovelListRepository?.isAuthenticated() == true
+            TrackerService.MANGABAKA -> mangaBakaRepository != null
             else -> false
         }
     }
@@ -312,6 +316,9 @@ class TrackingRepositoryImpl(
                 TrackerService.MYNOVELLIST -> {
                     myNovelListRepository?.deleteTrack(track.mediaId)
                 }
+                TrackerService.MANGABAKA -> {
+                    mangaBakaRepository?.deleteTrack(track.mediaId)
+                }
             }
         }
         
@@ -329,6 +336,7 @@ class TrackingRepositoryImpl(
             TrackerService.KITSU -> kitsuRepository?.search(query) ?: emptyList()
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.search(query) ?: emptyList()
             TrackerService.MYNOVELLIST -> myNovelListRepository?.search(query) ?: emptyList()
+            TrackerService.MANGABAKA -> mangaBakaRepository?.search(query) ?: emptyList()
             else -> emptyList()
         }
     }
@@ -340,6 +348,7 @@ class TrackingRepositoryImpl(
             TrackerService.KITSU -> kitsuRepository?.bindBook(bookId, searchResult)
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.bindBook(bookId, searchResult)
             TrackerService.MYNOVELLIST -> myNovelListRepository?.bindBook(bookId, searchResult)
+            TrackerService.MANGABAKA -> mangaBakaRepository?.bindBook(bookId, searchResult)
             else -> null
         }
         
@@ -364,6 +373,7 @@ class TrackingRepositoryImpl(
             TrackerService.KITSU -> kitsuRepository?.syncTrack(track)
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.syncTrack(track)
             TrackerService.MYNOVELLIST -> myNovelListRepository?.syncTrack(track)
+            TrackerService.MANGABAKA -> mangaBakaRepository?.syncTrack(track)
             else -> null
         }
         
@@ -509,6 +519,7 @@ class TrackingRepositoryImpl(
             }
             TrackerService.MANGAUPDATES -> mangaUpdatesRepository?.updateTrack(track) == true
             TrackerService.MYNOVELLIST -> myNovelListRepository?.updateTrack(track) == true
+            TrackerService.MANGABAKA -> mangaBakaRepository?.updateTrack(track) == true
             else -> true
         }
     }

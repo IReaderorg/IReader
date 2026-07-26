@@ -442,6 +442,11 @@ class AndroidCatalogLoader(
         // Fallback: try loading as Tsundoku extension
         val tsundokuData = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo)
         if (tsundokuData != null) {
+            // IReader is a novel app: skip Mihon/Tachiyomi manga-only extensions
+            if (!tsundokuData.isNovel) {
+                Log.info { "AndroidCatalogLoader: Skipping manga tsundoku extension $pkgName" }
+                return null
+            }
             return loadLocalTsundokuCatalog(pkgName, pkgInfo, file, tsundokuData)
         }
 
@@ -713,6 +718,12 @@ class AndroidCatalogLoader(
     private fun loadTsundokuCatalog(pkgInfo: PackageInfo): List<CatalogInstalled.SystemWide> {
         val pkgName = pkgInfo.packageName
         val data = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo) ?: return emptyList()
+
+        // IReader is a novel app: skip Mihon/Tachiyomi manga-only extensions
+        if (!data.isNovel) {
+            Log.info { "AndroidCatalogLoader: Skipping manga tsundoku extension $pkgName" }
+            return emptyList()
+        }
 
         val sourceDir = pkgInfo.applicationInfo?.sourceDir ?: run {
             Log.warn { "AndroidCatalogLoader: No sourceDir for tsundoku package $pkgName" }
