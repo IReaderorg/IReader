@@ -441,6 +441,19 @@ private fun LazyListScope.DispalyPage(
     }
     item {
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+        ClickableRow(onClick = { vm.hideCategorizedFromAll.value = !vm.hideCategorizedFromAll.value }) {
+            Checkbox(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                checked = vm.hideCategorizedFromAll.value,
+                onCheckedChange = {
+                    vm.hideCategorizedFromAll.value = it
+                }
+            )
+            MidSizeTextComposable(text = localizeHelper.localize(Res.string.hide_categorized_from_all))
+        }
+    }
+    item {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { vm.showCountInCategory.value = !vm.showCountInCategory.value }) {
             Checkbox(
                 modifier = Modifier.padding(horizontal = 16.dp),

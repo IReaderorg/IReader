@@ -278,8 +278,10 @@ private fun CategoryContent(
     onDelete: (CategoryWithCount) -> Unit,
     onRename: (CategoryWithCount) -> Unit
 ) {
-    // Filter out system categories (All, Uncategorized) - they cannot be deleted or reordered
-    val userCategories = remember(data) { data.filter { !it.isSystemCategory } }
+    // "All" is shown and reorderable; Uncategorized stays hidden
+    val userCategories = remember(data) {
+        data.filter { it.id != ireader.domain.models.entities.Category.UNCATEGORIZED_ID }
+    }
     
     LazyColumn(
         state = state.listState,
@@ -417,8 +419,8 @@ private fun EnhancedCategoryItem(
                     }
                 }
                 
-                // Action buttons
-                Row(
+                // Action buttons (system categories like "All" can only be reordered)
+                if (!category.isSystemCategory) Row(
                     modifier = Modifier.padding(start = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {

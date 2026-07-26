@@ -50,7 +50,8 @@ class CategoryScreenViewModel(
         // Subscribe to categories - use stateIn with Eagerly to start immediately
         libraryPreferences.showEmptyCategories().stateIn(scope)
             .flatMapLatest { showEmpty ->
-                categoriesUseCase.subscribe(false, showEmpty, scope)
+                // withAllCategory=true so the "All" tab can be reordered like other categories
+                categoriesUseCase.subscribe(true, showEmpty, scope)
             }
             .onEach { list ->
                 _categories.value = list
@@ -99,8 +100,8 @@ class CategoryScreenViewModel(
             try {
                 val showEmpty = showEmptyCategories.value
                 val list = categoriesUseCase.await()
-                    .filter { !it.isSystemCategory }
-                    .filter { showEmpty || it.bookCount > 0 }
+                    .filter { it.category.id != ireader.domain.models.entities.Category.UNCATEGORIZED_ID }
+                    .filter { it.isSystemCategory || showEmpty || it.bookCount > 0 }
                 _categories.value = list
             } catch (_: Exception) {
                 // Ignore errors during refresh

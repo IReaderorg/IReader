@@ -123,6 +123,7 @@ class LibraryViewModel(
     val sorting = libraryPreferences.sorting().asState()
     val showCategoryTabs = libraryPreferences.showCategoryTabs().asState()
     val showAllCategoryTab = libraryPreferences.showAllCategory().asState()
+    val hideCategorizedFromAll = libraryPreferences.hideCategorizedFromAll().asState()
     val showCountInCategory = libraryPreferences.showCountInCategory().asState()
     val readBadge = libraryPreferences.downloadBadges().asState()
     val unreadBadge = libraryPreferences.unreadBadges().asState()
@@ -369,6 +370,11 @@ class LibraryViewModel(
                 loadInitialBooksForCategory(0L)
             }
         }
+        
+        // Reload books when "hide categorized from All" toggles
+        libraryPreferences.hideCategorizedFromAll().changes()
+            .onEach { resetAllPagination() }
+            .launchIn(scope)
         
         // Debounced search
         searchQueryFlow
