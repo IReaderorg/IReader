@@ -252,6 +252,12 @@ class DesktopCatalogLoader(
 
             if (data == null) return emptyList()
 
+            // IReader is a novel app: skip Mihon/Tachiyomi manga-only extensions
+            if (!data.isNovel) {
+                Log.info { "DesktopCatalogLoader: Skipping manga tsundoku extension $pkgName" }
+                return emptyList()
+            }
+
             val sources = DesktopTsundokuExtensionLoader.loadSources(pkgName, file, data)
             if (sources.isEmpty()) {
                 Log.warn { "DesktopCatalogLoader: No sources from tsundoku APK $pkgName" }

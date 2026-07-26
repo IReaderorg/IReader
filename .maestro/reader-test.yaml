@@ -1,0 +1,163 @@
+appId: ir.kazemcodes.infinityreader.debug
+name: Reader Screen Test
+tags:
+  - reader
+  - all-features
+  - comprehensive
+---
+# Comprehensive Reader Test - Tests ALL reader features in a single test
+# Strategy: show controls once, do everything, then exit
+
+- launchApp
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# ============================================================
+# PHASE 1: Open book from Test source
+# ============================================================
+
+- extendedWaitUntil:
+    visible:
+      text: "Library"
+    timeout: 15000
+
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn:
+    text: "Fantasy Adventure"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn:
+    text: "Chapter 1"
+- waitForAnimationToEnd:
+    timeout: 15000
+
+# ============================================================
+# PHASE 2: Show reader controls
+# ============================================================
+
+- swipe:
+    direction: DOWN
+- waitForAnimationToEnd
+- swipe:
+    direction: DOWN
+- waitForAnimationToEnd
+
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- assertVisible:
+    text: "Drawer"
+- assertVisible:
+    text: "Play"
+- assertVisible:
+    text: "Settings"
+
+# ============================================================
+# PHASE 3: Test Top Bar - Expand Menu
+# ============================================================
+
+- tapOn:
+    text: "Expand Menu"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Bookmark"
+- assertVisible:
+    text: "Find in chapter"
+- assertVisible:
+    text: "Report broken chapter"
+
+# ============================================================
+# PHASE 4: Test Drawer (Table of Contents)
+# ============================================================
+
+# Go back to controls by tapping back on chapter name area
+- pressKey: Back
+- waitForAnimationToEnd
+
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Drawer"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Content"
+
+- pressKey: Back
+- waitForAnimationToEnd
+
+# ============================================================
+# PHASE 5: Test Settings Bottom Sheet - all tabs
+# ============================================================
+
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Settings"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Reader"
+- assertVisible:
+    text: "General"
+- assertVisible:
+    text: "Colors"
+- assertVisible:
+    text: "Fonts"
+
+- assertVisible:
+    text: "Font Size"
+
+- tapOn:
+    text: "General"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Translation Settings"
+- assertVisible:
+    text: "Translate now"
+
+- tapOn:
+    text: "Colors"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Custom Brightness"
+- assertVisible:
+    text: "Background Color"
+- assertVisible:
+    text: "Text Color"
+
+- tapOn:
+    text: "Fonts"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Roboto"
+
+# ============================================================
+# PHASE 6: Exit reader
+# ============================================================
+
+# Close settings, then press back again to exit reader
+- pressKey: Back
+- waitForAnimationToEnd
+- pressKey: Back
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    text: "Fantasy Adventure"
