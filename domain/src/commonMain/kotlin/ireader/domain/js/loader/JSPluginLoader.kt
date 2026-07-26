@@ -575,6 +575,7 @@ class JSPluginLoader(
             
             // Cache the loaded plugin
             pluginCache[pluginId] = LoadedPlugin(catalog, plugin, engine, lastModified)
+            loadErrors.remove(pluginId)
             
             // Save stub for future fast loading
             stubManager.savePluginStub(metadata, file.name.substringBeforeLast("."))
@@ -602,12 +603,24 @@ class JSPluginLoader(
             throw e
         } catch (e: PluginLoadException) {
             Log.warn { "JSPluginLoader: Plugin load error for ${file.name}: ${e.message}" }
+            loadErrors[pluginId] = e.message ?: "Plugin load error"
             return null
         } catch (e: Exception) {
             Log.warn { "JSPluginLoader: Unexpected error loading ${file.name}: ${e.message}" }
+            loadErrors[pluginId] = e.message ?: e::class.simpleName ?: "Unknown error"
             return null
         }
     }
+
+    /**
+     * Last load error per plugin id. Cleared on successful load.
+     * Lets the UI show why a source failed instead of silently listing it as pending.
+     */
+    private val loadErrors = mutableMapOf<String, String>()
+
+    fun getLoadError(pluginId: String): String? = loadErrors[pluginId]
+
+    fun getLoadErrors(): Map<String, String> = loadErrors.toMap()
     
     /**
      * Unloads a plugin and cleans up its resources.

@@ -1166,7 +1166,8 @@ private class J2V8ReflectionEngine(
                 // Setup bridge for fetch
                 setupBridge(runtime)
                 
-                // Initialize module system
+                // Initialize module system + require() shim (must come after fetch bridge)
+                executeVoidScriptMethod?.invoke(runtime, RequireShimJs.CODE)
                 executeVoidScriptMethod?.invoke(runtime, "var exports = {}; var module = { exports: exports };")
                 
                 // Load the plugin code
