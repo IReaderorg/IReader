@@ -922,6 +922,15 @@ class TTSController(
         
         // Clear engine's internal state (queue, cache) - IMPORTANT for Gradio engines
         engine?.clearState()
+
+        // Let the native TTS engine settle after stop() before any subsequent speak().
+        // This stop() runs AFTER nextChapter()'s own stop+delay, so without a settle here
+        // a prefetched chapter (near-instant loadChapter) leads to speak() milliseconds
+        // after stop() — many OEM engines then silently drop the utterance after the
+        // first syllable, leaving playback stuck in LOADING (auto-next cutoff bug).
+        if (engine != null) {
+            kotlinx.coroutines.delay(150)
+        }
         
         // Clear chunk mode data - IMPORTANT: must be done before loading new content
         mergeResult = null
