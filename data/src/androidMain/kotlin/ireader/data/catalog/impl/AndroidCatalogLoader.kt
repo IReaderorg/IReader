@@ -828,6 +828,11 @@ class AndroidCatalogLoader(
      * Get the number of JS plugins pending due to missing engine.
      */
     override fun getPendingJSPluginsCount(): Int = jsPluginLoader.pendingPluginsCount
+
+    /**
+     * Last load error per plugin id.
+     */
+    override fun getJSPluginLoadErrors(): Map<String, String> = jsPluginLoader.getLoadErrors()
     
     /**
      * Load engine plugins (.iplugin files like J2V8) before JS plugins.

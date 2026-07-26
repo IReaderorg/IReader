@@ -133,6 +133,15 @@ class CatalogStore(
      * Retry loading JS plugins.
      * Call this after the J2V8 plugin becomes available.
      */
+    /**
+     * Last load error per JS plugin id, so the UI can explain why a source is
+     * missing/pending instead of showing it as silently broken.
+     */
+    fun getJSPluginLoadErrors(): Map<String, String> {
+        val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader ?: return emptyMap()
+        return asyncLoader.getJSPluginLoadErrors()
+    }
+
     fun retryJSPluginLoading() {
         val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader ?: return
         

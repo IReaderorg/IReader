@@ -311,10 +311,15 @@ class RequiredPluginViewModel(
                             val pendingCount = catalogStore.pendingJSPluginsCount.value
                             
                             if (jsEngineMissing || pendingCount > 0) {
-                                // JS engine still not working, recommend restart
+                                // JS engine still not working, recommend restart.
+                                // Surface the first real load error so the failure isn't silent.
+                                val loadError = catalogStore.getJSPluginLoadErrors()
+                                    .entries.firstOrNull()
+                                    ?.let { "${it.key}: ${it.value}" }
                                 _state.value = _state.value.copy(
                                     restartRecommended = true,
-                                    jsSourcesReloaded = false
+                                    jsSourcesReloaded = false,
+                                    error = loadError
                                 )
                             } else {
                                 // JS sources loaded successfully!
