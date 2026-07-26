@@ -1,41 +1,70 @@
-# History Feature - Comprehensive Test
-# Tests: History screen, navigation
-
+# History: entry created by reading, search, filter menu, delete-all dialog
 appId: ir.kazemcodes.infinityreader.debug
+tags: [history]
 ---
-- launchApp
+- runFlow: common/launch.yaml
+
+# Create a history entry first: read a chapter
+- runFlow: common/open-book.yaml
+- tapOn:
+    text: "Chapter 1"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 15000
+- pressKey: Back
+- waitForAnimationToEnd
+- pressKey: Back
+- waitForAnimationToEnd
+- pressKey: Back
+- waitForAnimationToEnd
 
-# ============================================================
-# SECTION 1: History Tab
-# ============================================================
-
-# Navigate to History tab
 - tapOn:
     text: "History"
 - waitForAnimationToEnd
-- takeScreenshot: history_01_tab
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: history_01_entry
 
-# Verify screen loads
-- takeScreenshot: history_02_screen_state
-
-# ============================================================
-# SECTION 2: Navigation Away and Back
-# ============================================================
-
-# Navigate to Library
+# --- Search history ---
 - tapOn:
-    text: "Library"
+    text: "Search"
+- waitForAnimationToEnd
+- inputText: "Fantasy"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Fantasy Adventure"
+- eraseText
+- inputText: "zzz_nomatch"
+- waitForAnimationToEnd
+- takeScreenshot: history_02_search_empty
+- pressKey: Back
 - waitForAnimationToEnd
 
-# Return to History
+# --- Time filter menu ---
 - tapOn:
-    text: "History"
+    text: "Filter"
 - waitForAnimationToEnd
-- takeScreenshot: history_03_navigate_back
+- assertVisible:
+    text: "Today"
+- tapOn:
+    text: "Today"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Fantasy Adventure"
+- takeScreenshot: history_03_filter_today
 
-# Verify history is visible
+# --- Delete All dialog: open then cancel (no data loss) ---
+- tapOn:
+    text: "More Options"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Delete All Histories"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Cancel"
+    optional: true
+- waitForAnimationToEnd
 - assertVisible:
     text: "History"
-- takeScreenshot: history_04_verified
+- takeScreenshot: history_04_done

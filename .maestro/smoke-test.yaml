@@ -1,52 +1,49 @@
-# Smoke Test - App Launch and Navigation
-# Verifies: App launches, bottom nav works, screens load
-
+# Smoke: launch + every bottom tab loads + back doesn't crash
 appId: ir.kazemcodes.infinityreader.debug
+tags: [smoke]
 ---
-- launchApp
-- waitForAnimationToEnd:
-    timeout: 5000
+- runFlow: common/launch.yaml
+- takeScreenshot: smoke_01_library
 
-# Take screenshot of initial state
-- takeScreenshot: smoke_01_app_loaded
-
-# Test bottom navigation - Library (default)
-- assertVisible:
-    text: "Library"
-- takeScreenshot: smoke_02_library_tab
-
-# Test Updates tab
+# Cycle every tab; assert each screen renders
 - tapOn:
     text: "Updates"
 - waitForAnimationToEnd
-- takeScreenshot: smoke_03_updates_tab
-
-# Test History tab
+- assertVisible:
+    text: "Updates"
 - tapOn:
     text: "History"
 - waitForAnimationToEnd
-- takeScreenshot: smoke_04_history_tab
-
-# Test Sources tab
+- assertVisible:
+    text: "History"
 - tapOn:
     text: "Sources"
 - waitForAnimationToEnd
-- takeScreenshot: smoke_05_sources_tab
-
-# Test More tab
+- assertVisible:
+    text: "Test source"
 - tapOn:
     text: "More"
 - waitForAnimationToEnd
-- takeScreenshot: smoke_06_more_tab
-
-# Return to Library
+- assertVisible:
+    text: "More"
 - tapOn:
     text: "Library"
 - waitForAnimationToEnd
-- takeScreenshot: smoke_07_back_to_library
+- assertVisible:
+    text: "Library"
 
-# Test back button
-- pressKey: Back
+# Rapid tab switching (state-loss/crash bug hunt)
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          text: "Updates"
+      - tapOn:
+          text: "Library"
 - waitForAnimationToEnd
+- assertVisible:
+    text: "Library"
 
-- takeScreenshot: smoke_08_complete
+# Back on home tab must not crash
+- pressKey: Back
+- takeScreenshot: smoke_02_done

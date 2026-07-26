@@ -1,41 +1,45 @@
-# Updates Feature - Comprehensive Test
-# Tests: Updates screen, navigation
-
+# Updates: screen loads, category filter menu, update-all trigger
 appId: ir.kazemcodes.infinityreader.debug
+tags: [updates]
 ---
-- launchApp
-- waitForAnimationToEnd:
-    timeout: 5000
+- runFlow: common/launch.yaml
 
-# ============================================================
-# SECTION 1: Updates Tab
-# ============================================================
-
-# Navigate to Updates tab
 - tapOn:
     text: "Updates"
 - waitForAnimationToEnd
-- takeScreenshot: updates_01_tab
+- assertVisible:
+    text: "Updates"
+- takeScreenshot: updates_01_screen
 
-# Verify screen loads
-- takeScreenshot: updates_02_screen_state
+# --- Category filter menu ---
+- tapOn:
+    text: "Filter by category"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "All Categories"
+    optional: true
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Updates"
+- takeScreenshot: updates_02_filter
 
-# ============================================================
-# SECTION 2: Navigation Away and Back
-# ============================================================
+# --- Update All must not crash (empty library OK) ---
+- tapOn:
+    text: "Update All"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- assertVisible:
+    text: "Updates"
+- takeScreenshot: updates_03_after_update_all
 
-# Navigate to Library
+# Navigate away/back preserves screen
 - tapOn:
     text: "Library"
 - waitForAnimationToEnd
-
-# Return to Updates
 - tapOn:
     text: "Updates"
 - waitForAnimationToEnd
-- takeScreenshot: updates_03_navigate_back
-
-# Verify updates is visible
 - assertVisible:
     text: "Updates"
-- takeScreenshot: updates_04_verified

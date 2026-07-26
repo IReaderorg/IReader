@@ -1,0 +1,60 @@
+# Sources/Extensions: tabs, language filter, overflow menu, global search
+appId: ir.kazemcodes.infinityreader.debug
+tags: [sources]
+---
+- runFlow: common/launch.yaml
+
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Test source"
+- takeScreenshot: sources_01_installed
+
+# --- Installed / Available tabs ---
+- tapOn:
+    text: "Available"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: sources_02_available
+- tapOn:
+    text: "Installed"
+    optional: true
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Test source"
+
+# --- Overflow menu items ---
+- tapOn:
+    text: "More Options"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: sources_03_menu
+- tapOn:
+    text: "Global Search"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: sources_04_global_search
+- inputText: "fantasy"
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 15000
+- takeScreenshot: sources_05_global_results
+- pressKey: Back
+- waitForAnimationToEnd
+- pressKey: Back
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Test source"
+
+# --- Language filter ---
+- tapOn:
+    text: "Filter"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: sources_06_lang_filter
+- pressKey: Back
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Test source"

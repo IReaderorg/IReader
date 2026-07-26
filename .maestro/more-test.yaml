@@ -1,41 +1,79 @@
-# More/Settings Feature - Comprehensive Test
-# Tests: More tab, settings navigation
-
+# More tab: every menu destination opens and backs out without crash
 appId: ir.kazemcodes.infinityreader.debug
+tags: [more]
 ---
-- launchApp
-- waitForAnimationToEnd:
-    timeout: 5000
+- runFlow: common/launch.yaml
 
-# ============================================================
-# SECTION 1: More Tab
-# ============================================================
-
-# Navigate to More tab
 - tapOn:
     text: "More"
 - waitForAnimationToEnd
-- takeScreenshot: more_01_tab
+- assertVisible:
+    text: "IReader"
+- takeScreenshot: more_01_screen
 
-# Verify screen loads
-- takeScreenshot: more_02_screen_state
-
-# ============================================================
-# SECTION 2: Navigation Away and Back
-# ============================================================
-
-# Navigate to Library
+# --- Incognito toggle on/off ---
 - tapOn:
-    text: "Library"
+    text: "Incognito mode"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Incognito mode"
 - waitForAnimationToEnd
 
-# Return to More
+# --- Download queue ---
 - tapOn:
-    text: "More"
+    text: "Download"
 - waitForAnimationToEnd
-- takeScreenshot: more_03_navigate_back
+- assertVisible:
+    text: "Downloads queue"
+- takeScreenshot: more_02_downloads
+- pressKey: Back
+- waitForAnimationToEnd
 
-# Verify more is visible
+# --- Categories ---
+- tapOn:
+    text: "Categories"
+- waitForAnimationToEnd
+- takeScreenshot: more_03_categories
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- Reading Hub (statistics) ---
+- scrollUntilVisible:
+    element:
+      text: "Reading Hub"
+    direction: DOWN
+    timeout: 10000
+    optional: true
+- tapOn:
+    text: "Reading Hub"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: more_04_reading_hub
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- Community (only when Supabase enabled) ---
+- tapOn:
+    text: "Community"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: more_05_community
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- About ---
+- scrollUntilVisible:
+    element:
+      text: "About"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    text: "About"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Version"
+- takeScreenshot: more_06_about
+- pressKey: Back
+- waitForAnimationToEnd
 - assertVisible:
     text: "More"
-- takeScreenshot: more_04_verified

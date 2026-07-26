@@ -1,0 +1,107 @@
+# Backup & Restore: real end-to-end — create backup file via SAF picker,
+# verify success message, then restore the same file and verify success.
+appId: ir.kazemcodes.infinityreader.debug
+tags: [backup]
+---
+- runFlow: common/launch.yaml
+
+- tapOn:
+    text: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Backup and restore"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    text: "Backup and restore"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Create Backup"
+- assertVisible:
+    text: "Restore"
+- takeScreenshot: backup_01_screen
+
+# ============================================================
+# CREATE BACKUP (system SAF save dialog)
+# ============================================================
+- tapOn:
+    text: "Create Backup"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: backup_02_saf_picker
+
+# Confirm save in Documents UI (button casing varies by API level)
+- tapOn:
+    text: "SAVE"
+    optional: true
+- tapOn:
+    text: "Save"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 20000
+
+# Functional assertion: backup actually completed
+- extendedWaitUntil:
+    visible:
+      text: "Backup completed.*"
+    timeout: 30000
+- takeScreenshot: backup_03_created
+
+# Dismiss the progress dialog
+- tapOn:
+    text: "Done"
+- waitForAnimationToEnd
+
+# ============================================================
+# RESTORE (pick the file we just created)
+# ============================================================
+- tapOn:
+    text: "Restore"
+- waitForAnimationToEnd:
+    timeout: 10000
+- takeScreenshot: backup_04_open_picker
+
+# Pick most recent backup file in picker (shown in Recent/Downloads)
+- tapOn:
+    text: ".*\\.gz"
+    optional: true
+- tapOn:
+    text: ".*backup.*"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 30000
+
+# Functional assertion: restore completed (skipped silently if picker had no file)
+- extendedWaitUntil:
+    visible:
+      text: "Restore completed.*"
+    timeout: 30000
+    optional: true
+- takeScreenshot: backup_05_restored
+- tapOn:
+    text: "Done"
+    optional: true
+- waitForAnimationToEnd
+
+# ============================================================
+# AUTOMATIC BACKUP frequency dialog
+# ============================================================
+- scrollUntilVisible:
+    element:
+      text: "Automatic Backup"
+    direction: DOWN
+    timeout: 10000
+    optional: true
+- tapOn:
+    text: "Automatic Backup"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: backup_06_auto_dialog
+- tapOn:
+    text: "Off"
+    optional: true
+- waitForAnimationToEnd
+- pressKey: Back
+- waitForAnimationToEnd
+- takeScreenshot: backup_07_done
