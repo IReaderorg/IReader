@@ -32,10 +32,11 @@ class ReorderCategory  internal constructor(
      * @return Result indicating success, no change, or an error
      */
     suspend fun await(categoryId: Long, newPosition: Int) = withContext(NonCancellable) f@{
-        if (categoryId == Category.ALL_ID || categoryId == Category.UNCATEGORIZED_ID) return@f Result.InternalError(
+        if (categoryId == Category.UNCATEGORIZED_ID) return@f Result.InternalError(
             IllegalArgumentException()
         )
-        val categories = categoryRepository.findAll().filter { !it.category.isSystemCategory }
+        // ALL is reorderable so users can position the "All" tab; UNCATEGORIZED stays hidden
+        val categories = categoryRepository.findAll().filter { it.category.id != Category.UNCATEGORIZED_ID }
 
         // If nothing changed, return
         val currPosition = categories.indexOfFirst { it.id == categoryId }

@@ -65,6 +65,11 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getBoolean("show_all_category", true)
     }
 
+    /** When enabled, the "All" tab only shows books that are not in any category. */
+    fun hideCategorizedFromAll(): Preference<Boolean> {
+        return preferenceStore.getBoolean("hide_categorized_from_all", false)
+    }
+
     fun showCountInCategory(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_count_in_category", true)
     }

@@ -446,6 +446,7 @@
     <string name="go_to_last_chapter">Go to last chapter</string>
     <string name="read_chapters">read chapters</string>
     <string name="show_all_category_tab">Show "All" Category Tab</string>
+    <string name="hide_categorized_from_all">Hide categorized books from "All" tab</string>
     <string name="show_count_in_category_tab">Show Count in Category Tab</string>
     <string name="badges">Badges</string>
     <string name="downloaded_chapters">Downloaded chapters</string>

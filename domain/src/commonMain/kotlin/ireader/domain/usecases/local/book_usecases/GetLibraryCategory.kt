@@ -22,8 +22,17 @@ import kotlinx.coroutines.flow.onEach
 class GetLibraryCategory  internal constructor(
     private val libraryRepository: LibraryRepository,
     private val getSmartCategoryBooksUseCase: GetSmartCategoryBooksUseCase,
-    private val bookCategoryRepository: ireader.domain.data.repository.BookCategoryRepository
+    private val bookCategoryRepository: ireader.domain.data.repository.BookCategoryRepository,
+    private val libraryPreferences: ireader.domain.preferences.prefs.LibraryPreferences
 ) {
+
+    /**
+     * When "hide categorized from All" is enabled, the ALL category behaves like
+     * UNCATEGORIZED so books assigned to a category disappear from the All tab.
+     */
+    private fun effectiveCategoryId(categoryId: Long): Long {
+        return if (categoryId == 0L && libraryPreferences.hideCategorizedFromAll().get()) -1L else categoryId
+    }
 
     /**
      * Get paginated library books for a category.
@@ -45,6 +54,8 @@ class GetLibraryCategory  internal constructor(
         offset: Int,
         includeArchived: Boolean = false
     ): Pair<List<LibraryBook>, Int> {
+        @Suppress("NAME_SHADOWING")
+        val categoryId = effectiveCategoryId(categoryId)
         // Check if this is a smart category
         val smartCategory = SmartCategory.getById(categoryId)
         
@@ -103,6 +114,8 @@ class GetLibraryCategory  internal constructor(
         filters: List<LibraryFilter> = emptyList(),
         includeArchived: Boolean = false
     ): List<LibraryBook> {
+        @Suppress("NAME_SHADOWING")
+        val categoryId = effectiveCategoryId(categoryId)
         // Check if this is a smart category
         val smartCategory = SmartCategory.getById(categoryId)
         
@@ -141,6 +154,8 @@ class GetLibraryCategory  internal constructor(
         filters: List<LibraryFilter> = emptyList(),
         includeArchived: Boolean = false
     ): List<LibraryBook> {
+        @Suppress("NAME_SHADOWING")
+        val categoryId = effectiveCategoryId(categoryId)
         ScreenProfiler.mark("Library", "usecase_await_fast_category_$categoryId")
         
         // Only check ACTIVE filters
@@ -182,6 +197,8 @@ class GetLibraryCategory  internal constructor(
         filters: List<LibraryFilter> = emptyList(),
         includeArchived: Boolean = false
     ): Flow<List<LibraryBook>> {
+        @Suppress("NAME_SHADOWING")
+        val categoryId = effectiveCategoryId(categoryId)
         ScreenProfiler.mark("Library", "usecase_subscribe_category_$categoryId")
         
         // Only check ACTIVE filters (Included or Excluded, not Missing)
