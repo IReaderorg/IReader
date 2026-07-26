@@ -1,0 +1,17 @@
+# Maestro workspace config
+# Run all: maestro test .maestro
+flows:
+  - "*-test.yaml"
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - smoke-test
+    - explore-test
+    - reader-test
+    - library-test
+    - history-test
+    - updates-test
+    - sources-test
+    - more-test
+    - backup-test
+    - settings-test

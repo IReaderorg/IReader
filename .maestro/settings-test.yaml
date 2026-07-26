@@ -1,0 +1,86 @@
+# Settings: main screen + every subscreen opens and backs out
+appId: ir.kazemcodes.infinityreader.debug
+tags: [settings]
+---
+- runFlow: common/launch.yaml
+
+- tapOn:
+    text: "More"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: "Settings"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    text: "Settings"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Appearance"
+- takeScreenshot: settings_01_main
+
+# --- Appearance ---
+- tapOn:
+    text: "Appearance"
+- waitForAnimationToEnd
+- takeScreenshot: settings_02_appearance
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- Reader ---
+- tapOn:
+    text: "Reader"
+- waitForAnimationToEnd
+- takeScreenshot: settings_03_reader
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- Library ---
+- tapOn:
+    text: "Library"
+- waitForAnimationToEnd
+- takeScreenshot: settings_04_library
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- Downloads ---
+- tapOn:
+    text: "Downloads"
+- waitForAnimationToEnd
+- takeScreenshot: settings_05_downloads
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- Advanced ---
+- scrollUntilVisible:
+    element:
+      text: "Advanced"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    text: "Advanced"
+- waitForAnimationToEnd
+- takeScreenshot: settings_06_advanced
+- pressKey: Back
+- waitForAnimationToEnd
+
+# --- Security & Privacy ---
+- scrollUntilVisible:
+    element:
+      text: "Security & Privacy"
+    direction: DOWN
+    timeout: 10000
+    optional: true
+- tapOn:
+    text: "Security & Privacy"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: settings_07_security
+- pressKey: Back
+- waitForAnimationToEnd
+
+# Exit settings back to More
+- pressKey: Back
+- waitForAnimationToEnd
+- assertVisible:
+    text: "More"

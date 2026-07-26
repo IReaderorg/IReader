@@ -1,0 +1,18 @@
+# Shared: navigate Sources -> Test source -> Fantasy Adventure details
+appId: ir.kazemcodes.infinityreader.debug
+---
+- tapOn:
+    text: "Sources"
+- waitForAnimationToEnd
+- tapOn:
+    text: "Test source"
+- waitForAnimationToEnd:
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      text: "Fantasy Adventure"
+    timeout: 15000
+- tapOn:
+    text: "Fantasy Adventure"
+- waitForAnimationToEnd:
+    timeout: 10000

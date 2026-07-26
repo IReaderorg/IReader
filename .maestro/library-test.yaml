@@ -1,40 +1,49 @@
-# Library Feature - Comprehensive Test
-# Tests: Library screen, tabs, empty state
-
+# Library: search, filter/sort/display sheet, options menu, back handling
 appId: ir.kazemcodes.infinityreader.debug
+tags: [library]
 ---
-- launchApp
-- waitForAnimationToEnd:
-    timeout: 5000
+- runFlow: common/launch.yaml
+- takeScreenshot: library_01_home
 
-# ============================================================
-# SECTION 1: Library Tab
-# ============================================================
-
-# Verify Library tab is default
+# --- Search open/type/close ---
+- tapOn:
+    text: "Search"
+- waitForAnimationToEnd
+- inputText: "zzz_nomatch"
+- waitForAnimationToEnd
+- takeScreenshot: library_02_search_empty
+- pressKey: Back
+- waitForAnimationToEnd
 - assertVisible:
     text: "Library"
-- takeScreenshot: library_01_default_tab
 
-# Verify library screen loads
-- takeScreenshot: library_02_screen_state
-
-# ============================================================
-# SECTION 2: Navigation Away and Back
-# ============================================================
-
-# Navigate to Sources
+# --- Filter & Sort sheet ---
 - tapOn:
-    text: "Sources"
+    text: "Filter"
 - waitForAnimationToEnd
-
-# Return to Library
+- assertVisible:
+    text: "Filter & Sort"
+- takeScreenshot: library_03_filter_sheet
+# Toggle a filter chip twice (apply + revert must not crash)
 - tapOn:
-    text: "Library"
+    text: "Unread"
 - waitForAnimationToEnd
-- takeScreenshot: library_03_navigate_back
-
-# Verify library is still visible
+- tapOn:
+    text: "Unread"
+- waitForAnimationToEnd
+- pressKey: Back
+- waitForAnimationToEnd
 - assertVisible:
     text: "Library"
-- takeScreenshot: library_04_verified
+
+# --- Options menu ---
+- tapOn:
+    text: "More Options"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Update Library"
+- takeScreenshot: library_04_options_menu
+- pressKey: Back
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Library"

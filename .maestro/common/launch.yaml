@@ -1,0 +1,8 @@
+# Shared: cold launch, wait for Library home
+appId: ir.kazemcodes.infinityreader.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      text: "Library"
+    timeout: 15000

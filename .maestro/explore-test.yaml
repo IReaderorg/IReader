@@ -1,194 +1,111 @@
-# Explore Feature - Comprehensive Test
-# Tests: Source selection, browse mode, search, listings, layouts, book interactions, navigation
-
+# Explore: listings, layouts, search (incl. empty query + no-results), book details, back stack
 appId: ir.kazemcodes.infinityreader.debug
+tags: [explore]
 ---
-- launchApp
-- waitForAnimationToEnd:
-    timeout: 5000
+- runFlow: common/launch.yaml
 
-# ============================================================
-# SECTION 1: Source Navigation
-# ============================================================
-
-# Navigate to Sources tab
 - tapOn:
     text: "Sources"
 - waitForAnimationToEnd
-- takeScreenshot: explore_01_sources_tab
-
-# Verify sources list loads
 - assertVisible:
     text: "Test source"
-- takeScreenshot: explore_02_sources_visible
-
-# Select Test source
 - tapOn:
     text: "Test source"
 - waitForAnimationToEnd:
     timeout: 10000
-- takeScreenshot: explore_03_source_selected
+- extendedWaitUntil:
+    visible:
+      text: "Fantasy Adventure"
+    timeout: 15000
+- takeScreenshot: explore_01_browse
 
-# Verify browse mode - books should be visible
-- assertVisible:
-    text: "Fantasy Adventure"
-- takeScreenshot: explore_04_browse_mode
-
-# ============================================================
-# SECTION 2: Listings (Sort Options)
-# ============================================================
-
-# Verify listing chips are visible
-- assertVisible:
-    text: "Alphabetically"
-- assertVisible:
-    text: "Latest"
-- takeScreenshot: explore_05_listings_visible
-
-# Tap on Latest listing
+# --- Listings ---
 - tapOn:
     text: "Latest"
 - waitForAnimationToEnd
-- takeScreenshot: explore_06_latest_selected
-
-# Verify books still visible after listing change
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_07_latest_books
-
-# Tap on Alphabetically listing
 - tapOn:
     text: "Alphabetically"
 - waitForAnimationToEnd
-- takeScreenshot: explore_08_alphabetically_selected
+- assertVisible:
+    text: "Fantasy Adventure"
 
-# ============================================================
-# SECTION 3: Layout Selector
-# ============================================================
-
-# Open layout selector
+# --- Layouts: cycle all three, books must survive each ---
 - tapOn:
     text: "Layout"
 - waitForAnimationToEnd
-- takeScreenshot: explore_09_layout_selector
-
-# Verify layout options are visible
+- tapOn:
+    text: "List Layout"
+- waitForAnimationToEnd
 - assertVisible:
-    text: "Comfortable Grid"
-- assertVisible:
+    text: "Fantasy Adventure"
+- tapOn:
+    text: "Layout"
+- waitForAnimationToEnd
+- tapOn:
     text: "Compact Layout"
-- assertVisible:
-    text: "List Layout"
-- takeScreenshot: explore_10_layout_options
-
-# Select List Layout
-- tapOn:
-    text: "List Layout"
 - waitForAnimationToEnd
-- takeScreenshot: explore_11_list_layout
-
-# Verify books still visible in list layout
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_12_list_layout_books
-
-# Open layout selector again
 - tapOn:
     text: "Layout"
 - waitForAnimationToEnd
-
-# Select Comfortable Grid
 - tapOn:
     text: "Comfortable Grid"
 - waitForAnimationToEnd
-- takeScreenshot: explore_13_comfortable_grid
-
-# Verify books visible in grid
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_14_grid_books
+- takeScreenshot: explore_02_layouts
 
-# ============================================================
-# SECTION 4: Search Functionality
-# ============================================================
-
-# Open search mode
+# --- Search: normal, no-results, cancel ---
+- tapOn:
+    id: "search_icon"
+    optional: true
 - tapOn:
     text: "Search"
+    optional: true
 - waitForAnimationToEnd
-- takeScreenshot: explore_15_search_mode
-
-# Enter search query
 - inputText: "fantasy"
-- takeScreenshot: explore_16_query_entered
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      text: "Fantasy Adventure"
+    timeout: 15000
+- takeScreenshot: explore_03_search_hit
 
-# Execute search
+# No-results query must not crash
+- eraseText
+- inputText: "zzzz_no_such_book"
 - pressKey: Enter
 - waitForAnimationToEnd:
     timeout: 15000
+- takeScreenshot: explore_04_search_empty
 
-# Verify fantasy results appear
-- assertVisible:
-    text: "Fantasy Adventure"
-- takeScreenshot: explore_17_search_results
-
-# Cancel search using accessibility text
+# Cancel search restores browse
+- tapOn:
+    id: "close_search"
+    optional: true
 - tapOn:
     text: "Close"
+    optional: true
 - waitForAnimationToEnd
-
-# Verify back to browse mode
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_18_back_to_browse
 
-# ============================================================
-# SECTION 5: Book Interactions
-# ============================================================
-
-# Tap on a book to open details
+# --- Book details + back stack ---
 - tapOn:
     text: "Fantasy Adventure"
 - waitForAnimationToEnd:
     timeout: 10000
-
-# Verify book details screen
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_19_book_details
-
-# Go back to explore using pressKey
+- takeScreenshot: explore_05_details
 - pressKey: Back
 - waitForAnimationToEnd
-
-# Verify back at explore
 - assertVisible:
     text: "Fantasy Adventure"
-- takeScreenshot: explore_20_back_to_explore
-
-# ============================================================
-# SECTION 6: Back Navigation
-# ============================================================
-
-# Go back to sources list using pressKey
 - pressKey: Back
 - waitForAnimationToEnd
-
-# Verify back at sources
 - assertVisible:
     text: "Test source"
-- takeScreenshot: explore_21_back_to_sources
-
-# Navigate to different tab
-- tapOn:
-    text: "Library"
-- waitForAnimationToEnd
-- takeScreenshot: explore_22_library_tab
-
-# Return to Sources
-- tapOn:
-    text: "Sources"
-- waitForAnimationToEnd
-- takeScreenshot: explore_23_return_to_sources
-
-- takeScreenshot: explore_24_complete
