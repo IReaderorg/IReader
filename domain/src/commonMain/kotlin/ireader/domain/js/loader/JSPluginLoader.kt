@@ -66,6 +66,13 @@ class JSPluginLoader(
     
     private val pluginCache = mutableMapOf<String, LoadedPlugin>()
     private val stubManager = JSPluginStubManager(preferenceStoreFactory.create("js_plugin_stubs"))
+
+    /**
+     * Set while a load pass is running so a pending source that self-heals on
+     * first use can push its real catalog back to the CatalogStore.
+     */
+    @kotlin.concurrent.Volatile
+    private var pluginReloadedCallback: (suspend (JSPluginCatalog) -> Unit)? = null
     
     /**
      * Tracks if JS engine is missing (NoJSEngineException was thrown during loading)
@@ -200,7 +207,12 @@ class JSPluginLoader(
                 preferences = pluginPreferenceStore
             )
             
-            val pendingSource = JSPluginPendingSource(metadata, dependencies)
+            val pendingSource = JSPluginPendingSource(
+                metadata = metadata,
+                dependencies = dependencies,
+                retryBlock = { loadPlugin(file) },
+                onReloaded = { catalog -> pluginReloadedCallback?.invoke(catalog) }
+            )
             
             return JSPluginCatalog(
                 source = pendingSource,
@@ -697,6 +709,8 @@ class JSPluginLoader(
         val startTime = currentTimeToLong()
         jsEngineMissing = false
         pendingPluginsCount = 0
+        // Pending catalogs that self-heal on first use push the real catalog back here.
+        pluginReloadedCallback = { catalog -> onPluginLoaded(catalog) }
         
         // Debug: Log the directory being scanned
         Log.info { "JSPluginLoader.loadPluginsAsync: Scanning directory: $pluginsDirectory" }
@@ -822,6 +836,8 @@ class JSPluginLoader(
         // Reset engine status
         jsEngineMissing = false
         pendingPluginsCount = 0
+        // Pending catalogs that self-heal on first use push the real catalog back here.
+        pluginReloadedCallback = onPluginLoaded
         
         // Helper function to load or create pending catalog
         suspend fun loadOrCreatePending(file: Path): JSPluginCatalog? {

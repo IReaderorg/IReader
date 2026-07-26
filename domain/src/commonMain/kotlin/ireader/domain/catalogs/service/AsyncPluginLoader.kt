@@ -41,4 +41,10 @@ interface AsyncPluginLoader {
      * Get the number of JS plugins pending due to missing engine.
      */
     fun getPendingJSPluginsCount(): Int = 0
+
+    /**
+     * Last load error per plugin id, so the UI can show why a source failed
+     * instead of silently listing it as pending. Empty when everything loaded.
+     */
+    fun getJSPluginLoadErrors(): Map<String, String> = emptyMap()
 }
