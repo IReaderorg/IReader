@@ -26,6 +26,9 @@ import io.ktor.client.statement.*
  * - iOS prohibits dynamic native code loading (no dlopen for App Store apps)
  * - JavaScript execution via JavaScriptCore is allowed
  * - Sources are compiled to JS and loaded at runtime
+ * 
+ * Each source load request cancels any previous in-flight load for the same source,
+ * ensuring that stale downloads and evaluations are properly cleaned up.
  */
 @OptIn(ExperimentalForeignApi::class)
 class IosCatalogLoader(
@@ -44,6 +47,9 @@ class IosCatalogLoader(
     private var runtimeLoaded = false
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    
+    // Tracks in-flight source download jobs per sourceId so they can be cancelled
+    private val sourceLoadJobs = mutableMapOf<String, Job>()
     
     init {
         setupJSContext()
@@ -93,13 +99,21 @@ class IosCatalogLoader(
     }
     
     /**
-     * Load a JS source by ID
+     * Load a JS source by ID.
+     * Cancels any previous in-flight load for the same source before starting a new one.
      */
     suspend fun loadSource(sourceId: String): Boolean {
+        // Cancel any previous load for this source
+        sourceLoadJobs.remove(sourceId)?.cancel()
+        
         if (!runtimeLoaded) loadRuntime()
         
         return try {
-            val sourceJs = downloadSourceFile(sourceId)
+            val deferred = scope.async {
+                downloadSourceFile(sourceId)
+            }
+            sourceLoadJobs[sourceId] = deferred
+            val sourceJs = deferred.await()
             if (sourceJs != null) {
                 jsContext?.evaluateScript(sourceJs)
                 jsContext?.exception == null
@@ -111,7 +125,7 @@ class IosCatalogLoader(
             false
         }
     }
-    
+
     override suspend fun loadAll(): List<CatalogLocal> {
         val bundled = mutableListOf<CatalogLocal>(
             CatalogBundled(

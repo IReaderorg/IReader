@@ -1,5 +1,6 @@
 package ireader.domain.services
 
+import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
 
@@ -7,42 +8,47 @@ import ireader.core.source.model.Text
  * Service for detecting broken or corrupted chapters
  */
 class ChapterHealthChecker {
-    
+
     /**
      * Checks if a chapter is broken based on multiple criteria
      */
     fun isChapterBroken(content: List<Page>): Boolean {
+        if (content.isEmpty()) return true
+
+        val hasImagePages = content.any { it is ImageUrl }
+        if (hasImagePages) return false
+
         val textContent = extractTextContent(content)
-        
-        // Empty content is definitely broken
+
         if (textContent.isBlank()) return true
-        
-        // For very short content, only check if it's completely empty
-        // This avoids false positives for short chapters or chapter titles
+
         if (textContent.length < MIN_CONTENT_LENGTH) {
-            return false // Short content is not necessarily broken
+            return false
         }
-        
-        // Check for scrambled text (low letter ratio)
-        // This is more lenient to support non-Latin languages
+
         if (hasLowLetterRatio(textContent)) return true
-        
+
         return false
     }
-    
+
     /**
      * Gets the specific reason why a chapter is broken
      */
     fun getBreakReason(content: List<Page>): BreakReason? {
+        if (content.isEmpty()) return BreakReason.EMPTY_CONTENT
+
+        val hasImagePages = content.any { it is ImageUrl }
+        if (hasImagePages) return null
+
         val textContent = extractTextContent(content)
-        
+
         return when {
             textContent.isBlank() -> BreakReason.EMPTY_CONTENT
             textContent.length >= MIN_CONTENT_LENGTH && hasLowLetterRatio(textContent) -> BreakReason.SCRAMBLED_TEXT
             else -> null
         }
     }
-    
+
     /**
      * Extracts text content from Page list
      */

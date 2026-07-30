@@ -3,11 +3,12 @@ package ireader.core.http.ratelimit
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+
 import ireader.core.log.Log
 
 /**
@@ -24,12 +25,12 @@ interface RequestQueue {
     ): T
     
     /**
-     * Cancel all pending requests for a domain
+     * Cancel all pending and in-flight requests for a domain
      */
     fun cancel(domain: String)
     
     /**
-     * Cancel all pending requests
+     * Cancel all pending and in-flight requests
      */
     fun cancelAll()
     
@@ -89,8 +90,10 @@ class DefaultRequestQueue(
         val result: CompletableDeferred<T>
     )
     
+    /** Tracks in-flight request jobs per domain so they can be cancelled */
+    private val activeRequestJobs = mutableMapOf<String, MutableList<Job>>()
+    
     private val queues = mutableMapOf<String, MutableList<QueuedRequest<*>>>()
-    private val activeRequests = mutableMapOf<String, Int>()
     private val processing = mutableSetOf<String>()
     
     @Suppress("UNCHECKED_CAST")
@@ -136,11 +139,20 @@ class DefaultRequestQueue(
         val normalizedDomain = domain.normalizeDomain()
         scope.launch {
             mutex.withLock {
-                val queue = queues[normalizedDomain] ?: return@withLock
-                queue.forEach { request ->
+                // Cancel all queued requests for the domain
+                val queue = queues[normalizedDomain]
+                queue?.forEach { request ->
                     request.result.cancel()
                 }
-                queue.clear()
+                queue?.clear()
+                queues.remove(normalizedDomain)
+                
+                // Cancel all in-flight requests for the domain
+                val jobs = activeRequestJobs.remove(normalizedDomain)
+                jobs?.forEach { it.cancel() }
+                
+                // Stop processing this domain
+                processing.remove(normalizedDomain)
             }
         }
     }
@@ -152,6 +164,11 @@ class DefaultRequestQueue(
                     request.result.cancel()
                 }
                 queues.clear()
+                
+                activeRequestJobs.values.flatten().forEach { it.cancel() }
+                activeRequestJobs.clear()
+                
+                processing.clear()
             }
         }
     }
@@ -187,33 +204,41 @@ class DefaultRequestQueue(
                             return@withLock null
                         }
                         
-                        val currentActive = activeRequests[domain] ?: 0
+                        val currentActive = activeRequestJobs[domain]?.size ?: 0
                         if (currentActive >= config.maxConcurrentPerDomain) {
                             return@withLock null
                         }
                         
-                        activeRequests[domain] = currentActive + 1
                         queue.removeAt(0)
                     } ?: break
                     
                     // Apply rate limiting if configured
                     rateLimiter?.acquire(domain)
                     
-                    // Execute the request
-                    try {
-                        val result = (request as QueuedRequest<Any?>).request()
-                        request.result.complete(result)
-                    } catch (e: Exception) {
-                        request.result.completeExceptionally(e)
-                    } finally {
-                        mutex.withLock {
-                            val current = activeRequests[domain] ?: 1
-                            if (current <= 1) {
-                                activeRequests.remove(domain)
-                            } else {
-                                activeRequests[domain] = current - 1
+                    // Execute the request in a tracked job so it can be cancelled
+                    val deferred = (request as QueuedRequest<Any?>).result
+                    val job = scope.launch {
+                        try {
+                            val result = request.request()
+                            if (deferred.isActive) {
+                                deferred.complete(result)
+                            }
+                        } catch (e: Exception) {
+                            if (deferred.isActive) {
+                                deferred.completeExceptionally(e)
+                            }
+                        } finally {
+                            mutex.withLock {
+                                activeRequestJobs[domain]?.remove(job)
+                                if (activeRequestJobs[domain]?.isEmpty() == true) {
+                                    activeRequestJobs.remove(domain)
+                                }
                             }
                         }
+                    }
+                    
+                    mutex.withLock {
+                        activeRequestJobs.getOrPut(domain) { mutableListOf() }.add(job)
                     }
                 }
             } finally {
