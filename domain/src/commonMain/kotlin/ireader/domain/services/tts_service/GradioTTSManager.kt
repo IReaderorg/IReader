@@ -2,9 +2,13 @@ package ireader.domain.services.tts_service
 
 import io.ktor.client.*
 import ireader.core.log.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 /**
@@ -36,8 +40,18 @@ class GradioTTSManager(
         private const val TAG = "GradioTTSManager"
     }
     
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    
     init {
         loadSavedConfigs()
+        pluginManager?.let { pm ->
+            scope.launch {
+                pm.pluginsFlow.collect { plugins ->
+                    Log.info { "$TAG: Observed ${plugins.size} plugins from pluginManager, reloading configs" }
+                    loadSavedConfigs()
+                }
+            }
+        }
     }
     
     /**
