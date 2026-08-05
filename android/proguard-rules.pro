@@ -269,6 +269,61 @@
 -keep class ireader.core.source.Dependencies { *; }
 ##---------------End: proguard configuration for IReader Extensions  ----------
 
+##---------------Begin: proguard configuration for Tsundoku (Tachiyomi/Mihon) Extensions  ----------
+# Tsundoku extensions load Tachiyomi/Mihon extension APKs at runtime via reflection.
+# Without these keep rules, R8 strips the tachiyomi source library classes
+# (eu.kanade.tachiyomi.source.*, eu.kanade.tachiyomi.network.*) and Injekt DI
+# because they appear to be unused at compile time — only referenced via
+# Class.forName() and ChildFirstPathClassLoader.
+
+# Keep ALL tachiyomi source library classes (CatalogueSource, SManga, SChapter,
+# FilterList, MangasPage, HttpSource, SourceFactory, NetworkHelper, etc.)
+-keep class eu.kanade.tachiyomi.** { *; }
+-keep interface eu.kanade.tachiyomi.** { *; }
+-keepclassmembers class eu.kanade.tachiyomi.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep Injekt DI framework (required by Tsundoku extension dependencies)
+-keep class uy.kohesive.injekt.** { *; }
+-keep interface uy.kohesive.injekt.** { *; }
+-keepclassmembers class uy.kohesive.injekt.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep Tsundoku loader classes themselves (loaded via reflection/ClassLoader)
+-keep class ireader.data.catalog.impl.tsundoku.** { *; }
+-keepclassmembers class ireader.data.catalog.impl.tsundoku.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+# Keep ChildFirstPathClassLoader (extends PathClassLoader, used for extension loading)
+-keep class ireader.data.catalog.impl.tsundoku.ChildFirstPathClassLoader { *; }
+-keepclassmembers class ireader.data.catalog.impl.tsundoku.ChildFirstPathClassLoader {
+    public <methods>;
+    protected <methods>;
+}
+
+# Keep RxJava 1.x (required by Tachiyomi/Tsundoku extensions)
+-keep class rx.** { *; }
+-keep interface rx.** { *; }
+-keepclassmembers class rx.** {
+    <fields>;
+    <methods>;
+    <init>(...);
+}
+
+-dontwarn eu.kanade.tachiyomi.**
+-dontwarn uy.kohesive.injekt.**
+-dontwarn rx.**
+##---------------End: proguard configuration for Tsundoku (Tachiyomi/Mihon) Extensions  ----------
+
 ##---------------Begin: proguard configuration for couroutines  ----------
 # When editing this file, update the following files as well:
 # - META-INF/com.android.tools/proguard/coroutines.pro

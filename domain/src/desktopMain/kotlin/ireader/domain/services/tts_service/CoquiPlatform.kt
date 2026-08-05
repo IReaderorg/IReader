@@ -30,6 +30,7 @@ class DesktopGradioAudioPlayer : GradioAudioPlayer {
     private var tempFile: File? = null
     @Volatile private var isPlaying = false
     @Volatile private var isPaused = false
+    private var currentSpeed: Float = 1.0f
     
     override suspend fun play(audioData: ByteArray, onComplete: () -> Unit) {
         withContext(Dispatchers.IO) {
@@ -129,6 +130,17 @@ class DesktopGradioAudioPlayer : GradioAudioPlayer {
             
             clip = AudioSystem.getClip().apply {
                 open(decodedStream)
+                try {
+                    if (isControlSupported(FloatControl.Type.SAMPLE_RATE)) {
+                        val rateControl = getControl(FloatControl.Type.SAMPLE_RATE) as? FloatControl
+                        rateControl?.let {
+                            val newRate = decodedFormat.sampleRate * currentSpeed
+                            it.value = newRate.coerceIn(it.minimum, it.maximum)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.warn { "Could not set sample rate control: ${e.message}" }
+                }
                 addLineListener { event ->
                     when (event.type) {
                         LineEvent.Type.STOP -> {
@@ -176,11 +188,17 @@ class DesktopGradioAudioPlayer : GradioAudioPlayer {
             // Try to use ffmpeg to convert to WAV
             val wavFile = File.createTempFile("gradio_tts_converted_", ".wav")
             
-            val process = ProcessBuilder(
+            val ffmpegArgs = mutableListOf(
                 "ffmpeg", "-y", "-i", tempFile!!.absolutePath,
-                "-acodec", "pcm_s16le", "-ar", "22050", "-ac", "1",
-                wavFile.absolutePath
-            ).redirectErrorStream(true).start()
+                "-acodec", "pcm_s16le", "-ar", "22050", "-ac", "1"
+            )
+            if (currentSpeed != 1.0f) {
+                ffmpegArgs.add("-filter:a")
+                ffmpegArgs.add("atempo=$currentSpeed")
+            }
+            ffmpegArgs.add(wavFile.absolutePath)
+            
+            val process = ProcessBuilder(ffmpegArgs).redirectErrorStream(true).start()
             
             val completed = process.waitFor(30, java.util.concurrent.TimeUnit.SECONDS)
             
@@ -325,6 +343,24 @@ class DesktopGradioAudioPlayer : GradioAudioPlayer {
     override fun release() {
         stop()
         cleanup()
+    }
+    
+    override fun setSpeed(speed: Float) {
+        val clampedSpeed = speed.coerceIn(0.5f, 2.0f)
+        Log.info { "DesktopGradioAudioPlayer setSpeed($clampedSpeed)" }
+        currentSpeed = clampedSpeed
+        try {
+            if (clip?.isControlSupported(FloatControl.Type.SAMPLE_RATE) == true) {
+                val rateControl = clip?.getControl(FloatControl.Type.SAMPLE_RATE) as? FloatControl
+                rateControl?.let {
+                    val baseRate = 22050f
+                    val newRate = baseRate * currentSpeed
+                    it.value = newRate.coerceIn(it.minimum, it.maximum)
+                }
+            }
+        } catch (e: Exception) {
+            Log.warn { "Failed to update sample rate control: ${e.message}" }
+        }
     }
     
     private fun cleanup() {

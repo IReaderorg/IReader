@@ -376,8 +376,17 @@ class CoquiTTSPlayer(
             )
             
             mediaPlayer.setOnPreparedListener { mp ->
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    try {
+                        val params = mp.playbackParams
+                        params.speed = currentSpeed
+                        mp.playbackParams = params
+                    } catch (e: Exception) {
+                        Log.warn { "Failed to set CoquiTTS MP3 playback speed: ${e.message}" }
+                    }
+                }
                 mp.start()
-                Log.info { "Gradio TTS MP3 playback started" }
+                Log.info { "Gradio TTS MP3 playback started with speed $currentSpeed" }
             }
             
             mediaPlayer.setOnCompletionListener { mp ->
