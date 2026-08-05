@@ -39,9 +39,9 @@ object GradioTTSPluginLoader {
     fun loadFromPlugins(pluginManager: PluginManager): List<GradioTTSConfig> {
         return try {
             val gradioPlugins = pluginManager.pluginsFlow.value
-                .filter { it.manifest.type == PluginType.GRADIO_TTS }
+                .filter { it.manifest.type == PluginType.GRADIO_TTS || it.manifest.type == PluginType.TTS }
             
-            Log.info { "$TAG: Found ${gradioPlugins.size} GRADIO_TTS plugins" }
+            Log.info { "$TAG: Found ${gradioPlugins.size} TTS/GRADIO_TTS plugins" }
             
             gradioPlugins.mapNotNull { pluginInfo ->
                 try {
@@ -53,7 +53,7 @@ object GradioTTSPluginLoader {
                         Log.info { "$TAG: Loaded ${pluginInfo.id} from manifest metadata: spaceUrl=${config.spaceUrl}" }
                         config
                     } else {
-                        Log.warn { "$TAG: No gradio.spaceUrl in metadata for plugin ${pluginInfo.id}. Metadata: ${pluginInfo.manifest.metadata}" }
+                        Log.warn { "$TAG: No spaceUrl in metadata for plugin ${pluginInfo.id}. Metadata: ${pluginInfo.manifest.metadata}" }
                         null
                     }
                 } catch (e: Exception) {
@@ -75,13 +75,18 @@ object GradioTTSPluginLoader {
         val metadata = manifest.metadata
         if (metadata.isNullOrEmpty()) return null
         
-        val spaceUrl = metadata["gradio.spaceUrl"]
+        val spaceUrl = metadata["gradio.spaceUrl"] 
+            ?: metadata["spaceUrl"] 
+            ?: metadata["url"] 
+            ?: metadata["gradio_url"]
+            ?: metadata["space_url"]
+            
         if (spaceUrl.isNullOrEmpty()) return null
         
-        val apiName = metadata["gradio.apiName"] ?: "/predict"
-        val apiTypeStr = metadata["gradio.apiType"] ?: "AUTO"
-        val audioOutputIndex = metadata["gradio.audioOutputIndex"]?.toIntOrNull() ?: 0
-        val paramsJson = metadata["gradio.params"]
+        val apiName = metadata["gradio.apiName"] ?: metadata["apiName"] ?: metadata["api_name"] ?: "/predict"
+        val apiTypeStr = metadata["gradio.apiType"] ?: metadata["apiType"] ?: metadata["api_type"] ?: "AUTO"
+        val audioOutputIndex = (metadata["gradio.audioOutputIndex"] ?: metadata["audioOutputIndex"] ?: metadata["audio_output_index"])?.toIntOrNull() ?: 0
+        val paramsJson = metadata["gradio.params"] ?: metadata["params"] ?: metadata["parameters"]
         
         // Parse API type
         val apiType = try {
@@ -100,7 +105,7 @@ object GradioTTSPluginLoader {
             apiName = apiName,
             parameters = parameters,
             audioOutputIndex = audioOutputIndex,
-            apiKey = null,
+            apiKey = metadata["apiKey"] ?: metadata["api_key"] ?: metadata["gradio.apiKey"],
             isCustom = false,
             enabled = true,
             defaultSpeed = 1.0f,
