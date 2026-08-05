@@ -35,6 +35,8 @@ class AndroidGradioAudioPlayer(private val context: Context) : GradioAudioPlayer
     @Volatile
     private var isStopped: Boolean = false
     
+    private var currentSpeed: Float = 1.0f
+    
     override suspend fun play(audioData: ByteArray, onComplete: () -> Unit) {
         val thisPlayId = ++playId
         Log.info { "$TAG: play() START - playId=$thisPlayId, audioSize=${audioData.size}, isStopped=$isStopped" }
@@ -122,7 +124,16 @@ class AndroidGradioAudioPlayer(private val context: Context) : GradioAudioPlayer
                     
                     // Final check before starting
                     if (!isStopped) {
-                        Log.info { "$TAG: play() - Starting playback (playId=$thisPlayId)" }
+                        Log.info { "$TAG: play() - Starting playback (playId=$thisPlayId, speed=$currentSpeed)" }
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            try {
+                                val params = player.playbackParams
+                                params.speed = currentSpeed
+                                player.playbackParams = params
+                            } catch (e: Exception) {
+                                Log.warn { "$TAG: Failed to set playback params speed: ${e.message}" }
+                            }
+                        }
                         player.start()
                     } else {
                         Log.info { "$TAG: play() - ABORTED: isStopped=true before start (playId=$thisPlayId)" }
@@ -197,6 +208,23 @@ class AndroidGradioAudioPlayer(private val context: Context) : GradioAudioPlayer
     override fun release() {
         Log.info { "$TAG: release()" }
         stop()
+    }
+    
+    override fun setSpeed(speed: Float) {
+        val clampedSpeed = speed.coerceIn(0.5f, 2.0f)
+        Log.info { "$TAG: setSpeed($clampedSpeed)" }
+        currentSpeed = clampedSpeed
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                mediaPlayer?.let { player ->
+                    val params = player.playbackParams
+                    params.speed = clampedSpeed
+                    player.playbackParams = params
+                }
+            }
+        } catch (e: Exception) {
+            Log.warn { "$TAG: Failed to update playback params speed: ${e.message}" }
+        }
     }
     
     /**

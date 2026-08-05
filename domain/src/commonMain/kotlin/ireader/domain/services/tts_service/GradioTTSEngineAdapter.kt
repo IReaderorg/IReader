@@ -1,4 +1,4 @@
-﻿package ireader.domain.services.tts_service
+package ireader.domain.services.tts_service
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -143,6 +143,7 @@ class GradioTTSEngineAdapter(
     
     override fun setSpeed(speed: Float) {
         this.speed = speed.coerceIn(0.5f, 2.0f)
+        audioPlayer.setSpeed(this.speed)
     }
     
     override fun setPitch(pitch: Float) {
