@@ -83,6 +83,12 @@ agents/
 test_local_novel/
 graphify-out/
 .codegraph/
+# Individual dev-tool state files (tracked by accident historically)
+.config.kiro
+.kilocodemodes
+.graphifyignore
+.playwright-mcp/
+IReader.code-workspace
 # ============================================
 # Cloned repos (not part of this project)
 # ============================================
