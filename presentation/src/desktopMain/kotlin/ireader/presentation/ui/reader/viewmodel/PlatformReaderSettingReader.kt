@@ -29,14 +29,18 @@ actual class PlatformReaderSettingReader {
         scrollState: ScrollState,
         lazyScrollState: LazyListState
     ) {
-        // Save scroll position from LazyListState (used by optimized reader)
-        val lazyScrollPosition = lazyScrollState.firstVisibleItemIndex.toLong()
+        // Save scroll position based on reading mode
+        val scrollPosition = if (readingMode.value == ireader.domain.preferences.prefs.ReadingMode.Continues) {
+            scrollState.value.toLong()
+        } else {
+            lazyScrollState.firstVisibleItemIndex.toLong()
+        }
         
         stateChapter?.let { chapter ->
             scope.launch(kotlinx.coroutines.NonCancellable) {
-                ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: lazyScrollPosition=$lazyScrollPosition" }
+                ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: scrollPosition=$scrollPosition" }
                 // Use the dedicated updateLastPageRead method for efficient update
-                saveScrollPosition(lazyScrollPosition)
+                saveScrollPosition(scrollPosition)
                 getChapterUseCase.updateLastReadTime(chapter)
             }
         }

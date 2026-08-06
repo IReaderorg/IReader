@@ -37,7 +37,7 @@ import ireader.domain.services.processstate.ProcessStateManager
 import ireader.domain.services.processstate.ReaderProcessState
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.UiText
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 import ireader.i18n.resources.this_is_first_chapter
 import ireader.i18n.resources.this_is_last_chapter
 import ireader.presentation.core.IModalDrawer
@@ -46,6 +46,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.theme.AppColors
@@ -67,7 +68,6 @@ import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
-import ireader.presentation.core.safePopBackStack
 
 @OptIn(ExperimentalMaterial3Api::class)
 data class ReaderScreenSpec(
@@ -84,20 +84,34 @@ data class ReaderScreenSpec(
     fun Content() {
         val scope = rememberCoroutineScope()
 
+        val platformReader: PlatformReaderSettingReader = koinInject()
+        val processStateManager: ProcessStateManager = koinInject()
+
+        // Check for process death / orientation state restoration
+        val restoredState = remember { processStateManager.getReaderState() }
+
+        // Track active chapter ID with rememberSaveable so orientation change retains the current chapter
+        var activeChapterId by rememberSaveable(bookId) {
+            val restoredChapterId = if (restoredState != null && restoredState.bookId == bookId && restoredState.chapterId > 0) {
+                restoredState.chapterId
+            } else {
+                chapterId
+            }
+            mutableStateOf(restoredChapterId)
+        }
+
         val koin = getKoin()
         val vm: ReaderScreenViewModel =
-            remember(chapterId, bookId) {
+            remember(activeChapterId, bookId) {
                 koin.get<ReaderScreenViewModel>(parameters = {
                     parametersOf(
                         ReaderScreenViewModel.Param(
-                            chapterId,
+                            activeChapterId,
                             bookId
                         )
                     )
                 })
             }
-        val platformReader: PlatformReaderSettingReader = koinInject()
-        val processStateManager: ProcessStateManager = koinInject()
         val readerState by vm.state.collectAsState()
 
         // Plugin integration for reader menu items
@@ -128,6 +142,15 @@ data class ReaderScreenSpec(
             successState?.currentChapter
         }
 
+        // Keep activeChapterId updated as user reads through chapters
+        LaunchedEffect(chapter?.id) {
+            chapter?.id?.let { id ->
+                if (id > 0 && id != activeChapterId) {
+                    activeChapterId = id
+                }
+            }
+        }
+
         val context = getContextWrapper()
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
@@ -143,42 +166,76 @@ data class ReaderScreenSpec(
 
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
 
-        // Restore scroll position from process death state
-        val restoredState = remember { processStateManager.getReaderState() }
-        LaunchedEffect(restoredState, successState) {
-            if (restoredState != null &&
-                restoredState.bookId == bookId &&
-                restoredState.chapterId == chapterId &&
-                successState != null
-            ) {
-                // Restore scroll position
-                try {
-                    delay(100) // Wait for content to load
-                    scrollState.scrollTo(restoredState.scrollPosition)
-                } catch (e: Exception) {
-                    Log.warn { "Failed to restore scroll position: ${e.message}" }
-                }
-                // Clear restored state after applying
-                processStateManager.clearReaderState()
-            }
+        // Track saved scroll position and offset across configuration changes
+        var savedScrollPosition by rememberSaveable(bookId, activeChapterId) {
+            mutableStateOf(if (restoredState != null && restoredState.bookId == bookId && restoredState.chapterId == activeChapterId) restoredState.scrollPosition else 0)
         }
+        var savedScrollOffset by rememberSaveable(bookId, activeChapterId) {
+            mutableStateOf(if (restoredState != null && restoredState.bookId == bookId && restoredState.chapterId == activeChapterId) restoredState.scrollOffset else 0)
+        }
+        var scrollRestoredForChapter by rememberSaveable(bookId, activeChapterId) { mutableStateOf(false) }
 
-        // Save state periodically for process death recovery
-        LaunchedEffect(scrollState.value, chapter?.id) {
+        // Save scroll position continuously for process death and orientation change recovery
+        LaunchedEffect(
+            scrollState.value,
+            lazyListState.firstVisibleItemIndex,
+            lazyListState.firstVisibleItemScrollOffset,
+            chapter?.id
+        ) {
             if (chapter != null) {
+                val isContinuous = vm.readingMode.value == ireader.domain.preferences.prefs.ReadingMode.Continues
+                val currentPosition = if (isContinuous) scrollState.value else lazyListState.firstVisibleItemIndex
+                val currentOffset = if (isContinuous) 0 else lazyListState.firstVisibleItemScrollOffset
+
+                if (currentPosition > 0 || currentOffset > 0) {
+                    savedScrollPosition = currentPosition
+                    savedScrollOffset = currentOffset
+                }
+
                 // Debounce state saving to avoid excessive writes
-                delay(500)
+                delay(300)
                 processStateManager.saveReaderState(
                     ReaderProcessState(
                         bookId = bookId,
                         chapterId = chapter.id,
-                        scrollPosition = scrollState.value,
-                        scrollOffset = 0,
+                        scrollPosition = if (currentPosition > 0) currentPosition else savedScrollPosition,
+                        scrollOffset = if (currentOffset > 0) currentOffset else savedScrollOffset,
                         readingParagraph = 0,
                         isReaderModeEnabled = successState?.isReaderModeEnabled ?: true,
                         timestamp = currentTimeToLong()
                     )
                 )
+            }
+        }
+
+        // Restore scroll position after content is rendered
+        LaunchedEffect(successState?.currentChapter?.id, activeChapterId) {
+            if (successState != null && !scrollRestoredForChapter) {
+                val isContinuous = vm.readingMode.value == ireader.domain.preferences.prefs.ReadingMode.Continues
+                val targetPosition = when {
+                    restoredState != null && restoredState.bookId == bookId && restoredState.chapterId == (chapter?.id ?: activeChapterId) -> restoredState.scrollPosition
+                    savedScrollPosition > 0 -> savedScrollPosition
+                    else -> 0
+                }
+                val targetOffset = when {
+                    restoredState != null && restoredState.bookId == bookId && restoredState.chapterId == (chapter?.id ?: activeChapterId) -> restoredState.scrollOffset
+                    savedScrollOffset > 0 -> savedScrollOffset
+                    else -> 0
+                }
+
+                if (targetPosition > 0 || targetOffset > 0) {
+                    try {
+                        delay(150) // Wait for layout pass
+                        if (isContinuous) {
+                            scrollState.scrollTo(targetPosition)
+                        } else {
+                            lazyListState.scrollToItem(targetPosition, targetOffset)
+                        }
+                        scrollRestoredForChapter = true
+                    } catch (e: Exception) {
+                        Log.warn { "Failed to restore scroll position: ${e.message}" }
+                    }
+                }
             }
         }
 
@@ -189,8 +246,6 @@ data class ReaderScreenSpec(
                         vm.restoreSetting(context, scrollState, lazyListState)
                     }
                 }
-                // Clear process state when user intentionally leaves the screen
-                processStateManager.clearReaderState()
             }
         }
 
@@ -257,9 +312,6 @@ data class ReaderScreenSpec(
                 } else {
                     Log.info { "Skipping final save: duration (${finalDuration}ms) is less than 5 seconds" }
                 }
-
-                // Clear process state when user intentionally leaves the screen
-                processStateManager.clearReaderState()
             }
         }
 
