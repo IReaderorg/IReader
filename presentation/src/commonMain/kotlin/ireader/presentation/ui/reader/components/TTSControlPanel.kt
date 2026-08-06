@@ -29,6 +29,8 @@ fun TTSControlPanel(
     onSkipBackward: () -> Unit,
     onSkipForward: () -> Unit,
     onSpeechRateChanged: (Float) -> Unit,
+    isLoading: Boolean = false,
+    loadingMessage: String? = null,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -41,6 +43,25 @@ fun TTSControlPanel(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            if (isLoading) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(14.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = loadingMessage ?: "Loading voice...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            
             // Progress bar
             LinearProgressIndicator(
                 progress = if (duration.inWholeMilliseconds > 0) {

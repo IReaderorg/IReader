@@ -235,14 +235,14 @@ fun TTSV2CommonScreen(
         adapter.events.collectLatest { event ->
             when (event) {
                 is TTSEvent.Error -> {
-                    val message = when (event.error) {
+                    val message = when (val err = event.error) {
                         is TTSError.NoContent -> "No content to read"
                         is TTSError.EngineNotReady -> "TTS engine not ready"
-                        is TTSError.SpeechFailed -> "Speech failed: ${(event.error as TTSError.SpeechFailed).message}"
-                        is TTSError.ContentLoadFailed -> "Failed to load content"
-                        is TTSError.NetworkError -> "Network error"
-                        is TTSError.EngineInitFailed -> "Engine initialization failed"
-                        else -> "An error occurred"
+                        is TTSError.SpeechFailed -> "Gradio TTS error: ${err.message}"
+                        is TTSError.ContentLoadFailed -> "Content load failed: ${err.message}"
+                        is TTSError.NetworkError -> "Gradio network error: ${err.message}"
+                        is TTSError.EngineInitFailed -> "Gradio engine init failed: ${err.message}"
+                        else -> "TTS error occurred"
                     }
                     snackbarHostState.showSnackbar(message)
                 }
