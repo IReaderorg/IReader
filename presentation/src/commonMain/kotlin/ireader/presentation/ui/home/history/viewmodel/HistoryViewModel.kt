@@ -64,6 +64,24 @@ class HistoryViewModel(
             _state.update { it.copy(groupByNovel = groupByNovel) }
         }
         
+        // Instant display from in-memory cache if available on cold boot
+        if (ireader.domain.data.cache.HistoryDataCache.hasCache()) {
+            val cached = ireader.domain.data.cache.HistoryDataCache.getCachedHistories()
+            val cachedCount = cached.values.sumOf { it.size }
+            _state.update { current ->
+                current.copy(
+                    histories = cached,
+                    isLoading = false,
+                    paginationState = HistoryPaginationState(
+                        loadedCount = cachedCount,
+                        isLoadingMore = false,
+                        hasMoreItems = true,
+                        totalItems = cachedCount
+                    )
+                )
+            }
+        }
+
         // Load initial page from database
         loadInitialPage()
     }
@@ -74,7 +92,9 @@ class HistoryViewModel(
     private fun loadInitialPage() {
         loadJob?.cancel()
         loadJob = scope.launch {
-            _state.update { it.copy(isLoading = true) }
+            if (!ireader.domain.data.cache.HistoryDataCache.hasCache()) {
+                _state.update { it.copy(isLoading = true) }
+            }
             
             try {
                 val query = _state.value.searchQuery
