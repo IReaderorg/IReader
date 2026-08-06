@@ -271,8 +271,7 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             
             println("Database initialization: ${System.currentTimeMillis() - start}ms")
             
-            // Delay preloader more to let UI settle first
-            delay(2000)
+            // Start database preloader immediately to populate in-memory UI caches (History & Library)
             try {
                 println("MyApplication: Starting database preloader...")
                 val preloader: DatabasePreloader by inject()

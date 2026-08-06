@@ -71,7 +71,7 @@ object GradioTTSPluginLoader {
      * Convert plugin manifest metadata to GradioTTSConfig.
      * Returns null if required metadata is missing.
      */
-    private fun convertFromManifestMetadata(manifest: PluginManifest): GradioTTSConfig? {
+    internal fun convertFromManifestMetadata(manifest: PluginManifest): GradioTTSConfig? {
         val metadata = manifest.metadata
         if (metadata.isNullOrEmpty()) return null
         

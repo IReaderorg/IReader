@@ -58,31 +58,45 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
         offset: Int
     ): Pair<Map<Long, List<HistoryWithRelations>>, Int> {
         val items = historyRepository.findHistoriesPaginated(query, limit, offset)
-        val totalCount = historyRepository.getHistoryCount(query)
+        // Skip count query if initial page returned fewer items than limit (total items is known)
+        val totalCount = if (offset == 0 && items.size < limit && query.isEmpty()) {
+            items.size
+        } else {
+            historyRepository.getHistoryCount(query)
+        }
         val grouped = items.groupBy { it.readAt ?: 0L }
+        if (offset == 0 && query.isEmpty()) {
+            ireader.domain.data.cache.HistoryDataCache.updateCache(grouped)
+        }
         return Pair(grouped, totalCount)
     }
 
     suspend fun insertHistory(history: History) {
-        return historyRepository.insertHistory(history)
+        historyRepository.insertHistory(history)
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
     }
 
     suspend fun insertHistories(histories: List<History>) {
-        return historyRepository.insertHistories(histories)
+        historyRepository.insertHistories(histories)
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
     }
 
     suspend fun deleteHistories(histories: List<History>) {
-        return historyRepository.deleteHistories(histories)
+        historyRepository.deleteHistories(histories)
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
     }
 
     suspend fun deleteHistory(id: Long) {
-        return historyRepository.deleteHistory(id)
+        historyRepository.deleteHistory(id)
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
     }
     suspend fun deleteHistoryByBookId(bookId: Long) {
-        return historyRepository.deleteHistoryByBookId(bookId)
+        historyRepository.deleteHistoryByBookId(bookId)
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
     }
 
     suspend fun deleteAllHistories() {
-        return historyRepository.deleteAllHistories()
+        historyRepository.deleteAllHistories()
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
     }
 }
