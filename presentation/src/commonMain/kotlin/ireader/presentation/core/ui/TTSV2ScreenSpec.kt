@@ -1219,12 +1219,25 @@ class TTSV2ScreenSpec(
                 if (!fullScreenMode) {
                     TopAppBar(
                         title = {
-                            if (state.chapter != null) {
-                                Text(
-                                    text = state.chapter?.name ?: "",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    maxLines = 1
-                                )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                if (state.chapter != null) {
+                                    Text(
+                                        text = state.chapter?.name ?: "",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        maxLines = 1,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                }
+                                if (useGradioTTS && (isLoading || state.playbackState == ireader.domain.services.tts_service.v2.PlaybackState.LOADING)) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
                         },
                         navigationIcon = {

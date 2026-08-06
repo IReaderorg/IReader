@@ -20,6 +20,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -82,6 +84,22 @@ fun AndroidTTSMManagerSettingsScreen(
     val cacheEntryCount = cacheStats.entryCount
     val cacheSizeMB = cacheStats.totalSizeMB
     
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    androidx.compose.runtime.LaunchedEffect(gradioState?.testResult) {
+        when (val result = gradioState?.testResult) {
+            is ireader.presentation.ui.settings.viewmodels.TestResult.Success -> {
+                snackbarHostState.showSnackbar("Gradio TTS engine connection successful")
+                gradioViewModel?.clearTestResult()
+            }
+            is ireader.presentation.ui.settings.viewmodels.TestResult.Error -> {
+                snackbarHostState.showSnackbar("Gradio TTS error: ${result.message}")
+                gradioViewModel?.clearTestResult()
+            }
+            null -> {}
+        }
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -94,7 +112,8 @@ fun AndroidTTSMManagerSettingsScreen(
                     )
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

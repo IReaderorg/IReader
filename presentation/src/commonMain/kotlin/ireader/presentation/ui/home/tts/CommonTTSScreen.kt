@@ -1173,7 +1173,9 @@ fun TTSMediaControls(
                     progressFraction = state.progressFraction,
                     sleepModeEnabled = state.sleepModeEnabled,
                     sleepTimeRemaining = state.sleepTimeRemaining,
-                    selectedVoiceModel = state.selectedVoiceModel
+                    selectedVoiceModel = state.selectedVoiceModel,
+                    isLoading = state.isLoading,
+                    currentEngine = state.currentEngine
                 )
             }
             
@@ -1224,7 +1226,9 @@ private fun TTSProgressBar(
     progressFraction: Float,
     sleepModeEnabled: Boolean,
     sleepTimeRemaining: Long,
-    selectedVoiceModel: String?
+    selectedVoiceModel: String?,
+    isLoading: Boolean = false,
+    currentEngine: String = ""
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -1236,6 +1240,27 @@ private fun TTSProgressBar(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        if (isLoading) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(bottom = 2.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(12.dp),
+                    strokeWidth = 1.5.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = if (currentEngine.contains("Gradio", ignoreCase = true))
+                        "Loading Gradio TTS voice..."
+                    else
+                        "Loading TTS voice...",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
