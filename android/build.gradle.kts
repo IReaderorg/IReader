@@ -128,9 +128,7 @@ android {
             isEnable = true
             reset()
             include(*SUPPORTED_ABIS.toTypedArray())
-            // Set to false to reduce universal APK size
-            // Users should download architecture-specific APKs
-            isUniversalApk = false
+            isUniversalApk = true
         }
     }
     
