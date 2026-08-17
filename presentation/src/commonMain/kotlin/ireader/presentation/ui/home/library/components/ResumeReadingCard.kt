@@ -25,16 +25,14 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
-/**
- * Spotify-style bottom bar that displays the last read novel and allows quick resume
- */
 @Composable
 fun ResumeReadingCard(
     lastRead: LastReadInfo?,
     onResume: () -> Unit,
     onDismiss: () -> Unit,
     isVisible: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    coverColorScheme: androidx.compose.material3.ColorScheme? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
@@ -88,6 +86,7 @@ fun ResumeReadingCard(
                     }
                     
                     // Play Icon Button
+                    val playTint = coverColorScheme?.primary ?: MaterialTheme.colorScheme.primary
                     IconButton(
                         onClick = onResume,
                         modifier = Modifier.size(32.dp)
@@ -96,7 +95,7 @@ fun ResumeReadingCard(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = localize(Res.string.resume),
                             modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = playTint
                         )
                     }
                     

@@ -2893,4 +2893,17 @@
     <string name="youve_reached_the_end">¡Has llegado al final!</string>
     <string name="zoom_in">Acercar</string>
     <string name="zoom_out">Alejar</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
 </resources>

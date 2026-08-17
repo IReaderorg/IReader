@@ -55,7 +55,7 @@ data class LibraryUiState(
     
     // Resume reading
     val lastReadInfo: ireader.domain.models.entities.LastReadInfo? = null,
-    val isResumeCardVisible: Boolean = true,
+    val isResumeCardVisible: Boolean = false,
     
     // Sync
     val isSyncAvailable: Boolean = false
@@ -184,7 +184,7 @@ data class LibraryScreenState(
     
     // Resume reading
     val lastReadInfo: ireader.domain.models.entities.LastReadInfo? = null,
-    val isResumeCardVisible: Boolean = true,
+    val isResumeCardVisible: Boolean = false,
     
     // Sync
     val isSyncAvailable: Boolean = false,
