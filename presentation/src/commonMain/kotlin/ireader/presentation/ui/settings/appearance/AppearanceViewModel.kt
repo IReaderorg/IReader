@@ -38,6 +38,8 @@ class AppearanceViewModel(
     val themeMode = uiPreferences.themeMode().asState()
     val colorTheme = uiPreferences.colorTheme().asState()
     val dynamicColorMode = uiPreferences.dynamicColorMode().asState()
+    val coverBasedThemeEnabled = uiPreferences.coverBasedThemeEnabled().asState()
+    val coverBasedThemeStyle = uiPreferences.coverBasedThemeStyle().asState()
     val useTrueBlack = uiPreferences.useTrueBlack().asState()
     val appUiFont = uiPreferences.appUiFont().asState()
     val dateFormat = uiPreferences.dateFormat().asState()
