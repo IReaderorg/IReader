@@ -78,6 +78,6 @@ fun AppColors(
 
 // Use compositionLocalOf instead of staticCompositionLocalOf to ensure
 // proper recomposition when theme changes (e.g., switching between light/dark mode)
-private val LocalAppColors = compositionLocalOf<AppColors> {
+val LocalAppColors = compositionLocalOf<AppColors> {
     error("The AppColors composable must be called before usage")
 }
