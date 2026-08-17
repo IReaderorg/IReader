@@ -63,7 +63,7 @@ fun TextBadge(modifier: Modifier = Modifier, text: UiText) {
         modifier = Modifier
             .padding(5.dp)
             .size(width = 60.dp, height = 20.dp)
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)),
         contentAlignment = Alignment.Center,
     ) {
         SuperSmallTextComposable(

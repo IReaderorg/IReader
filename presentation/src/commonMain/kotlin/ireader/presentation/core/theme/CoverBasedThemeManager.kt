@@ -43,20 +43,27 @@ class CoverBasedThemeManager(
         coverUrl: String?,
         sourceId: Long?,
         style: PreferenceValues.CoverBasedThemeStyle,
-        isDark: Boolean
+        isDark: Boolean,
+        saturation: Float = 1.0f,
+        intensity: Float = 1.0f,
+        brightness: Float = 1.0f,
+        textColorMode: PreferenceValues.CoverBasedTextColorMode = PreferenceValues.CoverBasedTextColorMode.Auto,
+        contrast: PreferenceValues.CoverBasedThemeContrast = PreferenceValues.CoverBasedThemeContrast.Vibrant,
+        surfaceTinting: Boolean = true,
+        backgroundTintOpacity: Float = 0.3f
     ) {
-        if (coverUrl.isNullOrBlank()) {
+        val effectiveUrl = coverUrl?.takeIf { it.isNotBlank() } ?: run {
             _coverBasedTheme.value = null
             return
         }
         
-        val cacheKey = "${sourceId ?: 0}_${coverUrl.hashCode()}_${style.name}_$isDark"
+        val cacheKey = "${sourceId ?: 0}_${effectiveUrl.hashCode()}_${style.name}_${isDark}_${saturation}_${intensity}_${brightness}_${textColorMode.name}_${contrast.name}_${surfaceTinting}_${backgroundTintOpacity}"
         cache[cacheKey]?.let {
             _coverBasedTheme.value = it
             return
         }
         
-        val instantScheme = generateInstantFallback(coverUrl, style, isDark)
+        val instantScheme = generateInstantFallback(effectiveUrl, style, isDark)
         cache[cacheKey] = instantScheme
         _coverBasedTheme.value = instantScheme
         
@@ -66,11 +73,11 @@ class CoverBasedThemeManager(
                 _error.value = null
                 try {
                     val dominantColor = withContext(Dispatchers.IO) {
-                        coverColorExtractor.extractDominantColor(coverUrl, sourceId)
+                        coverColorExtractor.extractDominantColor(effectiveUrl, sourceId)
                     }
                     if (dominantColor != null) {
                         val seedColor = Color(dominantColor.red, dominantColor.green, dominantColor.blue, dominantColor.alpha)
-                        val scheme = Material3PaletteGenerator.generate(seedColor, style, isDark)
+                        val scheme = Material3PaletteGenerator.generate(seedColor, style, isDark, saturation, intensity, brightness, textColorMode, contrast, surfaceTinting, backgroundTintOpacity)
                         cache[cacheKey] = scheme
                         _coverBasedTheme.value = scheme
                     }
@@ -87,6 +94,11 @@ class CoverBasedThemeManager(
     fun clearCache() {
         cache.clear()
         pendingExtractions.clear()
+        _coverBasedTheme.value = null
+        _error.value = null
+    }
+    
+    fun clearTheme() {
         _coverBasedTheme.value = null
         _error.value = null
     }

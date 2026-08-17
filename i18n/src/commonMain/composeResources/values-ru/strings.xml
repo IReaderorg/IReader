@@ -49,6 +49,7 @@
     <string name="added_source_rule">Добавлено правило источника: %1$s</string>
     <string name="added_to_category">Добавлено в категорию %s</string>
     <string name="added_to_library">Добавлено в библиотеку</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Дополнительные детали:</string>
     <string name="additional_details_optional">Дополнительные сведения (необязательно)</string>
     <string name="additional_information">Дополнительная информация</string>
@@ -2099,6 +2100,8 @@
     <string name="results">результаты</string>
     <string name="results_found">результатов найдено</string>
     <string name="resume">Продолжить</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Возобновить все</string>
     <string name="resume_download">Возобновить загрузку</string>
     <string name="resume_downloads">Возобновить загрузки</string>
@@ -2915,4 +2918,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Быстрая предустановка</string>
+    <string name="cover_theme_preset_subtitle">Применение предустановленных настроек интенсивности темы обложки</string>
+    <string name="cover_theme_backdrop_blur">Обложка Фон Размытие</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Отрегулируйте интенсивность размытия для изображения обложки расширенного заголовка.</string>
+    <string name="cover_theme_background_tint_opacity">Непрозрачность оттенка фона</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Контролируйте, насколько сильно цвет обложки сливается с фоном карточки.</string>
+    <string name="cover_theme_preset_off">Выключенный</string>
+    <string name="cover_theme_preset_soft">Мягкий</string>
+    <string name="cover_theme_preset_medium">Середина</string>
+    <string name="cover_theme_preset_high">Высокий</string>
 </resources>
+
+
+
+
+
+
+

@@ -137,8 +137,8 @@ private fun TagsChip(
             border = SuggestionChipDefaults.suggestionChipBorder(enabled = true, borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                 borderWidth = 1.dp),
             colors = SuggestionChipDefaults.suggestionChipColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                labelColor = MaterialTheme.colorScheme.primary,
             ),
         )
     }

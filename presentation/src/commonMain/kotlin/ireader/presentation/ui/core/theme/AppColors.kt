@@ -12,6 +12,8 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import ireader.domain.models.theme.ExtraColors
 
+val LocalCoverBasedThemeForLibrary = compositionLocalOf { true }
+
 /**
  * All the application colors from both [MaterialTheme.colorScheme] and [ExtraColors] which can be
  * accessed through this class.

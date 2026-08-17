@@ -49,6 +49,7 @@
     <string name="added_source_rule">قانون منبع اضافه شد: %1$s</string>
     <string name="added_to_category">به %s اضافه شد</string>
     <string name="added_to_library">به کتابخانه اضافه شد</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">جزئیات بیشتر:</string>
     <string name="additional_details_optional">جزئیات اضافی (اختیاری)</string>
     <string name="additional_information">اطلاعات تکمیلی</string>
@@ -2089,6 +2090,8 @@
     <string name="results">نتایج</string>
     <string name="results_found">نتیجه یافت شد</string>
     <string name="resume">ادامه</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">ادامه همه</string>
     <string name="resume_download">ادامه دانلود</string>
     <string name="resume_downloads">ادامه بارگیری‌ها</string>
@@ -2905,4 +2908,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">از پیش تنظیم سریع</string>
+    <string name="cover_theme_preset_subtitle">تنظیمات از پیش تعریف شده را برای شدت تم جلد اعمال کنید</string>
+    <string name="cover_theme_backdrop_blur">تاری پس زمینه جلد</string>
+    <string name="cover_theme_backdrop_blur_subtitle">شدت تاری را برای تصویر جلد هدر توسعه یافته تنظیم کنید</string>
+    <string name="cover_theme_background_tint_opacity">تیرگی رنگ پس زمینه</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">کنترل کنید که چگونه رنگ پوشش به شدت با پس زمینه کارت ترکیب می شود</string>
+    <string name="cover_theme_preset_off">خاموش</string>
+    <string name="cover_theme_preset_soft">نرم</string>
+    <string name="cover_theme_preset_medium">متوسط</string>
+    <string name="cover_theme_preset_high">بالا</string>
 </resources>
+
+
+
+
+
+
+

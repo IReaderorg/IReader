@@ -24,6 +24,10 @@ import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.rememberIsGridScrollingFast
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.settings.appearance.AppearanceViewModel
+import org.koin.compose.getKoin
+import ireader.presentation.ui.core.theme.LocalCoverBasedThemeForLibrary
+import androidx.compose.runtime.CompositionLocalProvider
 
 /**
  * NATIVE-LIKE GRID LAYOUT
@@ -70,6 +74,7 @@ fun ComfortableGridLayout(
     
     // Track fast scrolling for deferred operations
     val isScrollingFast = rememberIsGridScrollingFast(scrollState)
+    val appearanceViewModel = getKoin().getOrNull<AppearanceViewModel>()
     
     // CRITICAL: Cache selection set with remember to avoid O(n) recreation on every recomposition
     // This is essential for 800+ books where selection changes are frequent
@@ -90,7 +95,10 @@ fun ComfortableGridLayout(
     val contentPadding = remember { androidx.compose.foundation.layout.PaddingValues(8.dp) }
     
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
+        CompositionLocalProvider(
+            LocalCoverBasedThemeForLibrary provides (appearanceViewModel?.coverBasedThemeForLibrary?.value ?: true)
+        ) {
+            LazyVerticalGrid(
             state = scrollState,
             modifier = modifier.fillMaxSize(),
             columns = cells,
@@ -159,6 +167,6 @@ fun ComfortableGridLayout(
                 }
             }
         )
-        // NO loading indicator - native apps don't show loading for cached data
+        }
     }
 }

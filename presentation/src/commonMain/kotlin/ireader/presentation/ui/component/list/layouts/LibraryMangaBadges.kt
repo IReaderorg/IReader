@@ -110,7 +110,7 @@ fun BookCoverBadge(
         text = text,
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
-            .background(backgroundColor)
+            .background(backgroundColor.copy(alpha = 0.7f))
             .padding(horizontal = 6.dp, vertical = 3.dp),
         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
         color = textColor

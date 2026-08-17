@@ -48,6 +48,7 @@
     <string name="added_source_rule">Regla de fuente añadida: %1$s</string>
     <string name="added_to_category">Añadido a %s</string>
     <string name="added_to_library">Añadido a la biblioteca</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Detalles Adicionales:</string>
     <string name="additional_details_optional">Detalles adicionales (opcional)</string>
     <string name="additional_information">Información adicional</string>
@@ -2094,6 +2095,8 @@
     <string name="results">resultados</string>
     <string name="results_found">resultados encontrados</string>
     <string name="resume">Reanudar</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Reanudar todo</string>
     <string name="resume_download">Reanudar descarga</string>
     <string name="resume_downloads">Reanudar Descargas</string>
@@ -2906,4 +2909,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Preajuste rápido</string>
+    <string name="cover_theme_preset_subtitle">Aplicar configuraciones predefinidas para la intensidad del tema de portada</string>
+    <string name="cover_theme_backdrop_blur">Desenfoque de fondo de portada</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Ajustar la intensidad del desenfoque para la imagen de portada del encabezado extendido</string>
+    <string name="cover_theme_background_tint_opacity">Opacidad del tinte de fondo</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Controle la intensidad con la que el color de la cobertura se mezcla con los fondos de las tarjetas</string>
+    <string name="cover_theme_preset_off">Apagado</string>
+    <string name="cover_theme_preset_soft">Suave</string>
+    <string name="cover_theme_preset_medium">Medio</string>
+    <string name="cover_theme_preset_high">Alto</string>
 </resources>
+
+
+
+
+
+
+

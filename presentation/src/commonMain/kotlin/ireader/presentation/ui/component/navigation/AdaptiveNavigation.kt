@@ -54,7 +54,6 @@ fun AdaptiveNavigationLayout(
             }
             if (showNavigation) {
                 ModernBottomNavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     content = bottomBarContent
                 )

@@ -47,6 +47,7 @@
     <string name="added_source_rule">Manba qoidasi qo'shildi: %1$s</string>
     <string name="added_to_category">%s ga qoʻshildi</string>
     <string name="added_to_library">Kutubxonaga qo'shildi</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Qo'shimcha ma'lumotlar:</string>
     <string name="additional_details_optional">Qo'shimcha ma'lumotlar (ixtiyoriy)</string>
     <string name="additional_information">Qoʻshimcha maʼlumot</string>
@@ -1877,6 +1878,8 @@ Tavsiya etiladi: 1024x1024 yoki yuqori</string>
     <string name="results">natijalar</string>
     <string name="results_found">natijalar topildi</string>
     <string name="resume">Davom ettirish</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Hammasini davom ettirish</string>
     <string name="resume_download">Yuklab olishni davom ettirish</string>
     <string name="resume_downloads">Yuklab olishlarni davom ettirish</string>
@@ -2491,4 +2494,29 @@ Keling, boshlash uchun bir nechta narsalarni sozlaymiz.</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Tezkor oldindan sozlash</string>
+    <string name="cover_theme_preset_subtitle">Muqova mavzusi intensivligi uchun oldindan belgilangan sozlamalarni qo'llang</string>
+    <string name="cover_theme_backdrop_blur">Muqova fonini xiralashtirish</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Kengaytirilgan sarlavha qopqog'i tasviri uchun xiralik intensivligini sozlang</string>
+    <string name="cover_theme_background_tint_opacity">Fon rangi shaffofligi</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Qopqoq rangining karta foniga qanchalik aralashishini boshqaring</string>
+    <string name="cover_theme_preset_off">Oʻchirilgan</string>
+    <string name="cover_theme_preset_soft">Yumshoq</string>
+    <string name="cover_theme_preset_medium">O'rta</string>
+    <string name="cover_theme_preset_high">Yuqori</string>
 </resources>
+
+
+
+
+
+
+

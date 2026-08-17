@@ -61,7 +61,7 @@ fun BookStatsCard(
                     book.favorite -> Icons.Default.Favorite
                     else -> Icons.Default.FavoriteBorder
                 },
-                value = if (book.favorite) "In Library" else "Not Added",
+                value = if (book.favorite) localizeHelper.localize(Res.string.in_library) else localizeHelper.localize(Res.string.not_added),
                 label = localizeHelper.localize(Res.string.status),
                 iconTint = if (book.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -76,7 +76,7 @@ fun BookStatsCard(
             if (onTracking != null) {
                 ClickableStatItem(
                     icon = Icons.Default.Sync,
-                    value = if (isTracked) "Tracked" else "Not Tracked",
+                    value = if (isTracked) localizeHelper.localize(Res.string.tracked) else localizeHelper.localize(Res.string.not_tracked),
                     label = localizeHelper.localize(Res.string.tracking),
                     iconTint = if (isTracked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = onTracking
@@ -84,7 +84,7 @@ fun BookStatsCard(
             } else {
                 StatItem(
                     icon = Icons.Default.Sync,
-                    value = if (isTracked) "Tracked" else "Not Tracked",
+                    value = if (isTracked) localizeHelper.localize(Res.string.tracked) else localizeHelper.localize(Res.string.not_tracked),
                     label = localizeHelper.localize(Res.string.tracking),
                     iconTint = if (isTracked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )

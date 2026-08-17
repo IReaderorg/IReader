@@ -49,6 +49,7 @@
     <string name="added_source_rule">ソースルールを追加しました: %1$s</string>
     <string name="added_to_category">%sに追加しました</string>
     <string name="added_to_library">ライブラリに追加されました</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">追加の詳細:</string>
     <string name="additional_details_optional">追加の詳細（オプション）</string>
     <string name="additional_information">追加情報</string>
@@ -2096,6 +2097,8 @@
     <string name="results">結果</string>
     <string name="results_found">件の結果が見つかりました</string>
     <string name="resume">再開</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">すべて再開</string>
     <string name="resume_download">ダウンロードを再開</string>
     <string name="resume_downloads">ダウンロードを再開</string>
@@ -2911,4 +2914,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">クイックプリセット</string>
+    <string name="cover_theme_preset_subtitle">カバーテーマの強度に事前定義された設定を適用する</string>
+    <string name="cover_theme_backdrop_blur">カバー背景のぼかし</string>
+    <string name="cover_theme_backdrop_blur_subtitle">拡張ヘッダー カバー画像のぼかし強度を調整する</string>
+    <string name="cover_theme_background_tint_opacity">背景の色合いの不透明度</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">カバーの色がカードの背景にどの程度溶け込むかを制御します</string>
+    <string name="cover_theme_preset_off">オフ</string>
+    <string name="cover_theme_preset_soft">柔らかい</string>
+    <string name="cover_theme_preset_medium">中くらい</string>
+    <string name="cover_theme_preset_high">高い</string>
 </resources>
+
+
+
+
+
+
+

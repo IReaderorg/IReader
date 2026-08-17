@@ -48,6 +48,7 @@
     <string name="added_source_rule">स्रोत नियम जोड़ा गया: %1$s</string>
     <string name="added_to_category">%s में जोड़ा गया</string>
     <string name="added_to_library">पुस्तकालय में जोड़ा गया</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">अतिरिक्त विवरण:</string>
     <string name="additional_details_optional">अतिरिक्त विवरण (वैकल्पिक)</string>
     <string name="additional_information">अतिरिक्त जानकारी</string>
@@ -2094,6 +2095,8 @@
     <string name="results">परिणाम</string>
     <string name="results_found">परिणाम मिले</string>
     <string name="resume">फिर से शुरू करें</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">सभी फिर से शुरू करें</string>
     <string name="resume_download">डाउनलोड फिर से शुरू करें</string>
     <string name="resume_downloads">डाउनलोड फिर से शुरू करें</string>
@@ -2906,4 +2909,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">त्वरित प्रीसेट</string>
+    <string name="cover_theme_preset_subtitle">कवर थीम की तीव्रता के लिए पूर्वनिर्धारित सेटिंग्स लागू करें</string>
+    <string name="cover_theme_backdrop_blur">कवर पृष्ठभूमि धुंधला</string>
+    <string name="cover_theme_backdrop_blur_subtitle">विस्तारित हेडर कवर छवि के लिए धुंधली तीव्रता को समायोजित करें</string>
+    <string name="cover_theme_background_tint_opacity">पृष्ठभूमि टिंट अपारदर्शिता</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">नियंत्रित करें कि कवर का रंग कार्ड की पृष्ठभूमि में कितनी तीव्रता से मिश्रित होता है</string>
+    <string name="cover_theme_preset_off">बंद</string>
+    <string name="cover_theme_preset_soft">कोमल</string>
+    <string name="cover_theme_preset_medium">मध्यम</string>
+    <string name="cover_theme_preset_high">उच्च</string>
 </resources>
+
+
+
+
+
+
+

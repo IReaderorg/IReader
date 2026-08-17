@@ -49,6 +49,7 @@
     <string name="added_source_rule">출처 규칙 추가됨: %1$s</string>
     <string name="added_to_category">%s에 추가됨</string>
     <string name="added_to_library">라이브러리에 추가됨</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">추가 정보:</string>
     <string name="additional_details_optional">추가 세부 정보 (선택 사항)</string>
     <string name="additional_information">추가 정보</string>
@@ -2090,6 +2091,8 @@
     <string name="results">결과</string>
     <string name="results_found">결과 찾음</string>
     <string name="resume">다시 시작</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">모두 재개</string>
     <string name="resume_download">다운로드 다시 시작</string>
     <string name="resume_downloads">다운로드 재개</string>
@@ -2905,4 +2908,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">빠른 사전 설정</string>
+    <string name="cover_theme_preset_subtitle">표지 테마 강도에 대해 사전 정의된 설정 적용</string>
+    <string name="cover_theme_backdrop_blur">표지 배경 흐림</string>
+    <string name="cover_theme_backdrop_blur_subtitle">확장된 헤더 표지 이미지의 흐림 강도 조정</string>
+    <string name="cover_theme_background_tint_opacity">배경 색조 불투명도</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">표지 색상이 카드 배경에 얼마나 많이 혼합되는지 제어합니다.</string>
+    <string name="cover_theme_preset_off">끄다</string>
+    <string name="cover_theme_preset_soft">부드러운</string>
+    <string name="cover_theme_preset_medium">중간</string>
+    <string name="cover_theme_preset_high">높은</string>
 </resources>
+
+
+
+
+
+
+

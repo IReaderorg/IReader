@@ -49,6 +49,7 @@
     <string name="added_source_rule">အရင်းအမြစ် စည်းမျဉ်း ထည့်သွင်းပြီးပြီ: %1$s</string>
     <string name="added_to_category">%s ထဲသို့ ထည့်သွင်းပြီးပြီ</string>
     <string name="added_to_library">Ditambah ke Perpustakaan</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Butiran Tambahan:</string>
     <string name="additional_details_optional">Butiran tambahan (pilihan)</string>
     <string name="additional_information">နောက်ထပ်အချက်အလက်</string>
@@ -2102,6 +2103,8 @@
     <string name="results">hasil</string>
     <string name="results_found">hasil ditemui</string>
     <string name="resume">Sambung semula</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Sambung Semula Semua</string>
     <string name="resume_download">ဒေါင်းလုဒ် ဆက်လုပ်ပါ</string>
     <string name="resume_downloads">ဒေါင်းလုဒ်များ ပြန်စပါ</string>
@@ -2918,4 +2921,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">အမြန်ကြိုတင်သတ်မှတ်ပါ။</string>
+    <string name="cover_theme_preset_subtitle">မျက်နှာဖုံး အပြင်အဆင် ပြင်းထန်မှုအတွက် ကြိုတင်သတ်မှတ်ထားသော ဆက်တင်များကို အသုံးပြုပါ။</string>
+    <string name="cover_theme_backdrop_blur">နောက်ခံ မှုန်ဝါးမှုကို ဖုံးအုပ်ပါ။</string>
+    <string name="cover_theme_backdrop_blur_subtitle">တိုးချဲ့ခေါင်းစီးကာဗာပုံအတွက် မှုန်ဝါးမှုပြင်းထန်မှုကို ချိန်ညှိပါ။</string>
+    <string name="cover_theme_background_tint_opacity">နောက်ခံအရောင် အလင်းပိတ်ခြင်း။</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">ကတ်နောက်ခံသို့ အရောင်ရောစပ်ပုံကို ဖုံးအုပ်ထားပုံကို ထိန်းချုပ်ပါ။</string>
+    <string name="cover_theme_preset_off">ပိတ်သည်။</string>
+    <string name="cover_theme_preset_soft">ပျော့ပျောင်းသည်။</string>
+    <string name="cover_theme_preset_medium">လတ်</string>
+    <string name="cover_theme_preset_high">မြင့်သည်။</string>
 </resources>
+
+
+
+
+
+
+

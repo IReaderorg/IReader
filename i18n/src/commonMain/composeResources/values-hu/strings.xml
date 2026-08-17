@@ -49,6 +49,7 @@
     <string name="added_source_rule">Hozzáadott forrás szabály: %1$s</string>
     <string name="added_to_category">Hozzáadva ehhez: %s</string>
     <string name="added_to_library">Hozzáadva a könyvtárhoz</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">További részletek:</string>
     <string name="additional_details_optional">További részletek (opcionális)</string>
     <string name="additional_information">További információk</string>
@@ -2104,6 +2105,8 @@
     <string name="results">találatok</string>
     <string name="results_found">találat</string>
     <string name="resume">Folytatás</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Összes folytatása</string>
     <string name="resume_download">Letöltés folytatása</string>
     <string name="resume_downloads">Letöltések folytatása</string>
@@ -2924,4 +2927,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Gyors előbeállítás</string>
+    <string name="cover_theme_preset_subtitle">Alkalmazzon előre meghatározott beállításokat a borítótéma intenzitására</string>
+    <string name="cover_theme_backdrop_blur">Borító Háttér életlenítése</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Állítsa be az elmosódás intenzitását a kiterjesztett fejléc borítóképéhez</string>
+    <string name="cover_theme_background_tint_opacity">Háttér árnyalat átlátszatlansága</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Szabályozhatja, hogy a borító színe milyen erősen keveredjen a kártya hátterébe</string>
+    <string name="cover_theme_preset_off">Le</string>
+    <string name="cover_theme_preset_soft">Puha</string>
+    <string name="cover_theme_preset_medium">Közepes</string>
+    <string name="cover_theme_preset_high">Magas</string>
 </resources>
+
+
+
+
+
+
+

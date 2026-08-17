@@ -85,19 +85,19 @@ fun ResumeReadingCard(
                         )
                     }
                     
-                    // Play Icon Button
-                    val playTint = coverColorScheme?.primary ?: MaterialTheme.colorScheme.primary
-                    IconButton(
-                        onClick = onResume,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = localize(Res.string.resume),
-                            modifier = Modifier.size(18.dp),
-                            tint = playTint
-                        )
-                    }
+                     // Play Icon Button
+                     val playTint = coverColorScheme?.secondary ?: MaterialTheme.colorScheme.secondary
+                     IconButton(
+                         onClick = onResume,
+                         modifier = Modifier.size(32.dp)
+                     ) {
+                         Icon(
+                             imageVector = Icons.Default.PlayArrow,
+                             contentDescription = localize(Res.string.resume),
+                             modifier = Modifier.size(18.dp),
+                             tint = playTint
+                         )
+                     }
                     
                     // Close Button
                     IconButton(

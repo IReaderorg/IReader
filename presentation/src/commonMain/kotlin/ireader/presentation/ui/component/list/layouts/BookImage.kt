@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,6 +27,7 @@ import ireader.domain.models.entities.BaseBook
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.components.IBookImageComposable
+import ireader.presentation.ui.core.theme.LocalCoverBasedThemeForLibrary
 
 /**
  * NATIVE-LIKE BOOK IMAGE COMPOSABLE
@@ -61,21 +63,40 @@ fun BookImage(
     performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
     badge: @Composable BoxScope.() -> Unit,
 ) {
+    val useCoverColors = LocalCoverBasedThemeForLibrary.current
     // Cache BookCover - stable reference prevents recomposition
     val bookCover = remember(book.id, book.cover) { BookCover.from(book) }
     
+    // Generate deterministic accent color from cover URL for library items
+    val coverAccentColor = if (useCoverColors) remember(book.cover) {
+        val hash = book.cover?.hashCode() ?: book.id.hashCode()
+        val hue = (hash and 0x7FFFFFFF) % 360
+        Color.hsv(hue / 360f, 0.7f, 0.5f)
+    } else Color.Gray
+    
     // Pre-compute colors - avoid recalculation during scroll
     val borderColor = remember(selected) {
-        if (selected) Color(0xFF6200EE) else Color(0x1A000000)
+        if (selected) coverAccentColor else Color(0x1A000000)
+    }
+    
+    // Compute high-contrast title color for comfortable mode
+    val titleTextColor = remember(coverAccentColor) {
+        val luminance = coverAccentColor.luminance()
+        if (luminance > 0.5f) Color.Black else Color.White
+    }
+    
+    // Compute semi-transparent badge background
+    val badgeBackgroundColor = remember(coverAccentColor) {
+        coverAccentColor.copy(alpha = 0.7f)
     }
     
     // ZERO crossfade for native-like instant display
     val crossfadeDuration = 0
     
-    // Cache gradient for title overlay
-    val titleGradient = remember {
+    // Cache gradient for title overlay - use cover-based accent
+    val titleGradient = remember(coverAccentColor) {
         Brush.verticalGradient(
-            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
+            colors = listOf(Color.Transparent, coverAccentColor.copy(alpha = 0.85f)),
             startY = 0f,
             endY = 80f
         )
@@ -155,7 +176,7 @@ fun BookImage(
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = titleTextColor,
                 maxLines = 2,
             )
         }

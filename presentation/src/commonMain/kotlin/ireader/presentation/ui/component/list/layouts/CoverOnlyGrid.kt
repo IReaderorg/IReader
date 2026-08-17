@@ -22,6 +22,10 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.rememberIsGridScrollingFast
+import ireader.presentation.ui.settings.appearance.AppearanceViewModel
+import org.koin.compose.getKoin
+import ireader.presentation.ui.core.theme.LocalCoverBasedThemeForLibrary
+import androidx.compose.runtime.CompositionLocalProvider
 
 /**
  * NATIVE-LIKE COVER-ONLY GRID
@@ -49,6 +53,7 @@ fun CoverOnlyGrid(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
+    showLanguageBadge: Boolean = false,
     columns: Int = 3,
     header: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any),
@@ -56,6 +61,7 @@ fun CoverOnlyGrid(
 ) {
     val performanceConfig = LocalPerformanceConfig.current
     val isScrollingFast = rememberIsGridScrollingFast(scrollState)
+    val appearanceViewModel = getKoin().getOrNull<AppearanceViewModel>()
     
     // CRITICAL: Cache selection set with remember to avoid O(n) recreation on every recomposition
     // This is essential for 800+ books where selection changes are frequent
@@ -77,7 +83,10 @@ fun CoverOnlyGrid(
     val contentPadding = remember { PaddingValues(8.dp) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
+        CompositionLocalProvider(
+            LocalCoverBasedThemeForLibrary provides (appearanceViewModel?.coverBasedThemeForLibrary?.value ?: true)
+        ) {
+            LazyVerticalGrid(
             state = scrollState,
             modifier = modifier.fillMaxSize(),
             columns = cells,
@@ -119,7 +128,9 @@ fun CoverOnlyGrid(
                                 unread = if (showUnreadBadge) book.unread else null,
                                 downloaded = if (showReadBadge) book.downloaded else null,
                                 isPinned = false,
-                                isArchived = book.isArchived
+                                isArchived = book.isArchived,
+                                sourceId = book.sourceId,
+                                showLanguage = showLanguageBadge
                             )
                         }
                         if (showInLibraryBadge && book.favorite) {
@@ -139,5 +150,6 @@ fun CoverOnlyGrid(
                 }
             }
         )
+        }
     }
 }

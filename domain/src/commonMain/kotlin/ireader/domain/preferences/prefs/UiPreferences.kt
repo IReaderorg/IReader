@@ -28,6 +28,50 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getEnum("cover_based_theme_style", PreferenceValues.CoverBasedThemeStyle.TonalSpot)
     }
     
+    fun coverBasedThemeSaturation(): Preference<Float> {
+        return preferenceStore.getFloat("cover_based_theme_saturation", 1.0f)
+    }
+    
+    fun coverBasedThemeIntensity(): Preference<Float> {
+        return preferenceStore.getFloat("cover_based_theme_intensity", 1.0f)
+    }
+    
+    fun coverBasedThemeTextColorMode(): Preference<PreferenceValues.CoverBasedTextColorMode> {
+        return preferenceStore.getEnum("cover_based_theme_text_color", PreferenceValues.CoverBasedTextColorMode.Auto)
+    }
+    
+    fun coverBasedThemeForLibrary(): Preference<Boolean> {
+        return preferenceStore.getBoolean("cover_based_theme_for_library", true)
+    }
+    
+    fun coverBasedThemeSource(): Preference<PreferenceValues.CoverBasedThemeSource> {
+        return preferenceStore.getEnum("cover_based_theme_source", PreferenceValues.CoverBasedThemeSource.BookCover)
+    }
+    
+    fun coverBasedThemeSurfaceTinting(): Preference<Boolean> {
+        return preferenceStore.getBoolean("cover_based_theme_surface_tinting", true)
+    }
+    
+    fun coverBasedThemeContrast(): Preference<PreferenceValues.CoverBasedThemeContrast> {
+        return preferenceStore.getEnum("cover_based_theme_contrast", PreferenceValues.CoverBasedThemeContrast.Vibrant)
+    }
+    
+    fun coverBasedThemePreset(): Preference<PreferenceValues.CoverBasedThemePreset> {
+        return preferenceStore.getEnum("cover_based_theme_preset", PreferenceValues.CoverBasedThemePreset.Medium)
+    }
+    
+    fun coverBasedThemeBrightness(): Preference<Float> {
+        return preferenceStore.getFloat("cover_based_theme_brightness", 5f)
+    }
+    
+    fun coverBasedThemeBackgroundTintOpacity(): Preference<Float> {
+        return preferenceStore.getFloat("cover_based_theme_background_tint_opacity", 3f)
+    }
+    
+    fun coverBasedThemeBackdropBlur(): Preference<Float> {
+        return preferenceStore.getFloat("cover_based_theme_backdrop_blur", 0f)
+    }
+    
     fun useTrueBlack(): Preference<Boolean> {
         return preferenceStore.getBoolean("use_true_black", false)
     }

@@ -49,6 +49,7 @@
     <string name="added_source_rule">Regulă de sursă adăugată: %1$s</string>
     <string name="added_to_category">Adăugat la %s</string>
     <string name="added_to_library">Adăugat în bibliotecă</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Detalii suplimentare:</string>
     <string name="additional_details_optional">Detalii suplimentare (opțional)</string>
     <string name="additional_information">Informații Suplimentare</string>
@@ -2103,6 +2104,8 @@
     <string name="results">rezultate</string>
     <string name="results_found">rezultate găsite</string>
     <string name="resume">Reia</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Reia tot</string>
     <string name="resume_download">Reia descărcarea</string>
     <string name="resume_downloads">Reia descărcările</string>
@@ -2919,4 +2922,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Presetare rapidă</string>
+    <string name="cover_theme_preset_subtitle">Aplicați setări predefinite pentru intensitatea temei de copertă</string>
+    <string name="cover_theme_backdrop_blur">Coperta Fundal Blur</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Reglați intensitatea încețoșării pentru imaginea de acoperire a antetului extins</string>
+    <string name="cover_theme_background_tint_opacity">Opacitatea nuanței de fundal</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Controlați cât de puternic se îmbină culoarea copertei în fundalul cardului</string>
+    <string name="cover_theme_preset_off">Oprit</string>
+    <string name="cover_theme_preset_soft">Moale</string>
+    <string name="cover_theme_preset_medium">Mediu</string>
+    <string name="cover_theme_preset_high">Ridicat</string>
 </resources>
+
+
+
+
+
+
+

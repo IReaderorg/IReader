@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,7 +41,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 @Composable
 fun ModernBottomNavigationBar(
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
+    containerColor: Color = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.primary, 0.08f),
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     content: @Composable RowScope.() -> Unit
 ) {

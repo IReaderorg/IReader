@@ -217,7 +217,8 @@ class DefaultRequestQueue(
                     
                     // Execute the request in a tracked job so it can be cancelled
                     val deferred = (request as QueuedRequest<Any?>).result
-                    val job = scope.launch {
+                    var trackedJob: kotlinx.coroutines.Job? = null
+                    trackedJob = scope.launch {
                         try {
                             val result = request.request()
                             if (deferred.isActive) {
@@ -229,7 +230,7 @@ class DefaultRequestQueue(
                             }
                         } finally {
                             mutex.withLock {
-                                activeRequestJobs[domain]?.remove(job)
+                                activeRequestJobs[domain]?.remove(trackedJob)
                                 if (activeRequestJobs[domain]?.isEmpty() == true) {
                                     activeRequestJobs.remove(domain)
                                 }
@@ -238,7 +239,7 @@ class DefaultRequestQueue(
                     }
                     
                     mutex.withLock {
-                        activeRequestJobs.getOrPut(domain) { mutableListOf() }.add(job)
+                        activeRequestJobs.getOrPut(domain) { mutableListOf() }.add(trackedJob)
                     }
                 }
             } finally {

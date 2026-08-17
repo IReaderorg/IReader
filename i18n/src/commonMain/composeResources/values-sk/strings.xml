@@ -49,6 +49,7 @@
     <string name="added_source_rule">Pridané pravidlo zdroja: %1$s</string>
     <string name="added_to_category">Pridané do %s</string>
     <string name="added_to_library">Pridané do knižnice</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Ďalšie podrobnosti:</string>
     <string name="additional_details_optional">Ďalšie podrobnosti (voliteľné)</string>
     <string name="additional_information">Ďalšie informácie</string>
@@ -2105,6 +2106,8 @@ nastaveniach.
     <string name="results">výsledky</string>
     <string name="results_found">nájdené výsledky</string>
     <string name="resume">Obnoviť</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Obnoviť všetky</string>
     <string name="resume_download">Pokračovať v sťahovaní</string>
     <string name="resume_downloads">Pokračovať v sťahovaní</string>
@@ -2921,4 +2924,29 @@ kapitoly.
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Rýchla predvoľba</string>
+    <string name="cover_theme_preset_subtitle">Použite preddefinované nastavenia pre intenzitu motívu pokrytia</string>
+    <string name="cover_theme_backdrop_blur">Cover Backdrop Blur</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Upravte intenzitu rozmazania pre rozšírený titulný obrázok</string>
+    <string name="cover_theme_background_tint_opacity">Nepriehľadnosť odtieňa pozadia</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Ovládajte, do akej miery sa farba krytu mieša s pozadím kariet</string>
+    <string name="cover_theme_preset_off">Vypnuté</string>
+    <string name="cover_theme_preset_soft">Mäkký</string>
+    <string name="cover_theme_preset_medium">Stredná</string>
+    <string name="cover_theme_preset_high">Vysoká</string>
 </resources>
+
+
+
+
+
+
+

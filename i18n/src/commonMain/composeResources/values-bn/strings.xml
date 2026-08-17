@@ -48,6 +48,7 @@
     <string name="added_source_rule">উৎস নিয়ম যোগ করা হয়েছে: %1$s</string>
     <string name="added_to_category">%s-এ যোগ করা হয়েছে</string>
     <string name="added_to_library">লাইব্রেরিতে যোগ করা হয়েছে</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">অতিরিক্ত বিবরণ:</string>
     <string name="additional_details_optional">অতিরিক্ত বিবরণ (ঐচ্ছিক)</string>
     <string name="additional_information">অতিরিক্ত তথ্য</string>
@@ -2087,6 +2088,8 @@
     <string name="results">ফলাফল</string>
     <string name="results_found">ফলাফল পাওয়া গেছে</string>
     <string name="resume">পুনরায় শুরু করুন</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">সব আবার শুরু করুন</string>
     <string name="resume_download">ডাউনলোড পুনরায় শুরু করুন</string>
     <string name="resume_downloads">ডাউনলোডগুলি পুনরায় শুরু করুন</string>
@@ -2899,4 +2902,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">দ্রুত প্রিসেট</string>
+    <string name="cover_theme_preset_subtitle">কভার থিমের তীব্রতার জন্য পূর্বনির্ধারিত সেটিংস প্রয়োগ করুন</string>
+    <string name="cover_theme_backdrop_blur">কভার ব্যাকড্রপ ব্লার</string>
+    <string name="cover_theme_backdrop_blur_subtitle">বর্ধিত হেডার কভার ইমেজের জন্য ঝাপসা তীব্রতা সামঞ্জস্য করুন</string>
+    <string name="cover_theme_background_tint_opacity">ব্যাকগ্রাউন্ড টিন্ট অপাসিটি</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">কার্ড ব্যাকগ্রাউন্ডে রঙ মিশে কতটা ভারীভাবে কভার হয় তা নিয়ন্ত্রণ করুন</string>
+    <string name="cover_theme_preset_off">বন্ধ</string>
+    <string name="cover_theme_preset_soft">নরম</string>
+    <string name="cover_theme_preset_medium">মাঝারি</string>
+    <string name="cover_theme_preset_high">উচ্চ</string>
 </resources>
+
+
+
+
+
+
+

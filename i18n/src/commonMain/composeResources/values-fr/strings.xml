@@ -49,6 +49,7 @@
     <string name="added_source_rule">Règle de source ajoutée : %1$s</string>
     <string name="added_to_category">Ajouté à %s</string>
     <string name="added_to_library">Ajouté à la bibliothèque</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Détails supplémentaires :</string>
     <string name="additional_details_optional">Détails supplémentaires (facultatif)</string>
     <string name="additional_information">Informations supplémentaires</string>
@@ -2086,6 +2087,8 @@
     <string name="results">résultats</string>
     <string name="results_found">résultats trouvés</string>
     <string name="resume">Reprendre</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Tout reprendre</string>
     <string name="resume_download">Reprendre le téléchargement</string>
     <string name="resume_downloads">Reprendre les téléchargements</string>
@@ -2902,4 +2905,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Préréglage rapide</string>
+    <string name="cover_theme_preset_subtitle">Appliquer des paramètres prédéfinis pour l'intensité du thème de couverture</string>
+    <string name="cover_theme_backdrop_blur">Flou de fond de couverture</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Ajuster l'intensité du flou pour l'image de couverture d'en-tête étendue</string>
+    <string name="cover_theme_background_tint_opacity">Opacité de la teinte d’arrière-plan</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Contrôlez la façon dont la couleur de la couverture se fond dans les arrière-plans des cartes</string>
+    <string name="cover_theme_preset_off">Désactivé</string>
+    <string name="cover_theme_preset_soft">Doux</string>
+    <string name="cover_theme_preset_medium">Moyen</string>
+    <string name="cover_theme_preset_high">Haut</string>
 </resources>
+
+
+
+
+
+
+

@@ -49,6 +49,7 @@
     <string name="added_source_rule">Aturan sumber ditambahkan: %1$s</string>
     <string name="added_to_category">Ditambahkan ke %s</string>
     <string name="added_to_library">Ditambahkan ke Pustaka</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Detail Tambahan:</string>
     <string name="additional_details_optional">Detail tambahan (opsional)</string>
     <string name="additional_information">Informasi Tambahan</string>
@@ -2102,6 +2103,8 @@
     <string name="results">hasil</string>
     <string name="results_found">hasil ditemukan</string>
     <string name="resume">Lanjutkan</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Lanjutkan Semua</string>
     <string name="resume_download">Lanjutkan Unduhan</string>
     <string name="resume_downloads">Lanjutkan Unduhan</string>
@@ -2918,4 +2921,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Prasetel Cepat</string>
+    <string name="cover_theme_preset_subtitle">Terapkan pengaturan yang telah ditentukan sebelumnya untuk intensitas tema sampul</string>
+    <string name="cover_theme_backdrop_blur">Penutup Latar Belakang Buram</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Sesuaikan intensitas blur untuk gambar sampul header yang diperluas</string>
+    <string name="cover_theme_background_tint_opacity">Opasitas Warna Latar Belakang</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Kontrol seberapa banyak warna sampul menyatu dengan latar belakang kartu</string>
+    <string name="cover_theme_preset_off">Mati</string>
+    <string name="cover_theme_preset_soft">Lembut</string>
+    <string name="cover_theme_preset_medium">Sedang</string>
+    <string name="cover_theme_preset_high">Tinggi</string>
 </resources>
+
+
+
+
+
+
+

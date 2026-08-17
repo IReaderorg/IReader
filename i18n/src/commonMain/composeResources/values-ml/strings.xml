@@ -49,6 +49,7 @@
     <string name="added_source_rule">ചേർത്ത ഉറവിട നിയമം: %1$s</string>
     <string name="added_to_category">%s-ൽ ചേർത്തു</string>
     <string name="added_to_library">ലൈബ്രറിയിലേക്ക് ചേർത്തു</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">கூடுதல் விவரங்கள்:</string>
     <string name="additional_details_optional">അധിക വിശദാംശങ്ങൾ (ഓപ്ഷണൽ)</string>
     <string name="additional_information">അധിക വിവരങ്ങൾ</string>
@@ -2097,6 +2098,8 @@
     <string name="results">ഫലങ്ങൾ</string>
     <string name="results_found">ഫലങ്ങൾ കണ്ടെത്തി</string>
     <string name="resume">പുനരാരംഭിക്കുക</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">എല്ലാം പുനരാരംഭിക്കുക</string>
     <string name="resume_download">ഡൗൺലോഡ് പുനരാരംഭിക്കുക</string>
     <string name="resume_downloads">ഡൗൺലോഡുകൾ പുനരാരംഭിക്കുക</string>
@@ -2912,4 +2915,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">ദ്രുത പ്രീസെറ്റ്</string>
+    <string name="cover_theme_preset_subtitle">കവർ തീം തീവ്രതയ്ക്കായി മുൻകൂട്ടി നിശ്ചയിച്ച ക്രമീകരണങ്ങൾ പ്രയോഗിക്കുക</string>
+    <string name="cover_theme_backdrop_blur">കവർ ബാക്ക്‌ഡ്രോപ്പ് മങ്ങൽ</string>
+    <string name="cover_theme_backdrop_blur_subtitle">വിപുലീകൃത ഹെഡർ കവർ ചിത്രത്തിനായി ബ്ലർ തീവ്രത ക്രമീകരിക്കുക</string>
+    <string name="cover_theme_background_tint_opacity">പശ്ചാത്തല ടിൻ്റ് അതാര്യത</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">കാർഡ് പശ്ചാത്തലങ്ങളിലേക്ക് വർണ്ണം എത്രമാത്രം കവർ ചെയ്യുന്നു എന്നത് നിയന്ത്രിക്കുക</string>
+    <string name="cover_theme_preset_off">ഓഫ്</string>
+    <string name="cover_theme_preset_soft">മൃദുവായ</string>
+    <string name="cover_theme_preset_medium">ഇടത്തരം</string>
+    <string name="cover_theme_preset_high">ഉയർന്നത്</string>
 </resources>
+
+
+
+
+
+
+

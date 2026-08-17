@@ -599,6 +599,30 @@
     <string name="cover_theme_monochrome">أحادي اللون</string>
     <string name="cover_theme_fidelity">وفاء</string>
     <string name="cover_theme_content">محتوى</string>
+    <string name="cover_theme_advanced_controls">إعدادات متقدمة</string>
+    <string name="cover_theme_saturation">التشبع</string>
+    <string name="cover_theme_intensity">الحدّة</string>
+    <string name="cover_theme_text_color">وضع لون النص</string>
+    <string name="cover_theme_text_color_auto">تلقائي</string>
+    <string name="cover_theme_text_color_light">فاتح</string>
+    <string name="cover_theme_text_color_dark">داكن</string>
+    <string name="cover_theme_text_color_subtitle">فرض ألوان نص فاتحة أو داكنة لسهولة القراءة</string>
+    <string name="cover_theme_reset_settings">إعادة تعيين إعدادات سمة الغلاف</string>
+    <string name="cover_based_theme_for_library">استخدام ألوان الغلاف في المكتبة</string>
+    <string name="cover_based_theme_for_library_subtitle">تطبيق ألوان مستندة إلى الغلاف على عناصر الكتب في المكتبة</string>
+    <string name="cover_theme_source">مصدر استخراج الألوان</string>
+    <string name="cover_theme_source_subtitle">اختر من حيث يتم استخراج الألوان الديناميكية</string>
+    <string name="cover_theme_source_book_cover">غلاف الكتاب</string>
+    <string name="cover_theme_source_system_material_you">Material You للنظام</string>
+    <string name="cover_theme_source_static_theme">ثيم التطبيق الثابت</string>
+    <string name="cover_theme_surface_tinting">تلوين خلفية البطاقات</string>
+    <string name="cover_theme_surface_tinting_subtitle">تطبيق لون خفيف من الغلاف على خلفيات البطاقات</string>
+    <string name="cover_theme_contrast">تباين السمة</string>
+    <string name="cover_theme_contrast_subtitle">تحكم في أولوية لوحة الألوان لضمان القراءة</string>
+    <string name="cover_theme_contrast_vibrant">نابض بالحياة</string>
+    <string name="cover_theme_contrast_muted">هادئ</string>
+    <string name="cover_theme_contrast_high">تباين عالي</string>
+    <string name="reader_text_contrast_protected">تباين نص القارئ محمي</string>
     <string name="cutout_area_behavior">سلوك منطقة القطع</string>
     <string name="d1_database_id">معرف قاعدة بيانات D1</string>
     <string name="daily">يوميًا</string>
@@ -2917,4 +2941,15 @@
     <string name="youve_reached_the_end">لقد وصلت إلى النهاية!</string>
     <string name="zoom_in">تكبير</string>
     <string name="zoom_out">تصغير</string>
+    <string name="cover_theme_preset">إعداد مسبق سريع</string>
+    <string name="cover_theme_preset_subtitle">قم بتطبيق الإعدادات المحددة مسبقًا لكثافة موضوع الغلاف</string>
+    <string name="cover_theme_backdrop_blur">تغطية الخلفية طمس</string>
+    <string name="cover_theme_backdrop_blur_subtitle">اضبط شدة التمويه لصورة غلاف الرأس الممتد</string>
+    <string name="cover_theme_background_tint_opacity">عتامة لون الخلفية</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">التحكم في مدى كثافة لون الغلاف الذي يمتزج مع خلفيات البطاقة</string>
+    <string name="cover_theme_preset_off">عن</string>
+    <string name="cover_theme_preset_soft">ناعم</string>
+    <string name="cover_theme_preset_medium">واسطة</string>
+    <string name="cover_theme_preset_high">عالي</string>
 </resources>
+

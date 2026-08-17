@@ -49,6 +49,7 @@
     <string name="added_source_rule">已新增來源規則：%1$s</string>
     <string name="added_to_category">已新增至 %s</string>
     <string name="added_to_library">已新增到書庫</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">其他詳細資訊:</string>
     <string name="additional_details_optional">其他詳細資訊（選填）</string>
     <string name="additional_information">附加資訊</string>
@@ -2089,6 +2090,8 @@
     <string name="results">結果</string>
     <string name="results_found">已找到結果</string>
     <string name="resume">恢復</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">全部恢復</string>
     <string name="resume_download">繼續下載</string>
     <string name="resume_downloads">恢復下載</string>
@@ -2904,4 +2907,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_backdrop_blur">封面背景模糊</string>
+    <string name="cover_theme_backdrop_blur_subtitle">調整擴展標題封面圖像的模糊強度</string>
+    <string name="cover_theme_background_tint_opacity">背景色調不透明度</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">控制覆蓋顏色融入卡片背景的程度</string>
+    <string name="cover_theme_preset">快速預設</string>
+    <string name="cover_theme_preset_subtitle">應用封面主題強度的預定義設置</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset_off">離開</string>
+    <string name="cover_theme_preset_soft">柔軟的</string>
+    <string name="cover_theme_preset_medium">中等的</string>
+    <string name="cover_theme_preset_high">高的</string>
 </resources>
+
+
+
+
+
+
+

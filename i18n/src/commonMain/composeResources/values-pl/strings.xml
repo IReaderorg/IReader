@@ -48,6 +48,7 @@
     <string name="added_source_rule">Dodano zasadę źródła: %1$s</string>
     <string name="added_to_category">Dodano do %s</string>
     <string name="added_to_library">Dodano do biblioteki</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dodatkowe szczegóły:</string>
     <string name="additional_details_optional">Dodatkowe szczegóły (opcjonalnie)</string>
     <string name="additional_information">Dodatkowe Informacje</string>
@@ -2095,6 +2096,8 @@ Zalecane: 1024x1024 lub wyższe</string>
     <string name="results">wyników</string>
     <string name="results_found">znalezionych wyników</string>
     <string name="resume">Wznów</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Wznów wszystkie</string>
     <string name="resume_download">Wznów pobieranie</string>
     <string name="resume_downloads">Wznów pobieranie</string>
@@ -2910,4 +2913,29 @@ Zalecane: 1024x1024 lub wyższe</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Szybkie ustawienie wstępne</string>
+    <string name="cover_theme_preset_subtitle">Zastosuj predefiniowane ustawienia intensywności motywu okładki</string>
+    <string name="cover_theme_backdrop_blur">Okładka Rozmycie Tła</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Dostosuj intensywność rozmycia rozszerzonego obrazu okładki nagłówka</string>
+    <string name="cover_theme_background_tint_opacity">Nieprzezroczystość odcienia tła</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Kontroluj stopień wtapiania się koloru okładki w tło karty</string>
+    <string name="cover_theme_preset_off">Wyłączony</string>
+    <string name="cover_theme_preset_soft">Miękki</string>
+    <string name="cover_theme_preset_medium">Średni</string>
+    <string name="cover_theme_preset_high">Wysoki</string>
 </resources>
+
+
+
+
+
+
+

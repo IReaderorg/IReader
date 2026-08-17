@@ -49,6 +49,7 @@
     <string name="added_source_rule">Quellen-Regel hinzugefügt: %1$s</string>
     <string name="added_to_category">Zu %s hinzugefügt</string>
     <string name="added_to_library">Zur Bibliothek hinzugefügt</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Zusätzliche Details:</string>
     <string name="additional_details_optional">Zusätzliche Details (optional)</string>
     <string name="additional_information">Zusätzliche Informationen</string>
@@ -2107,6 +2108,8 @@ Empfohlen: 1024x1024 oder höher</string>
     <string name="results">Ergebnisse</string>
     <string name="results_found">Ergebnisse gefunden</string>
     <string name="resume">Fortsetzen</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Alle fortsetzen</string>
     <string name="resume_download">Download fortsetzen</string>
     <string name="resume_downloads">Downloads fortsetzen</string>
@@ -2929,4 +2932,29 @@ Lassen Sie uns ein paar Dinge einrichten, um loszulegen.</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Schnellvoreinstellung</string>
+    <string name="cover_theme_preset_subtitle">Wenden Sie vordefinierte Einstellungen für die Intensität des Cover-Themas an</string>
+    <string name="cover_theme_backdrop_blur">Hintergrundunschärfe abdecken</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Passen Sie die Unschärfeintensität für das Titelbild der erweiterten Kopfzeile an</string>
+    <string name="cover_theme_background_tint_opacity">Deckkraft der Hintergrundtönung</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Steuern Sie, wie stark sich die Deckfarbe in den Kartenhintergrund einfügt</string>
+    <string name="cover_theme_preset_off">Aus</string>
+    <string name="cover_theme_preset_soft">Weich</string>
+    <string name="cover_theme_preset_medium">Medium</string>
+    <string name="cover_theme_preset_high">Hoch</string>
 </resources>
+
+
+
+
+
+
+

@@ -49,6 +49,7 @@
     <string name="added_source_rule">Dodano pravilo izvora: %1$s</string>
     <string name="added_to_category">Dodano u %s</string>
     <string name="added_to_library">Dodano u biblioteku</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dodatni detalji:</string>
     <string name="additional_details_optional">Dodatni detalji (izborno)</string>
     <string name="additional_information">Dodatne informacije</string>
@@ -2093,6 +2094,8 @@
     <string name="results">rezultati</string>
     <string name="results_found">rezultata pronađeno</string>
     <string name="resume">Nastavi</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Nastavi sve</string>
     <string name="resume_download">Nastavi preuzimanje</string>
     <string name="resume_downloads">Nastavi preuzimanja</string>
@@ -2909,4 +2912,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Brzo unaprijed postavljeno</string>
+    <string name="cover_theme_preset_subtitle">Primijenite unaprijed definirane postavke za intenzitet naslovne teme</string>
+    <string name="cover_theme_backdrop_blur">Zamućenje pozadine naslovnice</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Podesite intenzitet zamućenja za naslovnu sliku proširenog zaglavlja</string>
+    <string name="cover_theme_background_tint_opacity">Neprozirnost nijansi pozadine</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Kontrolirajte koliko se boja naslovnice stapa s pozadinom kartice</string>
+    <string name="cover_theme_preset_off">Isključeno</string>
+    <string name="cover_theme_preset_soft">Meko</string>
+    <string name="cover_theme_preset_medium">srednje</string>
+    <string name="cover_theme_preset_high">visoko</string>
 </resources>
+
+
+
+
+
+
+

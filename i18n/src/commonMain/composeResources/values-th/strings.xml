@@ -48,6 +48,7 @@
     <string name="added_source_rule">เพิ่มกฎแหล่งที่มา: %1$s</string>
     <string name="added_to_category">เพิ่มไปยัง %s</string>
     <string name="added_to_library">เพิ่มลงในคลังหนังสือแล้ว</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">รายละเอียดเพิ่มเติม:</string>
     <string name="additional_details_optional">รายละเอียดเพิ่มเติม (ไม่บังคับ)</string>
     <string name="additional_information">ข้อมูลเพิ่มเติม</string>
@@ -2088,6 +2089,8 @@
     <string name="results">ผลลัพธ์</string>
     <string name="results_found">พบผลลัพธ์</string>
     <string name="resume">ดำเนินการต่อ</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">ดำเนินการต่อทั้งหมด</string>
     <string name="resume_download">ดำเนินการดาวน์โหลดต่อ</string>
     <string name="resume_downloads">ดำเนินการดาวน์โหลดต่อ</string>
@@ -2901,4 +2904,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Quick Preset</string>
+    <string name="cover_theme_preset_subtitle">ใช้การตั้งค่าที่กำหนดไว้ล่วงหน้าสำหรับความเข้มของธีมหน้าปก</string>
+    <string name="cover_theme_backdrop_blur">ปกปิดฉากหลังเบลอ</string>
+    <string name="cover_theme_backdrop_blur_subtitle">ปรับความเข้มของภาพเบลอสำหรับภาพปกส่วนหัวที่ขยาย</string>
+    <string name="cover_theme_background_tint_opacity">ความทึบของสีพื้นหลัง</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">ควบคุมว่าสีปกจะผสมเข้ากับพื้นหลังการ์ดมากเพียงใด</string>
+    <string name="cover_theme_preset_off">ปิด</string>
+    <string name="cover_theme_preset_soft">อ่อนนุ่ม</string>
+    <string name="cover_theme_preset_medium">ปานกลาง</string>
+    <string name="cover_theme_preset_high">สูง</string>
 </resources>
+
+
+
+
+
+
+

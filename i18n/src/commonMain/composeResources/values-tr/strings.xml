@@ -49,6 +49,7 @@
     <string name="added_source_rule">Eklenen kaynak kuralı: %1$s</string>
     <string name="added_to_category">%s kategorisine eklendi</string>
     <string name="added_to_library">Kütüphaneye Eklendi</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Ek Ayrıntılar:</string>
     <string name="additional_details_optional">Ek ayrıntılar (isteğe bağlı)</string>
     <string name="additional_information">Ek Bilgiler</string>
@@ -2098,6 +2099,8 @@
     <string name="results">sonuçlar</string>
     <string name="results_found">sonuç bulundu</string>
     <string name="resume">Devam Et</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Tümünü Devam Ettir</string>
     <string name="resume_download">İndirmeye Devam Et</string>
     <string name="resume_downloads">İndirmeleri Devam Ettir</string>
@@ -2913,4 +2916,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Hızlı Ön Ayar</string>
+    <string name="cover_theme_preset_subtitle">Kapak teması yoğunluğu için önceden tanımlanmış ayarları uygulama</string>
+    <string name="cover_theme_backdrop_blur">Kapak Arka Plan Bulanıklığı</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Genişletilmiş başlık kapak resmi için bulanıklık yoğunluğunu ayarlayın</string>
+    <string name="cover_theme_background_tint_opacity">Arka Plan Renk Tonu Opaklığı</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Kapak renginin kart arka planlarına ne kadar yoğun şekilde karışacağını kontrol edin</string>
+    <string name="cover_theme_preset_off">Kapalı</string>
+    <string name="cover_theme_preset_soft">Yumuşak</string>
+    <string name="cover_theme_preset_medium">Orta</string>
+    <string name="cover_theme_preset_high">Yüksek</string>
 </resources>
+
+
+
+
+
+
+

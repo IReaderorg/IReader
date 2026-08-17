@@ -48,6 +48,7 @@
     <string name="added_source_rule">Regra de fonte adicionada: %1$s</string>
     <string name="added_to_category">Adicionado a %s</string>
     <string name="added_to_library">Adicionado à Biblioteca</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Detalhes Adicionais:</string>
     <string name="additional_details_optional">Detalhes adicionais (opcional)</string>
     <string name="additional_information">Informações Adicionais</string>
@@ -2101,6 +2102,8 @@ Recomendado: 1024x1024 ou superior</string>
     <string name="results">resultados</string>
     <string name="results_found">resultados encontrados</string>
     <string name="resume">Retomar</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Retomar Todos</string>
     <string name="resume_download">Retomar Download</string>
     <string name="resume_downloads">Retomar Downloads</string>
@@ -2920,4 +2923,29 @@ Recomendado: 1024x1024 ou superior</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Predefinição rápida</string>
+    <string name="cover_theme_preset_subtitle">Aplicar configurações predefinidas para intensidade do tema de capa</string>
+    <string name="cover_theme_backdrop_blur">Desfoque de fundo da capa</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Ajuste a intensidade do desfoque para a imagem estendida da capa do cabeçalho</string>
+    <string name="cover_theme_background_tint_opacity">Opacidade da tonalidade de fundo</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Control how heavily cover color blends into card backgrounds</string>
+    <string name="cover_theme_preset_off">Desligado</string>
+    <string name="cover_theme_preset_soft">Macio</string>
+    <string name="cover_theme_preset_medium">Médio</string>
+    <string name="cover_theme_preset_high">Alto</string>
 </resources>
+
+
+
+
+
+
+

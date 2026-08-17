@@ -304,7 +304,6 @@ object MainStarterScreen {
                             exit = shrinkVertically(),
                         ) {
                             ModernBottomNavigationBar(
-                                containerColor = MaterialTheme.colorScheme.surface,
                                 contentColor = MaterialTheme.colorScheme.onSurface
                             ) {
                                 BottomNavTabItem(

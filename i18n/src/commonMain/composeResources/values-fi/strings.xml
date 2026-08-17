@@ -49,6 +49,7 @@
     <string name="added_source_rule">Lisätty lähdesääntö: %1$s</string>
     <string name="added_to_category">Lisätty luokkaan %s</string>
     <string name="added_to_library">Lisätty kirjastoon</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Lisätietoja:</string>
     <string name="additional_details_optional">Lisätiedot (valinnainen)</string>
     <string name="additional_information">Lisätiedot</string>
@@ -2106,6 +2107,8 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="results">tulokset</string>
     <string name="results_found">tulosta löydetty</string>
     <string name="resume">Jatka</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Jatka kaikkia</string>
     <string name="resume_download">Jatka latausta</string>
     <string name="resume_downloads">Jatka latauksia</string>
@@ -2921,4 +2924,29 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Nopea esiasetus</string>
+    <string name="cover_theme_preset_subtitle">Käytä valmiita kansiteeman intensiteetin asetuksia</string>
+    <string name="cover_theme_backdrop_blur">Kannen taustan sumennus</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Säädä laajennetun otsikon kansikuvan epäterävyyttä</string>
+    <string name="cover_theme_background_tint_opacity">Taustan sävyn läpinäkyvyys</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Hallitse kuinka voimakkaasti kannen väri sekoittuu korttien taustoihin</string>
+    <string name="cover_theme_preset_off">Pois</string>
+    <string name="cover_theme_preset_soft">Pehmeä</string>
+    <string name="cover_theme_preset_medium">Keskikokoinen</string>
+    <string name="cover_theme_preset_high">Korkea</string>
 </resources>
+
+
+
+
+
+
+

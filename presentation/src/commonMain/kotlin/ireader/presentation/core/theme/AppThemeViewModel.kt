@@ -50,6 +50,17 @@ class AppThemeViewModel(
     private val dynamicColorModeState = uiPreferences.dynamicColorMode().asState()
     private val coverBasedThemeEnabledState = uiPreferences.coverBasedThemeEnabled().asState()
     private val coverBasedThemeStyleState = uiPreferences.coverBasedThemeStyle().asState()
+    private val coverBasedThemeSaturationState = uiPreferences.coverBasedThemeSaturation().asState()
+    private val coverBasedThemeIntensityState = uiPreferences.coverBasedThemeIntensity().asState()
+    private val coverBasedThemeTextColorModeState = uiPreferences.coverBasedThemeTextColorMode().asState()
+    private val coverBasedThemeForLibraryState = uiPreferences.coverBasedThemeForLibrary().asState()
+    private val coverBasedThemeSourceState = uiPreferences.coverBasedThemeSource().asState()
+    private val coverBasedThemeSurfaceTintingState = uiPreferences.coverBasedThemeSurfaceTinting().asState()
+    private val coverBasedThemeContrastState = uiPreferences.coverBasedThemeContrast().asState()
+    private val coverBasedThemePresetState = uiPreferences.coverBasedThemePreset().asState()
+    private val coverBasedThemeBrightnessState = uiPreferences.coverBasedThemeBrightness().asState()
+    private val coverBasedThemeBackgroundTintOpacityState = uiPreferences.coverBasedThemeBackgroundTintOpacity().asState()
+    private val coverBasedThemeBackdropBlurState = uiPreferences.coverBasedThemeBackdropBlur().asState()
     private val useTrueBlackState = uiPreferences.useTrueBlack().asState()
     private val appUiFontState = uiPreferences.appUiFont().asState()
     
@@ -83,7 +94,280 @@ class AppThemeViewModel(
                     PreferenceValues.ThemeMode.Dark -> true
                     else -> lastAppliedIsDark
                 }
-                coverBasedThemeManager?.applyCoverBasedTheme(currentUrl, null, newStyle, resolvedIsDark)
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when contrast changes
+        coverBasedThemeContrastState.value
+        uiPreferences.coverBasedThemeContrast().changes().onEach { newContrast ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    newContrast,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when preset changes
+        coverBasedThemePresetState.value
+        uiPreferences.coverBasedThemePreset().changes().onEach { preset ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                val presetSaturation: Float
+                val presetIntensity: Float
+                val presetBrightness: Float
+                val presetBackgroundTintOpacity: Float
+                when (preset) {
+                    PreferenceValues.CoverBasedThemePreset.Off -> {
+                        presetSaturation = 0f
+                        presetIntensity = 0f
+                        presetBrightness = 0f
+                        presetBackgroundTintOpacity = 0f
+                    }
+                    PreferenceValues.CoverBasedThemePreset.Soft -> {
+                        presetSaturation = 3f
+                        presetIntensity = 3f
+                        presetBrightness = 3f
+                        presetBackgroundTintOpacity = 2f
+                    }
+                    PreferenceValues.CoverBasedThemePreset.Medium -> {
+                        presetSaturation = 5f
+                        presetIntensity = 5f
+                        presetBrightness = 5f
+                        presetBackgroundTintOpacity = 3f
+                    }
+                    PreferenceValues.CoverBasedThemePreset.High -> {
+                        presetSaturation = 8f
+                        presetIntensity = 8f
+                        presetBrightness = 8f
+                        presetBackgroundTintOpacity = 5f
+                    }
+                }
+                uiPreferences.coverBasedThemeSaturation().set(presetSaturation)
+                uiPreferences.coverBasedThemeIntensity().set(presetIntensity)
+                uiPreferences.coverBasedThemeBrightness().set(presetBrightness)
+                uiPreferences.coverBasedThemeBackgroundTintOpacity().set(presetBackgroundTintOpacity)
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    presetSaturation / 5.0f,
+                    presetIntensity / 10.0f + 0.5f,
+                    presetBrightness / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    presetBackgroundTintOpacity / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when saturation changes
+        coverBasedThemeSaturationState.value
+        uiPreferences.coverBasedThemeSaturation().changes().onEach { newSaturation ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    newSaturation / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when intensity changes
+        coverBasedThemeIntensityState.value
+        uiPreferences.coverBasedThemeIntensity().changes().onEach { newIntensity ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    newIntensity / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when text color mode changes
+        coverBasedThemeTextColorModeState.value
+        uiPreferences.coverBasedThemeTextColorMode().changes().onEach { newTextColorMode ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+            coverBasedThemeManager?.applyCoverBasedTheme(
+                currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                coverBasedThemeSaturationState.value / 5.0f,
+                coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                newTextColorMode,
+                coverBasedThemeContrastState.value,
+                coverBasedThemeSurfaceTintingState.value,
+                coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+            )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when source changes
+        coverBasedThemeSourceState.value
+        uiPreferences.coverBasedThemeSource().changes().onEach { newSource ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when contrast changes
+        coverBasedThemeContrastState.value
+        uiPreferences.coverBasedThemeContrast().changes().onEach { newContrast ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    newContrast,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when brightness changes
+        coverBasedThemeBrightnessState.value
+        uiPreferences.coverBasedThemeBrightness().changes().onEach { newBrightness ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    newBrightness / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when background tint opacity changes
+        coverBasedThemeBackgroundTintOpacityState.value
+        uiPreferences.coverBasedThemeBackgroundTintOpacity().changes().onEach { newOpacity ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    newOpacity / 10.0f
+                )
+            }
+        }.launchIn(scope)
+        
+        // Re-apply cover-based theme when backdrop blur changes
+        coverBasedThemeBackdropBlurState.value
+        uiPreferences.coverBasedThemeBackdropBlur().changes().onEach { newBlur ->
+            val currentUrl = lastAppliedCoverUrl
+            if (currentUrl != null && coverBasedThemeEnabledState.value) {
+                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+                    PreferenceValues.ThemeMode.Light -> false
+                    PreferenceValues.ThemeMode.Dark -> true
+                    else -> lastAppliedIsDark
+                }
+                coverBasedThemeManager?.applyCoverBasedTheme(
+                    currentUrl, null, coverBasedThemeStyleState.value, resolvedIsDark,
+                    coverBasedThemeSaturationState.value / 5.0f,
+                    coverBasedThemeIntensityState.value / 10.0f + 0.5f,
+                    coverBasedThemeBrightnessState.value / 10.0f + 0.5f,
+                    coverBasedThemeTextColorModeState.value,
+                    coverBasedThemeContrastState.value,
+                    coverBasedThemeSurfaceTintingState.value,
+                    coverBasedThemeBackgroundTintOpacityState.value / 10.0f
+                )
             }
         }.launchIn(scope)
     }
@@ -173,15 +457,24 @@ class AppThemeViewModel(
         lastAppliedCoverUrl = coverUrl
         lastAppliedIsDark = isDark
         val coverBasedThemeEnabled = coverBasedThemeEnabledState.value
-        val coverBasedThemeStyle = coverBasedThemeStyleState.value
-        if (coverBasedThemeEnabled) {
-            val resolvedIsDark = when (uiPreferences.themeMode().get()) {
-                PreferenceValues.ThemeMode.Light -> false
-                PreferenceValues.ThemeMode.Dark -> true
-                else -> isDark
-            }
-            coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, coverBasedThemeStyle, resolvedIsDark)
+        if (!coverBasedThemeEnabled) {
+            coverBasedThemeManager.clearTheme()
+            return
         }
+        if (coverUrl == null || coverUrl.isBlank()) {
+            return
+        }
+        val coverBasedThemeStyle = coverBasedThemeStyleState.value
+        val saturation = coverBasedThemeSaturationState.value / 5.0f
+        val intensity = coverBasedThemeIntensityState.value / 10.0f + 0.5f
+        val brightness = coverBasedThemeBrightnessState.value / 10.0f + 0.5f
+        val textColorMode = coverBasedThemeTextColorModeState.value
+        val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+            PreferenceValues.ThemeMode.Light -> false
+            PreferenceValues.ThemeMode.Dark -> true
+            else -> isDark
+        }
+        coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, coverBasedThemeStyle, resolvedIsDark, saturation, intensity, brightness, textColorMode, coverBasedThemeContrastState.value, coverBasedThemeSurfaceTintingState.value, coverBasedThemeBackgroundTintOpacityState.value / 10.0f)
     }
 
     @Composable

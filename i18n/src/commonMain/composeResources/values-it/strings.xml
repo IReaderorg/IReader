@@ -48,6 +48,7 @@
     <string name="added_source_rule">Aggiunta regola fonte: %1$s</string>
     <string name="added_to_category">Aggiunto a %s</string>
     <string name="added_to_library">Aggiunto alla Libreria</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dettagli aggiuntivi:</string>
     <string name="additional_details_optional">Dettagli aggiuntivi (opzionale)</string>
     <string name="additional_information">Informazioni Aggiuntive</string>
@@ -2101,6 +2102,8 @@
     <string name="results">risultati</string>
     <string name="results_found">risultati trovati</string>
     <string name="resume">Riprendi</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Riprendi tutto</string>
     <string name="resume_download">Riprendi Download</string>
     <string name="resume_downloads">Riprendi Download</string>
@@ -2917,4 +2920,29 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Preimpostazione rapida</string>
+    <string name="cover_theme_preset_subtitle">Applica le impostazioni predefinite per l'intensità del tema della copertina</string>
+    <string name="cover_theme_backdrop_blur">Sfocatura dello sfondo della copertina</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Regola l'intensità della sfocatura per l'immagine di copertina dell'intestazione estesa</string>
+    <string name="cover_theme_background_tint_opacity">Opacità della tinta di sfondo</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Controlla l'intensità con cui il colore della copertura si fonde con gli sfondi delle carte</string>
+    <string name="cover_theme_preset_off">Spento</string>
+    <string name="cover_theme_preset_soft">Morbido</string>
+    <string name="cover_theme_preset_medium">Medio</string>
+    <string name="cover_theme_preset_high">Alto</string>
 </resources>
+
+
+
+
+
+
+

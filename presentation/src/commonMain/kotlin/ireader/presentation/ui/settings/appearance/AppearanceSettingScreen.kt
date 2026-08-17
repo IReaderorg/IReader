@@ -33,6 +33,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -198,6 +200,246 @@ fun AppearanceSettingScreen(
                     subtitle = localizeHelper.localize(Res.string.cover_theme_style_subtitle),
                     enable = vm.coverBasedThemeEnabled.value
                 )
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                val sourceState = remember(vm.coverBasedThemeSource.value) { vm.coverBasedThemeSource }
+                val sourceChoices = remember {
+                    PreferenceValues.CoverBasedThemeSource.entries.associateWith { source ->
+                        when (source) {
+                            PreferenceValues.CoverBasedThemeSource.BookCover -> localizeHelper.localize(Res.string.cover_theme_source_book_cover)
+                            PreferenceValues.CoverBasedThemeSource.SystemMaterialYou -> localizeHelper.localize(Res.string.cover_theme_source_system_material_you)
+                            PreferenceValues.CoverBasedThemeSource.StaticTheme -> localizeHelper.localize(Res.string.cover_theme_source_static_theme)
+                        }
+                    }
+                }
+                ChoicePreference(
+                    preference = sourceState,
+                    choices = sourceChoices,
+                    title = localizeHelper.localize(Res.string.cover_theme_source),
+                    subtitle = localizeHelper.localize(Res.string.cover_theme_source_subtitle),
+                    enable = vm.coverBasedThemeEnabled.value
+                )
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                val contrastState = remember(vm.coverBasedThemeContrast.value) { vm.coverBasedThemeContrast }
+                val contrastChoices = remember {
+                    PreferenceValues.CoverBasedThemeContrast.entries.associateWith { contrast ->
+                        when (contrast) {
+                            PreferenceValues.CoverBasedThemeContrast.Vibrant -> localizeHelper.localize(Res.string.cover_theme_contrast_vibrant)
+                            PreferenceValues.CoverBasedThemeContrast.Muted -> localizeHelper.localize(Res.string.cover_theme_contrast_muted)
+                            PreferenceValues.CoverBasedThemeContrast.HighContrast -> localizeHelper.localize(Res.string.cover_theme_contrast_high)
+                        }
+                    }
+                }
+                ChoicePreference(
+                    preference = contrastState,
+                    choices = contrastChoices,
+                    title = localizeHelper.localize(Res.string.cover_theme_contrast),
+                    subtitle = localizeHelper.localize(Res.string.cover_theme_contrast_subtitle),
+                    enable = vm.coverBasedThemeEnabled.value
+                )
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                val presetState = remember(vm.coverBasedThemePreset.value) { vm.coverBasedThemePreset }
+                val presetChoices = remember {
+                    PreferenceValues.CoverBasedThemePreset.entries.associateWith { preset ->
+                        when (preset) {
+                            PreferenceValues.CoverBasedThemePreset.Off -> localizeHelper.localize(Res.string.cover_theme_preset_off)
+                            PreferenceValues.CoverBasedThemePreset.Soft -> localizeHelper.localize(Res.string.cover_theme_preset_soft)
+                            PreferenceValues.CoverBasedThemePreset.Medium -> localizeHelper.localize(Res.string.cover_theme_preset_medium)
+                            PreferenceValues.CoverBasedThemePreset.High -> localizeHelper.localize(Res.string.cover_theme_preset_high)
+                        }
+                    }
+                }
+                ChoicePreference(
+                    preference = presetState,
+                    choices = presetChoices,
+                    title = localizeHelper.localize(Res.string.cover_theme_preset),
+                    subtitle = localizeHelper.localize(Res.string.cover_theme_preset_subtitle),
+                    enable = vm.coverBasedThemeEnabled.value
+                )
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                val saturationState = remember(vm.coverBasedThemeSaturation.value) { vm.coverBasedThemeSaturation }
+                val intensityState = remember(vm.coverBasedThemeIntensity.value) { vm.coverBasedThemeIntensity }
+                val textColorModeState = remember(vm.coverBasedThemeTextColorMode.value) { vm.coverBasedThemeTextColorMode }
+                
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(
+                        text = localizeHelper.localize(Res.string.cover_theme_advanced_controls),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = localizeHelper.localize(Res.string.cover_theme_saturation))
+                        Slider(
+                            value = saturationState.value,
+                            onValueChange = { saturationState.value = it },
+                            valueRange = 0f..10f,
+                            steps = 10,
+                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                            enabled = vm.coverBasedThemeEnabled.value
+                        )
+                        Text(
+                            text = "${saturationState.value.toInt()}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.width(24.dp)
+                        )
+                    }
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = localizeHelper.localize(Res.string.cover_theme_intensity))
+                        Slider(
+                            value = intensityState.value,
+                            onValueChange = { intensityState.value = it },
+                            valueRange = 0f..10f,
+                            steps = 10,
+                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                            enabled = vm.coverBasedThemeEnabled.value
+                        )
+                        Text(
+                            text = "${intensityState.value.toInt()}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.width(24.dp)
+                        )
+                    }
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = localizeHelper.localize(Res.string.cover_theme_brightness))
+                        Slider(
+                            value = vm.coverBasedThemeBrightness.value,
+                            onValueChange = { vm.coverBasedThemeBrightness.value = it },
+                            valueRange = 0f..10f,
+                            steps = 10,
+                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                            enabled = vm.coverBasedThemeEnabled.value
+                        )
+                        Text(
+                            text = "${vm.coverBasedThemeBrightness.value.toInt()}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.width(24.dp)
+                        )
+                    }
+                    
+                    val textColorModeChoices = remember {
+                        PreferenceValues.CoverBasedTextColorMode.entries.associateWith { mode ->
+                            when (mode) {
+                                PreferenceValues.CoverBasedTextColorMode.Auto -> localizeHelper.localize(Res.string.cover_theme_text_color_auto)
+                                PreferenceValues.CoverBasedTextColorMode.AdaptiveCoverTone -> localizeHelper.localize(Res.string.cover_theme_text_color_adaptive)
+                                PreferenceValues.CoverBasedTextColorMode.PureWhite -> localizeHelper.localize(Res.string.cover_theme_text_color_pure_white)
+                                PreferenceValues.CoverBasedTextColorMode.PureBlack -> localizeHelper.localize(Res.string.cover_theme_text_color_pure_black)
+                                PreferenceValues.CoverBasedTextColorMode.Light -> localizeHelper.localize(Res.string.cover_theme_text_color_light)
+                                PreferenceValues.CoverBasedTextColorMode.Dark -> localizeHelper.localize(Res.string.cover_theme_text_color_dark)
+                            }
+                        }
+                    }
+                    ChoicePreference(
+                        preference = textColorModeState,
+                        choices = textColorModeChoices,
+                        title = localizeHelper.localize(Res.string.cover_theme_text_color),
+                        subtitle = localizeHelper.localize(Res.string.cover_theme_text_color_subtitle),
+                        enable = vm.coverBasedThemeEnabled.value
+                    )
+                }
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = localizeHelper.localize(Res.string.cover_theme_background_tint_opacity))
+                    Slider(
+                        value = vm.coverBasedThemeBackgroundTintOpacity.value,
+                        onValueChange = { vm.coverBasedThemeBackgroundTintOpacity.value = it },
+                        valueRange = 0f..10f,
+                        steps = 10,
+                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                        enabled = vm.coverBasedThemeEnabled.value
+                    )
+                    Text(
+                        text = "${vm.coverBasedThemeBackgroundTintOpacity.value.toInt()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.width(24.dp)
+                    )
+                }
+            }.Build()
+        }
+        item {
+            Components.Dynamic {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = localizeHelper.localize(Res.string.cover_theme_backdrop_blur))
+                    Slider(
+                        value = vm.coverBasedThemeBackdropBlur.value,
+                        onValueChange = { vm.coverBasedThemeBackdropBlur.value = it },
+                        valueRange = 0f..10f,
+                        steps = 10,
+                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                        enabled = vm.coverBasedThemeEnabled.value
+                    )
+                    Text(
+                        text = "${vm.coverBasedThemeBackdropBlur.value.toInt()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.width(24.dp)
+                    )
+                }
+            }.Build()
+        }
+        item {
+            Components.Switch(
+                preference = vm.coverBasedThemeForLibrary,
+                title = localizeHelper.localize(Res.string.cover_based_theme_for_library),
+                subtitle = localizeHelper.localize(Res.string.cover_based_theme_for_library_subtitle),
+                enabled = vm.coverBasedThemeEnabled.value
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                OutlinedButton(
+                    onClick = {
+                        vm.coverBasedThemeStyle.value = PreferenceValues.CoverBasedThemeStyle.TonalSpot
+                        vm.coverBasedThemeSaturation.value = 1.0f
+                        vm.coverBasedThemeIntensity.value = 1.0f
+                        vm.coverBasedThemeTextColorMode.value = PreferenceValues.CoverBasedTextColorMode.Auto
+                        vm.coverBasedThemeSource.value = PreferenceValues.CoverBasedThemeSource.BookCover
+                        vm.coverBasedThemeContrast.value = PreferenceValues.CoverBasedThemeContrast.Vibrant
+                        vm.coverBasedThemeBrightness.value = 1.0f
+                        vm.coverBasedThemeBackgroundTintOpacity.value = 0.3f
+                        vm.coverBasedThemeBackdropBlur.value = 0f
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = vm.coverBasedThemeEnabled.value
+                ) {
+                    Text(text = localizeHelper.localize(Res.string.cover_theme_reset_settings))
+                }
             }.Build()
         }
         
