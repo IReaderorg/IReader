@@ -163,8 +163,42 @@ fun AppearanceSettingScreen(
             Components.Switch(
                 preference = vm.useTrueBlack,
                 title = localizeHelper.localize(Res.string.use_true_black_amoled),
-                subtitle = localizeHelper.localize(Res.string.pure_black_backgrounds_for_power),
+                subtitle = localizeHelper.localize(Res.string.use_true_black_amoled_subtitle),
             ).Build()
+        }
+        item {
+            Components.Switch(
+                preference = vm.coverBasedThemeEnabled,
+                title = localizeHelper.localize(Res.string.cover_based_dynamic_color),
+                subtitle = localizeHelper.localize(Res.string.cover_based_dynamic_color_subtitle),
+            ).Build()
+        }
+        item {
+            Components.Dynamic {
+                val coverStyleState = remember(vm.coverBasedThemeStyle.value) { vm.coverBasedThemeStyle }
+                val coverStyleChoices = remember {
+                    PreferenceValues.CoverBasedThemeStyle.entries.associateWith { style ->
+                        when (style) {
+                            PreferenceValues.CoverBasedThemeStyle.TonalSpot -> localizeHelper.localize(Res.string.cover_theme_tonal_spot)
+                            PreferenceValues.CoverBasedThemeStyle.Neutral -> localizeHelper.localize(Res.string.cover_theme_neutral)
+                            PreferenceValues.CoverBasedThemeStyle.Vibrant -> localizeHelper.localize(Res.string.cover_theme_vibrant)
+                            PreferenceValues.CoverBasedThemeStyle.Expressive -> localizeHelper.localize(Res.string.cover_theme_expressive)
+                            PreferenceValues.CoverBasedThemeStyle.Rainbow -> localizeHelper.localize(Res.string.cover_theme_rainbow)
+                            PreferenceValues.CoverBasedThemeStyle.FruitSalad -> localizeHelper.localize(Res.string.cover_theme_fruit_salad)
+                            PreferenceValues.CoverBasedThemeStyle.Monochrome -> localizeHelper.localize(Res.string.cover_theme_monochrome)
+                            PreferenceValues.CoverBasedThemeStyle.Fidelity -> localizeHelper.localize(Res.string.cover_theme_fidelity)
+                            PreferenceValues.CoverBasedThemeStyle.Content -> localizeHelper.localize(Res.string.cover_theme_content)
+                        }
+                    }
+                }
+                ChoicePreference(
+                    preference = coverStyleState,
+                    choices = coverStyleChoices,
+                    title = localizeHelper.localize(Res.string.cover_theme_style),
+                    subtitle = localizeHelper.localize(Res.string.cover_theme_style_subtitle),
+                    enable = vm.coverBasedThemeEnabled.value
+                )
+            }.Build()
         }
         
         // Section Divider

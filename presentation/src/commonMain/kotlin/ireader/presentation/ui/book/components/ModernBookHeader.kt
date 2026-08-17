@@ -97,7 +97,11 @@ fun ModernBookHeader(
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White,
+                            color = when (book.status) {
+                                MangaInfo.ONGOING -> MaterialTheme.colorScheme.onPrimary
+                                MangaInfo.COMPLETED -> MaterialTheme.colorScheme.onTertiary
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            },
                             fontSize = 9.sp
                         )
                     }

@@ -12,6 +12,7 @@ import ireader.presentation.ui.settings.tracking.AndroidTrackingSyncScheduler
 import ireader.presentation.ui.settings.tracking.TrackingSyncScheduler
 import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageStateImpl
+import ireader.presentation.utils.cover.AndroidCoverColorExtractor
 import org.koin.dsl.module
 
 
@@ -60,4 +61,7 @@ actual val presentationPlatformModule = module  {
     
     // Tracking sync scheduler using WorkManager
     single<TrackingSyncScheduler> { AndroidTrackingSyncScheduler(get()) }
+    
+    // Cover color extractor for cover-based dynamic theme
+    single<ireader.domain.utils.cover.CoverColorExtractor> { AndroidCoverColorExtractor(get(), get<ireader.core.http.HttpClients>()) }
 }

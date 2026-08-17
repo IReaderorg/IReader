@@ -14,7 +14,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -33,6 +35,10 @@ import androidx.compose.ui.unit.dp
 import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.BookCover
+import ireader.presentation.core.theme.AppThemeViewModel
+import ireader.presentation.core.theme.WithCoverBasedTheme
+import ireader.core.source.HttpSource
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.core.ui.TwoPanelBoxStandalone
@@ -124,6 +130,32 @@ fun BookDetailScreen(
     // Collect appearance preferences with stable initial values
     val hideBackdrop by uiPreferences.hideNovelBackdrop().changes().collectAsState(initial = false)
     val useFab by uiPreferences.useFabInNovelInfo().changes().collectAsState(initial = false)
+    
+    // Cover-based dynamic color theme wiring
+    val appThemeViewModel: AppThemeViewModel = koinInject()
+    val rawCoverUrl = BookCover.from(book).cover
+    val effectiveCoverUrl = remember(book.id, rawCoverUrl, source) {
+        if (!rawCoverUrl.isNullOrBlank()) {
+            if (rawCoverUrl.startsWith("http")) {
+                rawCoverUrl
+            } else {
+                val base = (source as? HttpSource)?.baseUrl?.trimEnd('/') ?: ""
+                if (base.isNotBlank()) "$base/$rawCoverUrl" else rawCoverUrl
+            }
+        } else null
+    }
+    val isSystemDark = isSystemInDarkTheme()
+    LaunchedEffect(effectiveCoverUrl) {
+        appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, book.sourceId, isSystemDark)
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            appThemeViewModel.setCurrentCoverUrl(null, book.sourceId, isSystemDark)
+        }
+    }
+    
+    // Collect cover-based dynamic color scheme for local theme override
+    val coverBasedColorScheme by appThemeViewModel.coverBasedColorScheme.collectAsState(initial = null)
     
     // Cache tablet check - computed once per composition
     val isTablet = isTableUi()
@@ -258,7 +290,8 @@ fun BookDetailScreen(
     )
 
     // Responsive layout: tablet uses two-panel, phone uses single column
-    if (isTablet) {
+    WithCoverBasedTheme(coverBasedColorScheme = coverBasedColorScheme) {
+        if (isTablet) {
         TwoPanelBoxStandalone(
             modifier = Modifier.fillMaxSize(),
             isExpandedWidth = true,
@@ -521,6 +554,7 @@ fun BookDetailScreen(
                 }
             }
         }
+    }
     }
 }
 
