@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -2512,7 +2512,62 @@ Keling, boshlash uchun bir nechta narsalarni sozlaymiz.</string>
     <string name="cover_theme_preset_soft">Yumshoq</string>
     <string name="cover_theme_preset_medium">O'rta</string>
     <string name="cover_theme_preset_high">Yuqori</string>
+
+    <string name="recommendations_empty">Tavsiyalar mavjud emas</string>
+    <string name="recommendations_error">Tavsiyalarni yuklab bo‘lmadi</string>
+    <string name="recommendations_section_title">Tavsiyalar</string>
+    <string name="recommendations_section_title_suggestions">Takliflar</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Tavsiya sozlamalari</string>
+    <string name="recommendations_settings_subtitle">Kitob tavsiyalarini ko‘rsatish usulini sozlash</string>
+    <string name="recommendation_source_similar_by_title">Nomi bo‘yicha o‘xshash</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Manbaga bir xil nomli kitoblarni qidirish</string>
+    <string name="recommendation_source_native_only">Faqat asl manba</string>
+    <string name="recommendation_source_native_only_subtitle">Manba tomonidan to‘g‘ridan-to‘g‘ri taqdim etilgan tavsiyalardan foydalaning</string>
+    <string name="recommendation_source_genre_fallback">Janr mosligi</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Asl tavsiyalar bo‘lmaganda janr mosligiga qaytish</string>
+    <string name="recommendation_search_keywords">Qidiruv kalit so‘zlari</string>
+    <string name="recommendation_search_keywords_subtitle">O‘xshash kitoblarni topish uchun joriy kitob nomidan olingan kalit so‘zlar</string>
+    <string name="recommendations_disabled">Tavsiyalar o‘chirilgan</string>
+    <string name="recommendations_no_similar_books">Ushbu nom uchun o‘xshash kitoblar topilmadi</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">O'xshash Sarlavhalar</string>
+    <string name="show_similar_titles">O'xshash Sarlavhalarni Ko'rsatish</string>
+    <string name="similar_titles_source">O'xshash Sarlavhalar Manbasi</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">O'xshash Sarlavhalar Maksimum Soni</string>
+    <string name="similar_titles_settings">O'xshash Sarlavhalar Sozlamalari</string>
+    <string name="similar_titles_source_subtitle">O'xshash sarlavhalar uchun ishlatiladigan manbalarni tanlang</string>
+    <string name="max_similar_titles_count_subtitle">Ko'rsatish uchun o'xshash sarlavhalar maksimum soni</string>
+    <string name="show_similar_titles_subtitle">Roman tafsilotlari ostida o'xshash nomli kitoblarni ko'rsatish</string>
+    <string name="similar_titles_source_same_source">Faqat Bir Xil Manba</string>
+    <string name="similar_titles_source_same_source_subtitle">O'xshash sarlavhalarni faqat joriy manbadan ko'rsatish</string>
+    <string name="similar_titles_source_other_sources">Faqat Boshqa Manbalar</string>
+    <string name="similar_titles_source_other_sources_subtitle">O'xshash sarlavhalarni faqat boshqa manbalardan ko'rsatish</string>
+    <string name="similar_titles_source_all_sources">Barcha Manbalar</string>
+    <string name="similar_titles_source_all_sources_subtitle">O'xshash sarlavhalarni barcha mavjud manbalardan ko'rsatish</string>
+    <string name="similar_titles_match_mode">O'xshash Sarlavhalar Moslik Rejimi</string>
+    <string name="similar_titles_match_mode_subtitle">O'xshash sarlavhalar qanday solishtirilishini tanlang</string>
+    <string name="similar_titles_mode_by_name">Nomi Bo'yicha O'xshash</string>
+    <string name="similar_titles_mode_by_name_subtitle">O'xshash sarlavha/nomli kitoblarni topish</string>
+    <string name="similar_titles_mode_by_genre">Janr Bo'yicha O'xshash</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Mos keladigan janrlar/toifali kitoblarni topish</string>
+    <string name="similar_titles_mode_by_category">Kategoriya Bo'yicha O'xshash</string>
+    <string name="similar_titles_mode_by_category_subtitle">Bir xil kategoriyadagi kitoblarni topish</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
 
 
 

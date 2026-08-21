@@ -2,7 +2,10 @@ package ireader.presentation.core
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import kotlinx.coroutines.flow.collectLatest
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -34,10 +37,12 @@ import ireader.presentation.core.ui.NavigationViewModelStore
 import ireader.presentation.core.ui.RouteScope
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.ReaderSettingSpec
+import ireader.presentation.core.ui.RecommendationsListScreenSpec
 import ireader.presentation.core.ui.RepositoryAddScreenSpec
 import ireader.presentation.core.ui.RepositoryScreenSpec
 import ireader.presentation.core.ui.SecuritySettingSpec
 import ireader.presentation.core.ui.SettingScreenSpec
+import ireader.presentation.core.ui.SimilarTitlesScreenSpec
 import ireader.presentation.core.ui.SourceMigrationScreenSpec
 import ireader.presentation.core.ui.SyncScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
@@ -431,6 +436,68 @@ fun CommonNavHost(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(NavigationRoutes.similarTitlesSettings) {
+            SimilarTitlesScreenSpec().Content()
+        }
+        composable(
+            route = "recommendationsList?bookId={bookId}",
+            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val bookId = remember(backStackEntry) {
+                backStackEntry.getStringArg("bookId")?.toLongOrNull()
+            } ?: return@composable
+            
+            val vm: ireader.presentation.ui.book.viewmodel.BookDetailViewModel = getIViewModel(
+                parameters = { org.koin.core.parameter.parametersOf(ireader.presentation.ui.book.viewmodel.BookDetailViewModel.Param(bookId)) }
+            )
+            val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+            val state = vm.state.collectAsState()
+            
+            val recommendations = remember(state.value) {
+                when (val s = state.value) {
+                    is ireader.presentation.ui.book.viewmodel.BookDetailState.Success -> s.sourceRecommendations
+                    else -> emptyList()
+                }
+            }
+            
+            ireader.presentation.core.ui.RecommendationsListScreenSpec(
+                recommendations = recommendations,
+                onBack = { navController.safePopBackStack() },
+                onRecommendationClick = { recommendation ->
+                    vm.openRecommendation(recommendation)
+                }
+            )
+            
+            LaunchedEffect(vm) {
+                vm.events.collectLatest { event ->
+                    when (event) {
+                        is ireader.presentation.ui.book.viewmodel.BookDetailEvent.NavigateToBookDetail -> {
+                            navController.navigate(NavigationRoutes.bookDetail(event.bookId))
+                        }
+                        is ireader.presentation.ui.book.viewmodel.BookDetailEvent.NavigateBack -> {
+                            navController.safePopBackStack()
+                        }
+                        is ireader.presentation.ui.book.viewmodel.BookDetailEvent.ShowSnackbar -> {
+                        }
+                        is ireader.presentation.ui.book.viewmodel.BookDetailEvent.NavigateToReader -> {
+                            navController.navigate(NavigationRoutes.reader(event.bookId, event.chapterId))
+                        }
+                        is ireader.presentation.ui.book.viewmodel.BookDetailEvent.NavigateToWebView -> {
+                            navController.navigate(
+                                NavigationRoutes.webView(
+                                    url = event.url,
+                                    sourceId = event.sourceId,
+                                    bookId = event.bookId,
+                                    enableBookFetch = false,
+                                    enableChapterFetch = false,
+                                    enableChaptersFetch = false
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
         composable(NavigationRoutes.jsPluginSettings) {
             ireader.presentation.core.ui.JSPluginSettingsScreenSpec().Content()

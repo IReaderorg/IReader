@@ -18,8 +18,11 @@ import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.Recommendation
 import ireader.domain.models.entities.isObsolete
+import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.book.BookCommand
 import ireader.domain.services.book.BookController
 import ireader.domain.services.bookdetail.BookDetailController
@@ -99,6 +102,7 @@ class BookDetailViewModel(
     private val applicationScope: CoroutineScope,
     val createEpub: EpubCreator,
     val readerPreferences: ReaderPreferences,
+    private val uiPreferences: UiPreferences,
     private val param: Param,
     private val checkSourceAvailabilityUseCase: CheckSourceAvailabilityUseCase,
     private val migrateToSourceUseCase: MigrateToSourceUseCase,
@@ -119,6 +123,7 @@ class BookDetailViewModel(
     private val trackingRepository: ireader.domain.data.repository.TrackingRepository? = null,
     private val translateBookMetadataUseCase: TranslateBookMetadataUseCase? = null,
     private val chapterRepository: ireader.domain.data.repository.ChapterRepository,
+    private val getRecommendationsUseCase: ireader.domain.usecases.statistics.GetRecommendationsUseCase? = null,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -147,6 +152,7 @@ class BookDetailViewModel(
     private var getBookDetailJob: Job? = null
     private var getChapterDetailJob: Job? = null
     private var subscriptionJob: Job? = null
+    private var getRecommendationsJob: Job? = null
     
     // ==================== Mass Translation State ====================
     var showTranslationOptionsDialog by mutableStateOf(false)
@@ -402,6 +408,9 @@ class BookDetailViewModel(
                     is ControllerEvent.ShowSnackbar -> {
                         emitEvent(BookDetailEvent.ShowSnackbar(event.message))
                     }
+                    else -> {
+                        Log.warn { "Unhandled BookDetailController event: $event" }
+                    }
                 }
             }
             .launchIn(scope)
@@ -495,6 +504,12 @@ class BookDetailViewModel(
                     scope.launch(ioDispatcher) {
                         checkSourceAvailability(bookId)
                     }
+                    
+                    // Load source recommendations in background
+                    scope.launch(ioDispatcher) {
+                        loadSourceRecommendations(book, catalogSource)
+                    }
+                    
                     return@launch
                 }
                 
@@ -619,6 +634,13 @@ class BookDetailViewModel(
                     checkSourceAvailability(bookId)
                 }
                 
+                // Load source recommendations in background
+                if (book != null) {
+                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        loadSourceRecommendations(book, catalogSourceDeferred?.await())
+                    }
+                }
+                
             } catch (e: Exception) {
                 Log.error("Error initializing book", e)
                 _state.value = BookDetailState.Error(e.message ?: "Failed to load book")
@@ -679,6 +701,72 @@ class BookDetailViewModel(
         }
     }
     
+    private fun loadSourceRecommendations(book: Book, catalog: CatalogLocal?) {
+        if (!uiPreferences.showSimilarTitles().get()) return
+        if (catalog == null) return
+        
+        getRecommendationsJob?.cancel()
+        getRecommendationsJob = scope.launch(ioDispatcher) {
+            val sourceFilter = uiPreferences.similarTitlesSource().get()
+            val matchMode = uiPreferences.similarTitlesMatchMode().get()
+            val maxCount = uiPreferences.similarTitlesMaxCount().get()
+            
+            when (matchMode) {
+                PreferenceValues.SimilarTitlesMatchMode.ByName -> {
+                    remoteUseCases.getSimilarBooksByTitle(
+                        book = book,
+                        onError = { message ->
+                            Log.error { "Failed to load similar books by name: ${message?.toString() ?: "unknown"}" }
+                        },
+                        onSuccess = { recommendations ->
+                            applyRecommendationLimit(recommendations)
+                        },
+                        maxResults = maxCount,
+                        sourceFilter = sourceFilter
+                    )
+                }
+                PreferenceValues.SimilarTitlesMatchMode.ByGenre -> {
+                    remoteUseCases.getSourceRecommendations(
+                        book = book,
+                        catalog = catalog,
+                        onError = { message ->
+                            Log.error { "Failed to load similar titles by genre: ${message?.toString() ?: "unknown"}" }
+                        },
+                        onSuccess = { recommendations ->
+                            applyRecommendationLimit(recommendations)
+                        }
+                    )
+                }
+                PreferenceValues.SimilarTitlesMatchMode.ByCategory -> {
+                    remoteUseCases.getSourceRecommendations(
+                        book = book,
+                        catalog = catalog,
+                        onError = { message ->
+                            Log.error { "Failed to load similar titles by category: ${message?.toString() ?: "unknown"}" }
+                        },
+                        onSuccess = { recommendations ->
+                            applyRecommendationLimit(recommendations)
+                        }
+                    )
+                }
+            }
+        }
+    }
+    
+    private fun applyRecommendationLimit(recommendations: List<Recommendation>) {
+        val maxCount = uiPreferences.similarTitlesMaxCount().get()
+        val limited = if (maxCount <= 0) {
+            recommendations.toImmutableList()
+        } else {
+            if (recommendations.size > maxCount) {
+                recommendations.take(maxCount).toImmutableList()
+            } else {
+                recommendations.toImmutableList()
+            }
+        }
+        updateSuccessState { it.copy(sourceRecommendations = limited) }
+    }
+    
     private fun subscribeToBookAndChapters(bookId: Long, initialCatalog: CatalogLocal?) {
         // Cancel previous subscription if any
         subscriptionJob?.cancel()
@@ -729,6 +817,7 @@ class BookDetailViewModel(
                     lastReadChapterId = history?.chapterId,
                     commands = commands,
                     modifiedCommands = currentState?.modifiedCommands ?: commands,
+                    sourceRecommendations = currentState?.sourceRecommendations ?: persistentListOf(),
                     // Preserve UI state
                     isRefreshingBook = currentState?.isRefreshingBook ?: false,
                     isRefreshingChapters = currentState?.isRefreshingChapters ?: false,
@@ -909,6 +998,41 @@ class BookDetailViewModel(
     fun toggleSummaryExpansion() {
         expandedSummaryState = !expandedSummaryState
         updateSuccessState { it.copy(isSummaryExpanded = expandedSummaryState) }
+    }
+
+    fun openRecommendation(recommendation: Recommendation) {
+        val catalog = getLocalCatalog.get(recommendation.sourceId)
+        if (catalog == null) {
+            scope.launch { _events.emit(BookDetailEvent.ShowSnackbar("Source not available")) }
+            return
+        }
+        
+        val tempBook = Book(
+            key = recommendation.key,
+            title = recommendation.title,
+            cover = recommendation.cover,
+            sourceId = recommendation.sourceId
+        )
+        
+        scope.launch {
+            try {
+                val savedBookId = localInsertUseCases.insertBook(tempBook)
+                val savedBook = getBookUseCases.findBookById(savedBookId) ?: tempBook
+                
+                remoteUseCases.getBookDetail(
+                    book = savedBook,
+                    catalog = catalog,
+                    onError = { message ->
+                        _events.emit(BookDetailEvent.ShowSnackbar(message?.asString(localizeHelper) ?: "Failed to load book"))
+                    },
+                    onSuccess = { book ->
+                        _events.emit(BookDetailEvent.NavigateToBookDetail(book.id))
+                    }
+                )
+            } catch (e: Exception) {
+                _events.emit(BookDetailEvent.ShowSnackbar("Failed to open recommendation: ${e.message}"))
+            }
+        }
     }
 
 
@@ -2975,6 +3099,7 @@ class BookDetailViewModel(
         getBookDetailJob?.cancel()
         getChapterDetailJob?.cancel()
         subscriptionJob?.cancel()
+        getRecommendationsJob?.cancel()
         
         // Cleanup ChapterController state for this book (Requirements: 9.4, 9.5)
         chapterController.dispatch(ChapterCommand.Cleanup)

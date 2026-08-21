@@ -36,13 +36,13 @@ import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.BookCover
+import ireader.domain.models.entities.Recommendation
 import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.presentation.core.theme.WithCoverBasedTheme
 import ireader.core.source.HttpSource
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.core.ui.TwoPanelBoxStandalone
-import ireader.presentation.ui.book.components.BookReviewsIntegration
 import ireader.presentation.ui.book.components.BookStatsCard
 import ireader.presentation.ui.book.components.ChapterBar
 import ireader.presentation.ui.book.components.ChapterDetailBottomBar
@@ -56,6 +56,7 @@ import ireader.presentation.ui.book.components.ModernBookBackdrop
 import ireader.presentation.ui.book.components.ModernBookHeader
 import ireader.presentation.ui.book.components.ModernBookSummary
 import ireader.presentation.ui.book.components.NovelInfoFab
+import ireader.presentation.ui.book.components.RecommendationsSection
 import ireader.presentation.ui.book.components.TranslationWarningDialog
 import ireader.presentation.ui.book.components.ChapterRangeDownloadDialog
 import ireader.presentation.ui.book.components.DownloadNextChaptersDialog
@@ -122,6 +123,9 @@ fun BookDetailScreen(
     onCharacterArtDetail: (String) -> Unit = {},
     onTracking: (() -> Unit)? = null,
     isTracked: Boolean = false,
+    recommendations: List<Recommendation> = emptyList(),
+    onRecommendationClick: (Recommendation) -> Unit = {},
+    onViewMore: () -> Unit = {},
     uiPreferences: UiPreferences = koinInject(),
 ) {
     val focusManager = LocalFocusManager.current
@@ -313,7 +317,9 @@ fun BookDetailScreen(
                     onCharacterArtGallery = onCharacterArtGallery,
                     onCharacterArtDetail = onCharacterArtDetail,
                     onTracking = onTracking,
-                    isTracked = isTracked
+                    isTracked = isTracked,
+                    recommendations = recommendations,
+                    onRecommendationClick = onRecommendationClick
                 )
             },
             endContent = {
@@ -411,9 +417,11 @@ fun BookDetailScreen(
                             onCopy = onCopyTitle
                         )
                     }
-                    item(key = "book_reviews") {
-                        BookReviewsIntegration(
-                            bookTitle = book.title,
+                    item(key = "recommendations") {
+                        RecommendationsSection(
+                            recommendations = recommendations,
+                            onRecommendationClick = onRecommendationClick,
+                            onViewMore = onViewMore,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                         )
                     }
@@ -580,6 +588,8 @@ private fun BookInfoPanel(
     onCharacterArtDetail: (String) -> Unit,
     onTracking: (() -> Unit)? = null,
     isTracked: Boolean = false,
+    recommendations: List<Recommendation> = emptyList(),
+    onRecommendationClick: (Recommendation) -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Backdrop behind everything
@@ -637,8 +647,9 @@ private fun BookInfoPanel(
             }
             
             item {
-                BookReviewsIntegration(
-                    bookTitle = book.title,
+                RecommendationsSection(
+                    recommendations = recommendations,
+                    onRecommendationClick = onRecommendationClick,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                 )
             }

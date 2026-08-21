@@ -198,6 +198,14 @@ class SettingScreenSpec {
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
                 ))
+                add(SearchableSettingItem(
+                    id = "similar_titles",
+                    title = localizeHelper.localize(Res.string.similar_titles_settings),
+                    description = localizeHelper.localize(Res.string.similar_titles_settings_subtitle),
+                    icon = Icons.Default.Search,
+                    section = localizeHelper.localize(Res.string.reader),
+                    onClick = { navController.navigate(NavigationRoutes.similarTitlesSettings) }
+                ))
                 
                 // Security & Privacy
                 add(SearchableSettingItem(
@@ -553,6 +561,14 @@ class SettingScreenSpec {
                             description = "View reading statistics and progress",
                             icon = Icons.Default.BarChart,
                             onClick = { navController.navigate(NavigationRoutes.readingHub) }
+                        )
+                    }
+                    item {
+                        SettingsItem(
+                            title = localizeHelper.localize(Res.string.similar_titles_settings),
+                            description = localizeHelper.localize(Res.string.similar_titles_settings_subtitle),
+                            icon = Icons.Default.Search,
+                            onClick = { navController.navigate(NavigationRoutes.similarTitlesSettings) }
                         )
                     }
                     

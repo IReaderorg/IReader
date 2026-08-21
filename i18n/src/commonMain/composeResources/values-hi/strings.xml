@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">प्रेरणा की एक दैनिक खुराक</string>
@@ -2927,7 +2927,62 @@
     <string name="cover_theme_preset_soft">कोमल</string>
     <string name="cover_theme_preset_medium">मध्यम</string>
     <string name="cover_theme_preset_high">उच्च</string>
+
+    <string name="recommendations_empty">कोई सिफ़ारिशें उपलब्ध नहीं</string>
+    <string name="recommendations_error">सिफ़ारिशें लोड करने में विफल</string>
+    <string name="recommendations_section_title">सिफारिशों</string>
+    <string name="recommendations_section_title_suggestions">सुझाव</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">सिफारिश सेटिंग्स</string>
+    <string name="recommendations_settings_subtitle">किताब सिफारिशों को कैसे दिखाना है कॉन्फ़िगर करें</string>
+    <string name="recommendation_source_similar_by_title">शीर्षक के अनुसार समान</string>
+    <string name="recommendation_source_similar_by_title_subtitle">समान नामों वाली किताबों के लिए स्रोत खोजें</string>
+    <string name="recommendation_source_native_only">केवल नेटिव स्रोत</string>
+    <string name="recommendation_source_native_only_subtitle">सीधे स्रोत द्वारा प्रदान की गई सिफारिशों का उपयोग करें</string>
+    <string name="recommendation_source_genre_fallback">जैनर मैचिंग</string>
+    <string name="recommendation_source_genre_fallback_subtitle">नेटिव सिफारिशों के अभाव में जैनर मैचिंग पर वापस जाएं</string>
+    <string name="recommendation_search_keywords">खोज कीवर्ड</string>
+    <string name="recommendation_search_keywords_subtitle">समान किताबों खोजने के लिए वर्तमान किताब के शीर्षक से निकाले गए कीवर्ड</string>
+    <string name="recommendations_disabled">सिफारिशें अक्षम हैं</string>
+    <string name="recommendations_no_similar_books">इस शीर्षक के लिए कोई समान किताब नहीं मिली</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">समान शीर्षक</string>
+    <string name="show_similar_titles">समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_source">समान शीर्षक स्रोत</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">समान शीर्षकों की अधिकतम संख्या</string>
+    <string name="similar_titles_settings">समान शीर्षक सेटिंग्स</string>
+    <string name="similar_titles_source_subtitle">समान शीर्षकों के लिए उपयोग करने के लिए स्रोत चुनें</string>
+    <string name="max_similar_titles_count_subtitle">दिखाने के लिए समान शीर्षकों की अधिकतम संख्या</string>
+    <string name="show_similar_titles_subtitle">उपन्यास की विवरण के नीचे समान नाम वाली किताबें दिखाएं</string>
+    <string name="similar_titles_source_same_source">केवल एक ही स्रोत</string>
+    <string name="similar_titles_source_same_source_subtitle">केवल वर्तमान स्रोत से समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_source_other_sources">केवल अन्य स्रोत</string>
+    <string name="similar_titles_source_other_sources_subtitle">केवल अन्य स्रोतों से समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_source_all_sources">सभी स्रोत</string>
+    <string name="similar_titles_source_all_sources_subtitle">सभी उपलब्ध स्रोतों से समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_match_mode">समान शीर्षक मिलान मोड</string>
+    <string name="similar_titles_match_mode_subtitle">समान शीर्षकों की तुलना करने का तरीका चुनें</string>
+    <string name="similar_titles_mode_by_name">नाम से समान</string>
+    <string name="similar_titles_mode_by_name_subtitle">समान शीर्षक/नाम वाली किताबें खोजें</string>
+    <string name="similar_titles_mode_by_genre">शैली से समान</string>
+    <string name="similar_titles_mode_by_genre_subtitle">मिलान वाली शैलियों/श्रेणियों वाली किताबें खोजें</string>
+    <string name="similar_titles_mode_by_category">श्रेणी से समान</string>
+    <string name="similar_titles_mode_by_category_subtitle">एक ही श्रेणी में किताबें खोजें</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
 
 
 

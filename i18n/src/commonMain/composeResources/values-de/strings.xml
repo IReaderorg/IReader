@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -2950,7 +2950,62 @@ Lassen Sie uns ein paar Dinge einrichten, um loszulegen.</string>
     <string name="cover_theme_preset_soft">Weich</string>
     <string name="cover_theme_preset_medium">Medium</string>
     <string name="cover_theme_preset_high">Hoch</string>
+
+    <string name="recommendations_empty">Keine Empfehlungen verfügbar</string>
+    <string name="recommendations_error">Empfehlungen konnten nicht geladen werden</string>
+    <string name="recommendations_section_title">Empfehlungen</string>
+    <string name="recommendations_section_title_suggestions">Vorschläge</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Empfehlungseinstellungen</string>
+    <string name="recommendations_settings_subtitle">Konfigurieren Sie, wie Buchempfehlungen angezeigt werden</string>
+    <string name="recommendation_source_similar_by_title">Ähnlich nach Titel</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Suche in der Quelle nach Büchern mit ähnlichen Namen</string>
+    <string name="recommendation_source_native_only">Nur native Quelle</string>
+    <string name="recommendation_source_native_only_subtitle">Verwenden Sie die direkt von der Quelle bereitgestellten Empfehlungen</string>
+    <string name="recommendation_source_genre_fallback">Genre-Matching-Fallback</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Fallback auf Genre-Matching, wenn keine nativen Empfehlungen</string>
+    <string name="recommendation_search_keywords">Suchbegriffe</string>
+    <string name="recommendation_search_keywords_subtitle">Aus dem aktuellen Buchtitel extrahierte Begriffe zum Finden ähnlicher Bücher</string>
+    <string name="recommendations_disabled">Empfehlungen deaktiviert</string>
+    <string name="recommendations_no_similar_books">Keine ähnlichen Bücher für diesen Titel gefunden</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Ähnliche Titel</string>
+    <string name="show_similar_titles">Ähnliche Titel Anzeigen</string>
+    <string name="similar_titles_source">Quelle für Ähnliche Titel</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Maximale Anzahl Ähnlicher Titel</string>
+    <string name="similar_titles_settings">Einstellungen für Ähnliche Titel</string>
+    <string name="similar_titles_source_subtitle">Wählen Sie, welche Quellen für ähnliche Titel verwendet werden sollen</string>
+    <string name="max_similar_titles_count_subtitle">Maximale Anzahl ähnlicher Titel zum Anzeigen</string>
+    <string name="show_similar_titles_subtitle">Bücher mit ähnlichen Namen unter den Roman-Details anzeigen</string>
+    <string name="similar_titles_source_same_source">Nur Gleiche Quelle</string>
+    <string name="similar_titles_source_same_source_subtitle">Ähnliche Titel nur von der aktuellen Quelle anzeigen</string>
+    <string name="similar_titles_source_other_sources">Nur Andere Quellen</string>
+    <string name="similar_titles_source_other_sources_subtitle">Ähnliche Titel nur von anderen Quellen anzeigen</string>
+    <string name="similar_titles_source_all_sources">Alle Quellen</string>
+    <string name="similar_titles_source_all_sources_subtitle">Ähnliche Titel von allen verfügbaren Quellen anzeigen</string>
+    <string name="similar_titles_match_mode">Übereinstimmungsmodus für Ähnliche Titel</string>
+    <string name="similar_titles_match_mode_subtitle">Wählen Sie, wie ähnliche Titel abgeglichen werden</string>
+    <string name="similar_titles_mode_by_name">Ähnlich nach Name</string>
+    <string name="similar_titles_mode_by_name_subtitle">Bücher mit ähnlichen Titeln/Namen finden</string>
+    <string name="similar_titles_mode_by_genre">Ähnlich nach Genre</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Bücher mit übereinstimmenden Genres/Kategorien finden</string>
+    <string name="similar_titles_mode_by_category">Ähnlich nach Kategorie</string>
+    <string name="similar_titles_mode_by_category_subtitle">Bücher in der gleichen Kategorie finden</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
 
 
 

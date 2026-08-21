@@ -7,6 +7,7 @@ import ireader.core.source.model.Command
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.Recommendation
 import ireader.domain.models.entities.isLockedChapter
 import ireader.domain.models.entities.SourceComparison
 import ireader.domain.usecases.source.MigrateToSourceUseCase
@@ -84,6 +85,9 @@ sealed interface BookDetailState {
         // Commands for source
         val commands: ImmutableList<Command<*>> = persistentListOf(),
         val modifiedCommands: ImmutableList<Command<*>> = persistentListOf(),
+        
+        // Recommendations from source
+        val sourceRecommendations: ImmutableList<Recommendation> = persistentListOf(),
     ) : BookDetailState {
         
         // Derived properties for efficient access
@@ -94,6 +98,7 @@ sealed interface BookDetailState {
         val isRefreshing: Boolean get() = isRefreshingBook || isRefreshingChapters
         val isInLibrary: Boolean get() = book.favorite
         val isArchived: Boolean get() = book.isArchived
+        val hasRecommendations: Boolean get() = sourceRecommendations.isNotEmpty()
         
         // Pagination derived properties
         // Only show pagination UI if source supports it AND we have confirmed multiple pages exist
@@ -245,4 +250,5 @@ sealed interface BookDetailEvent {
     data class NavigateToReader(val bookId: Long, val chapterId: Long) : BookDetailEvent
     data class NavigateToWebView(val url: String, val sourceId: Long, val bookId: Long) : BookDetailEvent
     data object NavigateBack : BookDetailEvent
+    data class NavigateToBookDetail(val bookId: Long) : BookDetailEvent
 }

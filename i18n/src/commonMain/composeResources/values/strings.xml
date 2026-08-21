@@ -3009,4 +3009,63 @@
     
     <!-- Download Delay Formatting -->
     <string name="no_delay">No delay</string>
+
+    <!-- Recommendations -->
+    <string name="recommendations_section_title">Recommendations</string>
+    <string name="recommendations_section_title_suggestions">Suggestions</string>
+    <string name="view_recommendations">View Recommendations</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="recommendation_source">Recommendation Source</string>
+    <string name="recommendation_source_native_only">Native Source Only</string>
+    <string name="recommendation_source_native_only_subtitle">Use recommendations provided directly by the source</string>
+    <string name="recommendation_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Fall back to matching by genre when no native recommendations</string>
+    <string name="recommendation_source_subtitle">Choose how recommendations are fetched</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="max_recommendation_count_5">5</string>
+    <string name="max_recommendation_count_10">10</string>
+    <string name="max_recommendation_count_15">15</string>
+    <string name="recommendations_empty">No recommendations available</string>
+    <string name="recommendations_error">Failed to load recommendations</string>
+
+    <!-- Similar Titles -->
+    <string name="similar_titles_section_title">Similar Titles</string>
+    <string name="similar_titles_section_title_suggestions">Suggestions</string>
+    <string name="view_similar_titles">View Similar Titles</string>
+    <string name="show_similar_titles">Show Similar Titles</string>
+    <string name="show_similar_titles_subtitle">Display books with similar names below the novel details</string>
+    <string name="similar_titles_source">Similar Titles Source</string>
+    <string name="similar_titles_source_same_source">Same Source Only</string>
+    <string name="similar_titles_source_same_source_subtitle">Show similar titles only from the current source</string>
+    <string name="similar_titles_source_other_sources">Other Sources Only</string>
+    <string name="similar_titles_source_other_sources_subtitle">Show similar titles only from other sources</string>
+    <string name="similar_titles_source_all_sources">All Sources</string>
+    <string name="similar_titles_source_all_sources_subtitle">Show similar titles from all available sources</string>
+    <string name="similar_titles_source_subtitle">Choose which sources to use for similar titles</string>
+    <string name="similar_titles_match_mode">Similar Titles Match Mode</string>
+    <string name="similar_titles_match_mode_subtitle">Choose how similar titles are matched</string>
+    <string name="similar_titles_mode_by_name">Similar by Name</string>
+    <string name="similar_titles_mode_by_name_subtitle">Find books with similar titles/names</string>
+    <string name="similar_titles_mode_by_genre">Similar by Genre</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Find books with matching genres/categories</string>
+    <string name="similar_titles_mode_by_category">Similar by Category</string>
+    <string name="similar_titles_mode_by_category_subtitle">Find books in the same category</string>
+    <string name="max_similar_titles_count">Maximum Similar Titles Count</string>
+    <string name="max_similar_titles_count_subtitle">Maximum number of similar titles to display</string>
+    <string name="max_similar_titles_count_5">5</string>
+    <string name="max_similar_titles_count_10">10</string>
+    <string name="max_similar_titles_count_15">15</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
+    <string name="similar_titles_empty">No similar titles available</string>
+    <string name="similar_titles_error">Failed to load similar titles</string>
+
+    <!-- Similar Titles Settings -->
+    <string name="similar_titles_settings">Similar Titles Settings</string>
+    <string name="similar_titles_settings_subtitle">Configure how similar titles are shown</string>
+    <string name="similar_titles_search_keywords">Search Keywords</string>
+    <string name="similar_titles_search_keywords_subtitle">Keywords extracted from the current book title to find similar books</string>
+    <string name="similar_titles_disabled">Similar titles are disabled</string>
+    <string name="similar_titles_no_similar_books">No similar books found for this title</string>
 </resources>

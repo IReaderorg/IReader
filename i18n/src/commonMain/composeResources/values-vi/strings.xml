@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">Một liều cảm hứng hàng ngày</string>
@@ -2921,7 +2921,62 @@
     <string name="cover_theme_preset_soft">Mềm mại</string>
     <string name="cover_theme_preset_medium">Trung bình</string>
     <string name="cover_theme_preset_high">Cao</string>
+
+    <string name="recommendations_empty">Không có đề xuất nào</string>
+    <string name="recommendations_error">Không tải được đề xuất</string>
+    <string name="recommendations_section_title">Khuyến nghị</string>
+    <string name="recommendations_section_title_suggestions">Đề xuất</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Cài đặt đề xuất</string>
+    <string name="recommendations_settings_subtitle">Cấu hình cách hiển thị đề xuất sách</string>
+    <string name="recommendation_source_similar_by_title">Tương tự theo tiêu đề</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Tìm kiếm trong nguồn các sách có tên tương tự</string>
+    <string name="recommendation_source_native_only">Chỉ nguồn gốc</string>
+    <string name="recommendation_source_native_only_subtitle">Sử dụng đề xuất được cung cấp trực tiếp bởi nguồn</string>
+    <string name="recommendation_source_genre_fallback">Khớp thể loại</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Quay lại khớp thể loại khi không có đề xuất gốc</string>
+    <string name="recommendation_search_keywords">Từ khóa</string>
+    <string name="recommendation_search_keywords_subtitle">Từ khóa trích xuất từ tiêu đề sách hiện tại để tìm sách tương tự</string>
+    <string name="recommendations_disabled">Đề xuất đã tắt</string>
+    <string name="recommendations_no_similar_books">Không tìm thấy sách tương tự cho tiêu đề này</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Tiêu đề Tương tự</string>
+    <string name="show_similar_titles">Hiển thị Tiêu đề Tương tự</string>
+    <string name="similar_titles_source">Nguồn Tiêu đề Tương tự</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Số lượng Tiêu đề Tương tự Tối đa</string>
+    <string name="similar_titles_settings">Cài đặt Tiêu đề Tương tự</string>
+    <string name="similar_titles_source_subtitle">Chọn nguồn nào sẽ sử dụng cho tiêu đề tương tự</string>
+    <string name="max_similar_titles_count_subtitle">Số lượng tiêu đề tương tự tối đa để hiển thị</string>
+    <string name="show_similar_titles_subtitle">Hiển thị sách có tên tương tự bên dưới chi tiết tiểu thuyết</string>
+    <string name="similar_titles_source_same_source">Chỉ Nguồn Giống nhau</string>
+    <string name="similar_titles_source_same_source_subtitle">Hiển thị tiêu đề tương tự chỉ từ nguồn hiện tại</string>
+    <string name="similar_titles_source_other_sources">Chỉ Nguồn Khác</string>
+    <string name="similar_titles_source_other_sources_subtitle">Hiển thị tiêu đề tương tự chỉ từ các nguồn khác</string>
+    <string name="similar_titles_source_all_sources">Tất cả Nguồn</string>
+    <string name="similar_titles_source_all_sources_subtitle">Hiển thị tiêu đề tương tự từ tất cả các nguồn có sẵn</string>
+    <string name="similar_titles_match_mode">Chế độ Khớp Tiêu đề Tương tự</string>
+    <string name="similar_titles_match_mode_subtitle">Chọn cách so sánh các tiêu đề tương tự</string>
+    <string name="similar_titles_mode_by_name">Tương tự theo Tên</string>
+    <string name="similar_titles_mode_by_name_subtitle">Tìm sách có tiêu đề/tên tương tự</string>
+    <string name="similar_titles_mode_by_genre">Tương tự theo Thể loại</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Tìm sách có thể loại/danh mục tương ứng</string>
+    <string name="similar_titles_mode_by_category">Tương tự theo Danh mục</string>
+    <string name="similar_titles_mode_by_category_subtitle">Tìm sách trong cùng danh mục</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
 
 
 

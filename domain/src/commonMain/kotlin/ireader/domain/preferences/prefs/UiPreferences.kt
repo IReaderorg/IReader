@@ -72,6 +72,22 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getFloat("cover_based_theme_backdrop_blur", 0f)
     }
     
+    fun showSimilarTitles(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_similar_titles", true)
+    }
+    
+    fun similarTitlesSource(): Preference<PreferenceValues.SimilarTitlesSource> {
+        return preferenceStore.getEnum("similar_titles_source", PreferenceValues.SimilarTitlesSource.AllSources)
+    }
+    
+    fun similarTitlesMatchMode(): Preference<PreferenceValues.SimilarTitlesMatchMode> {
+        return preferenceStore.getEnum("similar_titles_match_mode", PreferenceValues.SimilarTitlesMatchMode.ByName)
+    }
+    
+    fun similarTitlesMaxCount(): Preference<Int> {
+        return preferenceStore.getInt("similar_titles_max_count", 10)
+    }
+    
     fun useTrueBlack(): Preference<Boolean> {
         return preferenceStore.getBoolean("use_true_black", false)
     }

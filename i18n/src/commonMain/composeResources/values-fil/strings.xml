@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">Isang pang-araw-araw na dosis ng inspirasyon</string>
@@ -2918,7 +2918,62 @@
     <string name="cover_theme_preset_soft">Malambot</string>
     <string name="cover_theme_preset_medium">Katamtaman</string>
     <string name="cover_theme_preset_high">Mataas</string>
+
+    <string name="recommendations_empty">Walang available na rekomendasyon</string>
+    <string name="recommendations_error">Nabigong i-load ang mga rekomendasyon</string>
+    <string name="recommendations_section_title">Mga Rekomendasyon</string>
+    <string name="recommendations_section_title_suggestions">Mga mungkahi</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Mga Setting ng Rekomendasyon</string>
+    <string name="recommendations_settings_subtitle">I-configure kung paano ipinapakita ang mga rekomendasyon ng libro</string>
+    <string name="recommendation_source_similar_by_title">Katulad sa Pamagat</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Maghanap sa pinagmulan ng mga libro na may katulad na pangalan</string>
+    <string name="recommendation_source_native_only">Native Source Lang</string>
+    <string name="recommendation_source_native_only_subtitle">Gamitin ang mga rekomendasyon na ibinigay ng pinagmulan</string>
+    <string name="recommendation_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Bumalik sa genre matching kapag walang native na rekomendasyon</string>
+    <string name="recommendation_search_keywords">Mga Keyword sa Paghahanap</string>
+    <string name="recommendation_search_keywords_subtitle">Mga keyword na kinuha mula sa pamagat ng kasalukuyang libro para makahanap ng mga katulad na libro</string>
+    <string name="recommendations_disabled">Hindi pinagana ang mga rekomendasyon</string>
+    <string name="recommendations_no_similar_books">Walang nahanap na katulad na libro para sa pamagat na ito</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Mga Katulad na Pamagat</string>
+    <string name="show_similar_titles">Ipakita ang Mga Katulad na Pamagat</string>
+    <string name="similar_titles_source">Pinagmulan ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Maksimum na Bilang ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_settings">Mga Setting ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_source_subtitle">Piliin kung aling pinagmulan ang gagamitin para sa mga katulad na pamagat</string>
+    <string name="max_similar_titles_count_subtitle">Maksimum na bilang ng mga katulad na pamagat na ipapakita</string>
+    <string name="show_similar_titles_subtitle">Ipakita ang mga aklat na may katulad na pangalan sa ibaba ng mga detalye ng nobela</string>
+    <string name="similar_titles_source_same_source">Lamang ang Parehong Pinagmulan</string>
+    <string name="similar_titles_source_same_source_subtitle">Ipakita ang mga katulad na pamagat lamang mula sa kasalukuyang pinagmulan</string>
+    <string name="similar_titles_source_other_sources">Lamang ang Iba Pang Pinagmulan</string>
+    <string name="similar_titles_source_other_sources_subtitle">Ipakita ang mga katulad na pamagat lamang mula sa ibang pinagmulan</string>
+    <string name="similar_titles_source_all_sources">Lahat ng Pinagmulan</string>
+    <string name="similar_titles_source_all_sources_subtitle">Ipakita ang mga katulad na pamagat mula sa lahat ng available na pinagmulan</string>
+    <string name="similar_titles_match_mode">Mode ng Pagtutugma ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_match_mode_subtitle">Piliin kung paano ihahambing ang mga katulad na pamagat</string>
+    <string name="similar_titles_mode_by_name">Katulad ayon sa Pangalan</string>
+    <string name="similar_titles_mode_by_name_subtitle">Maghanap ng mga aklat na may katulad na pamagat/pangalan</string>
+    <string name="similar_titles_mode_by_genre">Katulad ayon sa Genre</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Maghanap ng mga aklat na may tumutugmang mga genre/kategoriya</string>
+    <string name="similar_titles_mode_by_category">Katulad ayon sa Kategorya</string>
+    <string name="similar_titles_mode_by_category_subtitle">Maghanap ng mga aklat sa parehong kategorya</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
 
 
 
