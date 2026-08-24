@@ -32,10 +32,7 @@ data class LibraryUiState(
     val searchQuery: String? = null,
     val inSearchMode: Boolean = false,
     val sort: LibrarySort = LibrarySort(LibrarySort.Type.LastRead, true),
-    
-    // Scroll positions per category (categoryId -> (index, offset))
-    val categoryScrollPositions: Map<Long, Pair<Int, Int>> = emptyMap(),
-    
+
     // Pagination state per category (categoryId -> PaginationState)
     val categoryPaginationState: Map<Long, PaginationState> = emptyMap(),
     
@@ -160,10 +157,7 @@ data class LibraryScreenState(
     
     // Error
     val error: UiText? = null,
-    
-    // Scroll positions per category (categoryId -> (index, offset))
-    val categoryScrollPositions: Map<Long, Pair<Int, Int>> = emptyMap(),
-    
+
     // Pagination state per category (categoryId -> PaginationState)
     val categoryPaginationState: Map<Long, PaginationState> = emptyMap(),
     

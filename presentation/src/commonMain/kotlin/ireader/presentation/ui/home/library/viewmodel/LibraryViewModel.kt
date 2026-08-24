@@ -196,7 +196,6 @@ class LibraryViewModel(
                 .map { it.type }
                 .toImmutableSet(),
             error = controllerState.error?.let { ireader.i18n.UiText.DynamicString(it.toUserMessage()) },
-            categoryScrollPositions = uiState.categoryScrollPositions,
             showUpdateCategoryDialog = uiState.showUpdateCategoryDialog,
             showImportEpubDialog = uiState.showImportEpubDialog,
             showImportPdfDialog = uiState.showImportPdfDialog,
@@ -571,16 +570,17 @@ class LibraryViewModel(
 
     // ==================== Scroll Position ====================
     
+    // Scroll positions kept OUT of observable state: written on every scroll frame,
+    // and pushing them through _uiState re-ran the whole combine pipeline per frame
+    // (new LibraryScreenState + immutable list rebuild -> visible scroll jank).
+    private val categoryScrollPositions = mutableMapOf<Long, Pair<Int, Int>>()
+
     fun saveScrollPosition(categoryId: Long, index: Int, offset: Int) {
-        _uiState.update { current ->
-            current.copy(
-                categoryScrollPositions = current.categoryScrollPositions + (categoryId to (index to offset))
-            )
-        }
+        categoryScrollPositions[categoryId] = index to offset
     }
-    
+
     fun getScrollPosition(categoryId: Long): Pair<Int, Int> {
-        return _uiState.value.categoryScrollPositions[categoryId] ?: (0 to 0)
+        return categoryScrollPositions[categoryId] ?: (0 to 0)
     }
 
     // ==================== Category Management ====================
