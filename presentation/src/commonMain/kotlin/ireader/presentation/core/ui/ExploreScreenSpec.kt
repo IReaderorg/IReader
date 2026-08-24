@@ -36,7 +36,7 @@ import ireader.presentation.ui.home.explore.FilterBottomSheet
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
 
-import org.koin.compose.getKoin
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @OptIn(
@@ -53,11 +53,11 @@ data class ExploreScreenSpec(
     )
     @Composable
     fun Content() {
-        // Don't cache ExploreViewModel - always create fresh to avoid stale data
-        val koin = getKoin()
-        val vm: ExploreViewModel = remember(sourceId, query) {
-            koin.get<ExploreViewModel>(parameters = { parametersOf(ExploreViewModel.Param(sourceId, query)) })
-        }
+        // Scoped to the NavBackStackEntry: survives navigation to detail/search,
+        // cleared only when explore itself is popped. Keeps books/query/scroll on return.
+        val vm: ExploreViewModel = koinViewModel(
+            parameters = { parametersOf(ExploreViewModel.Param(sourceId, query)) }
+        )
         
         // Collect state as Compose state for efficient recomposition
         val state by vm.state.collectAsState()

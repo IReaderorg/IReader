@@ -144,6 +144,7 @@ koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndr
 koin-workManager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
 koin-androidCompose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidCompose" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinCompose" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 # Asm modificiation

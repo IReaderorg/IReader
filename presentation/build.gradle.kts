@@ -95,6 +95,7 @@ kotlin {
                 implementation(libs.navigation.compose)
                 api(libs.koin.core)
                 api(libs.koin.compose)
+                api(libs.koin.compose.viewmodel)
                 
                 // Immutable Collections - Critical for Compose performance (Mihon pattern)
                 api(libs.kotlinx.collections.immutable)
