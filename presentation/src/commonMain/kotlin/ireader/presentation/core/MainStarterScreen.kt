@@ -201,8 +201,7 @@ object MainStarterScreen {
             }
         }
         
-        // Use a direct reference to the shared Koin singleton instead of getIViewModel
-        // which creates a new instance outside RouteScope
+        // Use a direct reference to the shared Koin singleton (not a screen-scoped VM)
         val koinInstance = org.koin.compose.getKoin()
         val libraryUseCases: ireader.domain.usecases.library.LibraryUseCases? = koinInstance.getOrNull()
         

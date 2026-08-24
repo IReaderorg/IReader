@@ -29,9 +29,6 @@ import ireader.presentation.core.ui.FontScreenSpec
 import ireader.presentation.core.ui.GeneralScreenSpec
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
 import ireader.presentation.core.ui.GoogleDriveBackupScreenSpec
-import ireader.presentation.core.ui.LocalNavigationViewModelStore
-import ireader.presentation.core.ui.NavigationViewModelStore
-import ireader.presentation.core.ui.RouteScope
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.ReaderSettingSpec
 import ireader.presentation.core.ui.RepositoryAddScreenSpec
@@ -91,9 +88,7 @@ fun CommonNavHost(
     ) {
         // Main screen
         composable("main") {
-            RouteScope {
-                MainStarterScreen()
-            }
+            MainStarterScreen()
         }
         
         // Settings routes
@@ -136,18 +131,6 @@ fun CommonNavHost(
             ireader.presentation.core.ui.UserProfileScreenSpec().Content(userId = userId)
         }
 
-        composable(
-            route = NavigationRoutes.userProfile,
-            arguments = listOf(
-                navArgument("userId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val userId = remember(backStackEntry) {
-                backStackEntry.getStringArg("userId")
-            } ?: return@composable
-            ireader.presentation.core.ui.UserProfileScreenSpec().Content(userId = userId)
-        }
-
         composable(NavigationRoutes.popularBooks) {
             ireader.presentation.core.ui.PopularBooksScreenSpec().Content()
         }
@@ -168,17 +151,17 @@ fun CommonNavHost(
             )
         }
         
-        // My Quotes Screen - View and manage saved quotes (replaces old quotes/submit screens)
+        // My Quotes Screen - View and manage saved quotes
         composable(NavigationRoutes.myQuotes) {
             val vm: ireader.presentation.ui.quote.MyQuotesViewModel = getIViewModel()
             val navController = requireNotNull(LocalNavigator.current)
-            
+
             ireader.presentation.ui.community.QuotesScreen(
                 vm = vm,
                 onBack = { navController.popBackStack() }
             )
         }
-        
+
         // Community Hub - parent screen for all community features
         composable(NavigationRoutes.communityHub) {
             ireader.presentation.core.ui.CommunityHubScreenSpec().Content()
@@ -304,17 +287,6 @@ fun CommonNavHost(
                 vm = vm,
                 onBack = { navController.popBackStack() },
                 onSaveSuccess = { navController.popBackStack() }
-            )
-        }
-        
-        // My Quotes Screen - View and manage saved quotes
-        composable(NavigationRoutes.myQuotes) {
-            val vm: ireader.presentation.ui.quote.MyQuotesViewModel = getIViewModel()
-            val navController = requireNotNull(LocalNavigator.current)
-            
-            ireader.presentation.ui.community.QuotesScreen(
-                vm = vm,
-                onBack = { navController.popBackStack() }
             )
         }
         
@@ -474,9 +446,7 @@ fun CommonNavHost(
                 backStackEntry.getStringArg("bookId")?.toLongOrNull()
             }
             if (bookId != null) {
-                RouteScope {
-                    BookDetailScreenSpec(bookId).Content()
-                }
+                BookDetailScreenSpec(bookId).Content()
             }
         }
         
@@ -498,9 +468,7 @@ fun CommonNavHost(
                 ireader.presentation.core.ui.ModuleLoadingGuard(
                     loadingMessage = "Preparing reader..."
                 ) {
-                    RouteScope {
-                        ReaderScreenSpec(bookId, chapterId).Content()
-                    }
+                    ReaderScreenSpec(bookId, chapterId).Content()
                 }
             }
         }
@@ -515,9 +483,7 @@ fun CommonNavHost(
                 backStackEntry.getStringArg("sourceId")?.toLongOrNull()
             }
             if (sourceId != null) {
-                RouteScope {
-                    ExploreScreenSpec(sourceId, null).Content()
-                }
+                ExploreScreenSpec(sourceId, null).Content()
             }
         }
         
@@ -653,9 +619,7 @@ fun CommonNavHost(
                 backStackEntry.getStringArg("readingParagraph")?.toIntOrNull() ?: 0
             }
             if (bookId != null && chapterId != null && sourceId != null) {
-                RouteScope {
-                    TTSV2ScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
-                }
+                TTSV2ScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
             }
         }
         

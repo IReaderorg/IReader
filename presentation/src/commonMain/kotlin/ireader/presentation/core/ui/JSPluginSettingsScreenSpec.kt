@@ -21,7 +21,7 @@ class JSPluginSettingsScreenSpec {
     fun Content() {
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-        val uiPreferences: UiPreferences = getIViewModel()
+        val uiPreferences: UiPreferences = org.koin.compose.koinInject()
         
         IScaffold(
             topBar = { scrollBehavior ->
