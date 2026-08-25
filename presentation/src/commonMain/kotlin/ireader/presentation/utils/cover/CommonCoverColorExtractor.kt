@@ -68,40 +68,83 @@ class CommonCoverColorExtractor(
 
             // Sample ~2500 grid points regardless of resolution
             val stride = maxOf(1, sqrt(w.toFloat() * h / 2500f).toInt())
-            val counts = IntArray(16 * 16 * 16)
             var y = 0
+            var write = 0
+            val argb = IntArray((w / stride + 1) * (h / stride + 1))
             while (y < h) {
                 var x = 0
                 while (x < w) {
                     val c = pixels[x, y]
                     if (c.alpha >= 0.5f) {
-                        val r = (c.red * 255f).toInt() shr 4
-                        val g = (c.green * 255f).toInt() shr 4
-                        val b = (c.blue * 255f).toInt() shr 4
-                        counts[(r shl 8) or (g shl 4) or b]++
+                        argb[write++] =
+                            (((c.red * 255f).toInt()) shl 16) or
+                            (((c.green * 255f).toInt()) shl 8) or
+                            ((c.blue * 255f).toInt())
                     }
                     x += stride
                 }
                 y += stride
             }
 
-            var bestIdx = -1
-            var bestCount = 0
-            for (i in counts.indices) {
-                if (counts[i] > bestCount) {
-                    bestCount = counts[i]
-                    bestIdx = i
-                }
-            }
-            if (bestIdx < 0 || bestCount == 0) return@withContext null
-
-            val r = ((bestIdx shr 8) and 0xF) * 17
-            val g = ((bestIdx shr 4) and 0xF) * 17
-            val b = (bestIdx and 0xF) * 17
-            DomainColor(r / 255f, g / 255f, b / 255f)
+            selectSeedColor(argb.copyOf(write))
         } catch (e: Exception) {
             Log.warn { "CoverColorExtractor: decode failed: ${e.message}" }
             null
+        }
+    }
+
+    /**
+     * Picks a vivid seed from sampled RGB pixels. Plain "most frequent bucket"
+     * usually lands on white/black text or borders, washing the theme out to
+     * gray — so score buckets by population × saturation², skipping near-gray
+     * and extreme-brightness buckets. Falls back to the plain winner when the
+     * cover is genuinely grayscale.
+     */
+    companion object {
+        fun selectSeedColor(argb: IntArray): DomainColor? {
+        if (argb.isEmpty()) return null
+        val counts = IntArray(16 * 16 * 16)
+        for (p in argb) {
+            // Pack each channel's high nibble: [r@8][g@4][b@0], matching the *17 decode below
+            val r = (p shr 20) and 0xF
+            val g = (p shr 12) and 0xF
+            val b = (p shr 4) and 0xF
+            counts[(r shl 8) or (g shl 4) or b]++
+        }
+
+        var fallbackIdx = -1
+        var fallbackCount = 0
+        var bestIdx = -1
+        var bestScore = 0f
+        for (i in counts.indices) {
+            val count = counts[i]
+            if (count > fallbackCount) {
+                fallbackCount = count
+                fallbackIdx = i
+            }
+            if (count == 0) continue
+            val r = (((i shr 8) and 0xF) * 17) / 255f
+            val g = (((i shr 4) and 0xF) * 17) / 255f
+            val b = ((i and 0xF) * 17) / 255f
+            val max = maxOf(r, g, b)
+            val min = minOf(r, g, b)
+            val sat = if (max == 0f) 0f else (max - min) / max
+            val lum = 0.2126f * r + 0.7152f * g + 0.0722f * b
+            if (sat < 0.18f || lum < 0.12f || lum > 0.92f) continue
+            val score = count * sat * sat
+            if (score > bestScore) {
+                bestScore = score
+                bestIdx = i
+            }
+        }
+        val idx = if (bestIdx >= 0) bestIdx else fallbackIdx
+        if (idx < 0) return null
+
+            return DomainColor(
+                ((((idx shr 8) and 0xF) * 17) / 255f),
+                ((((idx shr 4) and 0xF) * 17) / 255f),
+                (((idx and 0xF) * 17) / 255f)
+            )
         }
     }
 }

@@ -78,8 +78,8 @@ object Material3PaletteGenerator {
         primaryHue: Float = h, primarySat: Float = s, primaryLight: Float = l,
         secondaryHue: Float = (h + 30f) % 360f, secondarySat: Float = s * 0.85f, secondaryLight: Float = if (isDark) 0.58f else 0.4f,
         tertiaryHue: Float = (h + 180f) % 360f, tertiarySat: Float = s * 0.9f, tertiaryLight: Float = if (isDark) 0.55f else 0.45f,
-        bgSat: Float = s * 0.15f, bgLight: Float = if (isDark) 0.06f else 0.96f,
-        surfSat: Float = s * 0.12f, surfLight: Float = if (isDark) 0.1f else 0.94f
+        bgSat: Float = s * 0.25f, bgLight: Float = if (isDark) 0.06f else 0.96f,
+        surfSat: Float = s * 0.2f, surfLight: Float = if (isDark) 0.1f else 0.94f
     ): DomainColorScheme {
         val p = HSL(primaryHue, primarySat, primaryLight)
         val sec = HSL(secondaryHue, secondarySat, secondaryLight)

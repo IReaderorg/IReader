@@ -3,6 +3,7 @@ package ireader.presentation.core.theme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import kotlin.test.Test
+import ireader.presentation.utils.cover.CommonCoverColorExtractor
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -53,6 +54,30 @@ class Material3PaletteGeneratorTest {
             saturationOf(Material3PaletteGenerator.generate(vivid, false).primary.toComposeColorForTest()) > 0.4f,
             "vivid seed should stay saturated"
         )
+    }
+
+    @Test
+    fun `seed selection prefers vivid region over dominant white or black`() {
+        // Cover that is mostly white background + black title text with a smaller red artwork area
+        val pixels = IntArray(1000)
+        for (i in pixels.indices) {
+            pixels[i] = when {
+                i < 600 -> 0xFFFFFF // white bg
+                i < 900 -> 0x000000 // black text
+                else -> 0xE53935   // red artwork (~10%)
+            }
+        }
+        val seed = CommonCoverColorExtractor.selectSeedColor(pixels)!!
+        // 16-level quantization loses up to ~15/255 per channel
+        assertEquals(0xE5 / 255f, seed.red, 0.06f, "should pick the red region, not white/black")
+    }
+
+    @Test
+    fun `genuinely grayscale cover falls back to most frequent shade`() {
+        val pixels = IntArray(500) { if (it < 400) 0xDDDDDD else 0x333333 }
+        val seed = CommonCoverColorExtractor.selectSeedColor(pixels)!!
+        assertEquals(0xDD / 255f, seed.red, 0.06f)
+        assertEquals(seed.red, seed.blue, "grayscale seed must stay grayscale")
     }
 
     @Test
