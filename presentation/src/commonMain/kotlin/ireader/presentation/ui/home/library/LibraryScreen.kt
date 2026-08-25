@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,11 +34,8 @@ import ireader.presentation.ui.home.library.components.ResumeReadingCard
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
-import ireader.presentation.core.theme.AppThemeViewModel
-import ireader.presentation.core.theme.WithCoverBasedTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import org.koin.compose.koinInject
 
 @ExperimentalAnimationApi
 @Composable
@@ -97,27 +93,6 @@ fun LibraryScreen(
         // the ViewModel to reload the affected data automatically.
     }
     
-    // Cover-based dynamic color theme wiring for resume card
-    val appThemeViewModel: AppThemeViewModel = koinInject()
-    val lastReadForCover = state.lastReadInfo
-    val effectiveResumeCoverUrl = remember(lastReadForCover?.coverUrl) {
-        lastReadForCover?.coverUrl?.takeIf { it.isNotBlank() }
-    }
-    val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
-    LaunchedEffect(effectiveResumeCoverUrl, isSystemDark) {
-        if (effectiveResumeCoverUrl != null) {
-            appThemeViewModel.setCurrentCoverUrl(effectiveResumeCoverUrl, null, isSystemDark)
-        } else {
-            appThemeViewModel.setCurrentCoverUrl(null, null, isSystemDark)
-        }
-    }
-    DisposableEffect(Unit) {
-        onDispose {
-            appThemeViewModel.setCurrentCoverUrl(null, null, isSystemDark)
-        }
-    }
-    val resumeCoverColorScheme by appThemeViewModel.coverBasedColorScheme.collectAsState(initial = null)
-    
     // NOTE: Category change effect removed - pagination handles loading automatically
     // when category changes via getLibraryForCategoryIndexAsState()
 
@@ -157,8 +132,7 @@ fun LibraryScreen(
                 },
                 onDismiss = { vm.dismissResumeCard() },
                 isVisible = showResumeCard,
-                modifier = Modifier.align(Alignment.BottomCenter),
-                coverColorScheme = resumeCoverColorScheme
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
             
             // Pre-compute filtered categories to avoid recalculation on each recomposition

@@ -1,97 +1,86 @@
 package ireader.presentation.core.theme
 
 import androidx.compose.ui.graphics.Color
-import ireader.domain.models.common.DomainColor
 import ireader.domain.models.theme.DomainColorScheme
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.cover.CoverColorExtractor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlin.math.roundToInt
+import kotlin.coroutines.coroutineContext
 
+/**
+ * Extracts a palette from the current book cover and exposes it as a StateFlow.
+ *
+ * No fake fallback: until real extraction succeeds the flow stays null and the UI
+ * keeps the regular app theme — a wrong random color is worse than no color.
+ * The cache map is guarded by [mutex]; extraction runs on Dispatchers.IO.
+ */
 class CoverBasedThemeManager(
     private val coverColorExtractor: CoverColorExtractor,
     private val scope: CoroutineScope
 ) {
     private val _coverBasedTheme = MutableStateFlow<DomainColorScheme?>(null)
     val coverBasedTheme: StateFlow<DomainColorScheme?> = _coverBasedTheme.asStateFlow()
-    
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-    
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
-    
+
+    // ponytail: cache is unbounded per-session but entries are tiny (one ColorScheme)
+    // and keyed by visited covers; swap to LRU if memory ever shows up in profiling.
     private val cache = mutableMapOf<String, DomainColorScheme>()
-    private val pendingExtractions = mutableSetOf<String>()
-    
-    private fun generateInstantFallback(coverUrl: String, style: PreferenceValues.CoverBasedThemeStyle, isDark: Boolean): DomainColorScheme {
-        val hash = coverUrl.hashCode()
-        val hue = (hash and 0x7FFFFFFF) % 360
-        val sat = 0.65f
-        val light = if (isDark) 0.5f else 0.45f
-        val seed = Color.hsv(hue / 360f, sat, light)
-        return Material3PaletteGenerator.generate(seed, style, isDark)
-    }
-    
+    private val mutex = Mutex()
+    private var extractionJob: Job? = null
+
     fun applyCoverBasedTheme(
         coverUrl: String?,
         sourceId: Long?,
         style: PreferenceValues.CoverBasedThemeStyle,
         isDark: Boolean
     ) {
+        // Cancel any in-flight extraction for the previous cover
+        extractionJob?.cancel()
+        extractionJob = null
+
         if (coverUrl.isNullOrBlank()) {
-            _coverBasedTheme.value = null
+            clear()
             return
         }
-        
+
         val cacheKey = "${sourceId ?: 0}_${coverUrl.hashCode()}_${style.name}_$isDark"
-        cache[cacheKey]?.let {
-            _coverBasedTheme.value = it
-            return
-        }
-        
-        val instantScheme = generateInstantFallback(coverUrl, style, isDark)
-        cache[cacheKey] = instantScheme
-        _coverBasedTheme.value = instantScheme
-        
-        if (pendingExtractions.add(cacheKey)) {
-            scope.launch {
-                _isLoading.value = true
-                _error.value = null
-                try {
-                    val dominantColor = withContext(Dispatchers.IO) {
-                        coverColorExtractor.extractDominantColor(coverUrl, sourceId)
-                    }
-                    if (dominantColor != null) {
-                        val seedColor = Color(dominantColor.red, dominantColor.green, dominantColor.blue, dominantColor.alpha)
-                        val scheme = Material3PaletteGenerator.generate(seedColor, style, isDark)
-                        cache[cacheKey] = scheme
-                        _coverBasedTheme.value = scheme
-                    }
-                } catch (e: Exception) {
-                    _error.value = e.message
-                } finally {
-                    _isLoading.value = false
-                    pendingExtractions.remove(cacheKey)
+        extractionJob = scope.launch {
+            val cached = mutex.withLock { cache[cacheKey] }
+            if (cached != null) {
+                _coverBasedTheme.value = cached
+                return@launch
+            }
+
+            try {
+                val dominantColor = withContext(Dispatchers.IO) {
+                    coverColorExtractor.extractDominantColor(coverUrl, sourceId)
                 }
+                if (dominantColor != null) {
+                    val seedColor = Color(dominantColor.red, dominantColor.green, dominantColor.blue, dominantColor.alpha)
+                    val scheme = Material3PaletteGenerator.generate(seedColor, style, isDark)
+                    mutex.withLock { cache[cacheKey] = scheme }
+                    // Publish only if this extraction is still the latest request;
+                    // a newer applyCoverBasedTheme/clear call has cancelled this job by then.
+                    if (coroutineContext[Job] === extractionJob) _coverBasedTheme.value = scheme
+                }
+            } catch (e: Exception) {
+                // Extraction is best-effort; keep regular theme on failure
             }
         }
     }
-    
-    fun clearCache() {
-        cache.clear()
-        pendingExtractions.clear()
+
+    /** Cancels in-flight extraction and unpublishes the current scheme (cache retained). */
+    fun clear() {
+        extractionJob?.cancel()
+        extractionJob = null
         _coverBasedTheme.value = null
-        _error.value = null
-    }
-    
-    fun clearError() {
-        _error.value = null
     }
 }

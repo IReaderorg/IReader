@@ -163,7 +163,7 @@ fun AppearanceSettingScreen(
             Components.Switch(
                 preference = vm.useTrueBlack,
                 title = localizeHelper.localize(Res.string.use_true_black_amoled),
-                subtitle = localizeHelper.localize(Res.string.use_true_black_amoled_subtitle),
+                subtitle = localizeHelper.localize(Res.string.pure_black_backgrounds_for_power),
             ).Build()
         }
         item {
@@ -175,7 +175,7 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
-                val coverStyleState = remember(vm.coverBasedThemeStyle.value) { vm.coverBasedThemeStyle }
+                val coverStyleState = vm.coverBasedThemeStyle
                 val coverStyleChoices = remember {
                     PreferenceValues.CoverBasedThemeStyle.entries.associateWith { style ->
                         when (style) {

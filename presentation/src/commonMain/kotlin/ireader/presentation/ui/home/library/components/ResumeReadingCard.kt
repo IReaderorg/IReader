@@ -31,8 +31,7 @@ fun ResumeReadingCard(
     onResume: () -> Unit,
     onDismiss: () -> Unit,
     isVisible: Boolean,
-    modifier: Modifier = Modifier,
-    coverColorScheme: androidx.compose.material3.ColorScheme? = null
+    modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
@@ -86,7 +85,6 @@ fun ResumeReadingCard(
                     }
                     
                     // Play Icon Button
-                    val playTint = coverColorScheme?.primary ?: MaterialTheme.colorScheme.primary
                     IconButton(
                         onClick = onResume,
                         modifier = Modifier.size(32.dp)
@@ -95,7 +93,7 @@ fun ResumeReadingCard(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = localize(Res.string.resume),
                             modifier = Modifier.size(18.dp),
-                            tint = playTint
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                     

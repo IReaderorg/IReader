@@ -26,5 +26,7 @@ actual val presentationPlatformModule: Module = module {
     single<TrackingSyncScheduler> { DesktopTrackingSyncScheduler() }
     
     // Cover color extractor for cover-based dynamic theme
-    single<ireader.domain.utils.cover.CoverColorExtractor> { DesktopCoverColorExtractor() }
+    single<ireader.domain.utils.cover.CoverColorExtractor> {
+        DesktopCoverColorExtractor(get(), get<ireader.core.http.HttpClients>())
+    }
 }

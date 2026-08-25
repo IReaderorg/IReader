@@ -65,9 +65,7 @@ import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderState
 import ireader.presentation.core.theme.AppThemeViewModel
-import ireader.presentation.core.theme.WithCoverBasedTheme
 import ireader.domain.models.BookCover
-import ireader.core.source.HttpSource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
@@ -119,37 +117,24 @@ data class ReaderScreenSpec(
             }
         val readerState by vm.state.collectAsState()
 
-        // Cover-based dynamic color theme wiring
+        // Cover-based dynamic color theme: feed the current book cover to the
+        // AppThemeViewModel; the root AppTheme applies the resulting scheme globally.
         val appThemeViewModel: AppThemeViewModel = koinInject()
         val successStateForCover = readerState as? ReaderState.Success
         val bookForCover = successStateForCover?.book
         val rawCoverUrl = bookForCover?.let { BookCover.from(it).cover }
-        val catalogSourceBaseUrl = (successStateForCover?.catalog?.source as? HttpSource)?.baseUrl
-        val effectiveCoverUrl = remember(bookForCover?.id, rawCoverUrl, catalogSourceBaseUrl) {
-            if (!rawCoverUrl.isNullOrBlank()) {
-                if (rawCoverUrl.startsWith("http")) {
-                    rawCoverUrl
-                } else {
-                    val base = catalogSourceBaseUrl?.trimEnd('/') ?: ""
-                    if (base.isNotBlank()) "$base/$rawCoverUrl" else rawCoverUrl
-                }
-            } else null
+        val effectiveCoverUrl = remember(bookForCover?.id, rawCoverUrl) {
+            rawCoverUrl?.takeIf { it.isNotBlank() }
         }
         val isSystemDark = isSystemInDarkTheme()
         LaunchedEffect(effectiveCoverUrl, isSystemDark) {
-            if (effectiveCoverUrl != null) {
-                appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, bookForCover?.sourceId, isSystemDark)
-            } else {
-                appThemeViewModel.setCurrentCoverUrl(null, bookForCover?.sourceId, isSystemDark)
-            }
+            appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, bookForCover?.sourceId, isSystemDark)
         }
         DisposableEffect(Unit) {
             onDispose {
-                appThemeViewModel.setCurrentCoverUrl(null, bookForCover?.sourceId, isSystemDark)
+                appThemeViewModel.setCurrentCoverUrl(null, null, false)
             }
         }
-
-        val coverBasedColorScheme by appThemeViewModel.coverBasedColorScheme.collectAsState(initial = null)
 
         // Plugin integration for reader menu items
         val featurePluginIntegration: FeaturePluginIntegration? = remember {
@@ -513,11 +498,10 @@ data class ReaderScreenSpec(
                 statusBar = customColor.status,
                 navigationBar = customColor.navigation
             ) {
-                WithCoverBasedTheme(coverBasedColorScheme = coverBasedColorScheme) {
-                    // Use Box to overlay top bar without affecting content layout
-                    androidx.compose.foundation.layout.Box(
-                        modifier = androidx.compose.ui.Modifier.fillMaxSize()
-                    ) {
+                // Use Box to overlay top bar without affecting content layout
+                androidx.compose.foundation.layout.Box(
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                ) {
                     // Content first (below the top bar)
                     val padding = androidx.compose.foundation.layout.PaddingValues(0.dp)
 
@@ -846,12 +830,8 @@ data class ReaderScreenSpec(
     }
 }
 
-private fun LazyListState.getId(): Long? {
-        return kotlin.runCatching {
-            return@runCatching this.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString()
-                .substringAfter("-").toLong()
-        }.getOrNull()
-    }
-
-}
+private fun LazyListState.getId(): Long? = kotlin.runCatching {
+    layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString()
+        .substringAfter("-").toLong()
+}.getOrNull()
 

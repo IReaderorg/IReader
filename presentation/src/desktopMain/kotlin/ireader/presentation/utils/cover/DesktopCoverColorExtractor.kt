@@ -1,8 +1,5 @@
 package ireader.presentation.utils.cover
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -13,11 +10,13 @@ import ireader.core.source.HttpSource
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.models.common.DomainColor
 import ireader.domain.utils.cover.CoverColorExtractor
-import ireader.presentation.imageloader.convertToOkHttpRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import javax.imageio.ImageIO
 
-class AndroidCoverColorExtractor(
+class DesktopCoverColorExtractor(
     private val catalogStore: CatalogStore,
     private val httpClients: HttpClients
 ) : CoverColorExtractor {
@@ -27,12 +26,11 @@ class AndroidCoverColorExtractor(
             val baseUrl = (catalog?.source as? HttpSource)?.baseUrl
             val absoluteUrl = CoverColorExtractor.resolveCoverUrl(coverUrl, baseUrl)
 
-            val sourceHeaders = sourceId?.let {
+            val sourceHeaders: Map<String, List<String>>? = sourceId?.let {
                 val httpSource = catalog?.source as? HttpSource
-                runCatching {
-                    httpSource?.getCoverRequest(absoluteUrl)?.second?.build()
-                        ?.convertToOkHttpRequest()?.headers?.toMultimap()
-                }.getOrNull()
+                val builder = runCatching { httpSource?.getCoverRequest(absoluteUrl)?.second }
+                    .getOrNull() ?: return@let null
+                builder.build().headers.entries().associate { it.key to it.value }
             }
 
             val response = httpClients.default.get(absoluteUrl) {
@@ -55,18 +53,23 @@ class AndroidCoverColorExtractor(
 
     override suspend fun extractDominantColorFromBitmap(byteArray: ByteArray): DomainColor? = withContext(Dispatchers.IO) {
         try {
-            val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size) ?: return@withContext null
-            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 50, 50, false)
-            val pixels = IntArray(50 * 50)
-            scaledBitmap.getPixels(pixels, 0, 50, 0, 0, 50, 50)
+            val image = ImageIO.read(ByteArrayInputStream(byteArray)) ?: return@withContext null
+
+            // Downscale to a tiny sample; dominant hue is stable at this size
+            val scaled = BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB)
+            val g2d = scaled.createGraphics()
+            try {
+                g2d.drawImage(image, 0, 0, 50, 50, null)
+            } finally {
+                g2d.dispose()
+            }
 
             // Quantize to 16-level channels; count with an IntArray instead of a Map
             val counts = IntArray(16 * 16 * 16)
-            for (pixel in pixels) {
-                if (Color.alpha(pixel) < 128) continue
-                val r = Color.red(pixel) shr 4
-                val g = Color.green(pixel) shr 4
-                val b = Color.blue(pixel) shr 4
+            for (pixel in scaled.getRGB(0, 0, 50, 50, null, 0, 50)) {
+                val r = ((pixel shr 16) and 0xF0) shr 4
+                val g = ((pixel shr 8) and 0xF0) shr 4
+                val b = (pixel and 0xF0) shr 4
                 counts[(r shl 8) or (g shl 4) or b]++
             }
 
@@ -80,10 +83,10 @@ class AndroidCoverColorExtractor(
             }
             if (bestIdx < 0) return@withContext null
 
-            DomainColor.fromArgb(
-                0xFF000000.toInt() or (((bestIdx shr 8) and 0xF) * 17 shl 16) or
-                    (((bestIdx shr 4) and 0xF) * 17 shl 8) or ((bestIdx and 0xF) * 17)
-            )
+            val r = ((bestIdx shr 8) and 0xF) * 17
+            val g = ((bestIdx shr 4) and 0xF) * 17
+            val b = (bestIdx and 0xF) * 17
+            DomainColor(r / 255f, g / 255f, b / 255f)
         } catch (e: Exception) {
             null
         }

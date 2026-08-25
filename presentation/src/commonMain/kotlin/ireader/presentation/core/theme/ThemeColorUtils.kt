@@ -45,11 +45,8 @@ object ThemeColorUtils {
     
     /**
      * Ensures all "on" colors in a ColorScheme have proper contrast with their backgrounds.
-     * Reader text contrast protection: onBackground and onSurface are always high-emphasis (0.87 alpha)
-     * to ensure reading text is never hidden or dimmed by theme colors.
      */
     fun ensureProperOnColors(colorScheme: ColorScheme): ColorScheme {
-        val highEmphasis = 0.87f
         return colorScheme.copy(
             onPrimary = getOnColor(colorScheme.primary),
             onPrimaryContainer = getOnColor(colorScheme.primaryContainer),
@@ -57,10 +54,8 @@ object ThemeColorUtils {
             onSecondaryContainer = getOnColor(colorScheme.secondaryContainer),
             onTertiary = getOnColor(colorScheme.tertiary),
             onTertiaryContainer = getOnColor(colorScheme.tertiaryContainer),
-            onBackground = Color.Black.copy(alpha = highEmphasis).takeIf { colorScheme.background.luminance() > 0.5f }
-                ?: Color.White.copy(alpha = highEmphasis),
-            onSurface = Color.Black.copy(alpha = highEmphasis).takeIf { colorScheme.surface.luminance() > 0.5f }
-                ?: Color.White.copy(alpha = highEmphasis),
+            onBackground = getOnColor(colorScheme.background),
+            onSurface = getOnColor(colorScheme.surface),
             onSurfaceVariant = getOnColor(colorScheme.surfaceVariant),
             onError = getOnColor(colorScheme.error),
             onErrorContainer = getOnColor(colorScheme.errorContainer),

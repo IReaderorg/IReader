@@ -66,10 +66,11 @@ object Material3PaletteGenerator {
     }
     
     private fun hslContrastOn(hsl: HSL): DomainColor {
-        return if (hsl.lightness > 0.55f) DomainColor(0f, 0f, 0f, 0.87f) else DomainColor(1f, 1f, 1f, 0.87f)
+        // Decide by perceptual luminance, not HSL lightness — blue hues at the same
+        // lightness are visibly darker than yellow ones.
+        val c = hslToDomainColor(hsl.hue, hsl.saturation, hsl.lightness)
+        return if (c.luminance() > 0.5f) DomainColor(0f, 0f, 0f, 0.87f) else DomainColor(1f, 1f, 1f, 0.87f)
     }
-    
-    private fun hslContrastOn(h: Float, s: Float, l: Float): DomainColor = hslContrastOn(HSL(h, s, l))
     
     private fun baseColors(h: Float, s: Float, l: Float, isDark: Boolean): Triple<HSL, HSL, HSL> {
         val boostedS = (s * 1.5f).coerceAtMost(1f)

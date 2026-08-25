@@ -29,10 +29,7 @@ import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeColorScheme
 import ireader.presentation.core.toDomainColor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 class AppThemeViewModel(
@@ -53,15 +50,11 @@ class AppThemeViewModel(
     private val useTrueBlackState = uiPreferences.useTrueBlack().asState()
     private val appUiFontState = uiPreferences.appUiFont().asState()
     
-    // Track last applied cover URL so we can re-apply when style changes
+    // Track last applied cover so we can re-apply when the style preference changes
     private var lastAppliedCoverUrl: String? = null
+    private var lastAppliedSourceId: Long? = null
     private var lastAppliedIsDark: Boolean = false
-    
-    // Expose cover-based ColorScheme for local MaterialTheme overrides
-    val coverBasedColorScheme: Flow<ColorScheme?> = coverBasedThemeManager?.coverBasedTheme?.map { scheme ->
-        scheme?.toComposeColorScheme()
-    } ?: kotlinx.coroutines.flow.flowOf(null)
-    
+
     // Pre-create color states for both light and dark modes
     // This ensures we always have reactive state objects ready
     private val lightColorsState = uiPreferences.getLightColors().asState(scope)
@@ -72,9 +65,8 @@ class AppThemeViewModel(
             themes.removeIf { baseTheme -> baseTheme.id > 0L }
             themes.addAll(it)
         }.launchIn(scope)
-        
+
         // Re-apply cover-based theme when style changes, if we have a cached cover URL
-        coverBasedThemeStyleState.value
         uiPreferences.coverBasedThemeStyle().changes().onEach { newStyle ->
             val currentUrl = lastAppliedCoverUrl
             if (currentUrl != null && coverBasedThemeEnabledState.value) {
@@ -83,8 +75,13 @@ class AppThemeViewModel(
                     PreferenceValues.ThemeMode.Dark -> true
                     else -> lastAppliedIsDark
                 }
-                coverBasedThemeManager?.applyCoverBasedTheme(currentUrl, null, newStyle, resolvedIsDark)
+                coverBasedThemeManager?.applyCoverBasedTheme(currentUrl, lastAppliedSourceId, newStyle, resolvedIsDark)
             }
+        }.launchIn(scope)
+
+        // Clear the published scheme when the feature is switched off
+        uiPreferences.coverBasedThemeEnabled().changes().onEach { enabled ->
+            if (!enabled) coverBasedThemeManager?.clear()
         }.launchIn(scope)
     }
 
@@ -96,7 +93,6 @@ class AppThemeViewModel(
         val colorTheme = colorThemeState.value
         val dynamicColorMode = dynamicColorModeState.value
         val coverBasedThemeEnabled = coverBasedThemeEnabledState.value
-        val coverBasedThemeStyle = coverBasedThemeStyleState.value
         val useTrueBlack = useTrueBlackState.value
         
         val baseTheme = getBaseTheme(themeMode, colorTheme)
@@ -127,11 +123,15 @@ class AppThemeViewModel(
             baseTheme.materialColors.toComposeColorScheme()
         }
         
-        // Step 1b: Apply cover-based theme if enabled
+        // Step 1b: Apply cover-based theme if enabled. The cover scheme wins over
+        // dynamic/base themes; user custom primary/secondary are skipped so they
+        // don't fight the extracted palette.
+        var usingCoverScheme = false
         if (coverBasedThemeEnabled && coverBasedThemeManager != null) {
             val coverScheme = coverBasedThemeManager.coverBasedTheme.collectAsState(initial = null).value
             if (coverScheme != null) {
                 materialColors = coverScheme.toComposeColorScheme()
+                usingCoverScheme = true
             }
         }
          
@@ -139,7 +139,7 @@ class AppThemeViewModel(
         val customPrimary = customPrimaryColor.takeIf { it != Color.Unspecified }
         val customSecondary = customSecondaryColor.takeIf { it != Color.Unspecified }
         
-        if (customPrimary != null || customSecondary != null) {
+        if (!usingCoverScheme && (customPrimary != null || customSecondary != null)) {
             materialColors = ThemeColorUtils.applyCustomColors(
                 materialColors,
                 customPrimary,
@@ -171,17 +171,20 @@ class AppThemeViewModel(
     fun setCurrentCoverUrl(coverUrl: String?, sourceId: Long?, isDark: Boolean) {
         if (coverBasedThemeManager == null) return
         lastAppliedCoverUrl = coverUrl
+        lastAppliedSourceId = sourceId
         lastAppliedIsDark = isDark
-        val coverBasedThemeEnabled = coverBasedThemeEnabledState.value
-        val coverBasedThemeStyle = coverBasedThemeStyleState.value
-        if (coverBasedThemeEnabled) {
-            val resolvedIsDark = when (uiPreferences.themeMode().get()) {
-                PreferenceValues.ThemeMode.Light -> false
-                PreferenceValues.ThemeMode.Dark -> true
-                else -> isDark
-            }
-            coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, coverBasedThemeStyle, resolvedIsDark)
+        if (!coverBasedThemeEnabledState.value || coverUrl == null) {
+            // Leaving a themed screen (or feature off): drop the override.
+            // Safe to call repeatedly — StateFlow dedupes the null publish.
+            coverBasedThemeManager.clear()
+            return
         }
+        val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+            PreferenceValues.ThemeMode.Light -> false
+            PreferenceValues.ThemeMode.Dark -> true
+            else -> isDark
+        }
+        coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, coverBasedThemeStyleState.value, resolvedIsDark)
     }
 
     @Composable
