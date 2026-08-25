@@ -116,14 +116,9 @@ class AppThemeViewModel(
         var usingCoverScheme = false
         if (coverBasedThemeEnabled && coverBasedThemeManager != null) {
             val coverScheme = coverBasedThemeManager.coverBasedTheme.collectAsState(initial = null).value
-            // Fade toward the cover scheme on enter, fade back to base on leave —
-            // no hard snap in either direction.
-            val animated = blendCoverScheme(materialColors, coverScheme?.toComposeColorScheme())
             if (coverScheme != null) {
-                materialColors = animated
+                materialColors = coverScheme.toComposeColorScheme()
                 usingCoverScheme = true
-            } else {
-                materialColors = animated
             }
         }
          
@@ -146,8 +141,12 @@ class AppThemeViewModel(
          
         // Step 4: Ensure all "on" colors have proper contrast
         materialColors = ThemeColorUtils.ensureProperOnColors(materialColors)
-        
-        // Step 5: Create extra colors for bars
+
+        // Step 5: Animate toward the final scheme — every theme change (cover claim,
+        // cover release, manual theme switch) cross-fades instead of snapping.
+        materialColors = animateScheme(materialColors, isLight)
+
+        // Step 6: Create extra colors for bars
         // Use base theme's bar color, but allow custom override
         val extraColors = createExtraColors(
             baseExtraColors = baseTheme.extraColors,
@@ -156,7 +155,7 @@ class AppThemeViewModel(
             isLight = isLight,
             useTrueBlack = useTrueBlack
         )
-        
+
         return materialColors to extraColors
     }
     
@@ -185,24 +184,37 @@ class AppThemeViewModel(
     }
 
     /**
-     * Cross-fades [base] toward the cover scheme on appear, and back to [base] on
-     * disappear — turning hard theme snaps into smooth fades.
+     * Animates toward whatever the fully-computed target scheme is — cover claim,
+     * release, switching between books, or a manual theme change all cross-fade.
+     * Lerp starts from the currently displayed colors, so mid-flight retargets are
+     * seamless.
      */
     @Composable
-    private fun blendCoverScheme(base: ColorScheme, cover: ColorScheme?): ColorScheme {
-        var lastCover by remember { mutableStateOf(cover) }
-        val fraction = remember { Animatable(if (cover != null) 1f else 0f) }
+    private fun animateScheme(target: ColorScheme, isLight: Boolean): ColorScheme {
+        var lastLight by remember { mutableStateOf(isLight) }
+        val anim = remember { Animatable(1f) }
+        // Animation start point; null while settled on target
+        val from = remember { mutableStateOf<ColorScheme?>(null) }
 
-        LaunchedEffect(cover) {
-            if (cover != null) lastCover = cover
-            fraction.animateTo(if (cover != null) 1f else 0f, tween(durationMillis = 400, easing = FastOutSlowInEasing))
+        // Last frame actually shown — recomputed every pass, so a retarget mid-flight
+        // starts the new fade from wherever the screen currently is.
+        val displayed = from.value?.lerpTo(target, anim.value) ?: target
+
+        LaunchedEffect(target, isLight) {
+            if (isLight != lastLight) {
+                // Light↔dark flips read as intentional; blend would pass through muddy gray
+                lastLight = isLight
+                from.value = null
+                anim.snapTo(1f)
+            } else if (displayed != target) {
+                from.value = displayed
+                anim.snapTo(0f)
+                anim.animateTo(1f, tween(durationMillis = 400, easing = FastOutSlowInEasing))
+                from.value = null
+            }
         }
 
-        if (fraction.value >= 1f) return cover ?: base
-        if (fraction.value <= 0f) return base
-        val from = if (cover != null) base else lastCover ?: return base
-        val to = cover ?: base
-        return from.lerpTo(to, fraction.value)
+        return displayed
     }
 
     @Composable
