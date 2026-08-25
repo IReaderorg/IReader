@@ -1,14 +1,20 @@
 package ireader.presentation.core.theme
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.intl.Locale
 import ireader.core.prefs.Preference
 import ireader.domain.data.repository.ThemeRepository
@@ -62,7 +68,7 @@ class AppThemeViewModel(
 
         // Clear the published scheme when the feature is switched off
         uiPreferences.coverBasedThemeEnabled().changes().onEach { enabled ->
-            if (!enabled) coverBasedThemeManager?.clear()
+            if (!enabled) coverBasedThemeManager?.clearAll()
         }.launchIn(scope)
     }
 
@@ -110,9 +116,14 @@ class AppThemeViewModel(
         var usingCoverScheme = false
         if (coverBasedThemeEnabled && coverBasedThemeManager != null) {
             val coverScheme = coverBasedThemeManager.coverBasedTheme.collectAsState(initial = null).value
+            // Fade toward the cover scheme on enter, fade back to base on leave —
+            // no hard snap in either direction.
+            val animated = blendCoverScheme(materialColors, coverScheme?.toComposeColorScheme())
             if (coverScheme != null) {
-                materialColors = coverScheme.toComposeColorScheme()
+                materialColors = animated
                 usingCoverScheme = true
+            } else {
+                materialColors = animated
             }
         }
          
@@ -149,12 +160,15 @@ class AppThemeViewModel(
         return materialColors to extraColors
     }
     
-    fun setCurrentCoverUrl(coverUrl: String?, sourceId: Long?, isDark: Boolean) {
+    /**
+     * [owner] is a composition-scoped token (e.g. remember { Any() }) identifying the
+     * claiming screen; its dispose must clear with the same token so stale screens
+     * can't wipe a theme claimed by someone else.
+     */
+    fun setCurrentCoverUrl(coverUrl: String?, sourceId: Long?, isDark: Boolean, owner: Any) {
         if (coverBasedThemeManager == null) return
         if (!coverBasedThemeEnabledState.value || coverUrl == null) {
-            // Leaving a themed screen (or feature off): drop the override.
-            // Safe to call repeatedly — StateFlow dedupes the null publish.
-            coverBasedThemeManager.clear()
+            coverBasedThemeManager.clear(owner)
             return
         }
         val resolvedIsDark = when (uiPreferences.themeMode().get()) {
@@ -162,7 +176,33 @@ class AppThemeViewModel(
             PreferenceValues.ThemeMode.Dark -> true
             else -> isDark
         }
-        coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, resolvedIsDark)
+        coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, resolvedIsDark, owner)
+    }
+
+    /** Feature switched off — unconditional clear regardless of owner. */
+    fun onCoverBasedThemeDisabled() {
+        coverBasedThemeManager?.clearAll()
+    }
+
+    /**
+     * Cross-fades [base] toward the cover scheme on appear, and back to [base] on
+     * disappear — turning hard theme snaps into smooth fades.
+     */
+    @Composable
+    private fun blendCoverScheme(base: ColorScheme, cover: ColorScheme?): ColorScheme {
+        var lastCover by remember { mutableStateOf(cover) }
+        val fraction = remember { Animatable(if (cover != null) 1f else 0f) }
+
+        LaunchedEffect(cover) {
+            if (cover != null) lastCover = cover
+            fraction.animateTo(if (cover != null) 1f else 0f, tween(durationMillis = 400, easing = FastOutSlowInEasing))
+        }
+
+        if (fraction.value >= 1f) return cover ?: base
+        if (fraction.value <= 0f) return base
+        val from = if (cover != null) base else lastCover ?: return base
+        val to = cover ?: base
+        return from.lerpTo(to, fraction.value)
     }
 
     @Composable
@@ -226,6 +266,39 @@ class AppThemeViewModel(
 
     var locales by mutableStateOf(listOf<Locale>())
         private set
+
+    @Composable
+    private fun ColorScheme.lerpTo(other: ColorScheme, fraction: Float): ColorScheme = ColorScheme(
+        primary = lerp(primary, other.primary, fraction),
+        onPrimary = lerp(onPrimary, other.onPrimary, fraction),
+        primaryContainer = lerp(primaryContainer, other.primaryContainer, fraction),
+        onPrimaryContainer = lerp(onPrimaryContainer, other.onPrimaryContainer, fraction),
+        inversePrimary = lerp(inversePrimary, other.inversePrimary, fraction),
+        secondary = lerp(secondary, other.secondary, fraction),
+        onSecondary = lerp(onSecondary, other.onSecondary, fraction),
+        secondaryContainer = lerp(secondaryContainer, other.secondaryContainer, fraction),
+        onSecondaryContainer = lerp(onSecondaryContainer, other.onSecondaryContainer, fraction),
+        tertiary = lerp(tertiary, other.tertiary, fraction),
+        onTertiary = lerp(onTertiary, other.onTertiary, fraction),
+        tertiaryContainer = lerp(tertiaryContainer, other.tertiaryContainer, fraction),
+        onTertiaryContainer = lerp(onTertiaryContainer, other.onTertiaryContainer, fraction),
+        background = lerp(background, other.background, fraction),
+        onBackground = lerp(onBackground, other.onBackground, fraction),
+        surface = lerp(surface, other.surface, fraction),
+        onSurface = lerp(onSurface, other.onSurface, fraction),
+        surfaceVariant = lerp(surfaceVariant, other.surfaceVariant, fraction),
+        onSurfaceVariant = lerp(onSurfaceVariant, other.onSurfaceVariant, fraction),
+        surfaceTint = lerp(surfaceTint, other.surfaceTint, fraction),
+        inverseSurface = lerp(inverseSurface, other.inverseSurface, fraction),
+        inverseOnSurface = lerp(inverseOnSurface, other.inverseOnSurface, fraction),
+        error = lerp(error, other.error, fraction),
+        onError = lerp(onError, other.onError, fraction),
+        errorContainer = lerp(errorContainer, other.errorContainer, fraction),
+        onErrorContainer = lerp(onErrorContainer, other.onErrorContainer, fraction),
+        outline = lerp(outline, other.outline, fraction),
+        outlineVariant = lerp(outlineVariant, other.outlineVariant, fraction),
+        scrim = lerp(scrim, other.scrim, fraction)
+    )
 
     @Composable
     fun getTypography(): Typography {

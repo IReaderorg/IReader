@@ -120,6 +120,7 @@ data class ReaderScreenSpec(
         // Cover-based dynamic color theme: feed the current book cover to the
         // AppThemeViewModel; the root AppTheme applies the resulting scheme globally.
         val appThemeViewModel: AppThemeViewModel = koinInject()
+        val coverOwner = remember { Any() }  // composition-scoped claim token
         val successStateForCover = readerState as? ReaderState.Success
         val bookForCover = successStateForCover?.book
         val rawCoverUrl = bookForCover?.let { BookCover.from(it).cover }
@@ -127,12 +128,12 @@ data class ReaderScreenSpec(
             rawCoverUrl?.takeIf { it.isNotBlank() }
         }
         val isSystemDark = isSystemInDarkTheme()
-        LaunchedEffect(effectiveCoverUrl, isSystemDark) {
-            appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, bookForCover?.sourceId, isSystemDark)
-        }
-        DisposableEffect(Unit) {
+        DisposableEffect(effectiveCoverUrl, isSystemDark) {
+            appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, bookForCover?.sourceId, isSystemDark, coverOwner)
             onDispose {
-                appThemeViewModel.setCurrentCoverUrl(null, null, false)
+                // Fires both on pop-away and on back-nav resume of the detail screen;
+                // owner check + grace delay keep the handoff flash-free.
+                appThemeViewModel.setCurrentCoverUrl(null, null, false, coverOwner)
             }
         }
 

@@ -132,17 +132,18 @@ fun BookDetailScreen(
     // Cover-based dynamic color theme: feed the current book cover to the
     // AppThemeViewModel; the root AppTheme applies the resulting scheme globally.
     val appThemeViewModel: AppThemeViewModel = koinInject()
+    val coverOwner = remember { Any() }  // composition-scoped claim token
     val rawCoverUrl = BookCover.from(book).cover
     val effectiveCoverUrl = remember(book.id, rawCoverUrl) {
         rawCoverUrl?.takeIf { it.isNotBlank() }
     }
     val isSystemDark = isSystemInDarkTheme()
-    LaunchedEffect(effectiveCoverUrl, isSystemDark) {
-        appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, book.sourceId, isSystemDark)
-    }
-    DisposableEffect(Unit) {
+    DisposableEffect(effectiveCoverUrl, isSystemDark) {
+        // Re-runs on every resume of this back-stack entry, so returning from the
+        // reader re-claims the theme immediately (fixes "color lost on back").
+        appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, book.sourceId, isSystemDark, coverOwner)
         onDispose {
-            appThemeViewModel.setCurrentCoverUrl(null, null, false)
+            appThemeViewModel.setCurrentCoverUrl(null, null, false, coverOwner)
         }
     }
 
