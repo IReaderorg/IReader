@@ -3,32 +3,33 @@ package ireader.presentation.core.theme
 import androidx.compose.ui.graphics.Color
 import ireader.domain.models.common.DomainColor
 import ireader.domain.models.theme.DomainColorScheme
-import ireader.domain.models.prefs.PreferenceValues
 import kotlin.math.roundToInt
 
+/**
+ * Builds a Material-style palette from a single cover-extracted seed color.
+ * Fully automatic: muted covers stay muted, vivid covers stay vivid.
+ */
 object Material3PaletteGenerator {
-    
-    fun generate(
-        seedColor: Color,
-        style: PreferenceValues.CoverBasedThemeStyle,
-        isDark: Boolean
-    ): DomainColorScheme {
+
+    fun generate(seedColor: Color, isDark: Boolean): DomainColorScheme {
         val hsl = seedColor.toHSL()
-        return when (style) {
-            PreferenceValues.CoverBasedThemeStyle.TonalSpot -> generateTonalSpot(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.Neutral -> generateNeutral(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.Vibrant -> generateVibrant(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.Expressive -> generateExpressive(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.Rainbow -> generateRainbow(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.FruitSalad -> generateFruitSalad(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.Monochrome -> generateMonochrome(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.Fidelity -> generateFidelity(hsl, isDark)
-            PreferenceValues.CoverBasedThemeStyle.Content -> generateContent(hsl, isDark)
+        // Adaptive saturation: near-gray covers stay quiet, mid covers get a lift,
+        // vivid covers keep (most of) their punch.
+        val s = when {
+            hsl.saturation <= 0.1f -> hsl.saturation.coerceAtLeast(0.05f)
+            hsl.saturation < 0.35f -> 0.45f
+            else -> (hsl.saturation * 1.25f).coerceAtMost(1f)
         }
+        return scheme(
+            hsl.hue, s, hsl.lightness, isDark,
+            hsl.hue, s, if (isDark) 0.45f else 0.32f,
+            (hsl.hue + 30f) % 360f, (s * 0.85f).coerceAtMost(1f), if (isDark) 0.58f else 0.4f,
+            (hsl.hue + 180f) % 360f, (s * 0.9f).coerceAtMost(1f), if (isDark) 0.55f else 0.45f
+        )
     }
-    
+
     private data class HSL(val hue: Float, val saturation: Float, val lightness: Float)
-    
+
     private fun Color.toHSL(): HSL {
         val r = red
         val g = green
@@ -46,7 +47,7 @@ object Material3PaletteGenerator {
         }
         return HSL(if (h < 0f) h + 360f else h, s, l)
     }
-    
+
     private fun hslToDomainColor(h: Float, s: Float, l: Float, alpha: Float = 1f): DomainColor {
         val c = (1f - kotlin.math.abs(2 * l - 1f)) * s
         val x = c * (1f - kotlin.math.abs(((h / 60f) % 2f) - 1f))
@@ -64,23 +65,14 @@ object Material3PaletteGenerator {
         val b = ((b1 + m) * 255).roundToInt().coerceIn(0, 255)
         return DomainColor(r / 255f, g / 255f, b / 255f, alpha)
     }
-    
+
     private fun hslContrastOn(hsl: HSL): DomainColor {
         // Decide by perceptual luminance, not HSL lightness — blue hues at the same
         // lightness are visibly darker than yellow ones.
         val c = hslToDomainColor(hsl.hue, hsl.saturation, hsl.lightness)
         return if (c.luminance() > 0.5f) DomainColor(0f, 0f, 0f, 0.87f) else DomainColor(1f, 1f, 1f, 0.87f)
     }
-    
-    private fun baseColors(h: Float, s: Float, l: Float, isDark: Boolean): Triple<HSL, HSL, HSL> {
-        val boostedS = (s * 1.5f).coerceAtMost(1f)
-        return Triple(
-            HSL(h, boostedS, if (isDark) 0.45f else 0.32f),
-            HSL((h + 30f) % 360f, (boostedS * 0.85f).coerceAtMost(1f), if (isDark) 0.58f else 0.4f),
-            HSL((h + 180f) % 360f, (boostedS * 0.9f).coerceAtMost(1f), if (isDark) 0.55f else 0.45f)
-        )
-    }
-    
+
     private fun scheme(
         h: Float, s: Float, l: Float, isDark: Boolean,
         primaryHue: Float = h, primarySat: Float = s, primaryLight: Float = l,
@@ -131,58 +123,5 @@ object Material3PaletteGenerator {
             error = error, onError = onError, errorContainer = errorContainer, onErrorContainer = onErrorContainer,
             outline = outline, outlineVariant = outlineVariant, scrim = scrim
         )
-    }
-    
-    private fun generateTonalSpot(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val (p, sec, ter) = baseColors(hsl.hue, hsl.saturation, hsl.lightness, isDark)
-        return scheme(hsl.hue, (hsl.saturation * 1.3f).coerceAtMost(1f), hsl.lightness, isDark, p.hue, p.saturation, p.lightness, sec.hue, sec.saturation, sec.lightness, ter.hue, ter.saturation, ter.lightness)
-    }
-    
-    private fun generateNeutral(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val ns = (hsl.saturation * 0.45f).coerceAtMost(0.55f)
-        val (p, sec, ter) = baseColors(hsl.hue, ns, hsl.lightness, isDark)
-        return scheme(hsl.hue, ns, hsl.lightness, isDark, p.hue, p.saturation, p.lightness, sec.hue, sec.saturation, sec.lightness, ter.hue, ter.saturation, ter.lightness)
-    }
-    
-    private fun generateVibrant(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val vs = (hsl.saturation * 1.6f).coerceAtMost(1f)
-        val (p, sec, ter) = baseColors(hsl.hue, vs, hsl.lightness, isDark)
-        return scheme(hsl.hue, vs, hsl.lightness, isDark, p.hue, p.saturation, p.lightness, (hsl.hue + 40f) % 360f, vs * 0.95f, sec.lightness, (hsl.hue + 200f) % 360f, vs * 0.9f, ter.lightness)
-    }
-    
-    private fun generateExpressive(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val es = (hsl.saturation * 1.5f).coerceAtMost(1f)
-        return scheme(hsl.hue, es, hsl.lightness, isDark, hsl.hue, es, if (isDark) 0.52f else 0.32f, (hsl.hue + 60f) % 360f, es * 0.9f, if (isDark) 0.55f else 0.35f, (hsl.hue + 150f) % 360f, es * 0.95f, if (isDark) 0.52f else 0.38f)
-    }
-    
-    private fun generateRainbow(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val s = hsl.saturation.coerceAtLeast(0.85f)
-        return scheme(hsl.hue, s, hsl.lightness, isDark, hsl.hue, s, if (isDark) 0.58f else 0.35f, (hsl.hue + 90f) % 360f, s * 0.95f, if (isDark) 0.55f else 0.38f, (hsl.hue + 210f) % 360f, s * 0.9f, if (isDark) 0.52f else 0.4f)
-    }
-    
-    private fun generateFruitSalad(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val fs = (hsl.saturation * 1.55f).coerceAtMost(1f)
-        return scheme(hsl.hue, fs, hsl.lightness, isDark, hsl.hue, fs, if (isDark) 0.5f else 0.35f, (hsl.hue + 45f) % 360f, fs * 0.95f, if (isDark) 0.52f else 0.37f, (hsl.hue + 160f) % 360f, fs * 0.9f, if (isDark) 0.5f else 0.4f)
-    }
-    
-    private fun generateMonochrome(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val ms = (hsl.saturation * 0.2f).coerceAtMost(0.25f)
-        return scheme(hsl.hue, ms, hsl.lightness, isDark, hsl.hue, ms, if (isDark) 0.55f else 0.35f, hsl.hue, ms * 0.9f, if (isDark) 0.5f else 0.38f, hsl.hue, ms * 0.85f, if (isDark) 0.48f else 0.4f)
-    }
-    
-    private fun generateFidelity(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val s = hsl.saturation.coerceAtLeast(0.65f)
-        val primaryL = if (isDark) 0.6f else 0.35f
-        val secondaryL = if (isDark) 0.55f else 0.38f
-        val tertiaryL = if (isDark) 0.52f else 0.4f
-        return scheme(hsl.hue, s, hsl.lightness, isDark, hsl.hue, s, primaryL, (hsl.hue + 35f) % 360f, s * 0.9f, secondaryL, (hsl.hue + 170f) % 360f, s * 0.85f, tertiaryL)
-    }
-    
-    private fun generateContent(hsl: HSL, isDark: Boolean): DomainColorScheme {
-        val s = hsl.saturation.coerceAtLeast(0.55f)
-        val primaryL = if (isDark) 0.62f else 0.34f
-        val secondaryL = if (isDark) 0.56f else 0.37f
-        val tertiaryL = if (isDark) 0.52f else 0.39f
-        return scheme(hsl.hue, s, hsl.lightness, isDark, hsl.hue, s, primaryL, (hsl.hue + 25f) % 360f, s * 0.75f, secondaryL, (hsl.hue + 190f) % 360f, s * 0.8f, tertiaryL)
     }
 }

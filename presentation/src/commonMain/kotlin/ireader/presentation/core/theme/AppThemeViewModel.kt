@@ -46,14 +46,8 @@ class AppThemeViewModel(
     private val colorThemeState = uiPreferences.colorTheme().asState()
     private val dynamicColorModeState = uiPreferences.dynamicColorMode().asState()
     private val coverBasedThemeEnabledState = uiPreferences.coverBasedThemeEnabled().asState()
-    private val coverBasedThemeStyleState = uiPreferences.coverBasedThemeStyle().asState()
     private val useTrueBlackState = uiPreferences.useTrueBlack().asState()
     private val appUiFontState = uiPreferences.appUiFont().asState()
-    
-    // Track last applied cover so we can re-apply when the style preference changes
-    private var lastAppliedCoverUrl: String? = null
-    private var lastAppliedSourceId: Long? = null
-    private var lastAppliedIsDark: Boolean = false
 
     // Pre-create color states for both light and dark modes
     // This ensures we always have reactive state objects ready
@@ -64,19 +58,6 @@ class AppThemeViewModel(
         themeRepository.subscribe().onEach {
             themes.removeIf { baseTheme -> baseTheme.id > 0L }
             themes.addAll(it)
-        }.launchIn(scope)
-
-        // Re-apply cover-based theme when style changes, if we have a cached cover URL
-        uiPreferences.coverBasedThemeStyle().changes().onEach { newStyle ->
-            val currentUrl = lastAppliedCoverUrl
-            if (currentUrl != null && coverBasedThemeEnabledState.value) {
-                val resolvedIsDark = when (uiPreferences.themeMode().get()) {
-                    PreferenceValues.ThemeMode.Light -> false
-                    PreferenceValues.ThemeMode.Dark -> true
-                    else -> lastAppliedIsDark
-                }
-                coverBasedThemeManager?.applyCoverBasedTheme(currentUrl, lastAppliedSourceId, newStyle, resolvedIsDark)
-            }
         }.launchIn(scope)
 
         // Clear the published scheme when the feature is switched off
@@ -170,9 +151,6 @@ class AppThemeViewModel(
     
     fun setCurrentCoverUrl(coverUrl: String?, sourceId: Long?, isDark: Boolean) {
         if (coverBasedThemeManager == null) return
-        lastAppliedCoverUrl = coverUrl
-        lastAppliedSourceId = sourceId
-        lastAppliedIsDark = isDark
         if (!coverBasedThemeEnabledState.value || coverUrl == null) {
             // Leaving a themed screen (or feature off): drop the override.
             // Safe to call repeatedly — StateFlow dedupes the null publish.
@@ -184,7 +162,7 @@ class AppThemeViewModel(
             PreferenceValues.ThemeMode.Dark -> true
             else -> isDark
         }
-        coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, coverBasedThemeStyleState.value, resolvedIsDark)
+        coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, resolvedIsDark)
     }
 
     @Composable

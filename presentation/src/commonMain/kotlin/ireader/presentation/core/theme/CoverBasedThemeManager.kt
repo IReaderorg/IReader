@@ -1,8 +1,8 @@
 package ireader.presentation.core.theme
 
 import androidx.compose.ui.graphics.Color
+import ireader.core.log.Log
 import ireader.domain.models.theme.DomainColorScheme
-import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.cover.CoverColorExtractor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +17,8 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
 /**
- * Extracts a palette from the current book cover and exposes it as a StateFlow.
+ * Extracts a dominant color from the current book cover and exposes the generated
+ * scheme via StateFlow.
  *
  * No fake fallback: until real extraction succeeds the flow stays null and the UI
  * keeps the regular app theme — a wrong random color is worse than no color.
@@ -36,12 +37,7 @@ class CoverBasedThemeManager(
     private val mutex = Mutex()
     private var extractionJob: Job? = null
 
-    fun applyCoverBasedTheme(
-        coverUrl: String?,
-        sourceId: Long?,
-        style: PreferenceValues.CoverBasedThemeStyle,
-        isDark: Boolean
-    ) {
+    fun applyCoverBasedTheme(coverUrl: String?, sourceId: Long?, isDark: Boolean) {
         // Cancel any in-flight extraction for the previous cover
         extractionJob?.cancel()
         extractionJob = null
@@ -51,7 +47,7 @@ class CoverBasedThemeManager(
             return
         }
 
-        val cacheKey = "${sourceId ?: 0}_${coverUrl.hashCode()}_${style.name}_$isDark"
+        val cacheKey = "${sourceId ?: 0}_${coverUrl.hashCode()}_$isDark"
         extractionJob = scope.launch {
             val cached = mutex.withLock { cache[cacheKey] }
             if (cached != null) {
@@ -65,14 +61,16 @@ class CoverBasedThemeManager(
                 }
                 if (dominantColor != null) {
                     val seedColor = Color(dominantColor.red, dominantColor.green, dominantColor.blue, dominantColor.alpha)
-                    val scheme = Material3PaletteGenerator.generate(seedColor, style, isDark)
+                    val scheme = Material3PaletteGenerator.generate(seedColor, isDark)
                     mutex.withLock { cache[cacheKey] = scheme }
                     // Publish only if this extraction is still the latest request;
                     // a newer applyCoverBasedTheme/clear call has cancelled this job by then.
                     if (coroutineContext[Job] === extractionJob) _coverBasedTheme.value = scheme
+                } else {
+                    Log.warn { "CoverBasedTheme: no color extracted from $coverUrl" }
                 }
             } catch (e: Exception) {
-                // Extraction is best-effort; keep regular theme on failure
+                Log.error { "CoverBasedTheme: extraction failed for $coverUrl: ${e.message}" }
             }
         }
     }

@@ -7,10 +7,7 @@ interface CoverColorExtractor {
     suspend fun extractDominantColorFromBitmap(byteArray: ByteArray): DomainColor?
 
     companion object {
-        /**
-         * Resolves relative/protocol-relative cover URLs against a source base URL.
-         * Mirrors HttpSource.getAbsoluteUrl; kept here so every caller agrees.
-         */
+        /** Builds an absolute URL from a possibly-relative cover path and the source's base URL. */
         fun resolveCoverUrl(coverUrl: String, baseUrl: String?): String = when {
             coverUrl.startsWith("http://") || coverUrl.startsWith("https://") -> coverUrl
             coverUrl.startsWith("//") -> "https:$coverUrl"

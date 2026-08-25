@@ -90,18 +90,6 @@ object PreferenceValues {
         Every2Days,
         Weekly
     }
-
-    enum class CoverBasedThemeStyle(val titleResId: UiText.MStringResource) {
-        TonalSpot(UiText.MStringResource(Res.string.cover_theme_tonal_spot)),
-        Neutral(UiText.MStringResource(Res.string.cover_theme_neutral)),
-        Vibrant(UiText.MStringResource(Res.string.cover_theme_vibrant)),
-        Expressive(UiText.MStringResource(Res.string.cover_theme_expressive)),
-        Rainbow(UiText.MStringResource(Res.string.cover_theme_rainbow)),
-        FruitSalad(UiText.MStringResource(Res.string.cover_theme_fruit_salad)),
-        Monochrome(UiText.MStringResource(Res.string.cover_theme_monochrome)),
-        Fidelity(UiText.MStringResource(Res.string.cover_theme_fidelity)),
-        Content(UiText.MStringResource(Res.string.cover_theme_content));
-    }
 }
 fun PreferenceValues.PreferenceAlignment.mapAlignment() : AlignmentModel? {
     return when(this) {

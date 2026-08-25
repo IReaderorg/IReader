@@ -23,11 +23,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun coverBasedThemeEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean("cover_based_theme_enabled", false)
     }
-    
-    fun coverBasedThemeStyle(): Preference<PreferenceValues.CoverBasedThemeStyle> {
-        return preferenceStore.getEnum("cover_based_theme_style", PreferenceValues.CoverBasedThemeStyle.TonalSpot)
-    }
-    
+
     fun useTrueBlack(): Preference<Boolean> {
         return preferenceStore.getBoolean("use_true_black", false)
     }

@@ -28,12 +28,8 @@ actual val presentationPlatformModule: Module = module {
     // Tracking sync scheduler using NSTimer
     single<TrackingSyncScheduler> { IosTrackingSyncScheduler() }
 
-    // No native image decoder on iOS; extractor returns null so cover theme
-    // simply stays off (UI falls back to the regular app theme)
+    // Cover color extractor for cover-based dynamic theme (Skia decode works on iOS)
     single<ireader.domain.utils.cover.CoverColorExtractor> {
-        object : ireader.domain.utils.cover.CoverColorExtractor {
-            override suspend fun extractDominantColor(coverUrl: String, sourceId: Long?) = null
-            override suspend fun extractDominantColorFromBitmap(byteArray: ByteArray) = null
-        }
+        ireader.presentation.utils.cover.CommonCoverColorExtractor(get(), get())
     }
 }
