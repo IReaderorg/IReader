@@ -108,18 +108,21 @@ object MainStarterScreen {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val vm: ScreenContentViewModel = getIViewModel()
         
-        // Defer LibraryViewModel creation until after first frame
-        var libraryVmInitialized by remember { mutableStateOf(false) }
+        // Defer LibraryViewModel creation until after first frame (cold start only).
+        // Saveable so returning from detail/reader restores instantly - no spinner flash.
+        var libraryVmInitialized by rememberSaveable { mutableStateOf(false) }
         val libraryVm: LibraryViewModel? = if (libraryVmInitialized) {
             getIViewModel(key = "library")
         } else {
             null
         }
-        
+
         // Initialize LibraryViewModel after first frame
         LaunchedEffect(Unit) {
-            delay(100)
-            libraryVmInitialized = true
+            if (!libraryVmInitialized) {
+                delay(100)
+                libraryVmInitialized = true
+            }
         }
         
         // Always-current reference for double-tap handlers
@@ -147,11 +150,11 @@ object MainStarterScreen {
         // Mark current tab as visited (but only after initial delay)
         // This is handled by the LaunchedEffect below
         
-        // Defer tab initialization until after first frame renders
-        // This significantly improves app startup time by:
-        // 1. Showing shimmer loading immediately
-        // 2. Loading actual content after UI is responsive
+        // Defer tab initialization until after first frame renders (cold start only).
+        // On return-from-detail the saveable visitedTabs is already complete, so this
+        // becomes a no-op instead of replaying staggered delays during the pop animation.
         LaunchedEffect(Unit) {
+            if (visitedTabs.size >= 5) return@LaunchedEffect
             // Wait for first frame to render (show shimmer)
             delay(50)
             // Initialize the current tab first (usually Library)
@@ -201,8 +204,7 @@ object MainStarterScreen {
             }
         }
         
-        // Use a direct reference to the shared Koin singleton instead of getIViewModel
-        // which creates a new instance outside RouteScope
+        // Use a direct reference to the shared Koin singleton (not a screen-scoped VM)
         val koinInstance = org.koin.compose.getKoin()
         val libraryUseCases: ireader.domain.usecases.library.LibraryUseCases? = koinInstance.getOrNull()
         

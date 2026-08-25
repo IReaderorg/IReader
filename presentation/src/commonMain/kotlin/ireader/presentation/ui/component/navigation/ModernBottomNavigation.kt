@@ -89,7 +89,7 @@ fun RowScope.ModernNavigationItem(
         targetValue = if (selected) 1.05f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
+            stiffness = Spring.StiffnessMedium
         ),
         label = localizeHelper.localize(Res.string.scale)
     )
@@ -234,7 +234,7 @@ fun ModernNavigationRailItem(
         targetValue = if (selected) 1.05f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
+            stiffness = Spring.StiffnessMedium
         ),
         label = localizeHelper.localize(Res.string.scale)
     )

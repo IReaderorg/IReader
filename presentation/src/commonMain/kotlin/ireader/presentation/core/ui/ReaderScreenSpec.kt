@@ -70,6 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,18 +104,17 @@ data class ReaderScreenSpec(
             mutableStateOf(restoredChapterId)
         }
 
-        val koin = getKoin()
+        // One VM per back-stack entry: survives forward navigation, handles chapter
+        // switches internally via contentVM (no VM recreation per chapter).
         val vm: ReaderScreenViewModel =
-            remember(activeChapterId, bookId) {
-                koin.get<ReaderScreenViewModel>(parameters = {
-                    parametersOf(
-                        ReaderScreenViewModel.Param(
-                            activeChapterId,
-                            bookId
-                        )
+            koinViewModel(parameters = {
+                parametersOf(
+                    ReaderScreenViewModel.Param(
+                        activeChapterId,
+                        bookId
                     )
-                })
-            }
+                )
+            })
         val readerState by vm.state.collectAsState()
 
         // Cover-based dynamic color theme: feed the current book cover to the
@@ -137,6 +137,7 @@ data class ReaderScreenSpec(
         }
 
         // Plugin integration for reader menu items
+        val koin = getKoin()
         val featurePluginIntegration: FeaturePluginIntegration? = remember {
             koin.getOrNull<FeaturePluginIntegration>()
         }
