@@ -2140,6 +2140,8 @@
     <string name="use_translated_text_for_text">Use translated text for text-to-speech when available</string>
     <string name="use_true_black_amoled">Use True Black (AMOLED)</string>
     <string name="use_your_fingerprint_or_face">Use your fingerprint or face to unlock the app. You can still use your device PIN as a fallback.</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
     <string name="user_interface">User Interface</string>
     <string name="verification_details">Verification Details</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Verification is automatic and takes a few seconds</string>

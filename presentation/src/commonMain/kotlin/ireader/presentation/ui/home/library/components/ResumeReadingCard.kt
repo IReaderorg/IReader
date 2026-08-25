@@ -25,9 +25,6 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
-/**
- * Spotify-style bottom bar that displays the last read novel and allows quick resume
- */
 @Composable
 fun ResumeReadingCard(
     lastRead: LastReadInfo?,

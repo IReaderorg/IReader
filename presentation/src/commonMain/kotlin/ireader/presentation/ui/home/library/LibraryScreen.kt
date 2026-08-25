@@ -30,6 +30,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.empty_library
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
+import ireader.presentation.ui.home.library.components.ResumeReadingCard
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel

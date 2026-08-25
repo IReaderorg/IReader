@@ -27,4 +27,9 @@ actual val presentationPlatformModule: Module = module {
     
     // Tracking sync scheduler using NSTimer
     single<TrackingSyncScheduler> { IosTrackingSyncScheduler() }
+
+    // Cover color extractor for cover-based dynamic theme (Skia decode works on iOS)
+    single<ireader.domain.utils.cover.CoverColorExtractor> {
+        ireader.presentation.utils.cover.CommonCoverColorExtractor(get(), get())
+    }
 }
