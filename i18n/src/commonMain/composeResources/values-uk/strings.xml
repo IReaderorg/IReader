@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">Щоденна доза натхнення</string>
@@ -48,6 +48,7 @@
     <string name="added_source_rule">Додано правило джерела: %1$s</string>
     <string name="added_to_category">Додано до %s</string>
     <string name="added_to_library">Додано до бібліотеки</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Додаткові відомості:</string>
     <string name="additional_details_optional">Додаткові деталі (необов'язково)</string>
     <string name="additional_information">Додаткова інформація</string>
@@ -2097,6 +2098,8 @@
     <string name="results">результати</string>
     <string name="results_found">результатів знайдено</string>
     <string name="resume">Відновити</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Відновити все</string>
     <string name="resume_download">Відновити завантаження</string>
     <string name="resume_downloads">Відновити завантаження</string>
@@ -2900,4 +2903,97 @@
     <string name="youve_reached_the_end">Ви дійшли до кінця!</string>
     <string name="zoom_in">Збільшити</string>
     <string name="zoom_out">Зменшити</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Швидке налаштування</string>
+    <string name="cover_theme_preset_subtitle">Застосуйте попередньо визначені параметри інтенсивності теми обкладинки</string>
+    <string name="cover_theme_backdrop_blur">Розмиття фону обкладинки</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Налаштуйте інтенсивність розмиття для розширеного зображення обкладинки заголовка</string>
+    <string name="cover_theme_background_tint_opacity">Непрозорість відтінку фону</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Контролюйте, наскільки інтенсивно колір обкладинки зливається з фоном картки</string>
+    <string name="cover_theme_preset_off">Вимкнено</string>
+    <string name="cover_theme_preset_soft">М'який</string>
+    <string name="cover_theme_preset_medium">Середній</string>
+    <string name="cover_theme_preset_high">Високий</string>
+
+    <string name="recommendations_empty">Рекомендації відсутні</string>
+    <string name="recommendations_error">Не вдалося завантажити рекомендації</string>
+    <string name="recommendations_section_title">Рекомендації</string>
+    <string name="recommendations_section_title_suggestions">Пропозиції</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Налаштування рекомендацій</string>
+    <string name="recommendations_settings_subtitle">Налаштувати спосіб відображення рекомендацій книг</string>
+    <string name="recommendation_source_similar_by_title">Схожі за назвою</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Шукати у джерелі книги з подібними назвами</string>
+    <string name="recommendation_source_native_only">Лише власне джерело</string>
+    <string name="recommendation_source_native_only_subtitle">Використовувати рекомендації, надані безпосередньо джерелом</string>
+    <string name="recommendation_source_genre_fallback">Збіг за жанром</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Повернення до збігу за жанром при відсутності власних рекомендацій</string>
+    <string name="recommendation_search_keywords">Ключові слова</string>
+    <string name="recommendation_search_keywords_subtitle">Ключові слова, видобуті з назви поточної книги для пошуку схожих</string>
+    <string name="recommendations_disabled">Рекомендації вимкнено</string>
+    <string name="recommendations_no_similar_books">Схожих книг для цієї назви не знайдено</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Схожі Назви</string>
+    <string name="show_similar_titles">Показувати Схожі Назви</string>
+    <string name="similar_titles_source">Джерело Схожих Назв</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Максимальна Кількість Схожих Назв</string>
+    <string name="similar_titles_settings">Налаштування Схожих Назв</string>
+    <string name="similar_titles_source_subtitle">Виберіть джерела для схожих назв</string>
+    <string name="max_similar_titles_count_subtitle">Максимальна кількість схожих назв для відображення</string>
+    <string name="show_similar_titles_subtitle">Показувати книги зі схожими назвами під деталями роману</string>
+    <string name="similar_titles_source_same_source">Тільки Те Саме Джерело</string>
+    <string name="similar_titles_source_same_source_subtitle">Показувати схожі назви тільки з поточного джерела</string>
+    <string name="similar_titles_source_other_sources">Тільки Інші Джерела</string>
+    <string name="similar_titles_source_other_sources_subtitle">Показувати схожі назви тільки з інших джерел</string>
+    <string name="similar_titles_source_all_sources">Усі Джерела</string>
+    <string name="similar_titles_source_all_sources_subtitle">Показувати схожі назви з усіх доступних джерел</string>
+    <string name="similar_titles_match_mode">Режим Відповідності Схожих Назв</string>
+    <string name="similar_titles_match_mode_subtitle">Виберіть, як порівнюються схожі назви</string>
+    <string name="similar_titles_mode_by_name">Схоже за Назвою</string>
+    <string name="similar_titles_mode_by_name_subtitle">Знайти книги зі схожими назвами/іменами</string>
+    <string name="similar_titles_mode_by_genre">Схоже за Жанром</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Знайти книги з відповідними жанрами/категоріями</string>
+    <string name="similar_titles_mode_by_category">Схоже за Категорією</string>
+    <string name="similar_titles_mode_by_category_subtitle">Знайти книги в тій самій категорії</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

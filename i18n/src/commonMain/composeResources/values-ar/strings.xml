@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -586,6 +586,43 @@
     <string name="custom_cover_set">تم تعيين الغلاف المخصص بنجاح</string>
     <string name="custom_fonts">خطوط مخصصة</string>
     <string name="customize_individual_colors_to_create">خصص الألوان الفردية لإنشاء المظهر الخاص بك</string>
+    <string name="cover_based_dynamic_color">سمة ديناميكية مستوحاة من الغلاف</string>
+    <string name="cover_based_dynamic_color_subtitle">استخراج الألوان الرئيسية من أغلفة الروايات وتطبيقها على الواجهة</string>
+    <string name="cover_theme_style">نمط سمة الغلاف</string>
+    <string name="cover_theme_style_subtitle">اختر نمط لوحة ألوان Material You للألوان المستخرجة من الغلاف</string>
+    <string name="cover_theme_tonal_spot">بقعة لونية</string>
+    <string name="cover_theme_neutral">محايد</string>
+    <string name="cover_theme_vibrant">نابض بالحياة</string>
+    <string name="cover_theme_expressive">معبر</string>
+    <string name="cover_theme_rainbow">قوس قزح</string>
+    <string name="cover_theme_fruit_salad">سلطة فواكه</string>
+    <string name="cover_theme_monochrome">أحادي اللون</string>
+    <string name="cover_theme_fidelity">وفاء</string>
+    <string name="cover_theme_content">محتوى</string>
+    <string name="cover_theme_advanced_controls">إعدادات متقدمة</string>
+    <string name="cover_theme_saturation">التشبع</string>
+    <string name="cover_theme_intensity">الحدّة</string>
+    <string name="cover_theme_text_color">وضع لون النص</string>
+    <string name="cover_theme_text_color_auto">تلقائي</string>
+    <string name="cover_theme_text_color_light">فاتح</string>
+    <string name="cover_theme_text_color_dark">داكن</string>
+    <string name="cover_theme_text_color_subtitle">فرض ألوان نص فاتحة أو داكنة لسهولة القراءة</string>
+    <string name="cover_theme_reset_settings">إعادة تعيين إعدادات سمة الغلاف</string>
+    <string name="cover_based_theme_for_library">استخدام ألوان الغلاف في المكتبة</string>
+    <string name="cover_based_theme_for_library_subtitle">تطبيق ألوان مستندة إلى الغلاف على عناصر الكتب في المكتبة</string>
+    <string name="cover_theme_source">مصدر استخراج الألوان</string>
+    <string name="cover_theme_source_subtitle">اختر من حيث يتم استخراج الألوان الديناميكية</string>
+    <string name="cover_theme_source_book_cover">غلاف الكتاب</string>
+    <string name="cover_theme_source_system_material_you">Material You للنظام</string>
+    <string name="cover_theme_source_static_theme">ثيم التطبيق الثابت</string>
+    <string name="cover_theme_surface_tinting">تلوين خلفية البطاقات</string>
+    <string name="cover_theme_surface_tinting_subtitle">تطبيق لون خفيف من الغلاف على خلفيات البطاقات</string>
+    <string name="cover_theme_contrast">تباين السمة</string>
+    <string name="cover_theme_contrast_subtitle">تحكم في أولوية لوحة الألوان لضمان القراءة</string>
+    <string name="cover_theme_contrast_vibrant">نابض بالحياة</string>
+    <string name="cover_theme_contrast_muted">هادئ</string>
+    <string name="cover_theme_contrast_high">تباين عالي</string>
+    <string name="reader_text_contrast_protected">تباين نص القارئ محمي</string>
     <string name="cutout_area_behavior">سلوك منطقة القطع</string>
     <string name="d1_database_id">معرف قاعدة بيانات D1</string>
     <string name="daily">يوميًا</string>
@@ -2904,4 +2941,70 @@
     <string name="youve_reached_the_end">لقد وصلت إلى النهاية!</string>
     <string name="zoom_in">تكبير</string>
     <string name="zoom_out">تصغير</string>
+    <string name="cover_theme_preset">إعداد مسبق سريع</string>
+    <string name="cover_theme_preset_subtitle">قم بتطبيق الإعدادات المحددة مسبقًا لكثافة موضوع الغلاف</string>
+    <string name="cover_theme_backdrop_blur">تغطية الخلفية طمس</string>
+    <string name="cover_theme_backdrop_blur_subtitle">اضبط شدة التمويه لصورة غلاف الرأس الممتد</string>
+    <string name="cover_theme_background_tint_opacity">عتامة لون الخلفية</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">التحكم في مدى كثافة لون الغلاف الذي يمتزج مع خلفيات البطاقة</string>
+    <string name="cover_theme_preset_off">عن</string>
+    <string name="cover_theme_preset_soft">ناعم</string>
+    <string name="cover_theme_preset_medium">واسطة</string>
+    <string name="cover_theme_preset_high">عالي</string>
+
+    <string name="recommendations_empty">لا توجد توصيات متاحة</string>
+    <string name="recommendations_error">فشل تحميل التوصيات</string>
+    <string name="recommendations_section_title">التوصيات</string>
+    <string name="recommendations_section_title_suggestions">اقتراحات</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">إعدادات الاقتراحات</string>
+    <string name="recommendations_settings_subtitle">تكوين كيفية عرض اقتراحات الكتب</string>
+    <string name="recommendation_source_similar_by_title">مشابه بالاسم</string>
+    <string name="recommendation_source_similar_by_title_subtitle">البحث في المصدر عن كتب بأسماء مشابهة</string>
+    <string name="recommendation_source_native_only">المصدر الأصلي فقط</string>
+    <string name="recommendation_source_native_only_subtitle">استخدام الاقتراحات المقدمة مباشرة من المصدر</string>
+    <string name="recommendation_source_genre_fallback">مطابقة النوع</string>
+    <string name="recommendation_source_genre_fallback_subtitle">الرجوع إلى مطابقة النوع عند عدم وجود اقتراحات أصلية</string>
+    <string name="recommendation_search_keywords">كلمات البحث</string>
+    <string name="recommendation_search_keywords_subtitle">كلمات مستخرجة من عنوان الكتاب الحالي للعثور على كتب مشابهة</string>
+    <string name="recommendations_disabled">الاقتراحات معطلة</string>
+    <string name="recommendations_no_similar_books">لم يتم العثور على كتب مشابهة لهذا العنوان</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">عناوين متشابهة</string>
+    <string name="show_similar_titles">إظهار العناوين المتشابهة</string>
+    <string name="similar_titles_source">مصدر العناوين المتشابهة</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">الحد الأقصى لعدد العناوين المتشابهة</string>
+    <string name="similar_titles_settings">إعدادات العناوين المتشابهة</string>
+    <string name="similar_titles_source_subtitle">اختر المصادر المستخدمة للعناوين المتشابهة</string>
+    <string name="max_similar_titles_count_subtitle">الحد الأقصى لعدد العناوين المتشابهة للعرض</string>
+    <string name="show_similar_titles_subtitle">عرض كتب بأسماء مشابهة أدناه تفاصيل الرواية</string>
+    <string name="similar_titles_source_same_source">نفس المصدر فقط</string>
+    <string name="similar_titles_source_same_source_subtitle">إظهار العناوين المتشابهة من المصدر الحالي فقط</string>
+    <string name="similar_titles_source_other_sources">مصادر أخرى فقط</string>
+    <string name="similar_titles_source_other_sources_subtitle">إظهار العناوين المتشابهة من مصادر أخرى فقط</string>
+    <string name="similar_titles_source_all_sources">جميع المصادر</string>
+    <string name="similar_titles_source_all_sources_subtitle">إظهار العناوين المتشابهة من جميع المصادر المتاحة</string>
+    <string name="similar_titles_match_mode">وضع مطابقة العناوين المتشابهة</string>
+    <string name="similar_titles_match_mode_subtitle">اختر كيفية مطابقة العناوين المتشابهة</string>
+    <string name="similar_titles_mode_by_name">مشابه بالاسم</string>
+    <string name="similar_titles_mode_by_name_subtitle">العثور على كتب بعناوين/أسماء مشابهة</string>
+    <string name="similar_titles_mode_by_genre">مشابه بالنوع</string>
+    <string name="similar_titles_mode_by_genre_subtitle">العثور على كتب بأنواع/تصنيفات متطابقة</string>
+    <string name="similar_titles_mode_by_category">مشابه بالفئة</string>
+    <string name="similar_titles_mode_by_category_subtitle">العثور على كتب في نفس الفئة</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+

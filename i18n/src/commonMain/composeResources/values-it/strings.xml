@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">Una dose quotidiana di ispirazione</string>
@@ -48,6 +48,7 @@
     <string name="added_source_rule">Aggiunta regola fonte: %1$s</string>
     <string name="added_to_category">Aggiunto a %s</string>
     <string name="added_to_library">Aggiunto alla Libreria</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dettagli aggiuntivi:</string>
     <string name="additional_details_optional">Dettagli aggiuntivi (opzionale)</string>
     <string name="additional_information">Informazioni Aggiuntive</string>
@@ -2101,6 +2102,8 @@
     <string name="results">risultati</string>
     <string name="results_found">risultati trovati</string>
     <string name="resume">Riprendi</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Riprendi tutto</string>
     <string name="resume_download">Riprendi Download</string>
     <string name="resume_downloads">Riprendi Download</string>
@@ -2904,4 +2907,97 @@
     <string name="youve_reached_the_end">Hai raggiunto la fine!</string>
     <string name="zoom_in">Ingrandisci</string>
     <string name="zoom_out">Rimpicciolisci</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Preimpostazione rapida</string>
+    <string name="cover_theme_preset_subtitle">Applica le impostazioni predefinite per l'intensità del tema della copertina</string>
+    <string name="cover_theme_backdrop_blur">Sfocatura dello sfondo della copertina</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Regola l'intensità della sfocatura per l'immagine di copertina dell'intestazione estesa</string>
+    <string name="cover_theme_background_tint_opacity">Opacità della tinta di sfondo</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Controlla l'intensità con cui il colore della copertura si fonde con gli sfondi delle carte</string>
+    <string name="cover_theme_preset_off">Spento</string>
+    <string name="cover_theme_preset_soft">Morbido</string>
+    <string name="cover_theme_preset_medium">Medio</string>
+    <string name="cover_theme_preset_high">Alto</string>
+
+    <string name="recommendations_empty">Nessun consiglio disponibile</string>
+    <string name="recommendations_error">Impossibile caricare i consigli</string>
+    <string name="recommendations_section_title">Raccomandazioni</string>
+    <string name="recommendations_section_title_suggestions">Suggerimenti</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Impostazioni consigli</string>
+    <string name="recommendations_settings_subtitle">Configura come vengono mostrati i consigli sui libri</string>
+    <string name="recommendation_source_similar_by_title">Simile per titolo</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Cerca nella fonte libri con nomi simili</string>
+    <string name="recommendation_source_native_only">Solo fonte nativa</string>
+    <string name="recommendation_source_native_only_subtitle">Usa i consigli forniti direttamente dalla fonte</string>
+    <string name="recommendation_source_genre_fallback">Corrispondenza per genere</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Torna alla corrispondenza per genere quando non ci sono consigli nativi</string>
+    <string name="recommendation_search_keywords">Parole chiave</string>
+    <string name="recommendation_search_keywords_subtitle">Parole estratte dal titolo del libro attuale per trovare libri simili</string>
+    <string name="recommendations_disabled">Consigli disattivati</string>
+    <string name="recommendations_no_similar_books">Nessun libro simile trovato per questo titolo</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Titoli Simili</string>
+    <string name="show_similar_titles">Mostra Titoli Simili</string>
+    <string name="similar_titles_source">Fonte dei Titoli Simili</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Numero Massimo di Titoli Simili</string>
+    <string name="similar_titles_settings">Impostazioni dei Titoli Simili</string>
+    <string name="similar_titles_source_subtitle">Scegli quali fonti usare per i titoli simili</string>
+    <string name="max_similar_titles_count_subtitle">Numero massimo di titoli simili da visualizzare</string>
+    <string name="show_similar_titles_subtitle">Mostra libri con nomi simili sotto i dettagli del romanzo</string>
+    <string name="similar_titles_source_same_source">Solo Stessa Fonte</string>
+    <string name="similar_titles_source_same_source_subtitle">Mostra titoli simili solo dalla fonte attuale</string>
+    <string name="similar_titles_source_other_sources">Solo Altre Fonti</string>
+    <string name="similar_titles_source_other_sources_subtitle">Mostra titoli simili solo da altre fonti</string>
+    <string name="similar_titles_source_all_sources">Tutte le Fonti</string>
+    <string name="similar_titles_source_all_sources_subtitle">Mostra titoli simili da tutte le fonti disponibili</string>
+    <string name="similar_titles_match_mode">Modalità di Corrispondenza dei Titoli Simili</string>
+    <string name="similar_titles_match_mode_subtitle">Scegli come vengono confrontati i titoli simili</string>
+    <string name="similar_titles_mode_by_name">Simile per Nome</string>
+    <string name="similar_titles_mode_by_name_subtitle">Trova libri con titoli/nomi simili</string>
+    <string name="similar_titles_mode_by_genre">Simile per Genere</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Trova libri con generi/categorie corrispondenti</string>
+    <string name="similar_titles_mode_by_category">Simile per Categoria</string>
+    <string name="similar_titles_mode_by_category_subtitle">Trova libri nella stessa categoria</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

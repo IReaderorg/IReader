@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">Isang pang-araw-araw na dosis ng inspirasyon</string>
@@ -48,6 +48,7 @@
     <string name="added_source_rule">Naidagdag na panuntunan ng source: %1$s</string>
     <string name="added_to_category">Idinagdag sa %s</string>
     <string name="added_to_library">Idinagdag sa Aklatan</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Karagdagang Detalye:</string>
     <string name="additional_details_optional">Karagdagang detalye (opsyonal)</string>
     <string name="additional_information">Karagdagang Impormasyon</string>
@@ -2084,6 +2085,8 @@
     <string name="results">mga resulta</string>
     <string name="results_found">mga resulta ang natagpuan</string>
     <string name="resume">Ipagpatuloy</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Ipagpatuloy Lahat</string>
     <string name="resume_download">Ipagpatuloy ang Pag-download</string>
     <string name="resume_downloads">Ipagpatuloy ang mga Pag-download</string>
@@ -2884,4 +2887,97 @@
     <string name="youve_reached_the_end">Nakarating ka na sa dulo!</string>
     <string name="zoom_in">Mag-zoom in</string>
     <string name="zoom_out">Mag-zoom out</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Mabilis na Preset</string>
+    <string name="cover_theme_preset_subtitle">Ilapat ang mga paunang natukoy na setting para sa intensity ng tema ng cover</string>
+    <string name="cover_theme_backdrop_blur">Cover Backdrop Blur</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Isaayos ang intensity ng blur para sa pinahabang larawan ng pabalat ng header</string>
+    <string name="cover_theme_background_tint_opacity">Opacity ng Tint ng Background</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Kontrolin kung gaano kabigat ang pagsasama ng kulay ng takip sa mga background ng card</string>
+    <string name="cover_theme_preset_off">Naka-off</string>
+    <string name="cover_theme_preset_soft">Malambot</string>
+    <string name="cover_theme_preset_medium">Katamtaman</string>
+    <string name="cover_theme_preset_high">Mataas</string>
+
+    <string name="recommendations_empty">Walang available na rekomendasyon</string>
+    <string name="recommendations_error">Nabigong i-load ang mga rekomendasyon</string>
+    <string name="recommendations_section_title">Mga Rekomendasyon</string>
+    <string name="recommendations_section_title_suggestions">Mga mungkahi</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Mga Setting ng Rekomendasyon</string>
+    <string name="recommendations_settings_subtitle">I-configure kung paano ipinapakita ang mga rekomendasyon ng libro</string>
+    <string name="recommendation_source_similar_by_title">Katulad sa Pamagat</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Maghanap sa pinagmulan ng mga libro na may katulad na pangalan</string>
+    <string name="recommendation_source_native_only">Native Source Lang</string>
+    <string name="recommendation_source_native_only_subtitle">Gamitin ang mga rekomendasyon na ibinigay ng pinagmulan</string>
+    <string name="recommendation_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Bumalik sa genre matching kapag walang native na rekomendasyon</string>
+    <string name="recommendation_search_keywords">Mga Keyword sa Paghahanap</string>
+    <string name="recommendation_search_keywords_subtitle">Mga keyword na kinuha mula sa pamagat ng kasalukuyang libro para makahanap ng mga katulad na libro</string>
+    <string name="recommendations_disabled">Hindi pinagana ang mga rekomendasyon</string>
+    <string name="recommendations_no_similar_books">Walang nahanap na katulad na libro para sa pamagat na ito</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Mga Katulad na Pamagat</string>
+    <string name="show_similar_titles">Ipakita ang Mga Katulad na Pamagat</string>
+    <string name="similar_titles_source">Pinagmulan ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Maksimum na Bilang ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_settings">Mga Setting ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_source_subtitle">Piliin kung aling pinagmulan ang gagamitin para sa mga katulad na pamagat</string>
+    <string name="max_similar_titles_count_subtitle">Maksimum na bilang ng mga katulad na pamagat na ipapakita</string>
+    <string name="show_similar_titles_subtitle">Ipakita ang mga aklat na may katulad na pangalan sa ibaba ng mga detalye ng nobela</string>
+    <string name="similar_titles_source_same_source">Lamang ang Parehong Pinagmulan</string>
+    <string name="similar_titles_source_same_source_subtitle">Ipakita ang mga katulad na pamagat lamang mula sa kasalukuyang pinagmulan</string>
+    <string name="similar_titles_source_other_sources">Lamang ang Iba Pang Pinagmulan</string>
+    <string name="similar_titles_source_other_sources_subtitle">Ipakita ang mga katulad na pamagat lamang mula sa ibang pinagmulan</string>
+    <string name="similar_titles_source_all_sources">Lahat ng Pinagmulan</string>
+    <string name="similar_titles_source_all_sources_subtitle">Ipakita ang mga katulad na pamagat mula sa lahat ng available na pinagmulan</string>
+    <string name="similar_titles_match_mode">Mode ng Pagtutugma ng Mga Katulad na Pamagat</string>
+    <string name="similar_titles_match_mode_subtitle">Piliin kung paano ihahambing ang mga katulad na pamagat</string>
+    <string name="similar_titles_mode_by_name">Katulad ayon sa Pangalan</string>
+    <string name="similar_titles_mode_by_name_subtitle">Maghanap ng mga aklat na may katulad na pamagat/pangalan</string>
+    <string name="similar_titles_mode_by_genre">Katulad ayon sa Genre</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Maghanap ng mga aklat na may tumutugmang mga genre/kategoriya</string>
+    <string name="similar_titles_mode_by_category">Katulad ayon sa Kategorya</string>
+    <string name="similar_titles_mode_by_category_subtitle">Maghanap ng mga aklat sa parehong kategorya</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

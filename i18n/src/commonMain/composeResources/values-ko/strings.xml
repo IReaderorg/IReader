@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -49,6 +49,7 @@
     <string name="added_source_rule">출처 규칙 추가됨: %1$s</string>
     <string name="added_to_category">%s에 추가됨</string>
     <string name="added_to_library">라이브러리에 추가됨</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">추가 정보:</string>
     <string name="additional_details_optional">추가 세부 정보 (선택 사항)</string>
     <string name="additional_information">추가 정보</string>
@@ -2090,6 +2091,8 @@
     <string name="results">결과</string>
     <string name="results_found">결과 찾음</string>
     <string name="resume">다시 시작</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">모두 재개</string>
     <string name="resume_download">다운로드 다시 시작</string>
     <string name="resume_downloads">다운로드 재개</string>
@@ -2892,4 +2895,97 @@
     <string name="youve_reached_the_end">마지막 페이지입니다!</string>
     <string name="zoom_in">확대</string>
     <string name="zoom_out">축소</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">빠른 사전 설정</string>
+    <string name="cover_theme_preset_subtitle">표지 테마 강도에 대해 사전 정의된 설정 적용</string>
+    <string name="cover_theme_backdrop_blur">표지 배경 흐림</string>
+    <string name="cover_theme_backdrop_blur_subtitle">확장된 헤더 표지 이미지의 흐림 강도 조정</string>
+    <string name="cover_theme_background_tint_opacity">배경 색조 불투명도</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">표지 색상이 카드 배경에 얼마나 많이 혼합되는지 제어합니다.</string>
+    <string name="cover_theme_preset_off">끄다</string>
+    <string name="cover_theme_preset_soft">부드러운</string>
+    <string name="cover_theme_preset_medium">중간</string>
+    <string name="cover_theme_preset_high">높은</string>
+
+    <string name="recommendations_empty">추천 항목이 없습니다.</string>
+    <string name="recommendations_error">추천을 로드하지 못했습니다.</string>
+    <string name="recommendations_section_title">권장사항</string>
+    <string name="recommendations_section_title_suggestions">제안</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">추천 설정</string>
+    <string name="recommendations_settings_subtitle">책 추천 표시 방법 구성</string>
+    <string name="recommendation_source_similar_by_title">제목으로 유사</string>
+    <string name="recommendation_source_similar_by_title_subtitle">소스에서 같은 이름의 책 검색</string>
+    <string name="recommendation_source_native_only">네이티브 소스만</string>
+    <string name="recommendation_source_native_only_subtitle">소스에서 직접 제공하는 추천 사용</string>
+    <string name="recommendation_source_genre_fallback">장르 일치</string>
+    <string name="recommendation_source_genre_fallback_subtitle">네이티브 추천이 없을 때 장르 일치로 대체</string>
+    <string name="recommendation_search_keywords">검색 키워드</string>
+    <string name="recommendation_search_keywords_subtitle">유사한 책을 찾기 위해 현재 책 제목에서 추출한 키워드</string>
+    <string name="recommendations_disabled">추천이 비활성화됨</string>
+    <string name="recommendations_no_similar_books">이 제목과 유사한 책을 찾을 수 없습니다</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">유사 제목</string>
+    <string name="show_similar_titles">유사 제목 표시</string>
+    <string name="similar_titles_source">유사 제목 소스</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">최대 유사 제목 수</string>
+    <string name="similar_titles_settings">유사 제목 설정</string>
+    <string name="similar_titles_source_subtitle">유사 제목에 사용할 소스 선택</string>
+    <string name="max_similar_titles_count_subtitle">표시할 유사 제목의 최대 수</string>
+    <string name="show_similar_titles_subtitle">소설 세부 정보 아래에 이름이 비슷한 책 표시</string>
+    <string name="similar_titles_source_same_source">동일 소스만</string>
+    <string name="similar_titles_source_same_source_subtitle">현재 소스의 유사 제목만 표시</string>
+    <string name="similar_titles_source_other_sources">다른 소스만</string>
+    <string name="similar_titles_source_other_sources_subtitle">다른 소스의 유사 제목만 표시</string>
+    <string name="similar_titles_source_all_sources">모든 소스</string>
+    <string name="similar_titles_source_all_sources_subtitle">사용 가능한 모든 소스의 유사 제목 표시</string>
+    <string name="similar_titles_match_mode">유사 제목 일치 모드</string>
+    <string name="similar_titles_match_mode_subtitle">유사 제목 비교 방법 선택</string>
+    <string name="similar_titles_mode_by_name">이름으로 유사</string>
+    <string name="similar_titles_mode_by_name_subtitle">제목/이름이 비슷한 책 찾기</string>
+    <string name="similar_titles_mode_by_genre">장르로 유사</string>
+    <string name="similar_titles_mode_by_genre_subtitle">장르/카테고리가 일치하는 책 찾기</string>
+    <string name="similar_titles_mode_by_category">카테고리로 유사</string>
+    <string name="similar_titles_mode_by_category_subtitle">같은 카테고리의 책 찾기</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

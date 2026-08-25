@@ -1,4 +1,4 @@
-package ireader.presentation.core.ui
+﻿package ireader.presentation.core.ui
 
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
@@ -197,6 +197,14 @@ class SettingScreenSpec {
                     icon = Icons.Default.MenuBook,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
+                ))
+                add(SearchableSettingItem(
+                    id = "similar_titles",
+                    title = localizeHelper.localize(Res.string.similar_titles_settings),
+                    description = localizeHelper.localize(Res.string.similar_titles_settings_subtitle),
+                    icon = Icons.Default.Search,
+                    section = localizeHelper.localize(Res.string.reader),
+                    onClick = { navController.navigate(NavigationRoutes.similarTitlesSettings) }
                 ))
                 
                 // Security & Privacy
@@ -553,6 +561,14 @@ class SettingScreenSpec {
                             description = "View reading statistics and progress",
                             icon = Icons.Default.BarChart,
                             onClick = { navController.navigate(NavigationRoutes.readingHub) }
+                        )
+                    }
+                    item {
+                        SettingsItem(
+                            title = localizeHelper.localize(Res.string.similar_titles_settings),
+                            description = localizeHelper.localize(Res.string.similar_titles_settings_subtitle),
+                            icon = Icons.Default.Search,
+                            onClick = { navController.navigate(NavigationRoutes.similarTitlesSettings) }
                         )
                     }
                     

@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">प्रेरणा की एक दैनिक खुराक</string>
@@ -48,6 +48,7 @@
     <string name="added_source_rule">स्रोत नियम जोड़ा गया: %1$s</string>
     <string name="added_to_category">%s में जोड़ा गया</string>
     <string name="added_to_library">पुस्तकालय में जोड़ा गया</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">अतिरिक्त विवरण:</string>
     <string name="additional_details_optional">अतिरिक्त विवरण (वैकल्पिक)</string>
     <string name="additional_information">अतिरिक्त जानकारी</string>
@@ -2094,6 +2095,8 @@
     <string name="results">परिणाम</string>
     <string name="results_found">परिणाम मिले</string>
     <string name="resume">फिर से शुरू करें</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">सभी फिर से शुरू करें</string>
     <string name="resume_download">डाउनलोड फिर से शुरू करें</string>
     <string name="resume_downloads">डाउनलोड फिर से शुरू करें</string>
@@ -2893,4 +2896,97 @@
     <string name="youve_reached_the_end">आप अंत तक पहुँच गए हैं!</string>
     <string name="zoom_in">बड़ा करें</string>
     <string name="zoom_out">छोटा करें</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">त्वरित प्रीसेट</string>
+    <string name="cover_theme_preset_subtitle">कवर थीम की तीव्रता के लिए पूर्वनिर्धारित सेटिंग्स लागू करें</string>
+    <string name="cover_theme_backdrop_blur">कवर पृष्ठभूमि धुंधला</string>
+    <string name="cover_theme_backdrop_blur_subtitle">विस्तारित हेडर कवर छवि के लिए धुंधली तीव्रता को समायोजित करें</string>
+    <string name="cover_theme_background_tint_opacity">पृष्ठभूमि टिंट अपारदर्शिता</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">नियंत्रित करें कि कवर का रंग कार्ड की पृष्ठभूमि में कितनी तीव्रता से मिश्रित होता है</string>
+    <string name="cover_theme_preset_off">बंद</string>
+    <string name="cover_theme_preset_soft">कोमल</string>
+    <string name="cover_theme_preset_medium">मध्यम</string>
+    <string name="cover_theme_preset_high">उच्च</string>
+
+    <string name="recommendations_empty">कोई सिफ़ारिशें उपलब्ध नहीं</string>
+    <string name="recommendations_error">सिफ़ारिशें लोड करने में विफल</string>
+    <string name="recommendations_section_title">सिफारिशों</string>
+    <string name="recommendations_section_title_suggestions">सुझाव</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">सिफारिश सेटिंग्स</string>
+    <string name="recommendations_settings_subtitle">किताब सिफारिशों को कैसे दिखाना है कॉन्फ़िगर करें</string>
+    <string name="recommendation_source_similar_by_title">शीर्षक के अनुसार समान</string>
+    <string name="recommendation_source_similar_by_title_subtitle">समान नामों वाली किताबों के लिए स्रोत खोजें</string>
+    <string name="recommendation_source_native_only">केवल नेटिव स्रोत</string>
+    <string name="recommendation_source_native_only_subtitle">सीधे स्रोत द्वारा प्रदान की गई सिफारिशों का उपयोग करें</string>
+    <string name="recommendation_source_genre_fallback">जैनर मैचिंग</string>
+    <string name="recommendation_source_genre_fallback_subtitle">नेटिव सिफारिशों के अभाव में जैनर मैचिंग पर वापस जाएं</string>
+    <string name="recommendation_search_keywords">खोज कीवर्ड</string>
+    <string name="recommendation_search_keywords_subtitle">समान किताबों खोजने के लिए वर्तमान किताब के शीर्षक से निकाले गए कीवर्ड</string>
+    <string name="recommendations_disabled">सिफारिशें अक्षम हैं</string>
+    <string name="recommendations_no_similar_books">इस शीर्षक के लिए कोई समान किताब नहीं मिली</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">समान शीर्षक</string>
+    <string name="show_similar_titles">समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_source">समान शीर्षक स्रोत</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">समान शीर्षकों की अधिकतम संख्या</string>
+    <string name="similar_titles_settings">समान शीर्षक सेटिंग्स</string>
+    <string name="similar_titles_source_subtitle">समान शीर्षकों के लिए उपयोग करने के लिए स्रोत चुनें</string>
+    <string name="max_similar_titles_count_subtitle">दिखाने के लिए समान शीर्षकों की अधिकतम संख्या</string>
+    <string name="show_similar_titles_subtitle">उपन्यास की विवरण के नीचे समान नाम वाली किताबें दिखाएं</string>
+    <string name="similar_titles_source_same_source">केवल एक ही स्रोत</string>
+    <string name="similar_titles_source_same_source_subtitle">केवल वर्तमान स्रोत से समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_source_other_sources">केवल अन्य स्रोत</string>
+    <string name="similar_titles_source_other_sources_subtitle">केवल अन्य स्रोतों से समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_source_all_sources">सभी स्रोत</string>
+    <string name="similar_titles_source_all_sources_subtitle">सभी उपलब्ध स्रोतों से समान शीर्षक दिखाएं</string>
+    <string name="similar_titles_match_mode">समान शीर्षक मिलान मोड</string>
+    <string name="similar_titles_match_mode_subtitle">समान शीर्षकों की तुलना करने का तरीका चुनें</string>
+    <string name="similar_titles_mode_by_name">नाम से समान</string>
+    <string name="similar_titles_mode_by_name_subtitle">समान शीर्षक/नाम वाली किताबें खोजें</string>
+    <string name="similar_titles_mode_by_genre">शैली से समान</string>
+    <string name="similar_titles_mode_by_genre_subtitle">मिलान वाली शैलियों/श्रेणियों वाली किताबें खोजें</string>
+    <string name="similar_titles_mode_by_category">श्रेणी से समान</string>
+    <string name="similar_titles_mode_by_category_subtitle">एक ही श्रेणी में किताबें खोजें</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

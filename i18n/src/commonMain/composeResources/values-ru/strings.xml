@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -49,6 +49,7 @@
     <string name="added_source_rule">Добавлено правило источника: %1$s</string>
     <string name="added_to_category">Добавлено в категорию %s</string>
     <string name="added_to_library">Добавлено в библиотеку</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Дополнительные детали:</string>
     <string name="additional_details_optional">Дополнительные сведения (необязательно)</string>
     <string name="additional_information">Дополнительная информация</string>
@@ -2099,6 +2100,8 @@
     <string name="results">результаты</string>
     <string name="results_found">результатов найдено</string>
     <string name="resume">Продолжить</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Возобновить все</string>
     <string name="resume_download">Возобновить загрузку</string>
     <string name="resume_downloads">Возобновить загрузки</string>
@@ -2902,4 +2905,97 @@
     <string name="youve_reached_the_end">Вы достигли конца!</string>
     <string name="zoom_in">Увеличить</string>
     <string name="zoom_out">Уменьшить</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Быстрая предустановка</string>
+    <string name="cover_theme_preset_subtitle">Применение предустановленных настроек интенсивности темы обложки</string>
+    <string name="cover_theme_backdrop_blur">Обложка Фон Размытие</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Отрегулируйте интенсивность размытия для изображения обложки расширенного заголовка.</string>
+    <string name="cover_theme_background_tint_opacity">Непрозрачность оттенка фона</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Контролируйте, насколько сильно цвет обложки сливается с фоном карточки.</string>
+    <string name="cover_theme_preset_off">Выключенный</string>
+    <string name="cover_theme_preset_soft">Мягкий</string>
+    <string name="cover_theme_preset_medium">Середина</string>
+    <string name="cover_theme_preset_high">Высокий</string>
+
+    <string name="recommendations_empty">Нет доступных рекомендаций</string>
+    <string name="recommendations_error">Не удалось загрузить рекомендации.</string>
+    <string name="recommendations_section_title">Рекомендации</string>
+    <string name="recommendations_section_title_suggestions">Предложения</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Настройки рекомендаций</string>
+    <string name="recommendations_settings_subtitle">Настройка отображения рекомендаций книг</string>
+    <string name="recommendation_source_similar_by_title">Похожие по названию</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Поиск в источнике книг с похожими названиями</string>
+    <string name="recommendation_source_native_only">Только нативный источник</string>
+    <string name="recommendation_source_native_only_subtitle">Использовать рекомендации, предоставленные напрямую источником</string>
+    <string name="recommendation_source_genre_fallback">Совпадение по жанру</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Возврат к совпадению по жанру при отсутствии нативных рекомендаций</string>
+    <string name="recommendation_search_keywords">Ключевые слова</string>
+    <string name="recommendation_search_keywords_subtitle">Ключевые слова, извлеченные из названия текущей книги для поиска похожих</string>
+    <string name="recommendations_disabled">Рекомендации отключены</string>
+    <string name="recommendations_no_similar_books">Похожие книги для этого названия не найдены</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Похожие названия</string>
+    <string name="show_similar_titles">Показывать похожие названия</string>
+    <string name="similar_titles_source">Источник похожих названий</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Максимальное количество похожих названий</string>
+    <string name="similar_titles_settings">Настройки похожих названий</string>
+    <string name="similar_titles_source_subtitle">Выберите источники для похожих названий</string>
+    <string name="max_similar_titles_count_subtitle">Максимальное количество похожих названий для отображения</string>
+    <string name="show_similar_titles_subtitle">Показывать книги с похожими названиями под деталями романа</string>
+    <string name="similar_titles_source_same_source">Только тот же источник</string>
+    <string name="similar_titles_source_same_source_subtitle">Показывать похожие названия только из текущего источника</string>
+    <string name="similar_titles_source_other_sources">Только другие источники</string>
+    <string name="similar_titles_source_other_sources_subtitle">Показывать похожие названия только из других источников</string>
+    <string name="similar_titles_source_all_sources">Все источники</string>
+    <string name="similar_titles_source_all_sources_subtitle">Показывать похожие названия из всех доступных источников</string>
+    <string name="similar_titles_match_mode">Режим сопоставления похожих названий</string>
+    <string name="similar_titles_match_mode_subtitle">Выберите, как сравниваются похожие названия</string>
+    <string name="similar_titles_mode_by_name">Похоже по названию</string>
+    <string name="similar_titles_mode_by_name_subtitle">Найти книги с похожими названиями/именами</string>
+    <string name="similar_titles_mode_by_genre">Похоже по жанру</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Найти книги с совпадающими жанрами/категориями</string>
+    <string name="similar_titles_mode_by_category">Похоже по категории</string>
+    <string name="similar_titles_mode_by_category_subtitle">Найти книги в той же категории</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

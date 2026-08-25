@@ -66,6 +66,8 @@ import ireader.domain.usecases.remote.GetBookDetail
 import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
+import ireader.domain.usecases.remote.GetSimilarBooksByTitleUseCase
+import ireader.domain.usecases.remote.GetSourceRecommendations
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.statistics.GetReadingStatisticsUseCase
 import ireader.domain.usecases.statistics.StatisticsUseCases
@@ -98,6 +100,8 @@ val UseCasesInject = module {
             getRemoteReadingContent = GetRemoteReadingContent(),
             globalSearch = get(),
             fetchAndSaveChapterContent = FetchAndSaveChapterContentUseCase(get(), findChapterById),
+            getSourceRecommendations = GetSourceRecommendations(),
+            getSimilarBooksByTitle = GetSimilarBooksByTitleUseCase(get()),
         )
     }
     factory<ireader.domain.usecases.reader.PreloadChapterUseCase> { ireader.domain.usecases.reader.PreloadChapterUseCase() }

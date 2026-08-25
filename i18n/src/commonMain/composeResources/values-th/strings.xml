@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">แรงบันดาลใจรายวัน</string>
@@ -48,6 +48,7 @@
     <string name="added_source_rule">เพิ่มกฎแหล่งที่มา: %1$s</string>
     <string name="added_to_category">เพิ่มไปยัง %s</string>
     <string name="added_to_library">เพิ่มลงในคลังหนังสือแล้ว</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">รายละเอียดเพิ่มเติม:</string>
     <string name="additional_details_optional">รายละเอียดเพิ่มเติม (ไม่บังคับ)</string>
     <string name="additional_information">ข้อมูลเพิ่มเติม</string>
@@ -2088,6 +2089,8 @@
     <string name="results">ผลลัพธ์</string>
     <string name="results_found">พบผลลัพธ์</string>
     <string name="resume">ดำเนินการต่อ</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">ดำเนินการต่อทั้งหมด</string>
     <string name="resume_download">ดำเนินการดาวน์โหลดต่อ</string>
     <string name="resume_downloads">ดำเนินการดาวน์โหลดต่อ</string>
@@ -2888,4 +2891,97 @@
     <string name="youve_reached_the_end">คุณมาถึงจุดสิ้นสุดแล้ว!</string>
     <string name="zoom_in">ซูมเข้า</string>
     <string name="zoom_out">ซูมออก</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Quick Preset</string>
+    <string name="cover_theme_preset_subtitle">ใช้การตั้งค่าที่กำหนดไว้ล่วงหน้าสำหรับความเข้มของธีมหน้าปก</string>
+    <string name="cover_theme_backdrop_blur">ปกปิดฉากหลังเบลอ</string>
+    <string name="cover_theme_backdrop_blur_subtitle">ปรับความเข้มของภาพเบลอสำหรับภาพปกส่วนหัวที่ขยาย</string>
+    <string name="cover_theme_background_tint_opacity">ความทึบของสีพื้นหลัง</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">ควบคุมว่าสีปกจะผสมเข้ากับพื้นหลังการ์ดมากเพียงใด</string>
+    <string name="cover_theme_preset_off">ปิด</string>
+    <string name="cover_theme_preset_soft">อ่อนนุ่ม</string>
+    <string name="cover_theme_preset_medium">ปานกลาง</string>
+    <string name="cover_theme_preset_high">สูง</string>
+
+    <string name="recommendations_empty">ไม่มีข้อเสนอแนะ</string>
+    <string name="recommendations_error">โหลดคำแนะนำไม่สำเร็จ</string>
+    <string name="recommendations_section_title">คำแนะนำ</string>
+    <string name="recommendations_section_title_suggestions">ข้อเสนอแนะ</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">การตั้งค่าคำแนะนำ</string>
+    <string name="recommendations_settings_subtitle">กำหนดวิธีการแสดงคำแนะนำหนังสือ</string>
+    <string name="recommendation_source_similar_by_title">คล้ายตามชื่อ</string>
+    <string name="recommendation_source_similar_by_title_subtitle">ค้นหาในแหล่งที่มาสำหรับหนังสือที่มีชื่อคล้ายกัน</string>
+    <string name="recommendation_source_native_only">แหล่งที่มาพื้นฐานเท่านั้น</string>
+    <string name="recommendation_source_native_only_subtitle">ใช้คำแนะนำที่ให้โดยแหล่งที่มาโดยตรง</string>
+    <string name="recommendation_source_genre_fallback">การจับคู่ประเภท</string>
+    <string name="recommendation_source_genre_fallback_subtitle">กลับไปเป็นการจับคู่ประเภทเมื่อไม่มีคำแนะนำพื้นฐาน</string>
+    <string name="recommendation_search_keywords">คำค้นหา</string>
+    <string name="recommendation_search_keywords_subtitle">คำที่สกัดออกจากชื่อหนังสือปัจจุบันเพื่อค้นหาหนังสือที่คล้ายกัน</string>
+    <string name="recommendations_disabled">ปิดใช้งานคำแนะนำ</string>
+    <string name="recommendations_no_similar_books">ไม่พบหนังสือที่คล้ายกันสำหรับชื่อนี้</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">ชื่อที่คล้ายกัน</string>
+    <string name="show_similar_titles">แสดงชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_source">แหล่งชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">จำนวนชื่อที่คล้ายกันสูงสุด</string>
+    <string name="similar_titles_settings">การตั้งค่าชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_source_subtitle">เลือกแหล่งที่จะใช้สำหรับชื่อที่คล้ายกัน</string>
+    <string name="max_similar_titles_count_subtitle">จำนวนชื่อที่คล้ายกันสูงสุดที่จะแสดง</string>
+    <string name="show_similar_titles_subtitle">แสดงหนังสือที่มีชื่อคล้ายกันใต้รายละเอียดนวนิยาย</string>
+    <string name="similar_titles_source_same_source">แค่อันเดียวกัน</string>
+    <string name="similar_titles_source_same_source_subtitle">แสดงชื่อที่คล้ายกันเฉพาะจากแหล่งปัจจุบัน</string>
+    <string name="similar_titles_source_other_sources">เฉพาะแหล่งอื่น</string>
+    <string name="similar_titles_source_other_sources_subtitle">แสดงชื่อที่คล้ายกันเฉพาะจากแหล่งอื่น</string>
+    <string name="similar_titles_source_all_sources">แหล่งทั้งหมด</string>
+    <string name="similar_titles_source_all_sources_subtitle">แสดงชื่อที่คล้ายกันจากแหล่งที่มีอยู่ทั้งหมด</string>
+    <string name="similar_titles_match_mode">โหมดการจับคู่ชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_match_mode_subtitle">เลือกวิธีเปรียบเทียบชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_mode_by_name">คล้ายกันตามชื่อ</string>
+    <string name="similar_titles_mode_by_name_subtitle">ค้นหาหนังสือที่มีชื่อ/ชื่อคล้ายกัน</string>
+    <string name="similar_titles_mode_by_genre">คล้ายกันตามประเภท</string>
+    <string name="similar_titles_mode_by_genre_subtitle">ค้นหาหนังสือที่มีประเภท/หมวดหมู่ที่ตรงกัน</string>
+    <string name="similar_titles_mode_by_category">คล้ายกันตามหมวดหมู่</string>
+    <string name="similar_titles_mode_by_category_subtitle">ค้นหาหนังสือในหมวดหมู่เดียวกัน</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

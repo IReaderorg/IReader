@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -49,6 +49,7 @@
     <string name="added_source_rule">ソースルールを追加しました: %1$s</string>
     <string name="added_to_category">%sに追加しました</string>
     <string name="added_to_library">ライブラリに追加されました</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">追加の詳細:</string>
     <string name="additional_details_optional">追加の詳細（オプション）</string>
     <string name="additional_information">追加情報</string>
@@ -2096,6 +2097,8 @@
     <string name="results">結果</string>
     <string name="results_found">件の結果が見つかりました</string>
     <string name="resume">再開</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">すべて再開</string>
     <string name="resume_download">ダウンロードを再開</string>
     <string name="resume_downloads">ダウンロードを再開</string>
@@ -2898,4 +2901,97 @@
     <string name="youve_reached_the_end">終わりに達しました！</string>
     <string name="zoom_in">拡大</string>
     <string name="zoom_out">縮小</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">クイックプリセット</string>
+    <string name="cover_theme_preset_subtitle">カバーテーマの強度に事前定義された設定を適用する</string>
+    <string name="cover_theme_backdrop_blur">カバー背景のぼかし</string>
+    <string name="cover_theme_backdrop_blur_subtitle">拡張ヘッダー カバー画像のぼかし強度を調整する</string>
+    <string name="cover_theme_background_tint_opacity">背景の色合いの不透明度</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">カバーの色がカードの背景にどの程度溶け込むかを制御します</string>
+    <string name="cover_theme_preset_off">オフ</string>
+    <string name="cover_theme_preset_soft">柔らかい</string>
+    <string name="cover_theme_preset_medium">中くらい</string>
+    <string name="cover_theme_preset_high">高い</string>
+
+    <string name="recommendations_empty">利用可能な推奨事項はありません</string>
+    <string name="recommendations_error">推奨事項の読み込みに失敗しました</string>
+    <string name="recommendations_section_title">推奨事項</string>
+    <string name="recommendations_section_title_suggestions">提案</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">推奨設定</string>
+    <string name="recommendations_settings_subtitle">書籍の推奨表示方法を構成する</string>
+    <string name="recommendation_source_similar_by_title">タイトルで類似</string>
+    <string name="recommendation_source_similar_by_title_subtitle">ソースで同じ名前の書籍を検索</string>
+    <string name="recommendation_source_native_only">ネイティブソースのみ</string>
+    <string name="recommendation_source_native_only_subtitle">ソースから直接提供される推奨を使用する</string>
+    <string name="recommendation_source_genre_fallback">ジャンルマッチング</string>
+    <string name="recommendation_source_genre_fallback_subtitle">ネイティブ推奨がない場合にジャンルマッチングにフォールバック</string>
+    <string name="recommendation_search_keywords">検索キーワード</string>
+    <string name="recommendation_search_keywords_subtitle">類似の書籍を見つけるために現在の書籍のタイトルから抽出されたキーワード</string>
+    <string name="recommendations_disabled">推奨が無効です</string>
+    <string name="recommendations_no_similar_books">このタイトルの類似書籍が見つかりません</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">類似タイトル</string>
+    <string name="show_similar_titles">類似タイトルを表示</string>
+    <string name="similar_titles_source">類似タイトルのソース</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">類似タイトルの最大数</string>
+    <string name="similar_titles_settings">類似タイトル設定</string>
+    <string name="similar_titles_source_subtitle">類似タイトルに使用するソースを選択</string>
+    <string name="max_similar_titles_count_subtitle">表示する類似タイトルの最大数</string>
+    <string name="show_similar_titles_subtitle">小説の詳細の下に名前が類似した本を表示</string>
+    <string name="similar_titles_source_same_source">同じソースのみ</string>
+    <string name="similar_titles_source_same_source_subtitle">現在のソースからの類似タイトルのみを表示</string>
+    <string name="similar_titles_source_other_sources">他のソースのみ</string>
+    <string name="similar_titles_source_other_sources_subtitle">他のソースからの類似タイトルのみを表示</string>
+    <string name="similar_titles_source_all_sources">すべてのソース</string>
+    <string name="similar_titles_source_all_sources_subtitle">すべての利用可能なソースからの類似タイトルを表示</string>
+    <string name="similar_titles_match_mode">類似タイトル一致モード</string>
+    <string name="similar_titles_match_mode_subtitle">類似タイトルの比較方法を選択</string>
+    <string name="similar_titles_mode_by_name">名前で類似</string>
+    <string name="similar_titles_mode_by_name_subtitle">タイトル/名前が類似した本を検索</string>
+    <string name="similar_titles_mode_by_genre">ジャンルで類似</string>
+    <string name="similar_titles_mode_by_genre_subtitle">ジャンル/カテゴリが一致する本を検索</string>
+    <string name="similar_titles_mode_by_category">カテゴリで類似</string>
+    <string name="similar_titles_mode_by_category_subtitle">同じカテゴリの本を検索</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -49,6 +49,7 @@
     <string name="added_source_rule">Aturan sumber ditambahkan: %1$s</string>
     <string name="added_to_category">Ditambahkan ke %s</string>
     <string name="added_to_library">Ditambahkan ke Pustaka</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Detail Tambahan:</string>
     <string name="additional_details_optional">Detail tambahan (opsional)</string>
     <string name="additional_information">Informasi Tambahan</string>
@@ -2102,6 +2103,8 @@
     <string name="results">hasil</string>
     <string name="results_found">hasil ditemukan</string>
     <string name="resume">Lanjutkan</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Lanjutkan Semua</string>
     <string name="resume_download">Lanjutkan Unduhan</string>
     <string name="resume_downloads">Lanjutkan Unduhan</string>
@@ -2905,4 +2908,97 @@
     <string name="youve_reached_the_end">Anda telah mencapai akhir!</string>
     <string name="zoom_in">Perbesar</string>
     <string name="zoom_out">Perkecil</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Prasetel Cepat</string>
+    <string name="cover_theme_preset_subtitle">Terapkan pengaturan yang telah ditentukan sebelumnya untuk intensitas tema sampul</string>
+    <string name="cover_theme_backdrop_blur">Penutup Latar Belakang Buram</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Sesuaikan intensitas blur untuk gambar sampul header yang diperluas</string>
+    <string name="cover_theme_background_tint_opacity">Opasitas Warna Latar Belakang</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Kontrol seberapa banyak warna sampul menyatu dengan latar belakang kartu</string>
+    <string name="cover_theme_preset_off">Mati</string>
+    <string name="cover_theme_preset_soft">Lembut</string>
+    <string name="cover_theme_preset_medium">Sedang</string>
+    <string name="cover_theme_preset_high">Tinggi</string>
+
+    <string name="recommendations_empty">Tidak ada rekomendasi yang tersedia</string>
+    <string name="recommendations_error">Gagal memuat rekomendasi</string>
+    <string name="recommendations_section_title">Rekomendasi</string>
+    <string name="recommendations_section_title_suggestions">Saran</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Pengaturan Rekomendasi</string>
+    <string name="recommendations_settings_subtitle">Konfigurasikan cara menampilkan rekomendasi buku</string>
+    <string name="recommendation_source_similar_by_title">Mirip berdasarkan Judul</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Cari di sumber untuk buku dengan nama yang mirip</string>
+    <string name="recommendation_source_native_only">Hanya Sumber Asli</string>
+    <string name="recommendation_source_native_only_subtitle">Gunakan rekomendasi yang diberikan langsung oleh sumber</string>
+    <string name="recommendation_source_genre_fallback">Pencocokan Genre</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Kembali ke pencocokan genre ketika tidak ada rekomendasi asli</string>
+    <string name="recommendation_search_keywords">Kata Kunci Pencarian</string>
+    <string name="recommendation_search_keywords_subtitle">Kata kunci yang diekstrak dari judul buku saat ini untuk menemukan buku yang mirip</string>
+    <string name="recommendations_disabled">Rekomendasi dinonaktifkan</string>
+    <string name="recommendations_no_similar_books">Tidak ada buku mirip yang ditemukan untuk judul ini</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Judul yang Mirip</string>
+    <string name="show_similar_titles">Tampilkan Judul yang Mirip</string>
+    <string name="similar_titles_source">Sumber Judul yang Mirip</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Jumlah Maksimum Judul yang Mirip</string>
+    <string name="similar_titles_settings">Pengaturan Judul yang Mirip</string>
+    <string name="similar_titles_source_subtitle">Pilih sumber mana yang akan digunakan untuk judul yang mirip</string>
+    <string name="max_similar_titles_count_subtitle">Jumlah maksimum judul yang mirip untuk ditampilkan</string>
+    <string name="show_similar_titles_subtitle">Tampilkan buku dengan nama yang mirip di bawah detail novel</string>
+    <string name="similar_titles_source_same_source">Hanya Sumber yang Sama</string>
+    <string name="similar_titles_source_same_source_subtitle">Tampilkan judul yang mirip hanya dari sumber saat ini</string>
+    <string name="similar_titles_source_other_sources">Hanya Sumber Lain</string>
+    <string name="similar_titles_source_other_sources_subtitle">Tampilkan judul yang mirip hanya dari sumber lain</string>
+    <string name="similar_titles_source_all_sources">Semua Sumber</string>
+    <string name="similar_titles_source_all_sources_subtitle">Tampilkan judul yang mirip dari semua sumber yang tersedia</string>
+    <string name="similar_titles_match_mode">Mode Kecocokan Judul yang Mirip</string>
+    <string name="similar_titles_match_mode_subtitle">Pilih bagaimana judul yang mirip dibandingkan</string>
+    <string name="similar_titles_mode_by_name">Mirip berdasarkan Nama</string>
+    <string name="similar_titles_mode_by_name_subtitle">Cari buku dengan judul/nama yang mirip</string>
+    <string name="similar_titles_mode_by_genre">Mirip berdasarkan Genre</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Cari buku dengan genre/kategori yang cocok</string>
+    <string name="similar_titles_mode_by_category">Mirip berdasarkan Kategori</string>
+    <string name="similar_titles_mode_by_category_subtitle">Cari buku dalam kategori yang sama</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

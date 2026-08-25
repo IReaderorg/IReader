@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -49,6 +49,7 @@
     <string name="added_source_rule">ചേർത്ത ഉറവിട നിയമം: %1$s</string>
     <string name="added_to_category">%s-ൽ ചേർത്തു</string>
     <string name="added_to_library">ലൈബ്രറിയിലേക്ക് ചേർത്തു</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">கூடுதல் விவரங்கள்:</string>
     <string name="additional_details_optional">അധിക വിശദാംശങ്ങൾ (ഓപ്ഷണൽ)</string>
     <string name="additional_information">അധിക വിവരങ്ങൾ</string>
@@ -2097,6 +2098,8 @@
     <string name="results">ഫലങ്ങൾ</string>
     <string name="results_found">ഫലങ്ങൾ കണ്ടെത്തി</string>
     <string name="resume">പുനരാരംഭിക്കുക</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">എല്ലാം പുനരാരംഭിക്കുക</string>
     <string name="resume_download">ഡൗൺലോഡ് പുനരാരംഭിക്കുക</string>
     <string name="resume_downloads">ഡൗൺലോഡുകൾ പുനരാരംഭിക്കുക</string>
@@ -2899,4 +2902,97 @@
     <string name="youve_reached_the_end">നിങ്ങൾ അവസാനത്തിലെത്തി!</string>
     <string name="zoom_in">സൂം ഇൻ ചെയ്യുക</string>
     <string name="zoom_out">സൂം ഔട്ട് ചെയ്യുക</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">ദ്രുത പ്രീസെറ്റ്</string>
+    <string name="cover_theme_preset_subtitle">കവർ തീം തീവ്രതയ്ക്കായി മുൻകൂട്ടി നിശ്ചയിച്ച ക്രമീകരണങ്ങൾ പ്രയോഗിക്കുക</string>
+    <string name="cover_theme_backdrop_blur">കവർ ബാക്ക്‌ഡ്രോപ്പ് മങ്ങൽ</string>
+    <string name="cover_theme_backdrop_blur_subtitle">വിപുലീകൃത ഹെഡർ കവർ ചിത്രത്തിനായി ബ്ലർ തീവ്രത ക്രമീകരിക്കുക</string>
+    <string name="cover_theme_background_tint_opacity">പശ്ചാത്തല ടിൻ്റ് അതാര്യത</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">കാർഡ് പശ്ചാത്തലങ്ങളിലേക്ക് വർണ്ണം എത്രമാത്രം കവർ ചെയ്യുന്നു എന്നത് നിയന്ത്രിക്കുക</string>
+    <string name="cover_theme_preset_off">ഓഫ്</string>
+    <string name="cover_theme_preset_soft">മൃദുവായ</string>
+    <string name="cover_theme_preset_medium">ഇടത്തരം</string>
+    <string name="cover_theme_preset_high">ഉയർന്നത്</string>
+
+    <string name="recommendations_empty">ശുപാർശകളൊന്നും ലഭ്യമല്ല</string>
+    <string name="recommendations_error">ശുപാർശകൾ ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു</string>
+    <string name="recommendations_section_title">ശുപാർശകൾ</string>
+    <string name="recommendations_section_title_suggestions">നിർദ്ദേശങ്ങൾ</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">ശുപാർശ ക്രമീകരണങ്ങൾ</string>
+    <string name="recommendations_settings_subtitle">പുസ്തക ശുപാർശകൾ എങ്ങനെ കാണിക്കാം എന്ന് കോൺഫിഗർ ചെയ്യുക</string>
+    <string name="recommendation_source_similar_by_title">പേരuilt അനുയോജ്യം</string>
+    <string name="recommendation_source_similar_by_title_subtitle">ഒരേ പേരുള്ള പുസ്തകങ്ങൾക്ക് വേദന ശോധിക്കുക</string>
+    <string name="recommendation_source_native_only">നേറ്റീവ് സോഴ്സ് മാത്രം</string>
+    <string name="recommendation_source_native_only_subtitle">സോഴ്സ് നേരിട്ട് നൽകിയ ശുപാർശകൾ ഉപയോഗിക്കുക</string>
+    <string name="recommendation_source_genre_fallback">ജാൻറ് മാച്ചിംഗ്</string>
+    <string name="recommendation_source_genre_fallback_subtitle">നേറ്റീവ് ശുപാർശകൾ ഇല്ലാത്തപ്പോൾ ജാൻറ് മാച്ചിംഗിലേക്ക് മടങ്ങുക</string>
+    <string name="recommendation_search_keywords">തിരഞ്ഞെടുപ്പുകൾ</string>
+    <string name="recommendation_search_keywords_subtitle">അനുയോജ്യമായ പുസ്തകങ്ങൾ കണ്ടെത്താനുള്ള നിലവിലെ പുസ്തകത്തിന്റെ പേരിൽ നിന്ന് എടുത്ത കീവേഡുകൾ</string>
+    <string name="recommendations_disabled">ശുപാർശകൾ നിരോധിച്ചു</string>
+    <string name="recommendations_no_similar_books">ഈ തലക്കെട്ടിന് ഒരുപക്ഷേ പുസ്തകങ്ങൾ കണ്ടെത്തിയില്ല</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">സമാന ശീർഷകങ്ങൾ</string>
+    <string name="show_similar_titles">സമാന ശീർഷകങ്ങൾ കാണിക്കുക</string>
+    <string name="similar_titles_source">സമാന ശീർഷകങ്ങളുടെ മൂലം</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">സമാന ശീർഷകങ്ങളുടെ പരമാവധി എണ്ണം</string>
+    <string name="similar_titles_settings">സമാന ശീർഷകങ്ങളുടെ സജീവരchet</string>
+    <string name="similar_titles_source_subtitle">സമാന ശീർഷകങ്ങള്‍ ഉപയോഗിക്കാനുള്ള മൂലങ്ങള്‍ തെരഞ്ഞെടുക്കുക</string>
+    <string name="max_similar_titles_count_subtitle">കാണിക്കാനുള്ള സമാന ശീർഷകങ്ങളുടെ പരമാവധി എണ്ണം</string>
+    <string name="show_similar_titles_subtitle">നോവലിന്റെ വിവരങ്ങള്‍ കീഴില്‍ സമാന പേരുകളുള്ള പുസ്തകങ്ങള്‍ കാണിക്കുക</string>
+    <string name="similar_titles_source_same_source">ഒരേ മൂലം മാത്രം</string>
+    <string name="similar_titles_source_same_source_subtitle">സമാന ശീർഷകങ്ങള്‍ നിലവിലെ മൂലത്തില്‍ നിന്ന് മാത്രം കാണിക്കുക</string>
+    <string name="similar_titles_source_other_sources">മറ്റ് മൂലങ്ങള്‍ മാത്രം</string>
+    <string name="similar_titles_source_other_sources_subtitle">സമാന ശീർഷകങ്ങള്‍ മറ്റ് മൂലങ്ങളില്‍ നിന്ന് മാത്രം കാണിക്കുക</string>
+    <string name="similar_titles_source_all_sources">എല്ലാ മൂലങ്ങളും</string>
+    <string name="similar_titles_source_all_sources_subtitle">ലഭ്യമായ എല്ലാ മൂലങ്ങളില്‍ നിന്നും സമാന ശീർഷകങ്ങള്‍ കാണിക്കുക</string>
+    <string name="similar_titles_match_mode">സമാന ശീർഷകങ്ങളുടെ മാച്ച് മോഡ്</string>
+    <string name="similar_titles_match_mode_subtitle">സമാന ശീർഷകങ്ങള്‍ താരതമ്യപ്പെടുത്തുന്ന രീതി തെരഞ്ഞെടുക്കുക</string>
+    <string name="similar_titles_mode_by_name">പേര് മുഖേന സമാനം</string>
+    <string name="similar_titles_mode_by_name_subtitle">സമാന ശീർഷകം/പേരുള്ള പുസ്തകങ്ങള്‍ കണ്ടെത്തുക</string>
+    <string name="similar_titles_mode_by_genre">ജീവന്‍ മുഖേന സമാനം</string>
+    <string name="similar_titles_mode_by_genre_subtitle">കൈകാര്യം ചെയ്ത ജീവന്‍/വിഭാഗങ്ങളുള്ള പുസ്തകങ്ങള്‍ കണ്ടെത്തുക</string>
+    <string name="similar_titles_mode_by_category">വിഭാഗം മുഖേന സമാനം</string>
+    <string name="similar_titles_mode_by_category_subtitle">അതേ വിഭാഗത്തിലുള്ള പുസ്തകങ്ങള്‍ കണ്ടെത്തുക</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

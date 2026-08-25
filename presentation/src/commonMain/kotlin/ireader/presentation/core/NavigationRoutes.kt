@@ -1,4 +1,4 @@
-package ireader.presentation.core
+﻿package ireader.presentation.core
 
 /**
  * Navigation routes for the application.
@@ -93,6 +93,10 @@ object NavigationRoutes {
     const val contentFilter = "contentFilter"
     const val textReplacement = "textReplacement"
     const val networkSettings = "networkSettings"
+    const val similarTitlesSettings = "similarTitlesSettings"
+    const val recommendationsList = "recommendationsList"
+    
+    fun recommendationsList(bookId: Long) = "recommendationsList?bookId=$bookId"
     
     fun quoteCreation(params: ireader.domain.models.quote.QuoteCreationParams): String {
         val encodedBookTitle = params.bookTitle.encodeForNav()

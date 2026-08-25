@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -49,6 +49,7 @@
     <string name="added_source_rule">قانون منبع اضافه شد: %1$s</string>
     <string name="added_to_category">به %s اضافه شد</string>
     <string name="added_to_library">به کتابخانه اضافه شد</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">جزئیات بیشتر:</string>
     <string name="additional_details_optional">جزئیات اضافی (اختیاری)</string>
     <string name="additional_information">اطلاعات تکمیلی</string>
@@ -2089,6 +2090,8 @@
     <string name="results">نتایج</string>
     <string name="results_found">نتیجه یافت شد</string>
     <string name="resume">ادامه</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">ادامه همه</string>
     <string name="resume_download">ادامه دانلود</string>
     <string name="resume_downloads">ادامه بارگیری‌ها</string>
@@ -2892,4 +2895,97 @@
     <string name="youve_reached_the_end">شما به پایان رسیدید!</string>
     <string name="zoom_in">بزرگ‌نمایی</string>
     <string name="zoom_out">کوچک‌نمایی</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">از پیش تنظیم سریع</string>
+    <string name="cover_theme_preset_subtitle">تنظیمات از پیش تعریف شده را برای شدت تم جلد اعمال کنید</string>
+    <string name="cover_theme_backdrop_blur">تاری پس زمینه جلد</string>
+    <string name="cover_theme_backdrop_blur_subtitle">شدت تاری را برای تصویر جلد هدر توسعه یافته تنظیم کنید</string>
+    <string name="cover_theme_background_tint_opacity">تیرگی رنگ پس زمینه</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">کنترل کنید که چگونه رنگ پوشش به شدت با پس زمینه کارت ترکیب می شود</string>
+    <string name="cover_theme_preset_off">خاموش</string>
+    <string name="cover_theme_preset_soft">نرم</string>
+    <string name="cover_theme_preset_medium">متوسط</string>
+    <string name="cover_theme_preset_high">بالا</string>
+
+    <string name="recommendations_empty">هیچ توصیه‌ای در دسترس نیست</string>
+    <string name="recommendations_error">توصیه ها بارگیری نشد</string>
+    <string name="recommendations_section_title">توصیه ها</string>
+    <string name="recommendations_section_title_suggestions">پیشنهادات</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">تنظیمات توصیه‌ها</string>
+    <string name="recommendations_settings_subtitle">پیکربندی نحوه نمایش توصیه‌های کتاب</string>
+    <string name="recommendation_source_similar_by_title">مشابه با عنوان</string>
+    <string name="recommendation_source_similar_by_title_subtitle">جستجو در منبع برای کتاب‌های با نام‌های مشابه</string>
+    <string name="recommendation_source_native_only">فقط منبع بومی</string>
+    <string name="recommendation_source_native_only_subtitle">استفاده از توصیه‌های ارائه شده directly توسط منبع</string>
+    <string name="recommendation_source_genre_fallback">تطابق ژانر</string>
+    <string name="recommendation_source_genre_fallback_subtitle">بازگشت به تطابق ژانر وقتی توصیه بومی وجود ندارد</string>
+    <string name="recommendation_search_keywords">کلیدواژه‌های جستجو</string>
+    <string name="recommendation_search_keywords_subtitle">کلیدواژه‌های استخراج شده از عنوان کتاب فعلی برای یافتن کتاب‌های مشابه</string>
+    <string name="recommendations_disabled">توصیه‌ها غیرفعال هستند</string>
+    <string name="recommendations_no_similar_books">کتاب مشابهی برای این عنوان یافت نشد</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">عناوان‌های مشابه</string>
+    <string name="show_similar_titles">نمایش عناوین مشابه</string>
+    <string name="similar_titles_source">منبع عناوین مشابه</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">حداکثر تعداد عناوین مشابه</string>
+    <string name="similar_titles_settings">تنظیمات عناوین مشابه</string>
+    <string name="similar_titles_source_subtitle">انتخاب منابع مورد استفاده برای عناوین مشابه</string>
+    <string name="max_similar_titles_count_subtitle">حداکثر تعداد عناوین مشابه برای نمایش</string>
+    <string name="show_similar_titles_subtitle">نمایش کتاب‌های با نام مشابه در زیر جزئیات رمان</string>
+    <string name="similar_titles_source_same_source">فقط همان منبع</string>
+    <string name="similar_titles_source_same_source_subtitle">نمایش عناوین مشابه فقط از منبع فعلی</string>
+    <string name="similar_titles_source_other_sources">فقط سایر منابع</string>
+    <string name="similar_titles_source_other_sources_subtitle">نمایش عناوین مشابه فقط از سایر منابع</string>
+    <string name="similar_titles_source_all_sources">همه منابع</string>
+    <string name="similar_titles_source_all_sources_subtitle">نمایش عناوین مشابه از همه منابع موجود</string>
+    <string name="similar_titles_match_mode">حالت تطابق عناوین مشابه</string>
+    <string name="similar_titles_match_mode_subtitle">انتخاب نحوه مقایسه عناوین مشابه</string>
+    <string name="similar_titles_mode_by_name">مشابه با نام</string>
+    <string name="similar_titles_mode_by_name_subtitle">یافتن کتاب‌های با عنوان/نام مشابه</string>
+    <string name="similar_titles_mode_by_genre">مشابه با ژانر</string>
+    <string name="similar_titles_mode_by_genre_subtitle">یافتن کتاب‌های با ژانر/دسته‌بندی مطابق</string>
+    <string name="similar_titles_mode_by_category">مشابه با دسته‌بندی</string>
+    <string name="similar_titles_mode_by_category_subtitle">یافتن کتاب‌های در همان دسته‌بندی</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
@@ -49,6 +49,7 @@
     <string name="added_source_rule">အရင်းအမြစ် စည်းမျဉ်း ထည့်သွင်းပြီးပြီ: %1$s</string>
     <string name="added_to_category">%s ထဲသို့ ထည့်သွင်းပြီးပြီ</string>
     <string name="added_to_library">Ditambah ke Perpustakaan</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Butiran Tambahan:</string>
     <string name="additional_details_optional">Butiran tambahan (pilihan)</string>
     <string name="additional_information">နောက်ထပ်အချက်အလက်</string>
@@ -2102,6 +2103,8 @@
     <string name="results">hasil</string>
     <string name="results_found">hasil ditemui</string>
     <string name="resume">Sambung semula</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Sambung Semula Semua</string>
     <string name="resume_download">ဒေါင်းလုဒ် ဆက်လုပ်ပါ</string>
     <string name="resume_downloads">ဒေါင်းလုဒ်များ ပြန်စပါ</string>
@@ -2905,4 +2908,97 @@
     <string name="youve_reached_the_end">Anda telah sampai ke penghujung!</string>
     <string name="zoom_in">ချဲ့ကြည့်ရန်</string>
     <string name="zoom_out">ချုံ့ကြည့်ရန်</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">အမြန်ကြိုတင်သတ်မှတ်ပါ။</string>
+    <string name="cover_theme_preset_subtitle">မျက်နှာဖုံး အပြင်အဆင် ပြင်းထန်မှုအတွက် ကြိုတင်သတ်မှတ်ထားသော ဆက်တင်များကို အသုံးပြုပါ။</string>
+    <string name="cover_theme_backdrop_blur">နောက်ခံ မှုန်ဝါးမှုကို ဖုံးအုပ်ပါ။</string>
+    <string name="cover_theme_backdrop_blur_subtitle">တိုးချဲ့ခေါင်းစီးကာဗာပုံအတွက် မှုန်ဝါးမှုပြင်းထန်မှုကို ချိန်ညှိပါ။</string>
+    <string name="cover_theme_background_tint_opacity">နောက်ခံအရောင် အလင်းပိတ်ခြင်း။</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">ကတ်နောက်ခံသို့ အရောင်ရောစပ်ပုံကို ဖုံးအုပ်ထားပုံကို ထိန်းချုပ်ပါ။</string>
+    <string name="cover_theme_preset_off">ပိတ်သည်။</string>
+    <string name="cover_theme_preset_soft">ပျော့ပျောင်းသည်။</string>
+    <string name="cover_theme_preset_medium">လတ်</string>
+    <string name="cover_theme_preset_high">မြင့်သည်။</string>
+
+    <string name="recommendations_empty">အကြံပြုချက်များ မရရှိနိုင်ပါ။</string>
+    <string name="recommendations_error">အကြံပြုချက်များကို တင်၍မရပါ။</string>
+    <string name="recommendations_section_title">အကြံပြုချက်များ</string>
+    <string name="recommendations_section_title_suggestions">အကြံပြုချက်များ</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">အကြံပြုချက် ဆက်တင်</string>
+    <string name="recommendations_settings_subtitle">စာအုပ်အကြံပြုချက်များကို ပြသမှုကို ပြင်ဆင်ရန်</string>
+    <string name="recommendation_source_similar_by_title">ခေါင်းစဉ်အရ ဆင်တူ</string>
+    <string name="recommendation_source_similar_by_title_subtitle">အမည်တူပသော စာအုပ်များအတွက် အရင်းအမြစ်ရှာဖွေပါ</string>
+    <string name="recommendation_source_native_only">ပုံမှန်အရင်းအမြစ်သာ</string>
+    <string name="recommendation_source_native_only_subtitle">အရင်းအမြစ်မှတဆင့်တည်ဆောက်ပြီး အကြံပြုချက်များကို အသုံးပြုပါ</string>
+    <string name="recommendation_source_genre_fallback">အမျိုးအစား ကိုက်ညီမှု</string>
+    <string name="recommendation_source_genre_fallback_subtitle">မူရင်း အကြံပြုချက်များ မရှိပါက အမျိုးအစား ကိုက်ညီမှုသို့ ပြန်သွားပါ</string>
+    <string name="recommendation_search_keywords">ရှာဖွေရေး စကားလုံးများ</string>
+    <string name="recommendation_search_keywords_subtitle">ဆင်တူသော စာအုပ်များရှာဖွjer için လက်ရှိ စာအုပ်ခေါင်းစဉ်မှ ရယူထားသည့် စကားလုံးများ</string>
+    <string name="recommendations_disabled">အကြံပြုချက်များ ပိတ်ထားပါသည်</string>
+    <string name="recommendations_no_similar_books">ဤခေါင်းစဉ်အတွက် ဆင်တူသော စာအုပ်များ မတွေ့ပါ</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">ဆင်တူချိန်ညှိမှုများ</string>
+    <string name="show_similar_titles">ဆင်တူချိန်ညှိမှုများပြရန်</string>
+    <string name="similar_titles_source">ဆင်တူချိန်ညှိမှုများရင်းမြစ်</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">ဆင်တူချိန်ညှိမှုများအများဆုံးအရေအတွက်</string>
+    <string name="similar_titles_settings">ဆင်တူချိန်ညှိမှုများ ဆેટဂ်များ</string>
+    <string name="similar_titles_source_subtitle">ဆင်တူချိန်ညှိမှုများအတွက်သုံးစွဲရင်းမြစ်များရွေးချယ်ပါ</string>
+    <string name="max_similar_titles_count_subtitle">ပြရန်ဆင်တူချိန်ညှိမှုများအများဆုံးအရေအတွက်</string>
+    <string name="show_similar_titles_subtitle">ရုပ်သံအသေးစီးအောက်မှာ အမည်ဆင်တူစာအုပ်စာတမ်းများပြရန်</string>
+    <string name="similar_titles_source_same_source">အတူတူသောရင်းမြစ်သာ</string>
+    <string name="similar_titles_source_same_source_subtitle">ယနေ့ရင်းမြစ်မှှ ဆင်တူချိန်ညှိမှုများသာ�ြရန်</string>
+    <string name="similar_titles_source_other_sources"> အခြားရင်းမြစ်များသာ</string>
+    <string name="similar_titles_source_other_sources_subtitle"> အခြားရင်းမြစ်များမှှ ဆင်တူချိန်ညှိမှုများသာ�ြရန်</string>
+    <string name="similar_titles_source_all_sources">အားလုံးရင်းမြစ်များ</string>
+    <string name="similar_titles_source_all_sources_subtitle"> ရရှိနိုင်သောအားလုံးရင်းမြစ်များမှှ ဆင်တူချိန်ညှိမှုများပြရန်</string>
+    <string name="similar_titles_match_mode">ဆင်တူချိန်ညှိမှုများနှင့် ကိုက်ညီမှုမိုဒ်</string>
+    <string name="similar_titles_match_mode_subtitle">ဆင်တူချိန်ညှိမှုများကိုဘယ်လောက်ကိုက်ညီစွာနှိုင်းချက်ကြည့်ပါ</string>
+    <string name="similar_titles_mode_by_name"> အမည်အလိုက်ဆင်တူ</string>
+    <string name="similar_titles_mode_by_name_subtitle">ချိန်ညှိမှုအမည်/အမည်ဆင်တူစာအုပ်စာတမ်းများရှာပါ</string>
+    <string name="similar_titles_mode_by_genre">ဇာဏ်အလိုက်ဆင်တူ</string>
+    <string name="similar_titles_mode_by_genre_subtitle">ကိုက်ညီသောဇာဏ်/ကဏ္ဍများရှိသောစာအုပ်စာတမ်းများရှာပါ</string>
+    <string name="similar_titles_mode_by_category">ကဏ္ဍအလိုက်ဆင်တူ</string>
+    <string name="similar_titles_mode_by_category_subtitle"> တူညီသောကဏ္ဍထဲမှာစာအုပ်စာတမ်းများရှာပါ</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="_1">✍️</string>
     <string name="_2">••••••••</string>
     <string name="a_daily_dose_of_inspiration">Codzienna dawka inspiracji</string>
@@ -48,6 +48,7 @@
     <string name="added_source_rule">Dodano zasadę źródła: %1$s</string>
     <string name="added_to_category">Dodano do %s</string>
     <string name="added_to_library">Dodano do biblioteki</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dodatkowe szczegóły:</string>
     <string name="additional_details_optional">Dodatkowe szczegóły (opcjonalnie)</string>
     <string name="additional_information">Dodatkowe Informacje</string>
@@ -2095,6 +2096,8 @@ Zalecane: 1024x1024 lub wyższe</string>
     <string name="results">wyników</string>
     <string name="results_found">znalezionych wyników</string>
     <string name="resume">Wznów</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Wznów wszystkie</string>
     <string name="resume_download">Wznów pobieranie</string>
     <string name="resume_downloads">Wznów pobieranie</string>
@@ -2897,4 +2900,97 @@ Zalecane: 1024x1024 lub wyższe</string>
     <string name="youve_reached_the_end">Dotarłeś do końca!</string>
     <string name="zoom_in">Powiększ</string>
     <string name="zoom_out">Zmniejsz</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
+    <string name="cover_theme_advanced_controls">Advanced Controls</string>
+    <string name="cover_theme_saturation">Saturation</string>
+    <string name="cover_theme_intensity">Intensity</string>
+    <string name="cover_theme_text_color">Text Color Mode</string>
+    <string name="cover_theme_text_color_auto">Auto</string>
+    <string name="cover_theme_text_color_light">Light</string>
+    <string name="cover_theme_text_color_dark">Dark</string>
+    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
+    <string name="cover_theme_preset">Szybkie ustawienie wstępne</string>
+    <string name="cover_theme_preset_subtitle">Zastosuj predefiniowane ustawienia intensywności motywu okładki</string>
+    <string name="cover_theme_backdrop_blur">Okładka Rozmycie Tła</string>
+    <string name="cover_theme_backdrop_blur_subtitle">Dostosuj intensywność rozmycia rozszerzonego obrazu okładki nagłówka</string>
+    <string name="cover_theme_background_tint_opacity">Nieprzezroczystość odcienia tła</string>
+    <string name="cover_theme_background_tint_opacity_subtitle">Kontroluj stopień wtapiania się koloru okładki w tło karty</string>
+    <string name="cover_theme_preset_off">Wyłączony</string>
+    <string name="cover_theme_preset_soft">Miękki</string>
+    <string name="cover_theme_preset_medium">Średni</string>
+    <string name="cover_theme_preset_high">Wysoki</string>
+
+    <string name="recommendations_empty">Brak dostępnych rekomendacji</string>
+    <string name="recommendations_error">Nie udało się załadować rekomendacji</string>
+    <string name="recommendations_section_title">Zalecenia</string>
+    <string name="recommendations_section_title_suggestions">Sugestie</string>
+
+    <!-- Recommendations Settings -->
+    <string name="recommendations_settings">Ustawienia rekomendacji</string>
+    <string name="recommendations_settings_subtitle">Konfiguruj sposób wyświetlania rekomendacji książek</string>
+    <string name="recommendation_source_similar_by_title">Podobne po tytule</string>
+    <string name="recommendation_source_similar_by_title_subtitle">Szukaj w źródle książek o podobnych nazwach</string>
+    <string name="recommendation_source_native_only">Tylko natywne źródło</string>
+    <string name="recommendation_source_native_only_subtitle">Używaj rekomendacji dostarczanych bezpośrednio przez źródło</string>
+    <string name="recommendation_source_genre_fallback">Dopasowanie gatunku</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Powrót do dopasowania gatunku, gdy brakuje rekomendacji natywnych</string>
+    <string name="recommendation_search_keywords">Słowa kluczowe</string>
+    <string name="recommendation_search_keywords_subtitle">Słowa wyekstrahowane z tytułu aktualnej książki do znalezienia podobnych</string>
+    <string name="recommendations_disabled">Rekomendacje wyłączone</string>
+    <string name="recommendations_no_similar_books">Nie znaleziono podobnych książek dla tego tytułu</string>
+
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Podobne Tytuły</string>
+    <string name="show_similar_titles">Pokaż Podobne Tytuły</string>
+    <string name="similar_titles_source">Źródło Podobnych Tytułów</string>
+    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
+    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
+    <string name="max_similar_titles_count">Maksymalna Liczba Podobnych Tytułów</string>
+    <string name="similar_titles_settings">Ustawienia Podobnych Tytułów</string>
+    <string name="similar_titles_source_subtitle">Wybierz źródła do użycia dla podobnych tytułów</string>
+    <string name="max_similar_titles_count_subtitle">Maksymalna liczba podobnych tytułów do wyświetlenia</string>
+    <string name="show_similar_titles_subtitle">Pokaż książki o podobnych nazwach poniżej szczegółów powieści</string>
+    <string name="similar_titles_source_same_source">Tylko To Samo Źródło</string>
+    <string name="similar_titles_source_same_source_subtitle">Pokaż podobne tytuły tylko z bieżącego źródła</string>
+    <string name="similar_titles_source_other_sources">Tylko Inne Źródła</string>
+    <string name="similar_titles_source_other_sources_subtitle">Pokaż podobne tytuły tylko z innych źródeł</string>
+    <string name="similar_titles_source_all_sources">Wszystkie Źródła</string>
+    <string name="similar_titles_source_all_sources_subtitle">Pokaż podobne tytuły ze wszystkich dostępnych źródeł</string>
+    <string name="similar_titles_match_mode">Tryb Dopasowania Podobnych Tytułów</string>
+    <string name="similar_titles_match_mode_subtitle">Wybierz, jak porównywane są podobne tytuły</string>
+    <string name="similar_titles_mode_by_name">Podobne po Nazwie</string>
+    <string name="similar_titles_mode_by_name_subtitle">Znajdź książki o podobnych tytułach/nazwach</string>
+    <string name="similar_titles_mode_by_genre">Podobne po Gatunku</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Znajdź książki o pasujących gatunkach/kategoriach</string>
+    <string name="similar_titles_mode_by_category">Podobne po Kategorii</string>
+    <string name="similar_titles_mode_by_category_subtitle">Znajdź książki w tej samej kategorii</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string>
 </resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

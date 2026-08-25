@@ -1,4 +1,4 @@
-package ireader.domain.usecases.remote
+﻿package ireader.domain.usecases.remote
 
 data class RemoteUseCases(
     val getBookDetail: GetBookDetail,
@@ -7,4 +7,6 @@ data class RemoteUseCases(
     val getRemoteBooks: GetRemoteBooksUseCase,
     val globalSearch: GlobalSearchUseCase,
     val fetchAndSaveChapterContent: FetchAndSaveChapterContentUseCase,
+    val getSourceRecommendations: GetSourceRecommendations,
+    val getSimilarBooksByTitle: GetSimilarBooksByTitleUseCase,
 )
