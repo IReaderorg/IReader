@@ -3003,7 +3003,7 @@
     <string name="recommendations_error">Failed to load recommendations</string>
 
     <!-- Similar Titles -->
-    <string name="similar_titles_section_title">Similar Titles (Experimental)</string>
+    <string name="similar_titles_section_title">Similar Titles</string>
     <string name="similar_titles_section_title_suggestions">Suggestions</string>
     <string name="view_similar_titles">View Similar Titles</string>
     <string name="show_similar_titles">Show Similar Titles (Experimental)</string>
