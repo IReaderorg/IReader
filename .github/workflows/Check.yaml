@@ -227,6 +227,7 @@ jobs:
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}
         uses: gradle/gradle-build-action@v2
         env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx5120m -XX:+UseG1GC -XX:MaxMetaspaceSize=768m"
           # 7-Project Supabase Configuration
           SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
           SUPABASE_AUTH_KEY: ${{ secrets.SUPABASE_AUTH_KEY }}

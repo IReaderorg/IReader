@@ -896,9 +896,11 @@
 ##---------------Begin: Startup Performance Optimizations  ----------
 # Aggressive optimizations for faster startup
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
--optimizationpasses 5
 -allowaccessmodification
 -dontpreverify
+
+# BlockHound / Reactor (service loader warning in R8)
+-dontwarn reactor.blockhound.**
 
 # Remove logging in release builds for faster startup
 -assumenosideeffects class android.util.Log {

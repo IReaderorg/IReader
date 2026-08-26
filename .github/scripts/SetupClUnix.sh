@@ -5,5 +5,7 @@ if [ "$(basename "$(pwd)")" = "scripts" ]; then
 fi
 
 echo "Writing ci gradle.properties"
-[ ! -d "/path/to/dir" ] && mkdir ".gradle"
-cp ".github/runner-files/ci-gradle.properties" ".gradle/gradle.properties"
+mkdir -p "$HOME/.gradle"
+cp ".github/runner-files/ci-gradle.properties" "$HOME/.gradle/gradle.properties"
+# Also append/override to project gradle.properties
+cat ".github/runner-files/ci-gradle.properties" >> "gradle.properties"

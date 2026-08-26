@@ -68,11 +68,15 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build and verify F-Droid APK
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx5120m -XX:+UseG1GC -XX:MaxMetaspaceSize=768m"
         run: fastlane android fdroid_verify
         working-directory: fastlane
 
       - name: Build Release APK
         if: ${{ github.event.inputs.build-release == 'true' }}
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx5120m -XX:+UseG1GC -XX:MaxMetaspaceSize=768m"
         run: fastlane android fdroid
         working-directory: fastlane
 
