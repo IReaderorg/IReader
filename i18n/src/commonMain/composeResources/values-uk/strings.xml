@@ -48,6 +48,7 @@
     <string name="added_source_rule">Додано правило джерела: %1$s</string>
     <string name="added_to_category">Додано до %s</string>
     <string name="added_to_library">Додано до бібліотеки</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Додаткові відомості:</string>
     <string name="additional_details_optional">Додаткові деталі (необов'язково)</string>
     <string name="additional_information">Додаткова інформація</string>
@@ -2097,6 +2098,8 @@
     <string name="results">результати</string>
     <string name="results_found">результатів знайдено</string>
     <string name="resume">Відновити</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Відновити все</string>
     <string name="resume_download">Відновити завантаження</string>
     <string name="resume_downloads">Відновити завантаження</string>
@@ -2913,4 +2916,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Рекомендації відсутні</string>
+    <string name="recommendations_error">Не вдалося завантажити рекомендації</string>
+    <string name="recommendations_section_title">Рекомендації</string>
+    <string name="recommendations_section_title_suggestions">Пропозиції</string>
+    <string name="recommendation_source_native_only">Лише власне джерело</string>
+    <string name="recommendation_source_native_only_subtitle">Використовувати рекомендації, надані безпосередньо джерелом</string>
+    <string name="recommendation_source_genre_fallback">Збіг за жанром</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Повернення до збігу за жанром при відсутності власних рекомендацій</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Схожі Назви</string>
+    <string name="show_similar_titles">Показувати Схожі Назви</string>
+    <string name="similar_titles_source">Джерело Схожих Назв</string>
+    <string name="max_similar_titles_count">Максимальна Кількість Схожих Назв</string>
+    <string name="similar_titles_settings">Налаштування Схожих Назв</string>
+    <string name="similar_titles_source_subtitle">Виберіть джерела для схожих назв</string>
+    <string name="max_similar_titles_count_subtitle">Максимальна кількість схожих назв для відображення</string>
+    <string name="show_similar_titles_subtitle">Показувати книги зі схожими назвами під деталями роману</string>
+    <string name="similar_titles_source_same_source">Тільки Те Саме Джерело</string>
+    <string name="similar_titles_source_same_source_subtitle">Показувати схожі назви тільки з поточного джерела</string>
+    <string name="similar_titles_source_other_sources">Тільки Інші Джерела</string>
+    <string name="similar_titles_source_other_sources_subtitle">Показувати схожі назви тільки з інших джерел</string>
+    <string name="similar_titles_source_all_sources">Усі Джерела</string>
+    <string name="similar_titles_source_all_sources_subtitle">Показувати схожі назви з усіх доступних джерел</string>
+    <string name="similar_titles_match_mode">Режим Відповідності Схожих Назв</string>
+    <string name="similar_titles_match_mode_subtitle">Виберіть, як порівнюються схожі назви</string>
+    <string name="similar_titles_mode_by_name">Схоже за Назвою</string>
+    <string name="similar_titles_mode_by_name_subtitle">Знайти книги зі схожими назвами/іменами</string>
+    <string name="similar_titles_mode_by_genre">Схоже за Жанром</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Знайти книги з відповідними жанрами/категоріями</string>
+    <string name="similar_titles_mode_by_category">Схоже за Категорією</string>
+    <string name="similar_titles_mode_by_category_subtitle">Знайти книги в тій самій категорії</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

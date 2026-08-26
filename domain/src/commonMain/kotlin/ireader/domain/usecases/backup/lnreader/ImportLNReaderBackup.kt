@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.backup.lnreader
+package ireader.domain.usecases.backup.lnreader
 
 import com.fleeksoft.io.exception.OutOfMemoryError
 import ireader.core.log.Log

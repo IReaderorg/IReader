@@ -36,6 +36,7 @@ import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.BookCover
+import ireader.domain.models.entities.Recommendation
 import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.domain.preferences.prefs.UiPreferences
@@ -53,6 +54,7 @@ import ireader.presentation.ui.book.components.ModernActionButtons
 import ireader.presentation.ui.book.components.ModernBookBackdrop
 import ireader.presentation.ui.book.components.ModernBookHeader
 import ireader.presentation.ui.book.components.ModernBookSummary
+import ireader.presentation.ui.book.components.RecommendationsSection
 import ireader.presentation.ui.book.components.NovelInfoFab
 import ireader.presentation.ui.book.components.TranslationWarningDialog
 import ireader.presentation.ui.book.components.ChapterRangeDownloadDialog
@@ -120,6 +122,10 @@ fun BookDetailScreen(
     onCharacterArtDetail: (String) -> Unit = {},
     onTracking: (() -> Unit)? = null,
     isTracked: Boolean = false,
+    recommendations: List<ireader.domain.models.entities.Recommendation> = emptyList(),
+    isLoadingRecommendations: Boolean = false,
+    onRecommendationClick: (ireader.domain.models.entities.Recommendation) -> Unit = {},
+    onViewMore: () -> Unit = {},
     uiPreferences: UiPreferences = koinInject(),
 ) {
     val focusManager = LocalFocusManager.current
@@ -302,7 +308,11 @@ fun BookDetailScreen(
                     onCharacterArtGallery = onCharacterArtGallery,
                     onCharacterArtDetail = onCharacterArtDetail,
                     onTracking = onTracking,
-                    isTracked = isTracked
+                    isTracked = isTracked,
+                    recommendations = recommendations,
+                    isLoadingRecommendations = isLoadingRecommendations,
+                    onRecommendationClick = onRecommendationClick,
+                    onViewMore = onViewMore
                 )
             },
             endContent = {
@@ -414,6 +424,18 @@ fun BookDetailScreen(
                             onViewAllClick = onCharacterArtGallery,
                             onArtClick = { art -> onCharacterArtDetail(art.id) }
                         )
+                    }
+                    // Recommendations Section
+                    if (recommendations.isNotEmpty() || isLoadingRecommendations) {
+                        item(key = "recommendations") {
+                            RecommendationsSection(
+                                recommendations = recommendations,
+                                isLoading = isLoadingRecommendations,
+                                onRecommendationClick = onRecommendationClick,
+                                onViewMore = onViewMore,
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                            )
+                        }
                     }
                     item(key = "chapter_bar") {
                         ChapterBar(
@@ -568,6 +590,10 @@ private fun BookInfoPanel(
     onCharacterArtDetail: (String) -> Unit,
     onTracking: (() -> Unit)? = null,
     isTracked: Boolean = false,
+    recommendations: List<ireader.domain.models.entities.Recommendation> = emptyList(),
+    isLoadingRecommendations: Boolean = false,
+    onRecommendationClick: (ireader.domain.models.entities.Recommendation) -> Unit = {},
+    onViewMore: () -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Backdrop behind everything
@@ -639,6 +665,19 @@ private fun BookInfoPanel(
                     onViewAllClick = onCharacterArtGallery,
                     onArtClick = { art -> onCharacterArtDetail(art.id) }
                 )
+            }
+            
+            // Recommendations Section
+            if (recommendations.isNotEmpty() || isLoadingRecommendations) {
+                item {
+                    RecommendationsSection(
+                        recommendations = recommendations,
+                        isLoading = isLoadingRecommendations,
+                        onRecommendationClick = onRecommendationClick,
+                        onViewMore = onViewMore,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                    )
+                }
             }
         }
     }

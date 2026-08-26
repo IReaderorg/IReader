@@ -48,6 +48,7 @@
     <string name="added_source_rule">Aggiunta regola fonte: %1$s</string>
     <string name="added_to_category">Aggiunto a %s</string>
     <string name="added_to_library">Aggiunto alla Libreria</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dettagli aggiuntivi:</string>
     <string name="additional_details_optional">Dettagli aggiuntivi (opzionale)</string>
     <string name="additional_information">Informazioni Aggiuntive</string>
@@ -2101,6 +2102,8 @@
     <string name="results">risultati</string>
     <string name="results_found">risultati trovati</string>
     <string name="resume">Riprendi</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Riprendi tutto</string>
     <string name="resume_download">Riprendi Download</string>
     <string name="resume_downloads">Riprendi Download</string>
@@ -2917,4 +2920,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Nessun consiglio disponibile</string>
+    <string name="recommendations_error">Impossibile caricare i consigli</string>
+    <string name="recommendations_section_title">Raccomandazioni</string>
+    <string name="recommendations_section_title_suggestions">Suggerimenti</string>
+    <string name="recommendation_source_native_only">Solo fonte nativa</string>
+    <string name="recommendation_source_native_only_subtitle">Usa i consigli forniti direttamente dalla fonte</string>
+    <string name="recommendation_source_genre_fallback">Corrispondenza per genere</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Torna alla corrispondenza per genere quando non ci sono consigli nativi</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Titoli Simili</string>
+    <string name="show_similar_titles">Mostra Titoli Simili</string>
+    <string name="similar_titles_source">Fonte dei Titoli Simili</string>
+    <string name="max_similar_titles_count">Numero Massimo di Titoli Simili</string>
+    <string name="similar_titles_settings">Impostazioni dei Titoli Simili</string>
+    <string name="similar_titles_source_subtitle">Scegli quali fonti usare per i titoli simili</string>
+    <string name="max_similar_titles_count_subtitle">Numero massimo di titoli simili da visualizzare</string>
+    <string name="show_similar_titles_subtitle">Mostra libri con nomi simili sotto i dettagli del romanzo</string>
+    <string name="similar_titles_source_same_source">Solo Stessa Fonte</string>
+    <string name="similar_titles_source_same_source_subtitle">Mostra titoli simili solo dalla fonte attuale</string>
+    <string name="similar_titles_source_other_sources">Solo Altre Fonti</string>
+    <string name="similar_titles_source_other_sources_subtitle">Mostra titoli simili solo da altre fonti</string>
+    <string name="similar_titles_source_all_sources">Tutte le Fonti</string>
+    <string name="similar_titles_source_all_sources_subtitle">Mostra titoli simili da tutte le fonti disponibili</string>
+    <string name="similar_titles_match_mode">Modalità di Corrispondenza dei Titoli Simili</string>
+    <string name="similar_titles_match_mode_subtitle">Scegli come vengono confrontati i titoli simili</string>
+    <string name="similar_titles_mode_by_name">Simile per Nome</string>
+    <string name="similar_titles_mode_by_name_subtitle">Trova libri con titoli/nomi simili</string>
+    <string name="similar_titles_mode_by_genre">Simile per Genere</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Trova libri con generi/categorie corrispondenti</string>
+    <string name="similar_titles_mode_by_category">Simile per Categoria</string>
+    <string name="similar_titles_mode_by_category_subtitle">Trova libri nella stessa categoria</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

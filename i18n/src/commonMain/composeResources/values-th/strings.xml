@@ -48,6 +48,7 @@
     <string name="added_source_rule">เพิ่มกฎแหล่งที่มา: %1$s</string>
     <string name="added_to_category">เพิ่มไปยัง %s</string>
     <string name="added_to_library">เพิ่มลงในคลังหนังสือแล้ว</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">รายละเอียดเพิ่มเติม:</string>
     <string name="additional_details_optional">รายละเอียดเพิ่มเติม (ไม่บังคับ)</string>
     <string name="additional_information">ข้อมูลเพิ่มเติม</string>
@@ -2088,6 +2089,8 @@
     <string name="results">ผลลัพธ์</string>
     <string name="results_found">พบผลลัพธ์</string>
     <string name="resume">ดำเนินการต่อ</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">ดำเนินการต่อทั้งหมด</string>
     <string name="resume_download">ดำเนินการดาวน์โหลดต่อ</string>
     <string name="resume_downloads">ดำเนินการดาวน์โหลดต่อ</string>
@@ -2901,4 +2904,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">ไม่มีข้อเสนอแนะ</string>
+    <string name="recommendations_error">โหลดคำแนะนำไม่สำเร็จ</string>
+    <string name="recommendations_section_title">คำแนะนำ</string>
+    <string name="recommendations_section_title_suggestions">ข้อเสนอแนะ</string>
+    <string name="recommendation_source_native_only">แหล่งที่มาพื้นฐานเท่านั้น</string>
+    <string name="recommendation_source_native_only_subtitle">ใช้คำแนะนำที่ให้โดยแหล่งที่มาโดยตรง</string>
+    <string name="recommendation_source_genre_fallback">การจับคู่ประเภท</string>
+    <string name="recommendation_source_genre_fallback_subtitle">กลับไปเป็นการจับคู่ประเภทเมื่อไม่มีคำแนะนำพื้นฐาน</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">ชื่อที่คล้ายกัน</string>
+    <string name="show_similar_titles">แสดงชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_source">แหล่งชื่อที่คล้ายกัน</string>
+    <string name="max_similar_titles_count">จำนวนชื่อที่คล้ายกันสูงสุด</string>
+    <string name="similar_titles_settings">การตั้งค่าชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_source_subtitle">เลือกแหล่งที่จะใช้สำหรับชื่อที่คล้ายกัน</string>
+    <string name="max_similar_titles_count_subtitle">จำนวนชื่อที่คล้ายกันสูงสุดที่จะแสดง</string>
+    <string name="show_similar_titles_subtitle">แสดงหนังสือที่มีชื่อคล้ายกันใต้รายละเอียดนวนิยาย</string>
+    <string name="similar_titles_source_same_source">แค่อันเดียวกัน</string>
+    <string name="similar_titles_source_same_source_subtitle">แสดงชื่อที่คล้ายกันเฉพาะจากแหล่งปัจจุบัน</string>
+    <string name="similar_titles_source_other_sources">เฉพาะแหล่งอื่น</string>
+    <string name="similar_titles_source_other_sources_subtitle">แสดงชื่อที่คล้ายกันเฉพาะจากแหล่งอื่น</string>
+    <string name="similar_titles_source_all_sources">แหล่งทั้งหมด</string>
+    <string name="similar_titles_source_all_sources_subtitle">แสดงชื่อที่คล้ายกันจากแหล่งที่มีอยู่ทั้งหมด</string>
+    <string name="similar_titles_match_mode">โหมดการจับคู่ชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_match_mode_subtitle">เลือกวิธีเปรียบเทียบชื่อที่คล้ายกัน</string>
+    <string name="similar_titles_mode_by_name">คล้ายกันตามชื่อ</string>
+    <string name="similar_titles_mode_by_name_subtitle">ค้นหาหนังสือที่มีชื่อ/ชื่อคล้ายกัน</string>
+    <string name="similar_titles_mode_by_genre">คล้ายกันตามประเภท</string>
+    <string name="similar_titles_mode_by_genre_subtitle">ค้นหาหนังสือที่มีประเภท/หมวดหมู่ที่ตรงกัน</string>
+    <string name="similar_titles_mode_by_category">คล้ายกันตามหมวดหมู่</string>
+    <string name="similar_titles_mode_by_category_subtitle">ค้นหาหนังสือในหมวดหมู่เดียวกัน</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

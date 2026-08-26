@@ -1,4 +1,4 @@
-﻿package ireader.core.source
+package ireader.core.source
 
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element

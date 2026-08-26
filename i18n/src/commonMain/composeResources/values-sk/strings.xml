@@ -49,6 +49,7 @@
     <string name="added_source_rule">Pridané pravidlo zdroja: %1$s</string>
     <string name="added_to_category">Pridané do %s</string>
     <string name="added_to_library">Pridané do knižnice</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Ďalšie podrobnosti:</string>
     <string name="additional_details_optional">Ďalšie podrobnosti (voliteľné)</string>
     <string name="additional_information">Ďalšie informácie</string>
@@ -2105,6 +2106,8 @@ nastaveniach.
     <string name="results">výsledky</string>
     <string name="results_found">nájdené výsledky</string>
     <string name="resume">Obnoviť</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Obnoviť všetky</string>
     <string name="resume_download">Pokračovať v sťahovaní</string>
     <string name="resume_downloads">Pokračovať v sťahovaní</string>
@@ -2921,4 +2924,51 @@ kapitoly.
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Nie sú k dispozícii žiadne odporúčania</string>
+    <string name="recommendations_error">Odporúčania sa nepodarilo načítať</string>
+    <string name="recommendations_section_title">Odporúčania</string>
+    <string name="recommendations_section_title_suggestions">Návrhy</string>
+    <string name="recommendation_source_native_only">Iba natívny zdroj</string>
+    <string name="recommendation_source_native_only_subtitle">Používajte odporúčania poskytované priamo zdrojom</string>
+    <string name="recommendation_source_genre_fallback">Zhoda žánru</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Návrat k zhode žánru pri absence natívnych odporúčaní</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Podobné Názvy</string>
+    <string name="show_similar_titles">Zobraziť Podobné Názvy</string>
+    <string name="similar_titles_source">Zdroj Podobných Názvov</string>
+    <string name="max_similar_titles_count">Maximálny Počet Podobných Názvov</string>
+    <string name="similar_titles_settings">Nastavenia Podobných Názvov</string>
+    <string name="similar_titles_source_subtitle">Vyberte zdroje, ktoré sa použijú pre podobné názvy</string>
+    <string name="max_similar_titles_count_subtitle">Maximálny počet podobných názvov na zobrazenie</string>
+    <string name="show_similar_titles_subtitle">Zobraziť knihy s podobnými názvami pod detailami románu</string>
+    <string name="similar_titles_source_same_source">Iba Rovnaký Zdroj</string>
+    <string name="similar_titles_source_same_source_subtitle">Zobraziť podobné názvy iba z aktuálneho zdroja</string>
+    <string name="similar_titles_source_other_sources">Iba Ostatné Zdroje</string>
+    <string name="similar_titles_source_other_sources_subtitle">Zobraziť podobné názvy iba z ostatných zdrojov</string>
+    <string name="similar_titles_source_all_sources">Všetky Zdroje</string>
+    <string name="similar_titles_source_all_sources_subtitle">Zobraziť podobné názvy zo všetkých dostupných zdrojov</string>
+    <string name="similar_titles_match_mode">Režim Zhody Podobných Názvov</string>
+    <string name="similar_titles_match_mode_subtitle">Vyberte, ako sa porovnávajú podobné názvy</string>
+    <string name="similar_titles_mode_by_name">Podobné podľa Názvu</string>
+    <string name="similar_titles_mode_by_name_subtitle">Nájsť knihy s podobnými titulami/menami</string>
+    <string name="similar_titles_mode_by_genre">Podobné podľa Žánru</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Nájsť knihy so zodpovedajúcimi žánrami/kategóriami</string>
+    <string name="similar_titles_mode_by_category">Podobné podľa Kategórie</string>
+    <string name="similar_titles_mode_by_category_subtitle">Nájsť knihy v rovnakej kategórii</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

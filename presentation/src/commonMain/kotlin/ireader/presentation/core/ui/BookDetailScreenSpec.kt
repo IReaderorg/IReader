@@ -39,6 +39,7 @@ import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
 import ireader.core.startup.ScreenProfiler
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.Recommendation
 import ireader.domain.models.entities.isLockedChapter
 import ireader.domain.services.processstate.BookDetailProcessState
 import ireader.domain.services.processstate.ProcessStateManager
@@ -53,6 +54,7 @@ import ireader.i18n.resources.source_not_available
 import ireader.i18n.resources.start
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.core.safePopBackStack
@@ -167,6 +169,9 @@ data class BookDetailScreenSpec constructor(
                     }
                     BookDetailEvent.NavigateBack -> {
                         navController.safePopBackStack()
+                    }
+                    is BookDetailEvent.NavigateToBookDetail -> {
+                        navController.navigate(NavigationRoutes.bookDetail(event.bookId))
                     }
                 }
             }
@@ -565,6 +570,11 @@ data class BookDetailScreenSpec constructor(
                             chaptersState.value = filteredChapters
                         }
                         
+                        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+                        val onRecommendationClick: (ireader.domain.models.entities.Recommendation) -> Unit = { recommendation ->
+                            vm.openRecommendation(recommendation)
+                        }
+                        
                         BookDetailScreen(
                             onSummaryExpand = { vm.toggleSummaryExpansion() },
                             book = state.book,
@@ -625,6 +635,13 @@ data class BookDetailScreenSpec constructor(
                             onCharacterArtDetail = navigationCallbacks.onNavigateToCharacterArtDetail,
                             onTracking = { vm.showTrackingDialog() },
                             isTracked = vm.isTracked,
+                            recommendations = state.sourceRecommendations,
+                            isLoadingRecommendations = state.isLoadingRecommendations,
+                            onRecommendationClick = onRecommendationClick,
+                            onViewMore = {
+                                val route = NavigationRoutes.recommendationsList(bookId)
+                                navController.navigate(route)
+                            },
                         )
                     }
                 }

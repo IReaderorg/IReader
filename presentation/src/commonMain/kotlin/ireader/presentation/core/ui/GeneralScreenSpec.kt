@@ -42,6 +42,9 @@ class GeneralScreenSpec {
                 onJSPluginSettingsClick = {
                     navController.navigate(NavigationRoutes.jsPluginSettings)
                 },
+                onSimilarTitlesSettingsClick = {
+                    navController.navigate(NavigationRoutes.similarTitlesSettings)
+                },
             )
         }
 

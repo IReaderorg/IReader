@@ -48,6 +48,7 @@
     <string name="added_source_rule">Dodano zasadę źródła: %1$s</string>
     <string name="added_to_category">Dodano do %s</string>
     <string name="added_to_library">Dodano do biblioteki</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dodatkowe szczegóły:</string>
     <string name="additional_details_optional">Dodatkowe szczegóły (opcjonalnie)</string>
     <string name="additional_information">Dodatkowe Informacje</string>
@@ -2095,6 +2096,8 @@ Zalecane: 1024x1024 lub wyższe</string>
     <string name="results">wyników</string>
     <string name="results_found">znalezionych wyników</string>
     <string name="resume">Wznów</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Wznów wszystkie</string>
     <string name="resume_download">Wznów pobieranie</string>
     <string name="resume_downloads">Wznów pobieranie</string>
@@ -2910,4 +2913,51 @@ Zalecane: 1024x1024 lub wyższe</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Brak dostępnych rekomendacji</string>
+    <string name="recommendations_error">Nie udało się załadować rekomendacji</string>
+    <string name="recommendations_section_title">Zalecenia</string>
+    <string name="recommendations_section_title_suggestions">Sugestie</string>
+    <string name="recommendation_source_native_only">Tylko natywne źródło</string>
+    <string name="recommendation_source_native_only_subtitle">Używaj rekomendacji dostarczanych bezpośrednio przez źródło</string>
+    <string name="recommendation_source_genre_fallback">Dopasowanie gatunku</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Powrót do dopasowania gatunku, gdy brakuje rekomendacji natywnych</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Podobne Tytuły</string>
+    <string name="show_similar_titles">Pokaż Podobne Tytuły</string>
+    <string name="similar_titles_source">Źródło Podobnych Tytułów</string>
+    <string name="max_similar_titles_count">Maksymalna Liczba Podobnych Tytułów</string>
+    <string name="similar_titles_settings">Ustawienia Podobnych Tytułów</string>
+    <string name="similar_titles_source_subtitle">Wybierz źródła do użycia dla podobnych tytułów</string>
+    <string name="max_similar_titles_count_subtitle">Maksymalna liczba podobnych tytułów do wyświetlenia</string>
+    <string name="show_similar_titles_subtitle">Pokaż książki o podobnych nazwach poniżej szczegółów powieści</string>
+    <string name="similar_titles_source_same_source">Tylko To Samo Źródło</string>
+    <string name="similar_titles_source_same_source_subtitle">Pokaż podobne tytuły tylko z bieżącego źródła</string>
+    <string name="similar_titles_source_other_sources">Tylko Inne Źródła</string>
+    <string name="similar_titles_source_other_sources_subtitle">Pokaż podobne tytuły tylko z innych źródeł</string>
+    <string name="similar_titles_source_all_sources">Wszystkie Źródła</string>
+    <string name="similar_titles_source_all_sources_subtitle">Pokaż podobne tytuły ze wszystkich dostępnych źródeł</string>
+    <string name="similar_titles_match_mode">Tryb Dopasowania Podobnych Tytułów</string>
+    <string name="similar_titles_match_mode_subtitle">Wybierz, jak porównywane są podobne tytuły</string>
+    <string name="similar_titles_mode_by_name">Podobne po Nazwie</string>
+    <string name="similar_titles_mode_by_name_subtitle">Znajdź książki o podobnych tytułach/nazwach</string>
+    <string name="similar_titles_mode_by_genre">Podobne po Gatunku</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Znajdź książki o pasujących gatunkach/kategoriach</string>
+    <string name="similar_titles_mode_by_category">Podobne po Kategorii</string>
+    <string name="similar_titles_mode_by_category_subtitle">Znajdź książki w tej samej kategorii</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

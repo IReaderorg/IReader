@@ -1,4 +1,4 @@
-﻿package ireader.data.plugin
+package ireader.data.plugin
 
 import ireader.domain.data.repository.PluginRepository
 import ireader.domain.plugins.PluginDatabase

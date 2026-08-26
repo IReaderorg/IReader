@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.reader
+package ireader.domain.models.reader
 
 import ireader.domain.utils.extensions.currentTimeToLong
 

@@ -49,6 +49,7 @@
     <string name="added_source_rule">Aturan sumber ditambahkan: %1$s</string>
     <string name="added_to_category">Ditambahkan ke %s</string>
     <string name="added_to_library">Ditambahkan ke Pustaka</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Detail Tambahan:</string>
     <string name="additional_details_optional">Detail tambahan (opsional)</string>
     <string name="additional_information">Informasi Tambahan</string>
@@ -2102,6 +2103,8 @@
     <string name="results">hasil</string>
     <string name="results_found">hasil ditemukan</string>
     <string name="resume">Lanjutkan</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Lanjutkan Semua</string>
     <string name="resume_download">Lanjutkan Unduhan</string>
     <string name="resume_downloads">Lanjutkan Unduhan</string>
@@ -2918,4 +2921,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Tidak ada rekomendasi yang tersedia</string>
+    <string name="recommendations_error">Gagal memuat rekomendasi</string>
+    <string name="recommendations_section_title">Rekomendasi</string>
+    <string name="recommendations_section_title_suggestions">Saran</string>
+    <string name="recommendation_source_native_only">Hanya Sumber Asli</string>
+    <string name="recommendation_source_native_only_subtitle">Gunakan rekomendasi yang diberikan langsung oleh sumber</string>
+    <string name="recommendation_source_genre_fallback">Pencocokan Genre</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Kembali ke pencocokan genre ketika tidak ada rekomendasi asli</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Judul yang Mirip</string>
+    <string name="show_similar_titles">Tampilkan Judul yang Mirip</string>
+    <string name="similar_titles_source">Sumber Judul yang Mirip</string>
+    <string name="max_similar_titles_count">Jumlah Maksimum Judul yang Mirip</string>
+    <string name="similar_titles_settings">Pengaturan Judul yang Mirip</string>
+    <string name="similar_titles_source_subtitle">Pilih sumber mana yang akan digunakan untuk judul yang mirip</string>
+    <string name="max_similar_titles_count_subtitle">Jumlah maksimum judul yang mirip untuk ditampilkan</string>
+    <string name="show_similar_titles_subtitle">Tampilkan buku dengan nama yang mirip di bawah detail novel</string>
+    <string name="similar_titles_source_same_source">Hanya Sumber yang Sama</string>
+    <string name="similar_titles_source_same_source_subtitle">Tampilkan judul yang mirip hanya dari sumber saat ini</string>
+    <string name="similar_titles_source_other_sources">Hanya Sumber Lain</string>
+    <string name="similar_titles_source_other_sources_subtitle">Tampilkan judul yang mirip hanya dari sumber lain</string>
+    <string name="similar_titles_source_all_sources">Semua Sumber</string>
+    <string name="similar_titles_source_all_sources_subtitle">Tampilkan judul yang mirip dari semua sumber yang tersedia</string>
+    <string name="similar_titles_match_mode">Mode Kecocokan Judul yang Mirip</string>
+    <string name="similar_titles_match_mode_subtitle">Pilih bagaimana judul yang mirip dibandingkan</string>
+    <string name="similar_titles_mode_by_name">Mirip berdasarkan Nama</string>
+    <string name="similar_titles_mode_by_name_subtitle">Cari buku dengan judul/nama yang mirip</string>
+    <string name="similar_titles_mode_by_genre">Mirip berdasarkan Genre</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Cari buku dengan genre/kategori yang cocok</string>
+    <string name="similar_titles_mode_by_category">Mirip berdasarkan Kategori</string>
+    <string name="similar_titles_mode_by_category_subtitle">Cari buku dalam kategori yang sama</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

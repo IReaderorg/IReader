@@ -437,8 +437,8 @@ fun CommonNavHost(
         // Routes with parameters
         composable(
             route = "bookDetail/{bookId}",
-            arguments = listOf(navArgument("bookId") { 
-                type = NavType.StringType 
+            arguments = listOf(navArgument("bookId") {
+                type = NavType.StringType
             })
         ) { backStackEntry ->
             // Use arguments from NavBackStackEntry directly - more reliable than savedStateHandle
@@ -449,7 +449,27 @@ fun CommonNavHost(
                 BookDetailScreenSpec(bookId).Content()
             }
         }
-        
+
+        // Similar-titles settings entry (linked from Settings screen)
+        composable(NavigationRoutes.similarTitlesSettings) {
+            ireader.presentation.core.ui.SimilarTitlesScreenSpec().Content()
+        }
+
+        composable(
+            route = "recommendationsList/{bookId}",
+            arguments = listOf(navArgument("bookId") {
+                type = NavType.StringType
+            })
+        ) { backStackEntry ->
+            val bookId = remember(backStackEntry) {
+                backStackEntry.getStringArg("bookId")?.toLongOrNull()
+            }
+            if (bookId != null) {
+                ireader.presentation.core.ui.RecommendationsListScreenSpec(bookId).Content()
+            }
+        }
+
+
         composable(
             route = "reader/{bookId}/{chapterId}",
             arguments = listOf(

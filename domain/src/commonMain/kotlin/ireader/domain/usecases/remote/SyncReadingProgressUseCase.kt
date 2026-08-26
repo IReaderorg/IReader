@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.remote
+package ireader.domain.usecases.remote
 
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.RemoteRepository

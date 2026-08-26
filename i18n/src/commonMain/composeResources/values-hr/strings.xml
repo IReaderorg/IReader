@@ -49,6 +49,7 @@
     <string name="added_source_rule">Dodano pravilo izvora: %1$s</string>
     <string name="added_to_category">Dodano u %s</string>
     <string name="added_to_library">Dodano u biblioteku</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Dodatni detalji:</string>
     <string name="additional_details_optional">Dodatni detalji (izborno)</string>
     <string name="additional_information">Dodatne informacije</string>
@@ -2093,6 +2094,8 @@
     <string name="results">rezultati</string>
     <string name="results_found">rezultata pronađeno</string>
     <string name="resume">Nastavi</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Nastavi sve</string>
     <string name="resume_download">Nastavi preuzimanje</string>
     <string name="resume_downloads">Nastavi preuzimanja</string>
@@ -2909,4 +2912,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Nema dostupnih preporuka</string>
+    <string name="recommendations_error">Učitavanje preporuka nije uspjelo</string>
+    <string name="recommendations_section_title">Preporuke</string>
+    <string name="recommendations_section_title_suggestions">Prijedlozi</string>
+    <string name="recommendation_source_native_only">Samo izvorni izvor</string>
+    <string name="recommendation_source_native_only_subtitle">Koristite preporuke koje izravno pruža izvor</string>
+    <string name="recommendation_source_genre_fallback">Podudaranje žanra</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Vratite se na podudaranje žanra kada nema izvornih preporuka</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Slični Naslovi</string>
+    <string name="show_similar_titles">Prikaži Slične Naslove</string>
+    <string name="similar_titles_source">Izvor Sličnih Naslova</string>
+    <string name="max_similar_titles_count">Maksimalni Broj Sličnih Naslova</string>
+    <string name="similar_titles_settings">Postavke Sličnih Naslova</string>
+    <string name="similar_titles_source_subtitle">Odaberite koje izvore koristiti za slične naslove</string>
+    <string name="max_similar_titles_count_subtitle">Maksimalni broj sličnih naslova za prikaz</string>
+    <string name="show_similar_titles_subtitle">Prikaži knjige s sličnim imenima ispod detalja romana</string>
+    <string name="similar_titles_source_same_source">Samo Isti Izvor</string>
+    <string name="similar_titles_source_same_source_subtitle">Prikaži slične naslove samo iz trenutnog izvora</string>
+    <string name="similar_titles_source_other_sources">Samo Drugi Izvori</string>
+    <string name="similar_titles_source_other_sources_subtitle">Prikaži slične naslove samo iz drugih izvora</string>
+    <string name="similar_titles_source_all_sources">Svi Izvori</string>
+    <string name="similar_titles_source_all_sources_subtitle">Prikaži slične naslove iz svih dostupnih izvora</string>
+    <string name="similar_titles_match_mode">Način Podudaranja Sličnih Naslova</string>
+    <string name="similar_titles_match_mode_subtitle">Odaberite kako se slični naslovi uspoređuju</string>
+    <string name="similar_titles_mode_by_name">Slično po Nazivu</string>
+    <string name="similar_titles_mode_by_name_subtitle">Pronađi knjige s sličnim naslovima/imena</string>
+    <string name="similar_titles_mode_by_genre">Slično po Žanru</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Pronađi knjige s odgovarajućim žanrovima/kategorijama</string>
+    <string name="similar_titles_mode_by_category">Slično po Kategoriji</string>
+    <string name="similar_titles_mode_by_category_subtitle">Pronađi knjige u istoj kategoriji</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

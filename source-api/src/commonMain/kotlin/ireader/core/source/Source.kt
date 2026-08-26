@@ -5,6 +5,7 @@ import ireader.core.source.model.ChaptersPageInfo
 import ireader.core.source.model.Command
 import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.Page
+import ireader.core.source.model.RecommendationInfo
 
 /**
  * A basic interface for creating a source. It could be an online source, a local source, etc...
@@ -90,5 +91,14 @@ interface Source {
     
     fun matchesId(sourceId: Long): Boolean {
         return this.id == sourceId
+    }
+
+    /**
+     * Returns a list of recommended novels/manga from the same source.
+     * Default implementation returns empty list. Sources should override this
+     * to provide native recommendations or fallback to catalog matching.
+     */
+    suspend fun getRecommendations(manga: MangaInfo, commands: List<Command<*>>): List<RecommendationInfo> {
+        return emptyList()
     }
 }

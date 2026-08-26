@@ -47,6 +47,7 @@
     <string name="added_source_rule">Manba qoidasi qo'shildi: %1$s</string>
     <string name="added_to_category">%s ga qoʻshildi</string>
     <string name="added_to_library">Kutubxonaga qo'shildi</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Qo'shimcha ma'lumotlar:</string>
     <string name="additional_details_optional">Qo'shimcha ma'lumotlar (ixtiyoriy)</string>
     <string name="additional_information">Qoʻshimcha maʼlumot</string>
@@ -1877,6 +1878,8 @@ Tavsiya etiladi: 1024x1024 yoki yuqori</string>
     <string name="results">natijalar</string>
     <string name="results_found">natijalar topildi</string>
     <string name="resume">Davom ettirish</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Hammasini davom ettirish</string>
     <string name="resume_download">Yuklab olishni davom ettirish</string>
     <string name="resume_downloads">Yuklab olishlarni davom ettirish</string>
@@ -2491,4 +2494,51 @@ Keling, boshlash uchun bir nechta narsalarni sozlaymiz.</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Tavsiyalar mavjud emas</string>
+    <string name="recommendations_error">Tavsiyalarni yuklab bo‘lmadi</string>
+    <string name="recommendations_section_title">Tavsiyalar</string>
+    <string name="recommendations_section_title_suggestions">Takliflar</string>
+    <string name="recommendation_source_native_only">Faqat asl manba</string>
+    <string name="recommendation_source_native_only_subtitle">Manba tomonidan to‘g‘ridan-to‘g‘ri taqdim etilgan tavsiyalardan foydalaning</string>
+    <string name="recommendation_source_genre_fallback">Janr mosligi</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Asl tavsiyalar bo‘lmaganda janr mosligiga qaytish</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">O'xshash Sarlavhalar</string>
+    <string name="show_similar_titles">O'xshash Sarlavhalarni Ko'rsatish</string>
+    <string name="similar_titles_source">O'xshash Sarlavhalar Manbasi</string>
+    <string name="max_similar_titles_count">O'xshash Sarlavhalar Maksimum Soni</string>
+    <string name="similar_titles_settings">O'xshash Sarlavhalar Sozlamalari</string>
+    <string name="similar_titles_source_subtitle">O'xshash sarlavhalar uchun ishlatiladigan manbalarni tanlang</string>
+    <string name="max_similar_titles_count_subtitle">Ko'rsatish uchun o'xshash sarlavhalar maksimum soni</string>
+    <string name="show_similar_titles_subtitle">Roman tafsilotlari ostida o'xshash nomli kitoblarni ko'rsatish</string>
+    <string name="similar_titles_source_same_source">Faqat Bir Xil Manba</string>
+    <string name="similar_titles_source_same_source_subtitle">O'xshash sarlavhalarni faqat joriy manbadan ko'rsatish</string>
+    <string name="similar_titles_source_other_sources">Faqat Boshqa Manbalar</string>
+    <string name="similar_titles_source_other_sources_subtitle">O'xshash sarlavhalarni faqat boshqa manbalardan ko'rsatish</string>
+    <string name="similar_titles_source_all_sources">Barcha Manbalar</string>
+    <string name="similar_titles_source_all_sources_subtitle">O'xshash sarlavhalarni barcha mavjud manbalardan ko'rsatish</string>
+    <string name="similar_titles_match_mode">O'xshash Sarlavhalar Moslik Rejimi</string>
+    <string name="similar_titles_match_mode_subtitle">O'xshash sarlavhalar qanday solishtirilishini tanlang</string>
+    <string name="similar_titles_mode_by_name">Nomi Bo'yicha O'xshash</string>
+    <string name="similar_titles_mode_by_name_subtitle">O'xshash sarlavha/nomli kitoblarni topish</string>
+    <string name="similar_titles_mode_by_genre">Janr Bo'yicha O'xshash</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Mos keladigan janrlar/toifali kitoblarni topish</string>
+    <string name="similar_titles_mode_by_category">Kategoriya Bo'yicha O'xshash</string>
+    <string name="similar_titles_mode_by_category_subtitle">Bir xil kategoriyadagi kitoblarni topish</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

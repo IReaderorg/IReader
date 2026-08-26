@@ -1,4 +1,4 @@
-﻿package ireader.domain.js.engine
+package ireader.domain.js.engine
 
 import ireader.domain.js.models.PluginPerformanceMetrics
 import kotlinx.coroutines.sync.Mutex

@@ -49,6 +49,7 @@
     <string name="added_source_rule">Regulă de sursă adăugată: %1$s</string>
     <string name="added_to_category">Adăugat la %s</string>
     <string name="added_to_library">Adăugat în bibliotecă</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Detalii suplimentare:</string>
     <string name="additional_details_optional">Detalii suplimentare (opțional)</string>
     <string name="additional_information">Informații Suplimentare</string>
@@ -2103,6 +2104,8 @@
     <string name="results">rezultate</string>
     <string name="results_found">rezultate găsite</string>
     <string name="resume">Reia</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Reia tot</string>
     <string name="resume_download">Reia descărcarea</string>
     <string name="resume_downloads">Reia descărcările</string>
@@ -2919,4 +2922,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Nu există recomandări disponibile</string>
+    <string name="recommendations_error">Nu s-au încărcat recomandările</string>
+    <string name="recommendations_section_title">Recomandări</string>
+    <string name="recommendations_section_title_suggestions">Sugestii</string>
+    <string name="recommendation_source_native_only">Doar sursa nativă</string>
+    <string name="recommendation_source_native_only_subtitle">Utilizați recomandările furnizate direct de sursă</string>
+    <string name="recommendation_source_genre_fallback">Potrivire gen</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Reveniți la potrivirea gen când nu există recomandări native</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Tituri Similare</string>
+    <string name="show_similar_titles">Afișați Titurile Similare</string>
+    <string name="similar_titles_source">Sursa Titlurilor Similare</string>
+    <string name="max_similar_titles_count">Număr Maxim de Titluri Similare</string>
+    <string name="similar_titles_settings">Setări Titluri Similare</string>
+    <string name="similar_titles_source_subtitle">Alegeți sursele de folosit pentru titluri similare</string>
+    <string name="max_similar_titles_count_subtitle">Numărul maxim de titluri similare de afișat</string>
+    <string name="show_similar_titles_subtitle">Afișează cărți cu nume similare sub detaliile romanului</string>
+    <string name="similar_titles_source_same_source">Doar Aceeași Sursă</string>
+    <string name="similar_titles_source_same_source_subtitle">Afișează titluri similare numai din sursa curentă</string>
+    <string name="similar_titles_source_other_sources">Doar Alte Surse</string>
+    <string name="similar_titles_source_other_sources_subtitle">Afișează titluri similare numai din alte surse</string>
+    <string name="similar_titles_source_all_sources">Toate Sursele</string>
+    <string name="similar_titles_source_all_sources_subtitle">Afișează titluri similare din toate sursele disponibile</string>
+    <string name="similar_titles_match_mode">Modul de Potrivire a Titlurilor Similare</string>
+    <string name="similar_titles_match_mode_subtitle">Alegeți cum sunt comparate titlurile similare</string>
+    <string name="similar_titles_mode_by_name">Similar după Nume</string>
+    <string name="similar_titles_mode_by_name_subtitle">Găsește cărți cu titluri/nume similare</string>
+    <string name="similar_titles_mode_by_genre">Similar după Gen</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Găsește cărți cu genuri/categorii corespunzătoare</string>
+    <string name="similar_titles_mode_by_category">Similar după Categorie</string>
+    <string name="similar_titles_mode_by_category_subtitle">Găsește cărți în aceeași categorie</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

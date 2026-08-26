@@ -38,6 +38,7 @@ import ireader.presentation.ui.settings.notifications.SettingsNotificationViewMo
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
 import ireader.presentation.ui.settings.reader.SettingsReaderViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
+import ireader.presentation.ui.settings.recommendations.SimilarTitlesSettingsViewModel
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import ireader.presentation.ui.settings.security.SettingsSecurityViewModel
 import ireader.presentation.ui.settings.tracking.SettingsTrackingViewModel
@@ -141,6 +142,7 @@ val PresentationModules = module {
             applicationScope = get(),
             createEpub = get(),
             readerPreferences = get(),
+            uiPreferences = get(),
             param = params,
             checkSourceAvailabilityUseCase = get(),
             migrateToSourceUseCase = get(),
@@ -196,6 +198,7 @@ val PresentationModules = module {
     factory  { SettingsReaderViewModel(get()) }
     factory  { SettingsLibraryViewModel(get(), get(), get()) }
     factory  { SettingsDownloadViewModel(get()) }
+    factory  { SimilarTitlesSettingsViewModel(get()) }
     factory  { SettingsSecurityViewModel(get(), get()) }
     factory  { SettingsNotificationViewModel(get()) }
     factory  { SettingsTrackingViewModel(get(), get(), OAuthCallbackHandler(), getOrNull()) }

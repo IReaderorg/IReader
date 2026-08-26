@@ -93,6 +93,9 @@ object NavigationRoutes {
     const val contentFilter = "contentFilter"
     const val textReplacement = "textReplacement"
     const val networkSettings = "networkSettings"
+    const val similarTitlesSettings = "similarTitlesSettings"
+
+    fun recommendationsList(bookId: Long) = "recommendationsList/$bookId"
     
     fun quoteCreation(params: ireader.domain.models.quote.QuoteCreationParams): String {
         val encodedBookTitle = params.bookTitle.encodeForNav()

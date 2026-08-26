@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.backup
+package ireader.domain.models.backup
 
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Category

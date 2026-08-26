@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.donation
+package ireader.domain.usecases.donation
 
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.models.donation.DonationTrigger

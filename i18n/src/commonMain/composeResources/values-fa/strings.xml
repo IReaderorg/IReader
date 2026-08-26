@@ -49,6 +49,7 @@
     <string name="added_source_rule">قانون منبع اضافه شد: %1$s</string>
     <string name="added_to_category">به %s اضافه شد</string>
     <string name="added_to_library">به کتابخانه اضافه شد</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">جزئیات بیشتر:</string>
     <string name="additional_details_optional">جزئیات اضافی (اختیاری)</string>
     <string name="additional_information">اطلاعات تکمیلی</string>
@@ -2089,6 +2090,8 @@
     <string name="results">نتایج</string>
     <string name="results_found">نتیجه یافت شد</string>
     <string name="resume">ادامه</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">ادامه همه</string>
     <string name="resume_download">ادامه دانلود</string>
     <string name="resume_downloads">ادامه بارگیری‌ها</string>
@@ -2905,4 +2908,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">هیچ توصیه‌ای در دسترس نیست</string>
+    <string name="recommendations_error">توصیه ها بارگیری نشد</string>
+    <string name="recommendations_section_title">توصیه ها</string>
+    <string name="recommendations_section_title_suggestions">پیشنهادات</string>
+    <string name="recommendation_source_native_only">فقط منبع بومی</string>
+    <string name="recommendation_source_native_only_subtitle">استفاده از توصیه‌های ارائه شده directly توسط منبع</string>
+    <string name="recommendation_source_genre_fallback">تطابق ژانر</string>
+    <string name="recommendation_source_genre_fallback_subtitle">بازگشت به تطابق ژانر وقتی توصیه بومی وجود ندارد</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">عناوان‌های مشابه</string>
+    <string name="show_similar_titles">نمایش عناوین مشابه</string>
+    <string name="similar_titles_source">منبع عناوین مشابه</string>
+    <string name="max_similar_titles_count">حداکثر تعداد عناوین مشابه</string>
+    <string name="similar_titles_settings">تنظیمات عناوین مشابه</string>
+    <string name="similar_titles_source_subtitle">انتخاب منابع مورد استفاده برای عناوین مشابه</string>
+    <string name="max_similar_titles_count_subtitle">حداکثر تعداد عناوین مشابه برای نمایش</string>
+    <string name="show_similar_titles_subtitle">نمایش کتاب‌های با نام مشابه در زیر جزئیات رمان</string>
+    <string name="similar_titles_source_same_source">فقط همان منبع</string>
+    <string name="similar_titles_source_same_source_subtitle">نمایش عناوین مشابه فقط از منبع فعلی</string>
+    <string name="similar_titles_source_other_sources">فقط سایر منابع</string>
+    <string name="similar_titles_source_other_sources_subtitle">نمایش عناوین مشابه فقط از سایر منابع</string>
+    <string name="similar_titles_source_all_sources">همه منابع</string>
+    <string name="similar_titles_source_all_sources_subtitle">نمایش عناوین مشابه از همه منابع موجود</string>
+    <string name="similar_titles_match_mode">حالت تطابق عناوین مشابه</string>
+    <string name="similar_titles_match_mode_subtitle">انتخاب نحوه مقایسه عناوین مشابه</string>
+    <string name="similar_titles_mode_by_name">مشابه با نام</string>
+    <string name="similar_titles_mode_by_name_subtitle">یافتن کتاب‌های با عنوان/نام مشابه</string>
+    <string name="similar_titles_mode_by_genre">مشابه با ژانر</string>
+    <string name="similar_titles_mode_by_genre_subtitle">یافتن کتاب‌های با ژانر/دسته‌بندی مطابق</string>
+    <string name="similar_titles_mode_by_category">مشابه با دسته‌بندی</string>
+    <string name="similar_titles_mode_by_category_subtitle">یافتن کتاب‌های در همان دسته‌بندی</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

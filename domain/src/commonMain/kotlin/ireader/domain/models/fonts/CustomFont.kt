@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.fonts
+package ireader.domain.models.fonts
 
 import ireader.domain.utils.extensions.currentTimeToLong
 

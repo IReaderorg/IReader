@@ -1,4 +1,4 @@
-﻿package ireader.data.statistics
+package ireader.data.statistics
 
 import ireader.core.log.Log
 import ireader.data.remote.MultiSupabaseClientProvider

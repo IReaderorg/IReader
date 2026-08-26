@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.history
+package ireader.domain.usecases.history
 
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History

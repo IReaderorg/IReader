@@ -1,4 +1,4 @@
-﻿package ireader.data.repository
+package ireader.data.repository
 
 import ireader.domain.data.repository.FundingGoalRepository
 import ireader.domain.models.donation.FundingGoal

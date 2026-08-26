@@ -1,4 +1,4 @@
-﻿package ireader.data.donationleaderboard
+package ireader.data.donationleaderboard
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.realtime.PostgresAction

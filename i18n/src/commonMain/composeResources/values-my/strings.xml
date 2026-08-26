@@ -49,6 +49,7 @@
     <string name="added_source_rule">အရင်းအမြစ် စည်းမျဉ်း ထည့်သွင်းပြီးပြီ: %1$s</string>
     <string name="added_to_category">%s ထဲသို့ ထည့်သွင်းပြီးပြီ</string>
     <string name="added_to_library">Ditambah ke Perpustakaan</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Butiran Tambahan:</string>
     <string name="additional_details_optional">Butiran tambahan (pilihan)</string>
     <string name="additional_information">နောက်ထပ်အချက်အလက်</string>
@@ -2102,6 +2103,8 @@
     <string name="results">hasil</string>
     <string name="results_found">hasil ditemui</string>
     <string name="resume">Sambung semula</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Sambung Semula Semua</string>
     <string name="resume_download">ဒေါင်းလုဒ် ဆက်လုပ်ပါ</string>
     <string name="resume_downloads">ဒေါင်းလုဒ်များ ပြန်စပါ</string>
@@ -2918,4 +2921,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">အကြံပြုချက်များ မရရှိနိုင်ပါ။</string>
+    <string name="recommendations_error">အကြံပြုချက်များကို တင်၍မရပါ။</string>
+    <string name="recommendations_section_title">အကြံပြုချက်များ</string>
+    <string name="recommendations_section_title_suggestions">အကြံပြုချက်များ</string>
+    <string name="recommendation_source_native_only">ပုံမှန်အရင်းအမြစ်သာ</string>
+    <string name="recommendation_source_native_only_subtitle">အရင်းအမြစ်မှတဆင့်တည်ဆောက်ပြီး အကြံပြုချက်များကို အသုံးပြုပါ</string>
+    <string name="recommendation_source_genre_fallback">အမျိုးအစား ကိုက်ညီမှု</string>
+    <string name="recommendation_source_genre_fallback_subtitle">မူရင်း အကြံပြုချက်များ မရှိပါက အမျိုးအစား ကိုက်ညီမှုသို့ ပြန်သွားပါ</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">ဆင်တူချိန်ညှိမှုများ</string>
+    <string name="show_similar_titles">ဆင်တူချိန်ညှိမှုများပြရန်</string>
+    <string name="similar_titles_source">ဆင်တူချိန်ညှိမှုများရင်းမြစ်</string>
+    <string name="max_similar_titles_count">ဆင်တူချိန်ညှိမှုများအများဆုံးအရေအတွက်</string>
+    <string name="similar_titles_settings">ဆင်တူချိန်ညှိမှုများ ဆેટဂ်များ</string>
+    <string name="similar_titles_source_subtitle">ဆင်တူချိန်ညှိမှုများအတွက်သုံးစွဲရင်းမြစ်များရွေးချယ်ပါ</string>
+    <string name="max_similar_titles_count_subtitle">ပြရန်ဆင်တူချိန်ညှိမှုများအများဆုံးအရေအတွက်</string>
+    <string name="show_similar_titles_subtitle">ရုပ်သံအသေးစီးအောက်မှာ အမည်ဆင်တူစာအုပ်စာတမ်းများပြရန်</string>
+    <string name="similar_titles_source_same_source">အတူတူသောရင်းမြစ်သာ</string>
+    <string name="similar_titles_source_same_source_subtitle">ယနေ့ရင်းမြစ်မှှ ဆင်တူချိန်ညှိမှုများသာ�ြရန်</string>
+    <string name="similar_titles_source_other_sources"> အခြားရင်းမြစ်များသာ</string>
+    <string name="similar_titles_source_other_sources_subtitle"> အခြားရင်းမြစ်များမှှ ဆင်တူချိန်ညှိမှုများသာ�ြရန်</string>
+    <string name="similar_titles_source_all_sources">အားလုံးရင်းမြစ်များ</string>
+    <string name="similar_titles_source_all_sources_subtitle"> ရရှိနိုင်သောအားလုံးရင်းမြစ်များမှှ ဆင်တူချိန်ညှိမှုများပြရန်</string>
+    <string name="similar_titles_match_mode">ဆင်တူချိန်ညှိမှုများနှင့် ကိုက်ညီမှုမိုဒ်</string>
+    <string name="similar_titles_match_mode_subtitle">ဆင်တူချိန်ညှိမှုများကိုဘယ်လောက်ကိုက်ညီစွာနှိုင်းချက်ကြည့်ပါ</string>
+    <string name="similar_titles_mode_by_name"> အမည်အလိုက်ဆင်တူ</string>
+    <string name="similar_titles_mode_by_name_subtitle">ချိန်ညှိမှုအမည်/အမည်ဆင်တူစာအုပ်စာတမ်းများရှာပါ</string>
+    <string name="similar_titles_mode_by_genre">ဇာဏ်အလိုက်ဆင်တူ</string>
+    <string name="similar_titles_mode_by_genre_subtitle">ကိုက်ညီသောဇာဏ်/ကဏ္ဍများရှိသောစာအုပ်စာတမ်းများရှာပါ</string>
+    <string name="similar_titles_mode_by_category">ကဏ္ဍအလိုက်ဆင်တူ</string>
+    <string name="similar_titles_mode_by_category_subtitle"> တူညီသောကဏ္ဍထဲမှာစာအုပ်စာတမ်းများရှာပါ</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

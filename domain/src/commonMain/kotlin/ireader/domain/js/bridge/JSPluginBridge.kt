@@ -1,4 +1,4 @@
-﻿package ireader.domain.js.bridge
+package ireader.domain.js.bridge
 
 import io.ktor.client.HttpClient
 import ireader.core.log.Log

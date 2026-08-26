@@ -1,4 +1,4 @@
-﻿//package ireader.domain.analytics
+//package ireader.domain.analytics
 //
 //import ireader.core.log.Log
 //import kotlinx.serialization.Serializable

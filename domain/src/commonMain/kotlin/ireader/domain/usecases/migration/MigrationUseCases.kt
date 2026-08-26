@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.migration
+package ireader.domain.usecases.migration
 
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository

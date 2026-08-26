@@ -1,4 +1,4 @@
-﻿package ireader.domain.services.tts_service
+package ireader.domain.services.tts_service
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get

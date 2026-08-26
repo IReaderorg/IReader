@@ -1,4 +1,4 @@
-﻿package ireader.domain.services
+package ireader.domain.services
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore

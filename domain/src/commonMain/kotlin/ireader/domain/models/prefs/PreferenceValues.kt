@@ -90,6 +90,24 @@ object PreferenceValues {
         Every2Days,
         Weekly
     }
+
+    enum class SimilarTitlesSource(val titleResId: UiText.MStringResource) {
+        SameSource(UiText.MStringResource(Res.string.similar_titles_source_same_source)),
+        OtherSources(UiText.MStringResource(Res.string.similar_titles_source_other_sources)),
+        AllSources(UiText.MStringResource(Res.string.similar_titles_source_all_sources));
+    }
+
+    enum class SimilarTitlesMatchMode(val titleResId: UiText.MStringResource) {
+        ByName(UiText.MStringResource(Res.string.similar_titles_mode_by_name)),
+        ByGenre(UiText.MStringResource(Res.string.similar_titles_mode_by_genre)),
+        ByCategory(UiText.MStringResource(Res.string.similar_titles_mode_by_category));
+    }
+
+    enum class SimilarTitlesMaxCount(val value: Int, val titleResId: UiText.MStringResource) {
+        Count5(5, UiText.MStringResource(Res.string.max_similar_titles_count_5)),
+        Count10(10, UiText.MStringResource(Res.string.max_similar_titles_count_10)),
+        Count15(15, UiText.MStringResource(Res.string.max_similar_titles_count_15));
+    }
 }
 fun PreferenceValues.PreferenceAlignment.mapAlignment() : AlignmentModel? {
     return when(this) {

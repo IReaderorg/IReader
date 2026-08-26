@@ -49,6 +49,7 @@
     <string name="added_source_rule">已添加来源规则：%1$s</string>
     <string name="added_to_category">已添加到 %s</string>
     <string name="added_to_library">已添加到书库</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">更多细节：</string>
     <string name="additional_details_optional">附加细节（可选）</string>
     <string name="additional_information">附加信息</string>
@@ -2103,6 +2104,8 @@
     <string name="results">结果</string>
     <string name="results_found">找到结果</string>
     <string name="resume">恢复</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">全部恢复</string>
     <string name="resume_download">继续下载</string>
     <string name="resume_downloads">恢复下载</string>
@@ -2931,4 +2934,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">没有可用的建议</string>
+    <string name="recommendations_error">无法加载推荐</string>
+    <string name="recommendations_section_title">建议</string>
+    <string name="recommendations_section_title_suggestions">建议</string>
+    <string name="recommendation_source_native_only">仅原生来源</string>
+    <string name="recommendation_source_native_only_subtitle">使用来源直接提供的推荐</string>
+    <string name="recommendation_source_genre_fallback">类型匹配</string>
+    <string name="recommendation_source_genre_fallback_subtitle">在没有原生推荐时回退到类型匹配</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">相似标题</string>
+    <string name="show_similar_titles">显示相似标题</string>
+    <string name="similar_titles_source">相似标题来源</string>
+    <string name="max_similar_titles_count">相似标题最大数量</string>
+    <string name="similar_titles_settings">相似标题设置</string>
+    <string name="similar_titles_source_subtitle">选择用于相似标题的来源</string>
+    <string name="max_similar_titles_count_subtitle">要显示的相似标题最大数量</string>
+    <string name="show_similar_titles_subtitle">在小说详情下方显示书名相似的书籍</string>
+    <string name="similar_titles_source_same_source">仅同一来源</string>
+    <string name="similar_titles_source_same_source_subtitle">仅显示当前来源的相似标题</string>
+    <string name="similar_titles_source_other_sources">仅其他来源</string>
+    <string name="similar_titles_source_other_sources_subtitle">仅显示其他来源的相似标题</string>
+    <string name="similar_titles_source_all_sources">所有来源</string>
+    <string name="similar_titles_source_all_sources_subtitle">显示所有可用来源的相似标题</string>
+    <string name="similar_titles_match_mode">相似标题匹配模式</string>
+    <string name="similar_titles_match_mode_subtitle">选择如何匹配相似标题</string>
+    <string name="similar_titles_mode_by_name">按名称相似</string>
+    <string name="similar_titles_mode_by_name_subtitle">查找书名/名称相似的书籍</string>
+    <string name="similar_titles_mode_by_genre">按类型相似</string>
+    <string name="similar_titles_mode_by_genre_subtitle">查找类型/类别匹配的书籍</string>
+    <string name="similar_titles_mode_by_category">按分类相似</string>
+    <string name="similar_titles_mode_by_category_subtitle">查找同一分类中的书籍</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

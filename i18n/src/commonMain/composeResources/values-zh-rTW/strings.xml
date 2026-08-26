@@ -49,6 +49,7 @@
     <string name="added_source_rule">已新增來源規則：%1$s</string>
     <string name="added_to_category">已新增至 %s</string>
     <string name="added_to_library">已新增到書庫</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">其他詳細資訊:</string>
     <string name="additional_details_optional">其他詳細資訊（選填）</string>
     <string name="additional_information">附加資訊</string>
@@ -2089,6 +2090,8 @@
     <string name="results">結果</string>
     <string name="results_found">已找到結果</string>
     <string name="resume">恢復</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">全部恢復</string>
     <string name="resume_download">繼續下載</string>
     <string name="resume_downloads">恢復下載</string>
@@ -2904,4 +2907,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">沒有可用的建議</string>
+    <string name="recommendations_error">無法加載推薦</string>
+    <string name="recommendations_section_title">建議</string>
+    <string name="recommendations_section_title_suggestions">建議</string>
+    <string name="recommendation_source_native_only">僅原生來源</string>
+    <string name="recommendation_source_native_only_subtitle">使用來源直接提供的推薦</string>
+    <string name="recommendation_source_genre_fallback">類型匹配</string>
+    <string name="recommendation_source_genre_fallback_subtitle">在無原生推薦時回退到類型匹配</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">相似書名</string>
+    <string name="show_similar_titles">顯示相似書名</string>
+    <string name="similar_titles_source">相似書名來源</string>
+    <string name="max_similar_titles_count">相似書名最大數量</string>
+    <string name="similar_titles_settings">相似書名設定</string>
+    <string name="similar_titles_source_subtitle">選擇用於相似書名的來源</string>
+    <string name="max_similar_titles_count_subtitle">要顯示的相似書名最大數量</string>
+    <string name="show_similar_titles_subtitle">在小說詳細資訊下方顯示名稱相似的書籍</string>
+    <string name="similar_titles_source_same_source">僅相同來源</string>
+    <string name="similar_titles_source_same_source_subtitle">僅顯示目前來源的相似書名</string>
+    <string name="similar_titles_source_other_sources">僅其他來源</string>
+    <string name="similar_titles_source_other_sources_subtitle">僅顯示其他來源的相似書名</string>
+    <string name="similar_titles_source_all_sources">所有來源</string>
+    <string name="similar_titles_source_all_sources_subtitle">顯示所有可用來源的相似書名</string>
+    <string name="similar_titles_match_mode">相似書名匹配模式</string>
+    <string name="similar_titles_match_mode_subtitle">選擇如何比較相似書名</string>
+    <string name="similar_titles_mode_by_name">依名稱相似</string>
+    <string name="similar_titles_mode_by_name_subtitle">尋找書名/名稱相似的書籍</string>
+    <string name="similar_titles_mode_by_genre">依類型相似</string>
+    <string name="similar_titles_mode_by_genre_subtitle">尋找類型/分類相符的書籍</string>
+    <string name="similar_titles_mode_by_category">依分類相似</string>
+    <string name="similar_titles_mode_by_category_subtitle">尋找同一分類中的書籍</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

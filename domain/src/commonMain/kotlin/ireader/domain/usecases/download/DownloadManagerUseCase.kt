@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.download
+package ireader.domain.usecases.download
 
 import ireader.domain.data.repository.DownloadRepository
 import ireader.domain.data.repository.NotificationRepository

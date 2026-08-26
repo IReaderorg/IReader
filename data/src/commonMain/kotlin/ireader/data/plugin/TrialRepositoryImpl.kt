@@ -1,4 +1,4 @@
-﻿package ireader.data.plugin
+package ireader.data.plugin
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.plugins.TrialInfo

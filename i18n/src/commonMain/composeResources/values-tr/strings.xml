@@ -49,6 +49,7 @@
     <string name="added_source_rule">Eklenen kaynak kuralı: %1$s</string>
     <string name="added_to_category">%s kategorisine eklendi</string>
     <string name="added_to_library">Kütüphaneye Eklendi</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">Ek Ayrıntılar:</string>
     <string name="additional_details_optional">Ek ayrıntılar (isteğe bağlı)</string>
     <string name="additional_information">Ek Bilgiler</string>
@@ -2098,6 +2099,8 @@
     <string name="results">sonuçlar</string>
     <string name="results_found">sonuç bulundu</string>
     <string name="resume">Devam Et</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">Tümünü Devam Ettir</string>
     <string name="resume_download">İndirmeye Devam Et</string>
     <string name="resume_downloads">İndirmeleri Devam Ettir</string>
@@ -2913,4 +2916,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">Öneri yok</string>
+    <string name="recommendations_error">Öneriler yüklenemedi</string>
+    <string name="recommendations_section_title">Öneriler</string>
+    <string name="recommendations_section_title_suggestions">Öneriler</string>
+    <string name="recommendation_source_native_only">Yalnızca yerel kaynak</string>
+    <string name="recommendation_source_native_only_subtitle">Kaynak tarafından doğrudan sağlanan önerileri kullanın</string>
+    <string name="recommendation_source_genre_fallback">Tür eşleşmesi</string>
+    <string name="recommendation_source_genre_fallback_subtitle">Yerel öneri olmadığında tür eşleşmesine geri dön</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">Benzer Başlıklar</string>
+    <string name="show_similar_titles">Benzer Başlıkları Göster</string>
+    <string name="similar_titles_source">Benzer Başlıklar Kaynağı</string>
+    <string name="max_similar_titles_count">Maksimum Benzer Başlık Sayısı</string>
+    <string name="similar_titles_settings">Benzer Başlıklar Ayarları</string>
+    <string name="similar_titles_source_subtitle">Benzer başlıklar için kullanılacak kaynakları seç</string>
+    <string name="max_similar_titles_count_subtitle">Gösterilecek maksimum benzer başlık sayısı</string>
+    <string name="show_similar_titles_subtitle">Roman detaylarının altında benzer isimde kitaplar göster</string>
+    <string name="similar_titles_source_same_source">Sadece Aynı Kaynak</string>
+    <string name="similar_titles_source_same_source_subtitle">Benzer başlıkları sadece mevcut kaynaktan göster</string>
+    <string name="similar_titles_source_other_sources">Sadece Diğer Kaynaklar</string>
+    <string name="similar_titles_source_other_sources_subtitle">Benzer başlıkları sadece diğer kaynaklardan göster</string>
+    <string name="similar_titles_source_all_sources">Tüm Kaynaklar</string>
+    <string name="similar_titles_source_all_sources_subtitle">Benzer başlıkları tüm mevcut kaynaklardan göster</string>
+    <string name="similar_titles_match_mode">Benzer Başlıklar Eşleşme Modu</string>
+    <string name="similar_titles_match_mode_subtitle">Benzer başlıkların nasıl eşleştirileceğini seç</string>
+    <string name="similar_titles_mode_by_name">İsme Göre Benzer</string>
+    <string name="similar_titles_mode_by_name_subtitle">Benzer başlık/isimde kitaplar bul</string>
+    <string name="similar_titles_mode_by_genre">Türe Göre Benzer</string>
+    <string name="similar_titles_mode_by_genre_subtitle">Eşleşen türler/kategorilerde kitaplar bul</string>
+    <string name="similar_titles_mode_by_category">Kategoriye Göre Benzer</string>
+    <string name="similar_titles_mode_by_category_subtitle">Aynı kategorideki kitapları bul</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

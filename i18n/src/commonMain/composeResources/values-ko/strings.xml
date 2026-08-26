@@ -49,6 +49,7 @@
     <string name="added_source_rule">출처 규칙 추가됨: %1$s</string>
     <string name="added_to_category">%s에 추가됨</string>
     <string name="added_to_library">라이브러리에 추가됨</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">추가 정보:</string>
     <string name="additional_details_optional">추가 세부 정보 (선택 사항)</string>
     <string name="additional_information">추가 정보</string>
@@ -2090,6 +2091,8 @@
     <string name="results">결과</string>
     <string name="results_found">결과 찾음</string>
     <string name="resume">다시 시작</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">모두 재개</string>
     <string name="resume_download">다운로드 다시 시작</string>
     <string name="resume_downloads">다운로드 재개</string>
@@ -2905,4 +2908,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">추천 항목이 없습니다.</string>
+    <string name="recommendations_error">추천을 로드하지 못했습니다.</string>
+    <string name="recommendations_section_title">권장사항</string>
+    <string name="recommendations_section_title_suggestions">제안</string>
+    <string name="recommendation_source_native_only">네이티브 소스만</string>
+    <string name="recommendation_source_native_only_subtitle">소스에서 직접 제공하는 추천 사용</string>
+    <string name="recommendation_source_genre_fallback">장르 일치</string>
+    <string name="recommendation_source_genre_fallback_subtitle">네이티브 추천이 없을 때 장르 일치로 대체</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">유사 제목</string>
+    <string name="show_similar_titles">유사 제목 표시</string>
+    <string name="similar_titles_source">유사 제목 소스</string>
+    <string name="max_similar_titles_count">최대 유사 제목 수</string>
+    <string name="similar_titles_settings">유사 제목 설정</string>
+    <string name="similar_titles_source_subtitle">유사 제목에 사용할 소스 선택</string>
+    <string name="max_similar_titles_count_subtitle">표시할 유사 제목의 최대 수</string>
+    <string name="show_similar_titles_subtitle">소설 세부 정보 아래에 이름이 비슷한 책 표시</string>
+    <string name="similar_titles_source_same_source">동일 소스만</string>
+    <string name="similar_titles_source_same_source_subtitle">현재 소스의 유사 제목만 표시</string>
+    <string name="similar_titles_source_other_sources">다른 소스만</string>
+    <string name="similar_titles_source_other_sources_subtitle">다른 소스의 유사 제목만 표시</string>
+    <string name="similar_titles_source_all_sources">모든 소스</string>
+    <string name="similar_titles_source_all_sources_subtitle">사용 가능한 모든 소스의 유사 제목 표시</string>
+    <string name="similar_titles_match_mode">유사 제목 일치 모드</string>
+    <string name="similar_titles_match_mode_subtitle">유사 제목 비교 방법 선택</string>
+    <string name="similar_titles_mode_by_name">이름으로 유사</string>
+    <string name="similar_titles_mode_by_name_subtitle">제목/이름이 비슷한 책 찾기</string>
+    <string name="similar_titles_mode_by_genre">장르로 유사</string>
+    <string name="similar_titles_mode_by_genre_subtitle">장르/카테고리가 일치하는 책 찾기</string>
+    <string name="similar_titles_mode_by_category">카테고리로 유사</string>
+    <string name="similar_titles_mode_by_category_subtitle">같은 카테고리의 책 찾기</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

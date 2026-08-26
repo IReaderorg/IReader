@@ -49,6 +49,7 @@
     <string name="added_source_rule">ചേർത്ത ഉറവിട നിയമം: %1$s</string>
     <string name="added_to_category">%s-ൽ ചേർത്തു</string>
     <string name="added_to_library">ലൈബ്രറിയിലേക്ക് ചേർത്തു</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">கூடுதல் விவரங்கள்:</string>
     <string name="additional_details_optional">അധിക വിശദാംശങ്ങൾ (ഓപ്ഷണൽ)</string>
     <string name="additional_information">അധിക വിവരങ്ങൾ</string>
@@ -2097,6 +2098,8 @@
     <string name="results">ഫലങ്ങൾ</string>
     <string name="results_found">ഫലങ്ങൾ കണ്ടെത്തി</string>
     <string name="resume">പുനരാരംഭിക്കുക</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">എല്ലാം പുനരാരംഭിക്കുക</string>
     <string name="resume_download">ഡൗൺലോഡ് പുനരാരംഭിക്കുക</string>
     <string name="resume_downloads">ഡൗൺലോഡുകൾ പുനരാരംഭിക്കുക</string>
@@ -2912,4 +2915,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">ശുപാർശകളൊന്നും ലഭ്യമല്ല</string>
+    <string name="recommendations_error">ശുപാർശകൾ ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു</string>
+    <string name="recommendations_section_title">ശുപാർശകൾ</string>
+    <string name="recommendations_section_title_suggestions">നിർദ്ദേശങ്ങൾ</string>
+    <string name="recommendation_source_native_only">നേറ്റീവ് സോഴ്സ് മാത്രം</string>
+    <string name="recommendation_source_native_only_subtitle">സോഴ്സ് നേരിട്ട് നൽകിയ ശുപാർശകൾ ഉപയോഗിക്കുക</string>
+    <string name="recommendation_source_genre_fallback">ജാൻറ് മാച്ചിംഗ്</string>
+    <string name="recommendation_source_genre_fallback_subtitle">നേറ്റീവ് ശുപാർശകൾ ഇല്ലാത്തപ്പോൾ ജാൻറ് മാച്ചിംഗിലേക്ക് മടങ്ങുക</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">സമാന ശീർഷകങ്ങൾ</string>
+    <string name="show_similar_titles">സമാന ശീർഷകങ്ങൾ കാണിക്കുക</string>
+    <string name="similar_titles_source">സമാന ശീർഷകങ്ങളുടെ മൂലം</string>
+    <string name="max_similar_titles_count">സമാന ശീർഷകങ്ങളുടെ പരമാവധി എണ്ണം</string>
+    <string name="similar_titles_settings">സമാന ശീർഷകങ്ങളുടെ സജീവരchet</string>
+    <string name="similar_titles_source_subtitle">സമാന ശീർഷകങ്ങള്‍ ഉപയോഗിക്കാനുള്ള മൂലങ്ങള്‍ തെരഞ്ഞെടുക്കുക</string>
+    <string name="max_similar_titles_count_subtitle">കാണിക്കാനുള്ള സമാന ശീർഷകങ്ങളുടെ പരമാവധി എണ്ണം</string>
+    <string name="show_similar_titles_subtitle">നോവലിന്റെ വിവരങ്ങള്‍ കീഴില്‍ സമാന പേരുകളുള്ള പുസ്തകങ്ങള്‍ കാണിക്കുക</string>
+    <string name="similar_titles_source_same_source">ഒരേ മൂലം മാത്രം</string>
+    <string name="similar_titles_source_same_source_subtitle">സമാന ശീർഷകങ്ങള്‍ നിലവിലെ മൂലത്തില്‍ നിന്ന് മാത്രം കാണിക്കുക</string>
+    <string name="similar_titles_source_other_sources">മറ്റ് മൂലങ്ങള്‍ മാത്രം</string>
+    <string name="similar_titles_source_other_sources_subtitle">സമാന ശീർഷകങ്ങള്‍ മറ്റ് മൂലങ്ങളില്‍ നിന്ന് മാത്രം കാണിക്കുക</string>
+    <string name="similar_titles_source_all_sources">എല്ലാ മൂലങ്ങളും</string>
+    <string name="similar_titles_source_all_sources_subtitle">ലഭ്യമായ എല്ലാ മൂലങ്ങളില്‍ നിന്നും സമാന ശീർഷകങ്ങള്‍ കാണിക്കുക</string>
+    <string name="similar_titles_match_mode">സമാന ശീർഷകങ്ങളുടെ മാച്ച് മോഡ്</string>
+    <string name="similar_titles_match_mode_subtitle">സമാന ശീർഷകങ്ങള്‍ താരതമ്യപ്പെടുത്തുന്ന രീതി തെരഞ്ഞെടുക്കുക</string>
+    <string name="similar_titles_mode_by_name">പേര് മുഖേന സമാനം</string>
+    <string name="similar_titles_mode_by_name_subtitle">സമാന ശീർഷകം/പേരുള്ള പുസ്തകങ്ങള്‍ കണ്ടെത്തുക</string>
+    <string name="similar_titles_mode_by_genre">ജീവന്‍ മുഖേന സമാനം</string>
+    <string name="similar_titles_mode_by_genre_subtitle">കൈകാര്യം ചെയ്ത ജീവന്‍/വിഭാഗങ്ങളുള്ള പുസ്തകങ്ങള്‍ കണ്ടെത്തുക</string>
+    <string name="similar_titles_mode_by_category">വിഭാഗം മുഖേന സമാനം</string>
+    <string name="similar_titles_mode_by_category_subtitle">അതേ വിഭാഗത്തിലുള്ള പുസ്തകങ്ങള്‍ കണ്ടെത്തുക</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

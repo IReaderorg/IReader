@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.fonts
+package ireader.domain.usecases.fonts
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*

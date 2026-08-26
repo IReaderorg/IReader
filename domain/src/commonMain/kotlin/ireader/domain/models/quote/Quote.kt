@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.quote
+package ireader.domain.models.quote
 
 import kotlinx.serialization.Serializable
 

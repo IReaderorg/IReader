@@ -1,4 +1,4 @@
-﻿package ireader.core.http
+package ireader.core.http
 
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.HttpClientCall

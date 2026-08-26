@@ -48,6 +48,7 @@
     <string name="added_source_rule">উৎস নিয়ম যোগ করা হয়েছে: %1$s</string>
     <string name="added_to_category">%s-এ যোগ করা হয়েছে</string>
     <string name="added_to_library">লাইব্রেরিতে যোগ করা হয়েছে</string>
+    <string name="not_added">Not Added</string>
     <string name="additional_details">অতিরিক্ত বিবরণ:</string>
     <string name="additional_details_optional">অতিরিক্ত বিবরণ (ঐচ্ছিক)</string>
     <string name="additional_information">অতিরিক্ত তথ্য</string>
@@ -2087,6 +2088,8 @@
     <string name="results">ফলাফল</string>
     <string name="results_found">ফলাফল পাওয়া গেছে</string>
     <string name="resume">পুনরায় শুরু করুন</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not Tracked</string>
     <string name="resume_all">সব আবার শুরু করুন</string>
     <string name="resume_download">ডাউনলোড পুনরায় শুরু করুন</string>
     <string name="resume_downloads">ডাউনলোডগুলি পুনরায় শুরু করুন</string>
@@ -2899,4 +2902,51 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-</resources>
+    <string name="recommendations_empty">কোন সুপারিশ উপলব্ধ</string>
+    <string name="recommendations_error">সুপারিশ লোড করতে ব্যর্থ হয়েছে</string>
+    <string name="recommendations_section_title">সুপারিশ</string>
+    <string name="recommendations_section_title_suggestions">পরামর্শ</string>
+    <string name="recommendation_source_native_only">কেবল মৌলিক সোর্স</string>
+    <string name="recommendation_source_native_only_subtitle">সোর্স দ্বারা সরাসরি প্রদত্ত সুপারিশ ব্যবহার করুন</string>
+    <string name="recommendation_source_genre_fallback">অনুরূপ ধরণের পাশে</string>
+    <string name="recommendation_source_genre_fallback_subtitle">কোন মৌলিক সুপারিশ না থাকলে ধরণের/anurূপ ব্যবহার করুন</string>
+    <string name="show_recommendations">Show Recommendations</string>
+    <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
+    <string name="max_recommendation_count">Maximum Recommendation Count</string>
+    <string name="max_recommendation_count_subtitle">Maximum number of recommendations to display</string>
+    <string name="similar_titles_section_title">সমান শিরোনাম</string>
+    <string name="show_similar_titles">সমান শিরোনাম দেখান</string>
+    <string name="similar_titles_source">সমান শিরোনামের উৎস</string>
+    <string name="max_similar_titles_count">সমান শিরোনামের সর্বাধিক সংখ্যা</string>
+    <string name="similar_titles_settings">সমান শিরোনাম সেটিংস</string>
+    <string name="similar_titles_source_subtitle">সমান শিরোনামের জন্য ব্যবহার করার জন্য উৎস নির্বাচন করুন</string>
+    <string name="max_similar_titles_count_subtitle">দেখার জন্য সমান শিরোনামের সর্বাধিক সংখ্যা</string>
+    <string name="show_similar_titles_subtitle">নoveলের বিবরণের নিচে সমান নামের বই দেখান</string>
+    <string name="similar_titles_source_same_source">কেবল একই উৎস</string>
+    <string name="similar_titles_source_same_source_subtitle">কেবল বর্তমান উৎস থেকে সমান শিরোনাম দেখান</string>
+    <string name="similar_titles_source_other_sources">কেবল অন্যান্য উৎস</string>
+    <string name="similar_titles_source_other_sources_subtitle">কেবল অন্যান্য উৎস থেকে সমান শিরোনাম দেখান</string>
+    <string name="similar_titles_source_all_sources">সমস্ত উৎস</string>
+    <string name="similar_titles_source_all_sources_subtitle">সমস্ত উপলব্ধ উৎস থেকে সমান শিরোনাম দেখান</string>
+    <string name="similar_titles_match_mode">সমান শিরোনাম ম্যাচ মোড</string>
+    <string name="similar_titles_match_mode_subtitle">সমান শিরোনামের তুলনা ন্যায় নির্বাচন করুন</string>
+    <string name="similar_titles_mode_by_name">নাম অনুযায়ী সমান</string>
+    <string name="similar_titles_mode_by_name_subtitle">সমান শিরোনাম/নামের সাথে বই খুঁজুন</string>
+    <string name="similar_titles_mode_by_genre">ধারা অনুযায়ী সমান</string>
+    <string name="similar_titles_mode_by_genre_subtitle">মিল রঙ/বিভাগের সাথে বই খুঁজুন</string>
+    <string name="similar_titles_mode_by_category">বিভাগ অনুযায়ী সমান</string>
+    <string name="similar_titles_mode_by_category_subtitle">একই বিভাগের বই খুঁজুন</string>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-﻿package ireader.domain.data.repository
+package ireader.domain.data.repository
 
 import ireader.domain.models.entities.SourceReport
 import kotlinx.coroutines.flow.Flow

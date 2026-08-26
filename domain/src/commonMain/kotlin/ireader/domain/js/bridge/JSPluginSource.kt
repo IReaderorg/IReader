@@ -1,4 +1,4 @@
-﻿package ireader.domain.js.bridge
+package ireader.domain.js.bridge
 
 import ireader.core.log.Log
 import ireader.core.source.Dependencies

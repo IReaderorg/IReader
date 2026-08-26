@@ -1,4 +1,4 @@
-﻿package ireader.domain.js.library
+package ireader.domain.js.library
 
 import ireader.core.prefs.PreferenceStore
 import kotlinx.coroutines.CoroutineScope

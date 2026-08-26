@@ -1,4 +1,4 @@
-﻿package ireader.data.catalog
+package ireader.data.catalog
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.interactor.*
