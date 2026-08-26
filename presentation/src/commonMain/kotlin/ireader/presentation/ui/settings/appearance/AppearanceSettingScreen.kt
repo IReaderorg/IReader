@@ -166,6 +166,13 @@ fun AppearanceSettingScreen(
                 subtitle = localizeHelper.localize(Res.string.pure_black_backgrounds_for_power),
             ).Build()
         }
+        item {
+            Components.Switch(
+                preference = vm.coverBasedThemeEnabled,
+                title = localizeHelper.localize(Res.string.cover_based_dynamic_color),
+                subtitle = localizeHelper.localize(Res.string.cover_based_dynamic_color_subtitle),
+            ).Build()
+        }
         
         // Section Divider
         item {

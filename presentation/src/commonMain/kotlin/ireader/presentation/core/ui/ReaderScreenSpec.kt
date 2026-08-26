@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +64,8 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.rememberSwipeRefreshS
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderState
+import ireader.presentation.core.theme.AppThemeViewModel
+import ireader.domain.models.BookCover
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.getKoin
@@ -113,6 +116,26 @@ data class ReaderScreenSpec(
                 )
             })
         val readerState by vm.state.collectAsState()
+
+        // Cover-based dynamic color theme: feed the current book cover to the
+        // AppThemeViewModel; the root AppTheme applies the resulting scheme globally.
+        val appThemeViewModel: AppThemeViewModel = koinInject()
+        val coverOwner = remember { Any() }  // composition-scoped claim token
+        val successStateForCover = readerState as? ReaderState.Success
+        val bookForCover = successStateForCover?.book
+        val rawCoverUrl = bookForCover?.let { BookCover.from(it).cover }
+        val effectiveCoverUrl = remember(bookForCover?.id, rawCoverUrl) {
+            rawCoverUrl?.takeIf { it.isNotBlank() }
+        }
+        val isSystemDark = isSystemInDarkTheme()
+        DisposableEffect(effectiveCoverUrl, isSystemDark) {
+            appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, bookForCover?.sourceId, isSystemDark, coverOwner)
+            onDispose {
+                // Fires both on pop-away and on back-nav resume of the detail screen;
+                // owner check + grace delay keep the handoff flash-free.
+                appThemeViewModel.setCurrentCoverUrl(null, null, false, coverOwner)
+            }
+        }
 
         // Plugin integration for reader menu items
         val koin = getKoin()
@@ -807,13 +830,10 @@ data class ReaderScreenSpec(
             }
         }
     }
-
-    private fun LazyListState.getId(): Long? {
-        return kotlin.runCatching {
-            return@runCatching this.layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString()
-                .substringAfter("-").toLong()
-        }.getOrNull()
-    }
-
 }
+
+private fun LazyListState.getId(): Long? = kotlin.runCatching {
+    layoutInfo.visibleItemsInfo.firstOrNull()?.key.toString()
+        .substringAfter("-").toLong()
+}.getOrNull()
 

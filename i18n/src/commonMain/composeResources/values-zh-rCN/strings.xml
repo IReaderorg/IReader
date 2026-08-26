@@ -60,9 +60,12 @@
     <string name="adult_content_warning">成人内容警告</string>
     <string name="advance_commands">高级命令</string>
     <string name="advance_setting">高级设置</string>
+    <string name="advance_setting_description">配置高级参数与选项</string>
     <string name="advanced">高级</string>
     <string name="advanced_features">高级功能</string>
     <string name="advanced_filters">高级筛选</string>
+    <string name="advanced_network">高级网络设置</string>
+    <string name="advanced_network_description">User Agent、Cookie 与代理设置</string>
     <string name="advanced_options">高级选项</string>
     <string name="advanced_security">高级安全</string>
     <string name="advanced_settings">高级设置</string>
@@ -123,6 +126,7 @@
     <string name="app_updates">应用更新</string>
     <string name="app_updates_display">应用更新和显示</string>
     <string name="appearance">外观</string>
+    <string name="appearance_description">个性化应用主题与颜色</string>
     <string name="appearance_settings">外观和设置</string>
     <string name="appearance_theme">外观和主题</string>
     <string name="apply">应用</string>
@@ -432,6 +436,7 @@
     <string name="clear_1">清除</string>
     <string name="clear_all_cache">清除所有缓存</string>
     <string name="clear_all_cache_confirmation">这将删除所有缓存的图片、章节和网络数据。此操作无法撤消。</string>
+    <string name="clear_all_cache_description">清除所有缓存数据以释放空间</string>
     <string name="clear_all_cached_data_to_free_up_storage_space">清除所有缓存数据以释放存储空间</string>
     <string name="clear_all_chapters">清除所有章节</string>
     <string name="clear_all_cover_cache">清除所有封面缓存</string>
@@ -463,6 +468,8 @@
     <string name="cloud_storage">云存储</string>
     <string name="cloud_storage_provider">云存储提供商</string>
     <string name="cloud_sync">云同步</string>
+    <string name="cloudflare_bypass">Cloudflare 绕过</string>
+    <string name="cloudflare_bypass_description">为受保护来源配置 FlareSolverr 以绕过 Cloudflare 验证</string>
     <string name="cloudflare_d1_r2">Cloudflare D1 + R2</string>
     <string name="cloudflare_provides_5gb_d1_10gb">Cloudflare 提供 5GB D1 + 10GB R2 免费套餐用于翻译存储</string>
     <string name="color_customization">颜色自定义</string>
@@ -472,6 +479,7 @@
     <string name="color_selected">已选择颜色</string>
     <string name="color_theme">颜色主题</string>
     <string name="colors">颜色</string>
+    <string name="colors_description">动态颜色与 Material You</string>
     <string name="columns">列</string>
     <string name="comfortable_grid_layout_description">网格中 3 列，封面图像较大
     </string>
@@ -1047,9 +1055,11 @@
     <string name="font">字体</string>
     <string name="font_customization">字体自定义</string>
     <string name="font_deleted_successfully">字体删除成功</string>
+    <string name="font_description">个性化阅读字体与字号</string>
     <string name="font_imported_successfully">字体导入成功</string>
     <string name="font_name">字体名称</string>
     <string name="font_size">字体大小</string>
+    <string name="font_size_description">调整阅读字号</string>
     <string name="font_used_for_all_app">用于所有应用界面元素的字体（非阅读器）</string>
     <string name="font_weight">字体粗细</string>
     <string name="font_weight_1">字体粗细</string>
@@ -1079,6 +1089,7 @@
     <string name="gemini_payment_required">您已超过 Gemini API 的当前配额。请查看您的计划和账单详情：https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="gender">性别</string>
     <string name="general">通用</string>
+    <string name="general_description">应用常规偏好</string>
     <string name="general_settings">通用设置</string>
     <string name="generate_ai">生成AI</string>
     <string name="generate_an_ai_image_prompt_from_this_chapter">从本章生成AI图片提示</string>
@@ -1265,6 +1276,7 @@
     <string name="installation_successful">安装成功。</string>
     <string name="installed">已安装</string>
     <string name="installed_plugins">已安装插件</string>
+    <string name="installed_plugins_description">管理已安装的插件与功能</string>
     <string name="installer_mode">安装模式</string>
     <string name="installing">正在安装</string>
     <string name="installing_1">正在安装...</string>
@@ -1308,6 +1320,7 @@
     <string name="language_added">语言已添加</string>
     <string name="language_badge">语言徽章</string>
     <string name="language_code">语言代码</string>
+    <string name="language_description">应用语言设置</string>
     <string name="language_filter">语言筛选</string>
     <string name="language_preferences">语言首选项</string>
     <string name="language_preferences_saved">本书的语言偏好设置已保存</string>
@@ -1955,6 +1968,7 @@
     <string name="read_chapters">已读章节</string>
     <string name="read_translated_text">阅读翻译文本</string>
     <string name="reader">阅读器</string>
+    <string name="reader_description">个性化阅读界面</string>
     <string name="reader_settings_reset">阅读器设置已重置。</string>
     <string name="reading">阅读</string>
     <string name="reading_activity">阅读活动</string>
@@ -1967,6 +1981,7 @@
     <string name="reading_experience">阅读体验</string>
     <string name="reading_hub">阅读中心</string>
     <string name="reading_mode">阅读模式</string>
+    <string name="reading_mode_description">阅读模式：滚动/翻页</string>
     <string name="reading_progress">阅读进度</string>
     <string name="reading_progress_sync">阅读进度同步</string>
     <string name="reading_progress_sync_across_devices">阅读进度跨设备同步</string>
@@ -2045,6 +2060,7 @@
     <string name="repository">存储库</string>
     <string name="repository_added_successfully">仓库已成功添加</string>
     <string name="repository_adding_a_new">添加新的存储库</string>
+    <string name="repository_description">管理书源与扩展</string>
     <string name="repository_example_url">示例：https://github.com/username/repo/raw/main/index.json</string>
     <string name="repository_explanation">存储库是在线托管的扩展集合。您可以添加自定义存储库以访问其他书籍和小说的源。</string>
     <string name="repository_name">仓库名称</string>
@@ -2178,6 +2194,7 @@
     <string name="security">安全</string>
     <string name="security_audit">安全审计</string>
     <string name="security_best_practices">安全最佳实践</string>
+    <string name="security_description">管理安全与隐私设置</string>
     <string name="security_features">安全功能</string>
     <string name="security_guide">安全指南</string>
     <string name="security_privacy">安全 &amp; 隐私</string>
@@ -2364,6 +2381,7 @@
     <string name="start_trial">开始试用</string>
     <string name="statistics">统计</string>
     <string name="statistics_and_analytics">统计和分析</string>
+    <string name="statistics_description">查看阅读统计与进度</string>
     <string name="stats">统计</string>
     <string name="status">状态</string>
     <string name="status_color">状态颜色</string>
@@ -2404,6 +2422,7 @@
     <string name="suggestions">建议</string>
     <string name="summary">摘要</string>
     <string name="supabase_configuration">Supabase 配置</string>
+    <string name="supabase_configuration_description">配置你的 Supabase 实例以进行同步</string>
     <string name="supabase_url">Supabase URL</string>
     <string name="support">支持</string>
     <string name="support_collect">支持 &amp; 收藏</string>
@@ -2503,6 +2522,7 @@
     <string name="the_quick_brown_fox_jumps_over_the_lazy_dog">敏捷的棕色狐狸跳过懒狗</string>
     <string name="the_source_is_not_found">找不到源。</string>
     <string name="theme">主题</string>
+    <string name="theme_description">浅色、深色或跟随系统主题</string>
     <string name="theme_exported_successfully">主题导出成功</string>
     <string name="theme_imported_successfully">主题导入成功</string>
     <string name="theme_management">主题管理</string>
@@ -2592,6 +2612,7 @@
     <string name="track_your_reading_journey">追踪您的阅读历程</string>
     <string name="tracker">追踪器</string>
     <string name="tracking">追踪</string>
+    <string name="tracking_description">同步阅读进度至 AniList、MAL 等第三方平台</string>
     <string name="tracking_services">跟踪服务</string>
     <string name="transaction_id">交易ID</string>
     <string name="translate_action">翻译</string>
@@ -2605,6 +2626,7 @@
     <string name="translation_auth_required">您需要登录 %1$s 才能使用此翻译功能。</string>
     <string name="translation_captcha_required">%1$s 需要验证。请完成验证码以继续。</string>
     <string name="translation_complete">翻译完成。</string>
+    <string name="translation_description">切换翻译引擎</string>
     <string name="translation_empty_response">%1$s 返回空响应。这可能是暂时性问题，请重试。</string>
     <string name="translation_engine">翻译引擎</string>
     <string name="translation_engine_not_available">%1$s 在此应用版本中不可用。请使用不同的翻译引擎。</string>
@@ -2664,6 +2686,7 @@
     <string name="tts_download_chapter_audio_desc">预下载整个章节音频，用于离线播放（仅限远程引擎）</string>
     <string name="tts_engine">TTS引擎</string>
     <string name="tts_engine_manager">TTS 引擎管理</string>
+    <string name="tts_engine_manager_description">配置语音合成引擎与音色</string>
     <string name="tts_engine_settings">TTS引擎设置</string>
     <string name="tts_error">TTS 错误: %1$s</string>
     <string name="tts_merge_info">将多个段落合并成更大的块，以实现更流畅的阅读。这可以减少服务器请求并提供更好的音频连贯性。设置为 0 可禁用合并。</string>
@@ -2852,6 +2875,8 @@
     <string name="wifi_only">仅限 WiFi</string>
     <string name="wifi_only_mode">仅限WiFi模式</string>
     <string name="wifi_only_warning">下载已暂停 - 仅限WiFi模式已启用</string>
+    <string name="wifi_sync">局域网同步</string>
+    <string name="wifi_sync_description">在同一网络中跨设备同步书籍与进度</string>
     <string name="with_trailing_content">带有尾随内容</string>
     <string name="wizard">向导</string>
     <string name="wizard_step">向导步骤</string>
@@ -2909,44 +2934,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">快速预设</string>
-    <string name="cover_theme_preset_subtitle">应用封面主题强度的预定义设置</string>
-    <string name="cover_theme_backdrop_blur">封面背景模糊</string>
-    <string name="cover_theme_backdrop_blur_subtitle">调整扩展标题封面图像的模糊强度</string>
-    <string name="cover_theme_background_tint_opacity">背景色调不透明度</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">控制覆盖颜色融入卡片背景的程度</string>
-    <string name="cover_theme_preset_off">离开</string>
-    <string name="cover_theme_preset_soft">柔软的</string>
-    <string name="cover_theme_preset_medium">中等的</string>
-    <string name="cover_theme_preset_high">高的</string>
-
     <string name="recommendations_empty">没有可用的建议</string>
     <string name="recommendations_error">无法加载推荐</string>
     <string name="recommendations_section_title">建议</string>
     <string name="recommendations_section_title_suggestions">建议</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">推荐设置</string>
-    <string name="recommendations_settings_subtitle">配置图书推荐的显示方式</string>
-    <string name="recommendation_source_similar_by_title">按标题相似</string>
-    <string name="recommendation_source_similar_by_title_subtitle">在来源中搜索名称相似的图书</string>
     <string name="recommendation_source_native_only">仅原生来源</string>
     <string name="recommendation_source_native_only_subtitle">使用来源直接提供的推荐</string>
     <string name="recommendation_source_genre_fallback">类型匹配</string>
     <string name="recommendation_source_genre_fallback_subtitle">在没有原生推荐时回退到类型匹配</string>
-    <string name="recommendation_search_keywords">搜索关键词</string>
-    <string name="recommendation_search_keywords_subtitle">从当前图书标题中提取的关键词，用于查找相似图书</string>
-    <string name="recommendations_disabled">推荐已禁用</string>
-    <string name="recommendations_no_similar_books">未找到与此标题相似的图书</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2954,8 +2949,6 @@
     <string name="similar_titles_section_title">相似标题</string>
     <string name="show_similar_titles">显示相似标题</string>
     <string name="similar_titles_source">相似标题来源</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">相似标题最大数量</string>
     <string name="similar_titles_settings">相似标题设置</string>
     <string name="similar_titles_source_subtitle">选择用于相似标题的来源</string>
@@ -2975,8 +2968,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">查找类型/类别匹配的书籍</string>
     <string name="similar_titles_mode_by_category">按分类相似</string>
     <string name="similar_titles_mode_by_category_subtitle">查找同一分类中的书籍</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

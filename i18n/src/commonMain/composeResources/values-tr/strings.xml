@@ -2916,44 +2916,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Hızlı Ön Ayar</string>
-    <string name="cover_theme_preset_subtitle">Kapak teması yoğunluğu için önceden tanımlanmış ayarları uygulama</string>
-    <string name="cover_theme_backdrop_blur">Kapak Arka Plan Bulanıklığı</string>
-    <string name="cover_theme_backdrop_blur_subtitle">Genişletilmiş başlık kapak resmi için bulanıklık yoğunluğunu ayarlayın</string>
-    <string name="cover_theme_background_tint_opacity">Arka Plan Renk Tonu Opaklığı</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">Kapak renginin kart arka planlarına ne kadar yoğun şekilde karışacağını kontrol edin</string>
-    <string name="cover_theme_preset_off">Kapalı</string>
-    <string name="cover_theme_preset_soft">Yumuşak</string>
-    <string name="cover_theme_preset_medium">Orta</string>
-    <string name="cover_theme_preset_high">Yüksek</string>
-
     <string name="recommendations_empty">Öneri yok</string>
     <string name="recommendations_error">Öneriler yüklenemedi</string>
     <string name="recommendations_section_title">Öneriler</string>
     <string name="recommendations_section_title_suggestions">Öneriler</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">Öneri ayarları</string>
-    <string name="recommendations_settings_subtitle">Kitap önerilerinin nasıl gösterileceğini yapılandırın</string>
-    <string name="recommendation_source_similar_by_title">Ada göre benzer</string>
-    <string name="recommendation_source_similar_by_title_subtitle">Benzer adlı kitapları kaynakta ara</string>
     <string name="recommendation_source_native_only">Yalnızca yerel kaynak</string>
     <string name="recommendation_source_native_only_subtitle">Kaynak tarafından doğrudan sağlanan önerileri kullanın</string>
     <string name="recommendation_source_genre_fallback">Tür eşleşmesi</string>
     <string name="recommendation_source_genre_fallback_subtitle">Yerel öneri olmadığında tür eşleşmesine geri dön</string>
-    <string name="recommendation_search_keywords">Arama anahtar kelimeleri</string>
-    <string name="recommendation_search_keywords_subtitle">Benzer kitapları bulmak için mevcut kitap başlığından çıkarılan anahtar kelimeler</string>
-    <string name="recommendations_disabled">Öneriler devre dışı</string>
-    <string name="recommendations_no_similar_books">Bu başlık için benzer kitap bulunamadı</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2961,8 +2931,6 @@
     <string name="similar_titles_section_title">Benzer Başlıklar</string>
     <string name="show_similar_titles">Benzer Başlıkları Göster</string>
     <string name="similar_titles_source">Benzer Başlıklar Kaynağı</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">Maksimum Benzer Başlık Sayısı</string>
     <string name="similar_titles_settings">Benzer Başlıklar Ayarları</string>
     <string name="similar_titles_source_subtitle">Benzer başlıklar için kullanılacak kaynakları seç</string>
@@ -2982,8 +2950,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">Eşleşen türler/kategorilerde kitaplar bul</string>
     <string name="similar_titles_mode_by_category">Kategoriye Göre Benzer</string>
     <string name="similar_titles_mode_by_category_subtitle">Aynı kategorideki kitapları bul</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

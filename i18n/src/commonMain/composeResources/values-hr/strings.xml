@@ -2912,44 +2912,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Brzo unaprijed postavljeno</string>
-    <string name="cover_theme_preset_subtitle">Primijenite unaprijed definirane postavke za intenzitet naslovne teme</string>
-    <string name="cover_theme_backdrop_blur">Zamućenje pozadine naslovnice</string>
-    <string name="cover_theme_backdrop_blur_subtitle">Podesite intenzitet zamućenja za naslovnu sliku proširenog zaglavlja</string>
-    <string name="cover_theme_background_tint_opacity">Neprozirnost nijansi pozadine</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">Kontrolirajte koliko se boja naslovnice stapa s pozadinom kartice</string>
-    <string name="cover_theme_preset_off">Isključeno</string>
-    <string name="cover_theme_preset_soft">Meko</string>
-    <string name="cover_theme_preset_medium">srednje</string>
-    <string name="cover_theme_preset_high">visoko</string>
-
     <string name="recommendations_empty">Nema dostupnih preporuka</string>
     <string name="recommendations_error">Učitavanje preporuka nije uspjelo</string>
     <string name="recommendations_section_title">Preporuke</string>
     <string name="recommendations_section_title_suggestions">Prijedlozi</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">Postavke preporuka</string>
-    <string name="recommendations_settings_subtitle">Konfigurirajte kako se prikazuju preporuke knjiga</string>
-    <string name="recommendation_source_similar_by_title">Slično po naslovu</string>
-    <string name="recommendation_source_similar_by_title_subtitle">Pretraži izvor za knjige s sličnim nazivima</string>
     <string name="recommendation_source_native_only">Samo izvorni izvor</string>
     <string name="recommendation_source_native_only_subtitle">Koristite preporuke koje izravno pruža izvor</string>
     <string name="recommendation_source_genre_fallback">Podudaranje žanra</string>
     <string name="recommendation_source_genre_fallback_subtitle">Vratite se na podudaranje žanra kada nema izvornih preporuka</string>
-    <string name="recommendation_search_keywords">Ključne riječi</string>
-    <string name="recommendation_search_keywords_subtitle">Ključne riječi izvedene iz naslova trenutačne knjige za pronalaženje sličnih knjiga</string>
-    <string name="recommendations_disabled">Preporuke su onemogućene</string>
-    <string name="recommendations_no_similar_books">Nema pronađenih sličnih knjiga za ovaj naslov</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2957,8 +2927,6 @@
     <string name="similar_titles_section_title">Slični Naslovi</string>
     <string name="show_similar_titles">Prikaži Slične Naslove</string>
     <string name="similar_titles_source">Izvor Sličnih Naslova</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">Maksimalni Broj Sličnih Naslova</string>
     <string name="similar_titles_settings">Postavke Sličnih Naslova</string>
     <string name="similar_titles_source_subtitle">Odaberite koje izvore koristiti za slične naslove</string>
@@ -2978,8 +2946,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">Pronađi knjige s odgovarajućim žanrovima/kategorijama</string>
     <string name="similar_titles_mode_by_category">Slično po Kategoriji</string>
     <string name="similar_titles_mode_by_category_subtitle">Pronađi knjige u istoj kategoriji</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

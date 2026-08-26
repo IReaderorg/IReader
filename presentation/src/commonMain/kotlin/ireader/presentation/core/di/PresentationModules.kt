@@ -3,6 +3,7 @@ package ireader.presentation.core.di
 // Enhanced Settings ViewModels
 import ireader.presentation.core.ScreenContentViewModel
 import ireader.presentation.core.theme.AppThemeViewModel
+import ireader.presentation.core.theme.CoverBasedThemeManager
 import ireader.presentation.di.screenModelModule
 import ireader.presentation.di.syncPresentationModule
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
@@ -59,7 +60,8 @@ val PresentationModules = module {
     factory <FontScreenStateImpl> { FontScreenStateImpl() }
 
     factory  { ScreenContentViewModel(get(), get(), get()) }
-    single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
+    single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get(), get()) }
+    single { CoverBasedThemeManager(get(), get()) }
 
     // ExploreViewModel - Simplified with ExploreUseCases aggregate (Requirements: 4.2, 4.4)
     // Reduced from 10 parameters to 6 using ExploreUseCases aggregate

@@ -2923,44 +2923,14 @@ Recomendado: 1024x1024 ou superior</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Predefinição rápida</string>
-    <string name="cover_theme_preset_subtitle">Aplicar configurações predefinidas para intensidade do tema de capa</string>
-    <string name="cover_theme_backdrop_blur">Desfoque de fundo da capa</string>
-    <string name="cover_theme_backdrop_blur_subtitle">Ajuste a intensidade do desfoque para a imagem estendida da capa do cabeçalho</string>
-    <string name="cover_theme_background_tint_opacity">Opacidade da tonalidade de fundo</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">Control how heavily cover color blends into card backgrounds</string>
-    <string name="cover_theme_preset_off">Desligado</string>
-    <string name="cover_theme_preset_soft">Macio</string>
-    <string name="cover_theme_preset_medium">Médio</string>
-    <string name="cover_theme_preset_high">Alto</string>
-
     <string name="recommendations_empty">Nenhuma recomendação disponível</string>
     <string name="recommendations_error">Falha ao carregar recomendações</string>
     <string name="recommendations_section_title">Recomendações</string>
     <string name="recommendations_section_title_suggestions">Sugestões</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">Configurações de recomendação</string>
-    <string name="recommendations_settings_subtitle">Configurar como as recomendações de livros são exibidas</string>
-    <string name="recommendation_source_similar_by_title">Similar por título</string>
-    <string name="recommendation_source_similar_by_title_subtitle">Pesquisar na fonte livros com nomes semelhantes</string>
     <string name="recommendation_source_native_only">Apenas fonte nativa</string>
     <string name="recommendation_source_native_only_subtitle">Usar recomendações fornecidas diretamente pela fonte</string>
     <string name="recommendation_source_genre_fallback">Correspondência de gênero</string>
     <string name="recommendation_source_genre_fallback_subtitle">Voltar para correspondência de gênero quando não houver recomendações nativas</string>
-    <string name="recommendation_search_keywords">Palavras-chave</string>
-    <string name="recommendation_search_keywords_subtitle">Palavras extraídas do título do livro atual para encontrar livros semelhantes</string>
-    <string name="recommendations_disabled">Recomendações desativadas</string>
-    <string name="recommendations_no_similar_books">Nenhum livro semelhante encontrado para este título</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2968,8 +2938,6 @@ Recomendado: 1024x1024 ou superior</string>
     <string name="similar_titles_section_title">Títulos Similares</string>
     <string name="show_similar_titles">Mostrar Títulos Similares</string>
     <string name="similar_titles_source">Fonte dos Títulos Similares</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">Número Máximo de Títulos Similares</string>
     <string name="similar_titles_settings">Configurações dos Títulos Similares</string>
     <string name="similar_titles_source_subtitle">Escolha quais fontes usar para títulos similares</string>
@@ -2989,8 +2957,7 @@ Recomendado: 1024x1024 ou superior</string>
     <string name="similar_titles_mode_by_genre_subtitle">Encontrar livros com géneros/categorias correspondentes</string>
     <string name="similar_titles_mode_by_category">Similar por Categoria</string>
     <string name="similar_titles_mode_by_category_subtitle">Encontrar livros na mesma categoria</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

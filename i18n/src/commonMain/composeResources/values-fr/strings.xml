@@ -2905,44 +2905,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Préréglage rapide</string>
-    <string name="cover_theme_preset_subtitle">Appliquer des paramètres prédéfinis pour l'intensité du thème de couverture</string>
-    <string name="cover_theme_backdrop_blur">Flou de fond de couverture</string>
-    <string name="cover_theme_backdrop_blur_subtitle">Ajuster l'intensité du flou pour l'image de couverture d'en-tête étendue</string>
-    <string name="cover_theme_background_tint_opacity">Opacité de la teinte d’arrière-plan</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">Contrôlez la façon dont la couleur de la couverture se fond dans les arrière-plans des cartes</string>
-    <string name="cover_theme_preset_off">Désactivé</string>
-    <string name="cover_theme_preset_soft">Doux</string>
-    <string name="cover_theme_preset_medium">Moyen</string>
-    <string name="cover_theme_preset_high">Haut</string>
-
     <string name="recommendations_empty">Aucune recommandation disponible</string>
     <string name="recommendations_error">Échec du chargement des recommandations</string>
     <string name="recommendations_section_title">Recommandations</string>
     <string name="recommendations_section_title_suggestions">Suggestions</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">Paramètres des recommandations</string>
-    <string name="recommendations_settings_subtitle">Configurer l'affichage des recommandations de livres</string>
-    <string name="recommendation_source_similar_by_title">Similaire par titre</string>
-    <string name="recommendation_source_similar_by_title_subtitle">Rechercher dans la source des livres avec des noms similaires</string>
     <string name="recommendation_source_native_only">Source native uniquement</string>
     <string name="recommendation_source_native_only_subtitle">Utiliser les recommandations fournies directement par la source</string>
     <string name="recommendation_source_genre_fallback">Correspondance de genre</string>
     <string name="recommendation_source_genre_fallback_subtitle">Revenir à la correspondance de genre quand il n'y a pas de recommandations natives</string>
-    <string name="recommendation_search_keywords">Mots-clés</string>
-    <string name="recommendation_search_keywords_subtitle">Mots extraits du titre du livre actuel pour trouver des livres similaires</string>
-    <string name="recommendations_disabled">Recommandations désactivées</string>
-    <string name="recommendations_no_similar_books">Aucun livre similaire trouvé pour ce titre</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2950,8 +2920,6 @@
     <string name="similar_titles_section_title">Titres Similaires</string>
     <string name="show_similar_titles">Afficher les Titres Similaires</string>
     <string name="similar_titles_source">Source des Titres Similaires</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">Nombre Maximum de Titres Similaires</string>
     <string name="similar_titles_settings">Paramètres des Titres Similaires</string>
     <string name="similar_titles_source_subtitle">Choisir les sources à utiliser pour les titres similaires</string>
@@ -2971,8 +2939,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">Trouver des livres avec des genres/catégories correspondants</string>
     <string name="similar_titles_mode_by_category">Similaire par Catégorie</string>
     <string name="similar_titles_mode_by_category_subtitle">Trouver des livres dans la même catégorie</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

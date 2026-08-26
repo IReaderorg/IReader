@@ -2918,44 +2918,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Быстрая предустановка</string>
-    <string name="cover_theme_preset_subtitle">Применение предустановленных настроек интенсивности темы обложки</string>
-    <string name="cover_theme_backdrop_blur">Обложка Фон Размытие</string>
-    <string name="cover_theme_backdrop_blur_subtitle">Отрегулируйте интенсивность размытия для изображения обложки расширенного заголовка.</string>
-    <string name="cover_theme_background_tint_opacity">Непрозрачность оттенка фона</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">Контролируйте, насколько сильно цвет обложки сливается с фоном карточки.</string>
-    <string name="cover_theme_preset_off">Выключенный</string>
-    <string name="cover_theme_preset_soft">Мягкий</string>
-    <string name="cover_theme_preset_medium">Середина</string>
-    <string name="cover_theme_preset_high">Высокий</string>
-
     <string name="recommendations_empty">Нет доступных рекомендаций</string>
     <string name="recommendations_error">Не удалось загрузить рекомендации.</string>
     <string name="recommendations_section_title">Рекомендации</string>
     <string name="recommendations_section_title_suggestions">Предложения</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">Настройки рекомендаций</string>
-    <string name="recommendations_settings_subtitle">Настройка отображения рекомендаций книг</string>
-    <string name="recommendation_source_similar_by_title">Похожие по названию</string>
-    <string name="recommendation_source_similar_by_title_subtitle">Поиск в источнике книг с похожими названиями</string>
     <string name="recommendation_source_native_only">Только нативный источник</string>
     <string name="recommendation_source_native_only_subtitle">Использовать рекомендации, предоставленные напрямую источником</string>
     <string name="recommendation_source_genre_fallback">Совпадение по жанру</string>
     <string name="recommendation_source_genre_fallback_subtitle">Возврат к совпадению по жанру при отсутствии нативных рекомендаций</string>
-    <string name="recommendation_search_keywords">Ключевые слова</string>
-    <string name="recommendation_search_keywords_subtitle">Ключевые слова, извлеченные из названия текущей книги для поиска похожих</string>
-    <string name="recommendations_disabled">Рекомендации отключены</string>
-    <string name="recommendations_no_similar_books">Похожие книги для этого названия не найдены</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2963,8 +2933,6 @@
     <string name="similar_titles_section_title">Похожие названия</string>
     <string name="show_similar_titles">Показывать похожие названия</string>
     <string name="similar_titles_source">Источник похожих названий</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">Максимальное количество похожих названий</string>
     <string name="similar_titles_settings">Настройки похожих названий</string>
     <string name="similar_titles_source_subtitle">Выберите источники для похожих названий</string>
@@ -2984,8 +2952,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">Найти книги с совпадающими жанрами/категориями</string>
     <string name="similar_titles_mode_by_category">Похоже по категории</string>
     <string name="similar_titles_mode_by_category_subtitle">Найти книги в той же категории</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

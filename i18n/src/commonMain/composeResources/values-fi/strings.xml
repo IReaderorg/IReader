@@ -2924,44 +2924,14 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Nopea esiasetus</string>
-    <string name="cover_theme_preset_subtitle">Käytä valmiita kansiteeman intensiteetin asetuksia</string>
-    <string name="cover_theme_backdrop_blur">Kannen taustan sumennus</string>
-    <string name="cover_theme_backdrop_blur_subtitle">Säädä laajennetun otsikon kansikuvan epäterävyyttä</string>
-    <string name="cover_theme_background_tint_opacity">Taustan sävyn läpinäkyvyys</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">Hallitse kuinka voimakkaasti kannen väri sekoittuu korttien taustoihin</string>
-    <string name="cover_theme_preset_off">Pois</string>
-    <string name="cover_theme_preset_soft">Pehmeä</string>
-    <string name="cover_theme_preset_medium">Keskikokoinen</string>
-    <string name="cover_theme_preset_high">Korkea</string>
-
     <string name="recommendations_empty">Suosituksia ei ole saatavilla</string>
     <string name="recommendations_error">Suositusten lataaminen epäonnistui</string>
     <string name="recommendations_section_title">Suositukset</string>
     <string name="recommendations_section_title_suggestions">ehdotuksia</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">Suositusten asetukset</string>
-    <string name="recommendations_settings_subtitle">Määritä, miten kirjasuositukset näytetään</string>
-    <string name="recommendation_source_similar_by_title">Samannimiset</string>
-    <string name="recommendation_source_similar_by_title_subtitle">Etsi lähteestä samannimisiä kirjoja</string>
     <string name="recommendation_source_native_only">Vain alkuperäinen lähde</string>
     <string name="recommendation_source_native_only_subtitle">Käytä lähde suosituksia suoraan</string>
     <string name="recommendation_source_genre_fallback">Genren täydennys</string>
     <string name="recommendation_source_genre_fallback_subtitle">Käytä genrematchingia, kun alkuperäisiä suosituksia ei ole</string>
-    <string name="recommendation_search_keywords">Hakusanat</string>
-    <string name="recommendation_search_keywords_subtitle">Nykyisen kirjan otsikosta poimitut sanat vastaavien kirjojen löytämiseksi</string>
-    <string name="recommendations_disabled">Suositukset poistettu käytöstä</string>
-    <string name="recommendations_no_similar_books">Tälle otsikolle ei löytynyt samanlaisia kirjoja</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2969,8 +2939,6 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="similar_titles_section_title">Samankaltaiset Otsikot</string>
     <string name="show_similar_titles">Näytä Samankaltaiset Otsikot</string>
     <string name="similar_titles_source">Samankaltaisten Otsikoiden Lähde</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">Samankaltaisten Otsikoiden Enimmäismäärä</string>
     <string name="similar_titles_settings">Samankaltaisten Otsikoiden Asetukset</string>
     <string name="similar_titles_source_subtitle">Valitse lähteet, joita käytetään samankaltaisiin otsikoihin</string>
@@ -2990,8 +2958,7 @@ Suositus: 1024x1024 tai suurempi</string>
     <string name="similar_titles_mode_by_genre_subtitle">Etsi kirjoja, joiden genret/kategoriat vastaavat</string>
     <string name="similar_titles_mode_by_category">Samankaltainen Kategorian mukaan</string>
     <string name="similar_titles_mode_by_category_subtitle">Etsi kirjoja samasta kategoriasta</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

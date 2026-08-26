@@ -2914,44 +2914,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">クイックプリセット</string>
-    <string name="cover_theme_preset_subtitle">カバーテーマの強度に事前定義された設定を適用する</string>
-    <string name="cover_theme_backdrop_blur">カバー背景のぼかし</string>
-    <string name="cover_theme_backdrop_blur_subtitle">拡張ヘッダー カバー画像のぼかし強度を調整する</string>
-    <string name="cover_theme_background_tint_opacity">背景の色合いの不透明度</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">カバーの色がカードの背景にどの程度溶け込むかを制御します</string>
-    <string name="cover_theme_preset_off">オフ</string>
-    <string name="cover_theme_preset_soft">柔らかい</string>
-    <string name="cover_theme_preset_medium">中くらい</string>
-    <string name="cover_theme_preset_high">高い</string>
-
     <string name="recommendations_empty">利用可能な推奨事項はありません</string>
     <string name="recommendations_error">推奨事項の読み込みに失敗しました</string>
     <string name="recommendations_section_title">推奨事項</string>
     <string name="recommendations_section_title_suggestions">提案</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">推奨設定</string>
-    <string name="recommendations_settings_subtitle">書籍の推奨表示方法を構成する</string>
-    <string name="recommendation_source_similar_by_title">タイトルで類似</string>
-    <string name="recommendation_source_similar_by_title_subtitle">ソースで同じ名前の書籍を検索</string>
     <string name="recommendation_source_native_only">ネイティブソースのみ</string>
     <string name="recommendation_source_native_only_subtitle">ソースから直接提供される推奨を使用する</string>
     <string name="recommendation_source_genre_fallback">ジャンルマッチング</string>
     <string name="recommendation_source_genre_fallback_subtitle">ネイティブ推奨がない場合にジャンルマッチングにフォールバック</string>
-    <string name="recommendation_search_keywords">検索キーワード</string>
-    <string name="recommendation_search_keywords_subtitle">類似の書籍を見つけるために現在の書籍のタイトルから抽出されたキーワード</string>
-    <string name="recommendations_disabled">推奨が無効です</string>
-    <string name="recommendations_no_similar_books">このタイトルの類似書籍が見つかりません</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2959,8 +2929,6 @@
     <string name="similar_titles_section_title">類似タイトル</string>
     <string name="show_similar_titles">類似タイトルを表示</string>
     <string name="similar_titles_source">類似タイトルのソース</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">類似タイトルの最大数</string>
     <string name="similar_titles_settings">類似タイトル設定</string>
     <string name="similar_titles_source_subtitle">類似タイトルに使用するソースを選択</string>
@@ -2980,8 +2948,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">ジャンル/カテゴリが一致する本を検索</string>
     <string name="similar_titles_mode_by_category">カテゴリで類似</string>
     <string name="similar_titles_mode_by_category_subtitle">同じカテゴリの本を検索</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

@@ -2921,44 +2921,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Prasetel Cepat</string>
-    <string name="cover_theme_preset_subtitle">Terapkan pengaturan yang telah ditentukan sebelumnya untuk intensitas tema sampul</string>
-    <string name="cover_theme_backdrop_blur">Penutup Latar Belakang Buram</string>
-    <string name="cover_theme_backdrop_blur_subtitle">Sesuaikan intensitas blur untuk gambar sampul header yang diperluas</string>
-    <string name="cover_theme_background_tint_opacity">Opasitas Warna Latar Belakang</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">Kontrol seberapa banyak warna sampul menyatu dengan latar belakang kartu</string>
-    <string name="cover_theme_preset_off">Mati</string>
-    <string name="cover_theme_preset_soft">Lembut</string>
-    <string name="cover_theme_preset_medium">Sedang</string>
-    <string name="cover_theme_preset_high">Tinggi</string>
-
     <string name="recommendations_empty">Tidak ada rekomendasi yang tersedia</string>
     <string name="recommendations_error">Gagal memuat rekomendasi</string>
     <string name="recommendations_section_title">Rekomendasi</string>
     <string name="recommendations_section_title_suggestions">Saran</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">Pengaturan Rekomendasi</string>
-    <string name="recommendations_settings_subtitle">Konfigurasikan cara menampilkan rekomendasi buku</string>
-    <string name="recommendation_source_similar_by_title">Mirip berdasarkan Judul</string>
-    <string name="recommendation_source_similar_by_title_subtitle">Cari di sumber untuk buku dengan nama yang mirip</string>
     <string name="recommendation_source_native_only">Hanya Sumber Asli</string>
     <string name="recommendation_source_native_only_subtitle">Gunakan rekomendasi yang diberikan langsung oleh sumber</string>
     <string name="recommendation_source_genre_fallback">Pencocokan Genre</string>
     <string name="recommendation_source_genre_fallback_subtitle">Kembali ke pencocokan genre ketika tidak ada rekomendasi asli</string>
-    <string name="recommendation_search_keywords">Kata Kunci Pencarian</string>
-    <string name="recommendation_search_keywords_subtitle">Kata kunci yang diekstrak dari judul buku saat ini untuk menemukan buku yang mirip</string>
-    <string name="recommendations_disabled">Rekomendasi dinonaktifkan</string>
-    <string name="recommendations_no_similar_books">Tidak ada buku mirip yang ditemukan untuk judul ini</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2966,8 +2936,6 @@
     <string name="similar_titles_section_title">Judul yang Mirip</string>
     <string name="show_similar_titles">Tampilkan Judul yang Mirip</string>
     <string name="similar_titles_source">Sumber Judul yang Mirip</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">Jumlah Maksimum Judul yang Mirip</string>
     <string name="similar_titles_settings">Pengaturan Judul yang Mirip</string>
     <string name="similar_titles_source_subtitle">Pilih sumber mana yang akan digunakan untuk judul yang mirip</string>
@@ -2987,8 +2955,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">Cari buku dengan genre/kategori yang cocok</string>
     <string name="similar_titles_mode_by_category">Mirip berdasarkan Kategori</string>
     <string name="similar_titles_mode_by_category_subtitle">Cari buku dalam kategori yang sama</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

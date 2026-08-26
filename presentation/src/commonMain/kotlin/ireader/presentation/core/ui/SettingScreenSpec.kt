@@ -93,7 +93,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "appearance",
                     title = localizeHelper.localize(Res.string.appearance),
-                    description = "Customize app theme and colors",
+                    description = localizeHelper.localize(Res.string.appearance_description),
                     icon = Icons.Default.Palette,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.appearance) }
@@ -101,7 +101,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "font",
                     title = localizeHelper.localize(Res.string.font),
-                    description = "Choose reading fonts and sizes",
+                    description = localizeHelper.localize(Res.string.font_description),
                     icon = Icons.Default.FontDownload,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.fontSettings) }
@@ -109,7 +109,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "theme",
                     title = localizeHelper.localize(Res.string.theme),
-                    description = "Light, dark, or system default theme",
+                    description = localizeHelper.localize(Res.string.theme_description),
                     icon = Icons.Default.DarkMode,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.appearance) }
@@ -117,7 +117,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "colors",
                     title = localizeHelper.localize(Res.string.colors),
-                    description = "Dynamic colors and Material You",
+                    description = localizeHelper.localize(Res.string.colors_description),
                     icon = Icons.Default.ColorLens,
                     section = localizeHelper.localize(Res.string.appearance),
                     onClick = { navController.navigate(NavigationRoutes.appearance) }
@@ -127,7 +127,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "general",
                     title = localizeHelper.localize(Res.string.general),
-                    description = "General app preferences",
+                    description = localizeHelper.localize(Res.string.general_description),
                     icon = Icons.Default.Tune,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.generalSettings) }
@@ -135,7 +135,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "translation",
                     title = localizeHelper.localize(Res.string.translation_settings),
-                    description = "Configure translation preferences",
+                    description = localizeHelper.localize(Res.string.translation_description),
                     icon = Icons.Default.Translate,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.translationSettings) }
@@ -143,7 +143,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "supabase",
                     title = localizeHelper.localize(Res.string.supabase_configuration),
-                    description = "Configure custom Supabase instance for sync",
+                    description = localizeHelper.localize(Res.string.supabase_configuration_description),
                     icon = Icons.Outlined.Cloud,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.supabaseConfig) }
@@ -151,7 +151,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "language",
                     title = localizeHelper.localize(Res.string.language),
-                    description = "App language settings",
+                    description = localizeHelper.localize(Res.string.language_description),
                     icon = Icons.Default.Language,
                     section = localizeHelper.localize(Res.string.general),
                     onClick = { navController.navigate(NavigationRoutes.generalSettings) }
@@ -161,7 +161,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "reader",
                     title = localizeHelper.localize(Res.string.reader),
-                    description = "Customize reading experience",
+                    description = localizeHelper.localize(Res.string.reader_description),
                     icon = Icons.Default.ChromeReaderMode,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
@@ -169,7 +169,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "tts",
                     title = localizeHelper.localize(Res.string.tts_engine_manager),
-                    description = "Configure text-to-speech engines and voices",
+                    description = localizeHelper.localize(Res.string.tts_engine_manager_description),
                     icon = Icons.Default.RecordVoiceOver,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.ttsEngineManager) }
@@ -177,7 +177,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "statistics",
                     title = localizeHelper.localize(Res.string.statistics),
-                    description = "View reading statistics and progress",
+                    description = localizeHelper.localize(Res.string.statistics_description),
                     icon = Icons.Default.BarChart,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readingHub) }
@@ -185,7 +185,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "font_size",
                     title = localizeHelper.localize(Res.string.font_size),
-                    description = "Adjust text size for reading",
+                    description = localizeHelper.localize(Res.string.font_size_description),
                     icon = Icons.Default.FormatSize,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
@@ -193,7 +193,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "reading_mode",
                     title = localizeHelper.localize(Res.string.reading_mode),
-                    description = "Scroll or page reading mode",
+                    description = localizeHelper.localize(Res.string.reading_mode_description),
                     icon = Icons.Default.MenuBook,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.readerSettings) }
@@ -211,7 +211,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "security",
                     title = localizeHelper.localize(Res.string.security),
-                    description = "Manage security and privacy settings",
+                    description = localizeHelper.localize(Res.string.security_description),
                     icon = Icons.Default.Security,
                     section = localizeHelper.localize(Res.string.security),
                     onClick = { navController.navigate(NavigationRoutes.securitySettings) }
@@ -229,23 +229,23 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "repository",
                     title = localizeHelper.localize(Res.string.repository),
-                    description = "Manage content sources and extensions",
+                    description = localizeHelper.localize(Res.string.repository_description),
                     icon = Icons.Default.Extension,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.repository) }
                 ))
                 add(SearchableSettingItem(
                     id = "plugins",
-                    title = "Installed Plugins",
-                    description = "Manage installed plugins and features",
+                    title = localizeHelper.localize(Res.string.installed_plugins),
+                    description = localizeHelper.localize(Res.string.installed_plugins_description),
                     icon = Icons.Default.Apps,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.pluginManagement) }
                 ))
                 add(SearchableSettingItem(
                     id = "feature_store",
-                    title = "Feature Store",
-                    description = "Browse and install plugins",
+                    title = localizeHelper.localize(Res.string.feature_store),
+                    description = localizeHelper.localize(Res.string.feature_store_description),
                     icon = Icons.Default.ShoppingCart,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.featureStore) }
@@ -254,8 +254,8 @@ class SettingScreenSpec {
                 if (isDesktop) {
                     add(SearchableSettingItem(
                         id = "cloudflare_bypass",
-                        title = "Cloudflare Bypass",
-                        description = "Configure FlareSolverr for protected sources",
+                        title = localizeHelper.localize(Res.string.cloudflare_bypass),
+                        description = localizeHelper.localize(Res.string.cloudflare_bypass_description),
                         icon = Icons.Default.Shield,
                         section = localizeHelper.localize(Res.string.advanced),
                         onClick = { navController.navigate(NavigationRoutes.cloudflareBypass) }
@@ -264,15 +264,15 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "advanced",
                     title = localizeHelper.localize(Res.string.advance_setting),
-                    description = "Advanced configuration options",
+                    description = localizeHelper.localize(Res.string.advance_setting_description),
                     icon = Icons.Default.Code,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
                 ))
                 add(SearchableSettingItem(
                     id = "network",
-                    title = "Advanced Network",
-                    description = "User agent, cookies, and proxy settings",
+                    title = localizeHelper.localize(Res.string.advanced_network),
+                    description = localizeHelper.localize(Res.string.advanced_network_description),
                     icon = Icons.Default.Wifi,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.networkSettings) }
@@ -280,7 +280,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "cache",
                     title = localizeHelper.localize(Res.string.clear_all_cache),
-                    description = "Clear cached data to free up space",
+                    description = localizeHelper.localize(Res.string.clear_all_cache_description),
                     icon = Icons.Default.DeleteSweep,
                     section = localizeHelper.localize(Res.string.advanced),
                     onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
@@ -290,7 +290,7 @@ class SettingScreenSpec {
                 add(SearchableSettingItem(
                     id = "tracking",
                     title = localizeHelper.localize(Res.string.tracking),
-                    description = "Sync reading progress with AniList, MAL, and more",
+                    description = localizeHelper.localize(Res.string.tracking_description),
                     icon = Icons.Default.Sync,
                     section = localizeHelper.localize(Res.string.tracking),
                     onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
@@ -299,10 +299,10 @@ class SettingScreenSpec {
                 // WiFi Sync
                 add(SearchableSettingItem(
                     id = "wifi_sync",
-                    title = "WiFi Sync",
-                    description = "Sync books and progress between devices on local network",
+                    title = localizeHelper.localize(Res.string.wifi_sync),
+                    description = localizeHelper.localize(Res.string.wifi_sync_description),
                     icon = Icons.Default.Wifi,
-                    section = "Sync",
+                    section = localizeHelper.localize(Res.string.sync),
                     onClick = { navController.navigate(NavigationRoutes.wifiSync) }
                 ))
             }
@@ -480,7 +480,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.appearance),
-                            description = "Customize app theme and colors",
+                            description = localizeHelper.localize(Res.string.appearance_description),
                             icon = Icons.Default.Palette,
                             onClick = { navController.navigate(NavigationRoutes.appearance) }
                         )
@@ -489,7 +489,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.font),
-                            description = "Choose reading fonts and sizes",
+                            description = localizeHelper.localize(Res.string.font_description),
                             icon = Icons.Default.FontDownload,
                             onClick = { navController.navigate(NavigationRoutes.fontSettings) }
                         )
@@ -506,7 +506,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.general),
-                            description = "General app preferences",
+                            description = localizeHelper.localize(Res.string.general_description),
                             icon = Icons.Default.Tune,
                             onClick = { navController.navigate(NavigationRoutes.generalSettings) }
                         )
@@ -515,7 +515,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.translation_settings),
-                            description = "Configure translation preferences",
+                            description = localizeHelper.localize(Res.string.translation_description),
                             icon = Icons.Default.Translate,
                             onClick = { navController.navigate(NavigationRoutes.translationSettings) }
                         )
@@ -523,7 +523,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.supabase_configuration),
-                            description = "Configure custom Supabase instance for sync",
+                            description = localizeHelper.localize(Res.string.supabase_configuration_description),
                             icon = Icons.Outlined.Cloud,
                             onClick = { navController.navigate(NavigationRoutes.supabaseConfig) }
                         )
@@ -540,7 +540,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.reader),
-                            description = "Customize reading experience",
+                            description = localizeHelper.localize(Res.string.reader_description),
                             icon = Icons.Default.ChromeReaderMode,
                             onClick = { navController.navigate(NavigationRoutes.readerSettings) }
                         )
@@ -549,7 +549,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.tts_engine_manager),
-                            description = "Configure text-to-speech engines and voices",
+                            description = localizeHelper.localize(Res.string.tts_engine_manager_description),
                             icon = Icons.Default.RecordVoiceOver,
                             onClick = { navController.navigate(NavigationRoutes.ttsEngineManager) }
                         )
@@ -558,7 +558,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.statistics),
-                            description = "View reading statistics and progress",
+                            description = localizeHelper.localize(Res.string.statistics_description),
                             icon = Icons.Default.BarChart,
                             onClick = { navController.navigate(NavigationRoutes.readingHub) }
                         )
@@ -583,7 +583,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.security),
-                            description = "Manage security and privacy settings",
+                            description = localizeHelper.localize(Res.string.security_description),
                             icon = Icons.Default.Security,
                             onClick = { navController.navigate(NavigationRoutes.securitySettings) }
                         )
@@ -600,7 +600,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.tracking),
-                            description = "Sync reading progress with AniList, MAL, and more",
+                            description = localizeHelper.localize(Res.string.tracking_description),
                             icon = Icons.Default.Sync,
                             onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
                         )
@@ -608,8 +608,8 @@ class SettingScreenSpec {
                     
                     item {
                         SettingsItem(
-                            title = "WiFi Sync",
-                            description = "Sync books and progress between devices on local network",
+                            title = localizeHelper.localize(Res.string.wifi_sync),
+                            description = localizeHelper.localize(Res.string.wifi_sync_description),
                             icon = Icons.Default.Wifi,
                             onClick = { navController.navigate(NavigationRoutes.wifiSync) }
                         )
@@ -626,7 +626,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.repository),
-                            description = "Manage content sources and extensions",
+                            description = localizeHelper.localize(Res.string.repository_description),
                             icon = Icons.Default.Extension,
                             onClick = { navController.navigate(NavigationRoutes.repository) }
                         )
@@ -634,8 +634,8 @@ class SettingScreenSpec {
                     
                     item {
                         SettingsItem(
-                            title = "Installed Plugins",
-                            description = "Manage installed plugins and features",
+                            title = localizeHelper.localize(Res.string.installed_plugins),
+                            description = localizeHelper.localize(Res.string.installed_plugins_description),
                             icon = Icons.Default.Apps,
                             onClick = { navController.navigate(NavigationRoutes.pluginManagement) }
                         )
@@ -643,8 +643,8 @@ class SettingScreenSpec {
                     
                     item {
                         SettingsItem(
-                            title = "Feature Store",
-                            description = "Browse and install plugins",
+                            title = localizeHelper.localize(Res.string.feature_store),
+                            description = localizeHelper.localize(Res.string.feature_store_description),
                             icon = Icons.Default.ShoppingCart,
                             onClick = { navController.navigate(NavigationRoutes.featureStore) }
                         )
@@ -654,8 +654,8 @@ class SettingScreenSpec {
                     if (isDesktop) {
                         item {
                             SettingsItem(
-                                title = "Cloudflare Bypass",
-                                description = "Configure FlareSolverr for protected sources",
+                                title =  localizeHelper.localize(Res.string.cloudflare_bypass),
+                                description = localizeHelper.localize(Res.string.cloudflare_bypass_description),
                                 icon = Icons.Default.Shield,
                                 onClick = { navController.navigate(NavigationRoutes.cloudflareBypass) }
                             )
@@ -665,7 +665,7 @@ class SettingScreenSpec {
                     item {
                         SettingsItem(
                             title = localizeHelper.localize(Res.string.advance_setting),
-                            description = "Advanced configuration options",
+                            description = localizeHelper.localize(Res.string.advance_setting_description),
                             icon = Icons.Default.Code,
                             onClick = { navController.navigate(NavigationRoutes.advanceSettings) }
                         )

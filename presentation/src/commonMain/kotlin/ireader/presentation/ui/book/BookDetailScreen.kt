@@ -14,7 +14,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
@@ -33,7 +35,9 @@ import androidx.compose.ui.unit.dp
 import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.BookCover
 import ireader.domain.models.entities.Recommendation
+import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.core.ui.TwoPanelBoxStandalone
@@ -130,6 +134,24 @@ fun BookDetailScreen(
     val hideBackdrop by uiPreferences.hideNovelBackdrop().changes().collectAsState(initial = false)
     val useFab by uiPreferences.useFabInNovelInfo().changes().collectAsState(initial = false)
     
+    // Cover-based dynamic color theme: feed the current book cover to the
+    // AppThemeViewModel; the root AppTheme applies the resulting scheme globally.
+    val appThemeViewModel: AppThemeViewModel = koinInject()
+    val coverOwner = remember { Any() }  // composition-scoped claim token
+    val rawCoverUrl = BookCover.from(book).cover
+    val effectiveCoverUrl = remember(book.id, rawCoverUrl) {
+        rawCoverUrl?.takeIf { it.isNotBlank() }
+    }
+    val isSystemDark = isSystemInDarkTheme()
+    DisposableEffect(effectiveCoverUrl, isSystemDark) {
+        // Re-runs on every resume of this back-stack entry, so returning from the
+        // reader re-claims the theme immediately (fixes "color lost on back").
+        appThemeViewModel.setCurrentCoverUrl(effectiveCoverUrl, book.sourceId, isSystemDark, coverOwner)
+        onDispose {
+            appThemeViewModel.setCurrentCoverUrl(null, null, false, coverOwner)
+        }
+    }
+
     // Cache tablet check - computed once per composition
     val isTablet = isTableUi()
     

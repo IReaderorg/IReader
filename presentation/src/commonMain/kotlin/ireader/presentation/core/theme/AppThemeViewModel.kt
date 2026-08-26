@@ -1,13 +1,20 @@
 package ireader.presentation.core.theme
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.intl.Locale
 import ireader.core.prefs.Preference
 import ireader.domain.data.repository.ThemeRepository
@@ -31,12 +38,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-
 class AppThemeViewModel(
     private val uiPreferences: UiPreferences,
     private val themeRepository: ThemeRepository,
     private val dynamicColorScheme: DynamicColorScheme,
-    val scope: CoroutineScope
+    val scope: CoroutineScope,
+    private val coverBasedThemeManager: CoverBasedThemeManager? = null
 ) {
     fun <T> Preference<T>.asState() = PreferenceMutableState(this, scope)
 
@@ -44,9 +51,10 @@ class AppThemeViewModel(
     private val themeModeState = uiPreferences.themeMode().asState()
     private val colorThemeState = uiPreferences.colorTheme().asState()
     private val dynamicColorModeState = uiPreferences.dynamicColorMode().asState()
+    private val coverBasedThemeEnabledState = uiPreferences.coverBasedThemeEnabled().asState()
     private val useTrueBlackState = uiPreferences.useTrueBlack().asState()
     private val appUiFontState = uiPreferences.appUiFont().asState()
-    
+
     // Pre-create color states for both light and dark modes
     // This ensures we always have reactive state objects ready
     private val lightColorsState = uiPreferences.getLightColors().asState(scope)
@@ -57,6 +65,11 @@ class AppThemeViewModel(
             themes.removeIf { baseTheme -> baseTheme.id > 0L }
             themes.addAll(it)
         }.launchIn(scope)
+
+        // Clear the published scheme when the feature is switched off
+        uiPreferences.coverBasedThemeEnabled().changes().onEach { enabled ->
+            if (!enabled) coverBasedThemeManager?.clearAll()
+        }.launchIn(scope)
     }
 
 
@@ -66,6 +79,7 @@ class AppThemeViewModel(
         val themeMode = themeModeState.value
         val colorTheme = colorThemeState.value
         val dynamicColorMode = dynamicColorModeState.value
+        val coverBasedThemeEnabled = coverBasedThemeEnabledState.value
         val useTrueBlack = useTrueBlackState.value
         
         val baseTheme = getBaseTheme(themeMode, colorTheme)
@@ -96,27 +110,43 @@ class AppThemeViewModel(
             baseTheme.materialColors.toComposeColorScheme()
         }
         
+        // Step 1b: Apply cover-based theme if enabled. The cover scheme wins over
+        // dynamic/base themes; user custom primary/secondary are skipped so they
+        // don't fight the extracted palette.
+        var usingCoverScheme = false
+        if (coverBasedThemeEnabled && coverBasedThemeManager != null) {
+            val coverScheme = coverBasedThemeManager.coverBasedTheme.collectAsState(initial = null).value
+            if (coverScheme != null) {
+                materialColors = coverScheme.toComposeColorScheme()
+                usingCoverScheme = true
+            }
+        }
+         
         // Step 2: Apply custom primary/secondary colors if specified
         val customPrimary = customPrimaryColor.takeIf { it != Color.Unspecified }
         val customSecondary = customSecondaryColor.takeIf { it != Color.Unspecified }
         
-        if (customPrimary != null || customSecondary != null) {
+        if (!usingCoverScheme && (customPrimary != null || customSecondary != null)) {
             materialColors = ThemeColorUtils.applyCustomColors(
                 materialColors,
                 customPrimary,
                 customSecondary
             )
         }
-        
+         
         // Step 3: Apply true black mode if enabled for dark themes
         if (!isLight && useTrueBlack) {
             materialColors = ThemeColorUtils.applyTrueBlack(materialColors)
         }
-        
+         
         // Step 4: Ensure all "on" colors have proper contrast
         materialColors = ThemeColorUtils.ensureProperOnColors(materialColors)
-        
-        // Step 5: Create extra colors for bars
+
+        // Step 5: Animate toward the final scheme — every theme change (cover claim,
+        // cover release, manual theme switch) cross-fades instead of snapping.
+        materialColors = animateScheme(materialColors, isLight)
+
+        // Step 6: Create extra colors for bars
         // Use base theme's bar color, but allow custom override
         val extraColors = createExtraColors(
             baseExtraColors = baseTheme.extraColors,
@@ -125,8 +155,66 @@ class AppThemeViewModel(
             isLight = isLight,
             useTrueBlack = useTrueBlack
         )
-        
+
         return materialColors to extraColors
+    }
+    
+    /**
+     * [owner] is a composition-scoped token (e.g. remember { Any() }) identifying the
+     * claiming screen; its dispose must clear with the same token so stale screens
+     * can't wipe a theme claimed by someone else.
+     */
+    fun setCurrentCoverUrl(coverUrl: String?, sourceId: Long?, isDark: Boolean, owner: Any) {
+        if (coverBasedThemeManager == null) return
+        if (!coverBasedThemeEnabledState.value || coverUrl == null) {
+            coverBasedThemeManager.clear(owner)
+            return
+        }
+        val resolvedIsDark = when (uiPreferences.themeMode().get()) {
+            PreferenceValues.ThemeMode.Light -> false
+            PreferenceValues.ThemeMode.Dark -> true
+            else -> isDark
+        }
+        coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, resolvedIsDark, owner)
+    }
+
+    /** Feature switched off — unconditional clear regardless of owner. */
+    fun onCoverBasedThemeDisabled() {
+        coverBasedThemeManager?.clearAll()
+    }
+
+    /**
+     * Animates toward whatever the fully-computed target scheme is — cover claim,
+     * release, switching between books, or a manual theme change all cross-fade.
+     * Lerp starts from the currently displayed colors, so mid-flight retargets are
+     * seamless.
+     */
+    @Composable
+    private fun animateScheme(target: ColorScheme, isLight: Boolean): ColorScheme {
+        var lastLight by remember { mutableStateOf(isLight) }
+        val anim = remember { Animatable(1f) }
+        // Animation start point; null while settled on target
+        val from = remember { mutableStateOf<ColorScheme?>(null) }
+
+        // Last frame actually shown — recomputed every pass, so a retarget mid-flight
+        // starts the new fade from wherever the screen currently is.
+        val displayed = from.value?.lerpTo(target, anim.value) ?: target
+
+        LaunchedEffect(target, isLight) {
+            if (isLight != lastLight) {
+                // Light↔dark flips read as intentional; blend would pass through muddy gray
+                lastLight = isLight
+                from.value = null
+                anim.snapTo(1f)
+            } else if (displayed != target) {
+                from.value = displayed
+                anim.snapTo(0f)
+                anim.animateTo(1f, tween(durationMillis = 400, easing = FastOutSlowInEasing))
+                from.value = null
+            }
+        }
+
+        return displayed
     }
 
     @Composable
@@ -190,6 +278,39 @@ class AppThemeViewModel(
 
     var locales by mutableStateOf(listOf<Locale>())
         private set
+
+    @Composable
+    private fun ColorScheme.lerpTo(other: ColorScheme, fraction: Float): ColorScheme = ColorScheme(
+        primary = lerp(primary, other.primary, fraction),
+        onPrimary = lerp(onPrimary, other.onPrimary, fraction),
+        primaryContainer = lerp(primaryContainer, other.primaryContainer, fraction),
+        onPrimaryContainer = lerp(onPrimaryContainer, other.onPrimaryContainer, fraction),
+        inversePrimary = lerp(inversePrimary, other.inversePrimary, fraction),
+        secondary = lerp(secondary, other.secondary, fraction),
+        onSecondary = lerp(onSecondary, other.onSecondary, fraction),
+        secondaryContainer = lerp(secondaryContainer, other.secondaryContainer, fraction),
+        onSecondaryContainer = lerp(onSecondaryContainer, other.onSecondaryContainer, fraction),
+        tertiary = lerp(tertiary, other.tertiary, fraction),
+        onTertiary = lerp(onTertiary, other.onTertiary, fraction),
+        tertiaryContainer = lerp(tertiaryContainer, other.tertiaryContainer, fraction),
+        onTertiaryContainer = lerp(onTertiaryContainer, other.onTertiaryContainer, fraction),
+        background = lerp(background, other.background, fraction),
+        onBackground = lerp(onBackground, other.onBackground, fraction),
+        surface = lerp(surface, other.surface, fraction),
+        onSurface = lerp(onSurface, other.onSurface, fraction),
+        surfaceVariant = lerp(surfaceVariant, other.surfaceVariant, fraction),
+        onSurfaceVariant = lerp(onSurfaceVariant, other.onSurfaceVariant, fraction),
+        surfaceTint = lerp(surfaceTint, other.surfaceTint, fraction),
+        inverseSurface = lerp(inverseSurface, other.inverseSurface, fraction),
+        inverseOnSurface = lerp(inverseOnSurface, other.inverseOnSurface, fraction),
+        error = lerp(error, other.error, fraction),
+        onError = lerp(onError, other.onError, fraction),
+        errorContainer = lerp(errorContainer, other.errorContainer, fraction),
+        onErrorContainer = lerp(onErrorContainer, other.onErrorContainer, fraction),
+        outline = lerp(outline, other.outline, fraction),
+        outlineVariant = lerp(outlineVariant, other.outlineVariant, fraction),
+        scrim = lerp(scrim, other.scrim, fraction)
+    )
 
     @Composable
     fun getTypography(): Typography {

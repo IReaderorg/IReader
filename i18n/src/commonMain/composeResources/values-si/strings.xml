@@ -2918,44 +2918,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">ඉක්මන් පෙරසිටුවීම</string>
-    <string name="cover_theme_preset_subtitle">ආවරණ තේමා තීව්‍රතාවය සඳහා පූර්ව නිශ්චිත සැකසුම් යොදන්න</string>
-    <string name="cover_theme_backdrop_blur">ආවරණ පසුබිම බොඳ කිරීම</string>
-    <string name="cover_theme_backdrop_blur_subtitle">විස්තීරණ ශීර්ෂ ආවරණ රූපය සඳහා නොපැහැදිලි තීව්‍රතාව සීරුමාරු කරන්න</string>
-    <string name="cover_theme_background_tint_opacity">පසුබිම් ටින්ට් පාරාන්ධතාව</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">කාඩ්පත් පසුබිම්වලට වර්ණ සම්මිශ්‍රණය වන ආකාරය පාලනය කරන්න</string>
-    <string name="cover_theme_preset_off">අක්රියයි</string>
-    <string name="cover_theme_preset_soft">මෘදුයි</string>
-    <string name="cover_theme_preset_medium">මධ්යම</string>
-    <string name="cover_theme_preset_high">ඉහළ</string>
-
     <string name="recommendations_empty">නිර්දේශ නොමැත</string>
     <string name="recommendations_error">නිර්දේශ පූරණය කිරීමට අසමත් විය</string>
     <string name="recommendations_section_title">නිර්දේශ</string>
     <string name="recommendations_section_title_suggestions">යෝජනා</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">නිර්දේශ සැකසුම්</string>
-    <string name="recommendations_settings_subtitle">පොත් නිර්දේශ පෙන්වන ආකාරය සකසන්න</string>
-    <string name="recommendation_source_similar_by_title">මාතෘකාව අනුව සමාන</string>
-    <string name="recommendation_source_similar_by_title_subtitle">සමාන නම් ඇති පොත් සඳහා මූලාශ්‍රයෙන් සොයන්න</string>
     <string name="recommendation_source_native_only">නේටිව් මූලාශ්‍රය මාත්‍රයි</string>
     <string name="recommendation_source_native_only_subtitle">මූලාශ්‍රය මගින් සෘජුවෙන් ලබා දෙන නිර්දේශ භාවිතා කරන්න</string>
     <string name="recommendation_source_genre_fallback">ජානු ගැලපීම</string>
     <string name="recommendation_source_genre_fallback_subtitle">නේටිව් නිර්දේශ නැති විට ජානු ගැලපීමට වාඩි වන්න</string>
-    <string name="recommendation_search_keywords">සොයන යතුරු වචන</string>
-    <string name="recommendation_search_keywords_subtitle">සමාන පොත් හඳුනා ගැනීමට වර්තමාන පොතේ මාතෘකාවෙන් නිකුත් කරන යතුරු වචන</string>
-    <string name="recommendations_disabled">නිර්දේශ අබල කර ඇත</string>
-    <string name="recommendations_no_similar_books">මෙම මාතෘකාවට සමාන පොත් හඳුනාගෙන නැත</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2963,8 +2933,6 @@
     <string name="similar_titles_section_title">සමාන මාතෘකා</string>
     <string name="show_similar_titles">සමාන මාතෘකා පෙන්වන්න</string>
     <string name="similar_titles_source">සමාන මාතෘකා මූලාස්ථානය</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">සමාන මාතෘකා උපරිම ගණන</string>
     <string name="similar_titles_settings">සමාන මාතෘකා සැකසුම්</string>
     <string name="similar_titles_source_subtitle">සමාන මාතෘකා සඳහා යොදන්නේ මූලාස්ථාන තෝරන්න</string>
@@ -2984,8 +2952,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">ගැලපෙන ජාති/ප්‍රවර්ග ඇති පොතුන් සොයන්න</string>
     <string name="similar_titles_mode_by_category">ප්‍රවර්ගය අනුව සමාන</string>
     <string name="similar_titles_mode_by_category_subtitle">එකම ප්‍රවර්ගයේ පොතුන් සොයන්න</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

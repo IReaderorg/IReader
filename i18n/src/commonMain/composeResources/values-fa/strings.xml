@@ -2908,44 +2908,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">از پیش تنظیم سریع</string>
-    <string name="cover_theme_preset_subtitle">تنظیمات از پیش تعریف شده را برای شدت تم جلد اعمال کنید</string>
-    <string name="cover_theme_backdrop_blur">تاری پس زمینه جلد</string>
-    <string name="cover_theme_backdrop_blur_subtitle">شدت تاری را برای تصویر جلد هدر توسعه یافته تنظیم کنید</string>
-    <string name="cover_theme_background_tint_opacity">تیرگی رنگ پس زمینه</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">کنترل کنید که چگونه رنگ پوشش به شدت با پس زمینه کارت ترکیب می شود</string>
-    <string name="cover_theme_preset_off">خاموش</string>
-    <string name="cover_theme_preset_soft">نرم</string>
-    <string name="cover_theme_preset_medium">متوسط</string>
-    <string name="cover_theme_preset_high">بالا</string>
-
     <string name="recommendations_empty">هیچ توصیه‌ای در دسترس نیست</string>
     <string name="recommendations_error">توصیه ها بارگیری نشد</string>
     <string name="recommendations_section_title">توصیه ها</string>
     <string name="recommendations_section_title_suggestions">پیشنهادات</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">تنظیمات توصیه‌ها</string>
-    <string name="recommendations_settings_subtitle">پیکربندی نحوه نمایش توصیه‌های کتاب</string>
-    <string name="recommendation_source_similar_by_title">مشابه با عنوان</string>
-    <string name="recommendation_source_similar_by_title_subtitle">جستجو در منبع برای کتاب‌های با نام‌های مشابه</string>
     <string name="recommendation_source_native_only">فقط منبع بومی</string>
     <string name="recommendation_source_native_only_subtitle">استفاده از توصیه‌های ارائه شده directly توسط منبع</string>
     <string name="recommendation_source_genre_fallback">تطابق ژانر</string>
     <string name="recommendation_source_genre_fallback_subtitle">بازگشت به تطابق ژانر وقتی توصیه بومی وجود ندارد</string>
-    <string name="recommendation_search_keywords">کلیدواژه‌های جستجو</string>
-    <string name="recommendation_search_keywords_subtitle">کلیدواژه‌های استخراج شده از عنوان کتاب فعلی برای یافتن کتاب‌های مشابه</string>
-    <string name="recommendations_disabled">توصیه‌ها غیرفعال هستند</string>
-    <string name="recommendations_no_similar_books">کتاب مشابهی برای این عنوان یافت نشد</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2953,8 +2923,6 @@
     <string name="similar_titles_section_title">عناوان‌های مشابه</string>
     <string name="show_similar_titles">نمایش عناوین مشابه</string>
     <string name="similar_titles_source">منبع عناوین مشابه</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">حداکثر تعداد عناوین مشابه</string>
     <string name="similar_titles_settings">تنظیمات عناوین مشابه</string>
     <string name="similar_titles_source_subtitle">انتخاب منابع مورد استفاده برای عناوین مشابه</string>
@@ -2974,8 +2942,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">یافتن کتاب‌های با ژانر/دسته‌بندی مطابق</string>
     <string name="similar_titles_mode_by_category">مشابه با دسته‌بندی</string>
     <string name="similar_titles_mode_by_category_subtitle">یافتن کتاب‌های در همان دسته‌بندی</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 

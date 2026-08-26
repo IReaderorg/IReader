@@ -1,6 +1,23 @@
 <resources>
+    <string name="advance_setting_description">Advanced configuration options</string>
+    <string name="advanced_network">Advanced Network</string>
+    <string name="advanced_network_description">User agent, cookies, and proxy settings</string>
+    <string name="appearance_description">Customize app theme and colors</string>
+    <string name="clear_all_cache_description">Clear cached data to free up space</string>
+    <string name="cloudflare_bypass">Cloudflare Bypass</string>
+    <string name="cloudflare_bypass_description">Configure FlareSolverr for protected sources</string>
+    <string name="colors_description">Dynamic colors and Material You</string>
+    <string name="font_description">Choose reading fonts and sizes</string>
+    <string name="font_size_description">Adjust text size for reading</string>
+    <string name="general_description">General app preferences</string>
+    <string name="installed_plugins_description">Manage installed plugins and features</string>
+    <string name="language_description">App language settings</string>
     <string name="library_screen_label">Library</string>
     <string name="explore_screen_label">Sources</string>
+    <string name="reader_description">Customize reading experience</string>
+    <string name="reading_mode_description">Scroll or page reading mode</string>
+    <string name="repository_description">Manage content sources and extensions</string>
+    <string name="security_description">Manage security and privacy settings</string>
     <string name="setting_screen_label">Setting</string>
     <string name="delete_all_downloads">Delete all downloads</string>
     <string name="cancel_all">Cancel all</string>
@@ -11,6 +28,12 @@
     </string>
     <string name="add_as_new">New</string>
     <string name="add">Add</string>
+    <string name="statistics_description">View reading statistics and progress</string>
+    <string name="supabase_configuration_description">Configure custom Supabase instance for sync</string>
+    <string name="theme_description">Light, dark, or system default theme</string>
+    <string name="tracking_description">Sync reading progress with AniList, MAL, and more</string>
+    <string name="translation_description">Configure translation preferences</string>
+    <string name="tts_engine_manager_description">Configure text-to-speech engines and voices</string>
     <string name="view_book">View Book</string>
     <string name="show_system_catalogs">Show System Extensions</string>
     <string name="show_system_catalogs_subtitle">Display built-in extensions that come with the app</string>
@@ -48,6 +71,8 @@
     <string name="no_repositories_added_subtitle">Add a repository to access additional sources</string>
     <string name="add_repository">Add Repository</string>
     <string name="checking_for_updates">Checking for updates…</string>
+    <string name="wifi_sync">WiFi Sync</string>
+    <string name="wifi_sync_description">Sync books and progress between devices on local network</string>
     <string name="you_are_on_latest_version">You are on the latest version</string>
     <string name="update_available">Update available</string>
     <string name="failed_to_check_updates">Failed to check for updates</string>
@@ -2140,6 +2165,8 @@
     <string name="use_translated_text_for_text">Use translated text for text-to-speech when available</string>
     <string name="use_true_black_amoled">Use True Black (AMOLED)</string>
     <string name="use_your_fingerprint_or_face">Use your fingerprint or face to unlock the app. You can still use your device PIN as a fallback.</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
     <string name="user_interface">User Interface</string>
     <string name="verification_details">Verification Details</string>
     <string name="verification_is_automatic_and_takes_a_few_seconds">• Verification is automatic and takes a few seconds</string>

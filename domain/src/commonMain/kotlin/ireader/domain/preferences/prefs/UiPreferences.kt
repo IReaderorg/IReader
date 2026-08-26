@@ -36,6 +36,9 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getInt("similar_titles_max_count", 10)
     }
     
+    fun coverBasedThemeEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("cover_based_theme_enabled", false)
+    }
     fun useTrueBlack(): Preference<Boolean> {
         return preferenceStore.getBoolean("use_true_black", false)
     }

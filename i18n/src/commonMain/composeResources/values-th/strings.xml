@@ -2904,44 +2904,14 @@
     <string name="cover_theme_monochrome">Monochrome</string>
     <string name="cover_theme_fidelity">Fidelity</string>
     <string name="cover_theme_content">Content</string>
-    <string name="cover_theme_advanced_controls">Advanced Controls</string>
-    <string name="cover_theme_saturation">Saturation</string>
-    <string name="cover_theme_intensity">Intensity</string>
-    <string name="cover_theme_text_color">Text Color Mode</string>
-    <string name="cover_theme_text_color_auto">Auto</string>
-    <string name="cover_theme_text_color_light">Light</string>
-    <string name="cover_theme_text_color_dark">Dark</string>
-    <string name="cover_theme_text_color_subtitle">Force light or dark text colors for better readability</string>
-    <string name="cover_theme_preset">Quick Preset</string>
-    <string name="cover_theme_preset_subtitle">ใช้การตั้งค่าที่กำหนดไว้ล่วงหน้าสำหรับความเข้มของธีมหน้าปก</string>
-    <string name="cover_theme_backdrop_blur">ปกปิดฉากหลังเบลอ</string>
-    <string name="cover_theme_backdrop_blur_subtitle">ปรับความเข้มของภาพเบลอสำหรับภาพปกส่วนหัวที่ขยาย</string>
-    <string name="cover_theme_background_tint_opacity">ความทึบของสีพื้นหลัง</string>
-    <string name="cover_theme_background_tint_opacity_subtitle">ควบคุมว่าสีปกจะผสมเข้ากับพื้นหลังการ์ดมากเพียงใด</string>
-    <string name="cover_theme_preset_off">ปิด</string>
-    <string name="cover_theme_preset_soft">อ่อนนุ่ม</string>
-    <string name="cover_theme_preset_medium">ปานกลาง</string>
-    <string name="cover_theme_preset_high">สูง</string>
-
     <string name="recommendations_empty">ไม่มีข้อเสนอแนะ</string>
     <string name="recommendations_error">โหลดคำแนะนำไม่สำเร็จ</string>
     <string name="recommendations_section_title">คำแนะนำ</string>
     <string name="recommendations_section_title_suggestions">ข้อเสนอแนะ</string>
-
-    <!-- Recommendations Settings -->
-    <string name="recommendations_settings">การตั้งค่าคำแนะนำ</string>
-    <string name="recommendations_settings_subtitle">กำหนดวิธีการแสดงคำแนะนำหนังสือ</string>
-    <string name="recommendation_source_similar_by_title">คล้ายตามชื่อ</string>
-    <string name="recommendation_source_similar_by_title_subtitle">ค้นหาในแหล่งที่มาสำหรับหนังสือที่มีชื่อคล้ายกัน</string>
     <string name="recommendation_source_native_only">แหล่งที่มาพื้นฐานเท่านั้น</string>
     <string name="recommendation_source_native_only_subtitle">ใช้คำแนะนำที่ให้โดยแหล่งที่มาโดยตรง</string>
     <string name="recommendation_source_genre_fallback">การจับคู่ประเภท</string>
     <string name="recommendation_source_genre_fallback_subtitle">กลับไปเป็นการจับคู่ประเภทเมื่อไม่มีคำแนะนำพื้นฐาน</string>
-    <string name="recommendation_search_keywords">คำค้นหา</string>
-    <string name="recommendation_search_keywords_subtitle">คำที่สกัดออกจากชื่อหนังสือปัจจุบันเพื่อค้นหาหนังสือที่คล้ายกัน</string>
-    <string name="recommendations_disabled">ปิดใช้งานคำแนะนำ</string>
-    <string name="recommendations_no_similar_books">ไม่พบหนังสือที่คล้ายกันสำหรับชื่อนี้</string>
-
     <string name="show_recommendations">Show Recommendations</string>
     <string name="show_recommendations_subtitle">Display related titles below the novel details</string>
     <string name="max_recommendation_count">Maximum Recommendation Count</string>
@@ -2949,8 +2919,6 @@
     <string name="similar_titles_section_title">ชื่อที่คล้ายกัน</string>
     <string name="show_similar_titles">แสดงชื่อที่คล้ายกัน</string>
     <string name="similar_titles_source">แหล่งชื่อที่คล้ายกัน</string>
-    <string name="similar_titles_source_genre_fallback">Genre Matching Fallback</string>
-    <string name="similar_titles_source_similar_by_title">Similar by Title</string>
     <string name="max_similar_titles_count">จำนวนชื่อที่คล้ายกันสูงสุด</string>
     <string name="similar_titles_settings">การตั้งค่าชื่อที่คล้ายกัน</string>
     <string name="similar_titles_source_subtitle">เลือกแหล่งที่จะใช้สำหรับชื่อที่คล้ายกัน</string>
@@ -2970,8 +2938,7 @@
     <string name="similar_titles_mode_by_genre_subtitle">ค้นหาหนังสือที่มีประเภท/หมวดหมู่ที่ตรงกัน</string>
     <string name="similar_titles_mode_by_category">คล้ายกันตามหมวดหมู่</string>
     <string name="similar_titles_mode_by_category_subtitle">ค้นหาหนังสือในหมวดหมู่เดียวกัน</string>
-    <string name="similar_titles_max_count_unlimited">Unlimited</string>
-</resources>
+    <string name="similar_titles_max_count_unlimited">Unlimited</string></resources>
 
 
 
