@@ -121,6 +121,7 @@ fun GeneralSettingScreen(
         vm: GeneralSettingScreenViewModel,
         onTranslationSettingsClick: () -> Unit,
         onJSPluginSettingsClick: () -> Unit = {},
+        onSimilarTitlesSettingsClick: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val manageNotificationComponent = mangeNotificationRow()
@@ -489,6 +490,34 @@ fun GeneralSettingScreen(
                 ),
                 manageNotificationComponent,
                 
+                Components.Space,
+                
+                // Similar Titles (Experimental) Section
+                Components.Header(
+                        text = localizeHelper.localize(Res.string.similar_titles_section_title),
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Search
+                ),
+                Components.Switch(
+                        preference = vm.showSimilarTitles,
+                        title = localizeHelper.localize(Res.string.show_similar_titles),
+                        subtitle = localizeHelper.localize(Res.string.show_similar_titles_subtitle),
+                        icon = Icons.Filled.Search
+                ),
+                Components.Dynamic {
+                    NavigationPreferenceCustom(
+                        title = localizeHelper.localize(Res.string.similar_titles_settings),
+                        subtitle = localizeHelper.localize(Res.string.similar_titles_settings_subtitle),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Settings,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        onClick = onSimilarTitlesSettingsClick
+                    )
+                },
         )
     }
 
@@ -649,6 +678,7 @@ class GeneralSettingScreenViewModel(
     var enableJSPlugins = uiPreferences.enableJSPlugins().asStateIn(scope)
     var autoInstaller = uiPreferences.autoCatalogUpdater().asStateIn(scope)
     var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asStateIn(scope)
+    var showSimilarTitles = uiPreferences.showSimilarTitles().asStateIn(scope)
     
     // Library preferences
     val showSmartCategories = libraryPreferences.showSmartCategories().asStateIn(scope)

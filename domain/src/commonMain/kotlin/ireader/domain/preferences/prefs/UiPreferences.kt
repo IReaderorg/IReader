@@ -21,11 +21,11 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     }
     
     fun showSimilarTitles(): Preference<Boolean> {
-        return preferenceStore.getBoolean("show_similar_titles", true)
+        return preferenceStore.getBoolean("show_similar_titles", false)
     }
     
     fun similarTitlesSource(): Preference<PreferenceValues.SimilarTitlesSource> {
-        return preferenceStore.getEnum("similar_titles_source", PreferenceValues.SimilarTitlesSource.AllSources)
+        return preferenceStore.getEnum("similar_titles_source", PreferenceValues.SimilarTitlesSource.SameSource)
     }
     
     fun similarTitlesMatchMode(): Preference<PreferenceValues.SimilarTitlesMatchMode> {

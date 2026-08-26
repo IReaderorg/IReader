@@ -122,19 +122,19 @@ class SimilarTitlesSettingsViewModelTest {
 
     @Test
     fun `default preference values are correct`() {
-        assertTrue(uiPreferences.showSimilarTitles().get())
-        assertEquals(PreferenceValues.SimilarTitlesSource.AllSources, uiPreferences.similarTitlesSource().get())
+        assertFalse(uiPreferences.showSimilarTitles().get())
+        assertEquals(PreferenceValues.SimilarTitlesSource.SameSource, uiPreferences.similarTitlesSource().get())
         assertEquals(PreferenceValues.SimilarTitlesMatchMode.ByName, uiPreferences.similarTitlesMatchMode().get())
         assertEquals(10, uiPreferences.similarTitlesMaxCount().get())
     }
 
     @Test
     fun `setShowSimilarTitles updates preference`() {
-        viewModel.setShowSimilarTitles(false)
-        assertFalse(uiPreferences.showSimilarTitles().get())
-
         viewModel.setShowSimilarTitles(true)
         assertTrue(uiPreferences.showSimilarTitles().get())
+
+        viewModel.setShowSimilarTitles(false)
+        assertFalse(uiPreferences.showSimilarTitles().get())
     }
 
     @Test

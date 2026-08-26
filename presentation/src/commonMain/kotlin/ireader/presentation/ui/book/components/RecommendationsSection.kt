@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -108,7 +109,8 @@ private fun RecommendationCard(
 ) {
     Card(
         modifier = modifier
-            .width(120.dp)
+            .width(125.dp)
+            .height(230.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -116,37 +118,30 @@ private fun RecommendationCard(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(0.7f)
+                    .height(160.dp)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (recommendation.cover.isNotBlank()) {
-                    AsyncImage(
-                        model = recommendation.cover,
-                        contentDescription = recommendation.title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(0.7f),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    AsyncImage(
-                        model = null,
-                        contentDescription = recommendation.title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(0.7f),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+                AsyncImage(
+                    model = recommendation.cover.takeIf { it.isNotBlank() },
+                    contentDescription = recommendation.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
             }
             
             Column(
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = recommendation.title,
@@ -157,7 +152,6 @@ private fun RecommendationCard(
                 )
                 
                 if (recommendation.sourceName.isNotBlank()) {
-                    Spacer(Modifier.height(2.dp))
                     Text(
                         text = recommendation.sourceName,
                         style = MaterialTheme.typography.labelSmall,

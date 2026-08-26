@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -167,6 +168,7 @@ private fun RecommendationItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .height(96.dp)
             .padding(horizontal = 16.dp)
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(
@@ -176,14 +178,14 @@ private fun RecommendationItem(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .clickable(onClick = onClick),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
+                    .size(width = 64.dp, height = 96.dp)
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -196,8 +198,10 @@ private fun RecommendationItem(
 
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = recommendation.title,
