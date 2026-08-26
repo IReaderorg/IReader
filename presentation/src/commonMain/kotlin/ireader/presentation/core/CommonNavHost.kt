@@ -39,6 +39,7 @@ import ireader.presentation.core.ui.SourceMigrationScreenSpec
 import ireader.presentation.core.ui.SyncScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import ireader.presentation.core.ui.TTSV2ScreenSpec
+import ireader.presentation.core.theme.CoverThemeScope
 import ireader.presentation.core.ui.TrackingSettingsScreenSpec
 import ireader.presentation.core.ui.TranslationScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
@@ -446,7 +447,11 @@ fun CommonNavHost(
                 backStackEntry.getStringArg("bookId")?.toLongOrNull()
             }
             if (bookId != null) {
-                BookDetailScreenSpec(bookId).Content()
+                // Cover-based theme is scoped to detail/reader only — library,
+                // explore, history etc. keep the user's chosen theme.
+                CoverThemeScope {
+                    BookDetailScreenSpec(bookId).Content()
+                }
             }
         }
 
@@ -488,7 +493,9 @@ fun CommonNavHost(
                 ireader.presentation.core.ui.ModuleLoadingGuard(
                     loadingMessage = "Preparing reader..."
                 ) {
-                    ReaderScreenSpec(bookId, chapterId).Content()
+                    CoverThemeScope {
+                        ReaderScreenSpec(bookId, chapterId).Content()
+                    }
                 }
             }
         }

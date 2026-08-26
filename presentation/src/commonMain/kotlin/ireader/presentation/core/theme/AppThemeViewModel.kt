@@ -79,7 +79,6 @@ class AppThemeViewModel(
         val themeMode = themeModeState.value
         val colorTheme = colorThemeState.value
         val dynamicColorMode = dynamicColorModeState.value
-        val coverBasedThemeEnabled = coverBasedThemeEnabledState.value
         val useTrueBlack = useTrueBlackState.value
         
         val baseTheme = getBaseTheme(themeMode, colorTheme)
@@ -110,23 +109,11 @@ class AppThemeViewModel(
             baseTheme.materialColors.toComposeColorScheme()
         }
         
-        // Step 1b: Apply cover-based theme if enabled. The cover scheme wins over
-        // dynamic/base themes; user custom primary/secondary are skipped so they
-        // don't fight the extracted palette.
-        var usingCoverScheme = false
-        if (coverBasedThemeEnabled && coverBasedThemeManager != null) {
-            val coverScheme = coverBasedThemeManager.coverBasedTheme.collectAsState(initial = null).value
-            if (coverScheme != null) {
-                materialColors = coverScheme.toComposeColorScheme()
-                usingCoverScheme = true
-            }
-        }
-         
         // Step 2: Apply custom primary/secondary colors if specified
         val customPrimary = customPrimaryColor.takeIf { it != Color.Unspecified }
         val customSecondary = customSecondaryColor.takeIf { it != Color.Unspecified }
-        
-        if (!usingCoverScheme && (customPrimary != null || customSecondary != null)) {
+
+        if (customPrimary != null || customSecondary != null) {
             materialColors = ThemeColorUtils.applyCustomColors(
                 materialColors,
                 customPrimary,
@@ -139,14 +126,14 @@ class AppThemeViewModel(
             materialColors = ThemeColorUtils.applyTrueBlack(materialColors)
         }
          
-        // Step 4: Ensure all "on" colors have proper contrast
+        // Step 3: Ensure all "on" colors have proper contrast
         materialColors = ThemeColorUtils.ensureProperOnColors(materialColors)
 
-        // Step 5: Animate toward the final scheme — every theme change (cover claim,
-        // cover release, manual theme switch) cross-fades instead of snapping.
+        // Step 4: Animate toward the final scheme — manual theme changes cross-fade
+        // instead of snapping. Cover-scheme fades live in [CoverThemeScope].
         materialColors = animateScheme(materialColors, isLight)
 
-        // Step 6: Create extra colors for bars
+        // Step 5: Create extra colors for bars
         // Use base theme's bar color, but allow custom override
         val extraColors = createExtraColors(
             baseExtraColors = baseTheme.extraColors,
@@ -157,6 +144,21 @@ class AppThemeViewModel(
         )
 
         return materialColors to extraColors
+    }
+
+    /**
+     * The cover scheme, scoped: screens that claim a cover (detail/reader) wrap their
+     * content in [CoverThemeScope], which overrides MaterialTheme + AppColors locally.
+     * Root [getColors] never sees it, so library/explore/history keep the user's theme.
+     */
+    @Composable
+    fun getCoverScopedColors(): ColorScheme? {
+        if (!coverBasedThemeEnabledState.value || coverBasedThemeManager == null) return null
+        val coverScheme = coverBasedThemeManager.coverBasedTheme.collectAsState(initial = null).value ?: return null
+
+        // Contrast pass only — custom primary/secondary and true-black intentionally
+        // don't fight the extracted palette; same policy as before scoping.
+        return ThemeColorUtils.ensureProperOnColors(coverScheme.toComposeColorScheme())
     }
     
     /**
@@ -178,19 +180,13 @@ class AppThemeViewModel(
         coverBasedThemeManager.applyCoverBasedTheme(coverUrl, sourceId, resolvedIsDark, owner)
     }
 
-    /** Feature switched off — unconditional clear regardless of owner. */
-    fun onCoverBasedThemeDisabled() {
-        coverBasedThemeManager?.clearAll()
-    }
-
     /**
-     * Animates toward whatever the fully-computed target scheme is — cover claim,
-     * release, switching between books, or a manual theme change all cross-fade.
-     * Lerp starts from the currently displayed colors, so mid-flight retargets are
-     * seamless.
+     * Animates toward whatever the fully-computed target scheme is — a manual theme
+     * change or the scoped cover fade both cross-fade. Lerp starts from the
+     * currently displayed colors, so mid-flight retargets are seamless.
      */
     @Composable
-    private fun animateScheme(target: ColorScheme, isLight: Boolean): ColorScheme {
+    fun animateScheme(target: ColorScheme, isLight: Boolean): ColorScheme {
         var lastLight by remember { mutableStateOf(isLight) }
         val anim = remember { Animatable(1f) }
         // Animation start point; null while settled on target

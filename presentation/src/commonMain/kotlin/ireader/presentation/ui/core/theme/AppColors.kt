@@ -20,7 +20,7 @@ import ireader.domain.models.theme.ExtraColors
 @Suppress("unused")
 class AppColors(
     private val materialColors: ColorScheme,
-    private val extraColors: ExtraColors,
+    val extraColors: ExtraColors,
 ) {
 
     val primary get() = materialColors.primary
