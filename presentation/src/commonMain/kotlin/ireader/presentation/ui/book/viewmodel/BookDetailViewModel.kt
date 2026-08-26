@@ -705,6 +705,7 @@ class BookDetailViewModel(
         if (catalog == null) return
         
         getRecommendationsJob?.cancel()
+        updateSuccessState { it.copy(isLoadingRecommendations = true) }
         getRecommendationsJob = scope.launch(ioDispatcher) {
             val sourceFilter = uiPreferences.similarTitlesSource().get()
             val matchMode = uiPreferences.similarTitlesMatchMode().get()
@@ -724,6 +725,7 @@ class BookDetailViewModel(
                         catalog = catalog,
                         onError = { message ->
                             Log.error { "Failed to load similar titles: ${message?.toString() ?: "unknown"}" }
+                            updateSuccessState { it.copy(isLoadingRecommendations = false) }
                         },
                         onSuccess = { recommendations ->
                             if (recommendations.isNotEmpty()) {
@@ -749,6 +751,7 @@ class BookDetailViewModel(
             book = book,
             onError = { message ->
                 Log.error { "Failed to load similar books by name: ${message?.toString() ?: "unknown"}" }
+                updateSuccessState { it.copy(isLoadingRecommendations = false) }
             },
             onSuccess = { recommendations ->
                 applyRecommendationLimit(recommendations)
@@ -769,7 +772,7 @@ class BookDetailViewModel(
                 recommendations.toImmutableList()
             }
         }
-        updateSuccessState { it.copy(sourceRecommendations = limited) }
+        updateSuccessState { it.copy(sourceRecommendations = limited, isLoadingRecommendations = false) }
     }
     
     private fun subscribeToBookAndChapters(bookId: Long, initialCatalog: CatalogLocal?) {

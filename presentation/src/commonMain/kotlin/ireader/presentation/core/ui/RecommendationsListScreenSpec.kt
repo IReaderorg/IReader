@@ -1,5 +1,6 @@
 package ireader.presentation.core.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
+import ireader.presentation.ui.component.shimmerBrush
 import ireader.presentation.ui.book.viewmodel.BookDetailEvent
 import ireader.presentation.ui.book.viewmodel.BookDetailState
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
@@ -115,13 +117,17 @@ private fun RecommendationsListScreen(
         }
     ) { paddingValues ->
         if (isLoading && recommendations.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding() + 16.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CircularProgressIndicator()
+                items(6) {
+                    RecommendationItemSkeleton()
+                }
             }
         } else if (recommendations.isEmpty()) {
             Box(
@@ -221,6 +227,68 @@ private fun RecommendationItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecommendationItemSkeleton(
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(96.dp)
+            .padding(horizontal = 16.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(width = 64.dp, height = 96.dp)
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                    .background(shimmerBrush())
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(horizontal = 12.dp, vertical = 12.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .height(14.dp)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp))
+                            .background(shimmerBrush())
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.55f)
+                            .height(14.dp)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp))
+                            .background(shimmerBrush())
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.35f)
+                        .height(12.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp))
+                        .background(shimmerBrush())
+                )
             }
         }
     }

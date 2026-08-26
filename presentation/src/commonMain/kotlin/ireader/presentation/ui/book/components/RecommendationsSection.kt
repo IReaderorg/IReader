@@ -1,5 +1,6 @@
 package ireader.presentation.ui.book.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import ireader.domain.models.entities.Recommendation
+import ireader.presentation.ui.component.shimmerBrush
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.similar_titles_section_title
@@ -42,12 +44,13 @@ import ireader.i18n.resources.view_all
 @Composable
 fun RecommendationsSection(
     recommendations: List<Recommendation>,
+    isLoading: Boolean = false,
     onRecommendationClick: (Recommendation) -> Unit,
     onViewMore: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    if (recommendations.isEmpty()) {
+    if (!isLoading && recommendations.isEmpty()) {
         return
     }
     
@@ -73,28 +76,102 @@ fun RecommendationsSection(
                 )
             }
             
-            TextButton(onClick = onViewMore) {
-                Text(
-                    text = localizeHelper.localize(Res.string.view_all),
-                    style = MaterialTheme.typography.labelLarge
-                )
+            if (recommendations.isNotEmpty()) {
+                TextButton(onClick = onViewMore) {
+                    Text(
+                        text = localizeHelper.localize(Res.string.view_all),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             }
         }
         
         Spacer(Modifier.height(8.dp))
         
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        if (isLoading && recommendations.isEmpty()) {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(5) {
+                    RecommendationCardSkeleton()
+                }
+            }
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(
+                    count = recommendations.size,
+                    key = { index -> "${recommendations[index].sourceId}_${recommendations[index].key}_$index" }
+                ) { index ->
+                    val recommendation = recommendations[index]
+                    RecommendationCard(
+                        recommendation = recommendation,
+                        onClick = { onRecommendationClick(recommendation) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RecommendationCardSkeleton(
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .width(125.dp)
+            .height(230.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(
-                count = recommendations.size,
-                key = { index -> "${recommendations[index].sourceId}_${recommendations[index].key}_$index" }
-            ) { index ->
-                val recommendation = recommendations[index]
-                RecommendationCard(
-                    recommendation = recommendation,
-                    onClick = { onRecommendationClick(recommendation) }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    .background(shimmerBrush())
+            )
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(shimmerBrush())
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.65f)
+                            .height(12.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(shimmerBrush())
+                    )
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.45f)
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(shimmerBrush())
                 )
             }
         }

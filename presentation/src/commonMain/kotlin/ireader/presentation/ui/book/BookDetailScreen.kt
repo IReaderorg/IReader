@@ -123,6 +123,7 @@ fun BookDetailScreen(
     onTracking: (() -> Unit)? = null,
     isTracked: Boolean = false,
     recommendations: List<ireader.domain.models.entities.Recommendation> = emptyList(),
+    isLoadingRecommendations: Boolean = false,
     onRecommendationClick: (ireader.domain.models.entities.Recommendation) -> Unit = {},
     onViewMore: () -> Unit = {},
     uiPreferences: UiPreferences = koinInject(),
@@ -309,6 +310,7 @@ fun BookDetailScreen(
                     onTracking = onTracking,
                     isTracked = isTracked,
                     recommendations = recommendations,
+                    isLoadingRecommendations = isLoadingRecommendations,
                     onRecommendationClick = onRecommendationClick,
                     onViewMore = onViewMore
                 )
@@ -424,10 +426,11 @@ fun BookDetailScreen(
                         )
                     }
                     // Recommendations Section
-                    if (recommendations.isNotEmpty()) {
+                    if (recommendations.isNotEmpty() || isLoadingRecommendations) {
                         item(key = "recommendations") {
                             RecommendationsSection(
                                 recommendations = recommendations,
+                                isLoading = isLoadingRecommendations,
                                 onRecommendationClick = onRecommendationClick,
                                 onViewMore = onViewMore,
                                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
@@ -588,6 +591,7 @@ private fun BookInfoPanel(
     onTracking: (() -> Unit)? = null,
     isTracked: Boolean = false,
     recommendations: List<ireader.domain.models.entities.Recommendation> = emptyList(),
+    isLoadingRecommendations: Boolean = false,
     onRecommendationClick: (ireader.domain.models.entities.Recommendation) -> Unit = {},
     onViewMore: () -> Unit = {},
 ) {
@@ -664,10 +668,11 @@ private fun BookInfoPanel(
             }
             
             // Recommendations Section
-            if (recommendations.isNotEmpty()) {
+            if (recommendations.isNotEmpty() || isLoadingRecommendations) {
                 item {
                     RecommendationsSection(
                         recommendations = recommendations,
+                        isLoading = isLoadingRecommendations,
                         onRecommendationClick = onRecommendationClick,
                         onViewMore = onViewMore,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)

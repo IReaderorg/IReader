@@ -636,6 +636,7 @@ data class BookDetailScreenSpec constructor(
                             onTracking = { vm.showTrackingDialog() },
                             isTracked = vm.isTracked,
                             recommendations = state.sourceRecommendations,
+                            isLoadingRecommendations = state.isLoadingRecommendations,
                             onRecommendationClick = onRecommendationClick,
                             onViewMore = {
                                 val route = NavigationRoutes.recommendationsList(bookId)

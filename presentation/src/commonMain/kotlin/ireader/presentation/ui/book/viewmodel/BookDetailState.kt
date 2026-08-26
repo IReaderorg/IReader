@@ -88,6 +88,7 @@ sealed interface BookDetailState {
         
         // Recommendations from source
         val sourceRecommendations: ImmutableList<Recommendation> = persistentListOf(),
+        val isLoadingRecommendations: Boolean = false,
     ) : BookDetailState {
         
         // Derived properties for efficient access
