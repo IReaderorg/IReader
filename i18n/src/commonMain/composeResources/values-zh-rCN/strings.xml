@@ -63,6 +63,8 @@
     <string name="advanced">高级</string>
     <string name="advanced_features">高级功能</string>
     <string name="advanced_filters">高级筛选</string>
+    <string name="advanced_network">高级网络设置</string>
+    <string name="advanced_network_description">User Agent、Cookie 与代理设置</string>
     <string name="advanced_options">高级选项</string>
     <string name="advanced_security">高级安全</string>
     <string name="advanced_settings">高级设置</string>
@@ -432,15 +434,13 @@
     <string name="clear">清除</string>
     <string name="clear_1">清除</string>
     <string name="clear_all_cache">清除所有缓存</string>
-    <string name="clear_all_cache_description">清除所有缓存数据以释放空间</string>
     <string name="clear_all_cache_confirmation">这将删除所有缓存的图片、章节和网络数据。此操作无法撤消。</string>
+    <string name="clear_all_cache_description">清除所有缓存数据以释放空间</string>
     <string name="clear_all_cached_data_to_free_up_storage_space">清除所有缓存数据以释放存储空间</string>
     <string name="clear_all_chapters">清除所有章节</string>
     <string name="clear_all_cover_cache">清除所有封面缓存</string>
     <string name="clear_all_database">清除所有数据库</string>
-    <string name="clear_auth_data_confirmation">
-        这将删除所有已保存的身份验证令牌和会话。您需要重新登录才能访问受保护的源。
-    </string>
+    <string name="clear_auth_data_confirmation">这将删除所有已保存的身份验证令牌和会话。您需要重新登录才能访问受保护的源。</string>
     <string name="clear_authentication_data">清除身份验证数据</string>
     <string name="clear_cache">清除缓存</string>
     <string name="clear_cache_on_low_storage">在低存储空间时清除缓存</string>
@@ -453,9 +453,7 @@
     <string name="clear_not_in_library_books">清除所有不在书库中的书籍</string>
     <string name="clear_search">清除搜索</string>
     <string name="clear_sync_data">清除同步数据</string>
-    <string name="clear_sync_data_confirmation">
-        这将删除所有跟踪数据并从所有服务中注销。您将需要重新登录并重新跟踪您的书籍。
-    </string>
+    <string name="clear_sync_data_confirmation">这将删除所有跟踪数据并从所有服务中注销。您将需要重新登录并重新跟踪您的书籍。</string>
     <string name="click_the_donation_button_below">点击下面的捐赠按钮</string>
     <string name="clickable_card">可点击卡片</string>
     <string name="clipboard_copy_error">无法复制此文本</string>
@@ -465,9 +463,7 @@
     <string name="cloud_backup_setup">云备份设置</string>
     <string name="cloud_community">云和社区</string>
     <string name="cloud_features">云功能</string>
-    <string name="cloud_features_description">IReader
-        可以连接到云服务以增强功能。如果您喜欢完全离线的体验，可以禁用此功能。
-    </string>
+    <string name="cloud_features_description">IReader 可以连接到云服务以增强功能。如果您喜欢完全离线的体验，可以禁用此功能。</string>
     <string name="cloud_storage">云存储</string>
     <string name="cloud_storage_provider">云存储提供商</string>
     <string name="cloud_sync">云同步</string>
@@ -519,13 +515,10 @@
     <string name="configure_how_to_get_book">配置如何从书籍页面获取书籍详情。这些选择器用于查找标题、作者、描述等。</string>
     <string name="configure_how_to_get_the">配置如何获取章节列表。“章节列表”选择器用于查找每个章节项。</string>
     <string name="configure_how_to_read_chapter">配置如何阅读章节内容。“内容”选择器用于查找每个章节的主文本。</string>
-    <string name="configure_how_to_search_for">配置如何搜索书籍。“书籍列表”选择器用于查找搜索结果中的每本书。在网址中使用
-        {{key}} 作为搜索词。
-    </string>
+    <string name="configure_how_to_search_for">配置如何搜索书籍。“书籍列表”选择器用于查找搜索结果中的每本书。在网址中使用 {{key}} 作为搜索词。</string>
     <string name="configure_js_plugins_and_enable">配置 JS 插件并启用与 LNReader 兼容的来源</string>
     <string name="configure_oauth2_credentials_in">1. 在Google Cloud Console中配置OAuth2凭据\n</string>
-    <string name="configure_your_own_supabase_instance">配置你自己的 Supabase 实例用于社区内容，或留空以使用默认设置。
-    </string>
+    <string name="configure_your_own_supabase_instance">配置你自己的 Supabase 实例用于社区内容，或留空以使用默认设置。</string>
     <string name="confirm">确认</string>
     <string name="confirm_exit">确认退出</string>
     <string name="confirm_exit_message">再次按返回键退出</string>
@@ -549,9 +542,7 @@
     <string name="continues">继续</string>
     <string name="contract_address">合约地址：</string>
     <string name="contributor_settings">贡献者设置</string>
-    <string name="controls_how_many_audio_files">控制可以为 Kokoro 和 Maya 引擎同时生成多少个音频文件。数值越高=生成速度越快，但
-        CPU/内存使用率越高。
-    </string>
+    <string name="controls_how_many_audio_files">控制可以为 Kokoro 和 Maya 引擎同时生成多少个音频文件。数值越高=生成速度越快，但 CPU/内存使用率越高。</string>
     <string name="conversation">对话</string>
     <string name="copied_to_clipboard">已复制到剪贴板</string>
     <string name="copy">复制</string>
@@ -565,8 +556,7 @@
     <string name="cover_only_layout">仅封面网格</string>
     <string name="cover_only_layout_description">仅 2 列封面图像 (无文本)</string>
     <string name="cover_reset_success">封面已重置为原始封面</string>
-    <string name="cover_url_must_start_with_http_https_or_file">封面 URL 必须以 http://, https:// 或 file:// 开头
-    </string>
+    <string name="cover_url_must_start_with_http_https_or_file">封面 URL 必须以 http://, https:// 或 file:// 开头</string>
     <string name="cover_url_selector">封面网址选择器</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">崩溃报告</string>
@@ -585,12 +575,8 @@
     <string name="creating_backup_1">正在创建备份...</string>
     <string name="creative">创意</string>
     <string name="cross_device_sync">跨设备同步</string>
-    <string name="crypto_donation_preferred">💡 提示：加密货币捐赠更受欢迎！通过 Reymit 进行的银行卡支付在小额交易中会收取约
-        40% 的手续费。直接发送加密货币意味着 100% 用于开发。
-    </string>
-    <string name="cryptocurrency_donations_are_non_refundable">加密货币捐赠恕不退还。请在发送前验证钱包地址。IReader
-        不存储或访问您的私钥。
-    </string>
+    <string name="crypto_donation_preferred">💡 提示：加密货币捐赠更受欢迎！通过 Reymit 进行的银行卡支付在小额交易中会收取约 40% 的手续费。直接发送加密货币意味着 100% 用于开发。</string>
+    <string name="cryptocurrency_donations_are_non_refundable">加密货币捐赠恕不退还。请在发送前验证钱包地址。IReader 不存储或访问您的私钥。</string>
     <string name="cryptocurrency_wallets">加密货币钱包</string>
     <string name="css_selectors_for_parsing_search">用于解析搜索结果的 CSS 选择器。对属性使用 @attr（例如，a@href）</string>
     <string name="current">当前</string>
@@ -625,9 +611,7 @@
     <string name="data_usage">数据使用</string>
     <string name="data_usage_statistics">数据使用统计</string>
     <string name="database_deleted">数据库已删除。</string>
-    <string name="database_error">检测到数据库错误。请尝试以下操作之一：1) 重启应用 2) 删除 %LOCALAPPDATA%\\IReader\\cache
-        处的数据库文件 3) 使用 --repair-database 参数启动
-    </string>
+    <string name="database_error">检测到数据库错误。请尝试以下操作之一：1) 重启应用 2) 删除 %LOCALAPPDATA%\\IReader\\cache 处的数据库文件 3) 使用 --repair-database 参数启动</string>
     <string name="database_maintenance">数据库维护</string>
     <string name="database_repair_failed">数据库修复失败: %1$s</string>
     <string name="database_schema">数据库模式</string>
@@ -777,7 +761,7 @@
     <string name="download_notifier_text_only_wifi">没有可用的 Wi-Fi 连接</string>
     <string name="download_notifier_title_error">错误</string>
     <string name="download_notifier_unknown_error">由于意外错误，无法下载章节
-    </string>
+</string>
     <string name="download_of">下载</string>
     <string name="download_only_over_wifi">仅通过 WiFi 下载</string>
     <string name="download_progress">下载进度</string>
@@ -833,7 +817,7 @@
     <string name="eighteen_source_lock">18+ 来源锁</string>
     <string name="email">电子邮件</string>
     <string name="empty_library">书库中没有书籍，您可以在浏览屏幕中添加书籍。
-    </string>
+</string>
     <string name="empty_response">从翻译服务收到空响应。</string>
     <string name="en_zh_ko_etc">en, zh, ko 等</string>
     <string name="enable">启用</string>
@@ -883,10 +867,8 @@
     <string name="enter_quote_text">输入名言...</string>
     <string name="enter_reason">输入原因...</string>
     <string name="enter_the_repository_url">输入存储库 URL：</string>
-    <string name="enter_the_url_of_the">输入要添加的存储库的 URL。该存储库应包含带有可用源的 index.min.json 文件。
-    </string>
-    <string name="enter_the_websites_name_and">输入网站名称和网址。网址应为小说网站的主页（例如：https://example.com）
-    </string>
+    <string name="enter_the_url_of_the">输入要添加的存储库的 URL。该存储库应包含带有可用源的 index.min.json 文件。</string>
+    <string name="enter_the_websites_name_and">输入网站名称和网址。网址应为小说网站的主页（例如：https://example.com）</string>
     <string name="enter_username">输入用户名</string>
     <string name="enter_your_ethereum_wallet_address">输入您的以太坊钱包地址。这将用作访问服务器功能的 API 密钥。</string>
     <string name="enter_your_ethereum_wallet_address_1">输入您的以太坊钱包地址以验证 NFT 所有权</string>
@@ -928,17 +910,11 @@
     <string name="estimated_time_remaining">预计剩余时间</string>
     <string name="eth_wallet_address_api_key">ETH 钱包地址（API 密钥）</string>
     <string name="example">示例：</string>
-    <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">
-        示例：https://raw.githubusercontent.com/username/repo/main/index.min.json
-    </string>
+    <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">示例：https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">示例 URL：</string>
     <string name="examples">示例：</string>
     <string name="examples_1">示例</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">
-        示例：\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n•
-        LNReader:
-        https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json
-    </string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">示例：\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">排除类别</string>
     <string name="excluded">（已排除）</string>
     <string name="exclusive">独家</string>
@@ -1013,7 +989,7 @@
     <string name="failed_to_reset_categories">重置分类失败: %1$s</string>
     <string name="failed_to_restore">恢复失败: %1$s</string>
     <string name="failed_to_search">搜索失败</string>
-    <string name="failed_to_select_save_location">自定义保存位置失败：%1$s</string>
+    <string name="failed_to_select_save_location">选择保存位置失败：%1$s</string>
     <string name="failed_to_set_brightness">设置亮度失败：%1$s</string>
     <string name="failed_to_set_keep_screen_on">设置保持屏幕常亮失败：%1$s</string>
     <string name="failed_to_set_secure_screen">设置安全屏幕失败: %1$s</string>
@@ -1030,7 +1006,7 @@
     <string name="favorite_genres">喜欢的类型</string>
     <string name="favorited">已收藏</string>
     <string name="feature_store">功能商店</string>
-    <string name="feature_store_description">发现与购买高级插件与功能</string>
+    <string name="feature_store_description">发现并购买高级插件和功能</string>
     <string name="featured">⭐ 精选</string>
     <string name="featured_badges">特色徽章</string>
     <string name="featured_badges_for_profile">特色徽章（用于个人资料）</string>
@@ -1067,9 +1043,7 @@
     <string name="fingerprint_verification_adds_an_extra">指纹验证增加了一层额外的安全性</string>
     <string name="first_chapter">第一章</string>
     <string name="first_launch_intro">让我们设置一些内容来帮助您入门。您可以随时更改这些设置。</string>
-    <string name="first_launch_privacy_note">
-        您可以随时在“设置”→“高级”中更改此设置。您的阅读数据保留在您的设备上，除非您启用云功能。
-    </string>
+    <string name="first_launch_privacy_note">您可以随时在“设置”→“高级”中更改此设置。您的阅读数据保留在您的设备上，除非您启用云功能。</string>
     <string name="five_min">5 分钟</string>
     <string name="fix_book_category_assignments">修复书籍类别分配</string>
     <string name="fix_database_structure_and_integrity_issues">修复数据库结构和完整性问题</string>
@@ -1078,9 +1052,9 @@
     <string name="folder_selected">已选择文件夹</string>
     <string name="follow_system_settings">跟随系统设置</string>
     <string name="font">字体</string>
-    <string name="font_description">个性化阅读字体与字号</string>
     <string name="font_customization">字体自定义</string>
     <string name="font_deleted_successfully">字体删除成功</string>
+    <string name="font_description">个性化阅读字体与字号</string>
     <string name="font_imported_successfully">字体导入成功</string>
     <string name="font_name">字体名称</string>
     <string name="font_size">字体大小</string>
@@ -1089,9 +1063,7 @@
     <string name="font_weight">字体粗细</string>
     <string name="font_weight_1">字体粗细</string>
     <string name="fonts">字体</string>
-    <string name="for_more_powerful_and_natural">要在 Android 上获得更强大和自然的语音，请从 Play 商店或 F-Droid 安装
-        Sherpa TTS 应用。
-    </string>
+    <string name="for_more_powerful_and_natural">要在 Android 上获得更强大和自然的语音，请从 Play 商店或 F-Droid 安装 Sherpa TTS 应用。</string>
     <string name="for_private_spaces">用于私人空间</string>
     <string name="formal">正式</string>
     <string name="formatting">格式</string>
@@ -1113,9 +1085,7 @@
     <string name="gemini_api_key_not_set">Gemini API 密钥未设置。请在设置中配置。
     </string>
     <string name="gemini_model">Gemini 模型</string>
-    <string name="gemini_payment_required">您已超过 Gemini API
-        的当前配额。请查看您的计划和账单详情：https://ai.google.dev/gemini-api/docs/rate-limits
-    </string>
+    <string name="gemini_payment_required">您已超过 Gemini API 的当前配额。请查看您的计划和账单详情：https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="gender">性别</string>
     <string name="general">通用</string>
     <string name="general_description">应用常规偏好</string>
@@ -1140,12 +1110,9 @@
     <string name="get_gentle_reminders_to_rest_your_eyes">获取休息眼睛的温馨提醒</string>
     <string name="get_nft">获取NFT</string>
     <string name="get_started">开始</string>
-    <string name="get_your_api_key_from_huggingfacecosettingstokens">从 huggingface.co/settings/tokens 获取你的 API
-        密钥
-    </string>
+    <string name="get_your_api_key_from_huggingfacecosettingstokens">从 huggingface.co/settings/tokens 获取你的 API 密钥</string>
     <string name="get_your_api_key_from_platformdeepseekcom">从 platform.deepseek.com 获取你的 API 密钥</string>
-    <string name="get_your_api_key_from_platformopenaicomapi_keys">从 platform.openai.com/api-keys 获取你的 API 密钥
-    </string>
+    <string name="get_your_api_key_from_platformopenaicomapi_keys">从 platform.openai.com/api-keys 获取你的 API 密钥</string>
     <string name="github">Github</string>
     <string name="github_1">GitHub</string>
     <string name="global_glossaries">全局词汇表</string>
@@ -1173,20 +1140,13 @@
     <string name="google_drive">Google Drive</string>
     <string name="google_drive_authentication">Google Drive 身份验证</string>
     <string name="google_drive_backup">Google Drive 备份</string>
-    <string name="google_ml_kit_requires_downloading">Google ML Kit
-        需要下载语言模型以进行离线翻译。请选择你的语言对并初始化。
-    </string>
-    <string name="googles_gemini_api_provides_high">Google 的 Gemini API 通过其 AI 平台提供高质量的翻译。要使用此功能，您需要从
-        Google AI Studio (https://aistudio.google.com) 获取 API 密钥。
-    </string>
+    <string name="google_ml_kit_requires_downloading">Google ML Kit 需要下载语言模型以进行离线翻译。请选择你的语言对并初始化。</string>
+    <string name="googles_gemini_api_provides_high">Google 的 Gemini API 通过其 AI 平台提供高质量的翻译。要使用此功能，您需要从 Google AI Studio (https://aistudio.google.com) 获取 API 密钥。</string>
     <string name="got_it">知道了</string>
     <string name="gradio">Gradio</string>
-    <string name="gradio_tts_connects_to_hugging">Gradio TTS 连接到 Hugging Face Spaces 进行语音合成。需要互联网连接。
-    </string>
+    <string name="gradio_tts_connects_to_hugging">Gradio TTS 连接到 Hugging Face Spaces 进行语音合成。需要互联网连接。</string>
     <string name="gradio_tts_online">Gradio TTS (在线)</string>
-    <string name="gradio_tts_uses_a_huggingface">Gradio TTS 使用 HuggingFace Space
-        合成语音。您可以使用默认空间或部署您自己的空间。
-    </string>
+    <string name="gradio_tts_uses_a_huggingface">Gradio TTS 使用 HuggingFace Space 合成语音。您可以使用默认空间或部署您自己的空间。</string>
     <string name="grant">授予</string>
     <string name="grant_access">授予访问权限</string>
     <string name="grant_access_to_users_for_testing_or_promotion">授予用户访问权限以进行测试或推广</string>
@@ -1219,10 +1179,8 @@
     <string name="high_brightness">高亮度</string>
     <string name="high_capacity_storage_for_community">带压缩功能的高容量存储，用于社区翻译</string>
     <string name="high_performance_neural_tts_with">高性能神经 TTS，具有 100+ 种声音（捆绑）</string>
-    <string name="high_quality_neural_voicesn_works">✓ 高质量神经语音\n✓ 离线工作\n✓ 多种语言\n✓ 与 Android TTS 集成
-    </string>
-    <string name="high_quality_offline_neural_voices">高质量的离线神经语音。浏览、下载和管理 30 多种语言的 100 多种声音。
-    </string>
+    <string name="high_quality_neural_voicesn_works">✓ 高质量神经语音\n✓ 离线工作\n✓ 多种语言\n✓ 与 Android TTS 集成</string>
+    <string name="high_quality_offline_neural_voices">高质量的离线神经语音。浏览、下载和管理 30 多种语言的 100 多种声音。</string>
     <string name="hint">…</string>
     <string name="history">历史</string>
     <string name="history_screen_label">历史记录</string>
@@ -1264,9 +1222,7 @@
     <string name="import_pdf">导入PDF</string>
     <string name="import_pdf_files_into_your_library">将PDF文件导入您的书库，以便阅读和TTS</string>
     <string name="import_sources">导入来源</string>
-    <string name="import_sources_from_legadoyuedu_json">从 Legado/Yuedu JSON 格式导入来源。你可以直接粘贴
-        JSON，输入网址，或从剪贴板导入。
-    </string>
+    <string name="import_sources_from_legadoyuedu_json">从 Legado/Yuedu JSON 格式导入来源。你可以直接粘贴 JSON，输入网址，或从剪贴板导入。</string>
     <string name="import_theme">导入主题</string>
     <string name="important_disclaimer">⚠️ 重要免责声明</string>
     <string name="important_you_need_to_enable">重要提示：您需要在常规屏幕中启用 JS 插件功能</string>
@@ -1307,11 +1263,11 @@
     <string name="installation_error_aborted">PackageManger: 已取消</string>
     <string name="installation_error_blocked">PackageManger: 安装程序被阻止</string>
     <string name="installation_error_conflicted">PackageManger: 与已安装的程序包冲突
-    </string>
+</string>
     <string name="installation_error_incompatible">PackageManger: 与已安装的程序包不兼容
-    </string>
+</string>
     <string name="installation_error_invalid">PackageManger: 已经安装了更高版本的 apk
-    </string>
+</string>
     <string name="installation_failed">安装失败: %1$s</string>
     <string name="installation_failed_generic">安装失败</string>
     <string name="installation_in_progress_this_may">安装进行中... 这可能需要几分钟。</string>
@@ -1336,9 +1292,7 @@
     <string name="ireader_ios">IReader iOS</string>
     <string name="ireader_is_a_free_open">IReader 是一款免费的开源应用，没有广告。您的捐款有助于支付：</string>
     <string name="ireader_logo">IReader 标志</string>
-    <string name="ireader_uses_your_devices_built">IReader 使用您设备的内置文本转语音引擎。您可以在 Android 设置 → 无障碍
-        → 文本转语音中配置语音。
-    </string>
+    <string name="ireader_uses_your_devices_built">IReader 使用您设备的内置文本转语音引擎。您可以在 Android 设置 → 无障碍 → 文本转语音中配置语音。</string>
     <string name="issue_category">问题类别：</string>
     <string name="issues">问题：</string>
     <string name="javascript_plugin_settings">JavaScript 插件设置</string>
@@ -1362,10 +1316,10 @@
     <string name="landscape_zoom">横向缩放</string>
     <string name="lang">语言</string>
     <string name="language">语言</string>
-    <string name="language_description">应用语言设置</string>
     <string name="language_added">语言已添加</string>
     <string name="language_badge">语言徽章</string>
     <string name="language_code">语言代码</string>
+    <string name="language_description">应用语言设置</string>
     <string name="language_filter">语言筛选</string>
     <string name="language_preferences">语言首选项</string>
     <string name="language_preferences_saved">本书的语言偏好设置已保存</string>
@@ -1436,8 +1390,7 @@
     <string name="lnreader_error_database_failed">导入期间发生数据库错误: %1$s</string>
     <string name="lnreader_error_empty_backup">备份文件不包含要导入的小说。</string>
     <string name="lnreader_error_file_not_found">找不到备份文件或无法访问。</string>
-    <string name="lnreader_error_invalid_backup">不是有效的 LNReader 备份文件。请选择从 LNReader 导出的 .zip 文件。
-    </string>
+    <string name="lnreader_error_invalid_backup">不是有效的 LNReader 备份文件。请选择从 LNReader 导出的 .zip 文件。</string>
     <string name="lnreader_error_novel_failed">导入小说 \"%1$s\" 失败: %2$s</string>
     <string name="lnreader_error_out_of_memory">没有足够的内存来处理此备份。请尝试关闭其他应用程序。</string>
     <string name="lnreader_error_parse_failed">解析备份数据失败: %1$s</string>
@@ -1448,8 +1401,7 @@
     <string name="lnreader_import_cancelled">导入已取消</string>
     <string name="lnreader_import_categories">导入分类：%1$d/%2$d</string>
     <string name="lnreader_import_complete">导入完成：%1$d 本小说, %2$d 章节, %3$d 分类 已导入</string>
-    <string name="lnreader_import_complete_with_errors">导入完成，但发生 %1$d 个错误。 已导入 %2$d 本小说，%3$d 章节。
-    </string>
+    <string name="lnreader_import_complete_with_errors">导入完成，但发生 %1$d 个错误。 已导入 %2$d 本小说，%3$d 章节。</string>
     <string name="lnreader_import_failed">导入失败: %1$s</string>
     <string name="lnreader_import_not_available">LNReader 导入不可用</string>
     <string name="lnreader_import_novels">导入小说：%1$d/%2$d - %3$s</string>
@@ -1501,14 +1453,12 @@
     <string name="lvl">等级</string>
     <string name="maintenance">维护</string>
     <string name="manage_badges">管理徽章</string>
-    <string name="manage_glossaries_for_any_book">管理任何书籍（即使不在您的书库中）的词汇表。这些词汇表可在设备之间同步。
-    </string>
+    <string name="manage_glossaries_for_any_book">管理任何书籍（即使不在您的书库中）的词汇表。这些词汇表可在设备之间同步。</string>
     <string name="manage_glossary">管理词汇表</string>
     <string name="manage_notification">管理通知</string>
     <string name="manage_notification_settings">管理通知设置</string>
     <string name="manage_piper_voices">管理 Piper 声音</string>
-    <string name="manage_translation_glossaries_for_your">管理您的书籍翻译词汇表。选择一本书以查看和编辑其词汇表条目。
-    </string>
+    <string name="manage_translation_glossaries_for_your">管理您的书籍翻译词汇表。选择一本书以查看和编辑其词汇表条目。</string>
     <string name="manage_tts_engines">管理 TTS 引擎</string>
     <string name="manual_sync">手动同步</string>
     <string name="margins">边距</string>
@@ -1581,8 +1531,6 @@
     <string name="network_cache">网络缓存</string>
     <string name="network_error">网络错误</string>
     <string name="network_settings">网络设置</string>
-    <string name="advanced_network">高级网络设置</string>
-    <string name="advanced_network_description">User Agent、Cookie 与代理设置</string>
     <string name="neutral">中性</string>
     <string name="new_chapter_notifications">新章节通知</string>
     <string name="new_components">新组件</string>
@@ -1698,8 +1646,7 @@
     <string name="note_cloud_backup_integration_requires">注意：云备份集成需要 API 凭据。</string>
     <string name="note_google_drive_backup_integration">注意：Google Drive 备份集成需要 API 凭据和 OAuth2 设置。</string>
     <string name="note_if_a_models_quota">注意：如果模型的配额超出，应用会自动尝试其他模型。</string>
-    <string name="note_some_engines_require_installation">注意：有些引擎需要安装。在设置中使用完整的 TTS 管理器进行安装。
-    </string>
+    <string name="note_some_engines_require_installation">注意：有些引擎需要安装。在设置中使用完整的 TTS 管理器进行安装。</string>
     <string name="notes_optional">备注（可选）</string>
     <string name="nothing_read_recently">最近没有阅读任何内容</string>
     <string name="notification_backup_complete">备份完成</string>
@@ -1734,9 +1681,7 @@
     <string name="nvidia_api_key_invalid">NVIDIA API 密钥无效。请在 build.nvidia.com 检查您的密钥</string>
     <string name="nvidia_api_key_not_set">NVIDIA API 密钥未设置。请在设置中配置。</string>
     <string name="nvidia_fetch_models">获取可用模型</string>
-    <string name="nvidia_info">NVIDIA NIM 提供对 Llama、Mistral、Gemma 等优化 AI 模型的访问。在 build.nvidia.com 获取您的
-        API 密钥
-    </string>
+    <string name="nvidia_info">NVIDIA NIM 提供对 Llama、Mistral、Gemma 等优化 AI 模型的访问。在 build.nvidia.com 获取您的 API 密钥</string>
     <string name="nvidia_insufficient_credits">NVIDIA API 积分不足。请在 build.nvidia.com 检查您的账户</string>
     <string name="nvidia_model">NVIDIA 模型</string>
     <string name="nvidia_models_loaded">NVIDIA 模型加载成功</string>
@@ -1744,24 +1689,19 @@
     <string name="of">共</string>
     <string name="off">关闭</string>
     <string name="offline_mode">离线模式</string>
-    <string name="offline_mode_description">该应用程序将完全离线工作。不会将任何数据发送到云服务器。社区功能将被隐藏。
-    </string>
+    <string name="offline_mode_description">该应用程序将完全离线工作。不会将任何数据发送到云服务器。社区功能将被隐藏。</string>
     <string name="offset">偏移</string>
     <string name="offsety">offsetY</string>
     <string name="ok">确定</string>
     <string name="ok_ill_restart_later">好的，我稍后重启</string>
     <string name="ollama_configuration">Ollama 配置</string>
     <string name="ollama_information">Ollama 信息</string>
-    <string name="ollama_is_a_local_llm">Ollama 是一个用于翻译的本地 LLM 服务器。确保 Ollama 已安装并在您的设备或网络上运行。您需要首先使用
-        'ollama pull modelname' 来拉取模型。
-    </string>
+    <string name="ollama_is_a_local_llm">Ollama 是一个用于翻译的本地 LLM 服务器。确保 Ollama 已安装并在您的设备或网络上运行。您需要首先使用 'ollama pull modelname' 来拉取模型。</string>
     <string name="ollama_model">Ollama 模型</string>
     <string name="ollama_server_url_not_set">OOllama 服务器 URL 未设置</string>
     <string name="ollama_url">Ollama URL</string>
     <string name="on">开启</string>
-    <string name="once_installed_go_to_android">安装完成后，转到 Android 设置 → 辅助功能 → 文本转语音 → 首选引擎并选择
-        Sherpa TTS。
-    </string>
+    <string name="once_installed_go_to_android">安装完成后，转到 Android 设置 → 辅助功能 → 文本转语音 → 首选引擎并选择 Sherpa TTS。</string>
     <string name="online_tts_engines">在线 TTS 引擎</string>
     <string name="only_share_high_quality_ai">仅分享高质量的 AI 翻译（OpenAI、Gemini、DeepSeek）</string>
     <string name="only_show_translations_with_this_rating_or_higher">仅显示此评分或更高评分的翻译</string>
@@ -1791,9 +1731,7 @@
     <string name="openrouter_api_key_invalid">OpenRouter API 密钥无效。请在 openrouter.ai/keys 检查您的密钥</string>
     <string name="openrouter_api_key_not_set">OpenRouter API 密钥未设置。请在设置中配置。</string>
     <string name="openrouter_fetch_models">获取可用模型</string>
-    <string name="openrouter_info">OpenRouter 提供对 GPT-4、Claude、Llama 等多种 AI 模型统一访问。在 openrouter.ai 获取您的
-        API 密钥
-    </string>
+    <string name="openrouter_info">OpenRouter 提供对 GPT-4、Claude、Llama 等多种 AI 模型统一访问。在 openrouter.ai 获取您的 API 密钥</string>
     <string name="openrouter_insufficient_credits">OpenRouter 积分不足。请在 openrouter.ai/credits 添加积分</string>
     <string name="openrouter_model">OpenRouter 模型</string>
     <string name="openrouter_models_loaded">OpenRouter 模型加载成功</string>
@@ -1817,8 +1755,8 @@
     <string name="overall_progress">总进度</string>
     <string name="owner">拥有者</string>
     <string name="package_installer_failed_to_install_packages">程序包安装程序无法安装
-        程序包：状态代码：
-    </string>
+程序包：状态代码：
+</string>
     <string name="package_manager">程序包管理器</string>
     <string name="package_name">包名</string>
     <string name="package_url">包网址</string>
@@ -1878,9 +1816,7 @@
     <string name="pinned_sources">已置顶</string>
     <string name="pinned_to_top">已置顶</string>
     <string name="piper_requires_native_libraries_provided">• Piper 需要本机库（在版本中提供）\n</string>
-    <string name="piper_requires_visual_c_redistributable">Piper 需要 Visual C++ 可再发行组件。请从 Microsoft
-        安装并重启应用。
-    </string>
+    <string name="piper_requires_visual_c_redistributable">Piper 需要 Visual C++ 可再发行组件。请从 Microsoft 安装并重启应用。</string>
     <string name="piper_tts">Piper TTS</string>
     <string name="piper_tts_voices">Piper TTS 声音</string>
     <string name="piper_voice_catalog">Piper 语音目录</string>
@@ -2121,12 +2057,11 @@
     <string name="report_source_as_broken">报告源已损坏</string>
     <string name="report_source_issue">报告源问题</string>
     <string name="repository">存储库</string>
-    <string name="repository_description">管理书源与扩展</string>
     <string name="repository_added_successfully">仓库已成功添加</string>
     <string name="repository_adding_a_new">添加新的存储库</string>
+    <string name="repository_description">管理书源与扩展</string>
     <string name="repository_example_url">示例：https://github.com/username/repo/raw/main/index.json</string>
-    <string name="repository_explanation">存储库是在线托管的扩展集合。您可以添加自定义存储库以访问其他书籍和小说的源。
-    </string>
+    <string name="repository_explanation">存储库是在线托管的扩展集合。您可以添加自定义存储库以访问其他书籍和小说的源。</string>
     <string name="repository_name">仓库名称</string>
     <string name="repository_type">存储库类型</string>
     <string name="repository_url">仓库URL</string>
@@ -2197,9 +2132,7 @@
     <string name="rule_syntax_help">规则语法帮助</string>
     <string name="rules_count">%1$d 条规则</string>
     <string name="run_health_check">运行健康检查</string>
-    <string name="run_the_migration_community_sourcesql">在您的 Supabase SQL 编辑器中运行 migration_community_source.sql
-        文件以创建这些表。
-    </string>
+    <string name="run_the_migration_community_sourcesql">在您的 Supabase SQL 编辑器中运行 migration_community_source.sql 文件以创建这些表。</string>
     <string name="sample_text">示例文本</string>
     <string name="save">保存</string>
     <string name="save_backup">保存备份</string>
@@ -2207,9 +2140,7 @@
     <string name="save_configuration">保存配置</string>
     <string name="save_custom_theme">保存自定义主题</string>
     <string name="save_epub">保存 EPUB</string>
-    <string name="save_js_sources_extensions_backups">在可用时将 JS 书源、扩展、备份和 EPUB 保存到 SAF
-        文件夹。如果不可用，则回退到缓存。
-    </string>
+    <string name="save_js_sources_extensions_backups">在可用时将 JS 书源、扩展、备份和 EPUB 保存到 SAF 文件夹。如果不可用，则回退到缓存。</string>
     <string name="save_language_preferences">保存语言偏好设置</string>
     <string name="save_multi_endpoint_configuration">保存多端点配置</string>
     <string name="save_patterns">保存模式</string>
@@ -2258,9 +2189,9 @@
     <string name="secure_private">安全 &amp; 私密</string>
     <string name="secure_screen">安全屏幕</string>
     <string name="security">安全</string>
-    <string name="security_description">管理安全与隐私设置</string>
     <string name="security_audit">安全审计</string>
     <string name="security_best_practices">安全最佳实践</string>
+    <string name="security_description">管理安全与隐私设置</string>
     <string name="security_features">安全功能</string>
     <string name="security_guide">安全指南</string>
     <string name="security_privacy">安全 &amp; 隐私</string>
@@ -2305,9 +2236,7 @@
     <string name="select_what_data_to_transfer">选择要传输的数据</string>
     <string name="select_when_automatic_updates_are_allowed">选择允许自动更新的时间：</string>
     <string name="select_which_gemini_model_to_use_for_translation">选择要用于翻译的 Gemini 模型</string>
-    <string name="select_your_preferred_translation_engine">选择您首选的翻译引擎并配置其设置。 AI
-        驱动的引擎（OpenAI、DeepSeek）需要 API 密钥并提供更高级的功能。
-    </string>
+    <string name="select_your_preferred_translation_engine">选择您首选的翻译引擎并配置其设置。 AI 驱动的引擎（OpenAI、DeepSeek）需要 API 密钥并提供更高级的功能。</string>
     <string name="selectable_mode">选择模式</string>
     <string name="selected">已选择</string>
     <string name="selected_languages">已选语言</string>
@@ -2394,8 +2323,7 @@
     <string name="skip_for_now">改用应用存储</string>
     <string name="skip_for_now_dont_show_again">暂时跳过（不再显示）</string>
     <string name="skip_forward_10_seconds">前进10秒</string>
-    <string name="skip_rate_limit_warnings_when">批量翻译章节时跳过速率限制警告。可能会耗尽 API 积分或导致 IP 被封锁。
-    </string>
+    <string name="skip_rate_limit_warnings_when">批量翻译章节时跳过速率限制警告。可能会耗尽 API 积分或导致 IP 被封锁。</string>
     <string name="skip_this_book">跳过这本书</string>
     <string name="skip_titles_without_chapters">跳过没有章节的标题</string>
     <string name="skip_to_content">跳转到内容</string>
@@ -2449,8 +2377,8 @@
     <string name="start_time">开始时间</string>
     <string name="start_trial">开始试用</string>
     <string name="statistics">统计</string>
-    <string name="statistics_description">查看阅读统计与进度</string>
     <string name="statistics_and_analytics">统计和分析</string>
+    <string name="statistics_description">查看阅读统计与进度</string>
     <string name="stats">统计</string>
     <string name="status">状态</string>
     <string name="status_color">状态颜色</string>
@@ -2459,13 +2387,10 @@
     <string name="stop_playback_after">播放停止后：</string>
     <string name="storage">存储</string>
     <string name="storage_access_lost">存储访问权限丢失</string>
-    <string name="storage_access_lost_description">IReader 无法再访问存储文件夹。请选择一个文件夹以继续使用本应用。
-    </string>
-    <string name="storage_access_lost_reasons">文件夹可能已被删除、移动，或权限被撤销。这可能在应用更新或系统更改后发生。
-    </string>
+    <string name="storage_access_lost_description">IReader 无法再访问存储文件夹。请选择一个文件夹以继续使用本应用。</string>
+    <string name="storage_access_lost_reasons">文件夹可能已被删除、移动，或权限被撤销。这可能在应用更新或系统更改后发生。</string>
     <string name="storage_is_needed_for">需要存储空间用于：</string>
-    <string name="storage_permission_privacy_note">IReader仅访问您选择的文件夹。您的其他文件将保持私密且不受影响。
-    </string>
+    <string name="storage_permission_privacy_note">IReader仅访问您选择的文件夹。您的其他文件将保持私密且不受影响。</string>
     <string name="storage_permission_required_explanation">需要存储权限说明
     </string>
     <string name="storage_permission_subtitle">选择IReader存储下载、扩展和备份的文件夹</string>
@@ -2511,9 +2436,7 @@
     <string name="swap_languages">切换语言</string>
     <string name="switch">切换</string>
     <string name="switch_preference">开关首选项</string>
-    <string name="switch_to_an_ai_powered">切换到AI驱动的引擎 (OpenAI 或 DeepSeek)
-        以访问高级翻译设置，如内容类型、语调控制和样式保留。
-    </string>
+    <string name="switch_to_an_ai_powered">切换到AI驱动的引擎 (OpenAI 或 DeepSeek) 以访问高级翻译设置，如内容类型、语调控制和样式保留。</string>
     <string name="switch_to_available_tab_to_install_sources">切换到“可用”标签页以安装来源</string>
     <string name="sync">同步</string>
     <string name="sync_from_cloud">从云端同步</string>
@@ -2529,13 +2452,13 @@
     <string name="sync_stats">同步统计</string>
     <string name="sync_with_cloud">与云同步</string>
     <string name="sync_your_stats_to_appear_on_the_leaderboard">同步您的统计数据以显示在排行榜上</string>
-    <string name="synced">• 已同步</string>
+    <string name="synced"> • 已同步</string>
     <string name="synced_1">已同步</string>
     <string name="syncing_with_cloud">正在与云同步...</string>
     <string name="synopsis">简介</string>
     <string name="syntax_any_chars_ab_a_or_bnn">语法：.* = 任意字符，(?:A|B) = A 或 B
 
-    </string>
+</string>
     <string name="system_default">默认</string>
     <string name="system_diagnostics">系统诊断</string>
     <string name="system_health">系统健康</string>
@@ -2592,9 +2515,7 @@
     <string name="the_end">全文完</string>
     <string name="the_plugin_has_been_successfully">插件已成功安装。 现在您可以启用和配置它。</string>
     <string name="the_plugin_was_installed_successfully">插件安装成功。请重启应用以加载 JavaScript 源。</string>
-    <string name="the_quick_brown_fox_jumps">敏捷的棕色狐狸跳过懒狗。 Lorem ipsum dolor sit amet, consectetur adipiscing
-        elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua。
-    </string>
+    <string name="the_quick_brown_fox_jumps">敏捷的棕色狐狸跳过懒狗。 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua。</string>
     <string name="the_quick_brown_fox_jumps_over_the_lazy_dog">敏捷的棕色狐狸跳过懒狗</string>
     <string name="the_source_is_not_found">找不到源。</string>
     <string name="theme">主题</string>
@@ -2619,18 +2540,11 @@
     <string name="this_card_can_be_clicked">此卡片可以点击。</string>
     <string name="this_feature_is_currently_in">此功能目前正在开发中，需要进行额外的设置。</string>
     <string name="this_feature_is_not_available">此功能不可用</string>
-    <string name="this_folder_will_be_used">此文件夹将用于所有应用数据，包括下载、扩展和备份。请选择一个易于访问的位置。
-    </string>
+    <string name="this_folder_will_be_used">此文件夹将用于所有应用数据，包括下载、扩展和备份。请选择一个易于访问的位置。</string>
     <string name="this_is_a_preview_of">这是一个文本在此主题卡片中的预览。</string>
-    <string name="this_is_a_recurring_monthly">这是一个周期性的每月目标。
-        一旦达到目标，它将自动重置为下个月，以确保持续支持。
-    </string>
-    <string name="this_is_a_sample_review">
-        这是一个示例评论文本，显示了当您撰写评论时，您的徽章将如何显示在您的用户名旁边。
-    </string>
-    <string name="this_is_a_very_long">
-        这是一个非常长的副标题，演示了当内容太长而无法容纳在单行上时，组件如何处理文本溢出和换行
-    </string>
+    <string name="this_is_a_recurring_monthly">这是一个周期性的每月目标。 一旦达到目标，它将自动重置为下个月，以确保持续支持。</string>
+    <string name="this_is_a_sample_review">这是一个示例评论文本，显示了当您撰写评论时，您的徽章将如何显示在您的用户名旁边。</string>
+    <string name="this_is_a_very_long">这是一个非常长的副标题，演示了当内容太长而无法容纳在单行上时，组件如何处理文本溢出和换行</string>
     <string name="this_is_an_example_of">这是Material Design 3风格的增强卡片示例。</string>
     <string name="this_is_disabled">此项已禁用</string>
     <string name="this_is_enabled">此项已启用</string>
@@ -2642,12 +2556,8 @@
     <string name="this_plugin_does_not_provide_custom_settings">此插件不提供自定义设置。</string>
     <string name="this_purchase_will_be_synced">此购买将在您的所有设备上同步。</string>
     <string name="this_source_requires_authentication_please">此源需要身份验证。 请输入您的凭据。</string>
-    <string name="this_translation_engine_uses_a">此翻译引擎使用 WebView 直接访问 ChatGPT。 您需要使用您的帐户登录
-        ChatGPT 才能使用此功能。 该应用程序将保存您的 Cookie 以供将来翻译使用。
-    </string>
-    <string name="this_translation_engine_uses_a_1">此翻译引擎使用 WebView 直接访问 DeepSeek。 您需要使用您的帐户登录
-        DeepSeek 才能使用此功能。 该应用程序将保存您的 Cookie 以供将来翻译使用。
-    </string>
+    <string name="this_translation_engine_uses_a">此翻译引擎使用 WebView 直接访问 ChatGPT。 您需要使用您的帐户登录 ChatGPT 才能使用此功能。 该应用程序将保存您的 Cookie 以供将来翻译使用。</string>
+    <string name="this_translation_engine_uses_a_1">此翻译引擎使用 WebView 直接访问 DeepSeek。 您需要使用您的帐户登录 DeepSeek 才能使用此功能。 该应用程序将保存您的 Cookie 以供将来翻译使用。</string>
     <string name="this_wallet_does_not_own_an_ireader_nft">此钱包不拥有 IReader NFT</string>
     <string name="this_will_compact_the_database">这将压缩数据库，并可能提高性能。此过程可能需要几分钟。</string>
     <string name="this_will_reset_all_data">这会将所有数据和存储设置重置为默认值。</string>
@@ -2659,7 +2569,7 @@
     <string name="timer_active">计时器已激活</string>
     <string name="tip_check_the_api_tab">提示：查看 Hugging Face Space 页面上的 API 选项卡以找到正确的 API 名称。</string>
     <string name="tip_use_regex_patterns_to_remove_unwanted_textn">提示：使用正则表达式模式移除不需要的文本。
-    </string>
+</string>
     <string name="tips">提示</string>
     <string name="title">标题</string>
     <string name="title_cannot_be_empty">标题不能为空</string>
@@ -2667,8 +2577,7 @@
     <string name="to">到</string>
     <string name="to_enable_google_drive_backup_you_need_to">要启用 Google Drive 备份，您需要：</string>
     <string name="to_enable_js_plugins">要启用 JS 插件：</string>
-    <string name="to_use_lnreader_compatible_plugins">要使用与 LNReader 兼容的插件，您需要在常规设置中启用插件功能。
-    </string>
+    <string name="to_use_lnreader_compatible_plugins">要使用与 LNReader 兼容的插件，您需要在常规设置中启用插件功能。</string>
     <string name="toc_url_selector">目录网址选择器</string>
     <string name="todays_quote">今日名言</string>
     <string name="todays_quote_1">✨ 今日语录</string>
@@ -2699,11 +2608,9 @@
     <string name="touch_the_fingerprint_sensor_or">触摸指纹传感器或使用面部识别解锁</string>
     <string name="track_your_reading_journey">追踪您的阅读历程</string>
     <string name="tracker">追踪器</string>
-    <string name="tracking">同步</string>
+    <string name="tracking">追踪</string>
     <string name="tracking_description">同步阅读进度至 AniList、MAL 等第三方平台</string>
-    <string name="tracking_services">同步服务</string>
-    <string name="wifi_sync">局域网同步</string>
-    <string name="wifi_sync_description">在同一网络中跨设备同步书籍与进度</string>
+    <string name="tracking_services">跟踪服务</string>
     <string name="transaction_id">交易ID</string>
     <string name="translate_action">翻译</string>
     <string name="translate_chapter">翻译章节</string>
@@ -2716,13 +2623,13 @@
     <string name="translation_auth_required">您需要登录 %1$s 才能使用此翻译功能。</string>
     <string name="translation_captcha_required">%1$s 需要验证。请完成验证码以继续。</string>
     <string name="translation_complete">翻译完成。</string>
+    <string name="translation_description">切换翻译引擎</string>
     <string name="translation_empty_response">%1$s 返回空响应。这可能是暂时性问题，请重试。</string>
     <string name="translation_engine">翻译引擎</string>
     <string name="translation_engine_not_available">%1$s 在此应用版本中不可用。请使用不同的翻译引擎。</string>
     <string name="translation_engines_refreshed">翻译引擎已刷新</string>
     <string name="translation_error">翻译错误</string>
-    <string name="translation_language_model_not_available">%1$s → %2$s 的语言模型未下载。请前往“设置”→“翻译”下载。
-    </string>
+    <string name="translation_language_model_not_available">%1$s → %2$s 的语言模型未下载。请前往“设置”→“翻译”下载。</string>
     <string name="translation_language_pair_not_supported">%1$s 不支持从 %2$s 翻译到 %3$s。请选择不同的语言。</string>
     <string name="translation_model_not_found">找不到 %1$s 的 AI 模型。请检查您的设置。</string>
     <string name="translation_model_not_found_with_name">在 %1$s 中找不到模型“%2$s”。请在设置中选择不同的模型。</string>
@@ -2735,12 +2642,10 @@
     <string name="translation_rate_limit">%1$s 收到过多请求。请稍等片刻再试。</string>
     <string name="translation_rate_limit_delay">翻译速率限制延迟</string>
     <string name="translation_rate_limit_with_retry">%1$s 达到速率限制。请等待 %2$d 秒后重试。</string>
-    <string name="translation_same_as_original">%1$s 返回的文本与原文相同。翻译可能失败，或者文本可能已经是目标语言。
-    </string>
+    <string name="translation_same_as_original">%1$s 返回的文本与原文相同。翻译可能失败，或者文本可能已经是目标语言。</string>
     <string name="translation_server_error">%1$s 服务器出现问题。请稍后再试。</string>
     <string name="translation_server_error_with_code">%1$s 服务器错误（代码：%2$d）。请稍后再试。</string>
     <string name="translation_settings">翻译设置</string>
-    <string name="translation_description">切换翻译引擎</string>
     <string name="translation_text_too_long">文本对于 %1$s 处理来说太长了。请尝试翻译较小的部分。</string>
     <string name="translation_text_too_long_with_limit">文本超过了 %1$s 的 %2$d 字符限制。请尝试翻译较小的部分。</string>
     <string name="translation_timeout">%1$s 响应超时。请重试。</string>
@@ -2781,9 +2686,7 @@
     <string name="tts_engine_manager_description">配置语音合成引擎与音色</string>
     <string name="tts_engine_settings">TTS引擎设置</string>
     <string name="tts_error">TTS 错误: %1$s</string>
-    <string name="tts_merge_info">将多个段落合并成更大的块，以实现更流畅的阅读。这可以减少服务器请求并提供更好的音频连贯性。设置为
-        0 可禁用合并。
-    </string>
+    <string name="tts_merge_info">将多个段落合并成更大的块，以实现更流畅的阅读。这可以减少服务器请求并提供更好的音频连贯性。设置为 0 可禁用合并。</string>
     <string name="tts_merge_words_native">为 Android TTS、Piper、Sherpa 引擎合并单词</string>
     <string name="tts_merge_words_remote">为 Gradio/在线 TTS 引擎合并单词</string>
     <string name="tts_native_engines">本地引擎</string>
@@ -2858,18 +2761,14 @@
     <string name="url">URL</string>
     <string name="url_1">URL</string>
     <string name="url_is_invalid">URL 无效</string>
-    <string name="url_must_start_with_https_and_end_with_indexjson">URL 必须以 https:// 开头并以 index.json 结尾
-    </string>
+    <string name="url_must_start_with_https_and_end_with_indexjson">URL 必须以 https:// 开头并以 index.json 结尾</string>
     <string name="url_of_your_ollama_api_server">您的 Ollama API 服务器的 URL</string>
     <string name="usage_count">使用次数</string>
     <string name="usage_history_last_hour">使用历史记录（过去一小时）</string>
     <string name="usage_statistics">使用统计</string>
     <string name="use_a_strong_pin_6_digits_or_passwordn">• 使用强 PIN 码（6 位数）或密码\n</string>
-    <string name="use_a_strong_pin_or">• 使用强 PIN 码或密码\n• 启用生物识别身份验证以方便使用\n• 在公共场所启用安全屏幕\n•
-        使用 18+ 源锁以增加隐私
-    </string>
-    <string name="use_arrow_keyschapternadchapternread_more_at">使用方向键.*章节\n(?:A|D|←|→).*章节\n阅读更多内容于.*
-    </string>
+    <string name="use_a_strong_pin_or">• 使用强 PIN 码或密码\n• 启用生物识别身份验证以方便使用\n• 在公共场所启用安全屏幕\n• 使用 18+ 源锁以增加隐私</string>
+    <string name="use_arrow_keyschapternadchapternread_more_at">使用方向键.*章节\n(?:A|D|←|→).*章节\n阅读更多内容于.*</string>
     <string name="use_auth">需要解锁</string>
     <string name="use_biometric">使用生物识别</string>
     <string name="use_coqui_tts">使用 Coqui TTS</string>
@@ -2973,6 +2872,8 @@
     <string name="wifi_only">仅限 WiFi</string>
     <string name="wifi_only_mode">仅限WiFi模式</string>
     <string name="wifi_only_warning">下载已暂停 - 仅限WiFi模式已启用</string>
+    <string name="wifi_sync">局域网同步</string>
+    <string name="wifi_sync_description">在同一网络中跨设备同步书籍与进度</string>
     <string name="with_trailing_content">带有尾随内容</string>
     <string name="wizard">向导</string>
     <string name="wizard_step">向导步骤</string>
@@ -3000,8 +2901,7 @@
     <string name="your_name_for_contributions">您的贡献者姓名</string>
     <string name="your_personal_book_reading_companion">您的个人图书阅读伴侣</string>
     <string name="your_personal_reading_companionnlets_set">您的私人阅读伴侣。
-        让我们开始设置一些东西。
-    </string>
+让我们开始设置一些东西。</string>
     <string name="your_plugins">您的插件</string>
     <string name="your_privacy_matters">您的隐私很重要</string>
     <string name="your_rank">您的等级</string>
@@ -3018,4 +2918,17 @@
     <string name="youve_reached_the_end">您已到达结尾！</string>
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
+    <string name="cover_theme_style">Cover-based Theme Style</string>
+    <string name="cover_theme_style_subtitle">Choose the Material You palette style for cover-extracted colors</string>
+    <string name="cover_theme_tonal_spot">Tonal Spot</string>
+    <string name="cover_theme_neutral">Neutral</string>
+    <string name="cover_theme_vibrant">Vibrant</string>
+    <string name="cover_theme_expressive">Expressive</string>
+    <string name="cover_theme_rainbow">Rainbow</string>
+    <string name="cover_theme_fruit_salad">Fruit Salad</string>
+    <string name="cover_theme_monochrome">Monochrome</string>
+    <string name="cover_theme_fidelity">Fidelity</string>
+    <string name="cover_theme_content">Content</string>
 </resources>

@@ -294,7 +294,7 @@ class SettingScreenSpec {
                     title = localizeHelper.localize(Res.string.wifi_sync),
                     description = localizeHelper.localize(Res.string.wifi_sync_description),
                     icon = Icons.Default.Wifi,
-                    section = "Sync",
+                    section = localizeHelper.localize(Res.string.sync),
                     onClick = { navController.navigate(NavigationRoutes.wifiSync) }
                 ))
             }

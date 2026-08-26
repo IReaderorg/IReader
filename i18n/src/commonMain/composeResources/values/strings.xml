@@ -1,6 +1,23 @@
 <resources>
+    <string name="advance_setting_description">Advanced configuration options</string>
+    <string name="advanced_network">Advanced Network</string>
+    <string name="advanced_network_description">User agent, cookies, and proxy settings</string>
+    <string name="appearance_description">Customize app theme and colors</string>
+    <string name="clear_all_cache_description">Clear cached data to free up space</string>
+    <string name="cloudflare_bypass">Cloudflare Bypass</string>
+    <string name="cloudflare_bypass_description">Configure FlareSolverr for protected sources</string>
+    <string name="colors_description">Dynamic colors and Material You</string>
+    <string name="font_description">Choose reading fonts and sizes</string>
+    <string name="font_size_description">Adjust text size for reading</string>
+    <string name="general_description">General app preferences</string>
+    <string name="installed_plugins_description">Manage installed plugins and features</string>
+    <string name="language_description">App language settings</string>
     <string name="library_screen_label">Library</string>
     <string name="explore_screen_label">Sources</string>
+    <string name="reader_description">Customize reading experience</string>
+    <string name="reading_mode_description">Scroll or page reading mode</string>
+    <string name="repository_description">Manage content sources and extensions</string>
+    <string name="security_description">Manage security and privacy settings</string>
     <string name="setting_screen_label">Setting</string>
     <string name="delete_all_downloads">Delete all downloads</string>
     <string name="cancel_all">Cancel all</string>
@@ -11,6 +28,12 @@
     </string>
     <string name="add_as_new">New</string>
     <string name="add">Add</string>
+    <string name="statistics_description">View reading statistics and progress</string>
+    <string name="supabase_configuration_description">Configure custom Supabase instance for sync</string>
+    <string name="theme_description">Light, dark, or system default theme</string>
+    <string name="tracking_description">Sync reading progress with AniList, MAL, and more</string>
+    <string name="translation_description">Configure translation preferences</string>
+    <string name="tts_engine_manager_description">Configure text-to-speech engines and voices</string>
     <string name="view_book">View Book</string>
     <string name="show_system_catalogs">Show System Extensions</string>
     <string name="show_system_catalogs_subtitle">Display built-in extensions that come with the app</string>
@@ -20,9 +43,7 @@
     <string name="auto_installer_subtitle">Automatically install extension updates when available</string>
     <string name="saved_local_source_location">Saved Sources to Cache</string>
     <string name="what_is_repository">What is a repository?</string>
-    <string name="repository_explanation">A repository is a collection of extensions hosted online. You can add custom
-        repositories to access additional sources for books and novels.
-    </string>
+    <string name="repository_explanation">A repository is a collection of extensions hosted online. You can add custom repositories to access additional sources for books and novels.</string>
     <string name="repository_example_url">Example: https://github.com/username/repo/raw/main/index.json</string>
     <string name="no_active_downloads">No active downloads</string>
     <string name="no_active_downloads_subtitle">Downloads will appear here when you start downloading chapters</string>
@@ -50,6 +71,8 @@
     <string name="no_repositories_added_subtitle">Add a repository to access additional sources</string>
     <string name="add_repository">Add Repository</string>
     <string name="checking_for_updates">Checking for updates…</string>
+    <string name="wifi_sync">WiFi Sync</string>
+    <string name="wifi_sync_description">Sync books and progress between devices on local network</string>
     <string name="you_are_on_latest_version">You are on the latest version</string>
     <string name="update_available">Update available</string>
     <string name="failed_to_check_updates">Failed to check for updates</string>
@@ -147,7 +170,6 @@
     <string name="check_permissions">Check Permissions</string>
     <string name="use_local_cache">Use Local Cache</string>
     <string name="appearance">Appearance</string>
-    <string name="appearance_description">Customize app theme and colors</string>
     <string name="updater_is_enable">Updater</string>
     <string name="show_update">Show App Update Notifications</string>
     <string name="confirm_exit">Confirm Exit</string>
@@ -200,7 +222,6 @@
     <string name="book_name">Book Name</string>
     <string name="auto_sort_chapters_in_db">Auto Sort Chapters in DB</string>
     <string name="advance_setting">Advanced Settings</string>
-    <string name="advance_setting_description">Advanced configuration options</string>
     <string name="advance_commands">Advanced Commands</string>
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
@@ -226,18 +247,13 @@
     <string name="lnreader_import_reading_backup">Reading backup file…</string>
     <string name="lnreader_import_novels">Importing novels: %1$d/%2$d - %3$s</string>
     <string name="lnreader_import_categories">Importing categories: %1$d/%2$d</string>
-    <string name="lnreader_import_complete">Import complete: %1$d novels, %2$d chapters, %3$d categories imported
-    </string>
-    <string name="lnreader_import_complete_with_errors">Import completed with %1$d errors. %2$d novels, %3$d chapters
-        imported.
-    </string>
+    <string name="lnreader_import_complete">Import complete: %1$d novels, %2$d chapters, %3$d categories imported</string>
+    <string name="lnreader_import_complete_with_errors">Import completed with %1$d errors. %2$d novels, %3$d chapters imported.</string>
     <string name="lnreader_import_failed">Import failed: %1$s</string>
     <string name="lnreader_import_cancelled">Import cancelled</string>
     <string name="lnreader_import_not_available">LNReader import not available</string>
     <string name="select_lnreader_backup">Select LNReader Backup</string>
-    <string name="lnreader_error_invalid_backup">Not a valid LNReader backup file. Please select a .zip file exported
-        from LNReader.
-    </string>
+    <string name="lnreader_error_invalid_backup">Not a valid LNReader backup file. Please select a .zip file exported from LNReader.</string>
     <string name="lnreader_error_corrupted_backup">The backup file appears to be corrupted or incomplete.</string>
     <string name="lnreader_error_empty_backup">The backup file contains no novels to import.</string>
     <string name="lnreader_error_read_failed">Failed to read backup file: %1$s</string>
@@ -245,21 +261,15 @@
     <string name="lnreader_error_novel_failed">Failed to import novel \"%1$s\": %2$s</string>
     <string name="lnreader_error_category_failed">Failed to import category \"%1$s\": %2$s</string>
     <string name="lnreader_error_chapter_failed">Failed to import chapters for \"%1$s\": %2$s</string>
-    <string name="lnreader_error_source_not_found">Source not found for plugin: %1$s. Novel will be imported as local.
-    </string>
+    <string name="lnreader_error_source_not_found">Source not found for plugin: %1$s. Novel will be imported as local.</string>
     <string name="lnreader_error_database_failed">Database error during import: %1$s</string>
-    <string name="lnreader_error_permission_denied">Storage permission denied. Please grant permission to access
-        files.
-    </string>
+    <string name="lnreader_error_permission_denied">Storage permission denied. Please grant permission to access files.</string>
     <string name="lnreader_error_file_not_found">Backup file not found or inaccessible.</string>
-    <string name="lnreader_error_out_of_memory">Not enough memory to process this backup. Try closing other apps.
-    </string>
+    <string name="lnreader_error_out_of_memory">Not enough memory to process this backup. Try closing other apps.</string>
     <string name="lnreader_error_unknown">An unexpected error occurred: %1$s</string>
     <string name="lnreader_warning_skipped_novels">%1$d novels were skipped (already in library)</string>
-    <string name="lnreader_warning_unmapped_sources">%1$d novels have unmapped sources and were imported as local
-    </string>
-    <string name="lnreader_warning_partial_import">Some items could not be imported. Check the error log for details.
-    </string>
+    <string name="lnreader_warning_unmapped_sources">%1$d novels have unmapped sources and were imported as local</string>
+    <string name="lnreader_warning_partial_import">Some items could not be imported. Check the error log for details.</string>
     <string name="author">Author</string>
     <string name="download">Download</string>
     <string name="bookmark">Bookmark</string>
@@ -367,12 +377,8 @@
     <string name="label_library">Checking Library</string>
     <string name="library">Library</string>
     <string name="security">Security</string>
-    <string name="security_description">Manage security and privacy settings</string>
     <string name="secure_screen">Secure Screen</string>
     <string name="tracking">Tracking</string>
-    <string name="tracking_description">Sync reading progress with AniList, MAL, and more</string>
-    <string name="wifi_sync">WiFi Sync</string>
-    <string name="wifi_sync_description">Sync books and progress between devices on local network</string>
     <string name="label_recent_updates">Recent Updates</string>
     <string name="popular_book">Most Popular</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
@@ -414,7 +420,6 @@
     <string name="clear_not_in_library_books">Clear All not in library books</string>
     <string name="clear_all_cover_cache">Clear All Cover Cache</string>
     <string name="clear_all_cache">Clear All Cache</string>
-    <string name="clear_all_cache_description">Clear cached data to free up space</string>
     <string name="unlock_app">Unlock</string>
     <string name="reset_setting">Reset Setting</string>
     <string name="reset_reader_screen_settings">Reset Reader Screen Settings</string>
@@ -430,10 +435,8 @@
     <string name="text_align_justify">Text Align Justify</string>
     <string name="text_align_right">Text Align right</string>
     <string name="font_size">Font Size</string>
-    <string name="font_size_description">Adjust text size for reading</string>
     <string name="font_weight">Font Weight</string>
     <string name="font">Font</string>
-    <string name="font_description">Choose reading fonts and sizes</string>
     <string name="page">Page</string>
     <string name="continues">Continue</string>
     <string name="right">Right</string>
@@ -461,7 +464,6 @@
     <string name="letter">Letter</string>
     <string name="width">Width</string>
     <string name="colors">Colors</string>
-    <string name="colors_description">Dynamic colors and Material You</string>
     <string name="scroll_mode">Scroll Mode</string>
     <string name="show_scrollbar">Show Scrollbar</string>
     <string name="show_category_tabs">Show Category Tabs</string>
@@ -469,28 +471,25 @@
     <string name="go_to_last_chapter">Go to last chapter</string>
     <string name="read_chapters">read chapters</string>
     <string name="show_all_category_tab">Show "All" Category Tab</string>
+    <string name="hide_categorized_from_all">Hide categorized books from "All" tab</string>
     <string name="show_count_in_category_tab">Show Count in Category Tab</string>
     <string name="badges">Badges</string>
     <string name="downloaded_chapters">Downloaded chapters</string>
     <string name="local_manga">Local manga</string>
     <string name="language">Language</string>
-    <string name="language_description">App language settings</string>
     <string name="scrollbar_draggable">ScrollBar Draggable</string>
     <string name="orientation">Orientation</string>
     <string name="scrollbar_mode">ScrollBar Mode</string>
     <string name="reading_mode">Reading Mode</string>
-    <string name="reading_mode_description">Scroll or page reading mode</string>
     <string name="immersive_mode">Immersive mode</string>
     <string name="bionic_reading">Bionic Reading mode</string>
     <string name="show_webView_during_fetching">WebView Integration</string>
     <string name="screen_always_on">Screen Always On</string>
     <string name="volume_key_navigation">Volume Key Navigation</string>
     <string name="general">General</string>
-    <string name="general_description">General app preferences</string>
     <string name="use_default_image_loader">Use the Default Image Loader</string>
     <string name="system_default">Default</string>
     <string name="reader">Reader</string>
-    <string name="reader_description">Customize reading experience</string>
     <string name="landscape">Landscape</string>
     <string name="portrait">Portrait</string>
     <string name="vertical">Vertical</string>
@@ -499,15 +498,11 @@
     <string name="custom_brightness">Custom Brightness</string>
     <string name="preload_settings">Chapter Preloading</string>
     <string name="auto_preload_next_chapter">Auto-preload next chapter</string>
-    <string name="auto_preload_next_chapter_summary">Automatically download the next chapter in the background for
-        instant reading
-    </string>
+    <string name="auto_preload_next_chapter_summary">Automatically download the next chapter in the background for instant reading</string>
     <string name="preload_only_on_wifi">Preload only on WiFi</string>
     <string name="preload_only_on_wifi_summary">Restrict automatic preloading to WiFi connections only</string>
     <string name="auto_translate_next_chapter">Auto-translate next chapter</string>
-    <string name="auto_translate_next_chapter_summary">Automatically translate the next chapter when navigating using
-        the selected translation engine
-    </string>
+    <string name="auto_translate_next_chapter_summary">Automatically translate the next chapter when navigating using the selected translation engine</string>
     <string name="history_screen_label">History</string>
     <string name="updates_screen_label">Updates</string>
     <string name="content">Content</string>
@@ -540,7 +535,6 @@
     <string name="refreshed">Refreshed</string>
     <string name="label_more">Load More</string>
     <string name="repository">Repository</string>
-    <string name="repository_description">Manage content sources and extensions</string>
     <string name="repository_adding_a_new">Adding a new Repository</string>
     <string name="select_all">Select All</string>
     <string name="select_inverted">Select Inverted</string>
@@ -552,7 +546,6 @@
     <string name="select">Select</string>
     <string name="presents">Presents</string>
     <string name="theme">Theme</string>
-    <string name="theme_description">Light, dark, or system default theme</string>
     <string name="date_format">Date Format</string>
     <string name="pref_relative_format">Relative timestamps</string>
     <string name="pref_relative_time_short">Short (Today, Yesterday)</string>
@@ -597,18 +590,14 @@
     <string name="storage_permission_required_explanation">Storage Permission Required Explanation
     </string>
     <string name="storage_permission_title">Choose Storage Folder</string>
-    <string name="storage_permission_subtitle">Select a folder where IReader will store your downloads, extensions, and
-        backups
-    </string>
+    <string name="storage_permission_subtitle">Select a folder where IReader will store your downloads, extensions, and backups</string>
     <string name="permission_feature_download_title">Download Novels</string>
     <string name="permission_feature_download_desc">Save chapters for offline reading anywhere, anytime</string>
     <string name="permission_feature_extensions_title">Install Extensions</string>
     <string name="permission_feature_extensions_desc">Add new sources to discover more content</string>
     <string name="permission_feature_backup_title">Backup &amp; Restore</string>
     <string name="permission_feature_backup_desc">Keep your library safe with automatic backups</string>
-    <string name="storage_permission_privacy_note">IReader only accesses the folder you select. Your other files remain
-        private and untouched.
-    </string>
+    <string name="storage_permission_privacy_note">IReader only accesses the folder you select. Your other files remain private and untouched.</string>
     <string name="grant_storage_permission">Select Folder</string>
     <string name="skip_for_now">Use App Storage Instead</string>
     <string name="file_not_found_error">File Not Found Exception</string>
@@ -623,14 +612,11 @@
     <string name="gemini_api_key_not_set">Gemini API key is not set. Please configure it in the
         settings.
     </string>
-    <string name="gemini_payment_required">You exceeded your current quota for Gemini API. Please check your plan and
-        billing details at https://ai.google.dev/gemini-api/docs/rate-limits
-    </string>
+    <string name="gemini_payment_required">You exceeded your current quota for Gemini API. Please check your plan and billing details at https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="empty_response">Received an empty response from the translation service.</string>
     <string name="translating">Translating... This may take a moment.</string>
     <string name="translation_complete">Translation complete.</string>
     <string name="translation_settings">Translation Settings</string>
-    <string name="translation_description">Configure translation preferences</string>
     <string name="translation_engine">Translation Engine</string>
     <string name="content_type">Content Type</string>
     <string name="tone_type">Tone</string>
@@ -641,32 +627,21 @@
     <string name="libretranslate_api_key">LibreTranslate API Key</string>
     <string name="openrouter_api_key">OpenRouter API Key</string>
     <string name="openrouter_model">OpenRouter Model</string>
-    <string name="openrouter_api_key_not_set">OpenRouter API key is not set. Please configure it in the settings.
-    </string>
-    <string name="openrouter_api_key_invalid">OpenRouter API key is invalid. Please check your key at
-        openrouter.ai/keys
-    </string>
-    <string name="openrouter_insufficient_credits">OpenRouter credits insufficient. Please add credits at
-        openrouter.ai/credits
-    </string>
+    <string name="openrouter_api_key_not_set">OpenRouter API key is not set. Please configure it in the settings.</string>
+    <string name="openrouter_api_key_invalid">OpenRouter API key is invalid. Please check your key at openrouter.ai/keys</string>
+    <string name="openrouter_insufficient_credits">OpenRouter credits insufficient. Please add credits at openrouter.ai/credits</string>
     <string name="openrouter_fetch_models">Fetch Available Models</string>
     <string name="openrouter_models_loaded">OpenRouter models loaded successfully</string>
-    <string name="openrouter_info">OpenRouter provides unified access to multiple AI models including GPT-4, Claude,
-        Llama, and more. Get your API key at openrouter.ai
-    </string>
+    <string name="openrouter_info">OpenRouter provides unified access to multiple AI models including GPT-4, Claude, Llama, and more. Get your API key at openrouter.ai</string>
     <string name="nvidia_nim">NVIDIA NIM</string>
     <string name="nvidia_api_key">NVIDIA API Key</string>
     <string name="nvidia_model">NVIDIA Model</string>
     <string name="nvidia_api_key_not_set">NVIDIA API key is not set. Please configure it in the settings.</string>
     <string name="nvidia_api_key_invalid">NVIDIA API key is invalid. Please check your key at build.nvidia.com</string>
-    <string name="nvidia_insufficient_credits">NVIDIA API credits insufficient. Please check your account at
-        build.nvidia.com
-    </string>
+    <string name="nvidia_insufficient_credits">NVIDIA API credits insufficient. Please check your account at build.nvidia.com</string>
     <string name="nvidia_fetch_models">Fetch Available Models</string>
     <string name="nvidia_models_loaded">NVIDIA models loaded successfully</string>
-    <string name="nvidia_info">NVIDIA NIM provides access to optimized AI models including Llama, Mistral, Gemma, and
-        more. Get your API key at build.nvidia.com
-    </string>
+    <string name="nvidia_info">NVIDIA NIM provides access to optimized AI models including Llama, Mistral, Gemma, and more. Get your API key at build.nvidia.com</string>
     <string name="refresh_models">Refresh Models</string>
     <string name="deepseek_api_key_invalid">DeepSeek api key is invalid</string>
     <string name="openai_api_key_invalid">Openai api key is invalid</string>
@@ -705,14 +680,11 @@
     <string name="logout">Logout</string>
     <string name="ollama_url">Ollama URL</string>
     <string name="ollama_model">Ollama Model</string>
-    <string name="database_error">Database error detected. Please try one of the following: 1) Restart the app 2) Delete
-        database files at %LOCALAPPDATA%\\IReader\\cache 3) Launch with --repair-database parameter
-    </string>
+    <string name="database_error">Database error detected. Please try one of the following: 1) Restart the app 2) Delete database files at %LOCALAPPDATA%\\IReader\\cache 3) Launch with --repair-database parameter</string>
     <string name="show_original">Show Original</string>
     <string name="show_translation">Show Translation</string>
     <string name="translated">Translated</string>
     <string name="statistics">Statistics</string>
-    <string name="statistics_description">View reading statistics and progress</string>
     <string name="reading_speed">Reading Speed</string>
     <string name="reading_speed_wpm">WPM</string>
     <string name="changelog">Changelog</string>
@@ -798,13 +770,11 @@
     <string name="category_already_exists">Category \'%1$s\' already exists</string>
     <string name="category_not_found">Category not found</string>
     <string name="failed_to_rename">Failed to rename: %1$s</string>
-
+    
     <!-- Auto-categorization strings -->
     <string name="auto_categorization">Auto-categorization</string>
     <string name="auto_categorization_rules">Auto-categorization Rules</string>
-    <string name="auto_categorization_description">Novels matching these rules will be automatically added to this
-        category.
-    </string>
+    <string name="auto_categorization_description">Novels matching these rules will be automatically added to this category.</string>
     <string name="current_rules">Current Rules</string>
     <string name="no_rules_configured">No rules configured. Add a rule to automatically categorize novels.</string>
     <string name="add_new_rule">Add New Rule</string>
@@ -822,7 +792,7 @@
     <string name="delete_rule">Delete rule</string>
     <string name="rules_count">%1$d rules</string>
     <string name="rule_count">%1$d rule</string>
-
+    
     <string name="backup_cancelled">Backup cancelled</string>
     <string name="restore_cancelled">Restore cancelled</string>
     <string name="creating_backup">Creating backup…</string>
@@ -880,13 +850,10 @@
     <string name="js_plugins_enabled">JavaScript plugins enabled. You can now enable plugins.</string>
     <string name="tts_performance_settings">TTS Performance Settings</string>
     <string name="tts_engine_manager">TTS Engine Manager</string>
-    <string name="tts_engine_manager_description">Configure text-to-speech engines and voices</string>
     <string name="performance">Performance</string>
     <string name="test">Test</string>
     <string name="delete_voice_model">Delete Voice Model</string>
-    <string name="delete_voice_model_confirmation">Are you sure you want to delete %1$s? This will free up %2$s of
-        storage.
-    </string>
+    <string name="delete_voice_model_confirmation">Are you sure you want to delete %1$s? This will free up %2$s of storage.</string>
     <string name="open_tts_manager">Open TTS Manager</string>
     <string name="downloading_chapter_audio">Downloading Chapter Audio</string>
     <string name="download_complete">Download Complete</string>
@@ -907,9 +874,7 @@
     <string name="enter_gemini_api_key">Enter your Gemini API key</string>
     <string name="sync_interval">Sync Interval</string>
     <string name="clear_sync_data">Clear Sync Data</string>
-    <string name="clear_sync_data_confirmation">This will remove all tracking data and logout from all services. You
-        will need to re-login and re-track your books.
-    </string>
+    <string name="clear_sync_data_confirmation">This will remove all tracking data and logout from all services. You will need to re-login and re-track your books.</string>
     <string name="plugin_enabled">Plugin enabled</string>
     <string name="plugin_already_enabled">Plugin is already enabled</string>
     <string name="review_submitted_successfully">Review submitted successfully</string>
@@ -960,13 +925,9 @@
     <string name="chapter_content_extracted">Chapter content extracted using %1$s</string>
     <string name="no_reliable_content_found">No reliable content found. Try a different page or source.</string>
     <string name="failed_to_extract_content">Failed to extract content: %1$s</string>
-    <string name="failed_to_fetch_chapters">Failed to fetch chapters. Please ensure you\'re on the correct page and try
-        again.
-    </string>
+    <string name="failed_to_fetch_chapters">Failed to fetch chapters. Please ensure you\'re on the correct page and try again.</string>
     <string name="no_chapters_found">No chapters found. Make sure you\'re on the chapter list page.</string>
-    <string name="failed_to_fetch_book_details">Failed to fetch book details. Please ensure you\'re on the book\'s
-        detail page and try again.
-    </string>
+    <string name="failed_to_fetch_book_details">Failed to fetch book details. Please ensure you\'re on the book\'s detail page and try again.</string>
     <string name="book_added_to_library">Book \'%1$s\' added to library</string>
     <string name="could_not_extract_book_info">Could not extract book information from this page.</string>
     <string name="installation_failed_generic">Installation failed</string>
@@ -981,19 +942,14 @@
     <string name="page_transitions">Page Transitions</string>
     <string name="navigation_mode">Navigation Mode</string>
     <string name="supabase_configuration">Supabase Configuration</string>
-    <string name="supabase_configuration_description">Configure custom Supabase instance for sync</string>
     <string name="lock_method">Lock Method</string>
     <string name="lock_after_inactivity">Lock After Inactivity</string>
     <string name="clear_authentication_data">Clear Authentication Data</string>
-    <string name="clear_auth_data_confirmation">This will remove all saved authentication tokens and sessions. You will
-        need to log in again to access protected sources.
-    </string>
+    <string name="clear_auth_data_confirmation">This will remove all saved authentication tokens and sessions. You will need to log in again to access protected sources.</string>
     <string name="statistics_and_analytics">Statistics &amp; Analytics</string>
     <string name="reading_statistics">Reading Statistics</string>
     <string name="enable_privacy_mode_question">Enable Privacy Mode?</string>
-    <string name="privacy_mode_description">This will disable all data collection features including analytics, crash
-        reporting, and diagnostics.
-    </string>
+    <string name="privacy_mode_description">This will disable all data collection features including analytics, crash reporting, and diagnostics.</string>
     <string name="default_sort">Default Sort</string>
     <string name="update_interval">Update Interval</string>
     <string name="update_restrictions">Update Restrictions</string>
@@ -1001,19 +957,13 @@
     <string name="download_location">Download Location</string>
     <string name="max_concurrent_downloads">Max Concurrent Downloads</string>
     <string name="clear_download_cache">Clear Download Cache</string>
-    <string name="clear_download_cache_confirmation">This will remove all temporary download files. Downloaded chapters
-        will not be affected.
-    </string>
+    <string name="clear_download_cache_confirmation">This will remove all temporary download files. Downloaded chapters will not be affected.</string>
     <string name="cleanup_interval">Cleanup Interval</string>
     <string name="max_cache_size">Max Cache Size</string>
     <string name="image_quality">Image Quality</string>
-    <string name="clear_all_cache_confirmation">This will remove all cached images, chapters, and network data. This
-        action cannot be undone.
-    </string>
+    <string name="clear_all_cache_confirmation">This will remove all cached images, chapters, and network data. This action cannot be undone.</string>
     <string name="optimize_database">Optimize Database</string>
-    <string name="no_alternative_sources_available">No alternative sources available. Total sources: %1$s, Current:
-        %2$s
-    </string>
+    <string name="no_alternative_sources_available">No alternative sources available. Total sources: %1$s, Current: %2$s</string>
     <string name="failed_to_load_sources">Failed to load sources: %1$s</string>
     <string name="successfully_migrated_to">Successfully migrated to %1$s</string>
     <string name="migration_failed_error">Migration failed: %1$s</string>
@@ -1059,8 +1009,7 @@
     <string name="app_crashed">App Crashed</string>
     <string name="apply_filters">Apply Filters</string>
     <string name="approve">Approve</string>
-    <string name="are_you_sure_you_want">Are you sure you want to delete this backup? This action cannot be undone.
-    </string>
+    <string name="are_you_sure_you_want">Are you sure you want to delete this backup? This action cannot be undone.</string>
     <string name="audio_output_index">Audio Output Index</string>
     <string name="authenticate">Authenticate</string>
     <string name="authenticate_with_biometric">Authenticate with Biometric</string>
@@ -1115,9 +1064,7 @@
     <string name="download_chapters">Download chapters</string>
     <string name="download_unread">Download unread</string>
     <string name="download_from_last_read">Download from last read</string>
-    <string name="download_unread_from_last_read_desc">Download chapters starting after your most recently read chapter
-        instead of from the first unread chapter
-    </string>
+    <string name="download_unread_from_last_read_desc">Download chapters starting after your most recently read chapter instead of from the first unread chapter</string>
     <string name="drag_to_reorder">Drag to reorder</string>
     <string name="dropdown">Dropdown</string>
     <string name="edit">Edit</string>
@@ -1170,7 +1117,6 @@
     <string name="increase_speed">Increase speed</string>
     <string name="install_free_with_in_app_purchases">Install (Free with in-app purchases)</string>
     <string name="installed_plugins">Installed Plugins</string>
-    <string name="installed_plugins_description">Manage installed plugins and features</string>
     <string name="ireader_logo">IReader Logo</string>
     <string name="lnreader">LNReader</string>
     <string name="login">Login</string>
@@ -1295,11 +1241,8 @@
     <string name="tap_to_reveal">Tap to reveal</string>
     <string name="testing_connection_1">Testing Connection...</string>
     <string name="text_to_speech">Text-to-Speech</string>
-    <string name="this_will_compact_the_database">This will compact the database and may improve performance. The
-        process may take a few minutes.
-    </string>
-    <string name="this_will_reset_all_data">This will reset all data and storage settings to their default values.
-    </string>
+    <string name="this_will_compact_the_database">This will compact the database and may improve performance. The process may take a few minutes.</string>
+    <string name="this_will_reset_all_data">This will reset all data and storage settings to their default values.</string>
     <string name="toggle_translation">Toggle Translation</string>
     <string name="transaction_id">Transaction ID</string>
     <string name="translation">Translation</string>
@@ -1331,9 +1274,7 @@
     <string name="eighteen_source_lock">18+ Source Lock</string>
     <string name="configure_oauth2_credentials_in">1. Configure OAuth2 credentials in Google Cloud Console\n</string>
     <string name="go_to_settings_generaln2_toggle">1. Go to Settings → General\n2. Toggle \</string>
-    <string name="gb_total_storage_7_500mb">3.5GB total storage (7 × 500MB) - Configure each project or use same URL for
-        all
-    </string>
+    <string name="gb_total_storage_7_500mb">3.5GB total storage (7 × 500MB) - Configure each project or use same URL for all</string>
     <string name="nine_forty_one">9:41</string>
     <string name="aa">Aa</string>
     <string name="about_google_drive_backup">About Google Drive Backup</string>
@@ -1355,15 +1296,13 @@
     <string name="advanced_filters">Advanced Filters</string>
     <string name="advanced_options">Advanced Options</string>
     <string name="advanced_security">Advanced Security</string>
-    <string name="all_data_collection_is_optional">All data collection is optional and can be disabled at any time.
-    </string>
+    <string name="all_data_collection_is_optional">All data collection is optional and can be disabled at any time. </string>
     <string name="all_donors">All Donors</string>
     <string name="all_google_fonts">All Google Fonts</string>
     <string name="all_payment_proofs_have_been_reviewed">All payment proofs have been reviewed</string>
     <string name="all_plugins">All Plugins</string>
     <string name="all_rankings">All Rankings</string>
-    <string name="allow_loading_lnreader_compatible_javascript">Allow loading LNReader-compatible JavaScript plugins
-    </string>
+    <string name="allow_loading_lnreader_compatible_javascript">Allow loading LNReader-compatible JavaScript plugins</string>
     <string name="alpha">alpha</string>
     <string name="alphaanimation">alphaAnimation</string>
     <string name="analytics">Analytics</string>
@@ -1376,8 +1315,7 @@
     <string name="appearance_settings">Appearance &amp; Settings</string>
     <string name="appearance_theme">Appearance &amp; Theme</string>
     <string name="archived_1">ARCHIVED</string>
-    <string name="authentication_is_required_to_access_this_source">Authentication is required to access this source.
-    </string>
+    <string name="authentication_is_required_to_access_this_source">Authentication is required to access this source.</string>
     <string name="authentication_optional">Authentication (Optional)</string>
     <string name="authors">Authors</string>
     <string name="auto_cleanup">Auto Cleanup</string>
@@ -1398,17 +1336,10 @@
     <string name="auto_update_status">Auto-Update Status</string>
     <string name="automatic_downloads">Automatic Downloads</string>
     <string name="automatic_error_reporting">Automatic Error Reporting</string>
-    <string name="automatically_check_for_and_install_plugin_updates">Automatically check for and install plugin
-        updates
-    </string>
-    <string name="automatically_download_newly_detected_chapters">Automatically download newly detected chapters in
-        background
-    </string>
-    <string name="automatically_play_next_chapter_when_current_ends">Automatically play next chapter when current ends
-    </string>
-    <string name="automatically_refresh_leaderboard_when_other">Automatically refresh leaderboard when other users sync
-        (uses more data)
-    </string>
+    <string name="automatically_check_for_and_install_plugin_updates">Automatically check for and install plugin updates</string>
+    <string name="automatically_download_newly_detected_chapters">Automatically download newly detected chapters in background</string>
+    <string name="automatically_play_next_chapter_when_current_ends">Automatically play next chapter when current ends</string>
+    <string name="automatically_refresh_leaderboard_when_other">Automatically refresh leaderboard when other users sync (uses more data)</string>
     <string name="automatically_stop_playback_after_set_time">Automatically stop playback after set time</string>
     <string name="automatically_sync_reading_progress">Automatically sync reading progress</string>
     <string name="available_backups">Available Backups</string>
@@ -1421,12 +1352,10 @@
     <string name="avg_response_time">Avg Response Time</string>
     <string name="background_webview_mode">Background WebView Mode</string>
     <string name="backup_and_restore_your_custom_themes">Backup and restore your custom themes</string>
-    <string name="backup_and_restore_your_library_to_google_drive">Backup and restore your library to Google Drive
-    </string>
+    <string name="backup_and_restore_your_library_to_google_drive">Backup and restore your library to Google Drive</string>
     <string name="backup_restore">Backup &amp; Restore</string>
     <string name="backup_to_google_drive_or_dropbox">Backup to Google Drive or Dropbox</string>
-    <string name="badge_granted_immediately_upon_successful">• Badge granted immediately upon successful verification
-    </string>
+    <string name="badge_granted_immediately_upon_successful">• Badge granted immediately upon successful verification</string>
     <string name="badge_verification">Badge Verification</string>
     <string name="badges_customization">Badges &amp; Customization</string>
     <string name="badges_owned">Badges Owned</string>
@@ -1453,8 +1382,7 @@
     <string name="build_time">Build Time</string>
     <string name="build_type">Build Type</string>
     <string name="built_in">Built-in</string>
-    <string name="bypass_bot_detection_invisibly_without">Bypass bot detection invisibly without showing WebView
-    </string>
+    <string name="bypass_bot_detection_invisibly_without">Bypass bot detection invisibly without showing WebView</string>
     <string name="cache_expires">Cache Expires:</string>
     <string name="cache_management">Cache Management</string>
     <string name="card_elevation">card_elevation</string>
@@ -1481,11 +1409,9 @@
     <string name="choose_which_tts_settings_to_open">Choose which TTS settings to open:</string>
     <string name="choose_your_languages">Choose Your Languages</string>
     <string name="choose_your_preferred_theme">Choose your preferred theme</string>
-    <string name="clear_all_cached_data_to_free_up_storage_space">Clear all cached data to free up storage space
-    </string>
+    <string name="clear_all_cached_data_to_free_up_storage_space">Clear all cached data to free up storage space</string>
     <string name="clear_cache_on_low_storage">Clear Cache on Low Storage</string>
-    <string name="clear_cached_book_cover_images_to_free_up_storage">Clear cached book cover images to free up storage
-    </string>
+    <string name="clear_cached_book_cover_images_to_free_up_storage">Clear cached book cover images to free up storage</string>
     <string name="click_the_donation_button_below">Click the donation button below</string>
     <string name="clickable_card">Clickable Card</string>
     <string name="cloud_backup_setup">Cloud Backup Setup</string>
@@ -1507,11 +1433,8 @@
     <string name="compress_images">Compress Images</string>
     <string name="concurrent_searches">Concurrent Searches</string>
     <string name="configure_advanced_options">Configure advanced options</string>
-    <string name="configure_androids_built_in_text_to_speech_engine">Configure Android's built-in text-to-speech
-        engine
-    </string>
-    <string name="configure_gradio_based_tts_coqui">Configure Gradio-based TTS (Coqui, Edge TTS, Persian TTS, etc.)
-    </string>
+    <string name="configure_androids_built_in_text_to_speech_engine">Configure Android's built-in text-to-speech engine</string>
+    <string name="configure_gradio_based_tts_coqui">Configure Gradio-based TTS (Coqui, Edge TTS, Persian TTS, etc.)</string>
     <string name="configure_gradio_tts">Configure Gradio TTS</string>
     <string name="configure_js_plugins_and_enable">Configure JS plugins and enable LNReader-compatible sources</string>
     <string name="connect_with_us">Connect with us</string>
@@ -1521,23 +1444,16 @@
     <string name="contents">Contents</string>
     <string name="continue_reading_button">Continue Reading Button</string>
     <string name="contract_address">Contract Address:</string>
-    <string name="controls_how_many_audio_files">Controls how many audio files can be generated simultaneously for
-        Kokoro and Maya engines. Higher values = faster generation but more CPU/memory usage.
-    </string>
+    <string name="controls_how_many_audio_files">Controls how many audio files can be generated simultaneously for Kokoro and Maya engines. Higher values = faster generation but more CPU/memory usage.</string>
     <string name="copy_your_transaction_id">Copy your transaction ID</string>
-    <string name="cover_url_must_start_with_http_https_or_file">Cover URL must start with http://, https://, or
-        file://
-    </string>
+    <string name="cover_url_must_start_with_http_https_or_file">Cover URL must start with http://, https://, or file://</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">Crash Reporting</string>
     <string name="crashes">Crashes</string>
-    <string name="create_your_first_backup_using_the_button_below">Create your first backup using the button below
-    </string>
+    <string name="create_your_first_backup_using_the_button_below">Create your first backup using the button below</string>
     <string name="creating_backup_1">Creating backup...</string>
     <string name="cross_device_sync">Cross-Device Sync</string>
-    <string name="cryptocurrency_donations_are_non_refundable">Cryptocurrency donations are non-refundable. Please
-        verify the wallet address before sending. IReader does not store or have access to your private keys.
-    </string>
+    <string name="cryptocurrency_donations_are_non_refundable">Cryptocurrency donations are non-refundable. Please verify the wallet address before sending. IReader does not store or have access to your private keys.</string>
     <string name="cryptocurrency_wallets">Cryptocurrency Wallets</string>
     <string name="current_engine">Current Engine</string>
     <string name="current_location">Current location:</string>
@@ -1580,17 +1496,13 @@
     <string name="disable_haptic_feedback">Disable Haptic Feedback</string>
     <string name="disable_loading_animations">Disable Loading Animations</string>
     <string name="max_performance_mode">Max Performance Mode</string>
-    <string name="max_performance_mode_subtitle">Disable all animations and effects for fastest rendering. Recommended
-        for older devices.
-    </string>
+    <string name="max_performance_mode_subtitle">Disable all animations and effects for fastest rendering. Recommended for older devices.</string>
     <string name="disabled_feature">Disabled Feature</string>
     <string name="disabled_navigation">Disabled Navigation</string>
     <string name="disabled_option">Disabled Option</string>
     <string name="disabled_preference">Disabled Preference</string>
     <string name="disabled_state">Disabled State</string>
-    <string name="display_auto_populated_categories_like">Display auto-populated categories like Recently Added,
-        Currently Reading, etc.
-    </string>
+    <string name="display_auto_populated_categories_like">Display auto-populated categories like Recently Added, Currently Reading, etc.</string>
     <string name="display_settings">Display Settings</string>
     <string name="display_when_each_novel_was">Display when each novel was last checked for updates</string>
     <string name="displayed_most_frequently_across_your_app">Displayed most frequently across your app</string>
@@ -1633,41 +1545,28 @@
     <string name="enable_quiet_hours">Enable Quiet Hours</string>
     <string name="enable_reminders">Enable Reminders</string>
     <string name="enable_streaming">Enable Streaming</string>
-    <string name="enable_to_use_your_own">Enable to use your own Supabase instance instead of the default backend
-    </string>
+    <string name="enable_to_use_your_own">Enable to use your own Supabase instance instead of the default backend</string>
     <string name="enabled_preference">Enabled Preference</string>
     <string name="enabled_state">Enabled State</string>
     <string name="end_time">End Time</string>
     <string name="enter_a_4_6_digit_pin_to_secure_your_app">Enter a 4-6 digit PIN to secure your app</string>
     <string name="enter_a_password_to_secure">Enter a password to secure your app (minimum 4 characters)</string>
-    <string name="enter_a_query_to_search_across_all_your_sources">Enter a query to search across all your sources
-    </string>
+    <string name="enter_a_query_to_search_across_all_your_sources">Enter a query to search across all your sources</string>
     <string name="enter_the_repository_url">Enter the repository URL:</string>
-    <string name="enter_the_url_of_the">Enter the URL of the repository you want to add. The repository should contain
-        an index.min.json file with available sources.
-    </string>
-    <string name="enter_your_ethereum_wallet_address">Enter your Ethereum wallet address. This will be used as an API
-        key to access server features.
-    </string>
-    <string name="enter_your_ethereum_wallet_address_1">Enter your Ethereum wallet address to verify NFT ownership
-    </string>
+    <string name="enter_the_url_of_the">Enter the URL of the repository you want to add. The repository should contain an index.min.json file with available sources.</string>
+    <string name="enter_your_ethereum_wallet_address">Enter your Ethereum wallet address. This will be used as an API key to access server features.</string>
+    <string name="enter_your_ethereum_wallet_address_1">Enter your Ethereum wallet address to verify NFT ownership</string>
     <string name="error_details">Error Details</string>
     <string name="error_loading_reviews">Error loading reviews</string>
     <string name="error_message">Error Message:</string>
     <string name="error_notifications">Error Notifications</string>
     <string name="error_occurred">Error Occurred</string>
     <string name="eth_wallet_address_api_key">ETH Wallet Address (API Key)</string>
-    <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Example:
-        https://raw.githubusercontent.com/username/repo/main/index.min.json
-    </string>
+    <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Example: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">Example URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">
-        Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n•
-        LNReader:
-        https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json
-    </string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Exclude Categories</string>
-    <string name="excluded">(excluded)</string>
+    <string name="excluded"> (excluded)</string>
     <string name="exclusive">Exclusive</string>
     <string name="exclusive_designs">Exclusive Designs</string>
     <string name="execution_timeout">Execution Timeout</string>
@@ -1691,8 +1590,7 @@
     <string name="fetch_current_chapter">Fetch Current Chapter</string>
     <string name="fetching_from_rhasspygithubio">Fetching from rhasspy.github.io</string>
     <string name="file_format">File Format</string>
-    <string name="fingerprint_verification_adds_an_extra">Fingerprint verification adds an extra layer of security
-    </string>
+    <string name="fingerprint_verification_adds_an_extra">Fingerprint verification adds an extra layer of security</string>
     <string name="fix_book_category_assignments">Fix book category assignments</string>
     <string name="fix_database_structure_and_integrity_issues">Fix database structure and integrity issues</string>
     <string name="flash_on_page_change">Flash on Page Change</string>
@@ -1700,9 +1598,7 @@
     <string name="font_used_for_all_app">Font used for all app interface elements (not reader)</string>
     <string name="font_weight_1">font_weight</string>
     <string name="fonts">Fonts</string>
-    <string name="for_more_powerful_and_natural">For more powerful and natural-sounding voices on Android, install the
-        Sherpa TTS app from the Play Store or F-Droid.
-    </string>
+    <string name="for_more_powerful_and_natural">For more powerful and natural-sounding voices on Android, install the Sherpa TTS app from the Play Store or F-Droid.</string>
     <string name="free">Free</string>
     <string name="freemium">Freemium</string>
     <string name="fullscreen">Fullscreen</string>
@@ -1722,38 +1618,25 @@
     <string name="goal_reached_1">Goal Reached!</string>
     <string name="goal_reached_thank_you">Goal Reached! Thank you!</string>
     <string name="google_drive">Google Drive</string>
-    <string name="googles_gemini_api_provides_high">Google's Gemini API provides high-quality translations through their
-        AI platform. To use this feature, you need to obtain an API key from Google AI Studio
-        (https://aistudio.google.com).
-    </string>
+    <string name="googles_gemini_api_provides_high">Google's Gemini API provides high-quality translations through their AI platform. To use this feature, you need to obtain an API key from Google AI Studio (https://aistudio.google.com).</string>
     <string name="gradio">Gradio</string>
-    <string name="gradio_tts_connects_to_hugging">Gradio TTS connects to Hugging Face Spaces for speech synthesis.
-        Requires internet connection.
-    </string>
+    <string name="gradio_tts_connects_to_hugging">Gradio TTS connects to Hugging Face Spaces for speech synthesis. Requires internet connection.</string>
     <string name="gradio_tts_online">Gradio TTS (Online)</string>
-    <string name="gradio_tts_uses_a_huggingface">Gradio TTS uses a HuggingFace Space to synthesize speech. You can use
-        the default space or deploy your own.
-    </string>
+    <string name="gradio_tts_uses_a_huggingface">Gradio TTS uses a HuggingFace Space to synthesize speech. You can use the default space or deploy your own.</string>
     <string name="grid">Grid</string>
     <string name="group_notifications">Group Notifications</string>
     <string name="header_alpha">header_alpha</string>
     <string name="hello_this_is_a_test">Hello, this is a test.</string>
     <string name="help_us_improve">Help us improve \</string>
     <string name="hide_backdrop">Hide Backdrop</string>
-    <string name="hide_background_images_on_novel">Hide background images on novel detail screens for cleaner look and
-        better performance
-    </string>
+    <string name="hide_background_images_on_novel">Hide background images on novel detail screens for cleaner look and better performance</string>
     <string name="hide_content">Hide Content</string>
     <string name="hide_duplicates">Hide Duplicates</string>
     <string name="hide_notification_content">Hide Notification Content</string>
     <string name="hide_read">Hide Read</string>
     <string name="high_performance_neural_tts_with">High-performance neural TTS with 100+ voices (bundled)</string>
-    <string name="high_quality_neural_voicesn_works">✓ High-quality neural voices\n✓ Works offline\n✓ Multiple
-        languages\n✓ Integrates with Android TTS
-    </string>
-    <string name="high_quality_offline_neural_voices">High-quality offline neural voices. Browse, download, and manage
-        100+ voices in 30+ languages.
-    </string>
+    <string name="high_quality_neural_voicesn_works">✓ High-quality neural voices\n✓ Works offline\n✓ Multiple languages\n✓ Integrates with Android TTS</string>
+    <string name="high_quality_offline_neural_voices">High-quality offline neural voices. Browse, download, and manage 100+ voices in 30+ languages.</string>
     <string name="hours">Hours</string>
     <string name="how_it_appears_on_your_profile">How it appears on your profile:</string>
     <string name="how_it_appears_on_your_reviews">How it appears on your reviews:</string>
@@ -1764,36 +1647,28 @@
     <string name="image_settings">Image Settings</string>
     <string name="import_epub_files_into_your_library">Import EPUB files into your library</string>
     <string name="important_disclaimer">⚠️ Important Disclaimer</string>
-    <string name="important_you_need_to_enable">Important: you need to enable JS plugin feature in general screen
-    </string>
-    <string name="included">(included)</string>
+    <string name="important_you_need_to_enable">Important: you need to enable JS plugin feature in general screen</string>
+    <string name="included"> (included)</string>
     <string name="incognito_mode">Incognito Mode</string>
     <string name="information">Information</string>
     <string name="information_support">Information &amp; Support</string>
-    <string name="install_and_configure_text_to">Install and configure text-to-speech engines for offline reading
-    </string>
+    <string name="install_and_configure_text_to">Install and configure text-to-speech engines for offline reading</string>
     <string name="install_extensions_to_add_sources">Install extensions to add sources</string>
     <string name="installation_complete">Installation Complete</string>
     <string name="installation_in_progress_this_may">Installation in progress... This may take several minutes.</string>
     <string name="installation_log">Installation Log</string>
     <string name="installing_1">Installing...</string>
     <string name="invert_tapping">Invert Tapping</string>
-    <string name="ireader_is_a_free_open">IReader is a free, open-source app with no ads. Your donations help cover:
-    </string>
-    <string name="ireader_uses_your_devices_built">IReader uses your device's built-in Text-to-Speech engine. You can
-        configure voices in Android Settings → Accessibility → Text-to-speech.
-    </string>
+    <string name="ireader_is_a_free_open">IReader is a free, open-source app with no ads. Your donations help cover:</string>
+    <string name="ireader_uses_your_devices_built">IReader uses your device's built-in Text-to-Speech engine. You can configure voices in Android Settings → Accessibility → Text-to-speech.</string>
     <string name="issue_category">Issue Category:</string>
     <string name="issues">Issues:</string>
     <string name="javascript_plugin_settings">JavaScript Plugin Settings</string>
-    <string name="javascript_plugins_are_currently_disabled">JavaScript plugins are currently disabled in your
-        settings.
-    </string>
+    <string name="javascript_plugins_are_currently_disabled">JavaScript plugins are currently disabled in your settings.</string>
     <string name="justify">Justify</string>
     <string name="keep_it_going">Keep it going!</string>
     <string name="keep_screen_on">Keep Screen On</string>
-    <string name="keep_the_original_writing_style_when_translating">Keep the original writing style when translating
-    </string>
+    <string name="keep_the_original_writing_style_when_translating">Keep the original writing style when translating</string>
     <string name="landscape_zoom">Landscape Zoom</string>
     <string name="language_badge">Language Badge</string>
     <string name="language_filter">Language Filter</string>
@@ -1805,8 +1680,7 @@
     <string name="last_verified">Last Verified:</string>
     <string name="leaderboard">Leaderboard</string>
     <string name="leaderboard_realtime_updates">Leaderboard Realtime Updates</string>
-    <string name="learn_about_security_features_and_best_practices">Learn about security features and best practices
-    </string>
+    <string name="learn_about_security_features_and_best_practices">Learn about security features and best practices</string>
     <string name="led_light">LED Light</string>
     <string name="library_management">Library Management</string>
     <string name="library_notifications">Library Notifications</string>
@@ -1819,9 +1693,7 @@
     <string name="light_themes">Light Themes</string>
     <string name="list">List</string>
     <string name="listofn">listOf(\n</string>
-    <string name="lnreader_repositories_require_javascript_plugins">LNReader repositories require JavaScript plugins to
-        be enabled.
-    </string>
+    <string name="lnreader_repositories_require_javascript_plugins">LNReader repositories require JavaScript plugins to be enabled.</string>
     <string name="loading_1">Loading...</string>
     <string name="loading_badges">Loading badges...</string>
     <string name="loading_fonts">Loading fonts...</string>
@@ -1868,12 +1740,10 @@
     <string name="network_error">Network Error</string>
     <string name="check_internet_connection">Please check your internet connection and try again.</string>
     <string name="try_different_source">The source may be unavailable. Try a different source.</string>
-    <string name="search_book_manually">Try searching for the book manually in the source to verify availability.
-    </string>
+    <string name="search_book_manually">Try searching for the book manually in the source to verify availability.</string>
     <string name="try_again_later">Your data is preserved. Please try again later.</string>
     <string name="minimum_rating">Minimum Rating</string>
-    <string name="model_to_use_for_translation_eg_mistral_llama2">Model to use for translation (e.g., mistral, llama2)
-    </string>
+    <string name="model_to_use_for_translation_eg_mistral_llama2">Model to use for translation (e.g., mistral, llama2)</string>
     <string name="monthly">Monthly</string>
     <string name="monthly_goal">Monthly Goal</string>
     <string name="monthly_recurring_goal">🔄 Monthly Recurring Goal</string>
@@ -1886,8 +1756,6 @@
     <string name="network">Network</string>
     <string name="network_cache">Network Cache</string>
     <string name="network_settings">Network Settings</string>
-    <string name="advanced_network">Advanced Network</string>
-    <string name="advanced_network_description">User agent, cookies, and proxy settings</string>
     <string name="new_chapter_notifications">New Chapter Notifications</string>
     <string name="new_components">New Components</string>
     <string name="new_updates">New Updates</string>
@@ -1899,8 +1767,7 @@
     <string name="no_alternative_sources_available_1">No alternative sources available</string>
     <string name="no_backups_found">No backups found</string>
     <string name="no_badges_available">No badges available</string>
-    <string name="no_badges_yet_earn_badges">No badges yet. Earn badges by purchasing them or owning IReader NFTs!
-    </string>
+    <string name="no_badges_yet_earn_badges">No badges yet. Earn badges by purchasing them or owning IReader NFTs!</string>
     <string name="no_chapters_available">No chapters available</string>
     <string name="no_cloud_backups_found">No cloud backups found</string>
     <string name="no_content_available">No content available</string>
@@ -1934,31 +1801,18 @@
     <string name="no_voices_available">No voices available</string>
     <string name="none">None</string>
     <string name="not_installed">Not installed</string>
-    <string name="note_cloud_backup_integration_requires">Note: Cloud backup integration requires API credentials.
-    </string>
-    <string name="note_google_drive_backup_integration">Note: Google Drive backup integration requires API credentials
-        and OAuth2 setup.
-    </string>
-    <string name="note_if_a_models_quota">Note: If a model's quota is exceeded, the app will automatically try other
-        models.
-    </string>
-    <string name="note_some_engines_require_installation">Note: Some engines require installation. Use the full TTS
-        Manager in Settings for installation options.
-    </string>
+    <string name="note_cloud_backup_integration_requires">Note: Cloud backup integration requires API credentials. </string>
+    <string name="note_google_drive_backup_integration">Note: Google Drive backup integration requires API credentials and OAuth2 setup. </string>
+    <string name="note_if_a_models_quota">Note: If a model's quota is exceeded, the app will automatically try other models.</string>
+    <string name="note_some_engines_require_installation">Note: Some engines require installation. Use the full TTS Manager in Settings for installation options.</string>
     <string name="notification_behavior">Notification Behavior</string>
     <string name="notification_channels">Notification Channels</string>
     <string name="notifications">Notifications</string>
     <string name="novel_info">Novel Info</string>
-    <string name="number_of_sources_to_search">Number of sources to search simultaneously. Higher values are faster but
-        use more resources.
-    </string>
+    <string name="number_of_sources_to_search">Number of sources to search simultaneously. Higher values are faster but use more resources.</string>
     <string name="ollama_information">Ollama Information</string>
-    <string name="ollama_is_a_local_llm">Ollama is a local LLM server for translations. Make sure Ollama is installed
-        and running on your device or network. You need to pull the model first with 'ollama pull modelname'.
-    </string>
-    <string name="once_installed_go_to_android">Once installed, go to Android Settings → Accessibility → Text-to-speech
-        → Preferred engine and select Sherpa TTS.
-    </string>
+    <string name="ollama_is_a_local_llm">Ollama is a local LLM server for translations. Make sure Ollama is installed and running on your device or network. You need to pull the model first with 'ollama pull modelname'.</string>
+    <string name="once_installed_go_to_android">Once installed, go to Android Settings → Accessibility → Text-to-speech → Preferred engine and select Sherpa TTS.</string>
     <string name="online_tts_engines">Online TTS Engines</string>
     <string name="only_update_on_finding_novel">Only Update on Finding Novel</string>
     <string name="open_tts_settings">Open TTS Settings</string>
@@ -1982,16 +1836,13 @@
     <string name="performance_monitoring">Performance Monitoring</string>
     <string name="permanently_delete_entire_database">⚠️ Permanently delete entire database</string>
     <string name="pill_offset">pill_offset</string>
-    <string name="piper_requires_native_libraries_provided">• Piper requires native libraries (provided in releases)\n
-    </string>
+    <string name="piper_requires_native_libraries_provided">• Piper requires native libraries (provided in releases)\n</string>
     <string name="piper_tts">Piper TTS</string>
     <string name="piper_tts_voices">Piper TTS Voices</string>
     <string name="piper_voice_catalog">Piper Voice Catalog</string>
     <string name="piper_voice_selection">Piper Voice Selection</string>
     <string name="playback">Playback</string>
-    <string name="please_click_refresh_available_models">Please click 'Refresh Available Models' above to load models
-        from the Gemini API.
-    </string>
+    <string name="please_click_refresh_available_models">Please click 'Refresh Available Models' above to load models from the Gemini API.</string>
     <string name="please_describe_the_issue">Please describe the issue:</string>
     <string name="please_download_and_select_a">Please download and select a voice model to enable TTS</string>
     <string name="please_enter_a_valid_repository">Please enter a valid repository URL ending with .json</string>
@@ -2034,19 +1885,11 @@
     <string name="project_7_analytics">Project 7 - Analytics</string>
     <string name="protect_with_a_4_6_digit_pin">Protect with a 4-6 digit PIN</string>
     <string name="protect_with_a_password">Protect with a password</string>
-    <string name="protect_your_privacy_and_secure">Protect your privacy and secure your reading experience with these
-        features:
-    </string>
+    <string name="protect_your_privacy_and_secure">Protect your privacy and secure your reading experience with these features:</string>
     <string name="pulseanimation">pulseAnimation</string>
-    <string name="purchase_exclusive_badges_to_support">Purchase exclusive badges to support development and customize
-        your profile.
-    </string>
-    <string name="purchase_exclusive_badges_to_support_1">Purchase exclusive badges to support development and customize
-        your profile
-    </string>
-    <string name="purchase_from_our_official_marketplace">Purchase from our official marketplace to unlock the exclusive
-        NFT badge
-    </string>
+    <string name="purchase_exclusive_badges_to_support">Purchase exclusive badges to support development and customize your profile. </string>
+    <string name="purchase_exclusive_badges_to_support_1">Purchase exclusive badges to support development and customize your profile</string>
+    <string name="purchase_from_our_official_marketplace">Purchase from our official marketplace to unlock the exclusive NFT badge</string>
     <string name="pure_black_backgrounds_for_power">Pure black backgrounds for power saving on AMOLED screens</string>
     <string name="pxs">px/s</string>
     <string name="quality">Quality</string>
@@ -2084,8 +1927,7 @@
     <string name="remove_all_downloaded_chapters">Remove all downloaded chapters</string>
     <string name="remove_books_not_in_library">Remove books not in library</string>
     <string name="rename_category">Rename Category</string>
-    <string name="replace_standard_action_buttons_with">Replace standard action buttons with floating action button
-    </string>
+    <string name="replace_standard_action_buttons_with">Replace standard action buttons with floating action button</string>
     <string name="replace_toolbar_buttons_with_floating">Replace toolbar buttons with floating action button</string>
     <string name="report_source_as_broken">Report Source as Broken</string>
     <string name="report_source_issue">Report Source Issue</string>
@@ -2140,23 +1982,16 @@
     <string name="select_match">Select Match</string>
     <string name="select_navigation_style">Select Navigation Style</string>
     <string name="select_target_source">Select Target Source</string>
-    <string name="select_the_languages_you_want">Select the languages you want to see when browsing and searching for
-        content. You can select multiple languages.
-    </string>
-    <string name="select_the_languages_you_want_1">Select the languages you want to see when browsing sources. Only
-        languages with available sources are shown.
-    </string>
+    <string name="select_the_languages_you_want">Select the languages you want to see when browsing and searching for content. You can select multiple languages.</string>
+    <string name="select_the_languages_you_want_1">Select the languages you want to see when browsing sources. Only languages with available sources are shown.</string>
     <string name="select_time">Select time:</string>
     <string name="select_up_to_3_badges">Select up to 3 badges to display prominently on your profile</string>
     <string name="select_voice_language_and_speech_rate">Select voice, language, and speech rate</string>
     <string name="select_wallet_app">Select Wallet App</string>
     <string name="select_what_data_to_transfer">Select what data to transfer</string>
     <string name="select_when_automatic_updates_are_allowed">Select when automatic updates are allowed:</string>
-    <string name="select_which_gemini_model_to_use_for_translation">Select which Gemini model to use for translation
-    </string>
-    <string name="select_your_preferred_translation_engine">Select your preferred translation engine and configure its
-        settings. AI-powered engines (OpenAI, DeepSeek) require API keys and offer more advanced features.
-    </string>
+    <string name="select_which_gemini_model_to_use_for_translation">Select which Gemini model to use for translation</string>
+    <string name="select_your_preferred_translation_engine">Select your preferred translation engine and configure its settings. AI-powered engines (OpenAI, DeepSeek) require API keys and offer more advanced features.</string>
     <string name="selected_languages">Selected Languages</string>
     <string name="selectionanimation">selectionAnimation</string>
     <string name="sets_the_tone_of_translated_text">Sets the tone of translated text</string>
@@ -2204,9 +2039,7 @@
     <string name="supporter">⭐ Supporter</string>
     <string name="surface_variant">Surface Variant</string>
     <string name="switch_preference">Switch Preference</string>
-    <string name="switch_to_an_ai_powered">Switch to an AI-powered engine (OpenAI or DeepSeek) to access advanced
-        translation settings like content type, tone control, and style preservation.
-    </string>
+    <string name="switch_to_an_ai_powered">Switch to an AI-powered engine (OpenAI or DeepSeek) to access advanced translation settings like content type, tone control, and style preservation.</string>
     <string name="sync_history">Sync History</string>
     <string name="sync_only_over_wifi">Sync Only Over WiFi</string>
     <string name="sync_only_when_connected_to_wifi">Sync only when connected to WiFi</string>
@@ -2215,9 +2048,7 @@
     <string name="synopsis">Synopsis</string>
     <string name="system_health">System Health</string>
     <string name="system_information">System Information</string>
-    <string name="system_integration_multiple_engines_supported">✓ System integration • ✓ Multiple engines supported • ✓
-        No downloads needed
-    </string>
+    <string name="system_integration_multiple_engines_supported">✓ System integration • ✓ Multiple engines supported • ✓ No downloads needed</string>
     <string name="system_notifications">System &amp; Notifications</string>
     <string name="system_notifications_1">System Notifications</string>
     <string name="system_settings">System Settings</string>
@@ -2234,74 +2065,45 @@
     <string name="text_does_not_match">Text does not match</string>
     <string name="text_trailing">Text Trailing</string>
     <string name="thank_you_for_your_support">Thank You for Your Support!</string>
-    <string name="the_app_encountered_an_unexpected">The app encountered an unexpected error and needs to restart.
-    </string>
-    <string name="the_book_could_not_be_found_in_the_target_source">The book could not be found in the target source
-    </string>
-    <string name="the_plugin_has_been_successfully">The plugin has been successfully installed. You can now enable and
-        configure it.
-    </string>
-    <string name="the_quick_brown_fox_jumps">The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet,
-        consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-    </string>
+    <string name="the_app_encountered_an_unexpected">The app encountered an unexpected error and needs to restart.</string>
+    <string name="the_book_could_not_be_found_in_the_target_source">The book could not be found in the target source</string>
+    <string name="the_plugin_has_been_successfully">The plugin has been successfully installed. You can now enable and configure it.</string>
+    <string name="the_quick_brown_fox_jumps">The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</string>
     <string name="the_quick_brown_fox_jumps_over_the_lazy_dog">The quick brown fox jumps over the lazy dog</string>
     <string name="theme_management">Theme Management</string>
     <string name="theme_plugin_errors">Theme Plugin Errors</string>
     <string name="themes">Themes</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">There are no novels in this source to migrate</string>
-    <string name="these_actions_are_destructive_and">These actions are destructive and cannot be undone. Proceed with
-        caution.
-    </string>
+    <string name="these_actions_are_destructive_and">These actions are destructive and cannot be undone. Proceed with caution.</string>
     <string name="these_are_all_the_popular_books">These are all the popular books</string>
     <string name="these_are_all_the_reviews">These are all the reviews</string>
     <string name="this_badge_will_appear_next">This badge will appear next to your username on all your reviews</string>
     <string name="this_card_can_be_clicked">This card can be clicked.</string>
-    <string name="this_feature_is_currently_in">This feature is currently in development and requires additional
-        setup.
-    </string>
+    <string name="this_feature_is_currently_in">This feature is currently in development and requires additional setup.</string>
     <string name="this_feature_is_not_available">This feature is not available</string>
     <string name="this_is_a_preview_of">This is a preview of how text will look in cards with this theme.</string>
-    <string name="this_is_a_recurring_monthly">This is a recurring monthly goal. Once reached, it will automatically
-        reset for the next month to ensure continuous support.
-    </string>
-    <string name="this_is_a_sample_review">This is a sample review text that shows how your badge will appear next to
-        your username when you write reviews.
-    </string>
-    <string name="this_is_a_very_long">This is a very long subtitle that demonstrates how the component handles text
-        overflow and wrapping when the content is too long to fit on a single line
-    </string>
+    <string name="this_is_a_recurring_monthly">This is a recurring monthly goal. Once reached, it will automatically reset for the next month to ensure continuous support.</string>
+    <string name="this_is_a_sample_review">This is a sample review text that shows how your badge will appear next to your username when you write reviews.</string>
+    <string name="this_is_a_very_long">This is a very long subtitle that demonstrates how the component handles text overflow and wrapping when the content is too long to fit on a single line</string>
     <string name="this_is_an_example_of">This is an example of an enhanced card with Material Design 3 styling.</string>
     <string name="this_is_disabled">This is disabled</string>
     <string name="this_is_enabled">This is enabled</string>
-    <string name="this_may_take_a_few_minutes_for_long_chapters">This may take a few minutes for long chapters...
-    </string>
+    <string name="this_may_take_a_few_minutes_for_long_chapters">This may take a few minutes for long chapters...</string>
     <string name="this_option_is_currently_disabled">This option is currently disabled</string>
     <string name="this_option_is_disabled">This option is disabled</string>
     <string name="this_plugin_does_not_provide_custom_settings">This plugin does not provide custom settings.</string>
     <string name="this_purchase_will_be_synced">This purchase will be synced across all your devices.</string>
-    <string name="this_source_requires_authentication_please">This source requires authentication. Please enter your
-        credentials.
-    </string>
-    <string name="this_translation_engine_uses_a">This translation engine uses a WebView to access ChatGPT directly. You
-        need to sign in to ChatGPT with your account to use this feature. The app will save your cookies for future
-        translations.
-    </string>
-    <string name="this_translation_engine_uses_a_1">This translation engine uses a WebView to access DeepSeek directly.
-        You need to sign in to DeepSeek with your account to use this feature. The app will save your cookies for future
-        translations.
-    </string>
+    <string name="this_source_requires_authentication_please">This source requires authentication. Please enter your credentials.</string>
+    <string name="this_translation_engine_uses_a">This translation engine uses a WebView to access ChatGPT directly. You need to sign in to ChatGPT with your account to use this feature. The app will save your cookies for future translations.</string>
+    <string name="this_translation_engine_uses_a_1">This translation engine uses a WebView to access DeepSeek directly. You need to sign in to DeepSeek with your account to use this feature. The app will save your cookies for future translations.</string>
     <string name="this_wallet_does_not_own_an_ireader_nft">This wallet does not own an IReader NFT</string>
     <string name="time_for_a_break">Time for a Break!</string>
     <string name="time_to_stretch_your_eyes_and_rest_a_bit">Time to stretch your eyes and rest a bit! 👀</string>
-    <string name="tip_check_the_api_tab">Tip: Check the API tab on the Hugging Face Space page to find the correct API
-        name.
-    </string>
+    <string name="tip_check_the_api_tab">Tip: Check the API tab on the Hugging Face Space page to find the correct API name.</string>
     <string name="title_cannot_be_empty">Title cannot be empty</string>
     <string name="to_enable_google_drive_backup_you_need_to">To enable Google Drive backup, you need to:</string>
     <string name="to_enable_js_plugins">To enable JS plugins:</string>
-    <string name="to_use_lnreader_compatible_plugins">To use LNReader-compatible plugins, you need to enable the plugin
-        feature in General Settings.
-    </string>
+    <string name="to_use_lnreader_compatible_plugins">To use LNReader-compatible plugins, you need to enable the plugin feature in General Settings.</string>
     <string name="toggle_this_option">Toggle this option</string>
     <string name="toolbar">Toolbar</string>
     <string name="toolbar_color">Toolbar color</string>
@@ -2314,12 +2116,9 @@
     <string name="total_donated">Total Donated</string>
     <string name="total_memory">Total Memory</string>
     <string name="total_reading_time">Total Reading Time</string>
-    <string name="touch_the_fingerprint_sensor_or">Touch the fingerprint sensor or use face recognition to unlock
-    </string>
+    <string name="touch_the_fingerprint_sensor_or">Touch the fingerprint sensor or use face recognition to unlock</string>
     <string name="tracking_services">Tracking Services</string>
-    <string name="translation_plugins_extend_ireader_with">Translation plugins extend IReader with additional
-        translation services
-    </string>
+    <string name="translation_plugins_extend_ireader_with">Translation plugins extend IReader with additional translation services</string>
     <string name="trending_now">Trending Now</string>
     <string name="troubleshooting_steps">Troubleshooting Steps:</string>
     <string name="trust_level">Trust Level</string>
@@ -2345,42 +2144,33 @@
     <string name="update_ready">Update Ready</string>
     <string name="updating_all_plugins">Updating all plugins...</string>
     <string name="updating_favorite_status">Updating favorite status...</string>
-    <string name="upload_your_first_backup_using_the_button_below">Upload your first backup using the button below
-    </string>
+    <string name="upload_your_first_backup_using_the_button_below">Upload your first backup using the button below</string>
     <string name="url_of_your_ollama_api_server">URL of your Ollama API server</string>
     <string name="usage_count">Usage Count</string>
     <string name="usage_history_last_hour">Usage History (Last Hour)</string>
     <string name="usage_statistics">Usage Statistics</string>
     <string name="use_a_strong_pin_6_digits_or_passwordn">• Use a strong PIN (6 digits) or password\n</string>
-    <string name="use_a_strong_pin_or">• Use a strong PIN or password\n• Enable biometric authentication for
-        convenience\n• Enable secure screen in public places\n• Use 18+ source lock for additional privacy
-    </string>
+    <string name="use_a_strong_pin_or">• Use a strong PIN or password\n• Enable biometric authentication for convenience\n• Enable secure screen in public places\n• Use 18+ source lock for additional privacy</string>
     <string name="use_biometric">Use Biometric</string>
     <string name="use_coqui_tts">Use Remote TTS</string>
     <string name="use_custom_colors">Use Custom Colors</string>
     <string name="use_custom_supabase">Use Custom Supabase</string>
     <string name="use_fab_in_library">Use FAB in Library</string>
     <string name="use_fab_instead_of_buttons">Use FAB Instead of Buttons</string>
-    <string name="use_online_tts_engines_from_hugging_face_spaces">Use online TTS engines from Hugging Face Spaces
-    </string>
+    <string name="use_online_tts_engines_from_hugging_face_spaces">Use online TTS engines from Hugging Face Spaces</string>
     <string name="use_password">Use Password</string>
     <string name="use_pin">Use PIN</string>
     <string name="use_separate_supabase_projects_for">Use separate Supabase projects for better scalability</string>
-    <string name="use_static_indicators_instead_of_animated_ones">Use static indicators instead of animated ones
-    </string>
+    <string name="use_static_indicators_instead_of_animated_ones">Use static indicators instead of animated ones</string>
     <string name="use_translated_text_for_text">Use translated text for text-to-speech when available</string>
     <string name="use_true_black_amoled">Use True Black (AMOLED)</string>
-    <string name="use_your_fingerprint_or_face">Use your fingerprint or face to unlock the app. You can still use your
-        device PIN as a fallback.
-    </string>
+    <string name="use_your_fingerprint_or_face">Use your fingerprint or face to unlock the app. You can still use your device PIN as a fallback.</string>
+    <string name="cover_based_dynamic_color">Cover-based Dynamic Color Theme</string>
+    <string name="cover_based_dynamic_color_subtitle">Extract dominant colors from novel covers and apply them to the UI</string>
     <string name="user_interface">User Interface</string>
     <string name="verification_details">Verification Details</string>
-    <string name="verification_is_automatic_and_takes_a_few_seconds">• Verification is automatic and takes a few
-        seconds
-    </string>
-    <string name="verification_is_cached_for_24">Verification is cached for 24 hours. Badge remains active for 7 days if
-        re-verification fails.
-    </string>
+    <string name="verification_is_automatic_and_takes_a_few_seconds">• Verification is automatic and takes a few seconds</string>
+    <string name="verification_is_cached_for_24">Verification is cached for 24 hours. Badge remains active for 7 days if re-verification fails.</string>
     <string name="verified">Verified</string>
     <string name="verified_supporter">Verified Supporter</string>
     <string name="verifying_nft_ownership">Verifying NFT ownership...</string>
@@ -2390,16 +2180,13 @@
     <string name="vibration">Vibration</string>
     <string name="view_all_reviews">View All Reviews</string>
     <string name="view_version_history_and_new_features">View version history and new features</string>
-    <string name="visit_the_badge_store_to_purchase_your_first_badge">Visit the Badge Store to purchase your first
-        badge
-    </string>
+    <string name="visit_the_badge_store_to_purchase_your_first_badge">Visit the Badge Store to purchase your first badge</string>
     <string name="visit_the_plugin_marketplace_to">Visit the Plugin Marketplace to discover and install plugins</string>
     <string name="visual_effects">Visual Effects</string>
     <string name="voice">Voice</string>
     <string name="voice_model_settings">Voice Model Settings</string>
     <string name="voice_models">Voice Models</string>
-    <string name="voice_selection_is_managed_through">Voice selection is managed through Android's TTS settings.
-    </string>
+    <string name="voice_selection_is_managed_through">Voice selection is managed through Android's TTS settings.</string>
     <string name="volume">Volume</string>
     <string name="warnings">Warnings:</string>
     <string name="webview_is_not_available_on_this_device">WebView is not available on this device.</string>
@@ -2420,13 +2207,9 @@
     <string name="you_are_about_to_report">You are about to report \</string>
     <string name="you_dont_have_any_badges_yet">You don't have any badges yet</string>
     <string name="you_own_an_ireader_nft">You own an IReader NFT!</string>
-    <string name="youll_receive_a_gentle_reminder">You'll receive a gentle reminder after reading continuously for the
-        selected duration.
-    </string>
+    <string name="youll_receive_a_gentle_reminder">You'll receive a gentle reminder after reading continuously for the selected duration.</string>
     <string name="your_badges">Your Badges</string>
-    <string name="your_contribution_helps_keep_ireader">Your contribution helps keep IReader free and ad-free for
-        everyone.
-    </string>
+    <string name="your_contribution_helps_keep_ireader">Your contribution helps keep IReader free and ad-free for everyone.</string>
     <string name="your_donation_rank">Your Donation Rank</string>
     <string name="your_personal_book_reading_companion">Your personal book reading companion</string>
     <string name="your_privacy_matters">Your Privacy Matters</string>
@@ -2442,48 +2225,34 @@
     <string name="view_chapter_reviews">View Chapter Reviews</string>
     <string name="hide_reviews">Hide Reviews</string>
     <string name="error_user_not_found">Account Not Found</string>
-    <string name="error_user_not_found_message">We couldn\'t find your account. Please sign in again to continue.
-    </string>
+    <string name="error_user_not_found_message">We couldn\'t find your account. Please sign in again to continue.</string>
     <string name="error_user_not_authenticated">Not Signed In</string>
     <string name="error_user_not_authenticated_message">You need to sign in to access this feature.</string>
     <string name="error_session_expired">Session Expired</string>
     <string name="error_session_expired_message">Your session has expired. Please sign in again.</string>
     <string name="error_network">Connection Error</string>
-    <string name="error_network_message">Unable to connect. Please check your internet connection and try again.
-    </string>
+    <string name="error_network_message">Unable to connect. Please check your internet connection and try again.</string>
     <string name="error_server">Server Error</string>
     <string name="error_server_message">Something went wrong on our end. Please try again later.</string>
     <string name="error_invalid_credentials">Invalid Credentials</string>
-    <string name="error_invalid_credentials_message">The email or password you entered is incorrect. Please try again.
-    </string>
+    <string name="error_invalid_credentials_message">The email or password you entered is incorrect. Please try again.</string>
     <string name="error_account_not_found">No Account Found</string>
-    <string name="error_account_not_found_message">No account found with this email. Please sign up or check your email
-        address.
-    </string>
+    <string name="error_account_not_found_message">No account found with this email. Please sign up or check your email address.</string>
     <string name="error_email_exists">Email Already Registered</string>
-    <string name="error_email_exists_message">An account with this email already exists. Please sign in or use a
-        different email.
-    </string>
+    <string name="error_email_exists_message">An account with this email already exists. Please sign in or use a different email.</string>
     <string name="error_too_many_attempts">Too Many Attempts</string>
-    <string name="error_too_many_attempts_message">Too many login attempts. Please wait a few minutes and try again.
-    </string>
+    <string name="error_too_many_attempts_message">Too many login attempts. Please wait a few minutes and try again.</string>
     <string name="error_service_unavailable">Service Unavailable</string>
-    <string name="error_service_unavailable_message">The authentication service is temporarily unavailable. Please try
-        again later.
-    </string>
+    <string name="error_service_unavailable_message">The authentication service is temporarily unavailable. Please try again later.</string>
     <string name="sign_in_again">Sign In Again</string>
     <string name="search_settings">Search settings…</string>
     <string name="no_settings_found">No settings found</string>
     <string name="try_different_search">Try a different search term</string>
     <string name="clear_search">Clear search</string>
     <string name="welcome_to_ireader">Welcome to IReader!</string>
-    <string name="first_launch_intro">Let\'s set up a few things to get you started. You can always change these
-        settings later.
-    </string>
+    <string name="first_launch_intro">Let\'s set up a few things to get you started. You can always change these settings later.</string>
     <string name="cloud_features">Cloud Features</string>
-    <string name="cloud_features_description">IReader can connect to cloud services for enhanced features. You can
-        disable this if you prefer a fully offline experience.
-    </string>
+    <string name="cloud_features_description">IReader can connect to cloud services for enhanced features. You can disable this if you prefer a fully offline experience.</string>
     <string name="enable_cloud_features">Enable Cloud Features</string>
     <string name="enable_cloud_features_subtitle">Sync, reviews, badges, and leaderboard</string>
     <string name="reading_progress_sync">Reading Progress Sync</string>
@@ -2493,12 +2262,8 @@
     <string name="badges_achievements">Badges &amp; Achievements</string>
     <string name="badges_achievements_desc">Earn and display badges on your profile</string>
     <string name="offline_mode">Offline Mode</string>
-    <string name="offline_mode_description">The app will work completely offline. No data will be sent to cloud servers.
-        Community features will be hidden.
-    </string>
-    <string name="first_launch_privacy_note">You can change this setting anytime in Settings → Advanced. Your reading
-        data stays on your device unless you enable cloud features.
-    </string>
+    <string name="offline_mode_description">The app will work completely offline. No data will be sent to cloud servers. Community features will be hidden.</string>
+    <string name="first_launch_privacy_note">You can change this setting anytime in Settings → Advanced. Your reading data stays on your device unless you enable cloud features.</string>
     <string name="reading_buddy">Reading Buddy</string>
     <string name="reading_buddy_quotes">Reading Buddy &amp; Quotes</string>
     <string name="reading_buddy_description">Your cute rabbit companion and daily quotes</string>
@@ -2554,18 +2319,14 @@
     <string name="notification_network_error">Network Error</string>
     <string name="notification_connection_restored">Connection Restored</string>
     <string name="tts_text_merging">TTS Text Merging</string>
-    <string name="tts_merge_info">Merge multiple paragraphs into larger chunks for smoother reading. This reduces server
-        requests and provides better audio continuity. Set to 0 to disable merging.
-    </string>
+    <string name="tts_merge_info">Merge multiple paragraphs into larger chunks for smoother reading. This reduces server requests and provides better audio continuity. Set to 0 to disable merging.</string>
     <string name="tts_remote_engines">Remote Engines</string>
     <string name="tts_merge_words_remote">Merge words for Gradio/online TTS engines</string>
     <string name="tts_native_engines">Native Engines</string>
     <string name="tts_merge_words_native">Merge words for Android TTS, Piper, Sherpa engines</string>
     <string name="tts_chapter_caching">Chapter Audio Caching</string>
     <string name="tts_download_chapter_audio">Download Chapter Audio</string>
-    <string name="tts_download_chapter_audio_desc">Pre-download entire chapter audio for offline playback (remote
-        engines only)
-    </string>
+    <string name="tts_download_chapter_audio_desc">Pre-download entire chapter audio for offline playback (remote engines only)</string>
     <string name="tts_cache_duration">Cache Duration</string>
     <string name="tts_cache_duration_desc">Auto-delete cached audio after this many days</string>
     <string name="tts_cache_status">Cache Status</string>
@@ -2583,19 +2344,13 @@
     <string name="password_updated_successfully">Your password has been updated successfully.</string>
     <string name="source_needs_update">Source Needs Update</string>
     <string name="source_broken_title">This Source is Broken</string>
-    <string name="source_broken_description">The website structure has changed and the source needs to be updated by a
-        developer. This is not a network issue.
-    </string>
+    <string name="source_broken_description">The website structure has changed and the source needs to be updated by a developer. This is not a network issue.</string>
     <string name="source_broken_help_title">Want to help fix this?</string>
-    <string name="source_broken_help_description">Support the development with a $5 donation and help us prioritize
-        fixing this source.
-    </string>
+    <string name="source_broken_help_description">Support the development with a $5 donation and help us prioritize fixing this source.</string>
     <string name="support_development_5">Support Development ($5)</string>
     <string name="parsing_error">Parsing Error</string>
     <string name="source_website_changed">The source website has changed its structure</string>
-    <string name="crypto_donation_preferred">💡 Tip: Crypto donations are preferred! Card payments via Reymit take ~40%
-        fees on small amounts. Sending crypto directly means 100% goes to development.
-    </string>
+    <string name="crypto_donation_preferred">💡 Tip: Crypto donations are preferred! Card payments via Reymit take ~40% fees on small amounts. Sending crypto directly means 100% goes to development.</string>
     <string name="donate_crypto">Donate Crypto</string>
     <string name="technical_details">Technical Details</string>
     <string name="package_url">Package URL</string>
@@ -2608,9 +2363,7 @@
     <string name="access_grants">Access Grants</string>
     <string name="account_id">Account ID</string>
     <string name="add_a_plugin_repository_to">Add a plugin repository to browse and install plugins</string>
-    <string name="add_a_repository_to_browse">Add a repository to browse and install extensions for reading novels from
-        various sources.
-    </string>
+    <string name="add_a_repository_to_browse">Add a repository to browse and install extensions for reading novels from various sources.</string>
     <string name="add_book">Add Book</string>
     <string name="add_books_to_your_library">Add books to your library first to create glossaries</string>
     <string name="add_more_time">Add more time:</string>
@@ -2643,16 +2396,13 @@
     <string name="auto_detect_selectors">Auto-Detect Selectors</string>
     <string name="auto_fallback_if_quota_exceeded">Auto-fallback if quota exceeded</string>
     <string name="auto_share_translations">Auto-share Translations</string>
-    <string name="automatically_share_your_translations_with">Automatically share your translations with the community
-    </string>
+    <string name="automatically_share_your_translations_with">Automatically share your translations with the community</string>
     <string name="avgday">Avg/Day</string>
     <string name="awesome">Awesome!</string>
     <string name="backups">Backups</string>
     <string name="baseurlsearchqkey">{{baseUrl}}/search?q={{key}}</string>
-    <string name="be_the_first_to_share">Be the first to share AI-generated art of your favorite book characters!
-    </string>
-    <string name="be_the_first_to_share_your_favorite_book_quotes">Be the first to share your favorite book quotes!
-    </string>
+    <string name="be_the_first_to_share">Be the first to share AI-generated art of your favorite book characters!</string>
+    <string name="be_the_first_to_share_your_favorite_book_quotes">Be the first to share your favorite book quotes!</string>
     <string name="be_the_first_to_submit_a_quote">Be the first to submit a quote</string>
     <string name="be_the_first_to_upload">Be the first to upload!</string>
     <string name="book_info">Book Info</string>
@@ -2668,9 +2418,7 @@
     <string name="bounce">bounce</string>
     <string name="bounceoffset">bounceOffset</string>
     <string name="brief_description_of_the_character">Brief description of the character...</string>
-    <string name="browse_and_read_novels_translated">Browse and read novels translated by the community. Share your own
-        translations to help others!
-    </string>
+    <string name="browse_and_read_novels_translated">Browse and read novels translated by the community. Share your own translations to help others!</string>
     <string name="buddy">buddy</string>
     <string name="bug_fixes_and_performance_improvements">Bug fixes and performance improvements</string>
     <string name="bypass_translation_warning">Bypass Translation Warning</string>
@@ -2694,9 +2442,7 @@
     <string name="character_gallery">Character Gallery</string>
     <string name="character_info">Character Info</string>
     <string name="community_powered">Community Powered</string>
-    <string name="discord_art_description">All character art is posted directly to our Discord community channel.
-        Generate art here and it will be shared with everyone!
-    </string>
+    <string name="discord_art_description">All character art is posted directly to our Discord community channel. Generate art here and it will be shared with everyone!</string>
     <string name="view_in_discord">View in Discord</string>
     <string name="recently_posted">Recently Posted</string>
     <string name="no_art_yet">No art yet</string>
@@ -2711,37 +2457,20 @@
     <string name="choose_style">Choose Style</string>
     <string name="cloud_community">Cloud &amp; Community</string>
     <string name="cloud_sync">Cloud Sync</string>
-    <string name="cloudflare_bypass">Cloudflare Bypass</string>
-    <string name="cloudflare_bypass_description">Configure FlareSolverr for protected sources</string>
     <string name="cloudflare_d1_r2">Cloudflare D1 + R2</string>
-    <string name="cloudflare_provides_5gb_d1_10gb">Cloudflare provides 5GB D1 + 10GB R2 free tier for translation
-        storage
-    </string>
-    <string name="comma_separated_selectors_for_ads_scripts_etc">Comma-separated selectors for ads, scripts, etc.
-    </string>
+    <string name="cloudflare_provides_5gb_d1_10gb">Cloudflare provides 5GB D1 + 10GB R2 free tier for translation storage</string>
+    <string name="comma_separated_selectors_for_ads_scripts_etc">Comma-separated selectors for ads, scripts, etc.</string>
     <string name="commentdescription">Comment/Description</string>
     <string name="common_selectors">Common selectors:</string>
     <string name="community_reviews_and_ratings">Community reviews and ratings</string>
     <string name="community_source">Community Source</string>
     <string name="complete_setup">Complete Setup</string>
-    <string name="configure_how_to_get_book">Configure how to get book details from the book's page. These selectors
-        find the title, author, description, etc.
-    </string>
-    <string name="configure_how_to_get_the">Configure how to get the chapter list. The 'Chapter List' selector finds
-        each chapter item.
-    </string>
-    <string name="configure_how_to_read_chapter">Configure how to read chapter content. The 'Content' selector finds the
-        main text of each chapter.
-    </string>
-    <string name="configure_how_to_search_for">Configure how to search for books. The 'Book List' selector finds each
-        book in search results. Use {{key}} for the search term in the URL.
-    </string>
-    <string name="configure_your_own_supabase_instance">Configure your own Supabase instance for community content, or
-        leave empty to use the default.
-    </string>
-    <string name="connect_with_other_readers_compete">Connect with other readers, compete on leaderboards, and customize
-        your profile
-    </string>
+    <string name="configure_how_to_get_book">Configure how to get book details from the book's page. These selectors find the title, author, description, etc.</string>
+    <string name="configure_how_to_get_the">Configure how to get the chapter list. The 'Chapter List' selector finds each chapter item.</string>
+    <string name="configure_how_to_read_chapter">Configure how to read chapter content. The 'Content' selector finds the main text of each chapter.</string>
+    <string name="configure_how_to_search_for">Configure how to search for books. The 'Book List' selector finds each book in search results. Use {{key}} for the search term in the URL.</string>
+    <string name="configure_your_own_supabase_instance">Configure your own Supabase instance for community content, or leave empty to use the default.</string>
+    <string name="connect_with_other_readers_compete">Connect with other readers, compete on leaderboards, and customize your profile</string>
     <string name="content_filter">Content Filter</string>
     <string name="content_preferences">Content Preferences</string>
     <string name="content_selector">Content Selector *</string>
@@ -2750,25 +2479,21 @@
     <string name="cover_image_selector">Cover Image Selector</string>
     <string name="cover_url_selector">Cover URL Selector</string>
     <string name="create">Create</string>
-    <string name="create_and_publish_plugins_to_manage_them_here">Create and publish plugins to manage them here
-    </string>
+    <string name="create_and_publish_plugins_to_manage_them_here">Create and publish plugins to manage them here</string>
     <string name="create_art">Create Art</string>
     <string name="create_source">Create Source</string>
     <string name="create_with_wizard_recommended">Create with Wizard (Recommended)</string>
     <string name="create_your_own_sources_or_import_from_others">Create your own sources or import from others</string>
     <string name="created">Created</string>
     <string name="creative">Creative</string>
-    <string name="css_selectors_for_parsing_search">CSS selectors for parsing search results. Use @attr for attributes
-        (e.g., a@href)
-    </string>
+    <string name="css_selectors_for_parsing_search">CSS selectors for parsing search results. Use @attr for attributes (e.g., a@href)</string>
     <string name="current">Current</string>
     <string name="d1_database_id">D1 Database ID</string>
     <string name="day_streak">day streak</string>
     <string name="deepseek_configuration">DeepSeek Configuration</string>
     <string name="deferredscreentransition">DeferredScreenTransition</string>
     <string name="deferredscreenwithconditiontransition">DeferredScreenWithConditionTransition</string>
-    <string name="delay_between_translation_requests_to">Delay between translation requests to prevent rate limiting
-    </string>
+    <string name="delay_between_translation_requests_to">Delay between translation requests to prevent rate limiting</string>
     <string name="delete_all">Delete All</string>
     <string name="delete_all_sources">Delete All Sources</string>
     <string name="delete_art">Delete Art?</string>
@@ -2779,21 +2504,15 @@
     <string name="deselect_all">Deselect All</string>
     <string name="detailed_statistics">Detailed Statistics</string>
     <string name="detected_selectors">Detected Selectors</string>
-    <string name="developer_badges_are_granted_to">Developer badges are granted to plugin creators who contribute to the
-        IReader ecosystem.
-    </string>
+    <string name="developer_badges_are_granted_to">Developer badges are granted to plugin creators who contribute to the IReader ecosystem.</string>
     <string name="developer_portal">Developer Portal</string>
     <string name="dialog_content">dialog_content</string>
-    <string name="disable_animations_for_better_performance">Disable animations for better performance on older
-        devices
-    </string>
+    <string name="disable_animations_for_better_performance">Disable animations for better performance on older devices</string>
     <string name="discover">Discover</string>
     <string name="discover_plugins_to_enhance_your_reading">Discover plugins to enhance your reading</string>
     <string name="display_adult_content_in_search_results">Display adult content in search results</string>
-    <string name="display_ai_generated_character_art">Display AI-generated character art gallery in book details
-    </string>
-    <string name="display_badge_on_your_profile_for_contributions">Display badge on your profile for contributions
-    </string>
+    <string name="display_ai_generated_character_art">Display AI-generated character art gallery in book details</string>
+    <string name="display_badge_on_your_profile_for_contributions">Display badge on your profile for contributions</string>
     <string name="display_name">Display Name</string>
     <string name="divads_script">div.ads, script</string>
     <string name="divdescription">div.description</string>
@@ -2815,22 +2534,16 @@
     <string name="eg_midjourney_dall_e_stable_diffusion">e.g., Midjourney, DALL-E, Stable Diffusion</string>
     <string name="eg_novel_name_source">e.g., novel_name_source</string>
     <string name="eg_the_great_gatsby">e.g., The Great Gatsby</string>
-    <string name="eg_young_wizard_with_round">e.g., Young wizard with round glasses, messy black hair, lightning scar on
-        forehead...
-    </string>
+    <string name="eg_young_wizard_with_round">e.g., Young wizard with round glasses, messy black hair, lightning scar on forehead...</string>
     <string name="en_zh_ko_etc">en, zh, ko, etc.</string>
     <string name="enable_bypass_warning_in_settings">Enable 'Bypass Warning' in settings to skip this dialog</string>
     <string name="enable_community_source">Enable Community Source</string>
     <string name="enable_compression">Enable Compression</string>
     <string name="enable_content_filter">Enable Content Filter</string>
     <string name="english_chinese_etc">English, Chinese, etc.</string>
-    <string name="enter_a_page_url_and">Enter a page URL and the app will analyze it to suggest CSS selectors
-        automatically.
-    </string>
+    <string name="enter_a_page_url_and">Enter a page URL and the app will analyze it to suggest CSS selectors automatically.</string>
     <string name="enter_reason">Enter reason...</string>
-    <string name="enter_the_websites_name_and">Enter the website's name and URL. The URL should be the main page of the
-        novel site (e.g., https://example.com)
-    </string>
+    <string name="enter_the_websites_name_and">Enter the website's name and URL. The URL should be the main page of the novel site (e.g., https://example.com)</string>
     <string name="enter_username">Enter username</string>
     <string name="example">Example:</string>
     <string name="examples">Examples:</string>
@@ -2842,8 +2555,7 @@
     <string name="featured">⭐ Featured</string>
     <string name="fetch_sources">Fetch Sources</string>
     <string name="field_to_fill">Field to fill:</string>
-    <string name="fill_in_character_name_and_book_title_above_first">Fill in Character Name and Book Title above first
-    </string>
+    <string name="fill_in_character_name_and_book_title_above_first">Fill in Character Name and Book Title above first</string>
     <string name="filter_patterns_one_regex_per_line">Filter Patterns (one regex per line)</string>
     <string name="first_chapter">First chapter</string>
     <string name="float">float</string>
@@ -2865,22 +2577,16 @@
     <string name="genre_selector">Genre Selector</string>
     <string name="genrekind_selector">Genre/Kind Selector</string>
     <string name="get_nft">Get NFT</string>
-    <string name="get_your_api_key_from_huggingfacecosettingstokens">Get your API key from
-        huggingface.co/settings/tokens
-    </string>
+    <string name="get_your_api_key_from_huggingfacecosettingstokens">Get your API key from huggingface.co/settings/tokens</string>
     <string name="get_your_api_key_from_platformdeepseekcom">Get your API key from platform.deepseek.com</string>
-    <string name="get_your_api_key_from_platformopenaicomapi_keys">Get your API key from platform.openai.com/api-keys
-    </string>
+    <string name="get_your_api_key_from_platformopenaicomapi_keys">Get your API key from platform.openai.com/api-keys</string>
     <string name="global_glossaries">Global Glossaries</string>
     <string name="glow">glow</string>
     <string name="glowpulse">glowPulse</string>
-    <string name="google_ml_kit_requires_downloading">Google ML Kit requires downloading language models for offline
-        translation. Select your language pair and initialize.
-    </string>
+    <string name="google_ml_kit_requires_downloading">Google ML Kit requires downloading language models for offline translation. Select your language pair and initialize.</string>
     <string name="grant">Grant</string>
     <string name="grant_access">Grant Access</string>
-    <string name="grant_access_to_users_for_testing_or_promotion">Grant access to users for testing or promotion
-    </string>
+    <string name="grant_access_to_users_for_testing_or_promotion">Grant access to users for testing or promotion</string>
     <string name="grant_plugin_access">Grant Plugin Access</string>
     <string name="grants">Grants</string>
     <string name="group">Group</string>
@@ -2888,9 +2594,7 @@
     <string name="headers_json">Headers (JSON)</string>
     <string name="help_others_by_sharing_your_translations">Help others by sharing your translations</string>
     <string name="help_topics">Help Topics</string>
-    <string name="high_capacity_storage_for_community">High-capacity storage for community translations with
-        compression
-    </string>
+    <string name="high_capacity_storage_for_community">High-capacity storage for community translations with compression</string>
     <string name="how_would_you_like_to_create_your_source">How would you like to create your source?</string>
     <string name="huggingface_configuration">HuggingFace Configuration</string>
     <string name="icon">icon</string>
@@ -2901,24 +2605,21 @@
     <string name="import_glossary">Import Glossary</string>
     <string name="import_legado_sources">Import Legado Sources</string>
     <string name="import_sources">Import Sources</string>
-    <string name="import_sources_from_legadoyuedu_json">Import sources from Legado/Yuedu JSON format. You can paste JSON
-        directly, enter a URL, or import from clipboard.
-    </string>
+    <string name="import_sources_from_legadoyuedu_json">Import sources from Legado/Yuedu JSON format. You can paste JSON directly, enter a URL, or import from clipboard.</string>
     <string name="importing">Importing...</string>
     <string name="indicator_offset">indicator_offset</string>
     <string name="indicator_width">indicator_width</string>
     <string name="inspire_other_readers_with_memorable_passages">Inspire other readers with memorable passages</string>
     <string name="install_later">Install Later</string>
     <string name="install_ollama_from_ollamaai">Install Ollama from ollama.ai</string>
-    <string name="install_ollama_from_ollamaai_make">Install Ollama from ollama.ai. Make sure the server is running.
-    </string>
+    <string name="install_ollama_from_ollamaai_make">Install Ollama from ollama.ai. Make sure the server is running.</string>
     <string name="install_piper_plugin">Install Piper Plugin</string>
     <string name="install_required_plugin">Install Required Plugin</string>
     <string name="interactive_tutorial">Interactive Tutorial</string>
     <string name="intro_selector">Intro Selector</string>
     <string name="ios_text_to_speech">iOS Text-to-Speech</string>
-    <string name="ios_uses_the_built_in">iOS uses the built-in AVSpeechSynthesizer for text-to-speech.</string>
-    <string name="ios_voices_are_managed_through_the_system">iOS voices are managed through the system.</string>
+    <string name="ios_uses_the_built_in">iOS uses the built-in AVSpeechSynthesizer for text-to-speech. </string>
+    <string name="ios_voices_are_managed_through_the_system">iOS voices are managed through the system. </string>
     <string name="ireader">📚 IReader</string>
     <string name="ireader_extensionsn_lnreader_plugins">• IReader Extensions\n• LNReader Plugins</string>
     <string name="ireader_ios">IReader iOS</string>
@@ -2930,7 +2631,7 @@
     <string name="later">Later</string>
     <string name="leaderboards_and_achievement_badges">Leaderboards and achievement badges</string>
     <string name="learn_how_to_create_sources">Learn How to Create Sources</string>
-    <string name="legado_description">Legado (阅读) is a popular Chinese novel reader app.</string>
+    <string name="legado_description">Legado (阅读) is a popular Chinese novel reader app. </string>
     <string name="legado_sources">Legado Sources</string>
     <string name="libretranslate_no_api_key_required">LibreTranslate - No API key required</string>
     <string name="libretranslate_ready_to_use">LibreTranslate - Ready to use</string>
@@ -2942,27 +2643,15 @@
     <string name="login_to_source">Login to Source</string>
     <string name="long_press_for_options">Long press for options</string>
     <string name="longest_streak">Longest Streak</string>
-    <string name="look_for_existing_community_translations">Look for existing community translations before
-        translating
-    </string>
-    <string name="manage_glossaries_for_any_book">Manage glossaries for any book, even those not in your library. These
-        can be synced across devices.
-    </string>
-    <string name="manage_translation_glossaries_for_your">Manage translation glossaries for your books. Select a book to
-        view and edit its glossary entries.
-    </string>
+    <string name="look_for_existing_community_translations">Look for existing community translations before translating</string>
+    <string name="manage_glossaries_for_any_book">Manage glossaries for any book, even those not in your library. These can be synced across devices.</string>
+    <string name="manage_translation_glossaries_for_your">Manage translation glossaries for your books. Select a book to view and edit its glossary entries.</string>
     <string name="mass_translation">Mass Translation</string>
     <string name="auto_translate_novel_names">Auto-translate novel names</string>
-    <string name="automatically_translate_novel_titles_when">Automatically translate novel titles when browsing
-        sources
-    </string>
+    <string name="automatically_translate_novel_titles_when">Automatically translate novel titles when browsing sources</string>
     <string name="auto_translate_descriptions">Auto-translate descriptions</string>
-    <string name="automatically_translate_novel_descriptions_when">Automatically translate novel descriptions when
-        browsing sources
-    </string>
-    <string name="merge_multiple_paragraphs_into_larger">Merge multiple paragraphs into larger chunks for smoother
-        reading.
-    </string>
+    <string name="automatically_translate_novel_descriptions_when">Automatically translate novel descriptions when browsing sources</string>
+    <string name="merge_multiple_paragraphs_into_larger">Merge multiple paragraphs into larger chunks for smoother reading. </string>
     <string name="min_ireader_version">Min IReader Version</string>
     <string name="model">Model</string>
     <string name="more_by_this_developer">More by this developer</string>
@@ -2991,10 +2680,8 @@
     <string name="offsety">offsetY</string>
     <string name="ok_ill_restart_later">OK, I'll Restart Later</string>
     <string name="ollama_configuration">Ollama Configuration</string>
-    <string name="only_share_high_quality_ai">Only share high-quality AI translations (OpenAI, Gemini, DeepSeek)
-    </string>
-    <string name="only_show_translations_with_this_rating_or_higher">Only show translations with this rating or higher
-    </string>
+    <string name="only_share_high_quality_ai">Only share high-quality AI translations (OpenAI, Gemini, DeepSeek)</string>
+    <string name="only_show_translations_with_this_rating_or_higher">Only show translations with this rating or higher</string>
     <string name="open_ios_settings">Open iOS Settings</string>
     <string name="openai_configuration">OpenAI Configuration</string>
     <string name="optional">Optional</string>
@@ -3009,17 +2696,13 @@
     <string name="paste_the_json_glossary_data_below">Paste the JSON glossary data below:</string>
     <string name="pen">pen</string>
     <string name="persistent_storage">Persistent Storage</string>
-    <string name="piper_requires_visual_c_redistributable">Piper requires Visual C++ Redistributable. Please install it
-        from Microsoft and restart the app.
-    </string>
+    <string name="piper_requires_visual_c_redistributable">Piper requires Visual C++ Redistributable. Please install it from Microsoft and restart the app.</string>
     <string name="platforms">Platforms</string>
     <string name="please_specify">Please specify</string>
     <string name="plugin_not_working">Plugin Not Working</string>
     <string name="plugin_required">Plugin Required</string>
     <string name="plugins">Plugins</string>
-    <string name="png_jpg_up_to_10mbnrecommended_1024x1024_or_higher">PNG, JPG up to 10MB\nRecommended: 1024x1024 or
-        higher
-    </string>
+    <string name="png_jpg_up_to_10mbnrecommended_1024x1024_or_higher">PNG, JPG up to 10MB\nRecommended: 1024x1024 or higher</string>
     <string name="popular_repositories">Popular Repositories</string>
     <string name="possible_causes">Possible Causes</string>
     <string name="prefer_saf_storage">Prefer SAF Storage</string>
@@ -3033,9 +2716,7 @@
     <string name="quote">Quote *</string>
     <string name="quote_of_the_day">Quote of the Day</string>
     <string name="quotes">Quotes</string>
-    <string name="quotes_will_be_reviewed_by">Quotes will be reviewed by admins before appearing publicly. Make sure
-        your quote is accurate and properly attributed.
-    </string>
+    <string name="quotes_will_be_reviewed_by">Quotes will be reviewed by admins before appearing publicly. Make sure your quote is accurate and properly attributed.</string>
     <string name="r2_bucket_name">R2 Bucket Name</string>
     <string name="r2_public_url_optional">R2 Public URL (Optional)</string>
     <string name="rate_limit_warning">Rate Limit Warning</string>
@@ -3069,19 +2750,13 @@
     <string name="reset_zoom">Reset zoom</string>
     <string name="result">Result:</string>
     <string name="resume_download">Resume Download</string>
-    <string name="review_your_source_configuration_and">Review your source configuration and test it before saving.
-    </string>
+    <string name="review_your_source_configuration_and">Review your source configuration and test it before saving.</string>
     <string name="revoke">Revoke</string>
     <string name="revoked">Revoked</string>
-    <string name="reymit_accepts_card_payments_and_cryptocurrency">Reymit accepts card payments and cryptocurrency
-    </string>
+    <string name="reymit_accepts_card_payments_and_cryptocurrency">Reymit accepts card payments and cryptocurrency</string>
     <string name="rule_syntax_help">Rule Syntax Help</string>
-    <string name="run_the_migration_community_sourcesql">Run the migration_community_source.sql file in your Supabase
-        SQL Editor to create these tables.
-    </string>
-    <string name="save_js_sources_extensions_backups">Save JS sources, extensions, backups, and epubs to SAF folder when
-        available. Falls back to cache if unavailable.
-    </string>
+    <string name="run_the_migration_community_sourcesql">Run the migration_community_source.sql file in your Supabase SQL Editor to create these tables.</string>
+    <string name="save_js_sources_extensions_backups">Save JS sources, extensions, backups, and epubs to SAF folder when available. Falls back to cache if unavailable.</string>
     <string name="save_patterns">Save Patterns</string>
     <string name="scene">Scene</string>
     <string name="search_bar">search_bar</string>
@@ -3091,9 +2766,7 @@
     <string name="search_users_by_email_or_username">Search users by email or username...</string>
     <string name="searchfieldalpha">SearchFieldAlpha</string>
     <string name="searchmodetransition">SearchModeTransition</string>
-    <string name="select_a_folder_where_ireader">Select a folder where IReader will store your data. A dedicated folder
-        is recommended.
-    </string>
+    <string name="select_a_folder_where_ireader">Select a folder where IReader will store your data. A dedicated folder is recommended.</string>
     <string name="select_applicable_styles">Select applicable styles:</string>
     <string name="select_export_directory">Select Export Directory</string>
     <string name="select_font_file">Select Font File</string>
@@ -3102,9 +2775,7 @@
     <string name="selectors_for_parsing_chapter_content">Selectors for parsing chapter content</string>
     <string name="selectors_for_parsing_the_table_of_contents">Selectors for parsing the table of contents</string>
     <string name="selectors_for_the_book_detailinfo_page">Selectors for the book detail/info page</string>
-    <string name="selectors_for_the_explorelatest_page">Selectors for the explore/latest page (optional, uses search
-        rules if empty)
-    </string>
+    <string name="selectors_for_the_explorelatest_page">Selectors for the explore/latest page (optional, uses search rules if empty)</string>
     <string name="send_reset_email">Send Reset Email</string>
     <string name="sentence_highlighting">Sentence Highlighting</string>
     <string name="share_ai_translations">Share AI Translations</string>
@@ -3120,9 +2791,7 @@
     <string name="sign_in_required">Sign in required</string>
     <string name="size">Size</string>
     <string name="skip_for_now_dont_show_again">Skip for now (don't show again)</string>
-    <string name="skip_rate_limit_warnings_when">Skip rate limit warnings when mass translating chapters. May exhaust
-        API credits or cause IP blocks.
-    </string>
+    <string name="skip_rate_limit_warnings_when">Skip rate limit warnings when mass translating chapters. May exhaust API credits or cause IP blocks.</string>
     <string name="skip_version">Skip Version</string>
     <string name="something_went_wrong_1">Something Went Wrong</string>
     <string name="source_json">Source JSON</string>
@@ -3133,19 +2802,14 @@
     <string name="source_url_1">Source URL</string>
     <string name="start_from_scratch">Start from Scratch</string>
     <string name="status_color">status_color</string>
-    <string name="step_by_step_guide_to_create_your_first_source">Step-by-step guide to create your first source
-    </string>
+    <string name="step_by_step_guide_to_create_your_first_source">Step-by-step guide to create your first source</string>
     <string name="stop_playback_after">Stop playback after:</string>
     <string name="storage_settings">Storage Settings</string>
     <string name="storage_setup">Storage Setup</string>
     <string name="storage_required">Storage Required</string>
     <string name="storage_access_lost">Storage Access Lost</string>
-    <string name="storage_access_lost_description">IReader no longer has access to the storage folder. Please select a
-        folder to continue using the app.
-    </string>
-    <string name="storage_access_lost_reasons">The folder may have been deleted, moved, or the permission was revoked.
-        This can happen after app updates or system changes.
-    </string>
+    <string name="storage_access_lost_description">IReader no longer has access to the storage folder. Please select a folder to continue using the app.</string>
+    <string name="storage_access_lost_reasons">The folder may have been deleted, moved, or the permission was revoked. This can happen after app updates or system changes.</string>
     <string name="why_did_this_happen">Why did this happen?</string>
     <string name="storage_is_needed_for">Storage is needed for:</string>
     <string name="select_storage_folder">Select Storage Folder</string>
@@ -3163,7 +2827,7 @@
     <string name="switch_to_available_tab_to_install_sources">Switch to Available tab to install sources</string>
     <string name="sync_from_cloud">Sync from cloud</string>
     <string name="sync_progress_reviews_badges">Sync progress, reviews, badges</string>
-    <string name="synced">• Synced</string>
+    <string name="synced"> • Synced</string>
     <string name="synced_1">synced</string>
     <string name="syntax_any_chars_ab_a_or_bnn">Syntax: .* = any chars, (?:A|B) = A or B\n\n</string>
     <string name="tap_to_add_a_new_book_glossary">Tap + to add a new book glossary</string>
@@ -3175,19 +2839,12 @@
     <string name="target_term">Target Term</string>
     <string name="test_filter">Test Filter</string>
     <string name="the_end">THE END</string>
-    <string name="the_plugin_was_installed_successfully">The plugin was installed successfully. Please restart the app
-        to load JavaScript sources.
-    </string>
-    <string name="this_folder_will_be_used">This folder will be used for all app data including downloads, extensions,
-        and backups. Choose a location you can easily access.
-    </string>
-    <string name="this_will_reset_all_your">This will reset all your reading statistics, streaks, and achievements. This
-        action cannot be undone.
-    </string>
+    <string name="the_plugin_was_installed_successfully">The plugin was installed successfully. Please restart the app to load JavaScript sources.</string>
+    <string name="this_folder_will_be_used">This folder will be used for all app data including downloads, extensions, and backups. Choose a location you can easily access.</string>
+    <string name="this_will_reset_all_your">This will reset all your reading statistics, streaks, and achievements. This action cannot be undone.</string>
     <string name="time">Time</string>
     <string name="timer_active">Timer Active</string>
-    <string name="tip_use_regex_patterns_to_remove_unwanted_textn">Tip: Use regex patterns to remove unwanted text.\n
-    </string>
+    <string name="tip_use_regex_patterns_to_remove_unwanted_textn">Tip: Use regex patterns to remove unwanted text.\n</string>
     <string name="tips">Tips</string>
     <string name="to">To</string>
     <string name="toc_url_selector">TOC URL Selector</string>
@@ -3201,82 +2858,46 @@
     <string name="translation_rate_limit_delay">Translation Rate Limit Delay</string>
     <string name="translation_warning">Translation Warning</string>
     <string name="try_these_fixes">Try these fixes:</string>
-
+    
     <!-- Translation Error Messages - User-friendly error descriptions -->
-    <string name="translation_api_key_not_set">%1$s requires an API key. Please go to Settings → Translation and
-        configure your API key.
-    </string>
-    <string name="translation_api_key_invalid">The API key for %1$s is invalid or has expired. Please check your key in
-        Settings → Translation.
-    </string>
-    <string name="translation_quota_exceeded">%1$s translation quota exceeded. Please check your plan and billing, or
-        try again later.
-    </string>
-    <string name="translation_rate_limit">%1$s is receiving too many requests. Please wait a moment and try again.
-    </string>
-    <string name="translation_rate_limit_with_retry">%1$s rate limit reached. Please wait %2$d seconds and try again.
-    </string>
-    <string name="translation_network_error">Cannot connect to %1$s. Please check your internet connection and try
-        again.
-    </string>
+    <string name="translation_api_key_not_set">%1$s requires an API key. Please go to Settings → Translation and configure your API key.</string>
+    <string name="translation_api_key_invalid">The API key for %1$s is invalid or has expired. Please check your key in Settings → Translation.</string>
+    <string name="translation_quota_exceeded">%1$s translation quota exceeded. Please check your plan and billing, or try again later.</string>
+    <string name="translation_rate_limit">%1$s is receiving too many requests. Please wait a moment and try again.</string>
+    <string name="translation_rate_limit_with_retry">%1$s rate limit reached. Please wait %2$d seconds and try again.</string>
+    <string name="translation_network_error">Cannot connect to %1$s. Please check your internet connection and try again.</string>
     <string name="translation_server_error">%1$s server is experiencing issues. Please try again later.</string>
     <string name="translation_server_error_with_code">%1$s server error (code: %2$d). Please try again later.</string>
-    <string name="translation_language_model_not_available">Language model for %1$s → %2$s is not downloaded. Please go
-        to Settings → Translation to download it.
-    </string>
-    <string name="translation_language_pair_not_supported">%1$s does not support translating from %2$s to %3$s. Please
-        select different languages.
-    </string>
-    <string name="translation_empty_response">%1$s returned an empty response. This may be a temporary issue - please
-        try again.
-    </string>
-    <string name="translation_parse_error">Could not understand the response from %1$s. The service may be experiencing
-        issues.
-    </string>
+    <string name="translation_language_model_not_available">Language model for %1$s → %2$s is not downloaded. Please go to Settings → Translation to download it.</string>
+    <string name="translation_language_pair_not_supported">%1$s does not support translating from %2$s to %3$s. Please select different languages.</string>
+    <string name="translation_empty_response">%1$s returned an empty response. This may be a temporary issue - please try again.</string>
+    <string name="translation_parse_error">Could not understand the response from %1$s. The service may be experiencing issues.</string>
     <string name="translation_auth_required">You need to sign in to %1$s to use this translation feature.</string>
-    <string name="translation_captcha_required">%1$s requires verification. Please complete the CAPTCHA to continue.
-    </string>
+    <string name="translation_captcha_required">%1$s requires verification. Please complete the CAPTCHA to continue.</string>
     <string name="translation_timeout">%1$s took too long to respond. Please try again.</string>
     <string name="translation_timeout_with_seconds">%1$s did not respond within %2$d seconds. Please try again.</string>
-    <string name="translation_text_too_long">The text is too long for %1$s to process. Try translating smaller
-        sections.
-    </string>
-    <string name="translation_text_too_long_with_limit">The text exceeds %1$s limit of %2$d characters. Try translating
-        smaller sections.
-    </string>
-    <string name="translation_engine_not_available">%1$s is not available in this version of the app. Please use a
-        different translation engine.
-    </string>
-    <string name="translation_model_not_found">The AI model for %1$s could not be found. Please check your settings.
-    </string>
-    <string name="translation_model_not_found_with_name">Model '%2$s' not found in %1$s. Please select a different model
-        in settings.
-    </string>
-    <string name="translation_plugin_error">Translation plugin '%1$s' encountered an error. Please check the plugin
-        settings or try a different engine.
-    </string>
+    <string name="translation_text_too_long">The text is too long for %1$s to process. Try translating smaller sections.</string>
+    <string name="translation_text_too_long_with_limit">The text exceeds %1$s limit of %2$d characters. Try translating smaller sections.</string>
+    <string name="translation_engine_not_available">%1$s is not available in this version of the app. Please use a different translation engine.</string>
+    <string name="translation_model_not_found">The AI model for %1$s could not be found. Please check your settings.</string>
+    <string name="translation_model_not_found_with_name">Model '%2$s' not found in %1$s. Please select a different model in settings.</string>
+    <string name="translation_plugin_error">Translation plugin '%1$s' encountered an error. Please check the plugin settings or try a different engine.</string>
     <string name="translation_unknown_error">%1$s encountered an unexpected error. Please try again.</string>
     <string name="translation_unknown_error_with_details">%1$s error: %2$s</string>
-    <string name="translation_same_as_original">%1$s returned the text unchanged. The translation may have failed or the
-        text may already be in the target language.
-    </string>
-    <string name="gemini_api_key_invalid">Gemini API key is invalid or has expired. Please get a new key from Google AI
-        Studio.
-    </string>
-
+    <string name="translation_same_as_original">%1$s returned the text unchanged. The translation may have failed or the text may already be in the target language.</string>
+    <string name="gemini_api_key_invalid">Gemini API key is invalid or has expired. Please get a new key from Google AI Studio.</string>
+    
     <!-- Translation Engine Initialization -->
     <string name="translation_engine_initialization">Translation Engine Initialization</string>
     <string name="engine_requires_initialization">Engine Requires Initialization</string>
-    <string name="engine_initialization_description">%1$s requires downloading language models before it can translate.
-        This is a one-time setup.
-    </string>
+    <string name="engine_initialization_description">%1$s requires downloading language models before it can translate. This is a one-time setup.</string>
     <string name="downloading_language_model">Downloading Language Model</string>
     <string name="initialization_complete">Initialization Complete!</string>
     <string name="initialization_failed">Initialization Failed</string>
     <string name="translation_engine_ready">Translation engine is ready to use</string>
     <string name="language_pair">Language Pair</string>
     <string name="initialize">Initialize</string>
-
+    
     <!-- Translation Language Preferences -->
     <string name="preferred_source_language">Preferred Source Language</string>
     <string name="preferred_target_language">Preferred Target Language</string>
@@ -3293,14 +2914,9 @@
     <string name="upload_character_art">Upload Character Art</string>
     <string name="upload_first_art">Upload First Art</string>
     <string name="upload_to_cloud">Upload to Cloud</string>
-    <string name="url_must_start_with_https_and_end_with_indexjson">URL must start with https:// and end with
-        index.json
-    </string>
-    <string name="use_arrow_keyschapternadchapternread_more_at">Use arrow keys.*chapter\n(?:A|D|←|→).*chapter\nRead more
-        at.*
-    </string>
-    <string name="use_key_for_search_term_page_for_page_number">Use {{key}} for search term, {{page}} for page number
-    </string>
+    <string name="url_must_start_with_https_and_end_with_indexjson">URL must start with https:// and end with index.json</string>
+    <string name="use_arrow_keyschapternadchapternread_more_at">Use arrow keys.*chapter\n(?:A|D|←|→).*chapter\nRead more at.*</string>
+    <string name="use_key_for_search_term_page_for_page_number">Use {{key}} for search term, {{page}} for page number</string>
     <string name="user_id">User ID</string>
     <string name="user_management">User Management</string>
     <string name="user_sources">User Sources</string>
@@ -3323,24 +2939,19 @@
     <string name="why_is_this_needed">Why is this needed?</string>
     <string name="wizard">Wizard</string>
     <string name="wizard_step">wizard_step</string>
-    <string name="you_can_change_these_settings_later_in_settings">You can change these settings later in Settings.
-    </string>
-    <string name="you_can_use_this_prompt_to_generate_character_art">You can use this prompt to generate character art
-    </string>
-    <string name="your_api_key_is_stored_locally_and_never_shared">🔒 Your API key is stored locally and never shared.
-    </string>
+    <string name="you_can_change_these_settings_later_in_settings">You can change these settings later in Settings.</string>
+    <string name="you_can_use_this_prompt_to_generate_character_art">You can use this prompt to generate character art</string>
+    <string name="your_api_key_is_stored_locally_and_never_shared">🔒 Your API key is stored locally and never shared.</string>
     <string name="your_cloudflare_account_id">Your Cloudflare Account ID</string>
     <string name="your_name_for_contributions">Your name for contributions</string>
-    <string name="your_personal_reading_companionnlets_set">Your personal reading companion.\nLet's set up a few things
-        to get started.
-    </string>
+    <string name="your_personal_reading_companionnlets_set">Your personal reading companion.\nLet's set up a few things to get started.</string>
     <string name="your_plugins">Your Plugins</string>
     <string name="your_reading_companion">Your reading companion</string>
     <string name="youre_ready">You're ready!</string>
     <string name="youve_completed_this_story">You've completed this story</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
-
+    
     <!-- Category Dialog Strings -->
     <string name="set_categories">Set Categories</string>
     <string name="no_categories_create_one">No categories found. Create one first to organize your library.</string>
@@ -3349,11 +2960,11 @@
     <string name="always_ask">Always ask</string>
     <string name="no_category">No category</string>
     <string name="added_to_category">Added to %s</string>
-
+    
     <!-- Color Customization Strings (Additional) -->
     <string name="custom_background_color">Customize background color for reader</string>
     <string name="custom_text_color">Customize text color for reader</string>
-
+    
     <!-- Thumbnail Quality Settings -->
     <string name="thumbnail_quality">Thumbnail Quality</string>
     <string name="thumbnail_quality_subtitle">Higher quality = sharper covers but more memory</string>
@@ -3361,13 +2972,13 @@
     <string name="thumbnail_quality_medium">Medium (256px)</string>
     <string name="thumbnail_quality_high">High (384px) - Recommended</string>
     <string name="thumbnail_quality_ultra">Ultra (512px) - Best for custom covers</string>
-
+    
     <!-- Chapter Sort Options -->
     <string name="sort_by_source_order">By Source Order</string>
     <string name="sort_by_chapter_number">By Chapter Number</string>
     <string name="sort_by_upload_date_asc">By Upload Date (Ascending)</string>
     <string name="sort_by_upload_date_desc">By Upload Date (Descending)</string>
-
+    
     <!-- Download Delay Formatting -->
     <string name="no_delay">No delay</string>
 </resources>
