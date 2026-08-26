@@ -1,4 +1,4 @@
-﻿package ireader.domain.services
+package ireader.domain.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

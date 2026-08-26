@@ -1,4 +1,4 @@
-﻿package ireader.core.startup
+package ireader.core.startup
 
 import ireader.core.log.Log
 import ireader.core.time.currentTimeMillis

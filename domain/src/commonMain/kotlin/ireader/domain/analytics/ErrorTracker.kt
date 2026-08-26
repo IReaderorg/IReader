@@ -1,4 +1,4 @@
-﻿//package ireader.domain.analytics
+//package ireader.domain.analytics
 //
 //import ireader.core.log.Log
 //import ireader.domain.utils.extensions.currentTimeToLong

@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.source
+package ireader.domain.usecases.source
 
 import ireader.core.log.Log
 import ireader.core.source.Source

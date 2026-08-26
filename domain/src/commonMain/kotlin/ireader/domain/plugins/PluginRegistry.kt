@@ -1,4 +1,4 @@
-﻿package ireader.domain.plugins
+package ireader.domain.plugins
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

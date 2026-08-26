@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.reader
+package ireader.domain.usecases.reader
 
 import ireader.domain.models.reader.ReadingSession
 import ireader.domain.models.reader.ReaderStatistics

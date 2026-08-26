@@ -1,4 +1,4 @@
-﻿package ireader.domain.js.loader
+package ireader.domain.js.loader
 
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStore

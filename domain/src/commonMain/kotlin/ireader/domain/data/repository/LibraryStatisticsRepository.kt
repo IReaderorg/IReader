@@ -1,4 +1,4 @@
-﻿package ireader.domain.data.repository
+package ireader.domain.data.repository
 
 import ireader.domain.models.library.LibraryAnalytics
 import ireader.domain.models.library.LibraryStatistics

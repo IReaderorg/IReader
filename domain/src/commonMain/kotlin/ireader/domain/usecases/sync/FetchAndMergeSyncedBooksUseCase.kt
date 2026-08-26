@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.sync
+package ireader.domain.usecases.sync
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore

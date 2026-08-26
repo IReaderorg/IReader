@@ -1,4 +1,4 @@
-﻿package ireader.domain.js.update
+package ireader.domain.js.update
 
 import ireader.domain.js.models.PluginUpdate
 import ireader.domain.js.util.JSPluginLogger

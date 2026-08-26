@@ -13,13 +13,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,9 +37,15 @@ import coil3.compose.AsyncImage
 import ireader.domain.models.entities.Recommendation
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.recommendations_section_title
+import ireader.i18n.resources.similar_titles_empty
+import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
+import ireader.presentation.ui.book.viewmodel.BookDetailEvent
+import ireader.presentation.ui.book.viewmodel.BookDetailState
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -51,12 +63,31 @@ data class RecommendationsListScreenSpec(val bookId: Long) {
         val vm: BookDetailViewModel = koinViewModel(
             parameters = { parametersOf(BookDetailViewModel.Param(bookId)) }
         )
-        val state = vm.state.value as? ireader.presentation.ui.book.viewmodel.BookDetailState.Success
-        val recommendations: List<Recommendation> = state?.sourceRecommendations ?: emptyList()
+        val state by vm.state.collectAsState()
+        val snackbarHostState = remember { SnackbarHostState() }
         val navController = requireNotNull(ireader.presentation.core.LocalNavigator.current) { "LocalNavigator not provided" }
+
+        LaunchedEffect(vm) {
+            vm.events.collect { event ->
+                when (event) {
+                    is BookDetailEvent.ShowSnackbar -> {
+                        snackbarHostState.showSnackbar(event.message)
+                    }
+                    is BookDetailEvent.NavigateToBookDetail -> {
+                        navController.navigate(NavigationRoutes.bookDetail(event.bookId))
+                    }
+                    else -> {}
+                }
+            }
+        }
+
+        val recommendations: List<Recommendation> = (state as? BookDetailState.Success)?.sourceRecommendations ?: emptyList()
+        val isLoading = state is BookDetailState.Loading
 
         RecommendationsListScreen(
             recommendations = recommendations,
+            isLoading = isLoading,
+            snackbarHostState = snackbarHostState,
             onBack = { navController.safePopBackStack() },
             onRecommendationClick = { vm.openRecommendation(it) }
         )
@@ -67,33 +98,61 @@ data class RecommendationsListScreenSpec(val bookId: Long) {
 @Composable
 private fun RecommendationsListScreen(
     recommendations: List<Recommendation>,
+    isLoading: Boolean,
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onRecommendationClick: (Recommendation) -> Unit
 ) {
     IScaffold(
+        snackbarHostState = snackbarHostState,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = org.jetbrains.compose.resources.stringResource(Res.string.recommendations_section_title),
+                title = stringResource(Res.string.recommendations_section_title),
                 popBackStack = onBack,
                 scrollBehavior = scrollBehavior
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding() + 16.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // ponytail: key falls back to position — source keys aren't globally unique,
-            // so key-only identity would crash on cross-source duplicates.
-            items(recommendations, key = { "${it.sourceId}_${it.key}" }) { recommendation ->
-                RecommendationItem(
-                    recommendation = recommendation,
-                    onClick = { onRecommendationClick(recommendation) }
+        if (isLoading && recommendations.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (recommendations.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(Res.string.similar_titles_empty),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding() + 16.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(
+                    items = recommendations,
+                    key = { index, item -> "${item.sourceId}_${item.key}_$index" }
+                ) { _, recommendation ->
+                    RecommendationItem(
+                        recommendation = recommendation,
+                        onClick = { onRecommendationClick(recommendation) }
+                    )
+                }
             }
         }
     }

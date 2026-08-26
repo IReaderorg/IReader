@@ -1,4 +1,4 @@
-﻿package ireader.domain.catalogs
+package ireader.domain.catalogs
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get

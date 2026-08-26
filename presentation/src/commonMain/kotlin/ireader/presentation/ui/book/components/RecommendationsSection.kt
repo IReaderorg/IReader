@@ -86,8 +86,11 @@ fun RecommendationsSection(
             contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ponytail: sourceId prefix — bare keys collide across sources
-            items(recommendations, key = { "${it.sourceId}_${it.key}" }) { recommendation ->
+            items(
+                count = recommendations.size,
+                key = { index -> "${recommendations[index].sourceId}_${recommendations[index].key}_$index" }
+            ) { index ->
+                val recommendation = recommendations[index]
                 RecommendationCard(
                     recommendation = recommendation,
                     onClick = { onRecommendationClick(recommendation) }

@@ -1,4 +1,4 @@
-﻿package ireader.data.review
+package ireader.data.review
 
 import io.github.jan.supabase.SupabaseClient
 import ireader.data.backend.BackendService

@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.local
+package ireader.domain.usecases.local
 
 import ireader.core.source.LocalSource
 import ireader.core.source.LocalCatalogSource

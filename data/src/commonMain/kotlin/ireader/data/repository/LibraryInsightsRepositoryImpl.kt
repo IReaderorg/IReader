@@ -1,4 +1,4 @@
-﻿package ireader.data.repository
+package ireader.data.repository
 
 import ireader.core.log.Log
 import ireader.domain.data.repository.BookRepository

@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.characterart
+package ireader.domain.models.characterart
 
 import kotlinx.serialization.Serializable
 import ireader.domain.utils.extensions.currentTimeToLong

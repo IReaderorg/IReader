@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.security
+package ireader.domain.usecases.security
 
 import ireader.domain.preferences.prefs.SecurityPreferences
 import ireader.domain.preferences.prefs.SecureScreenMode

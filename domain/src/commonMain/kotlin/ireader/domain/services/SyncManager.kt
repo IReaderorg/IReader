@@ -1,4 +1,4 @@
-﻿package ireader.domain.services
+package ireader.domain.services
 
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.entities.Book

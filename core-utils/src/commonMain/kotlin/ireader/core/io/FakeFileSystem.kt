@@ -1,4 +1,4 @@
-﻿package ireader.core.io
+package ireader.core.io
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

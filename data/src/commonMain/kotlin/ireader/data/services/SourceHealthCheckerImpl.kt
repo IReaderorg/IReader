@@ -1,4 +1,4 @@
-﻿package ireader.data.services
+package ireader.data.services
 
 import ireader.core.source.HttpSource
 import ireader.core.source.Source

@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.epub
+package ireader.domain.usecases.epub
 
 import com.fleeksoft.ksoup.Ksoup
 import ireader.core.source.model.Text

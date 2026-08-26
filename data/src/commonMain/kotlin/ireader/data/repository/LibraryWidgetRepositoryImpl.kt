@@ -1,4 +1,4 @@
-﻿package ireader.data.repository
+package ireader.data.repository
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.LibraryWidgetRepository

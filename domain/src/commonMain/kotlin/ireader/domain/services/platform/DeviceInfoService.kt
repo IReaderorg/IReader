@@ -1,4 +1,4 @@
-﻿package ireader.domain.services.platform
+package ireader.domain.services.platform
 
 import ireader.domain.services.common.PlatformService
 import kotlinx.coroutines.flow.Flow

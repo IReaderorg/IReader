@@ -1,4 +1,4 @@
-﻿package ireader.domain.plugins
+package ireader.domain.plugins
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow

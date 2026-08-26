@@ -50,16 +50,18 @@ class GetSimilarBooksByTitleUseCase(
         onSuccess: suspend (List<Recommendation>) -> Unit
     ) {
         val catalog = catalogStore.get(book.sourceId)
-        val source = catalog?.source as? CatalogSource ?: return
+        val source = catalog?.source as? CatalogSource
         
-        if (!source.supportsSearch()) {
-            Log.debug { "Source ${catalog.name} does not support search" }
+        if (source == null || !source.supportsSearch()) {
+            Log.debug { "Source ${catalog?.name} does not support search" }
+            onSuccess(emptyList())
             return
         }
         
         val keywords = extractKeywords(book.title)
         if (keywords.isEmpty()) {
             Log.debug { "No keywords extracted from title: ${book.title}" }
+            onSuccess(emptyList())
             return
         }
         
@@ -136,7 +138,11 @@ class GetSimilarBooksByTitleUseCase(
             return
         }
         
-        val catalogs = catalogStore.getCatalogsFlow().first { it.isNotEmpty() }
+        val catalogs = try {
+            catalogStore.getCatalogsFlow().first()
+        } catch (_: Exception) {
+            emptyList()
+        }
         
         val targetSources = when (sourceFilter) {
             PreferenceValues.SimilarTitlesSource.OtherSources -> {
@@ -167,14 +173,18 @@ class GetSimilarBooksByTitleUseCase(
                 .filter { it !is ireader.domain.models.entities.JSPluginCatalog }
                 .map { catalog ->
                     async {
-                        searchSourceForKeywords(catalog, keywords, book, maxPerSource, mutableSetOf())
+                        kotlinx.coroutines.withTimeoutOrNull(15_000L) {
+                            searchSourceForKeywords(catalog, keywords, book, maxPerSource, mutableSetOf())
+                        } ?: emptyList()
                     }
                 }.awaitAll()
 
             val jsResults = targetSources
                 .filter { it is ireader.domain.models.entities.JSPluginCatalog }
                 .map { catalog ->
-                    searchSourceForKeywords(catalog, keywords, book, maxPerSource, mutableSetOf())
+                    kotlinx.coroutines.withTimeoutOrNull(15_000L) {
+                        searchSourceForKeywords(catalog, keywords, book, maxPerSource, mutableSetOf())
+                    } ?: emptyList()
                 }
 
             val seenKeys = mutableSetOf<String>()
@@ -269,29 +279,29 @@ class GetSimilarBooksByTitleUseCase(
         return sourceResults
     }
     
-    private fun extractKeywords(title: String): List<String> {
-        val stopWords = setOf(
-            "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-            "of", "with", "by", "from", "as", "is", "was", "are", "were", "been",
-            "be", "have", "has", "had", "do", "does", "did", "will", "would", "could",
-            "should", "may", "might", "shall", "can", "need", "dare", "ought", "used",
-            "de", "la", "el", "los", "las", "un", "una", "unos", "unas", "y", "o",
-            "en", "con", "por", "para", "del", "al", "que", "se", "no", "si", "ya",
-            "le", "me", "te", "lo", "la", "les", "nos", "vos", "ellos", "ellas",
-            "von", "der", "die", "das", "und", "oder", "ist", "sind", "war", "waren",
-            "ein", "eine", "einer", "eines", "dem", "den", "des", "zu", "auf", "in",
-            "part", "vol", "chapter", "chapters", "novel", "manga", "manhwa", "manhua",
-            "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-            "of", "with", "by", "from", "as", "is", "was", "are", "were", "been"
-        )
-        
-        // Full title first (exact match is the best signal), then individual words
-        val cleaned = title.trim().lowercase().removeSuffix(".").removeSuffix(",")
-        return listOfNotNull(cleaned.takeIf { it.isNotBlank() }) +
-            title.split(Regex("\\s+"))
-                .map { it.trim().lowercase().removeSuffix(".").removeSuffix(",") }
-                .filter { it.length > 2 && it !in stopWords }
-                .distinct()
-                .take(5)
+    companion object {
+        fun extractKeywords(title: String): List<String> {
+            val stopWords = setOf(
+                "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
+                "of", "with", "by", "from", "as", "is", "was", "are", "were", "been",
+                "be", "have", "has", "had", "do", "does", "did", "will", "would", "could",
+                "should", "may", "might", "shall", "can", "need", "dare", "ought", "used",
+                "de", "la", "el", "los", "las", "un", "una", "unos", "unas", "y", "o",
+                "en", "con", "por", "para", "del", "al", "que", "se", "no", "si", "ya",
+                "le", "me", "te", "lo", "la", "les", "nos", "vos", "ellos", "ellas",
+                "von", "der", "die", "das", "und", "oder", "ist", "sind", "war", "waren",
+                "ein", "eine", "einer", "eines", "dem", "den", "des", "zu", "auf", "in",
+                "part", "vol", "chapter", "chapters", "novel", "manga", "manhwa", "manhua"
+            )
+            
+            // Full title first (exact match is the best signal), then individual words
+            val cleaned = title.trim().lowercase().removeSuffix(".").removeSuffix(",")
+            return listOfNotNull(cleaned.takeIf { it.isNotBlank() }) +
+                title.split(Regex("\\s+"))
+                    .map { it.trim().lowercase().removeSuffix(".").removeSuffix(",") }
+                    .filter { it.length > 2 && it !in stopWords }
+                    .distinct()
+                    .take(5)
+        }
     }
 }

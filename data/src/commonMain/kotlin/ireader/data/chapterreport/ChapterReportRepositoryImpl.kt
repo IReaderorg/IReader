@@ -1,4 +1,4 @@
-﻿package ireader.data.chapterreport
+package ireader.data.chapterreport
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.ChapterReportRepository

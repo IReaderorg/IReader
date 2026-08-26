@@ -1,4 +1,4 @@
-﻿package ireader.domain.plugins
+package ireader.domain.plugins
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

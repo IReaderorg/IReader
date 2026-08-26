@@ -739,7 +739,7 @@ class BookDetailViewModel(
         }
     }
     
-    private fun searchSimilarByName(
+    private suspend fun searchSimilarByName(
         book: Book,
         catalog: CatalogLocal?,
         sourceFilter: PreferenceValues.SimilarTitlesSource,
@@ -1021,16 +1021,20 @@ class BookDetailViewModel(
         
         scope.launch {
             try {
-                val savedBookId = localInsertUseCases.insertBook(tempBook)
+                val existingBook = getBookUseCases.findBookByKey(recommendation.key)
+                val isNewBook = existingBook == null
+                val savedBookId = existingBook?.id ?: localInsertUseCases.insertBook(tempBook)
                 val savedBook = getBookUseCases.findBookById(savedBookId) ?: tempBook
 
                 remoteUseCases.getBookDetail(
                     book = savedBook,
                     catalog = catalog,
                     onError = { message ->
-                        // Remove the stub row — the detail screen only makes sense
+                        // Remove the stub row only if it was newly created — the detail screen only makes sense
                         // with real source data behind it.
-                        scope.launch { deleteUseCase.deleteBookById(savedBookId) }
+                        if (isNewBook && savedBookId > 0) {
+                            scope.launch { deleteUseCase.deleteBookById(savedBookId) }
+                        }
                         _events.emit(BookDetailEvent.ShowSnackbar(message?.asString(localizeHelper) ?: "Failed to load book"))
                     },
                     onSuccess = { book ->

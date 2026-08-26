@@ -1,4 +1,4 @@
-﻿package ireader.domain.monitoring
+package ireader.domain.monitoring
 
 import ireader.domain.utils.extensions.currentTimeToLong
 
