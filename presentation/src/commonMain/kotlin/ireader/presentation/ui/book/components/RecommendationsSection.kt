@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.book.components
+package ireader.presentation.ui.book.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -86,7 +86,8 @@ fun RecommendationsSection(
             contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(recommendations, key = { it.key }) { recommendation ->
+            // ponytail: sourceId prefix — bare keys collide across sources
+            items(recommendations, key = { "${it.sourceId}_${it.key}" }) { recommendation ->
                 RecommendationCard(
                     recommendation = recommendation,
                     onClick = { onRecommendationClick(recommendation) }

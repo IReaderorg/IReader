@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.book.viewmodel
+package ireader.presentation.ui.book.viewmodel
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable

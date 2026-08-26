@@ -1,4 +1,4 @@
-﻿package ireader.presentation.core.ui
+package ireader.presentation.core.ui
 
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes

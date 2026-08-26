@@ -160,8 +160,7 @@ val PresentationModules = module {
             localizeHelper = get(),            // For UiText localization
             trackingRepository = getOrNull(),  // For AniList tracking
             translateBookMetadataUseCase = getOrNull(),  // For auto-translating novel names
-            chapterRepository = get(),          // For clearChapterContent operation
-            getRecommendationsUseCase = getOrNull()  // For genre-based recommendations
+            chapterRepository = get()          // For clearChapterContent operation
         )
     }
     // Changed from single to factory - settings screen is not always needed

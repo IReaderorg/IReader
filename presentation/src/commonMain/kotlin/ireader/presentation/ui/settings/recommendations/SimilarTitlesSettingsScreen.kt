@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.recommendations
+package ireader.presentation.ui.settings.recommendations
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

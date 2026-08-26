@@ -1,4 +1,4 @@
-﻿package ireader.domain.preferences.prefs
+package ireader.domain.preferences.prefs
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.remote
+package ireader.domain.usecases.remote
 
 import ireader.core.log.Log
 import ireader.core.source.CatalogSource
@@ -156,28 +156,35 @@ class GetSimilarBooksByTitleUseCase(
         
         val searchableSources = targetSources.count { it.source is CatalogSource && (it.source as CatalogSource).supportsSearch() }
         Log.debug { "Cross-source search: ${targetSources.size} sources, $searchableSources searchable" }
-        
-        val seenKeys = mutableSetOf<String>()
+
         val results = mutableListOf<Pair<ireader.domain.models.entities.CatalogLocal, MangaInfo>>()
         val maxPerSource = maxResults.coerceAtLeast(1)
-        
+
+        // Per-source results are deduped inside searchSourceForKeywords (each call
+        // owns its set); cross-source dedupe happens single-threaded at merge time.
         coroutineScope {
             val nonJsResults = targetSources
                 .filter { it !is ireader.domain.models.entities.JSPluginCatalog }
                 .map { catalog ->
                     async {
-                        searchSourceForKeywords(catalog, keywords, book, maxPerSource, seenKeys)
+                        searchSourceForKeywords(catalog, keywords, book, maxPerSource, mutableSetOf())
                     }
                 }.awaitAll()
-            
+
             val jsResults = targetSources
                 .filter { it is ireader.domain.models.entities.JSPluginCatalog }
                 .map { catalog ->
-                    searchSourceForKeywords(catalog, keywords, book, maxPerSource, seenKeys)
+                    searchSourceForKeywords(catalog, keywords, book, maxPerSource, mutableSetOf())
                 }
-            
-            val allResults = nonJsResults.flatten() + jsResults.flatten()
-            results.addAll(allResults.take(maxResults))
+
+            val seenKeys = mutableSetOf<String>()
+            for ((catalog, manga) in nonJsResults.flatten() + jsResults.flatten()) {
+                if (results.size >= maxResults) break
+                val dedupeKey = "${catalog.sourceId}_${manga.key}"
+                if (dedupeKey in seenKeys) continue
+                seenKeys.add(dedupeKey)
+                results.add(catalog to manga)
+            }
         }
         
         if (results.isEmpty()) {
@@ -278,10 +285,13 @@ class GetSimilarBooksByTitleUseCase(
             "of", "with", "by", "from", "as", "is", "was", "are", "were", "been"
         )
         
-        return title.split(Regex("\\s+"))
-            .map { it.trim().lowercase().removeSuffix(".").removeSuffix(",") }
-            .filter { it.length > 2 && it !in stopWords }
-            .distinct()
-            .take(5)
+        // Full title first (exact match is the best signal), then individual words
+        val cleaned = title.trim().lowercase().removeSuffix(".").removeSuffix(",")
+        return listOfNotNull(cleaned.takeIf { it.isNotBlank() }) +
+            title.split(Regex("\\s+"))
+                .map { it.trim().lowercase().removeSuffix(".").removeSuffix(",") }
+                .filter { it.length > 2 && it !in stopWords }
+                .distinct()
+                .take(5)
     }
 }

@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.remote
+package ireader.domain.usecases.remote
 
 data class RemoteUseCases(
     val getBookDetail: GetBookDetail,

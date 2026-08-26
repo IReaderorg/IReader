@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.book.viewmodel
+package ireader.presentation.ui.book.viewmodel
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -123,7 +123,6 @@ class BookDetailViewModel(
     private val trackingRepository: ireader.domain.data.repository.TrackingRepository? = null,
     private val translateBookMetadataUseCase: TranslateBookMetadataUseCase? = null,
     private val chapterRepository: ireader.domain.data.repository.ChapterRepository,
-    private val getRecommendationsUseCase: ireader.domain.usecases.statistics.GetRecommendationsUseCase? = null,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -713,39 +712,26 @@ class BookDetailViewModel(
             
             when (matchMode) {
                 PreferenceValues.SimilarTitlesMatchMode.ByName -> {
-                    remoteUseCases.getSimilarBooksByTitle(
-                        book = book,
-                        onError = { message ->
-                            Log.error { "Failed to load similar books by name: ${message?.toString() ?: "unknown"}" }
-                        },
-                        onSuccess = { recommendations ->
-                            applyRecommendationLimit(recommendations)
-                        },
-                        maxResults = maxCount,
-                        sourceFilter = sourceFilter
-                    )
+                    searchSimilarByName(book, catalog, sourceFilter, maxCount)
                 }
-                PreferenceValues.SimilarTitlesMatchMode.ByGenre -> {
-                    remoteUseCases.getSourceRecommendations(
-                        book = book,
-                        catalog = catalog,
-                        onError = { message ->
-                            Log.error { "Failed to load similar titles by genre: ${message?.toString() ?: "unknown"}" }
-                        },
-                        onSuccess = { recommendations ->
-                            applyRecommendationLimit(recommendations)
-                        }
-                    )
-                }
+                // ponytail: no installed source overrides getRecommendations yet, so
+                // ByGenre/ByCategory always return empty — fall back to name search
+                // until sources ship native recommendation support.
+                PreferenceValues.SimilarTitlesMatchMode.ByGenre,
                 PreferenceValues.SimilarTitlesMatchMode.ByCategory -> {
                     remoteUseCases.getSourceRecommendations(
                         book = book,
                         catalog = catalog,
                         onError = { message ->
-                            Log.error { "Failed to load similar titles by category: ${message?.toString() ?: "unknown"}" }
+                            Log.error { "Failed to load similar titles: ${message?.toString() ?: "unknown"}" }
                         },
                         onSuccess = { recommendations ->
-                            applyRecommendationLimit(recommendations)
+                            if (recommendations.isNotEmpty()) {
+                                applyRecommendationLimit(recommendations)
+                            } else {
+                                Log.debug { "Source returned no native recommendations; falling back to title search" }
+                                searchSimilarByName(book, catalog, sourceFilter, maxCount)
+                            }
                         }
                     )
                 }
@@ -753,6 +739,25 @@ class BookDetailViewModel(
         }
     }
     
+    private fun searchSimilarByName(
+        book: Book,
+        catalog: CatalogLocal?,
+        sourceFilter: PreferenceValues.SimilarTitlesSource,
+        maxCount: Int
+    ) {
+        remoteUseCases.getSimilarBooksByTitle(
+            book = book,
+            onError = { message ->
+                Log.error { "Failed to load similar books by name: ${message?.toString() ?: "unknown"}" }
+            },
+            onSuccess = { recommendations ->
+                applyRecommendationLimit(recommendations)
+            },
+            maxResults = maxCount,
+            sourceFilter = sourceFilter
+        )
+    }
+
     private fun applyRecommendationLimit(recommendations: List<Recommendation>) {
         val maxCount = uiPreferences.similarTitlesMaxCount().get()
         val limited = if (maxCount <= 0) {
@@ -1018,11 +1023,14 @@ class BookDetailViewModel(
             try {
                 val savedBookId = localInsertUseCases.insertBook(tempBook)
                 val savedBook = getBookUseCases.findBookById(savedBookId) ?: tempBook
-                
+
                 remoteUseCases.getBookDetail(
                     book = savedBook,
                     catalog = catalog,
                     onError = { message ->
+                        // Remove the stub row — the detail screen only makes sense
+                        // with real source data behind it.
+                        scope.launch { deleteUseCase.deleteBookById(savedBookId) }
                         _events.emit(BookDetailEvent.ShowSnackbar(message?.asString(localizeHelper) ?: "Failed to load book"))
                     },
                     onSuccess = { book ->

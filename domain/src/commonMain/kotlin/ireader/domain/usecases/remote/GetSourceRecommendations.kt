@@ -1,4 +1,4 @@
-﻿package ireader.domain.usecases.remote
+package ireader.domain.usecases.remote
 
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList

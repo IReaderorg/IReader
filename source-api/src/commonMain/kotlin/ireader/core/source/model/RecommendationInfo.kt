@@ -1,4 +1,4 @@
-﻿package ireader.core.source.model
+package ireader.core.source.model
 
 import kotlinx.serialization.Serializable
 

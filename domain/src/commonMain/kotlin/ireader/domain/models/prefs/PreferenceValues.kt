@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.prefs
+package ireader.domain.models.prefs
 
 import ireader.domain.models.common.AlignmentModel
 import ireader.domain.models.common.TextAlignmentModel

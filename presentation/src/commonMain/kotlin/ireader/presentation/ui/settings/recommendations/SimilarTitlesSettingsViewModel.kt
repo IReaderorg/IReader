@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.recommendations
+package ireader.presentation.ui.settings.recommendations
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -1,4 +1,4 @@
-﻿package ireader.domain.models.entities
+package ireader.domain.models.entities
 
 import ireader.core.source.model.RecommendationInfo
 import kotlinx.serialization.Serializable

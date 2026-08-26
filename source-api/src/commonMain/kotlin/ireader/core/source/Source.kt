@@ -1,4 +1,4 @@
-﻿package ireader.core.source
+package ireader.core.source
 
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.ChaptersPageInfo
