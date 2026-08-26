@@ -126,6 +126,7 @@ class SimilarTitlesSettingsViewModelTest {
         assertEquals(PreferenceValues.SimilarTitlesSource.SameSource, uiPreferences.similarTitlesSource().get())
         assertEquals(PreferenceValues.SimilarTitlesMatchMode.ByName, uiPreferences.similarTitlesMatchMode().get())
         assertEquals(10, uiPreferences.similarTitlesMaxCount().get())
+        assertTrue(uiPreferences.onlyShowSimilarTitlesInExplore().get())
     }
 
     @Test
@@ -135,6 +136,15 @@ class SimilarTitlesSettingsViewModelTest {
 
         viewModel.setShowSimilarTitles(false)
         assertFalse(uiPreferences.showSimilarTitles().get())
+    }
+
+    @Test
+    fun `setOnlyShowSimilarTitlesInExplore updates preference`() {
+        viewModel.setOnlyShowSimilarTitlesInExplore(false)
+        assertFalse(uiPreferences.onlyShowSimilarTitlesInExplore().get())
+
+        viewModel.setOnlyShowSimilarTitlesInExplore(true)
+        assertTrue(uiPreferences.onlyShowSimilarTitlesInExplore().get())
     }
 
     @Test

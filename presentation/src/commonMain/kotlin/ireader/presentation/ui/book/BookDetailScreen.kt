@@ -124,6 +124,7 @@ fun BookDetailScreen(
     isTracked: Boolean = false,
     recommendations: List<ireader.domain.models.entities.Recommendation> = emptyList(),
     isLoadingRecommendations: Boolean = false,
+    isSimilarTitlesVisible: Boolean = true,
     onRecommendationClick: (ireader.domain.models.entities.Recommendation) -> Unit = {},
     onViewMore: () -> Unit = {},
     uiPreferences: UiPreferences = koinInject(),
@@ -311,6 +312,7 @@ fun BookDetailScreen(
                     isTracked = isTracked,
                     recommendations = recommendations,
                     isLoadingRecommendations = isLoadingRecommendations,
+                    isSimilarTitlesVisible = isSimilarTitlesVisible,
                     onRecommendationClick = onRecommendationClick,
                     onViewMore = onViewMore
                 )
@@ -426,7 +428,7 @@ fun BookDetailScreen(
                         )
                     }
                     // Recommendations Section
-                    if (recommendations.isNotEmpty() || isLoadingRecommendations) {
+                    if (isSimilarTitlesVisible && (recommendations.isNotEmpty() || isLoadingRecommendations)) {
                         item(key = "recommendations") {
                             RecommendationsSection(
                                 recommendations = recommendations,
@@ -592,6 +594,7 @@ private fun BookInfoPanel(
     isTracked: Boolean = false,
     recommendations: List<ireader.domain.models.entities.Recommendation> = emptyList(),
     isLoadingRecommendations: Boolean = false,
+    isSimilarTitlesVisible: Boolean = true,
     onRecommendationClick: (ireader.domain.models.entities.Recommendation) -> Unit = {},
     onViewMore: () -> Unit = {},
 ) {
@@ -668,7 +671,7 @@ private fun BookInfoPanel(
             }
             
             // Recommendations Section
-            if (recommendations.isNotEmpty() || isLoadingRecommendations) {
+            if (isSimilarTitlesVisible && (recommendations.isNotEmpty() || isLoadingRecommendations)) {
                 item {
                     RecommendationsSection(
                         recommendations = recommendations,

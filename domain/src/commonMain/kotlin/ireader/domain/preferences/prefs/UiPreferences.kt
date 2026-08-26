@@ -35,6 +35,10 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun similarTitlesMaxCount(): Preference<Int> {
         return preferenceStore.getInt("similar_titles_max_count", 10)
     }
+
+    fun onlyShowSimilarTitlesInExplore(): Preference<Boolean> {
+        return preferenceStore.getBoolean("only_show_similar_titles_in_explore", true)
+    }
     
     fun coverBasedThemeEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean("cover_based_theme_enabled", false)

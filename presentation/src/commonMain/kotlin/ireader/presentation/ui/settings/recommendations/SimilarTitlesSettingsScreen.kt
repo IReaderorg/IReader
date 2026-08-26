@@ -44,6 +44,7 @@ fun SimilarTitlesSettingsScreen(
     val similarTitlesSource by viewModel.similarTitlesSource.collectAsState()
     val similarTitlesMatchMode by viewModel.similarTitlesMatchMode.collectAsState()
     val similarTitlesMaxCount by viewModel.similarTitlesMaxCount.collectAsState()
+    val onlyShowSimilarTitlesInExplore by viewModel.onlyShowSimilarTitlesInExplore.collectAsState()
 
     IScaffold(
         modifier = modifier,
@@ -78,6 +79,17 @@ fun SimilarTitlesSettingsScreen(
                     onClick = { viewModel.setShowSimilarTitles(!showSimilarTitles) },
                     containerColor = if (showSimilarTitles) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
+
+            item {
+                SettingsSwitchItem(
+                    title = localizeHelper.localize(Res.string.only_show_similar_titles_in_explore),
+                    description = localizeHelper.localize(Res.string.only_show_similar_titles_in_explore_subtitle),
+                    icon = Icons.Outlined.Explore,
+                    checked = onlyShowSimilarTitlesInExplore,
+                    onCheckedChange = { viewModel.setOnlyShowSimilarTitlesInExplore(it) },
+                    enabled = showSimilarTitles
                 )
             }
 

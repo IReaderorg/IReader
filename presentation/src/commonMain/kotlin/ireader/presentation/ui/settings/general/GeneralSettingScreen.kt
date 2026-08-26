@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
@@ -504,6 +505,12 @@ fun GeneralSettingScreen(
                         subtitle = localizeHelper.localize(Res.string.show_similar_titles_subtitle),
                         icon = Icons.Filled.Search
                 ),
+                Components.Switch(
+                        preference = vm.onlyShowSimilarTitlesInExplore,
+                        title = localizeHelper.localize(Res.string.only_show_similar_titles_in_explore),
+                        subtitle = localizeHelper.localize(Res.string.only_show_similar_titles_in_explore_subtitle),
+                        icon = Icons.Filled.Explore
+                ),
                 Components.Dynamic {
                     NavigationPreferenceCustom(
                         title = localizeHelper.localize(Res.string.similar_titles_settings),
@@ -679,6 +686,7 @@ class GeneralSettingScreenViewModel(
     var autoInstaller = uiPreferences.autoCatalogUpdater().asStateIn(scope)
     var localSourceLocation = uiPreferences.savedLocalCatalogLocation().asStateIn(scope)
     var showSimilarTitles = uiPreferences.showSimilarTitles().asStateIn(scope)
+    var onlyShowSimilarTitlesInExplore = uiPreferences.onlyShowSimilarTitlesInExplore().asStateIn(scope)
     
     // Library preferences
     val showSmartCategories = libraryPreferences.showSmartCategories().asStateIn(scope)

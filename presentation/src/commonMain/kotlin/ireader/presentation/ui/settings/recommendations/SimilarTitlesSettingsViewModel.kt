@@ -16,6 +16,7 @@ class SimilarTitlesSettingsViewModel(
     val similarTitlesSource = uiPreferences.similarTitlesSource().stateIn(scope)
     val similarTitlesMatchMode = uiPreferences.similarTitlesMatchMode().stateIn(scope)
     val similarTitlesMaxCount = uiPreferences.similarTitlesMaxCount().stateIn(scope)
+    val onlyShowSimilarTitlesInExplore = uiPreferences.onlyShowSimilarTitlesInExplore().stateIn(scope)
 
     var showSourceDialog by mutableStateOf(false)
         private set
@@ -62,5 +63,9 @@ class SimilarTitlesSettingsViewModel(
 
     fun setSimilarTitlesMaxCount(count: Int) {
         uiPreferences.similarTitlesMaxCount().set(count)
+    }
+
+    fun setOnlyShowSimilarTitlesInExplore(enabled: Boolean) {
+        uiPreferences.onlyShowSimilarTitlesInExplore().set(enabled)
     }
 }

@@ -39,15 +39,16 @@ import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
 import ireader.core.startup.ScreenProfiler
 import ireader.domain.models.entities.Chapter
-import ireader.domain.models.entities.Recommendation
 import ireader.domain.models.entities.isLockedChapter
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.processstate.BookDetailProcessState
 import ireader.domain.services.processstate.ProcessStateManager
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.go_back
 import ireader.i18n.resources.no_chapter_is_available
 import ireader.i18n.resources.resume
 import ireader.i18n.resources.source_not_available
@@ -56,6 +57,7 @@ import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
+import ireader.presentation.core.hasExploreInBackStack
 import ireader.presentation.core.navigateTo
 import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.book.BookDetailScreen
@@ -67,6 +69,7 @@ import ireader.presentation.ui.book.viewmodel.BookDetailState
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.isTableUi
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.utils.isScrolledToEnd
 import ireader.presentation.ui.core.utils.isScrollingUp
@@ -78,7 +81,6 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Stable holder for navigation callbacks to prevent recomposition
@@ -117,6 +119,7 @@ data class BookDetailScreenSpec constructor(
         
         // Inject process state manager for process death handling
         val processStateManager: ProcessStateManager = koinInject()
+
         
         // Mark after ViewModel obtained
         LaunchedEffect(Unit) {
@@ -135,6 +138,8 @@ data class BookDetailScreenSpec constructor(
         val snackbarHostState = remember { SnackbarHostState() }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
+
+
         
         // Finish navigation profiling when state is ready
         LaunchedEffect(state) {
@@ -297,7 +302,13 @@ data class BookDetailScreenSpec constructor(
                 scrollState.scrollToItem(vm.savedScrollIndex, vm.savedScrollOffset)
             }
         }
-        
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        val uiPreferences: UiPreferences = koinInject()
+        val onlyInExplore by uiPreferences.onlyShowSimilarTitlesInExplore().changes().collectAsState(initial = uiPreferences.onlyShowSimilarTitlesInExplore().get())
+        val hasExploreInBackstack = remember(navController.currentBackStackEntry) {
+            navController.hasExploreInBackStack()
+        }
+        val isSimilarTitlesVisible = !onlyInExplore || hasExploreInBackstack
         // Sheet state
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         
@@ -637,6 +648,7 @@ data class BookDetailScreenSpec constructor(
                             isTracked = vm.isTracked,
                             recommendations = state.sourceRecommendations,
                             isLoadingRecommendations = state.isLoadingRecommendations,
+                            isSimilarTitlesVisible = isSimilarTitlesVisible,
                             onRecommendationClick = onRecommendationClick,
                             onViewMore = {
                                 val route = NavigationRoutes.recommendationsList(bookId)

@@ -3040,4 +3040,6 @@
     <string name="similar_titles_search_keywords_subtitle">Keywords extracted from the current book title to find similar books</string>
     <string name="similar_titles_disabled">Similar titles are disabled</string>
     <string name="similar_titles_no_similar_books">No similar books found for this title</string>
+    <string name="only_show_similar_titles_in_explore">Only in Explore Screen</string>
+    <string name="only_show_similar_titles_in_explore_subtitle">Only show similar titles when navigating from Explore or Search screens</string>
 </resources>

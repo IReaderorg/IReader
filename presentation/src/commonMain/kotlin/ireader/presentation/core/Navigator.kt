@@ -355,3 +355,17 @@ fun NavHostController.navigateBack(): Boolean {
 fun NavHostController.navigateBackTo(route: String, inclusive: Boolean = false): Boolean {
     return popBackStack(route, inclusive)
 }
+
+/**
+ * Checks if the navigation backstack contains an Explore or Search destination.
+ */
+fun NavHostController.hasExploreInBackStack(): Boolean {
+    val prevRoute = previousBackStackEntry?.destination?.route
+    if (prevRoute != null && (prevRoute.startsWith("explore") || prevRoute.contains("explore") || prevRoute.contains("globalSearch") || prevRoute.contains("sourceDetail"))) {
+        return true
+    }
+    return currentBackStack.value.any { entry ->
+        val route = entry.destination.route
+        route != null && (route.startsWith("explore") || route.contains("explore") || route.contains("globalSearch") || route.contains("sourceDetail"))
+    }
+}
