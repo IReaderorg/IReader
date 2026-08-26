@@ -311,10 +311,7 @@ class PluginRepositoryViewModel(
                     // Silently ignore failures during auto-fetch to not spam errors
                 }
             } finally {
-                // Only update state if this job wasn't cancelled
-                if (isActive) {
-                    _state.value = _state.value.copy(isRefreshing = false)
-                }
+                _state.value = _state.value.copy(isRefreshing = false)
             }
         }
     }

@@ -470,7 +470,7 @@ class ExtensionViewModel(
             if (!isActive) return@launch
             updateState { it.copy(isRefreshing = true) }
             try { _syncRemoteCatalogs.await(forceRefresh = true, onError = { Log.warn(it, "Auto-fetch failed") }) }
-            finally { if (isActive) updateState { it.copy(isRefreshing = false) } }
+            finally { updateState { it.copy(isRefreshing = false) } }
         }
     }
 

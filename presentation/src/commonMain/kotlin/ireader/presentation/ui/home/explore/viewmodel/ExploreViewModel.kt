@@ -27,7 +27,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -119,13 +122,13 @@ class ExploreViewModel(
     init {
         initializeSource()
     }
-    
+
     private fun initializeSource() {
         val sourceId = param.sourceId
         val query = param.query
-        
+
         val catalog = catalogStore.find(sourceId)
-        
+
         if (catalog == null) {
             Log.error { "[ExploreViewModel] Catalog not found for sourceId: $sourceId" }
             scope.launch {
@@ -133,9 +136,9 @@ class ExploreViewModel(
             }
             return
         }
-        
+
         _state.update { it.copy(catalog = catalog) }
-        
+
         val source = _state.value.source
         if (sourceId != null && source != null) {
             try {
@@ -223,45 +226,83 @@ class ExploreViewModel(
     }
 
     /**
+     * Called when the screen becomes visible / resumed.
+     * On first entry, init already started loadItems so loadJob is active — this is a no-op.
+     * On re-entry, loadJob is inactive — detects stuck loading or empty books and reloads.
+     */
+    fun onScreenResumed() {
+        // Don't interfere if a load is already in progress (e.g. from init)
+        if (loadJob?.isActive == true) return
+
+        val currentState = _state.value
+
+        // Fix stuck loading: isLoading=true but no active job means it was cancelled
+        if (currentState.isLoading) {
+            _state.update { it.copy(isLoading = false) }
+        }
+
+        val hasNoCatalog = currentState.catalog == null || currentState.source == null
+        val hasNoBooks = currentState.books.isEmpty() && !currentState.endReached && currentState.error == null
+
+        if (hasNoCatalog) {
+            initializeSource()
+        } else if (hasNoBooks) {
+            if (currentState.currentListing != null || !currentState.searchQuery.isNullOrBlank()) {
+                loadItems(reset = true)
+            } else {
+                initializeSource()
+            }
+        }
+    }
+
+    /**
      * Load items with proper pagination and deduplication.
      * Following Mihon's pattern of efficient data loading.
      */
     fun loadItems(reset: Boolean = false) {
         // Cancel any existing load job
         loadJob?.cancel()
-        
+
         if (reset) {
             // Reset pagination state
             seenBooks.clear()
-            _state.update { 
+            _state.update {
                 it.copy(
                     page = 1,
                     books = emptyList(),
                     endReached = false,
-                    error = null
+                    error = null,
+                    isLoading = true
                 )
             }
+        } else {
+            _state.update { it.copy(isLoading = true, error = null) }
         }
-        
+
         loadJob = scope.launch {
             val currentState = _state.value
-            val catalog = currentState.catalog ?: return@launch
-            
-            // Set loading state
-            _state.update { it.copy(isLoading = true, error = null) }
-            
+            val catalog = currentState.catalog ?: run {
+                _state.update { it.copy(isLoading = false) }
+                return@launch
+            }
+
             try {
-                val result = fetchBooks(
-                    catalog = catalog,
-                    query = currentState.searchQuery,
-                    listing = currentState.currentListing,
-                    filters = currentState.appliedFilters,
-                    page = currentState.page
-                )
-                
+                // ponytail: 60s ceiling on source fetches - a hung HTTP/plugin call previously
+                // stranded isLoading=true forever (no timeout existed anywhere in the chain).
+                // Upgrade path: per-request timeouts in the http client once confirmed.
+                val result = withTimeout(60_000L) {
+                    fetchBooks(
+                        catalog = catalog,
+                        query = currentState.searchQuery,
+                        listing = currentState.currentListing,
+                        filters = currentState.appliedFilters,
+                        page = currentState.page
+                    )
+                }
+
                 // Check if job was cancelled during fetch
                 if (!isActive) return@launch
-                
+
                 result.fold(
                     onSuccess = { pageInfo ->
                         processSuccessResult(pageInfo)
@@ -270,14 +311,15 @@ class ExploreViewModel(
                         processErrorResult(error)
                     }
                 )
+            } catch (e: TimeoutCancellationException) {
+                processErrorResult(e)
             } catch (e: CancellationException) {
-                // Silently ignore cancellation - this is expected when switching listings
-                return@launch
+                throw e
             } catch (e: Exception) {
                 processErrorResult(e)
             } finally {
-                // Only update loading state if job wasn't cancelled
-                if (isActive) {
+                // Always reset isLoading when this job finishes or is cancelled
+                withContext(NonCancellable) {
                     _state.update { it.copy(isLoading = false) }
                 }
             }
@@ -297,9 +339,9 @@ class ExploreViewModel(
         try {
             // Check for cancellation before starting
             currentCoroutineContext().ensureActive()
-            
+
             var result = MangasPageInfo(emptyList(), false)
-            
+
             exploreUseCases.remote.getRemoteBooks(
                 query = query,
                 listing = listing,
@@ -315,7 +357,7 @@ class ExploreViewModel(
                 },
                 onSuccess = { res -> result = res }
             )
-            
+
             // Check for cancellation after fetch
             currentCoroutineContext().ensureActive()
             

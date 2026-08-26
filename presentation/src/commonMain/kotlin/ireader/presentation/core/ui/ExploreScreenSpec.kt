@@ -4,6 +4,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,10 +55,17 @@ data class ExploreScreenSpec(
     @Composable
     fun Content() {
         // Scoped to the NavBackStackEntry: survives navigation to detail/search,
-        // cleared only when explore itself is popped. Keeps books/query/scroll on return.
+        // cleared only when explore itself is popped. Unique key per source+query prevents
+        // collision when switching sources.
         val vm: ExploreViewModel = koinViewModel(
+            key = "explore_${sourceId}_${query ?: ""}",
             parameters = { parametersOf(ExploreViewModel.Param(sourceId, query)) }
         )
+        
+        // Ensure data is loaded/fresh when screen is revisited (e.g. NavBackStackEntry reused or popped & reentered)
+        LaunchedEffect(sourceId, query) {
+            vm.onScreenResumed()
+        }
         
         // Collect state as Compose state for efficient recomposition
         val state by vm.state.collectAsState()
@@ -176,7 +184,7 @@ data class ExploreScreenSpec(
                             vm.stateFilters = filters
                             vm.loadItems(reset = true)
                         },
-                        loadItems = { reset -> vm.loadItems(reset) },
+                                        loadItems = { reset -> vm.loadItems(reset) },
                         onBook = { book ->
                             scope.launch {
                                 handleBookClick(vm, book, navController)

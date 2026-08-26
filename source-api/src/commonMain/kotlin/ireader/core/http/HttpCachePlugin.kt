@@ -68,27 +68,28 @@ val HttpCachePlugin = createClientPlugin("HttpCachePlugin", ::HttpCacheConfig) {
         
         // Generate cache key
         val cacheKey = cache.generateKey(request.url.toString(), request.method)
-        
+
         // Try to get from cache (unless force refresh)
         if (cacheControl?.forceRefresh != true) {
             val cachedEntry = cache.get(cacheKey)
             if (cachedEntry != null) {
-                // Return cached response as HttpClientCall
+                // Already-completed Job: request.executionContext never completes when we
+                // short-circuit before the engine runs, and readers hang forever awaiting it.
                 val responseData = HttpResponseData(
                     statusCode = cachedEntry.statusCode,
                     requestTime = GMTDate(),
                     headers = cachedEntry.headers,
                     version = HttpProtocolVersion.HTTP_1_1,
                     body = ByteReadChannel(cachedEntry.response),
-                    callContext = request.executionContext
+                    callContext = kotlinx.coroutines.Job().apply { complete() }
                 )
                 return@on HttpClientCall(client, request.build(), responseData)
             }
         }
-        
+
         // Proceed with actual request
         val call = proceed(request)
-        
+
         // Cache response if status code is cacheable
         if (call.response.status in pluginConfig.cacheableStatusCodes) {
             try {
