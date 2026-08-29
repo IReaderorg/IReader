@@ -662,52 +662,26 @@ fun GeneralScreenTab(
         }
         item {
             val isDesktop = ireader.domain.di.getPlatformType() == ireader.domain.services.platform.PlatformType.DESKTOP
-            val modeChoices = if (isDesktop) {
-                listOf(
-                    localizeHelper.localize(Res.string.continues),
-                    "Infinite",
-                )
-            } else {
-                listOf(
-                    localizeHelper.localize(Res.string.continues),
-                    "Infinite",
-                )
-            }
+            val modeChoices = listOf(
+                localizeHelper.localize(Res.string.page),
+                localizeHelper.localize(Res.string.continues),
+                "Infinite",
+            )
             val currentMode = vm.readingMode.value
-            // Force away from Page mode (disabled)
-            if (currentMode == ReadingMode.Page) {
-                vm.readingMode.value = ReadingMode.Continues
-                vm.readerPreferences.defaultReadingMode().set(ReadingMode.Continues)
-            }
-            val selectedOrdinal = if (isDesktop) {
-                when (currentMode) {
-                    ReadingMode.Page -> 0
-                    ReadingMode.Continues -> 0
-                    ReadingMode.InfiniteScroll -> 1
-                }
-            } else {
-                when (currentMode) {
-                    ReadingMode.Page -> 0
-                    ReadingMode.Continues -> 0
-                    ReadingMode.InfiniteScroll -> 1
-                }
+            val selectedOrdinal = when (currentMode) {
+                ReadingMode.Page -> 0
+                ReadingMode.Continues -> 1
+                ReadingMode.InfiniteScroll -> 2
             }
             ChipPreference(
                 preference = modeChoices,
                 selected = selectedOrdinal,
                 onValueChange = {
-                    val mode = if (isDesktop) {
-                        when (it) {
-                            0 -> ReadingMode.Continues
-                            1 -> ReadingMode.InfiniteScroll
-                            else -> ReadingMode.Continues
-                        }
-                    } else {
-                        when (it) {
-                            0 -> ReadingMode.Continues
-                            1 -> ReadingMode.InfiniteScroll
-                            else -> ReadingMode.Continues
-                        }
+                    val mode = when (it) {
+                        0 -> ReadingMode.Page
+                        1 -> ReadingMode.Continues
+                        2 -> ReadingMode.InfiniteScroll
+                        else -> ReadingMode.Continues
                     }
                     vm.readingMode.value = mode
                     vm.readerPreferences.defaultReadingMode().set(mode)

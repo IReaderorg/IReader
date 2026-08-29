@@ -485,7 +485,7 @@ class ReaderContentViewModel(
 
     fun dispatchNextChapter() {
         val currentState = getState()
-        if (currentState !is ReaderState.Success) return
+        if (currentState !is ReaderState.Success || currentState.isNavigating) return
 
         val chaptersList = currentState.chapters
         val currentChapterIndex = currentState.currentChapterIndex
@@ -503,7 +503,7 @@ class ReaderContentViewModel(
 
     fun dispatchPrevChapter() {
         val currentState = getState()
-        if (currentState !is ReaderState.Success) return
+        if (currentState !is ReaderState.Success || currentState.isNavigating) return
 
         val chaptersList = currentState.chapters
         val currentChapterIndex = currentState.currentChapterIndex
