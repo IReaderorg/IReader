@@ -39,6 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_chapter_bookmark ON chapter(bookmark) WHERE bookm
 -- Composite indexes for common query patterns
 CREATE INDEX IF NOT EXISTS idx_chapter_book_source_order ON chapter(book_id, source_order);
 CREATE INDEX IF NOT EXISTS idx_chapter_book_read_number ON chapter(book_id, read, chapter_number);
+CREATE INDEX IF NOT EXISTS idx_chapter_book_read_order ON chapter(book_id, read, source_order);
 -- Index for content existence check (downloaded chapters)
 CREATE INDEX IF NOT EXISTS idx_chapter_has_content ON chapter(book_id) WHERE LENGTH(content) > 10;
 -- Unique constraint to prevent duplicate chapters per book (based on URL/key)

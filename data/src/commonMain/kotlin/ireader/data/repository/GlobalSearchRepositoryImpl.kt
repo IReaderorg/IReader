@@ -12,11 +12,15 @@ import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.prefs.UiPreferences
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlin.collections.emptyList
 import kotlin.time.ExperimentalTime
 
@@ -156,41 +160,50 @@ class GlobalSearchRepositoryImpl(
 
             // Search each source and emit progressive results
             val completedResults = mutableListOf<SourceSearchResult>()
+            val resultsChannel = Channel<SourceSearchResult>(Channel.UNLIMITED)
             
-            // Process non-JS sources first (they can be searched without mutex)
-            for (sourceId in nonJsSources) {
-                val result = searchSource(sourceId, query, libraryBookKeys)
-                completedResults.add(result)
+            coroutineScope {
+                val semaphore = Semaphore(5)
                 
-                val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
-                val remainingLoading = initialResults.filter { initial ->
-                    completedResults.none { it.sourceId == initial.sourceId }
+                // Launch non-JS searches concurrently with bounded parallelism
+                nonJsSources.forEach { sourceId ->
+                    launch {
+                        semaphore.withPermit {
+                            val result = searchSource(sourceId, query, libraryBookKeys)
+                            resultsChannel.send(result)
+                        }
+                    }
                 }
-                emit(GlobalSearchResult(
-                    query = query,
-                    sourceResults = completedResults + remainingLoading,
-                    totalResults = completedResults.sumOf { it.results.size },
-                    searchDuration = endTime - startTime
-                ))
-            }
-            
-            // Process JS sources sequentially with mutex to prevent JS engine conflicts
-            for (sourceId in jsSources) {
-                val result = jsSourceMutex.withLock {
-                    searchSource(sourceId, query, libraryBookKeys)
-                }
-                completedResults.add(result)
                 
-                val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
-                val remainingLoading = initialResults.filter { initial ->
-                    completedResults.none { it.sourceId == initial.sourceId }
+                // Launch JS sources sequentially with mutex to prevent JS engine conflicts
+                launch {
+                    jsSources.forEach { sourceId ->
+                        val result = jsSourceMutex.withLock {
+                            searchSource(sourceId, query, libraryBookKeys)
+                        }
+                        resultsChannel.send(result)
+                    }
                 }
-                emit(GlobalSearchResult(
-                    query = query,
-                    sourceResults = completedResults + remainingLoading,
-                    totalResults = completedResults.sumOf { it.results.size },
-                    searchDuration = endTime - startTime
-                ))
+                
+                // Collect results from channel and emit progressively as each source completes
+                var receivedCount = 0
+                val totalCount = sourcesToSearch.size
+                while (receivedCount < totalCount) {
+                    val result = resultsChannel.receive()
+                    completedResults.add(result)
+                    receivedCount++
+                    
+                    val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                    val remainingLoading = initialResults.filter { initial ->
+                        completedResults.none { it.sourceId == initial.sourceId }
+                    }
+                    emit(GlobalSearchResult(
+                        query = query,
+                        sourceResults = completedResults + remainingLoading,
+                        totalResults = completedResults.sumOf { it.results.size },
+                        searchDuration = endTime - startTime
+                    ))
+                }
             }
         } catch (e: kotlinx.coroutines.CancellationException) {
             Log.debug { "Global search flow cancelled for query: $query" }

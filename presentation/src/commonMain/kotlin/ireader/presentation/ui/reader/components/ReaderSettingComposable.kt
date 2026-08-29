@@ -746,6 +746,7 @@ fun GeneralScreenTab(
             SwitchPreference(
                 preference = vm.immersiveMode,
                 title = localizeHelper.localize(Res.string.immersive_mode),
+                subtitle = "Hide system status/navigation bars and controls while reading. Tap center to reveal."
             )
         }
         item {

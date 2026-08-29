@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS history(
 
 CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read DESC);
 CREATE INDEX IF NOT EXISTS idx_history_chapter_id ON history(chapter_id);
+CREATE INDEX IF NOT EXISTS idx_history_chapter_last_read ON history(chapter_id, last_read DESC);
 CREATE INDEX IF NOT EXISTS idx_history_time_read ON history(time_read DESC);
 
 

@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ScrollState
@@ -327,18 +329,22 @@ private fun ReadingScreenContent(
                                 }
                             }
 
-                            // Translation toggle button
-                            // Directly observe translationViewModel.translationState.hasTranslation for reactivity
-                            // This ensures the button shows/hides immediately when translation is loaded
-                            TranslationToggleButton(
-                                isTranslated = vm.showTranslatedContent.value,
-                                hasTranslation = vm.translationViewModel.translationState.hasTranslation,
-                                onToggle = { vm.toggleTranslation() },
+                            // Translation toggle button (hidden during active reading)
+                            AnimatedVisibility(
+                                visible = !vm.isReaderModeEnable,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
                                     .statusBarsPadding()
-                                    .padding(top = 56.dp, end = 16.dp) // Below top bar
-                            )
+                                    .padding(top = 56.dp, end = 16.dp)
+                            ) {
+                                TranslationToggleButton(
+                                    isTranslated = vm.showTranslatedContent.value,
+                                    hasTranslation = vm.translationViewModel.translationState.hasTranslation,
+                                    onToggle = { vm.toggleTranslation() }
+                                )
+                            }
 
                             // Translation progress indicator
                             TranslationProgressIndicator(

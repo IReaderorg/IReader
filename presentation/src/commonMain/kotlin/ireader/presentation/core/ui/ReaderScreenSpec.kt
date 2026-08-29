@@ -407,7 +407,7 @@ data class ReaderScreenSpec(
             }
         }
 
-        LaunchedEffect(key1 = vm.immersiveMode.value) {
+        LaunchedEffect(key1 = vm.immersiveMode.value, key2 = vm.isReaderModeEnable) {
             platformReader.apply {
                 if (context != null) {
                     vm.readImmersiveMode(

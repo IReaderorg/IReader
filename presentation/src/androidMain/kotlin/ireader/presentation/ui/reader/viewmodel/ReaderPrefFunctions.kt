@@ -37,20 +37,22 @@ actual class PlatformReaderSettingReader(
         onHideNav: (Boolean) -> Unit,
         onHideStatus: (Boolean) -> Unit
     ) {
-        (context as Context).findComponentActivity()!!
-            .let { activity ->
-                if (immersiveMode.value) {
-                    onHideNav(true)
-                    onHideStatus(true)
-                    hideSystemBars(context)
-                } else if (activity.isImmersiveModeEnabled) {
-                    onHideNav(false)
-                    onHideStatus(false)
-                    showSystemBars(context)
-                } else {
-                    print("")
-                }
+        val activity = (context as? Context)?.findComponentActivity() ?: return
+        if (immersiveMode.value) {
+            if (isReaderModeEnable) {
+                onHideNav(true)
+                onHideStatus(true)
+                hideSystemBars(context)
+            } else {
+                onHideNav(false)
+                onHideStatus(false)
+                showSystemBars(context)
             }
+        } else {
+            onHideNav(false)
+            onHideStatus(false)
+            showSystemBars(context)
+        }
     }
 
     actual suspend fun ReaderScreenViewModel.readBrightness(context: Any) {
