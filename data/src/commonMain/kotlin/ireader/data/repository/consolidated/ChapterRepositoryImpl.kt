@@ -2,6 +2,7 @@ package ireader.data.repository.consolidated
 
 import ireader.core.log.IReaderLog
 import ireader.data.chapter.chapterMapper
+import ireader.data.chapter.stripDownloadedPlaceholder
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.toDB
 import ireader.domain.data.repository.consolidated.ChapterRepository
@@ -99,7 +100,9 @@ class ChapterRepositoryImpl(
                         date_upload = chapter.dateUpload,
                         translator = chapter.translator,
                         type = chapter.type,
-                        content = chapter.content
+                        // See ChapterRepositoryImpl (data/chapter) for rationale: strip the
+                        // light-mapper placeholder so the upsert's COALESCE preserves real content.
+                        content = chapter.content.stripDownloadedPlaceholder()
                     )
                 }
                 chapterQueries.selectLastInsertedRowId()

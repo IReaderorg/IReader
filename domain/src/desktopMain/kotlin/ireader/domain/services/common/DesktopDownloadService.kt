@@ -90,23 +90,41 @@ class DesktopDownloadService : DownloadService, KoinComponent {
             }
         }
         
-        // Bridge DownloadManager queue to download progress
+        // Bridge DownloadManager queue to download progress.
+        //
+        // DownloadManager is the source of chapterName/bookName metadata and the QUEUE
+        // status when nothing's running yet. Once the legacy runDownloadService starts
+        // downloading a chapter, the OTHER bridge below overwrites the entry with live
+        // status. We merge rather than replace so we don't blow away those legacy
+        // transitions on every DownloadManager emission.
         scope.launch {
             downloadManager.queue.collect { queue ->
-                val progressMap = queue.associate { downloadState ->
+                val existing = _downloadProgress.value
+                val merged = existing.toMutableMap()
+                val queueIds = queue.map { it.download.chapterId }.toSet()
+                // Remove entries that disappeared from the DownloadManager queue.
+                merged.keys.retainAll(queueIds)
+                // Upsert queue entries, preserving any live legacy status already in place.
+                queue.forEach { downloadState ->
                     val download = downloadState.download
-                    download.chapterId to DownloadProgress(
-                        chapterId = download.chapterId,
+                    val chapterId = download.chapterId
+                    val existingEntry = existing[chapterId]
+                    val legacyHasLiveStatus = existingEntry != null &&
+                        existingEntry.status != DownloadStatus.QUEUED
+                    merged[chapterId] = DownloadProgress(
+                        chapterId = chapterId,
                         chapterName = download.chapterName,
                         bookName = download.bookTitle,
-                        status = mapNewStatusToServiceStatus(download.status),
-                        progress = download.progressFloat,
-                        errorMessage = download.errorMessage,
-                        retryCount = download.retryCount,
+                        status = if (legacyHasLiveStatus) existingEntry!!.status
+                        else mapNewStatusToServiceStatus(download.status),
+                        progress = if (legacyHasLiveStatus) existingEntry!!.progress
+                        else download.progressFloat,
+                        errorMessage = existingEntry?.errorMessage ?: download.errorMessage,
+                        retryCount = existingEntry?.retryCount ?: download.retryCount,
                         totalRetries = 3
                     )
                 }
-                _downloadProgress.value = progressMap
+                _downloadProgress.value = merged
             }
         }
         
@@ -129,24 +147,31 @@ class DesktopDownloadService : DownloadService, KoinComponent {
             }
         }
         
-        // Bridge legacy progress to our progress
+        // Bridge legacy progress to our progress.
+        //
+        // The legacy runDownloadService is what actually pulls chapters from the source on
+        // desktop — DownloadManager's queue is just a passive persistence layer that holds
+        // QUEUE entries. If we only bridge legacy entries when the chapterId is missing
+        // from _downloadProgress, every download sits at "QUEUE/Waiting…" forever because
+        // DownloadManager's stale queue-status shadows legacy's real DOWNLOADING/COMPLETED
+        // transitions. Bridge unconditionally: preserve the DownloadManager-sourced
+        // chapterName/bookName metadata (legacy doesn't always have it), but let legacy
+        // drive status/progress/error once a download actually runs.
         scope.launch {
             downloadServiceState.downloadProgress.collect { legacyProgress ->
-                // Merge legacy progress with new progress
                 val newProgress = _downloadProgress.value.toMutableMap()
                 legacyProgress.forEach { (chapterId, legacy) ->
-                    if (!newProgress.containsKey(chapterId)) {
-                        newProgress[chapterId] = DownloadProgress(
-                            chapterId = chapterId,
-                            chapterName = "",
-                            bookName = "",
-                            status = mapLegacyStatusToServiceStatus(legacy.status),
-                            progress = legacy.progress,
-                            errorMessage = legacy.errorMessage,
-                            retryCount = legacy.retryCount,
-                            totalRetries = 3
-                        )
-                    }
+                    val existing = newProgress[chapterId]
+                    newProgress[chapterId] = DownloadProgress(
+                        chapterId = chapterId,
+                        chapterName = existing?.chapterName.orEmpty(),
+                        bookName = existing?.bookName.orEmpty(),
+                        status = mapLegacyStatusToServiceStatus(legacy.status),
+                        progress = legacy.progress,
+                        errorMessage = legacy.errorMessage,
+                        retryCount = legacy.retryCount,
+                        totalRetries = 3
+                    )
                 }
                 _downloadProgress.value = newProgress
             }

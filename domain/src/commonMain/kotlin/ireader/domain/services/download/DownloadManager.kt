@@ -60,23 +60,48 @@ class DownloadManager(
      */
     suspend fun init() {
         if (initialized) return
-        
+
         try {
-            // Restore queue from persistence
+            // Restore queue from persistence, but drop entries that are already fulfilled.
+            // The legacy runDownloadService path writes chapter content directly to the DB
+            // and removes DB download rows on completion, but doesn't tell DownloadManager
+            // to prune its persisted JSON queue. Over time this file accumulates orphans
+            // that keep the "Downloading..." notification stuck with zero real progress.
+            // We rebuild a trimmed queue here by cross-checking each restored entry against
+            // the current chapter state.
             val savedItems = downloadStore.restoreQueue()
             if (savedItems.isNotEmpty()) {
-                val downloads = savedItems.mapNotNull { item ->
+                val fresh = savedItems.mapNotNull { item ->
+                    val chapter = runCatching { chapterRepository.findChapterById(item.chapterId) }.getOrNull()
+                    // Chapter missing (book deleted?) → drop the queue entry.
+                    if (chapter == null) {
+                        Log.debug { "DownloadManager: Dropping queued chapter ${item.chapterId} — chapter no longer exists" }
+                        return@mapNotNull null
+                    }
+                    // Chapter already has real content → the download was completed via the
+                    // legacy path (or by the reader fetching content on open). Drop it.
+                    val contentLen = chapter.content.joinToString("").length
+                    if (contentLen >= 50) {
+                        Log.debug { "DownloadManager: Dropping queued chapter ${item.chapterId} — already has $contentLen chars of content" }
+                        return@mapNotNull null
+                    }
                     createDownloadFromQueueItem(item)
                 }
-                _queue.value = downloads.map { DownloadState(it) }
-                Log.debug { "DownloadManager: Restored ${downloads.size} downloads from queue" }
+                _queue.value = fresh.map { DownloadState(it) }
+                if (fresh.size != savedItems.size) {
+                    Log.info { "DownloadManager: Restored ${fresh.size} downloads from queue (pruned ${savedItems.size - fresh.size} stale entries)" }
+                    // Re-persist so the JSON on disk matches our trimmed view.
+                    persistQueue()
+                } else if (fresh.isNotEmpty()) {
+                    Log.debug { "DownloadManager: Restored ${fresh.size} downloads from queue" }
+                }
             }
-            
+
             // Initialize cache
             if (!downloadCache.isInitialized()) {
                 downloadCache.refresh()
             }
-            
+
             initialized = true
             Log.debug { "DownloadManager: Initialized" }
         } catch (e: Exception) {
