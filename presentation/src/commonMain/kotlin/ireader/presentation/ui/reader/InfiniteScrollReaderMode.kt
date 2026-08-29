@@ -181,6 +181,8 @@ fun InfiniteScrollReaderContent(
         }
     }
 
+    val preferences = rememberReaderTextPreferencesState(vm)
+
     LazyColumn(
         state = lazyListState,
         modifier = modifier.fillMaxSize(),
@@ -189,6 +191,13 @@ fun InfiniteScrollReaderContent(
         items(
             count = chapterItems.size,
             key = { chapterItems[it].first },
+            contentType = { index ->
+                when (chapterItems[index].second) {
+                    is ChapterHeadingItem -> "heading"
+                    is ChapterVoidItem -> "void"
+                    is PageItem -> "paragraph"
+                }
+            }
         ) { index ->
             val (_, item) = chapterItems[index]
             when (item) {
@@ -211,11 +220,17 @@ fun InfiniteScrollReaderContent(
                     )
                 }
                 is PageItem -> {
+                    val translatedText = if (preferences.bilingualModeEnabled) vm.getTranslationForParagraph(index) else null
                     MainText(
                         modifier = Modifier,
                         index = index,
                         page = item.page,
-                        vm = vm,
+                        isLastIndex = index == chapterItems.lastIndex,
+                        preferences = preferences,
+                        translatedText = translatedText,
+                        onTranslateRequest = { selectedText ->
+                            vm.showParagraphTranslation(selectedText)
+                        }
                     )
                 }
             }

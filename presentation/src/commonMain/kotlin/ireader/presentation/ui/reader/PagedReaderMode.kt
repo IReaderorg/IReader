@@ -100,6 +100,8 @@ internal fun PagedReaderContent(
     var dragAccumulator by remember { mutableFloatStateOf(0f) }
     val swipeThreshold = with(density) { 80.dp.toPx() }
 
+    val preferences = rememberReaderTextPreferencesState(vm)
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -144,23 +146,29 @@ internal fun PagedReaderContent(
                 )
             }
     ) {
-            // Render all content in a single scrollable column
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onGloballyPositioned { coordinates ->
-                        contentHeightPx = coordinates.size.height
-                    }
-                    .verticalScroll(scrollState, enabled = false) // disabled — we control scroll programmatically
-            ) {
-                content.forEachIndexed { index, page ->
-                    MainText(
-                        modifier = Modifier.fillMaxWidth(),
-                        index = index,
-                        page = page,
-                        vm = vm
-                    )
+        // Render all content in a single scrollable column
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned { coordinates ->
+                    contentHeightPx = coordinates.size.height
                 }
+                .verticalScroll(scrollState, enabled = false) // disabled — we control scroll programmatically
+        ) {
+            content.forEachIndexed { index, page ->
+                val translatedText = if (preferences.bilingualModeEnabled) vm.getTranslationForParagraph(index) else null
+                MainText(
+                    modifier = Modifier.fillMaxWidth(),
+                    index = index,
+                    page = page,
+                    isLastIndex = index == content.lastIndex,
+                    preferences = preferences,
+                    translatedText = translatedText,
+                    onTranslateRequest = { selectedText ->
+                        vm.showParagraphTranslation(selectedText)
+                    }
+                )
             }
+        }
     }
 }

@@ -84,6 +84,8 @@ internal fun ContinuousReaderContent(
         }
     }
 
+    val preferences = rememberReaderTextPreferencesState(vm)
+
     ILazyColumnScrollbar(
         listState = lazyListState,
         padding = if (vm.scrollIndicatorPadding.lazyValue < 0) 0.dp else vm.scrollIndicatorPadding.lazyValue.dp,
@@ -101,22 +103,29 @@ internal fun ContinuousReaderContent(
             // Render ONLY the current chapter's content
             items(
                 count = content.size,
-                key = { index -> "content-${chapter?.id ?: 0}-$index" }
+                key = { index -> "content-${chapter?.id ?: 0}-$index" },
+                contentType = { "paragraph" }
             ) { index ->
                 val page = content.getOrNull(index)
                 if (page != null) {
+                    val translatedText = if (preferences.bilingualModeEnabled) vm.getTranslationForParagraph(index) else null
                     MainText(
                         modifier = modifier,
                         index = index,
                         page = page,
-                        vm = vm
+                        isLastIndex = index == content.lastIndex,
+                        preferences = preferences,
+                        translatedText = translatedText,
+                        onTranslateRequest = { selectedText ->
+                            vm.showParagraphTranslation(selectedText)
+                        }
                     )
                 }
             }
 
             // ChapterVoidSpace at the end
             if (content.isNotEmpty() && chapter != null) {
-                item(key = "void-${chapter.id}") {
+                item(key = "void-${chapter.id}", contentType = "void_space") {
                     ChapterVoidSpace(
                         chapter = chapter,
                         isLast = !hasNextChapter,

@@ -219,11 +219,24 @@ fun TTSV2CommonScreen(
     // LazyList state for content scrolling
     val lazyListState = rememberLazyListState()
     
-    // Auto-scroll to current paragraph
+    // Auto-scroll to current paragraph only when not visible on screen
     val currentParagraph by adapter.currentParagraph.collectAsState()
     LaunchedEffect(currentParagraph) {
-        if (currentParagraph > 0 && commonState.hasContent) {
-            lazyListState.animateScrollToItem(currentParagraph)
+        if (currentParagraph >= 0 && commonState.hasContent) {
+            val layoutInfo = lazyListState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            val visibleItem = visibleItems.find { it.index == currentParagraph }
+            val isVisible = visibleItem != null &&
+                visibleItem.offset >= layoutInfo.viewportStartOffset &&
+                (visibleItem.offset + visibleItem.size * 0.5f) <= layoutInfo.viewportEndOffset
+
+            if (!isVisible) {
+                try {
+                    lazyListState.animateScrollToItem(currentParagraph)
+                } catch (_: Exception) {
+                    try { lazyListState.scrollToItem(currentParagraph) } catch (_: Exception) {}
+                }
+            }
         }
     }
     

@@ -640,29 +640,40 @@ class TTSV2ScreenSpec(
             }
         }
         
-        // Auto-scroll to current paragraph/chunk (top of screen)
-        // Triggers on both playback progression AND paragraph tap
+        // Auto-scroll to current paragraph/chunk only when it is NOT visible on screen
+        // Prevents screen jumping on every single line, allowing comfortable reading while listening
         LaunchedEffect(currentParagraph, state.currentChunkIndex) {
             if (state.paragraphs.isNotEmpty() && currentParagraph < state.paragraphs.size) {
                 delay(100)
                 if (pageMode && pagerState != null) {
-                    // Page mode: animate pager to current page
+                    // Page mode: animate pager to current page if not already visible
                     val targetPage = if (chunkModeActive) {
                         state.currentChunkIndex.coerceIn(0, pagerState.pageCount - 1)
                     } else {
                         currentParagraph.coerceIn(0, pagerState.pageCount - 1)
                     }
-                    try {
-                        pagerState.animateScrollToPage(targetPage)
-                    } catch (e: Exception) {
-                        try { pagerState.scrollToPage(targetPage) } catch (_: Exception) {}
+                    if (pagerState.currentPage != targetPage) {
+                        try {
+                            pagerState.animateScrollToPage(targetPage)
+                        } catch (e: Exception) {
+                            try { pagerState.scrollToPage(targetPage) } catch (_: Exception) {}
+                        }
                     }
                 } else {
-                    // Scroll mode: scroll list to current paragraph
-                    try {
-                        lazyListState.animateScrollToItem(currentParagraph)
-                    } catch (e: Exception) {
-                        lazyListState.scrollToItem(currentParagraph)
+                    // Scroll mode: only scroll list when current paragraph is NOT visible in the viewport
+                    val layoutInfo = lazyListState.layoutInfo
+                    val visibleItems = layoutInfo.visibleItemsInfo
+                    val visibleItem = visibleItems.find { it.index == currentParagraph }
+                    val isVisible = visibleItem != null &&
+                        visibleItem.offset >= layoutInfo.viewportStartOffset &&
+                        (visibleItem.offset + visibleItem.size * 0.5f) <= layoutInfo.viewportEndOffset
+
+                    if (!isVisible) {
+                        try {
+                            lazyListState.animateScrollToItem(currentParagraph)
+                        } catch (e: Exception) {
+                            try { lazyListState.scrollToItem(currentParagraph) } catch (_: Exception) {}
+                        }
                     }
                 }
             }

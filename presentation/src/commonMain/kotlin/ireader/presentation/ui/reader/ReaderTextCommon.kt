@@ -85,7 +85,85 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.components.SelectableTranslatableText
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 
-@androidx.compose.runtime.Stable
+@androidx.compose.runtime.Immutable
+data class ReaderTextPreferencesState(
+    val fontSize: Int,
+    val lineHeight: Int,
+    val letterSpacing: Int,
+    val fontWeight: Int,
+    val paragraphIndent: Int,
+    val textAlignment: PreferenceValues.PreferenceTextAlignment,
+    val textColor: Color,
+    val fontFamily: androidx.compose.ui.text.font.FontFamily?,
+    val topContentPadding: Int,
+    val distanceBetweenParagraphs: Int,
+    val bottomContentPadding: Int,
+    val selectable: Boolean,
+    val bionicReadingMode: Boolean,
+    val bilingualModeEnabled: Boolean,
+    val bilingualModeLayout: Int,
+    val paragraphTranslationEnabled: Boolean,
+)
+
+@Composable
+fun rememberReaderTextPreferencesState(vm: ReaderScreenViewModel): ReaderTextPreferencesState {
+    val fontSize = vm.fontSize.lazyValue
+    val lineHeight = vm.lineHeight.lazyValue
+    val letterSpacing = vm.betweenLetterSpaces.lazyValue
+    val fontWeight = vm.textWeight.lazyValue
+    val paragraphIndent = vm.paragraphsIndent.lazyValue
+    val textAlignment = vm.textAlignment.value
+    val textColor = vm.textColor.value.toComposeColor()
+    val fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily()
+    val topContentPadding = vm.topContentPadding.lazyValue
+    val distanceBetweenParagraphs = vm.distanceBetweenParagraphs.lazyValue
+    val bottomContentPadding = vm.bottomContentPadding.lazyValue
+    val selectable = vm.selectableMode.value
+    val bionicReadingMode = vm.bionicReadingMode.value
+    val bilingualModeEnabled = vm.bilingualModeEnabled.value
+    val bilingualModeLayout = vm.bilingualModeLayout.value
+    val paragraphTranslationEnabled = vm.paragraphTranslationEnabled.value
+
+    return remember(
+        fontSize,
+        lineHeight,
+        letterSpacing,
+        fontWeight,
+        paragraphIndent,
+        textAlignment,
+        textColor,
+        fontFamily,
+        topContentPadding,
+        distanceBetweenParagraphs,
+        bottomContentPadding,
+        selectable,
+        bionicReadingMode,
+        bilingualModeEnabled,
+        bilingualModeLayout,
+        paragraphTranslationEnabled
+    ) {
+        ReaderTextPreferencesState(
+            fontSize = fontSize,
+            lineHeight = lineHeight,
+            letterSpacing = letterSpacing,
+            fontWeight = fontWeight,
+            paragraphIndent = paragraphIndent,
+            textAlignment = textAlignment,
+            textColor = textColor,
+            fontFamily = fontFamily,
+            topContentPadding = topContentPadding,
+            distanceBetweenParagraphs = distanceBetweenParagraphs,
+            bottomContentPadding = bottomContentPadding,
+            selectable = selectable,
+            bionicReadingMode = bionicReadingMode,
+            bilingualModeEnabled = bilingualModeEnabled,
+            bilingualModeLayout = bilingualModeLayout,
+            paragraphTranslationEnabled = paragraphTranslationEnabled,
+        )
+    }
+}
+
+@androidx.compose.runtime.Immutable
 internal data class TextStyleParams(
     val fontSize: Int,
     val lineHeight: Int,
@@ -114,7 +192,10 @@ internal fun MainText(
     modifier: Modifier,
     index: Int,
     page: Page,
-    vm: ReaderScreenViewModel
+    isLastIndex: Boolean = false,
+    preferences: ReaderTextPreferencesState,
+    translatedText: String? = null,
+    onTranslateRequest: (String) -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val context = LocalPlatformContext.current
@@ -122,29 +203,15 @@ internal fun MainText(
     androidx.compose.runtime.key(page) {
         when (page) {
             is Text -> {
-                val textStyleParams = remember(
-                    vm.fontSize.lazyValue,
-                    vm.lineHeight.lazyValue,
-                    vm.betweenLetterSpaces.lazyValue,
-                    vm.textWeight.lazyValue,
-                    vm.paragraphsIndent.lazyValue,
-                    vm.textAlignment.value,
-                    vm.textColor.value,
-                    vm.font?.value,
-                    vm.fontVersion
-                ) {
-                    TextStyleParams(
-                        fontSize = vm.fontSize.lazyValue,
-                        lineHeight = vm.lineHeight.lazyValue,
-                        letterSpacing = vm.betweenLetterSpaces.lazyValue,
-                        fontWeight = vm.textWeight.lazyValue,
-                        paragraphIndent = vm.paragraphsIndent.lazyValue,
-                        textAlignment = vm.textAlignment.value,
-                        textColor = vm.textColor.value.toComposeColor(),
-                        fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily()
-                    )
-                }
-                StyleTextOptimized(modifier, vm, index, page, vm.bionicReadingMode.value, textStyleParams)
+                StyleTextOptimized(
+                    modifier = modifier,
+                    index = index,
+                    page = page,
+                    isLastIndex = isLastIndex,
+                    preferences = preferences,
+                    translatedText = translatedText,
+                    onTranslateRequest = onTranslateRequest,
+                )
             }
             is ImageUrl -> {
                 val isLoading = remember { mutableStateOf(false) }
@@ -153,7 +220,7 @@ internal fun MainText(
                         modifier = Modifier
                             .fillMaxWidth()
                             .requiredHeight(500.dp),
-                        model = ImageRequest.Builder(context=context).data(page.url.toUri()).diskCachePolicy(CachePolicy.DISABLED).build(),
+                        model = ImageRequest.Builder(context = context).data(page.url.toUri()).diskCachePolicy(CachePolicy.DISABLED).build(),
                         contentDescription = localizeHelper.localize(Res.string.image),
                         contentScale = ContentScale.FillWidth,
                         onLoading = { isLoading.value = true },
@@ -171,44 +238,86 @@ internal fun MainText(
 }
 
 @Composable
-internal fun StyleTextOptimized(
+internal fun MainText(
     modifier: Modifier,
-    vm: ReaderScreenViewModel,
     index: Int,
-    page: Text,
-    enableBioReading: Boolean,
-    styleParams: TextStyleParams
+    page: Page,
+    vm: ReaderScreenViewModel
 ) {
+    val preferences = rememberReaderTextPreferencesState(vm)
     val readerState by vm.state.collectAsState()
     val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
     val currentContent = successState?.currentContent ?: emptyList()
     val isLastIndex = index == currentContent.lastIndex
+    val translatedText = if (preferences.bilingualModeEnabled) vm.getTranslationForParagraph(index) else null
 
+    MainText(
+        modifier = modifier,
+        index = index,
+        page = page,
+        isLastIndex = isLastIndex,
+        preferences = preferences,
+        translatedText = translatedText,
+        onTranslateRequest = { selectedText ->
+            vm.showParagraphTranslation(selectedText)
+        }
+    )
+}
+
+@Composable
+internal fun StyleTextOptimized(
+    modifier: Modifier,
+    index: Int,
+    page: Text,
+    isLastIndex: Boolean,
+    preferences: ReaderTextPreferencesState,
+    translatedText: String? = null,
+    onTranslateRequest: (String) -> Unit = {},
+) {
     val originalText = remember(
         page.text,
         index,
         isLastIndex,
-        vm.topContentPadding.lazyValue,
-        vm.distanceBetweenParagraphs.lazyValue,
-        vm.bottomContentPadding.lazyValue,
-        vm.paragraphsIndent.lazyValue
+        preferences.topContentPadding,
+        preferences.distanceBetweenParagraphs,
+        preferences.bottomContentPadding,
+        preferences.paragraphIndent
     ) {
         setText(
             text = page.text,
             index = index,
             isLast = isLastIndex,
-            topContentPadding = vm.topContentPadding.lazyValue,
-            contentPadding = vm.distanceBetweenParagraphs.lazyValue,
-            bottomContentPadding = vm.bottomContentPadding.lazyValue,
-            paragraphIndent = vm.paragraphsIndent.lazyValue
+            topContentPadding = preferences.topContentPadding,
+            contentPadding = preferences.distanceBetweenParagraphs,
+            bottomContentPadding = preferences.bottomContentPadding,
+            paragraphIndent = preferences.paragraphIndent
         )
     }
 
-    val bilingualModeEnabled = vm.bilingualModeEnabled.value
-    val translatedText = vm.getTranslationForParagraph(index)
+    val styleParams = remember(
+        preferences.fontSize,
+        preferences.lineHeight,
+        preferences.letterSpacing,
+        preferences.fontWeight,
+        preferences.paragraphIndent,
+        preferences.textAlignment,
+        preferences.textColor,
+        preferences.fontFamily
+    ) {
+        TextStyleParams(
+            fontSize = preferences.fontSize,
+            lineHeight = preferences.lineHeight,
+            letterSpacing = preferences.letterSpacing,
+            fontWeight = preferences.fontWeight,
+            paragraphIndent = preferences.paragraphIndent,
+            textAlignment = preferences.textAlignment,
+            textColor = preferences.textColor,
+            fontFamily = preferences.fontFamily
+        )
+    }
 
-    if (bilingualModeEnabled && translatedText != null) {
-        val bilingualMode = if (vm.bilingualModeLayout.value == 0) {
+    if (preferences.bilingualModeEnabled && translatedText != null) {
+        val bilingualMode = if (preferences.bilingualModeLayout == 0) {
             ireader.presentation.ui.reader.components.BilingualMode.SIDE_BY_SIDE
         } else {
             ireader.presentation.ui.reader.components.BilingualMode.PARAGRAPH_BY_PARAGRAPH
@@ -218,8 +327,7 @@ internal fun StyleTextOptimized(
             originalText = originalText,
             translatedText = translatedText,
             mode = bilingualMode,
-            modifier = modifier
-                .fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             fontSize = styleParams.fontSize.sp,
             fontFamily = styleParams.fontFamily,
             textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
@@ -229,7 +337,7 @@ internal fun StyleTextOptimized(
             letterSpacing = styleParams.letterSpacing.sp,
             fontWeight = FontWeight(styleParams.fontWeight)
         )
-    } else if (enableBioReading) {
+    } else if (preferences.bionicReadingMode) {
         val bionicText = remember(originalText, styleParams.fontWeight) {
             buildAnnotatedString {
                 originalText.split(" ").forEach { s ->
@@ -251,8 +359,7 @@ internal fun StyleTextOptimized(
 
         Text(
             text = bionicText,
-            modifier = modifier
-                .fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             fontSize = styleParams.fontSize.sp,
             fontFamily = styleParams.fontFamily,
             textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
@@ -264,8 +371,7 @@ internal fun StyleTextOptimized(
     } else {
         SelectableTranslatableText(
             text = originalText,
-            modifier = modifier
-                .fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             fontSize = styleParams.fontSize.sp,
             fontFamily = styleParams.fontFamily,
             textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
@@ -273,11 +379,9 @@ internal fun StyleTextOptimized(
             lineHeight = styleParams.lineHeight.sp,
             letterSpacing = styleParams.letterSpacing.sp,
             fontWeight = FontWeight(styleParams.fontWeight),
-            selectable = vm.selectableMode.value,
-            paragraphTranslationEnabled = vm.paragraphTranslationEnabled.value,
-            onTranslateRequest = { selectedText ->
-                vm.showParagraphTranslation(selectedText)
-            }
+            selectable = preferences.selectable,
+            paragraphTranslationEnabled = preferences.paragraphTranslationEnabled,
+            onTranslateRequest = onTranslateRequest
         )
     }
 }
