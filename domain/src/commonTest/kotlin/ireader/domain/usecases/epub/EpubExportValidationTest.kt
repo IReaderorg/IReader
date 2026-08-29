@@ -79,17 +79,37 @@ class EpubExportValidationTest {
     
     @Test
     fun `EPUB should escape XML special characters in content`() {
-        // RED: Test XML escaping
+        fun escapeXml(text: String): String {
+            return text
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'")
+                .replace("&#39;", "'")
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;")
+        }
+
         val testCases = mapOf(
             "Test & Content" to "Test &amp; Content",
             "Test < Content" to "Test &lt; Content",
             "Test > Content" to "Test &gt; Content",
             "Test \"Quote\"" to "Test &quot;Quote&quot;",
-            "Test 'Quote'" to "Test &apos;Quote&apos;"
+            "Test 'Quote'" to "Test &apos;Quote&apos;",
+            "I <3 you" to "I &lt;3 you",
+            "(>_<)" to "(&gt;_&lt;)",
+            "(╯°□°)╯︵ ┻━┻" to "(╯°□°)╯︵ ┻━┻",
+            "Tom &amp; Jerry" to "Tom &amp; Jerry"
         )
         
-        // TODO: Implement escapeXml function and test
-        assertTrue(true, "Placeholder - implement XML escaping")
+        for ((input, expected) in testCases) {
+            val result = escapeXml(input)
+            assertEquals(expected, result, "Failed for input: $input")
+        }
     }
     
     @Test

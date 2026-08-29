@@ -131,8 +131,23 @@ class DownloaderService constructor(
         ireader.core.log.Log.info { "DownloaderService: Starting doWork()" }
         
         val notificationId = ID_DOWNLOAD_CHAPTER_PROGRESS
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+        val wakeLock = powerManager?.newWakeLock(
+            android.os.PowerManager.PARTIAL_WAKE_LOCK,
+            "IReader:DownloaderServiceWakeLock"
+        )
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? android.net.wifi.WifiManager
+        @Suppress("DEPRECATION")
+        val wifiLock = wifiManager?.createWifiLock(
+            android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+            "IReader:DownloaderServiceWifiLock"
+        )
         
         try {
+            // Acquire wake lock to keep CPU and WiFi active when screen turns off or app is backgrounded
+            wakeLock?.acquire(2 * 60 * 60 * 1000L) // 2 hour safety timeout
+            wifiLock?.acquire()
+            
             // Set foreground immediately to prevent 10-minute timeout
             try {
                 setForeground(getForegroundInfo())
@@ -303,6 +318,20 @@ class DownloaderService constructor(
             return if (result) Result.success() else Result.failure()
             
         } finally {
+            try {
+                if (wakeLock?.isHeld == true) {
+                    wakeLock.release()
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.warn { "DownloaderService: Error releasing wakeLock: ${e.message}" }
+            }
+            try {
+                if (wifiLock?.isHeld == true) {
+                    wifiLock.release()
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.warn { "DownloaderService: Error releasing wifiLock: ${e.message}" }
+            }
             // Always ensure notification is cleaned up if work was cancelled
             if (isStopped || isCancelled) {
                 ireader.core.log.Log.info { "DownloaderService: Finally block - ensuring notification cleanup" }

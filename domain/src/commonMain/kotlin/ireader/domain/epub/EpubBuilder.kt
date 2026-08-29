@@ -99,6 +99,7 @@ class EpubBuilder(
             val metadata = createMetadata(book)
             
             // Create EPUB files
+            createSynopsisPage(tempDir, book)
             createContentOpf(tempDir, book, metadata, epubChapters, options, coverExtension, coverMediaType, coverEmbedded)
             createTocNcx(tempDir, metadata, epubChapters)
             createNavDocument(tempDir, epubChapters)
@@ -292,6 +293,7 @@ class EpubBuilder(
             appendLine("    <item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>")
             appendLine("    <item id=\"ncx\" href=\"toc.ncx\" media-type=\"application/x-dtbncx+xml\"/>")
             appendLine("    <item id=\"style\" href=\"Styles/style.css\" media-type=\"text/css\"/>")
+            appendLine("    <item id=\"synopsis-page\" href=\"Text/synopsis.xhtml\" media-type=\"application/xhtml+xml\"/>")
             chapters.forEach { chapter ->
                 appendLine("    <item id=\"${chapter.id}\" href=\"${chapter.fileName}\" media-type=\"application/xhtml+xml\"/>")
             }
@@ -313,6 +315,7 @@ class EpubBuilder(
             if (coverEmbedded) {
                 appendLine("    <itemref idref=\"cover-page\" linear=\"yes\"/>")
             }
+            appendLine("    <itemref idref=\"synopsis-page\" linear=\"yes\"/>")
             appendLine("    <itemref idref=\"nav\"/>")
             chapters.forEach { chapter ->
                 appendLine("    <itemref idref=\"${chapter.id}\"/>")
@@ -340,9 +343,15 @@ class EpubBuilder(
             appendLine("    <text>${metadata.title.escapeXml()}</text>")
             appendLine("  </docTitle>")
             appendLine("  <navMap>")
+            appendLine("    <navPoint id=\"navPoint-synopsis\" playOrder=\"1\">")
+            appendLine("      <navLabel>")
+            appendLine("        <text>Synopsis</text>")
+            appendLine("      </navLabel>")
+            appendLine("      <content src=\"Text/synopsis.xhtml\"/>")
+            appendLine("    </navPoint>")
             
             chapters.forEachIndexed { index, chapter ->
-                appendLine("    <navPoint id=\"navPoint-${index + 1}\" playOrder=\"${index + 1}\">")
+                appendLine("    <navPoint id=\"navPoint-${index + 2}\" playOrder=\"${index + 2}\">")
                 appendLine("      <navLabel>")
                 appendLine("        <text>${chapter.title.escapeXml()}</text>")
                 appendLine("      </navLabel>")
@@ -371,6 +380,7 @@ class EpubBuilder(
             appendLine("  <nav epub:type=\"toc\" id=\"toc\">")
             appendLine("    <h1>Table of Contents</h1>")
             appendLine("    <ol>")
+            appendLine("      <li><a href=\"Text/synopsis.xhtml\">Synopsis</a></li>")
             
             chapters.forEach { chapter ->
                 appendLine("      <li><a href=\"${chapter.fileName}\">${chapter.title.escapeXml()}</a></li>")
@@ -414,6 +424,66 @@ class EpubBuilder(
         }
 
         fileSystem.sink(baseDir / "OEBPS" / "Text" / "cover.xhtml").buffer().use { it.writeUtf8(coverXhtml) }
+    }
+
+    /**
+     * Writes a dedicated synopsis & book info page (OEBPS/Text/synopsis.xhtml)
+     * containing title, author, status, genres, and full description.
+     */
+    private fun createSynopsisPage(baseDir: Path, book: Book) {
+        val synopsisXhtml = buildString {
+            appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")
+            appendLine("""<!DOCTYPE html>""")
+            appendLine("""<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">""")
+            appendLine("<head>")
+            appendLine("  <meta charset=\"UTF-8\"/>")
+            appendLine("  <title>${book.title.escapeXml()}</title>")
+            appendLine("  <link rel=\"stylesheet\" type=\"text/css\" href=\"../Styles/style.css\"/>")
+            appendLine("</head>")
+            appendLine("<body>")
+            appendLine("  <section epub:type=\"frontmatter\" id=\"synopsis\">")
+            appendLine("    <h1 class=\"book-title\">${book.title.escapeXml()}</h1>")
+            appendLine("    <div class=\"book-info\">")
+            appendLine("      <p class=\"book-author\"><strong>Author:</strong> ${book.author.ifEmpty { "Unknown" }.escapeXml()}</p>")
+            val statusStr = when (book.status) {
+                1L -> "Ongoing"
+                2L -> "Completed"
+                3L -> "Licensed"
+                4L -> "Publishing Finished"
+                5L -> "Cancelled"
+                6L -> "On Hiatus"
+                else -> null
+            }
+            if (statusStr != null) {
+                appendLine("      <p class=\"book-status\"><strong>Status:</strong> $statusStr</p>")
+            }
+            if (book.genres.isNotEmpty()) {
+                val genresStr = book.genres.joinToString(", ") { it.escapeXml() }
+                appendLine("      <p class=\"book-genres\"><strong>Genres:</strong> $genresStr</p>")
+            }
+            appendLine("    </div>")
+            appendLine("    <hr class=\"divider\"/>")
+            appendLine("    <h2>Synopsis</h2>")
+            appendLine("    <div class=\"book-description\">")
+            val desc = book.description.ifBlank { "No description available." }
+            val cleanedDesc = if (HtmlContentCleaner.isHtml(desc)) {
+                HtmlContentCleaner.extractPlainText(desc)
+            } else {
+                desc
+            }
+            cleanedDesc.split("\n\n", "\n")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+                .forEach { paragraph ->
+                    appendLine("      <p>${paragraph.escapeXml()}</p>")
+                }
+            appendLine("    </div>")
+            appendLine("  </section>")
+            appendLine("</body>")
+            appendLine("</html>")
+        }
+
+        fileSystem.sink(baseDir / "OEBPS" / "Text" / "synopsis.xhtml").buffer().use { it.writeUtf8(synopsisXhtml) }
     }
 
     private fun createChapterFiles(
@@ -469,6 +539,13 @@ h1 {
     text-align: center;
 }
 
+h2 {
+    font-size: ${options.fontSize * 1.3}px;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
 p {
     margin-bottom: ${options.paragraphSpacing}em;
     text-indent: 1.5em;
@@ -478,6 +555,30 @@ p:first-of-type {
     text-indent: 0;
 }
 
+.book-title {
+    text-align: center;
+    margin-bottom: 0.5em;
+}
+
+.book-info {
+    margin: 1em 0;
+}
+
+.book-info p {
+    margin-bottom: 0.3em;
+    text-indent: 0;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 1.5em 0;
+}
+
+.book-description p {
+    margin-bottom: 0.8em;
+}
+
 section {
     page-break-after: always;
 }
@@ -485,6 +586,8 @@ section {
 img {
     max-width: 100%;
     height: auto;
+    display: block;
+    margin: 1em auto;
 }
 """.trimIndent()
         
@@ -499,21 +602,20 @@ img {
             content
         }
         
-        // Split into paragraphs and wrap in <p> tags, preserving <img> tags
+        // Split into paragraphs and wrap in <p> tags, escaping XML entities and preserving <img> tags
         return cleanedContent
-            .split("\n\n")
+            .split("\n\n", "\n")
+            .map { it.trim() }
             .filter { it.isNotBlank() }
             .joinToString("\n") { paragraph ->
-                val trimmed = paragraph.trim()
-                if (trimmed.isNotBlank()) {
-                    // Don't wrap <img> tags in <p> - they're block-level in EPUB
-                    if (trimmed.startsWith("<img")) {
-                        "    $trimmed"
-                    } else {
-                        "    <p>${trimmed}</p>"
-                    }
+                if (paragraph.startsWith("<img", ignoreCase = true)) {
+                    val safeImg = if (paragraph.endsWith("/>")) paragraph else paragraph.removeSuffix(">") + "/>"
+                    "    $safeImg"
+                } else if (paragraph.startsWith("<p", ignoreCase = true) && paragraph.endsWith("</p>", ignoreCase = true)) {
+                    val inner = paragraph.substringAfter(">").substringBeforeLast("</p>").trim()
+                    "    <p>${inner.escapeXml()}</p>"
                 } else {
-                    ""
+                    "    <p>${paragraph.escapeXml()}</p>"
                 }
             }
     }
@@ -679,6 +781,12 @@ img {
     
     private fun String.escapeXml(): String {
         return this
+            .replace("&amp;", "&")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&quot;", "\"")
+            .replace("&apos;", "'")
+            .replace("&#39;", "'")
             .replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")

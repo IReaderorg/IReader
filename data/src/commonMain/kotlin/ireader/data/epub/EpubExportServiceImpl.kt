@@ -397,21 +397,11 @@ $chapterSpine
         
         // If content doesn't have paragraph tags, add them
         if (!cleaned.contains("<p>") && !cleaned.contains("<p ")) {
-            // Split by double newlines and wrap in paragraphs
+            // Split by double newlines and wrap in paragraphs with XML escaping
             cleaned = cleaned.split(Regex("\n\n+"))
                 .filter { it.trim().isNotBlank() }
-                .joinToString("\n") { "<p>${it.trim()}</p>" }
+                .joinToString("\n") { "<p>${escapeXml(it.trim())}</p>" }
         }
-        
-        // Fix quotation marks
-        cleaned = cleaned
-            .replace("\"", """)
-            .replace("\"", """)
-            .replace("'", "'")
-            .replace("'", "'")
-        
-        // Fix em dashes
-        cleaned = cleaned.replace(" - ", "—")
         
         // Remove extra whitespace
         cleaned = cleaned.replace(Regex("\\s+"), " ")
@@ -423,6 +413,12 @@ $chapterSpine
      * Escape XML special characters
      */
     private fun escapeXml(text: String): String = text
+        .replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&apos;", "'")
+        .replace("&#39;", "'")
         .replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
