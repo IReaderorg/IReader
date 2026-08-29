@@ -202,6 +202,7 @@ fun ImageLoaderImage(
                     .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .crossfade(effectiveCrossfade)
                     .size(Size(performanceConfig.thumbnailSize, performanceConfig.thumbnailSize))
+                    .precision(coil3.size.Precision.INEXACT)
                     .build()
             }
             

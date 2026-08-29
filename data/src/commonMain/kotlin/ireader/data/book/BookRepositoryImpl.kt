@@ -189,37 +189,41 @@ class BookRepositoryImpl(
     }
 
     override suspend fun updateBook(book: List<Book>) {
-        handler.await(inTransaction = true) {
-            book.forEach { bookItem ->
-                try {
-                    bookQueries.update(
-                        source = bookItem.sourceId,
-                        dateAdded = bookItem.dateAdded,
-                        lastUpdate = bookItem.lastUpdate,
-                        title = bookItem.title,
-                        status = bookItem.status,
-                        description = bookItem.description,
-                        author = bookItem.author,
-                        url = bookItem.key,
-                        chapterFlags = bookItem.flags,
-                        coverLastModified = 0,
-                        thumbnailUrl = bookItem.cover,
-                        customCover = bookItem.customCover,
-                        viewer = bookItem.viewer,
-                        id = bookItem.id,
-                        initialized = bookItem.initialized,
-                        favorite = bookItem.favorite,
-                        genre = bookItem.genres.let(bookGenresConverter::encode),
-                        isPinned = bookItem.isPinned,
-                        pinnedOrder = bookItem.pinnedOrder.toLong(),
-                        isArchived = bookItem.isArchived,
-                    )
-                } catch (e: Exception) {
-                    IReaderLog.error("Failed to update book: ${bookItem.title}", e)
+        if (book.isEmpty()) return
+        val batchSize = 100
+        book.chunked(batchSize).forEach { chunk ->
+            handler.await(inTransaction = true) {
+                chunk.forEach { bookItem ->
+                    try {
+                        bookQueries.update(
+                            source = bookItem.sourceId,
+                            dateAdded = bookItem.dateAdded,
+                            lastUpdate = bookItem.lastUpdate,
+                            title = bookItem.title,
+                            status = bookItem.status,
+                            description = bookItem.description,
+                            author = bookItem.author,
+                            url = bookItem.key,
+                            chapterFlags = bookItem.flags,
+                            coverLastModified = 0,
+                            thumbnailUrl = bookItem.cover,
+                            customCover = bookItem.customCover,
+                            viewer = bookItem.viewer,
+                            id = bookItem.id,
+                            initialized = bookItem.initialized,
+                            favorite = bookItem.favorite,
+                            genre = bookItem.genres.let(bookGenresConverter::encode),
+                            isPinned = bookItem.isPinned,
+                            pinnedOrder = bookItem.pinnedOrder.toLong(),
+                            isArchived = bookItem.isArchived,
+                        )
+                    } catch (e: Exception) {
+                        IReaderLog.error("Failed to update book: ${bookItem.title}", e)
+                    }
                 }
             }
-            IReaderLog.info("Batch book update completed: ${book.size} books")
         }
+        IReaderLog.info("Batch book update completed: ${book.size} books")
         // Notify batch update
         if (book.size <= 100) {
             changeNotifier?.notifyChange(LibraryChangeNotifier.ChangeType.BooksUpdated(book.map { it.id }))

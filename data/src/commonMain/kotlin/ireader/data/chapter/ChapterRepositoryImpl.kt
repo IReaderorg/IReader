@@ -168,26 +168,32 @@ class ChapterRepositoryImpl(
             dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         }
         
-        val result = handler.awaitListAsync(true) {
-            chapters.forEach { chapter ->
-                chapterQueries.upsert(
-                    chapter.id.toDB(),
-                    chapter.bookId,
-                    chapter.key,
-                    chapter.name,
-                    chapter.translator,
-                    chapter.read,
-                    chapter.bookmark,
-                    chapter.lastPageRead,
-                    chapter.number,
-                    chapter.sourceOrder,
-                    chapter.dateFetch,
-                    chapter.dateUpload,
-                    chapter.content,
-                    chapter.type
-                )
+        val batchSize = 200
+        val results = mutableListOf<Long>()
+        
+        chapters.chunked(batchSize).forEach { chunk ->
+            val chunkResult = handler.awaitListAsync(true) {
+                chunk.forEach { chapter ->
+                    chapterQueries.upsert(
+                        chapter.id.toDB(),
+                        chapter.bookId,
+                        chapter.key,
+                        chapter.name,
+                        chapter.translator,
+                        chapter.read,
+                        chapter.bookmark,
+                        chapter.lastPageRead,
+                        chapter.number,
+                        chapter.sourceOrder,
+                        chapter.dateFetch,
+                        chapter.dateUpload,
+                        chapter.content,
+                        chapter.type
+                    )
+                }
+                chapterQueries.selectLastInsertedRowId()
             }
-            chapterQueries.selectLastInsertedRowId()
+            results.addAll(chunkResult)
         }
         
         // Invalidate cache AFTER the insert to ensure fresh data is read
@@ -204,7 +210,7 @@ class ChapterRepositoryImpl(
             }
         }
         
-        return result
+        return results
     }
 
 

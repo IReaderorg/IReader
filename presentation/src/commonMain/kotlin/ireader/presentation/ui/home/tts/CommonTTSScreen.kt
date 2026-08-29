@@ -206,6 +206,9 @@ object SentenceHighlighter {
         return true
     }
     
+    private const val MAX_CACHE_SIZE = 512
+    private val sentenceCache = mutableMapOf<String, List<String>>()
+
     /**
      * Split text into sentences for highlighting
      * Only splits on sentence endings to keep chunks larger and more natural
@@ -213,6 +216,8 @@ object SentenceHighlighter {
      */
     fun splitIntoSentences(text: String): List<String> {
         if (text.isBlank()) return emptyList()
+        
+        sentenceCache[text]?.let { return it }
         
         // Split by sentence endings
         val sentences = text.split(SENTENCE_END_PATTERN)
@@ -246,7 +251,12 @@ object SentenceHighlighter {
             }
         }
         
-        return if (result.isEmpty()) listOf(text.trim()) else result
+        val finalResult = if (result.isEmpty()) listOf(text.trim()) else result
+        if (sentenceCache.size >= MAX_CACHE_SIZE) {
+            sentenceCache.clear()
+        }
+        sentenceCache[text] = finalResult
+        return finalResult
     }
     
     // Internal word count - counts only actual words, not punctuation

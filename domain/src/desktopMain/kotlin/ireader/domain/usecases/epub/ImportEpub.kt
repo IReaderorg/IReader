@@ -89,13 +89,11 @@ actual class ImportEpub(
                 lastUpdate = currentTimeToLong()
             ).let { bookRepository.upsert(it) }
             
-            // Extract chapters
-            val chapters = extractChapters(zip, opfDoc, bookId, key)
-            if (chapters.isEmpty()) {
+            // Extract and insert chapters in streaming batches
+            val chapterCount = extractAndInsertChapters(zip, opfDoc, bookId, key)
+            if (chapterCount == 0) {
                 throw Exception("No readable content found in EPUB")
             }
-            
-            chapterRepository.insertChapters(chapters)
         }
     }
     
@@ -157,14 +155,17 @@ actual class ImportEpub(
         return coverFile.toString()
     }
     
-    private fun extractChapters(zip: ZipFile, opfDoc: Document, bookId: Long, key: String): List<Chapter> {
-        val chapters = mutableListOf<Chapter>()
+    private suspend fun extractAndInsertChapters(zip: ZipFile, opfDoc: Document, bookId: Long, key: String): Int {
         val opfPath = findOpfFile(zip)?.name ?: ""
         val basePath = if (opfPath.contains("/")) opfPath.substringBeforeLast("/") + "/" else ""
         
         // Get spine items
         val spineItems = opfDoc.select("spine itemref")
         val manifestItems = opfDoc.select("manifest item").associateBy { it.attr("id") }
+        
+        val batch = mutableListOf<Chapter>()
+        var totalInserted = 0
+        val batchSize = 50
         
         spineItems.forEachIndexed { index, itemref ->
             val idref = itemref.attr("idref")
@@ -186,7 +187,7 @@ actual class ImportEpub(
                 val content = extractTextContent(doc)
                 
                 if (content.isNotEmpty()) {
-                    chapters.add(
+                    batch.add(
                         Chapter(
                             name = title,
                             key = "${key}_chapter_$index",
@@ -196,13 +197,25 @@ actual class ImportEpub(
                             dateUpload = currentTimeToLong()
                         )
                     )
+                    
+                    if (batch.size >= batchSize) {
+                        chapterRepository.insertChapters(batch)
+                        totalInserted += batch.size
+                        batch.clear()
+                    }
                 }
             } catch (_: Exception) {
                 // Silently ignore chapter extraction errors
             }
         }
         
-        return chapters
+        if (batch.isNotEmpty()) {
+            chapterRepository.insertChapters(batch)
+            totalInserted += batch.size
+            batch.clear()
+        }
+        
+        return totalInserted
     }
     
     private fun extractTextContent(doc: Document): List<Text> {

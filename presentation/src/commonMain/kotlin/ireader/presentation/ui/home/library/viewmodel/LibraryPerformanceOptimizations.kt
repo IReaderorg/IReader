@@ -103,7 +103,10 @@ class SelectionManager {
  * 
  * Uses structural sharing to minimize allocations when toggling filters.
  */
-class FilterManager(initialFilters: List<LibraryFilter>) {
+class FilterManager(
+    initialFilters: List<LibraryFilter>,
+    scope: kotlinx.coroutines.CoroutineScope? = null
+) {
     private val _filters = MutableStateFlow(initialFilters)
     val filters: StateFlow<List<LibraryFilter>> = _filters.asStateFlow()
     
@@ -118,8 +121,8 @@ class FilterManager(initialFilters: List<LibraryFilter>) {
                 .toSet()
         }
         .stateIn(
-            scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default),
-            started = SharingStarted.Eagerly,
+            scope = scope ?: kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptySet()
         )
     
