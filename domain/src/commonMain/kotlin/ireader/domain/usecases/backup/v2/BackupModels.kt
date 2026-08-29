@@ -275,6 +275,13 @@ data class SettingSnapshot(
     @ProtoNumber(2) val value: String,
 )
 
+@Serializable
+data class BookContentSnapshot(
+    @ProtoNumber(1) val bookKey: String,
+    @ProtoNumber(2) val bookSourceId: Long,
+    @ProtoNumber(3) val chapters: List<ChapterSnapshot> = emptyList(),
+)
+
 // ── Operation results ─────────────────────────────────────────────────────
 
 data class BackupSummary(
@@ -318,7 +325,7 @@ data class ValidationResult(
 data class BackupOptions(
     val includeBooks: Boolean = true,
     val includeChapters: Boolean = true,
-    val includeChapterContent: Boolean = false,
+    val includeChapterContent: Boolean = true,
     val includeCategories: Boolean = true,
     val includeHistory: Boolean = true,
     val includeTracks: Boolean = true,

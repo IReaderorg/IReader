@@ -66,6 +66,9 @@ actual val DomainModule: Module = module {
     
     // Backup scheduling
     single<ScheduleAutomaticBackup> { ScheduleAutomaticBackupImpl() }
+    single<ireader.domain.usecases.backup.v2.BackupArchiveStreamer> {
+        ireader.domain.usecases.backup.v2.IosBackupArchiveStreamer()
+    }
     
     // Cloud providers
     // Note: These require OAuth tokens to be set via setAccessToken()

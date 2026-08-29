@@ -125,6 +125,9 @@ actual val DomainModule: Module = module {
     single<FileSaver> {
        DesktopFileSaver()
     }
+    single<ireader.domain.usecases.backup.v2.BackupArchiveStreamer> {
+        ireader.domain.usecases.backup.v2.DesktopBackupArchiveStreamer()
+    }
     single<ImportEpub> { ImportEpub(get(), get(), get(), get(), get()) }
     single<ImportPdf> { ImportPdf(get(), get(), get(), get()) }
     

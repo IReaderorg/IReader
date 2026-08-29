@@ -185,6 +185,9 @@ actual val DomainModule = module {
     single<FileSaver> {
         AndroidFileSaver(get())
     }
+    single<ireader.domain.usecases.backup.v2.BackupArchiveStreamer> {
+        ireader.domain.usecases.backup.v2.AndroidBackupArchiveStreamer(androidContext())
+    }
     single {
         AndroidReaderPrefUseCases(
                 selectedFontStateUseCase = SelectedFontStateUseCase(get(),get()),

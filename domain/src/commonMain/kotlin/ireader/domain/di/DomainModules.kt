@@ -112,6 +112,7 @@ val DomainServices = module {
             uiPreferences = get(),
             readerPreferences = get(),
             transactions = get(),
+            archiveStreamer = getOrNull(),
         )
     }
 

@@ -1,0 +1,86 @@
+package ireader.domain.usecases.backup.v2
+
+import ireader.domain.models.common.Uri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okio.Path.Companion.toPath
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
+
+class DesktopBackupArchiveStreamer : BackupArchiveStreamer {
+
+    override suspend fun createArchive(
+        uri: Uri,
+        metadataBytes: ByteArray,
+        totalBooks: Int,
+        writeBookEntries: suspend (emitEntry: suspend (entryName: String, bytes: ByteArray) -> Unit) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            val file = uri.uriString.toPath().toFile()
+            file.parentFile?.mkdirs()
+
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(file))).use { zipOut ->
+                // 1. Write metadata entry
+                val metaEntry = ZipEntry("metadata.pb")
+                metaEntry.size = metadataBytes.size.toLong()
+                zipOut.putNextEntry(metaEntry)
+                zipOut.write(metadataBytes)
+                zipOut.closeEntry()
+
+                // 2. Stream book entries one-by-one
+                writeBookEntries { entryName, bytes ->
+                    val bookEntry = ZipEntry(entryName)
+                    bookEntry.size = bytes.size.toLong()
+                    zipOut.putNextEntry(bookEntry)
+                    zipOut.write(bytes)
+                    zipOut.closeEntry()
+                    zipOut.flush()
+                }
+            }
+        }
+    }
+
+    override suspend fun extractArchive(
+        uri: Uri,
+        onMetadata: suspend (ByteArray) -> Unit,
+        onBookContent: suspend (entryName: String, bytes: ByteArray) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            val file = uri.uriString.toPath().toFile()
+            ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zipIn ->
+                while (true) {
+                    val entry = zipIn.nextEntry ?: break
+                    val bytes = zipIn.readBytes()
+                    if (entry.name == "metadata.pb" || entry.name == "metadata.proto.gz") {
+                        onMetadata(bytes)
+                    } else if (entry.name.startsWith("chapters/") || entry.name.endsWith(".pb")) {
+                        onBookContent(entry.name, bytes)
+                    }
+                    zipIn.closeEntry()
+                }
+            }
+        }
+    }
+
+    override suspend fun isZipArchive(uri: Uri): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val file = uri.uriString.toPath().toFile()
+                if (!file.exists()) return@withContext false
+                FileInputStream(file).use { input ->
+                    val header = ByteArray(4)
+                    val read = input.read(header)
+                    read == 4 && header[0] == 0x50.toByte() && header[1] == 0x4B.toByte() &&
+                            header[2] == 0x03.toByte() && header[3] == 0x04.toByte()
+                }
+            } catch (_: Exception) {
+                false
+            }
+        }
+    }
+}

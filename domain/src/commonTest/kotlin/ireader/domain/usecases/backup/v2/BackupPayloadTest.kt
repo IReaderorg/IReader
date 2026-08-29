@@ -148,6 +148,7 @@ class BackupPayloadTest {
         val options = BackupOptions()
         assertTrue(options.includeBooks)
         assertTrue(options.includeChapters)
+        assertTrue(options.includeChapterContent)
         assertTrue(options.includeCategories)
         assertTrue(options.includeHistory)
         assertTrue(options.includeTracks)
@@ -165,5 +166,36 @@ class BackupPayloadTest {
         assertTrue(options.restoreTracks)
         assertTrue(options.restoreThemes)
         assertTrue(options.restoreSettings)
+    }
+
+    @Test
+    fun testBookContentSnapshotSerializationAndDeserialization() {
+        val snapshot = BookContentSnapshot(
+            bookKey = "book-1",
+            bookSourceId = 1L,
+            chapters = listOf(
+                ChapterSnapshot(
+                    key = "ch-1",
+                    name = "Chapter 1",
+                    content = listOf(ireader.core.source.model.Text("Chapter 1 full text")).encode(),
+                ),
+                ChapterSnapshot(
+                    key = "ch-2",
+                    name = "Chapter 2",
+                    content = listOf(ireader.core.source.model.Text("Chapter 2 full text")).encode(),
+                )
+            )
+        )
+
+        val bytes = kotlinx.serialization.protobuf.ProtoBuf.encodeToByteArray(BookContentSnapshot.serializer(), snapshot)
+        assertTrue(bytes.isNotEmpty())
+
+        val decoded = kotlinx.serialization.protobuf.ProtoBuf.decodeFromByteArray(BookContentSnapshot.serializer(), bytes)
+        assertEquals("book-1", decoded.bookKey)
+        assertEquals(1L, decoded.bookSourceId)
+        assertEquals(2, decoded.chapters.size)
+        assertEquals("Chapter 1", decoded.chapters[0].name)
+        val ch1 = decoded.chapters[0].toChapter(1L)
+        assertEquals("Chapter 1 full text", (ch1.content[0] as ireader.core.source.model.Text).text)
     }
 }
