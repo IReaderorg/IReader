@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS history(
     ON DELETE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read DESC);
+CREATE INDEX IF NOT EXISTS idx_history_chapter_id ON history(chapter_id);
+CREATE INDEX IF NOT EXISTS idx_history_time_read ON history(time_read DESC);
+
+
 findHistoryByChapterId:
 SELECT * FROM history WHERE chapter_id = :chapterId ORDER BY history.last_read DESC LIMIT 1;
 

@@ -1,6 +1,8 @@
 package ireader.domain.models.entities
 
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class History(
     val id: Long,
     val chapterId: Long,
@@ -8,4 +10,3 @@ data class History(
     val readDuration: Long,
     val progress: Float = 0f,
 )
-

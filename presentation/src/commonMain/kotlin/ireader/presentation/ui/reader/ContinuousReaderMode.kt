@@ -51,15 +51,15 @@ internal fun ContinuousReaderContent(
         }
     }
 
-    // Update reading time estimation
-    val visibleItemInfo = remember { derivedStateOf { lazyListState.layoutInfo } }
-    LaunchedEffect(visibleItemInfo.value, vm.stateChapter?.id) {
-        val layoutInfo = lazyListState.layoutInfo
-        val totalItems = layoutInfo.totalItemsCount
-        val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
-        if (totalItems > 0 && !vm.isLoading) {
-            val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
-            vm.updateReadingTimeEstimation(scrollProgress)
+    // Update reading time estimation efficiently on visible item change
+    LaunchedEffect(lazyListState) {
+        androidx.compose.runtime.snapshotFlow { 
+            lazyListState.firstVisibleItemIndex to lazyListState.layoutInfo.totalItemsCount 
+        }.collect { (firstVisibleItem, totalItems) ->
+            if (totalItems > 0 && !vm.isLoading) {
+                val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
+                vm.updateReadingTimeEstimation(scrollProgress)
+            }
         }
     }
 

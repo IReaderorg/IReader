@@ -1,6 +1,8 @@
 package ireader.domain.models.entities
 
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class Category(
     val id: Long = 0,
     val name: String = "",
@@ -33,6 +35,7 @@ data class Category(
     }
 }
 
+@Immutable
 data class BookCategory(
     val bookId: Long,
     val categoryId: Long,

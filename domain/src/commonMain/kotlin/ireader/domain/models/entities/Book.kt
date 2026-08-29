@@ -1,10 +1,12 @@
 package ireader.domain.models.entities
 
-
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import ireader.core.source.model.MangaInfo
 import kotlinx.serialization.Serializable
 import kotlin.time.ExperimentalTime
 
+@Immutable
 @Serializable
 data class Book(
     override val id: Long = 0,
@@ -230,6 +232,7 @@ data class LibraryBook(
     }
 }
 
+@Stable
 interface BaseBook {
     val id: Long
     val sourceId: Long
@@ -239,6 +242,7 @@ interface BaseBook {
     val customCover: String
 }
 
+@Immutable
 data class BookItem(
     val column: Long = 0,
     override val id: Long = 0,

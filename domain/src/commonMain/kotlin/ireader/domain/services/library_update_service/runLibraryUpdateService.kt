@@ -59,28 +59,27 @@ suspend fun runLibraryUpdateService(
                         onSuccess = {}
                     )
 
-                    val newChapters =
-                        remoteChapters.filter { chapter -> chapter.key !in chapters.map { it.key } }
+                    val existingKeys = chapters.mapTo(HashSet(chapters.size)) { it.key }
+                    val newChapters = remoteChapters.filter { it.key !in existingKeys }
 
                     if (newChapters.isNotEmpty()) {
                         updatedBookSize += 1
-                    }
-                    withContext(ioDispatcher) {
-
-                        insertUseCases.insertChapters(
-                            newChapters.map {
-                                it.copy(
-                                    bookId = book.id,
-                                    dateFetch = kotlin.time.Clock.System.now().toEpochMilliseconds(),
-                                )
-                            }
-                        )
-                        insertUseCases.updateBook.update(
-                            book.copy(
-                                lastUpdate = kotlin.time.Clock.System.now()
-                                    .toEpochMilliseconds()
+                        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                        withContext(ioDispatcher) {
+                            insertUseCases.insertChapters(
+                                newChapters.map {
+                                    it.copy(
+                                        bookId = book.id,
+                                        dateFetch = now,
+                                    )
+                                }
                             )
-                        )
+                            insertUseCases.updateBook.update(
+                                book.copy(
+                                    lastUpdate = now
+                                )
+                            )
+                        }
                     }
                 }
             }

@@ -1,11 +1,14 @@
 package ireader.domain.usecases.backup.v2
 
+import ireader.core.source.model.decode
+import ireader.core.source.model.encode
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.Chapter
-import ireader.core.source.model.decode
-import ireader.core.source.model.encode
-import kotlinx.serialization.ExperimentalSerializationApi
+import ireader.domain.models.entities.History
+import ireader.domain.models.entities.Track
+import ireader.domain.models.entities.TrackStatus
+import ireader.domain.models.theme.ReaderTheme
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -18,9 +21,14 @@ data class BackupPayload(
     @ProtoNumber(3) val books: List<BookSnapshot> = emptyList(),
     @ProtoNumber(4) val categories: List<CategorySnapshot> = emptyList(),
     @ProtoNumber(5) val metadata: BackupMetadata = BackupMetadata(),
+    @ProtoNumber(6) val histories: List<HistorySnapshot> = emptyList(),
+    @ProtoNumber(7) val tracks: List<TrackSnapshot> = emptyList(),
+    @ProtoNumber(8) val themes: List<ReaderThemeSnapshot> = emptyList(),
+    @ProtoNumber(9) val readingStats: List<ReadingStatsSnapshot> = emptyList(),
+    @ProtoNumber(10) val settings: List<SettingSnapshot> = emptyList(),
 ) {
     companion object {
-        const val CURRENT_VERSION = 3
+        const val CURRENT_VERSION = 4
     }
 }
 
@@ -31,6 +39,10 @@ data class BackupMetadata(
     @ProtoNumber(3) val createdAt: Long = 0L,
     @ProtoNumber(4) val bookCount: Int = 0,
     @ProtoNumber(5) val chapterCount: Int = 0,
+    @ProtoNumber(6) val historyCount: Int = 0,
+    @ProtoNumber(7) val categoryCount: Int = 0,
+    @ProtoNumber(8) val trackCount: Int = 0,
+    @ProtoNumber(9) val themeCount: Int = 0,
 )
 
 @Serializable
@@ -167,17 +179,121 @@ data class CategorySnapshot(
     }
 }
 
+@Serializable
+data class HistorySnapshot(
+    @ProtoNumber(1) val bookKey: String,
+    @ProtoNumber(2) val bookSourceId: Long,
+    @ProtoNumber(3) val chapterKey: String,
+    @ProtoNumber(4) val lastRead: Long = 0,
+    @ProtoNumber(5) val timeRead: Long = 0,
+    @ProtoNumber(6) val progress: Float = 0f,
+)
+
+@Serializable
+data class TrackSnapshot(
+    @ProtoNumber(1) val bookKey: String,
+    @ProtoNumber(2) val bookSourceId: Long,
+    @ProtoNumber(3) val siteId: Int,
+    @ProtoNumber(4) val entryId: Long,
+    @ProtoNumber(5) val mediaId: Long = 0,
+    @ProtoNumber(6) val mediaUrl: String = "",
+    @ProtoNumber(7) val title: String = "",
+    @ProtoNumber(8) val lastRead: Float = 0f,
+    @ProtoNumber(9) val totalChapters: Int = 0,
+    @ProtoNumber(10) val score: Float = 0f,
+    @ProtoNumber(11) val status: Int = 1,
+    @ProtoNumber(12) val startReadTime: Long = 0,
+    @ProtoNumber(13) val endReadTime: Long = 0,
+) {
+    fun toTrack(mangaId: Long, trackId: Long = 0): Track = Track(
+        id = trackId,
+        mangaId = mangaId,
+        siteId = siteId,
+        entryId = entryId,
+        mediaId = mediaId,
+        mediaUrl = mediaUrl,
+        title = title,
+        lastRead = lastRead,
+        totalChapters = totalChapters,
+        score = score,
+        status = try { TrackStatus.from(status) } catch (_: Exception) { TrackStatus.Reading },
+        startReadTime = startReadTime,
+        endReadTime = endReadTime
+    )
+
+    companion object {
+        fun fromTrack(track: Track, bookKey: String, bookSourceId: Long): TrackSnapshot = TrackSnapshot(
+            bookKey = bookKey,
+            bookSourceId = bookSourceId,
+            siteId = track.siteId,
+            entryId = track.entryId,
+            mediaId = track.mediaId,
+            mediaUrl = track.mediaUrl,
+            title = track.title,
+            lastRead = track.lastRead,
+            totalChapters = track.totalChapters,
+            score = track.score,
+            status = track.status.value,
+            startReadTime = track.startReadTime,
+            endReadTime = track.endReadTime
+        )
+    }
+}
+
+@Serializable
+data class ReaderThemeSnapshot(
+    @ProtoNumber(1) val id: Long = 0,
+    @ProtoNumber(2) val backgroundColor: Int,
+    @ProtoNumber(3) val onTextColor: Int,
+) {
+    fun toReaderTheme(): ReaderTheme = ReaderTheme(
+        id = id,
+        backgroundColor = backgroundColor,
+        onTextColor = onTextColor
+    )
+
+    companion object {
+        fun fromReaderTheme(theme: ReaderTheme): ReaderThemeSnapshot = ReaderThemeSnapshot(
+            id = theme.id,
+            backgroundColor = theme.backgroundColor,
+            onTextColor = theme.onTextColor
+        )
+    }
+}
+
+@Serializable
+data class ReadingStatsSnapshot(
+    @ProtoNumber(1) val date: Long,
+    @ProtoNumber(2) val readDuration: Long,
+    @ProtoNumber(3) val chaptersRead: Long,
+    @ProtoNumber(4) val wordsRead: Long,
+)
+
+@Serializable
+data class SettingSnapshot(
+    @ProtoNumber(1) val key: String,
+    @ProtoNumber(2) val value: String,
+)
+
 // ── Operation results ─────────────────────────────────────────────────────
 
 data class BackupSummary(
     val booksCount: Int,
     val chaptersCount: Int,
-    val fileSizeBytes: Long,
+    val historyCount: Int = 0,
+    val categoriesCount: Int = 0,
+    val tracksCount: Int = 0,
+    val fileSizeBytes: Long = 0,
 )
 
 data class RestoreSummary(
     val booksRestored: Int,
     val chaptersRestored: Int,
+    val historyRestored: Int = 0,
+    val categoriesRestored: Int = 0,
+    val tracksRestored: Int = 0,
+    val themesRestored: Int = 0,
+    val settingsRestored: Int = 0,
     val errors: List<RestoreItemError> = emptyList(),
 )
 
@@ -192,19 +308,32 @@ data class ValidationResult(
     val version: Int = 0,
     val bookCount: Int = 0,
     val chapterCount: Int = 0,
+    val historyCount: Int = 0,
+    val categoryCount: Int = 0,
     val errors: List<String> = emptyList(),
 )
 
-// ── Options ───────────────────────────────────────────────────────────────
+// ── Options (ALL DEFAULT TO TRUE FOR FULL BACKUP & RESTORE) ────────────────
 
 data class BackupOptions(
+    val includeBooks: Boolean = true,
     val includeChapters: Boolean = true,
+    val includeChapterContent: Boolean = true,
     val includeCategories: Boolean = true,
+    val includeHistory: Boolean = true,
+    val includeTracks: Boolean = true,
+    val includeThemes: Boolean = true,
+    val includeSettings: Boolean = true,
 )
 
 data class RestoreOptions(
+    val restoreBooks: Boolean = true,
     val restoreChapters: Boolean = true,
     val restoreCategories: Boolean = true,
+    val restoreHistory: Boolean = true,
+    val restoreTracks: Boolean = true,
+    val restoreThemes: Boolean = true,
+    val restoreSettings: Boolean = true,
     val mergeMode: MergeMode = MergeMode.MERGE_PREFER_BACKUP,
 )
 

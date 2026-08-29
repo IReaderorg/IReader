@@ -9,6 +9,25 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlin.time.ExperimentalTime
 
+// Pre-compiled regex patterns to avoid repeated allocations during parsing
+private val WHITESPACE_REGEX = Regex("\\s+")
+private val LEADING_TRAILING_SPACES_REGEX = Regex("^\\s+|\\s+$")
+private val MULTI_NEWLINE_REGEX = Regex("\n{3,}")
+private val ISO_DATE_REGEX = Regex("""(\d{4})-(\d{2})-(\d{2})""")
+private val US_DATE_REGEX = Regex("""(\d{2})/(\d{2})/(\d{4})""")
+private val EU_DATE_REGEX = Regex("""(\d{2})\.(\d{2})\.(\d{4})""")
+
+private val CHAPTER_NUMBER_PATTERNS = listOf(
+    Regex("""(?:chapter|ch\.?|episode|ep\.?)\s*(\d+(?:\.\d+)?)""", RegexOption.IGNORE_CASE),
+    Regex("""^(\d+(?:\.\d+)?)(?:\s*[-:.]|\s+)"""),
+    Regex("""第\s*(\d+(?:\.\d+)?)\s*[章话]"""),
+    Regex("""(\d+(?:\.\d+)?)\s*화"""),
+    Regex("""(\d+(?:\.\d+)?)\s*話""")
+)
+
+private const val UNWANTED_ELEMENTS_SELECTOR =
+    "script, style, iframe, noscript, svg, nav, footer, header, aside, .advertisement, .ads, .ad, .social-share, .social, [class*='ad-'], [class*='ads-'], [id*='ad-'], [id*='ads-'], .popup, .modal, .overlay"
+
 /**
  * Enhanced HTML parsing utilities for better novel content extraction
  */
@@ -19,8 +38,8 @@ object ParsingUtils {
      */
     fun Element.extractCleanText(): String {
         return this.text()
-            .replace(Regex("\\s+"), " ")
-            .replace(Regex("^\\s+|\\s+$"), "")
+            .replace(WHITESPACE_REGEX, " ")
+            .replace(LEADING_TRAILING_SPACES_REGEX, "")
             .trim()
     }
     
@@ -39,7 +58,7 @@ object ParsingUtils {
                 if (text.isNotBlank() && text.length > 1) text else null
             }
             .joinToString("\n\n")
-            .replace(Regex("\n{3,}"), "\n\n")
+            .replace(MULTI_NEWLINE_REGEX, "\n\n")
             .trim()
     }
     
@@ -97,42 +116,23 @@ object ParsingUtils {
      * Extract chapter number from text using various patterns
      */
     fun extractChapterNumber(text: String): Float? {
-        val patterns = listOf(
-            Regex("""(?:chapter|ch\.?|episode|ep\.?)\s*(\d+(?:\.\d+)?)""", RegexOption.IGNORE_CASE),
-            Regex("""^(\d+(?:\.\d+)?)(?:\s*[-:.]|\s+)"""),
-            Regex("""第\s*(\d+(?:\.\d+)?)\s*[章话]"""),
-            Regex("""(\d+(?:\.\d+)?)\s*화"""),
-            Regex("""(\d+(?:\.\d+)?)\s*話""")
-        )
-        
-        for (pattern in patterns) {
+        for (pattern in CHAPTER_NUMBER_PATTERNS) {
             val match = pattern.find(text)
             if (match != null) {
                 return match.groupValues[1].toFloatOrNull()
             }
         }
-        
         return null
     }
     
     /**
-     * Clean HTML content by removing unwanted elements
+     * Clean HTML content by removing unwanted elements in a single selector pass
      */
     fun Document.cleanContent(): Document {
-        val unwantedSelectors = listOf(
-            "script", "style", "iframe", "noscript", "svg",
-            "nav", "footer", "header", "aside",
-            ".advertisement", ".ads", ".ad", ".social-share", ".social",
-            "[class*='ad-']", "[class*='ads-']", "[id*='ad-']", "[id*='ads-']",
-            ".popup", ".modal", ".overlay"
-        )
-        
-        unwantedSelectors.forEach { selector ->
-            try {
-                this.select(selector).remove()
-            } catch (e: Exception) {
-                // Continue if selector fails
-            }
+        try {
+            this.select(UNWANTED_ELEMENTS_SELECTOR).remove()
+        } catch (_: Exception) {
+            // Continue if selector fails
         }
         
         try {
@@ -141,7 +141,7 @@ object ParsingUtils {
                     .filter { it.nodeName() == "#comment" }
                     .forEach { it.remove() }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Continue if comment removal fails
         }
         
@@ -172,12 +172,12 @@ object ParsingUtils {
                 val element = this.selectFirst(selector)
                 if (element != null) {
                     val text = element.text()
-                    val wordCount = text.split(Regex("\\s+")).size
+                    val wordCount = text.split(WHITESPACE_REGEX).size
                     if (text.length > 100 && wordCount > 20) {
                         return element
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 continue
             }
         }
@@ -187,11 +187,11 @@ object ParsingUtils {
                 ?.select("div, article, section")
                 ?.filter { element ->
                     val text = element.text()
-                    val wordCount = text.split(Regex("\\s+")).size
+                    val wordCount = text.split(WHITESPACE_REGEX).size
                     text.length > 100 && wordCount > 20
                 }
                 ?.maxByOrNull { it.text().length }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -202,44 +202,38 @@ object ParsingUtils {
      */
     @OptIn(ExperimentalTime::class)
     fun parseDate(dateString: String): Long? {
-        // Pattern: YYYY-MM-DD (ISO format)
-        val isoPattern = Regex("""(\d{4})-(\d{2})-(\d{2})""")
-        isoPattern.find(dateString)?.let { match ->
+        ISO_DATE_REGEX.find(dateString)?.let { match ->
             val year = match.groupValues[1].toIntOrNull() ?: return@let
             val month = match.groupValues[2].toIntOrNull() ?: return@let
             val day = match.groupValues[3].toIntOrNull() ?: return@let
             return try {
                 val date = LocalDate(year, month, day)
                 date.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
         
-        // Pattern: MM/DD/YYYY (US format)
-        val usPattern = Regex("""(\d{2})/(\d{2})/(\d{4})""")
-        usPattern.find(dateString)?.let { match ->
+        US_DATE_REGEX.find(dateString)?.let { match ->
             val month = match.groupValues[1].toIntOrNull() ?: return@let
             val day = match.groupValues[2].toIntOrNull() ?: return@let
             val year = match.groupValues[3].toIntOrNull() ?: return@let
             return try {
                 val date = LocalDate(year, month, day)
                 date.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
         
-        // Pattern: DD.MM.YYYY (European format)
-        val euPattern = Regex("""(\d{2})\.(\d{2})\.(\d{4})""")
-        euPattern.find(dateString)?.let { match ->
+        EU_DATE_REGEX.find(dateString)?.let { match ->
             val day = match.groupValues[1].toIntOrNull() ?: return@let
             val month = match.groupValues[2].toIntOrNull() ?: return@let
             val year = match.groupValues[3].toIntOrNull() ?: return@let
             return try {
                 val date = LocalDate(year, month, day)
                 date.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
@@ -269,7 +263,7 @@ object ParsingUtils {
     fun List<String>.removeDuplicates(): List<String> {
         val seen = mutableSetOf<String>()
         return this.filter { text ->
-            val normalized = text.lowercase().replace(Regex("\\s+"), "")
+            val normalized = text.lowercase().replace(WHITESPACE_REGEX, "")
             if (normalized in seen) {
                 false
             } else {
@@ -283,7 +277,7 @@ object ParsingUtils {
      * Detect if content is likely a chapter or book description
      */
     fun detectContentType(text: String): ContentType {
-        val wordCount = text.split(Regex("\\s+")).size
+        val wordCount = text.split(WHITESPACE_REGEX).size
         
         return when {
             wordCount > 500 -> ContentType.CHAPTER
@@ -381,12 +375,12 @@ object ParsingErrorRecovery {
             val mainContent = with(ParsingUtils) { document.extractMainContent() }
             if (mainContent != null) {
                 val text = with(ParsingUtils) { mainContent.extractTextWithParagraphs() }
-                val wordCount = text.split(Regex("\\s+")).size
+                val wordCount = text.split(WHITESPACE_REGEX).size
                 if (text.length > 100 && wordCount > 20) {
                     return text
                 }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Continue to next strategy
         }
         
@@ -405,12 +399,12 @@ object ParsingErrorRecovery {
                 val element = document.selectFirst(selector)
                 if (element != null) {
                     val text = with(ParsingUtils) { element.extractTextWithParagraphs() }
-                    val wordCount = text.split(Regex("\\s+")).size
+                    val wordCount = text.split(WHITESPACE_REGEX).size
                     if (text.length > 100 && wordCount > 20) {
                         return text
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 continue
             }
         }
@@ -420,7 +414,7 @@ object ParsingErrorRecovery {
                 ?.select("div, article, section")
                 ?.filter { element ->
                     val text = element.text()
-                    val wordCount = text.split(Regex("\\s+")).size
+                    val wordCount = text.split(WHITESPACE_REGEX).size
                     text.length > 100 && wordCount > 20
                 }
                 ?.maxByOrNull { it.text().length }
@@ -428,7 +422,7 @@ object ParsingErrorRecovery {
             if (largestBlock != null) {
                 return with(ParsingUtils) { largestBlock.extractTextWithParagraphs() }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Continue to next strategy
         }
         
@@ -442,13 +436,13 @@ object ParsingErrorRecovery {
             if (paragraphs.isNotEmpty()) {
                 return paragraphs.joinToString("\n\n")
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Continue to last resort
         }
         
         return try {
             document.body()?.text()?.trim() ?: ""
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ""
         }
     }
@@ -457,7 +451,7 @@ object ParsingErrorRecovery {
      * Validate extracted content
      */
     fun validateContent(content: String): ValidationResult {
-        val wordCount = content.split(Regex("\\s+")).size
+        val wordCount = content.split(WHITESPACE_REGEX).size
         val hasMinimumLength = content.length >= 50
         val hasWords = wordCount >= 10
         val notOnlySpecialChars = content.any { it.isLetterOrDigit() }

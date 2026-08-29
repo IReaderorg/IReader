@@ -120,55 +120,53 @@ fun InfiniteScrollReaderContent(
         }
     }
 
-    // Track chapter from first visible item
-    val firstVisible by remember {
-        derivedStateOf { lazyListState.firstVisibleItemIndex }
-    }
-    LaunchedEffect(firstVisible) {
-        if (firstVisible < flatContentChapterMap.size) {
-            val chIdx = flatContentChapterMap[firstVisible]
-            if (chIdx != lastTrackedChapterIndex && chIdx < loadedChapters.size) {
-                lastTrackedChapterIndex = chIdx
-                vm.contentVM.updateCurrentChapterForInfiniteScroll(loadedChapters[chIdx].first)
+    // Track chapter from first visible item efficiently
+    LaunchedEffect(lazyListState, flatContentChapterMap, loadedChapters) {
+        androidx.compose.runtime.snapshotFlow { lazyListState.firstVisibleItemIndex }.collect { index ->
+            if (index < flatContentChapterMap.size) {
+                val chIdx = flatContentChapterMap[index]
+                if (chIdx != lastTrackedChapterIndex && chIdx < loadedChapters.size) {
+                    lastTrackedChapterIndex = chIdx
+                    vm.contentVM.updateCurrentChapterForInfiniteScroll(loadedChapters[chIdx].first)
+                }
             }
         }
     }
 
-    // Keep loading ahead
-    val scrollProgress by remember {
-        derivedStateOf {
+    // Keep loading ahead with snapshotFlow
+    LaunchedEffect(lazyListState, successState, loadedChapters) {
+        androidx.compose.runtime.snapshotFlow {
             val layoutInfo = lazyListState.layoutInfo
             val totalItems = layoutInfo.totalItemsCount
-            if (totalItems == 0) return@derivedStateOf 0f
-            val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisible.toFloat() / totalItems.toFloat()
-        }
-    }
+            if (totalItems == 0) 0f else {
+                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                lastVisible.toFloat() / totalItems.toFloat()
+            }
+        }.collect { progress ->
+            if (progress > 0.75f && !isLoadingNextChapter && hasMoreChapters) {
+                val chapters = successState.chapters
+                val currentId = loadedChapters.lastOrNull()?.first?.id ?: successState.currentChapter.id
+                val currentIdx = chapters.indexOfFirst { it.id == currentId }
+                val loadedCount = loadedChapters.size
 
-    LaunchedEffect(scrollProgress) {
-        if (scrollProgress > 0.75f && !isLoadingNextChapter && hasMoreChapters) {
-            val chapters = successState.chapters
-            val currentId = loadedChapters.lastOrNull()?.first?.id ?: successState.currentChapter.id
-            val currentIdx = chapters.indexOfFirst { it.id == currentId }
-            val loadedCount = loadedChapters.size
-
-            for (offset in loadedCount..<(loadedCount + 3)) {
-                val nextChapter = chapters.getOrNull(currentIdx + offset) ?: break
-                isLoadingNextChapter = true
-                try {
-                    val pages = vm.contentVM.fetchChapterContentForInfiniteScroll(nextChapter)
-                    if (pages.isNotEmpty()) {
-                        loadedChapters.add(nextChapter to pages)
-                    } else {
+                for (offset in loadedCount..<(loadedCount + 3)) {
+                    val nextChapter = chapters.getOrNull(currentIdx + offset) ?: break
+                    isLoadingNextChapter = true
+                    try {
+                        val pages = vm.contentVM.fetchChapterContentForInfiniteScroll(nextChapter)
+                        if (pages.isNotEmpty()) {
+                            loadedChapters.add(nextChapter to pages)
+                        } else {
+                            hasMoreChapters = false
+                            break
+                        }
+                    } catch (_: Exception) {
                         hasMoreChapters = false
                         break
                     }
-                } catch (_: Exception) {
-                    hasMoreChapters = false
-                    break
                 }
+                isLoadingNextChapter = false
             }
-            isLoadingNextChapter = false
         }
     }
 

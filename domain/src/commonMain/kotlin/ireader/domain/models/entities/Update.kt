@@ -1,9 +1,10 @@
 package ireader.domain.models.entities
 
+import androidx.compose.runtime.Immutable
 import ireader.domain.models.BookCover
 import kotlin.time.ExperimentalTime
 
-
+@Immutable
 data class UpdatesWithRelations(
     val bookId: Long,
     val bookTitle: String,
@@ -30,6 +31,7 @@ data class UpdatesWithRelations(
     }
 }
 
+@Immutable
 data class Update(
 
     val id: Long = 0,

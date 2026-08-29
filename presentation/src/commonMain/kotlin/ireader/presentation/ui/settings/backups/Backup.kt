@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -34,18 +35,34 @@ fun BackUpAndRestoreScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
-    // State for showing file pickers
+    // State for showing file pickers and dialogs
     var showLNReaderPicker by remember { mutableStateOf(false) }
     var showBackupSaver by remember { mutableStateOf(false) }
     var showRestorePicker by remember { mutableStateOf(false) }
+    var showBackupOptionsDialog by remember { mutableStateOf(false) }
     
     // Backup/Restore progress
     val backupRestoreProgress by vm.backupRestoreProgress.collectAsState()
+    val backupOptions by vm.backupOptions.collectAsState()
     
     // LNReader import progress
     val lnReaderProgress by vm.lnReaderImportProgress.collectAsState()
-    val lnReaderResult by vm.lnReaderImportResult.collectAsState()
     val lnReaderImportProgressDialog by vm.lnReaderImportProgressDialog.collectAsState()
+
+    // Backup options dialog
+    if (showBackupOptionsDialog) {
+        BackupOptionsDialog(
+            options = backupOptions,
+            onOptionChanged = { transform -> vm.updateBackupOptions(transform) },
+            onSelectAll = { vm.selectAllBackupOptions() },
+            onDeselectAll = { vm.deselectAllBackupOptions() },
+            onConfirm = {
+                showBackupOptionsDialog = false
+                showBackupSaver = true
+            },
+            onDismiss = { showBackupOptionsDialog = false }
+        )
+    }
 
     // Progress dialog
     BackupProgressDialog(
@@ -108,15 +125,27 @@ fun BackUpAndRestoreScreen(
     
     val items = androidx.compose.runtime.remember(importProgressText, localizeHelper) {
         listOf<Components>(
+            Components.Header("Full Backup & Restore"),
             Components.Row(
-                localizeHelper.localize(Res.string.create_backup), onClick = {
-                    // Show platform-specific file saver
+                title = localizeHelper.localize(Res.string.create_backup),
+                subtitle = "Complete backup: books, chapters, history, categories, tracks, themes, and settings",
+                onClick = {
+                    vm.selectAllBackupOptions()
                     showBackupSaver = true
                 }
             ),
             Components.Row(
-                localizeHelper.localize(Res.string.restore), onClick = {
-                    // Show platform-specific file picker
+                title = "Customize Backup Options",
+                subtitle = "Select specific data to include in backup",
+                icon = Icons.Filled.Tune,
+                onClick = {
+                    showBackupOptionsDialog = true
+                }
+            ),
+            Components.Row(
+                title = localizeHelper.localize(Res.string.restore),
+                subtitle = "Restore all data, history, and settings from backup file",
+                onClick = {
                     showRestorePicker = true
                 }
             ),
@@ -127,7 +156,6 @@ fun BackUpAndRestoreScreen(
                 icon = Icons.Filled.FileDownload,
                 onClick = {
                     if (importProgressText == null) {
-                        // Show platform-specific file picker
                         showLNReaderPicker = true
                     }
                 }
@@ -178,7 +206,6 @@ fun BackUpAndRestoreScreen(
                     enable = vm.automaticBackup.value != PreferenceValues.AutomaticBackup.Off
                 )
             }
-
         )
     }
     SetupSettingComponents(items = items, scaffoldPadding = scaffoldPadding)

@@ -9,6 +9,7 @@ import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup
 import ireader.domain.usecases.backup.v2.BackupException
+import ireader.domain.usecases.backup.v2.BackupOptions
 import ireader.domain.usecases.backup.v2.BackupOrchestrator
 import ireader.domain.usecases.backup.v2.BackupProgress
 import ireader.domain.usecases.backup.v2.RestoreProgress
@@ -169,6 +170,38 @@ class BackupScreenViewModel(
     private val _backupRestoreProgress = MutableStateFlow<BackupRestoreProgress>(BackupRestoreProgress.Idle)
     val backupRestoreProgress: StateFlow<BackupRestoreProgress> = _backupRestoreProgress.asStateFlow()
     
+    // Backup customization options (all enabled by default for full backup)
+    private val _backupOptions = MutableStateFlow(BackupOptions())
+    val backupOptions: StateFlow<BackupOptions> = _backupOptions.asStateFlow()
+
+    fun updateBackupOptions(transform: (BackupOptions) -> BackupOptions) {
+        _backupOptions.value = transform(_backupOptions.value)
+    }
+
+    fun selectAllBackupOptions() {
+        _backupOptions.value = BackupOptions(
+            includeBooks = true,
+            includeChapters = true,
+            includeCategories = true,
+            includeHistory = true,
+            includeTracks = true,
+            includeThemes = true,
+            includeSettings = true,
+        )
+    }
+
+    fun deselectAllBackupOptions() {
+        _backupOptions.value = BackupOptions(
+            includeBooks = false,
+            includeChapters = false,
+            includeCategories = false,
+            includeHistory = false,
+            includeTracks = false,
+            includeThemes = false,
+            includeSettings = false,
+        )
+    }
+    
     // LNReader import state
     private val _lnReaderImportProgress = MutableStateFlow<ImportLNReaderBackup.ImportProgress?>(null)
     val lnReaderImportProgress: StateFlow<ImportLNReaderBackup.ImportProgress?> = _lnReaderImportProgress.asStateFlow()
@@ -327,7 +360,7 @@ class BackupScreenViewModel(
 
     private suspend fun createBackupV2(orch: BackupOrchestrator, uri: ireader.domain.models.common.Uri) {
         withContext(ireader.domain.utils.extensions.ioDispatcher) {
-            orch.createBackup(uri) { progress ->
+            orch.createBackup(uri, _backupOptions.value) { progress ->
                 _backupRestoreProgress.value = when (progress) {
                     is BackupProgress.Collecting ->
                         BackupRestoreProgress.BackupStarting()
@@ -348,8 +381,16 @@ class BackupScreenViewModel(
                 }
             }.fold(
                 onSuccess = { summary ->
+                    val msg = buildString {
+                        append("Backup completed! ")
+                        append("${summary.booksCount} books, ${summary.chaptersCount} chapters")
+                        if (summary.historyCount > 0) append(", ${summary.historyCount} histories")
+                        if (summary.categoriesCount > 0) append(", ${summary.categoriesCount} categories")
+                        if (summary.tracksCount > 0) append(", ${summary.tracksCount} tracks")
+                        append(" saved.")
+                    }
                     _backupRestoreProgress.value = BackupRestoreProgress.BackupComplete(
-                        message = "Backup completed! ${summary.booksCount} books saved."
+                        message = msg
                     )
                 },
                 onFailure = { error ->
@@ -384,8 +425,13 @@ class BackupScreenViewModel(
                 onSuccess = { summary ->
                     val msg = buildString {
                         append("Restored ${summary.booksRestored} books, ${summary.chaptersRestored} chapters")
+                        if (summary.historyRestored > 0) append(", ${summary.historyRestored} histories")
+                        if (summary.categoriesRestored > 0) append(", ${summary.categoriesRestored} categories")
+                        if (summary.tracksRestored > 0) append(", ${summary.tracksRestored} tracks")
+                        if (summary.themesRestored > 0) append(", ${summary.themesRestored} themes")
+                        if (summary.settingsRestored > 0) append(", ${summary.settingsRestored} settings")
                         if (summary.errors.isNotEmpty()) {
-                            append(" (${summary.errors.size} books had errors)")
+                            append(" (${summary.errors.size} items had errors)")
                         }
                     }
                     _backupRestoreProgress.value = BackupRestoreProgress.RestoreComplete(

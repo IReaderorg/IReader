@@ -119,13 +119,56 @@ class LegacyMigrator {
             )
         }
 
+        val historySnapshots = mutableListOf<HistorySnapshot>()
+        val trackSnapshots = mutableListOf<TrackSnapshot>()
+
+        for (bookProto in library) {
+            for (historyProto in bookProto.histories) {
+                // Find matching chapter key if available
+                val chapter = bookProto.chapters.getOrNull(historyProto.chapterId.toInt())
+                historySnapshots.add(
+                    HistorySnapshot(
+                        bookKey = bookProto.key,
+                        bookSourceId = bookProto.sourceId,
+                        chapterKey = chapter?.key ?: historyProto.chapterId.toString(),
+                        lastRead = historyProto.readAt,
+                        timeRead = historyProto.progress,
+                    )
+                )
+            }
+            for (trackProto in bookProto.tracks) {
+                trackSnapshots.add(
+                    TrackSnapshot(
+                        bookKey = bookProto.key,
+                        bookSourceId = bookProto.sourceId,
+                        siteId = trackProto.siteId,
+                        entryId = trackProto.entryId,
+                        mediaId = trackProto.mediaId,
+                        mediaUrl = trackProto.mediaUrl,
+                        title = trackProto.title,
+                        lastRead = trackProto.lastRead,
+                        totalChapters = trackProto.totalChapters,
+                        score = trackProto.score,
+                        status = trackProto.status,
+                        startReadTime = trackProto.startReadTime,
+                        endReadTime = trackProto.endReadTime,
+                    )
+                )
+            }
+        }
+
         return BackupPayload(
             version = BackupPayload.CURRENT_VERSION,
             books = bookSnapshots,
             categories = categorySnapshots,
+            histories = historySnapshots,
+            tracks = trackSnapshots,
             metadata = BackupMetadata(
                 bookCount = bookSnapshots.size,
                 chapterCount = bookSnapshots.sumOf { it.chapters.size },
+                historyCount = historySnapshots.size,
+                categoryCount = categorySnapshots.size,
+                trackCount = trackSnapshots.size,
             ),
         )
     }

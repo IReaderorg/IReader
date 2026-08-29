@@ -2,8 +2,7 @@
 
 package ireader.domain.models.entities
 
-
-
+import androidx.compose.runtime.Immutable
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Page
 import kotlinx.serialization.Serializable
@@ -11,6 +10,7 @@ import kotlinx.serialization.Serializable
 /**
  * @param number it's number of current chapter
  */
+@Immutable
 @Serializable
 data class Chapter(
     val id: Long = 0,

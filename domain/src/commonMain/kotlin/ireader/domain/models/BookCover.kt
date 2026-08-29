@@ -1,5 +1,6 @@
 package ireader.domain.models
 
+import androidx.compose.runtime.Immutable
 import ireader.domain.models.entities.BaseBook
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.HistoryWithRelations
@@ -14,6 +15,7 @@ import ireader.domain.models.entities.UpdatesWithRelations
  * The cover field prioritizes customCover over the default cover from source.
  * This ensures user-set custom covers are displayed and persisted across updates.
  */
+@Immutable
 data class BookCover(
     val bookId: Long,
     val sourceId: Long,

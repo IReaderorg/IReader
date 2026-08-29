@@ -106,6 +106,11 @@ val DomainServices = module {
             chapterRepository = get(),
             categoryRepository = get(),
             bookCategoryRepository = get(),
+            historyRepository = get(),
+            trackingRepository = get(),
+            readerThemeRepository = get(),
+            uiPreferences = get(),
+            readerPreferences = get(),
             transactions = get(),
         )
     }
