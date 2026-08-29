@@ -8,7 +8,6 @@ plugins {
     id("com.android.application")
     kotlin("plugin.serialization")
     kotlin("plugin.parcelize")
-    id("com.google.devtools.ksp")
     alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.jetbrainCompose)
 }

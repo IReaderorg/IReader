@@ -12,7 +12,6 @@ import java.nio.file.Paths
 
 plugins {
     id(kotlinx.plugins.kotlin.jvm.get().pluginId)
-    id(kotlinx.plugins.ksp.get().pluginId)
     id(libs.plugins.jetbrainCompose.get().pluginId)
     alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.composeHotReload)
@@ -68,14 +67,6 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-kotlin {
-    sourceSets.main {
-        kotlin.srcDir("build/generated/ksp/main/kotlin")
-    }
-    sourceSets.test {
-        kotlin.srcDir("build/generated/ksp/test/kotlin")
-    }
-}
 
 // Configure the compose desktop application
 compose.desktop {

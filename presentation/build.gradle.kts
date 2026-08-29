@@ -7,7 +7,6 @@ plugins {
     id("com.android.kotlin.multiplatform.library")
     alias(libs.plugins.jetbrainCompose)
     id("kotlinx-serialization")
-    id("com.google.devtools.ksp")
     alias(kotlinx.plugins.compose.compiler)
 }
 

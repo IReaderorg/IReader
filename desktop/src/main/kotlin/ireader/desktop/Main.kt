@@ -128,6 +128,14 @@ fun main() {
             // Silently ignore font initialization errors
         }
         
+        // Initialize database preloader in background
+        try {
+            val databasePreloader = koinApp.koin.getOrNull<ireader.data.core.DatabasePreloader>()
+            databasePreloader?.preloadAsync()
+        } catch (_: Exception) {
+            // Silently ignore preloader errors
+        }
+
         // Start auto-sync service if available
         try {
             val autoSyncService = koinApp.koin.getOrNull<AutoSyncService>()

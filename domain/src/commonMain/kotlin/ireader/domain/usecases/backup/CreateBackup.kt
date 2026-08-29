@@ -79,25 +79,24 @@ class CreateBackup  internal constructor(
     }
 
     private suspend fun dumpChapters(bookId: Long, currentEvent: (String) -> Unit): List<ChapterProto> {
-        // Process chapters in chunks to avoid OOM errors
         val chapters = chapterRepository.findChaptersByBookId(bookId)
-        val chunkSize = 10
-        val result = mutableListOf<ChapterProto>()
-        
-        chapters.chunked(chunkSize).forEachIndexed { index, chunk ->
-            chunk.forEach { chapter ->
-                // Fetch individual chapter with content to avoid loading all at once
-                val chapterWithContent = chapterRepository.findChapterById(chapter.id)
-                if (chapterWithContent != null) {
-                    currentEvent(chapterWithContent.name)
-                    result.add(ChapterProto.fromDomain(chapterWithContent))
-                }
-            }
-            // Allow GC to reclaim memory between chunks
-            System.gc()
+        return chapters.fastMap { chapter ->
+            currentEvent(chapter.name)
+            ChapterProto(
+                key = chapter.key,
+                name = chapter.name,
+                translator = chapter.translator,
+                read = chapter.read,
+                bookmark = chapter.bookmark,
+                dateFetch = chapter.dateFetch,
+                dateUpload = chapter.dateUpload,
+                number = chapter.number,
+                sourceOrder = chapter.sourceOrder,
+                content = "",
+                type = chapter.type,
+                lastPageRead = chapter.lastPageRead,
+            )
         }
-        
-        return result
     }
 
     private suspend fun dumpHistories(bookId: Long): List<HistoryProto> {

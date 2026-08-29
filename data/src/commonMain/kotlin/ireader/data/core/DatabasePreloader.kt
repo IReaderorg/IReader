@@ -54,20 +54,24 @@ class DatabasePreloader(
         val startTime = currentTimeToLong()
         
         try {
-            // First, fix last_read_at if not populated (migration may have failed)
-            fixLastReadAtIfNeeded()
+            // 1. Concurrently preload UI caches first for zero-latency cold start rendering
+            kotlinx.coroutines.coroutineScope {
+                launch { preloadLibraryBooks() }
+                launch { preloadRecentHistory() }
+                launch { preloadCategories() }
+            }
             
-            // Refresh cached chapter counts for smart categories
-            // This ensures counts are accurate after app updates or data imports
-            refreshCachedChapterCounts()
+            val duration = currentTimeToLong() - startTime
+            Log.info("UI data preloaded into in-memory caches in ${duration}ms", TAG)
             
-            // Run preloads SEQUENTIALLY to reduce peak memory usage
-            // This is important for low-memory devices with large libraries
-            preloadCategories()
-            preloadRecentHistory()
-            // Preload library books with user's preferred sort order
-            // Limited to first page to prevent OOM on large libraries
-            preloadLibraryBooks()
+            // 2. Run maintenance asynchronously in background without blocking UI
+            scope.launch {
+                try {
+                    fixLastReadAtIfNeeded()
+                } catch (e: Exception) {
+                    Log.error("Background maintenance failed: ${e.message}", TAG)
+                }
+            }
             
             // Log performance stats
             dbOptimizations.logPerformanceReport()
@@ -211,10 +215,15 @@ class DatabasePreloader(
     
     private suspend fun preloadRecentHistory() {
         try {
-            handler.awaitList {
-                historyViewQueries.history("", 20, 0, ireader.data.history.historyWithRelationsMapper)
+            val limit = 30L
+            val historyItems = handler.awaitList {
+                historyViewQueries.history("", limit, 0L, ireader.data.history.historyWithRelationsMapper)
             }
-            Log.debug("Recent history preloaded", TAG)
+            if (historyItems.isNotEmpty()) {
+                val grouped = historyItems.groupBy { it.readAt ?: 0L }
+                ireader.domain.data.cache.HistoryDataCache.updateCache(grouped)
+            }
+            Log.debug("Recent history preloaded: ${historyItems.size} items", TAG)
         } catch (e: Exception) {
             Log.error("Failed to preload recent history: ${e.message}", TAG)
         }

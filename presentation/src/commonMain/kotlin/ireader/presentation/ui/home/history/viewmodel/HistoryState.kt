@@ -28,8 +28,8 @@ data class HistoryPaginationState(
     val totalItems: Int = 0
 ) {
     companion object {
-        const val INITIAL_PAGE_SIZE = 50
-        const val PAGE_SIZE = 30
+        const val INITIAL_PAGE_SIZE = 30
+        const val PAGE_SIZE = 25
     }
     
     val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore

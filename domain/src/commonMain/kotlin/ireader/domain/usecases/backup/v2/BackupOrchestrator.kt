@@ -231,12 +231,21 @@ class BackupOrchestrator(
         val books = libraryRepository.findFavorites()
         return books.map { book ->
             val chapters = if (options.includeChapters) {
-                // findChaptersByBookId uses the light mapper (no content / placeholder text),
-                // so fetch each chapter individually to get real content — same as legacy path.
-                chapterRepository.findChaptersByBookId(book.id).mapNotNull { light ->
-                    chapterRepository.findChapterById(light.id)?.let {
-                        ChapterSnapshot.fromChapter(it)
-                    }
+                chapterRepository.findChaptersByBookId(book.id).map { light ->
+                    ChapterSnapshot(
+                        key = light.key,
+                        name = light.name,
+                        translator = light.translator,
+                        read = light.read,
+                        bookmark = light.bookmark,
+                        dateFetch = light.dateFetch,
+                        dateUpload = light.dateUpload,
+                        number = light.number,
+                        sourceOrder = light.sourceOrder,
+                        content = "", // Exclude heavy text content from backup metadata to prevent OOM
+                        type = light.type,
+                        lastPageRead = light.lastPageRead,
+                    )
                 }
             } else {
                 emptyList()

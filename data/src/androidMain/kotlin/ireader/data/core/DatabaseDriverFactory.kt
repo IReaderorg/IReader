@@ -1,6 +1,7 @@
 package ireader.data.core
 
 import android.app.Application
+import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import app.cash.sqldelight.db.SqlDriver
@@ -18,7 +19,26 @@ actual class DatabaseDriverFactory constructor(
 
     val configuration = SupportSQLiteOpenHelper.Configuration.builder(app)
       .name("ireader.db")
-      .callback(AndroidSqliteDriver.Callback(schema))
+      .callback(object : AndroidSqliteDriver.Callback(schema) {
+        override fun onConfigure(db: SupportSQLiteDatabase) {
+          super.onConfigure(db)
+          db.enableWriteAheadLogging()
+          try {
+            db.execSQL("PRAGMA synchronous = NORMAL")
+            db.execSQL("PRAGMA temp_store = MEMORY")
+            db.execSQL("PRAGMA cache_size = -64000")
+            db.execSQL("PRAGMA mmap_size = 268435456")
+            db.execSQL("PRAGMA foreign_keys = ON")
+          } catch (_: Exception) {
+            // Ignore PRAGMA errors on older SQLite engines
+          }
+        }
+
+        override fun onOpen(db: SupportSQLiteDatabase) {
+          super.onOpen(db)
+          AndroidDatabaseOptimizations.applyOptimalPragmas(db)
+        }
+      })
       .build()
 
     val openHelper: SupportSQLiteOpenHelper = factory.create(configuration)

@@ -3,7 +3,6 @@ plugins {
     id("com.android.kotlin.multiplatform.library")
     kotlin("plugin.serialization")
     id(libs.plugins.sqldelight.get().pluginId)
-    id("com.google.devtools.ksp")
     alias(libs.plugins.jetbrainCompose)
     alias(kotlinx.plugins.compose.compiler)
     id(libs.plugins.buildkonfig.get().pluginId)

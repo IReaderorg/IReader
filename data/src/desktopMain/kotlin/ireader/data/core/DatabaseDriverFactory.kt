@@ -22,8 +22,23 @@ actual class DatabaseDriverFactory {
             url = JdbcSqliteDriver.IN_MEMORY.plus(dbFile.absolutePath),
             properties = Properties().apply {
                 put("foreign_keys", "true")
+                put("journal_mode", "WAL")
+                put("synchronous", "NORMAL")
+                put("cache_size", "-64000")
+                put("temp_store", "MEMORY")
+                put("mmap_size", "268435456")
             }
         )
+        
+        try {
+            driver.execute(null, "PRAGMA journal_mode = WAL;", 0)
+            driver.execute(null, "PRAGMA synchronous = NORMAL;", 0)
+            driver.execute(null, "PRAGMA temp_store = MEMORY;", 0)
+            driver.execute(null, "PRAGMA cache_size = -64000;", 0)
+            driver.execute(null, "PRAGMA mmap_size = 268435456;", 0)
+        } catch (_: Exception) {
+            // Ignore PRAGMA execution errors
+        }
         
         // Use SQLDelight's schema creation - it handles everything correctly
         try {
