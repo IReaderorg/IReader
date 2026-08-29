@@ -54,7 +54,7 @@ class FontPreferences @OptIn(ExperimentalTextApi::class) constructor(
                 ireader.domain.models.common.FontFamilyModel.Custom(fontName)
             )
         }.getOrElse {
-            FontType("Roboto", ireader.domain.models.common.FontFamilyModel.Default)
+            FontType("Lora", ireader.domain.models.common.FontFamilyModel.Custom("Lora"))
         }
     }
 

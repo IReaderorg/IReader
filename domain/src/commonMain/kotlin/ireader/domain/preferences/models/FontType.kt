@@ -7,5 +7,5 @@ data class FontType(
     val fontFamily: FontFamilyModel
 )
 fun getDefaultFont(): FontType {
-    return FontType("Roboto", FontFamilyModel.Default)
+    return FontType("Lora", FontFamilyModel.Custom("Lora"))
 }

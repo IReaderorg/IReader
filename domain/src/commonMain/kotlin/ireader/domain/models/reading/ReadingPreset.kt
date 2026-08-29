@@ -25,7 +25,7 @@ data class ReadingPreset(
          * Font defaults are based on device type (phone vs tablet).
          */
         fun getDefaultPresets(isTablet: Boolean): List<ReadingPreset> {
-            val defaultFontName = if (isTablet) "Merriweather" else "Roboto"
+            val defaultFontName = "Lora"
             val defaultFontFamily = FontFamilyModel.Custom(defaultFontName)
             
             return listOf(
@@ -34,8 +34,8 @@ data class ReadingPreset(
                     name = "Default",
                     description = "Balanced settings for everyday reading",
                     fontSize = if (isTablet) 20 else 18,
-                    lineHeight = 25,
-                    paragraphDistance = 2,
+                    lineHeight = if (isTablet) 30 else 28,
+                    paragraphDistance = 4,
                     paragraphIndent = 8,
                     textWeight = 400,
                     letterSpacing = 0,

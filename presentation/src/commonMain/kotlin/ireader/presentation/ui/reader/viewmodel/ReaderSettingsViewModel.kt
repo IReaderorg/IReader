@@ -113,11 +113,11 @@ class ReaderSettingsViewModel(
             fontsLoading = true
             try {
                 val remoteFonts = fontUseCase.getRemoteFonts()
-                val popularFonts = listOf("Roboto", "Open Sans", "Lato", "Montserrat", "Poppins", "Raleway", "Merriweather", "PT Serif", "Playfair Display", "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro")
+                val popularFonts = listOf("Lora", "Merriweather", "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins", "Raleway", "PT Serif", "Playfair Display", "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro")
                 fonts = (popularFonts + remoteFonts).distinct().sorted()
             } catch (e: Exception) {
                 ireader.core.log.Log.error("Failed to load fonts", e)
-                fonts = listOf("Roboto", "Open Sans", "Lato", "Montserrat", "Poppins", "Raleway", "Merriweather", "PT Serif", "Playfair Display", "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro", "Crimson Text", "Libre Baskerville", "Lora")
+                fonts = listOf("Lora", "Merriweather", "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins", "Raleway", "PT Serif", "Playfair Display", "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro", "Crimson Text", "Libre Baskerville")
             } finally {
                 fontsLoading = false
             }

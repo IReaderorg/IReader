@@ -48,16 +48,16 @@ fun FontPicker(
     var visibleFontsCount by remember { mutableStateOf(FONTS_PAGE_SIZE) }
     val listState = rememberLazyListState()
     
-    // Define 8 most popular fonts
+    // Define popular fonts
     val popularFontNames = listOf(
+        "Lora",
+        "Merriweather",
         "Roboto",
         "Open Sans",
         "Lato",
         "Montserrat",
-        "Oswald",
-        "Raleway",
-        "PT Sans",
-        "Merriweather"
+        "Playfair Display",
+        "PT Serif"
     )
     
     // Filter fonts based on search query and separate popular fonts

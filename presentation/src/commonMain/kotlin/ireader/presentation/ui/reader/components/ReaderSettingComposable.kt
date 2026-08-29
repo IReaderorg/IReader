@@ -318,7 +318,7 @@ fun ReaderScreenTab(
                 title = localizeHelper.localize(Res.string.font),
                 action = {
                     TextButton(onClick = { vm.toggleFontPicker() }) {
-                        Text(vm.font?.value?.name ?: "Roboto")
+                        Text(vm.font?.value?.name ?: "Lora")
                     }
                 }
             )

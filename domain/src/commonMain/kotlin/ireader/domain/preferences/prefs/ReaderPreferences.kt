@@ -102,7 +102,7 @@ Visit.*for more chapters"""
     }
 
     fun lineHeight(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_FONT_HEIGHT, 25)
+        return preferenceStore.getInt(SAVED_FONT_HEIGHT, 28)
     }
 
     fun readingMode(): Preference<ReadingMode> {
@@ -110,7 +110,7 @@ Visit.*for more chapters"""
     }
 
     fun paragraphDistance(): Preference<Int> {
-        return preferenceStore.getInt(SAVED_PARAGRAPH_DISTANCE, 2)
+        return preferenceStore.getInt(SAVED_PARAGRAPH_DISTANCE, 4)
     }
 
 
@@ -138,19 +138,19 @@ Visit.*for more chapters"""
     }
 
     fun topMargin(): Preference<Int> {
-        return preferenceStore.getInt("reader_top_margin", 0)
+        return preferenceStore.getInt("reader_top_margin", 12)
     }
 
     fun leftMargin(): Preference<Int> {
-        return preferenceStore.getInt("reader_left_margin", 0)
+        return preferenceStore.getInt("reader_left_margin", 16)
     }
 
     fun rightMargin(): Preference<Int> {
-        return preferenceStore.getInt("reader_right_margin", 0)
+        return preferenceStore.getInt("reader_right_margin", 16)
     }
 
     fun bottomMargin(): Preference<Int> {
-        return preferenceStore.getInt("reader_bottom_margin", 0)
+        return preferenceStore.getInt("reader_bottom_margin", 12)
     }
 
     fun topContentPadding(): Preference<Int> {

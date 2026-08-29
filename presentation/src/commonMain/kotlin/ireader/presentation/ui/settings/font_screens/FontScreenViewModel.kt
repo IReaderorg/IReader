@@ -34,8 +34,8 @@ class FontScreenViewModel(
                 
                 // Add some popular fonts at the top if not already present
                 val popularFonts = listOf(
-                    "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
-                    "Raleway", "Merriweather", "PT Serif", "Playfair Display",
+                    "Lora", "Merriweather", "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
+                    "Raleway", "PT Serif", "Playfair Display",
                     "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro"
                 )
                 
@@ -49,10 +49,10 @@ class FontScreenViewModel(
                 ireader.core.log.Log.error("Failed to load fonts", e)
                 // Fallback to popular fonts if API fails
                 fontScreenState.fonts = listOf(
-                    "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
-                    "Raleway", "Merriweather", "PT Serif", "Playfair Display",
+                    "Lora", "Merriweather", "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
+                    "Raleway", "PT Serif", "Playfair Display",
                     "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro",
-                    "Crimson Text", "Libre Baskerville", "Lora"
+                    "Crimson Text", "Libre Baskerville"
                 )
             } finally {
                 isLoading = false
