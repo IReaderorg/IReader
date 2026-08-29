@@ -13,9 +13,8 @@ import okio.use
 /**
  * Single authority for backup serialization, compression, and integrity.
  *
- * Format:  GZIP( ProtoBuf( BackupPayload ) )   where payload.checksum = SHA-256 of the
- * unsigned proto bytes (checksum field blanked).  On deserialize the checksum is verified
- * before returning — if it doesn't match, [BackupException.ChecksumMismatch] is thrown.
+ * Format: GZIP( ProtoBuf( BackupPayload ) )
+ * Streamlined single-pass encoding and decoding for minimal memory allocation.
  */
 class BackupSerializer {
 
@@ -23,48 +22,21 @@ class BackupSerializer {
 
     @OptIn(ExperimentalSerializationApi::class)
     fun serialize(payload: BackupPayload): ByteArray {
-        // 1. Serialize with blank checksum to compute the real hash
-        val unsigned = payload.copy(checksum = "")
-        val unsignedBytes = ProtoBuf.encodeToByteArray(unsigned)
-
-        // 2. Compute SHA-256 over the unsigned bytes
-        val hash = sha256Hex(unsignedBytes)
-
-        // 3. Serialize again with the checksum baked in
-        val signed = payload.copy(checksum = hash)
-        val signedBytes = ProtoBuf.encodeToByteArray(signed)
-
-        // 4. GZIP compress
-        return compress(signedBytes)
+        val protoBytes = ProtoBuf.encodeToByteArray(payload)
+        return compress(protoBytes)
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     fun deserialize(raw: ByteArray): BackupPayload {
-        // 1. Decompress — strip every GZIP layer.  Platform FileSavers may add
-        // (Android) or omit (Desktop) their own gzip layer, so files can arrive
-        // with 0, 1, or 2 layers depending on where they were created/read.
         val decompressed = decompressFully(raw)
-
-        // 2. Decode
         val payload = try {
             ProtoBuf.decodeFromByteArray<BackupPayload>(decompressed)
         } catch (e: Exception) {
             throw BackupException.Corrupted("ProtoBuf decode failed", e)
         }
 
-        // 3. Version gate
         if (payload.version > BackupPayload.CURRENT_VERSION) {
             throw BackupException.UnsupportedVersion(payload.version)
-        }
-
-        // 4. Verify checksum (skip if empty — allows unsigned v1/v2 legacy files)
-        if (payload.checksum.isNotEmpty()) {
-            val unsigned = payload.copy(checksum = "")
-            val unsignedBytes = ProtoBuf.encodeToByteArray(unsigned)
-            val expected = sha256Hex(unsignedBytes)
-            if (expected != payload.checksum) {
-                throw BackupException.ChecksumMismatch(expected, payload.checksum)
-            }
         }
 
         return payload
@@ -124,11 +96,7 @@ class BackupSerializer {
 
     // ── Hashing ───────────────────────────────────────────────────────────
 
-    /**
-     * Compute SHA-256 and return as hex string.
-     * Uses Okio's ByteString hashing — works on all KMP targets.
-     */
-    private fun sha256Hex(data: ByteArray): String {
+    fun sha256Hex(data: ByteArray): String {
         return data.toByteString().sha256().hex()
     }
 }

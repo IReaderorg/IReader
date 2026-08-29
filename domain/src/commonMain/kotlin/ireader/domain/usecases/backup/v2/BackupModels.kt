@@ -318,7 +318,7 @@ data class ValidationResult(
 data class BackupOptions(
     val includeBooks: Boolean = true,
     val includeChapters: Boolean = true,
-    val includeChapterContent: Boolean = true,
+    val includeChapterContent: Boolean = false,
     val includeCategories: Boolean = true,
     val includeHistory: Boolean = true,
     val includeTracks: Boolean = true,

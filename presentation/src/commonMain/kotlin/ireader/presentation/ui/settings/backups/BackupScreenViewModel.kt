@@ -182,6 +182,7 @@ class BackupScreenViewModel(
         _backupOptions.value = BackupOptions(
             includeBooks = true,
             includeChapters = true,
+            includeChapterContent = true,
             includeCategories = true,
             includeHistory = true,
             includeTracks = true,
@@ -194,6 +195,7 @@ class BackupScreenViewModel(
         _backupOptions.value = BackupOptions(
             includeBooks = false,
             includeChapters = false,
+            includeChapterContent = false,
             includeCategories = false,
             includeHistory = false,
             includeTracks = false,

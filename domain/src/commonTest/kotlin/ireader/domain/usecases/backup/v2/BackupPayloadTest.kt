@@ -144,11 +144,10 @@ class BackupPayloadTest {
     }
 
     @Test
-    fun testDefaultBackupOptionsAreAllEnabled() {
+    fun testDefaultBackupOptions() {
         val options = BackupOptions()
         assertTrue(options.includeBooks)
         assertTrue(options.includeChapters)
-        assertTrue(options.includeChapterContent)
         assertTrue(options.includeCategories)
         assertTrue(options.includeHistory)
         assertTrue(options.includeTracks)

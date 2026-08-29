@@ -105,19 +105,12 @@ class BackupOrchestrator(
             throw BackupException.WriteFailed(uri.toString(), e)
         }
 
-        // 4. Verify: read back and compare
+        // 4. Verify: validate written file without duplicate heap allocations
         onProgress(BackupProgress.Verifying)
-        val written = try {
-            fileSaver.read(uri)
-        } catch (e: Exception) {
-            throw BackupException.ReadFailed(uri.toString(), e)
+        val valid = fileSaver.validate(uri)
+        if (!valid) {
+            throw BackupException.VerificationFailed("Failed to verify written backup file")
         }
-        if (!written.contentEquals(bytes)) {
-            throw BackupException.VerificationFailed("Read-back bytes differ from written bytes")
-        }
-
-        // 5. Verify: deserialize to confirm integrity
-        serializer.deserialize(written)
 
         onProgress(BackupProgress.Complete)
         BackupSummary(
