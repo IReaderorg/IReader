@@ -205,25 +205,5 @@ fun LibraryScreen(
                 )
             }
         }
-
-//        // Filter Bottom Sheet
-//        if (showFilterSheet) {
-//            LibraryFilterBottomSheet(
-//                filters = state.filters,
-//                sorting = state.sort,
-//                columnCount = state.columnsInPortrait,
-//                displayMode = state.layout,
-//                showResumeReadingCard = vm.showResumeReadingCard.value,
-//                showArchivedBooks = vm.showArchivedBooks.value,
-//                onFilterToggle = { type -> vm.toggleFilterImmediate(type) },
-//                onSortChange = { type -> vm.toggleSort(type) },
-//                onSortDirectionToggle = { vm.toggleSortDirection() },
-//                onColumnCountChange = { count -> vm.updateColumnCount(count) },
-//                onDisplayModeChange = { mode -> vm.onLayoutTypeChange(mode) },
-//                onResumeReadingCardToggle = { enabled -> vm.toggleResumeReadingCard(enabled) },
-//                onArchivedBooksToggle = { enabled -> vm.toggleShowArchivedBooks(enabled) },
-//                onDismiss = onHideFilterSheet
-//            )
-//        }
     }
 }

@@ -1,10 +1,15 @@
 package ireader.presentation.core.ui
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import ireader.domain.utils.extensions.launchIO
@@ -39,35 +44,32 @@ object HistoryScreenSpec {
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
+        val state by vm.state.collectAsState()
+        val searchFocusRequester = remember { FocusRequester() }
         val host = SnackBarListener(vm)
+        
         IScaffold(
             topBar = { scrollBehavior ->
                 HistoryTopAppBar(
-                    vm = vm,
-                    onDeleteAll = {
-                        vm.warningAlert.apply {
-                            enable = true
-                            this.title.value = localizeHelper.localize(Res.string.remove)
-                            this.title.value =
-                                localizeHelper.localize(Res.string.dialog_remove_chapter_books_description)
-                            this.onDismiss.value = {
-                                this.enable = false
-                            }
-                            this.onConfirm.value = {
-                                this.enable = false
-                                vm.scope.launch {
-                                    vm.historyUseCase.deleteAllHistories()
-                                }
-                            }
-                        }
-                    },
-                    scrollBehavior = scrollBehavior,
+                    searchMode = state.isSearchMode,
+                    searchQuery = state.searchQuery,
+                    onSearchModeChange = { vm.toggleSearchMode() },
+                    onSearchQueryChange = { vm.onSearchQueryChange(it) },
+                    focusRequester = searchFocusRequester,
+                    onClearClick = { vm.onSearchQueryChange("") },
+                    groupByNovel = state.groupByNovel,
+                    onToggleGroupByNovel = { vm.toggleGroupByNovel() },
+                    dateFilter = state.dateFilter,
+                    onDateFilterChange = { vm.setDateFilterHistory(it) },
+                    onClearAll = { vm.deleteAllHistories(localizeHelper) },
+                    hasHistory = state.histories.values.isNotEmpty(),
+                    scrollBehavior = scrollBehavior
                 )
             },
             snackbarHostState = host
         ) { scaffoldPadding ->
             HistoryScreen(
-                modifier = Modifier,
+                modifier = Modifier.padding(scaffoldPadding),
                 onHistory = { history ->
                     navController.navigateTo(
                         ReaderScreenSpec(

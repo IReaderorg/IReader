@@ -62,14 +62,14 @@ class DatabasePreloader(
             }
             
             val duration = currentTimeToLong() - startTime
-            Log.info("UI data preloaded into in-memory caches in ${duration}ms", TAG)
+            Log.info { "UI data preloaded into in-memory caches in ${duration}ms" }
             
             // 2. Run maintenance asynchronously in background without blocking UI
             scope.launch {
                 try {
                     fixLastReadAtIfNeeded()
                 } catch (e: Exception) {
-                    Log.error("Background maintenance failed: ${e.message}", TAG)
+                    Log.error(e, "Background maintenance failed")
                 }
             }
             
@@ -77,7 +77,7 @@ class DatabasePreloader(
             dbOptimizations.logPerformanceReport()
             
         } catch (e: Exception) {
-            Log.error("Critical data preload failed: ${e.message}", TAG)
+            Log.error(e, "Critical data preload failed")
         }
     }
     
@@ -101,7 +101,7 @@ class DatabasePreloader(
                 }
             }
         } catch (e: Exception) {
-            Log.error("Failed to fix last_read_at: ${e.message}", TAG)
+            Log.error(e, "Failed to fix last_read_at")
         }
     }
     
@@ -117,9 +117,9 @@ class DatabasePreloader(
                 chapterQueries.refreshAllBookChapterCounts()
             }
             val duration = currentTimeToLong() - startTime
-            Log.debug("Cached chapter counts refreshed in ${duration}ms", TAG)
+            Log.debug { "Cached chapter counts refreshed in ${duration}ms" }
         } catch (e: Exception) {
-            Log.error("Failed to refresh cached chapter counts: ${e.message}", TAG)
+            Log.error(e, "Failed to refresh cached chapter counts")
         }
     }
     
@@ -148,11 +148,11 @@ class DatabasePreloader(
                 val nextChapter = chapters.getOrNull(currentIndex + 1)
                 nextChapter?.let { chapter ->
                     // This will be loaded when user navigates
-                    Log.debug("Next chapter ready for preload: ${chapter.name}", TAG)
+                    Log.debug { "Next chapter ready for preload: ${chapter.name}" }
                 }
             }
         } catch (e: Exception) {
-            Log.error("Reader data preload failed: ${e.message}", TAG)
+            Log.error(e, "Reader data preload failed")
         }
     }
     
@@ -198,7 +198,7 @@ class DatabasePreloader(
             // Update the in-memory cache for instant display
             ireader.domain.data.cache.LibraryDataCache.updateCache(books)
         } catch (e: Exception) {
-            Log.error("Failed to preload library books: ${e.message}", TAG)
+            Log.error(e, "Failed to preload library books")
         }
     }
     
@@ -207,9 +207,9 @@ class DatabasePreloader(
             handler.awaitList {
                 categoryQueries.getCategories(ireader.data.category.categoryMapper)
             }
-            Log.debug("Categories preloaded", TAG)
+            Log.debug { "Categories preloaded" }
         } catch (e: Exception) {
-            Log.error("Failed to preload categories: ${e.message}", TAG)
+            Log.error(e, "Failed to preload categories")
         }
     }
     
@@ -220,12 +220,12 @@ class DatabasePreloader(
                 historyViewQueries.history("", limit, 0L, ireader.data.history.historyWithRelationsMapper)
             }
             if (historyItems.isNotEmpty()) {
-                val grouped = historyItems.groupBy { it.readAt ?: 0L }
+                val grouped = historyItems.groupBy { it.readAt }
                 ireader.domain.data.cache.HistoryDataCache.updateCache(grouped)
             }
-            Log.debug("Recent history preloaded: ${historyItems.size} items", TAG)
+            Log.debug { "Recent history preloaded: ${historyItems.size} items" }
         } catch (e: Exception) {
-            Log.error("Failed to preload recent history: ${e.message}", TAG)
+            Log.error(e, "Failed to preload recent history")
         }
     }
     
@@ -235,6 +235,6 @@ class DatabasePreloader(
      */
     suspend fun invalidateAllPreloadedData() {
         dbOptimizations.invalidateCache("preload_")
-        Log.info("All preloaded data invalidated", TAG)
+        Log.info { "All preloaded data invalidated" }
     }
 }

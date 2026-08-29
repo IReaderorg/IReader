@@ -38,27 +38,31 @@ internal class JvmDatabaseHandler constructor(
     withContext(queryDispatcher) {
       try {
         driver.execute(null, "PRAGMA wal_checkpoint(TRUNCATE)", 0)
-        println("[JvmDatabaseHandler] WAL checkpoint completed successfully")
+        ireader.core.log.Log.debug { "[JvmDatabaseHandler] WAL checkpoint completed successfully" }
       } catch (e: Exception) {
-        println("[JvmDatabaseHandler] WAL checkpoint failed: ${e.message}")
+        ireader.core.log.Log.warn(e, "[JvmDatabaseHandler] WAL checkpoint failed")
       }
     }
   }
   
   override fun initialize() {
-    // Get current version from preferences
-    val oldVersion = preferencesHelper.database_version().get()
+    try {
+      // Get current version from preferences
+      val oldVersion = preferencesHelper.database_version().get()
 
-    // Apply migrations if needed
-    if (oldVersion < DatabaseMigrations.CURRENT_VERSION) {
-      DatabaseMigrations.migrate(driver, oldVersion)
+      // Apply migrations if needed
+      if (oldVersion < DatabaseMigrations.CURRENT_VERSION) {
+        DatabaseMigrations.migrate(driver, oldVersion)
 
-      // Update the stored version
-      preferencesHelper.database_version().set(DatabaseMigrations.CURRENT_VERSION)
-    } else {
-      // Even if no migration is needed, ensure required columns exist
-      // This handles cases where migrations failed silently
-      DatabaseMigrations.ensureRequiredColumns(driver)
+        // Update the stored version
+        preferencesHelper.database_version().set(DatabaseMigrations.CURRENT_VERSION)
+        ireader.core.log.Log.info { "[JvmDatabaseHandler] Migrated database from v$oldVersion to v${DatabaseMigrations.CURRENT_VERSION}" }
+      } else {
+        // Even if no migration is needed, ensure required columns exist
+        DatabaseMigrations.ensureRequiredColumns(driver)
+      }
+    } catch (e: Exception) {
+      ireader.core.log.Log.error(e, "[JvmDatabaseHandler] Database initialization failed")
     }
   }
 
@@ -79,8 +83,9 @@ internal class JvmDatabaseHandler constructor(
                 },
                 parameters = 0
             )
-        } catch (_: Exception) {
-            // Silently ignore repair errors
+            ireader.core.log.Log.info { "[JvmDatabaseHandler] Database repaired successfully" }
+        } catch (e: Exception) {
+            ireader.core.log.Log.error(e, "[JvmDatabaseHandler] Database repair failed")
         }
     }
     

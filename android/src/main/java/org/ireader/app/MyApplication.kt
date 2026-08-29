@@ -66,9 +66,9 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         // Initialize Compose Multiplatform resources with application context
         try {
             org.jetbrains.compose.resources.setResourceReaderAndroidContext(this.applicationContext)
-            println("✅ Compose resources context initialized successfully")
+            ireader.core.log.Log.info { "Compose resources context initialized successfully" }
         } catch (e: Exception) {
-            println("⚠️ Failed to initialize Compose resources: ${e.message}")
+            ireader.core.log.Log.warn(e, "Failed to initialize Compose resources")
         }
         
         // Start profiling
@@ -80,47 +80,34 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         Trace.endSection()
         StartupProfiler.mark("crash_handler")
         
-        // Configure Kermit logging
-        // Debug: logs to Logcat (default behavior)
-        // Release: could add CrashlyticsLogWriter for Firebase integration
-        // Kermit auto-configures with sensible defaults, no explicit init needed
-        
         // Initialize Koin - all modules
         Trace.beginSection("Koin.init")
         initializeKoin()
         Trace.endSection()
         StartupProfiler.mark("koin_init")
         
-        // Check database integrity after Koin init
-        // This handles cases where database corruption occurred during a crash
-        // Run on a background thread to avoid ANR on main thread
+        // Check database integrity asynchronously in background
         Trace.beginSection("DatabaseIntegrityCheck")
         val dbHandler: ireader.data.core.DatabaseHandler by inject()
-        // Use a new thread for the integrity check to avoid blocking the main thread
-        val dbCheckThread = Thread({
+        backgroundScope.launch {
             try {
                 val isValid = dbHandler.verifyDatabaseIntegrity()
                 if (!isValid) {
-                    println("⚠️ Database integrity check failed - attempting repair")
+                    ireader.core.log.Log.warn { "Database integrity check failed - attempting repair" }
                     dbHandler.repairDatabase()
-                    // Re-verify after repair
                     val repaired = dbHandler.verifyDatabaseIntegrity()
                     if (!repaired) {
-                        println("❌ Database repair failed - some data may be lost")
+                        ireader.core.log.Log.error { "Database repair failed - some data may be lost" }
                     } else {
-                        println("✅ Database repair successful")
+                        ireader.core.log.Log.info { "Database repair successful" }
                     }
                 } else {
-                    println("✅ Database integrity check passed")
+                    ireader.core.log.Log.debug { "Database integrity check passed" }
                 }
             } catch (e: Exception) {
-                println("⚠️ Database integrity check error: ${e.message}")
+                ireader.core.log.Log.warn(e, "Database integrity check error")
             }
-        }, "DBIntegrityCheck").apply {
-            isDaemon = true
-            start()
         }
-        // Don't join - let it run in background to avoid blocking startup
         Trace.endSection()
         StartupProfiler.mark("db_integrity_check")
         
@@ -128,15 +115,13 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         scheduleBackgroundInit()
         StartupProfiler.mark("background_scheduled")
         
-        // Finish startup profiling - this is the time to first frame
+        // Finish startup profiling
         StartupProfiler.finish()
         StartupProfiler.printReport()
         
         Trace.endSection() // MyApplication.onCreate
         
-        println("")
-        println("=== APP READY FOR FIRST FRAME ===")
-        println("")
+        ireader.core.log.Log.info { "=== APP READY FOR FIRST FRAME ===" }
     }
     
     /**
@@ -211,9 +196,7 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         
         // Mark modules as fully initialized
         ireader.domain.di.ModuleInitializationState.markFullyInitialized()
-        println("=== All modules loaded ===")
-        
-        println("=== Koin initialization (to first frame): ${System.currentTimeMillis() - totalStart}ms ===")
+        ireader.core.log.Log.info { "=== All Koin modules loaded in ${System.currentTimeMillis() - totalStart}ms ===" }
     }
     
     private fun initializeSecureStorage() {
@@ -226,14 +209,14 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
                 try {
                     val (fromSaf, toSaf) = ireader.domain.storage.SecureStorageHelper.syncJsPluginsBidirectional(this@MyApplication)
                     if (fromSaf > 0 || toSaf > 0) {
-                        println("Synced JS plugins: $fromSaf from SAF, $toSaf to SAF")
+                        ireader.core.log.Log.info { "Synced JS plugins: $fromSaf from SAF, $toSaf to SAF" }
                     }
                 } catch (e: Exception) {
-                    println("JS plugin sync failed: ${e.message}")
+                    ireader.core.log.Log.warn(e, "JS plugin sync failed")
                 }
             }
         } catch (e: Exception) {
-            println("SecureStorageHelper init failed: ${e.message}")
+            ireader.core.log.Log.warn(e, "SecureStorageHelper init failed")
         }
     }
     
@@ -242,12 +225,10 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             val clientId = BuildConfig.GOOGLE_DRIVE_CLIENT_ID
             if (clientId.isNotBlank()) {
                 ireader.data.backup.GoogleDriveConfig.initialize(clientId)
-                println("Google Drive config initialized")
-            } else {
-                println("Google Drive client ID not configured")
+                ireader.core.log.Log.info { "Google Drive config initialized" }
             }
         } catch (e: Exception) {
-            println("Google Drive config init failed: ${e.message}")
+            ireader.core.log.Log.warn(e, "Google Drive config init failed")
         }
     }
     
@@ -269,19 +250,17 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             val databaseHandler: DatabaseHandler by inject()
             databaseHandler.initialize()
             
-            println("Database initialization: ${System.currentTimeMillis() - start}ms")
+            ireader.core.log.Log.info { "Database initialization: ${System.currentTimeMillis() - start}ms" }
             
             // Start database preloader immediately to populate in-memory UI caches (History & Library)
             try {
-                println("MyApplication: Starting database preloader...")
                 val preloader: DatabasePreloader by inject()
                 preloader.preloadCriticalData()
-                println("MyApplication: Database preloader completed")
             } catch (e: Exception) {
-                println("Database preloader failed: ${e.message}")
+                ireader.core.log.Log.error(e, "Database preloader failed")
             }
         } catch (e: Exception) {
-            println("Failed to initialize database: ${e.message}")
+            ireader.core.log.Log.error(e, "Failed to initialize database")
         }
     }
     

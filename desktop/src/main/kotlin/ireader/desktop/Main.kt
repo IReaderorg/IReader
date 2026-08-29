@@ -75,21 +75,6 @@ fun main() {
             cacheDir.mkdirs()
         }
 
-        // Verify critical resources exist to avoid runtime errors (silent check)
-        val criticalResources = listOf(
-            "drawable/ic_eternity_light.xml",
-            "drawable/ic_eternity_dark.xml",
-            "drawable/ic_eternity.xml"
-        )
-        
-        for (resource in criticalResources) {
-            try {
-                Thread.currentThread().contextClassLoader.getResource(resource)
-            } catch (_: Exception) {
-                // Silently ignore missing resources
-            }
-        }
-        
         val koinApp = startKoin {
             modules(
                 localModule,
@@ -195,100 +180,7 @@ fun main() {
             }
         }
     } catch (e: Exception) {
-        // Handle critical errors silently with automatic repair attempts
-        when {
-            e.message?.contains("table history_new already exists") == true -> {
-                // Try to fix the issue by directly executing SQL to clean up
-                try {
-                    val dbDir = File(System.getProperty("user.home"), "AppData\\Local\\IReader\\cache")
-                    val dbFile = dbDir.listFiles { file -> file.name.endsWith(".db") }?.firstOrNull()
-                    
-                    if (dbFile != null) {
-                        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(java.util.Date())
-                        val backupFile = File(dbFile.parentFile, "${dbFile.nameWithoutExtension}_backup_$timestamp.db")
-                        dbFile.copyTo(backupFile, overwrite = true)
-                        
-                        try {
-                            Class.forName("org.sqlite.JDBC")
-                            val connection = java.sql.DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}")
-                            connection.use { conn ->
-                                conn.createStatement().use { stmt ->
-                                    stmt.execute("DROP TABLE IF EXISTS history_new;")
-                                }
-                            }
-                        } catch (_: Exception) { }
-                    }
-                } catch (_: Exception) { }
-            }
-            e.message?.contains("no such table: main.history") == true || 
-            e.message?.contains("historyView") == true -> {
-                // Try to fix the issue by directly creating the history table
-                try {
-                    val dbDir = File(System.getProperty("user.home"), "AppData\\Local\\IReader\\cache")
-                    val dbFile = dbDir.listFiles { file -> file.name.endsWith(".db") }?.firstOrNull()
-                    
-                    if (dbFile != null) {
-                        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(java.util.Date())
-                        val backupFile = File(dbFile.parentFile, "${dbFile.nameWithoutExtension}_backup_$timestamp.db")
-                        dbFile.copyTo(backupFile, overwrite = true)
-                        
-                        try {
-                            Class.forName("org.sqlite.JDBC")
-                            val connection = java.sql.DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}")
-                            connection.use { conn ->
-                                conn.createStatement().use { stmt ->
-                                    stmt.execute("DROP VIEW IF EXISTS historyView;")
-                                    val rs = stmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='history'")
-                                    val historyExists = rs.next()
-                                    rs.close()
-                                    
-                                    if (!historyExists) {
-                                        val createHistorySql = """
-                                            CREATE TABLE IF NOT EXISTS history(
-                                                _id INTEGER NOT NULL PRIMARY KEY,
-                                                chapter_id INTEGER NOT NULL UNIQUE,
-                                                last_read INTEGER,
-                                                time_read INTEGER NOT NULL,
-                                                progress REAL DEFAULT 0.0,
-                                                FOREIGN KEY(chapter_id) REFERENCES chapter (_id)
-                                                ON DELETE CASCADE
-                                            );
-                                        """.trimIndent()
-                                        stmt.execute(createHistorySql)
-                                        stmt.execute("CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);")
-                                        stmt.execute("CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read);")
-                                        stmt.execute("CREATE INDEX IF NOT EXISTS idx_history_progress ON history(progress);")
-                                    }
-                                }
-                            }
-                        } catch (_: Exception) { }
-                    }
-                } catch (_: Exception) { }
-            }
-            e.message?.contains("SQLite") == true -> {
-                // Try to launch in safe mode with minimal features
-                try {
-                    val dbDir = File(System.getProperty("user.home"), "AppData\\Local\\IReader\\cache")
-                    if (dbDir.exists()) {
-                        val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(java.util.Date())
-                        val backupDir = File(dbDir.parentFile, "backups/backup_$timestamp")
-                        backupDir.mkdirs()
-                        
-                        dbDir.listFiles()?.forEach { file ->
-                            try {
-                                if (file.name.endsWith(".db")) {
-                                    val backupFile = File(backupDir, file.name)
-                                    file.copyTo(backupFile, overwrite = true)
-                                    file.delete()
-                                }
-                            } catch (_: Exception) { }
-                        }
-                    }
-                } catch (_: Exception) { }
-            }
-            else -> { }
-        }
-        System.err.println("Application error: ${e.message}")
+        ireader.core.log.Log.error(e, "Fatal desktop application error: ${e.message}")
         exitProcess(1)
     }
 }

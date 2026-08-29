@@ -172,11 +172,8 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                 communityPreferences = communityPreferences,
                                 localeHelper = localeHelper,
                                 onFolderUriSelected = { uriString ->
-                                    // Permissions are now taken in the platform-specific directory picker
-                                    // Just clear the cache so new path is used
-                                    android.util.Log.d("MainActivity", "Folder selected: $uriString")
+                                    ireader.core.log.Log.debug { "Folder selected: $uriString" }
                                     ireader.domain.storage.SecureStorageHelper.clearCache()
-                                    android.util.Log.d("MainActivity", "SecureStorageHelper cache cleared")
                                 },
                                 onComplete = {
                                     // Onboarding screen sets hasCompletedOnboarding pref;
@@ -203,7 +200,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                     ireader.presentation.ui.plugins.required.RequiredPluginHandler()
                                     ireader.presentation.ui.storage.SafFolderHandler(
                                         onFolderSelected = { uri ->
-                                            // Take persistent permission for the selected folder
                                             try {
                                                 val treeUri = android.net.Uri.parse(uri)
                                                 contentResolver.takePersistableUriPermission(
@@ -212,7 +208,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                                     android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                                 )
                                             } catch (e: Exception) {
-                                                android.util.Log.e("MainActivity", "Failed to take SAF permission", e)
+                                                ireader.core.log.Log.warn(e, "Failed to take SAF permission")
                                             }
                                         }
                                     )
@@ -522,8 +518,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         }
     }
     
-    // FirstLaunchDialogHandler removed - now handled in OnboardingScreen
-
     /**
      * Initialize Compose Multiplatform resources with Android context
      */
@@ -531,9 +525,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     private fun initializeComposeResources() {
         try {
             org.jetbrains.compose.resources.setResourceReaderAndroidContext(this.applicationContext)
-            android.util.Log.d("MainActivity", "✅ Compose resources context initialized")
+            ireader.core.log.Log.info { "Compose resources context initialized" }
         } catch (e: Exception) {
-            android.util.Log.e("MainActivity", "⚠️ Failed to initialize Compose resources: ${e.message}")
+            ireader.core.log.Log.warn(e, "Failed to initialize Compose resources")
         }
     }
 

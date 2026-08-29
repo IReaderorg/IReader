@@ -10,6 +10,7 @@ import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import data.DatabaseMigrations
 import ir.kazemcodes.infinityreader.Database
+import ireader.core.log.Log
 import ireader.domain.preferences.prefs.AppPreferences
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -31,9 +32,9 @@ class AndroidDatabaseHandler(
             try {
                 // Execute WAL checkpoint to flush data to main database file
                 driver.execute(null, "PRAGMA wal_checkpoint(TRUNCATE)", 0)
-                println("[AndroidDatabaseHandler] WAL checkpoint completed successfully")
+                Log.debug { "[AndroidDatabaseHandler] WAL checkpoint completed successfully" }
             } catch (e: Exception) {
-                println("[AndroidDatabaseHandler] WAL checkpoint failed: ${e.message}")
+                Log.warn(e, "[AndroidDatabaseHandler] WAL checkpoint failed")
             }
         }
     }
@@ -51,24 +52,24 @@ class AndroidDatabaseHandler(
                     
                     // Update the stored version
                     preferencesHelper.database_version().set(currentVersion)
-                } catch (_: Exception) {
+                    Log.info { "[AndroidDatabaseHandler] Migrated database from v$oldVersion to v$currentVersion" }
+                } catch (e: Exception) {
+                    Log.warn(e, "[AndroidDatabaseHandler] Migration failed, attempting recovery")
                     // Try to recover by forcing view creation
                     try {
                         DatabaseMigrations.ensureRequiredColumns(driver)
                         DatabaseMigrations.forceViewReinit(driver)
-                    } catch (_: Exception) {
-                        // Recovery attempt also failed
+                    } catch (recErr: Exception) {
+                        Log.error(recErr, "[AndroidDatabaseHandler] Migration recovery failed")
                     }
                 }
             } else {
-                // Even if no migration is needed, ensure required columns exist
-                // This handles cases where migrations failed silently
+                // Even if no migration is needed, ensure required columns and views exist
                 DatabaseMigrations.ensureRequiredColumns(driver)
-                // Even if no migration is needed, ensure views are initialized
                 DatabaseMigrations.initializeViewsDirectly(driver)
             }
-        } catch (_: Exception) {
-            // Silently ignore initialization errors
+        } catch (e: Exception) {
+            Log.error(e, "[AndroidDatabaseHandler] Database initialization failed")
         }
     }
 
@@ -89,8 +90,9 @@ class AndroidDatabaseHandler(
                 },
                 parameters = 0
             )
-        } catch (_: Exception) {
-            // Silently ignore repair errors
+            Log.info { "[AndroidDatabaseHandler] Database repaired successfully" }
+        } catch (e: Exception) {
+            Log.error(e, "[AndroidDatabaseHandler] Database repair failed")
         }
     }
     
