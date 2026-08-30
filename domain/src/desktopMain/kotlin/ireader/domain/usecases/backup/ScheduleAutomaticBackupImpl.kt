@@ -17,18 +17,15 @@ class ScheduleAutomaticBackupImpl() : ScheduleAutomaticBackup {
         // Cancel any existing scheduled backup
         cancel()
         
-        if (frequency == PreferenceValues.AutomaticBackup.Off) {
-            return
-        }
-        
         val intervalMillis = when (frequency) {
+            PreferenceValues.AutomaticBackup.Off -> return
             PreferenceValues.AutomaticBackup.Every6Hours -> TimeUnit.HOURS.toMillis(6)
             PreferenceValues.AutomaticBackup.Every12Hours -> TimeUnit.HOURS.toMillis(12)
             PreferenceValues.AutomaticBackup.Daily -> TimeUnit.DAYS.toMillis(1)
             PreferenceValues.AutomaticBackup.Every2Days -> TimeUnit.DAYS.toMillis(2)
             PreferenceValues.AutomaticBackup.Weekly -> TimeUnit.DAYS.toMillis(7)
-            else -> return
         }
+
         
         scheduledJob = scope.launch {
             while (isActive) {

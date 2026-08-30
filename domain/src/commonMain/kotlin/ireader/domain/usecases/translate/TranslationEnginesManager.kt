@@ -363,16 +363,18 @@ class TranslationEnginesManager(
             }
         )
         
-        return if (result != null) {
+        val translations = result
+        return if (translations != null) {
             // Cache the results
-            texts.zip(result!!).forEach { (original, translated) ->
+            texts.zip(translations).forEach { (original, translated) ->
                 val cacheKey = "$original|$from|$to|builtin_${engine.id}"
                 translationCache[cacheKey] = translated
             }
-            Result.success(result!!)
+            Result.success(translations)
         } else {
             Result.failure(Exception(error?.toString() ?: "Translation failed"))
         }
+
     }
     
     /**

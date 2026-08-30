@@ -181,7 +181,8 @@ class ReadingStatisticsRepositoryImpl(
             val genreMap = mutableMapOf<String, Int>()
             
             bookQueries.getFavoriteGenres().executeAsList()
-                .flatMap { genreList -> genreList ?: emptyList() }
+                .flatten()
+
                 .forEach { genre ->
                     val trimmedGenre = genre.trim()
                     if (trimmedGenre.isNotBlank()) {

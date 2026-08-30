@@ -122,8 +122,9 @@ class ReaderTTSViewModel(
                     
                     when (result) {
                         is ServiceResult.Error -> {
-                            showSnackBar(UiText.DynamicString("TTS error: ${result.message ?: "Unknown error"}"))
+                            showSnackBar(UiText.DynamicString("TTS error: ${result.message}"))
                         }
+
                         is ServiceResult.Loading -> {
                             // Loading state - do nothing
                         }

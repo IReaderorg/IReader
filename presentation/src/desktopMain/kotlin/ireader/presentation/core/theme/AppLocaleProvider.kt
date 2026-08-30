@@ -26,15 +26,11 @@ actual fun AppLocaleProvider(
     // Apply locale change when language preference changes
     LaunchedEffect(currentLanguage) {
         if (currentLanguage.isNotEmpty()) {
-            val (language, region) = parseLanguageCode(currentLanguage)
-            val locale = if (region.isNotEmpty()) {
-                Locale(language, region)
-            } else {
-                Locale(language)
-            }
+            val locale = Locale.forLanguageTag(currentLanguage.replace('_', '-'))
             Locale.setDefault(locale)
         }
     }
+
     
     // Use key to force recomposition when language changes
     // This ensures Compose Resources reload strings in the new locale

@@ -32,7 +32,7 @@ class GetRemoteBooksUseCase() {
                 
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
                 if (query != null) {
-                    if (query != null && query.isNotBlank()) {
+                    if (query.isNotBlank()) {
                         item = source.getMangaList(
                             filters = listOf(
                                 Filter.Title()
@@ -43,7 +43,8 @@ class GetRemoteBooksUseCase() {
                     } else {
                         throw EmptyQuery()
                     }
-                } else if (!filters.isNullOrEmpty()) {
+                }
+ else if (!filters.isNullOrEmpty()) {
                     // Only use filters path if filters are actually provided
                     // Empty list should fall through to listing path
                     item = source.getMangaList(filters = filters, page)

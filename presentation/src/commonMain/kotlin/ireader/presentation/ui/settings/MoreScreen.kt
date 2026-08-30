@@ -8,15 +8,18 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.Help
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.Favorite
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -264,7 +267,7 @@ fun MoreScreen(
         item {
             SettingsSectionHeader(
                 title = localizeHelper.localize(Res.string.library_management),
-                icon = Icons.Filled.MenuBook
+                icon = Icons.AutoMirrored.Filled.MenuBook
             )
         }
         
@@ -290,7 +293,7 @@ fun MoreScreen(
             SettingsItem(
                 title = localizeHelper.localize(Res.string.category),
                 description = "Organize books with categories",
-                icon = Icons.Outlined.Label,
+                icon = Icons.AutoMirrored.Outlined.Label,
                 onClick = onCategory
             )
         }
@@ -333,10 +336,11 @@ fun MoreScreen(
             SettingsItem(
                 title = localizeHelper.localize(Res.string.help),
                 description = "Get help with the app",
-                icon = Icons.Outlined.Help,
+                icon = Icons.AutoMirrored.Outlined.Help,
                 onClick = onHelp
             )
         }
+
         
         item {
             SettingsItem(

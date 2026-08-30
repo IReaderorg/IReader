@@ -4,8 +4,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Help
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -117,9 +118,10 @@ fun SecuritySettingsScreen(
         add(Components.Row(
             title = localizeHelper.localize(Res.string.security_guide),
             subtitle = localizeHelper.localize(Res.string.learn_about_security_features_and_best_practices),
-            icon = Icons.Default.Help,
+            icon = Icons.AutoMirrored.Filled.Help,
             onClick = { vm.showOnboarding() }
         ))
+
         add(Components.Dynamic {
             androidx.compose.material3.Card(
                 modifier = Modifier

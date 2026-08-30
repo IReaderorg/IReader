@@ -202,8 +202,9 @@ class MigrateToSourceUseCase(
                 sourceId = targetSourceId,
                 key = matchedBook.key,
                 initialized = true,
-                customCover = if (flags.customCover) book.customCover ?: "" else ""
+                customCover = if (flags.customCover) book.customCover else ""
             )
+
             bookRepository.updateBook(updatedBook)
             
             Log.info { "Book updated successfully: ${book.id}" }
@@ -345,8 +346,9 @@ class MigrateToSourceUseCase(
             // Try author-based matching if available
             if (book.author.isNotBlank()) {
                 val authorMatch = searchResults.mangas.firstOrNull { mangaInfo ->
-                    val authorInResult = mangaInfo.description ?: ""
+                    val authorInResult = mangaInfo.description
                     authorInResult.contains(book.author, ignoreCase = true) &&
+
                     (mangaInfo.title.contains(book.title, ignoreCase = true) ||
                      book.title.contains(mangaInfo.title, ignoreCase = true))
                 }

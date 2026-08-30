@@ -6,7 +6,9 @@ import ireader.domain.usecases.backup.CloudBackupFile
 import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.formatDateTime
 import ireader.presentation.ui.core.viewmodel.StateViewModel
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -222,13 +224,10 @@ class CloudBackupViewModel(
                 
                 when (result) {
                     is ireader.domain.models.BackupResult.Success -> {
-                        val timestamp = result.timestamp.let { ts ->
-                            val dt = kotlinx.datetime.Instant.fromEpochMilliseconds(ts)
-                                .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                            val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-                            "${monthNames[dt.monthNumber - 1]} ${dt.dayOfMonth.toString().padStart(2, '0')}, ${dt.year} ${dt.hour.toString().padStart(2, '0')}:${dt.minute.toString().padStart(2, '0')}"
-                        }
+                        val timestamp = result.timestamp.formatDateTime()
                         _successMessage.value = "Backup uploaded successfully at $timestamp"
+
+
                         // Reload backups to show the new one
                         loadCloudBackups()
                         updateState { it.copy(

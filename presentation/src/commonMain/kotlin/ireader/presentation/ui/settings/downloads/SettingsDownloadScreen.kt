@@ -2,12 +2,12 @@ package ireader.presentation.ui.settings.downloads
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.CallSplit
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.resources.*
@@ -30,12 +30,8 @@ fun SettingsDownloadScreen(
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val listState = rememberSaveable(
-        key = "settings_download_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val listState = rememberLazyListState()
+
 
     // Download preferences state
     val downloadLocation by viewModel.downloadLocation.collectAsState()
@@ -216,9 +212,10 @@ fun SettingsDownloadScreen(
                 SettingsSwitchItem(
                     title = localizeHelper.localize(Res.string.split_tall_images),
                     description = "Split very tall images into multiple pages",
-                    icon = Icons.Outlined.CallSplit,
+                    icon = Icons.AutoMirrored.Outlined.CallSplit,
                     checked = splitTallImages,
                     onCheckedChange = viewModel::setSplitTallImages
+
                 )
             }
             

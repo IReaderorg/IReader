@@ -1,4 +1,7 @@
+@file:Suppress("DEPRECATION")
+
 package ireader.domain.utils.extensions
+
 
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -101,7 +104,7 @@ fun convertLongToTime(time: Long): String {
     
     val year = dateTime.year
     val month = (dateTime.month.ordinal + 1).toString().padStart(2, '0')
-    val day = dateTime.dayOfMonth.toString().padStart(2, '0')
+    val day = dateTime.date.dayOfMonth.toString().padStart(2, '0')
     val hour = dateTime.hour.toString().padStart(2, '0')
     val minute = dateTime.minute.toString().padStart(2, '0')
     
@@ -113,7 +116,7 @@ fun convertLongToTime(time: Long): String {
  */
 fun LocalDateTime.toIsoDateString(): String {
     val month = (month.ordinal + 1).toString().padStart(2, '0')
-    val day = dayOfMonth.toString().padStart(2, '0')
+    val day = date.dayOfMonth.toString().padStart(2, '0')
     return "$year-$month-$day"
 }
 
@@ -122,12 +125,13 @@ fun LocalDateTime.toIsoDateString(): String {
  */
 fun LocalDateTime.toIsoDateTimeString(): String {
     val month = (month.ordinal + 1).toString().padStart(2, '0')
-    val day = dayOfMonth.toString().padStart(2, '0')
+    val day = date.dayOfMonth.toString().padStart(2, '0')
     val h = hour.toString().padStart(2, '0')
     val m = minute.toString().padStart(2, '0')
     val s = second.toString().padStart(2, '0')
     return "$year-$month-${day}T$h:$m:$s"
 }
+
 
 /**
  * Check if a timestamp (in millis) is from today.
@@ -164,7 +168,7 @@ fun Long.formatDateTime(): String {
     val dt = this.toLocalDate()
     val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
     val month = monthNames[dt.month.ordinal]
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val day = dt.date.dayOfMonth.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     return "$month $day, ${dt.year} $hour:$minute"
@@ -178,7 +182,7 @@ fun Long.formatDate(): String {
     val dt = this.toLocalDate()
     val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
     val month = monthNames[dt.month.ordinal]
-    return "$month ${dt.dayOfMonth}, ${dt.year}"
+    return "$month ${dt.date.dayOfMonth}, ${dt.year}"
 }
 
 /**
@@ -200,7 +204,7 @@ fun Long.formatTime12Hour(): String {
 fun Long.formatForFilename(): String {
     val dt = this.toLocalDate()
     val month = (dt.month.ordinal + 1).toString().padStart(2, '0')
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val day = dt.date.dayOfMonth.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     val second = dt.second.toString().padStart(2, '0')
@@ -214,7 +218,7 @@ fun Long.formatForFilename(): String {
 fun Long.formatIsoDate(): String {
     val dt = this.toLocalDate()
     val month = (dt.month.ordinal + 1).toString().padStart(2, '0')
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val day = dt.date.dayOfMonth.toString().padStart(2, '0')
     return "${dt.year}-$month-$day"
 }
 
@@ -225,12 +229,13 @@ fun Long.formatIsoDate(): String {
 fun Long.formatIsoDateTime(): String {
     val dt = this.toLocalDate()
     val month = (dt.month.ordinal + 1).toString().padStart(2, '0')
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val day = dt.date.dayOfMonth.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     val second = dt.second.toString().padStart(2, '0')
     return "${dt.year}-$month-${day}T$hour:$minute:${second}Z"
 }
+
 
 /**
  * Format a relative time string (e.g., "2 hours ago", "3 days ago").

@@ -6,10 +6,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -33,12 +33,8 @@ fun SimilarTitlesSettingsScreen(
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val listState = rememberSaveable(
-        key = "settings_similar_titles_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val listState = rememberLazyListState()
+
 
     val showSimilarTitles by viewModel.showSimilarTitles.collectAsState()
     val similarTitlesSource by viewModel.similarTitlesSource.collectAsState()
@@ -149,8 +145,9 @@ fun SimilarTitlesSettingsScreen(
                 SettingsItemWithTrailing(
                     title = localizeHelper.localize(Res.string.max_similar_titles_count),
                     description = localizeHelper.localize(Res.string.max_similar_titles_count_subtitle),
-                    icon = Icons.Outlined.List,
+                    icon = Icons.AutoMirrored.Outlined.List,
                     onClick = { viewModel.showMaxCountDialog() },
+
                     enabled = showSimilarTitles
                 ) {
                     Text(

@@ -110,8 +110,9 @@ fun PluginVoiceSelector(
             // Configuration section
             if (state.selectedVoiceId != null) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider()
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
+
                 
                 VoiceConfigurationSection(
                     configuration = state.configuration,

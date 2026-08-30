@@ -90,14 +90,15 @@ fun AndroidTTSMManagerSettingsScreen(
         when (val result = gradioState?.testResult) {
             is ireader.presentation.ui.settings.viewmodels.TestResult.Success -> {
                 snackbarHostState.showSnackbar("Gradio TTS engine connection successful")
-                gradioViewModel?.clearTestResult()
+                gradioViewModel.clearTestResult()
             }
             is ireader.presentation.ui.settings.viewmodels.TestResult.Error -> {
                 snackbarHostState.showSnackbar("Gradio TTS error: ${result.message}")
-                gradioViewModel?.clearTestResult()
+                gradioViewModel.clearTestResult()
             }
             null -> {}
         }
+
     }
     
     Scaffold(

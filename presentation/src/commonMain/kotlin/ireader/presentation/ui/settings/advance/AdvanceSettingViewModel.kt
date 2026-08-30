@@ -65,7 +65,8 @@ class AdvanceSettingViewModel(
 
     fun deleteDefaultSettings() {
         scope.launchIO {
-            androidReaderPreferences.font()?.set(getDefaultFont())
+            androidReaderPreferences.font().set(getDefaultFont())
+
             prefUseCases.fontHeightUseCase.save(25)
             prefUseCases.fontSizeStateUseCase.save(18)
             prefUseCases.paragraphDistanceUseCase.save(2)

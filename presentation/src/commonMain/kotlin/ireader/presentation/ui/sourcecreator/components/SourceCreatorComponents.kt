@@ -76,12 +76,14 @@ fun RuleTextField(
 /**
  * Dialog for viewing/importing JSON.
  */
+@Suppress("DEPRECATION")
 @Composable
 fun JsonDialog(
     jsonContent: String,
     onDismiss: () -> Unit,
     onImport: (String) -> Unit
 ) {
+
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var editableJson by remember(jsonContent) { mutableStateOf(jsonContent) }
     val clipboardManager = LocalClipboardManager.current

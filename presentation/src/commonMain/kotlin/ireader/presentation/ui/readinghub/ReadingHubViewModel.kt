@@ -137,8 +137,9 @@ class ReadingHubViewModel(
                     val currentValue = when (milestone.metric) {
                         MilestoneMetric.BOOKS_READ -> stats.booksCompleted.toLong()
                         MilestoneMetric.CHAPTERS_READ -> stats.totalChaptersRead.toLong()
-                        MilestoneMetric.READING_MINUTES -> stats.totalReadingTimeMinutes.toLong()
+                        MilestoneMetric.READING_MINUTES -> stats.totalReadingTimeMinutes
                         MilestoneMetric.STREAK_DAYS -> stats.readingStreak.toLong()
+
                     }
                     if (currentValue >= milestone.threshold) {
                         newMilestones.add(milestone)

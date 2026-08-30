@@ -9,8 +9,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.VolumeMute
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.*
+
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -151,10 +156,11 @@ private fun VoiceTestBenchCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = if (state.isPlayingSample) Icons.Outlined.VolumeUp else Icons.Outlined.VolumeMute,
+                        imageVector = if (state.isPlayingSample) Icons.AutoMirrored.Outlined.VolumeUp else Icons.AutoMirrored.Outlined.VolumeMute,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary
                     )
+
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Voice Test Bench",

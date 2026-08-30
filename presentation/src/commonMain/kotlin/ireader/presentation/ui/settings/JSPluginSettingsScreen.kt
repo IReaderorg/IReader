@@ -78,8 +78,9 @@ fun JSPluginSettingsScreen(
         
         // Repository Management Section
         item {
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             Text(
+
                 text = localizeHelper.localize(Res.string.plugin_repositories),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)

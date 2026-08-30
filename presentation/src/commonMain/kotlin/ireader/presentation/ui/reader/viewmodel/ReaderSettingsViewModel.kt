@@ -59,8 +59,9 @@ class ReaderSettingsViewModel(
     
     // Font settings - debounced for sliders
     val fontSize = readerPreferences.fontSize().asStateDebounced()
-    val font = platformUiPreferences.font()?.asState()
+    val font = platformUiPreferences.font().asState()
     val lineHeight = readerPreferences.lineHeight().asStateDebounced()
+
     val betweenLetterSpaces = readerPreferences.betweenLetterSpaces().asStateDebounced()
     val textWeight = readerPreferences.textWeight().asStateDebounced()
     var showFontSizeAdjuster by mutableStateOf(false)
@@ -184,8 +185,9 @@ class ReaderSettingsViewModel(
                 is ServiceResult.Error -> {
                     // Still save to preferences even if system update fails
                     preferencesController.dispatch(PreferenceCommand.SetBrightness(newBrightness))
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set brightness: ${result.message ?: "Unknown error"}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set brightness: ${result.message}"))
                 }
+
                 else -> {}
             }
         }
@@ -372,7 +374,7 @@ class ReaderSettingsViewModel(
                     // Success
                 }
                 is ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set secure screen: ${result.message ?: "Unknown error"}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set secure screen: ${result.message}"))
                 }
                 else -> {}
             }
@@ -391,8 +393,9 @@ class ReaderSettingsViewModel(
                     preferencesController.dispatch(PreferenceCommand.SetScreenAlwaysOn(enabled))
                 }
                 is ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set keep screen on: ${result.message ?: "Unknown error"}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set keep screen on: ${result.message}"))
                 }
+
                 else -> {}
             }
         }

@@ -6,8 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.IconButton
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -76,7 +77,8 @@ fun ChaptersSliderComposable(
             IconButton(modifier = modifier.weight(1f), onClick = {
                 onNext()
             }) {
-                AppIcon(imageVector = Icons.Default.ArrowForward, contentDescription = localizeHelper.localize(Res.string.next_chapter_1))
+                AppIcon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = localizeHelper.localize(Res.string.next_chapter_1))
+
             }
         }
     }

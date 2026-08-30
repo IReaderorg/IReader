@@ -212,9 +212,10 @@ class BookCoverFetcher(
         val client = getOkHttpClient()
         val response = client.newCall(newRequest()).await()
         if (!response.isSuccessful && response.code != 304) {
-            response.body?.closeQuietly()
+            response.body.closeQuietly()
             throw HttpException(response)
         }
+
         return response
     }
 
@@ -304,8 +305,9 @@ class BookCoverFetcher(
         val editor = diskCacheLazy.value.openEditor(diskCacheKey) ?: return null
         try {
             diskCacheLazy.value.fileSystem.write(editor.data) {
-                response.body?.source()?.readAll(this)
+                response.body.source().readAll(this)
             }
+
             return editor.commitAndOpenSnapshot()
         } catch (e: Exception) {
             try {

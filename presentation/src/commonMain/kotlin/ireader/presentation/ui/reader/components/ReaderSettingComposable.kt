@@ -19,11 +19,12 @@ import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
-import androidx.compose.material.icons.filled.FormatAlignLeft
-import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Translate
+
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -318,7 +319,7 @@ fun ReaderScreenTab(
                 title = localizeHelper.localize(Res.string.font),
                 action = {
                     TextButton(onClick = { vm.toggleFontPicker() }) {
-                        Text(vm.font?.value?.name ?: "Lora")
+                        Text(vm.font.value.name)
                     }
                 }
             )
@@ -331,7 +332,7 @@ fun ReaderScreenTab(
                     LazyRow {
                         item {
                             AppIconButton(
-                                imageVector = Icons.Default.FormatAlignLeft,
+                                imageVector = Icons.AutoMirrored.Filled.FormatAlignLeft,
                                 contentDescription = localize(Res.string.text_align_left),
                                 onClick = {
                                     onTextAlign(PreferenceValues.PreferenceTextAlignment.Left)
@@ -355,7 +356,7 @@ fun ReaderScreenTab(
                                 tint = if (vm.textAlignment.value == PreferenceValues.PreferenceTextAlignment.Justify) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                             )
                             AppIconButton(
-                                imageVector = Icons.Default.FormatAlignRight,
+                                imageVector = Icons.AutoMirrored.Filled.FormatAlignRight,
                                 contentDescription = localize(Res.string.text_align_right),
                                 onClick = {
                                     onTextAlign(PreferenceValues.PreferenceTextAlignment.Right)
@@ -363,6 +364,7 @@ fun ReaderScreenTab(
                                 tint = if (vm.textAlignment.value == PreferenceValues.PreferenceTextAlignment.Right) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                             )
                         }
+
                     }
                 }
             )
@@ -450,8 +452,9 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.autoScrollOffset,
                 title = localizeHelper.localize(Res.string.offset),
-                trailing = (vm.autoScrollOffset.lazyValue / 100).toInt().toString(),
+                trailing = (vm.autoScrollOffset.lazyValue / 100).toString(),
                 valueRange = 1.0F..8F
+
             ).Build()
         }
         item {
@@ -1184,16 +1187,17 @@ fun FontPickerTab(
     // Determine the currently selected font ID
     // Check both the selectedFontId (for custom fonts) and the font preference (for Google Fonts)
     val fontPref = vm.font
-    val currentSelectedId = remember(vm.selectedFontId.value, fontPref?.value) {
+    val currentSelectedId = remember(vm.selectedFontId.value, fontPref.value) {
         val customFontId = vm.selectedFontId.value
-        val googleFontName = fontPref?.value?.name
+        val googleFontName = fontPref.value.name
         
         when {
             customFontId.isNotEmpty() -> customFontId
-            googleFontName != null -> "google_${googleFontName.lowercase().replace(" ", "_")}"
+            googleFontName.isNotEmpty() -> "google_${googleFontName.lowercase().replace(" ", "_")}"
             else -> ""
         }
     }
+
     
     FontPicker(
         selectedFontId = currentSelectedId,

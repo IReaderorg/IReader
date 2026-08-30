@@ -57,7 +57,8 @@ fun GoogleDriveAuthDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
                 
                 Text(
                     text = localizeHelper.localize(Res.string.this_feature_is_currently_in),

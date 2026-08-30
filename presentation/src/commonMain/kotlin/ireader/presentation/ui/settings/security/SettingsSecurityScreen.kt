@@ -33,12 +33,8 @@ fun SettingsSecurityScreen(
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val listState = rememberSaveable(
-        key = "settings_security_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val listState = rememberLazyListState()
+
 
     // Security preferences state
     val appLockEnabled by viewModel.appLockEnabled.collectAsState()

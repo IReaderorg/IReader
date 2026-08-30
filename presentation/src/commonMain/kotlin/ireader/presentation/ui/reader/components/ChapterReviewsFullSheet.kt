@@ -188,7 +188,8 @@ fun ChapterReviewsFullSheet(
             }
         }
         
-        Divider()
+        HorizontalDivider()
+
         
         // Content
         if (isLoading) {

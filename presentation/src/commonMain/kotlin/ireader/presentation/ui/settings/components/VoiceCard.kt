@@ -131,10 +131,11 @@ fun VoiceCard(
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(
-                                    progress = downloadProgress,
+                                    progress = { downloadProgress },
                                     modifier = Modifier.size(32.dp),
                                     strokeWidth = 3.dp
                                 )
+
                             }
                         }
                         isDownloaded -> {

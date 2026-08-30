@@ -5,10 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
@@ -32,12 +35,8 @@ fun SettingsNotificationScreen(
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val listState = rememberSaveable(
-        key = "settings_notification_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val listState = rememberLazyListState()
+
 
     // Notification preferences state
     val libraryUpdateNotifications by viewModel.libraryUpdateNotifications.collectAsState()
@@ -79,8 +78,9 @@ fun SettingsNotificationScreen(
             item {
                 SettingsSectionHeader(
                     title = localizeHelper.localize(Res.string.library_notifications),
-                    icon = Icons.Outlined.LibraryBooks
+                    icon = Icons.AutoMirrored.Outlined.LibraryBooks
                 )
+
             }
             
             item {
@@ -191,10 +191,11 @@ fun SettingsNotificationScreen(
                 SettingsSwitchItem(
                     title = localizeHelper.localize(Res.string.sound),
                     description = "Play sound for notifications",
-                    icon = Icons.Outlined.VolumeUp,
+                    icon = Icons.AutoMirrored.Outlined.VolumeUp,
                     checked = notificationSound,
                     onCheckedChange = viewModel::setNotificationSound
                 )
+
             }
             
             item {
@@ -306,9 +307,10 @@ fun SettingsNotificationScreen(
                 SettingsItem(
                     title = localizeHelper.localize(Res.string.test_notifications),
                     description = "Send test notifications to verify settings",
-                    icon = Icons.Outlined.Send,
+                    icon = Icons.AutoMirrored.Outlined.Send,
                     onClick = { viewModel.sendTestNotifications() }
                 )
+
             }
         }
     }

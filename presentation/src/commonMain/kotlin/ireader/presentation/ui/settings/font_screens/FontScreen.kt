@@ -103,8 +103,9 @@ fun FontScreen(
         }
 
         // Preview text - Shows currently selected font
-        if (vm.previewMode.value && vm.font?.value != null) {
+        if (vm.previewMode.value) {
             Card(
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -118,7 +119,7 @@ fun FontScreen(
                 ) {
                     // Header
                     Text(
-                        text = "Currently Selected: ${vm.font?.value?.name}",
+                        text = "Currently Selected: ${vm.font.value.name}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
@@ -131,7 +132,7 @@ fun FontScreen(
                         text = localizeHelper.localize(Res.string.the_quick_brown_fox_jumps),
                         fontSize = 16.sp,
                         lineHeight = 24.sp,
-                        fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                        fontFamily = vm.font.value.fontFamily.toComposeFontFamily(),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     
@@ -145,19 +146,19 @@ fun FontScreen(
                         Text(
                             text = localizeHelper.localize(Res.string.small),
                             fontSize = 12.sp,
-                            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                            fontFamily = vm.font.value.fontFamily.toComposeFontFamily(),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                         Text(
                             text = localizeHelper.localize(Res.string.medium),
                             fontSize = 16.sp,
-                            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                            fontFamily = vm.font.value.fontFamily.toComposeFontFamily(),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                         Text(
                             text = localizeHelper.localize(Res.string.large),
                             fontSize = 20.sp,
-                            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                            fontFamily = vm.font.value.fontFamily.toComposeFontFamily(),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
@@ -168,9 +169,10 @@ fun FontScreen(
                     Text(
                         text = "0123456789 !@#$%^&*()_+-=[]{}|;:',.<>?/",
                         fontSize = 14.sp,
-                        fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                        fontFamily = vm.font.value.fontFamily.toComposeFontFamily(),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
+
                 }
             }
         }
@@ -196,8 +198,9 @@ fun FontScreen(
             items(vm.uiFonts, key = { it }) { fontName ->
                 FontItem(
                     fontName = fontName,
-                    isSelected = fontName == vm.font?.value?.name,
+                    isSelected = fontName == vm.font.value.name,
                     showPreview = vm.previewMode.value,
+
                     onClick = {
                         onFont(fontName)
                     }

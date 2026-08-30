@@ -306,8 +306,9 @@ fun FontPicker(
             },
             dismissButton = {
                 TextButton(onClick = { fontToDelete = null }) {
-                    Text(localizeHelper?.localize(Res.string.cancel) ?: "Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
+
             }
         )
     }
@@ -405,8 +406,9 @@ fun ImportFontDialog(
     onConfirm: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" } ?: return
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var fontName by remember { mutableStateOf("") }
+
     
     AlertDialog(
         onDismissRequest = onDismiss,

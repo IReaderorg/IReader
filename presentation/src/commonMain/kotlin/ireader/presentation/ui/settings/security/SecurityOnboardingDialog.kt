@@ -83,7 +83,8 @@ fun SecurityOnboardingDialog(
                     description = "Require authentication to access adult content sources. Adds an extra layer of privacy protection."
                 )
                 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
                 
                 Card(
                     modifier = Modifier.fillMaxWidth(),

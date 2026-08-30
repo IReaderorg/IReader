@@ -14,7 +14,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
+
 import androidx.compose.material.icons.filled.*
+
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -119,9 +123,10 @@ fun CloudBackupScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.largeTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
+
             )
         },
         floatingActionButton = {
@@ -391,7 +396,7 @@ private fun GoogleDriveConnectionCard(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Logout,
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
@@ -413,7 +418,7 @@ private fun GoogleDriveConnectionCard(
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.Default.Login,
+                            imageVector = Icons.AutoMirrored.Filled.Login,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                         )
@@ -422,6 +427,7 @@ private fun GoogleDriveConnectionCard(
                     Text(localizeHelper.localize(Res.string.connect_to_google_drive))
                 }
             }
+
         }
     }
 }

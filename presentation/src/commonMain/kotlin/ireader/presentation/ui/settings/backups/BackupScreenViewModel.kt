@@ -487,9 +487,10 @@ class BackupScreenViewModel(
                     }
                     is ireader.domain.services.common.ServiceResult.Error -> {
                         _backupRestoreProgress.value = BackupRestoreProgress.BackupError(
-                            error = result.message ?: "Unknown error"
+                            error = result.message
                         )
                     }
+
                     else -> {}
                 }
             }
@@ -546,9 +547,10 @@ class BackupScreenViewModel(
                     }
                     is ireader.domain.services.common.ServiceResult.Error -> {
                         _backupRestoreProgress.value = BackupRestoreProgress.RestoreError(
-                            error = result.message ?: "Failed to read backup file"
+                            error = result.message
                         )
                     }
+
                     else -> {}
                 }
             }
@@ -680,11 +682,11 @@ class BackupScreenViewModel(
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.EmptyBackupException ->
                 localizeHelper.localize(Res.string.lnreader_error_empty_backup)
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.ReadFailedException ->
-                error.message ?: localizeHelper.localize(Res.string.lnreader_error_read_failed)
+                error.message
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.ParseFailedException ->
-                error.message ?: localizeHelper.localize(Res.string.lnreader_error_parse_failed)
+                error.message
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.DatabaseException ->
-                error.message ?: localizeHelper.localize(Res.string.lnreader_error_database_failed)
+                error.message
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.PermissionDeniedException ->
                 localizeHelper.localize(Res.string.lnreader_error_permission_denied)
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.FileNotFoundException ->
@@ -692,9 +694,10 @@ class BackupScreenViewModel(
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.OutOfMemoryException ->
                 localizeHelper.localize(Res.string.lnreader_error_out_of_memory)
             is ireader.domain.usecases.backup.lnreader.LNReaderImportException.UnknownException ->
-                error.message ?: "An unexpected error occurred"
+                error.message
             else ->
                 error.message ?: "Import failed: Unknown error"
+
         }
     }
     

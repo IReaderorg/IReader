@@ -5,10 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ChromeReaderMode
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -63,13 +66,8 @@ fun SettingsMainScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
-    // Use rememberSaveable with Saver for scroll state persistence
-    val listState = rememberSaveable(
-        key = "settings_main_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val listState = rememberLazyListState()
+
     
     // Pre-compute click handlers map to avoid lambda recreation
     val clickHandlers = remember {
@@ -130,7 +128,7 @@ fun SettingsMainScreen(
             item(key = "header_reading") {
                 SettingsSectionHeader(
                     title = localizeHelper.localize(Res.string.reading_experience),
-                    icon = Icons.Outlined.MenuBook
+                    icon = Icons.AutoMirrored.Outlined.MenuBook
                 )
             }
             
@@ -138,7 +136,7 @@ fun SettingsMainScreen(
                 SettingsItem(
                     title = localizeHelper.localize(Res.string.reader),
                     description = "Reading mode, controls, and display preferences",
-                    icon = Icons.Outlined.ChromeReaderMode,
+                    icon = Icons.AutoMirrored.Outlined.ChromeReaderMode,
                     onClick = clickHandlers["reader"]!!
                 )
             }
@@ -147,7 +145,7 @@ fun SettingsMainScreen(
             item(key = "header_library") {
                 SettingsSectionHeader(
                     title = localizeHelper.localize(Res.string.library_management),
-                    icon = Icons.Outlined.LibraryBooks
+                    icon = Icons.AutoMirrored.Outlined.LibraryBooks
                 )
             }
             
@@ -155,10 +153,11 @@ fun SettingsMainScreen(
                 SettingsItem(
                     title = localizeHelper.localize(Res.string.library),
                     description = "Sorting, filtering, and update preferences",
-                    icon = Icons.Outlined.LibraryBooks,
+                    icon = Icons.AutoMirrored.Outlined.LibraryBooks,
                     onClick = clickHandlers["library"]!!
                 )
             }
+
             
             item(key = "item_downloads") {
                 SettingsItem(

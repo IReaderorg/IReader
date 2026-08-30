@@ -133,8 +133,9 @@ class LibraryInsightsRepositoryImpl(
         return try {
             val history = historyRepository.findHistories()
             val totalReadingTimeMinutes = history.sumOf { 
-                (it.readDuration ?: 0L) / 60000
+                it.readDuration / 60000
             }
+
 
             // Calculate reading sessions
             val sessions = history.mapNotNull { historyItem ->
@@ -145,8 +146,10 @@ class LibraryInsightsRepositoryImpl(
                     bookId = book.id,
                     bookTitle = book.title,
                     startTime = historyItem.readAt ?: 0L,
-                    endTime = (historyItem.readAt ?: 0L) + (historyItem.readDuration ?: 0L),
-                    durationMinutes = (historyItem.readDuration ?: 0L) / 60000,
+                    endTime = (historyItem.readAt ?: 0L) + historyItem.readDuration,
+                    durationMinutes = historyItem.readDuration / 60000,
+
+
                     chaptersRead = 1,
                     wordsRead = estimateWordsInChapter()
                 )
@@ -340,7 +343,8 @@ class LibraryInsightsRepositoryImpl(
             
             val readingStatisticsType1 = ireader.domain.models.entities.ReadingStatisticsType1(
                 totalChaptersRead = history.size,
-                totalReadingTimeMinutes = history.sumOf { (it.readDuration ?: 0L) / 60000 },
+                totalReadingTimeMinutes = history.sumOf { it.readDuration / 60000 },
+
                 averageReadingSpeedWPM = readingAnalytics.averageReadingSpeedWPM,
                 favoriteGenres = libraryInsights.genreDistribution,
                 readingStreak = libraryInsights.readingPatterns.readingStreak,

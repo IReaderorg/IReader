@@ -5,10 +5,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ChromeReaderMode
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
@@ -32,12 +33,8 @@ fun SettingsReaderScreen(
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val listState = rememberSaveable(
-        key = "settings_reader_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val listState = rememberLazyListState()
+
 
     // Reader preferences state
     val readingMode by viewModel.readingMode.collectAsState()
@@ -77,9 +74,10 @@ fun SettingsReaderScreen(
             item {
                 SettingsSectionHeader(
                     title = localizeHelper.localize(Res.string.reading_mode),
-                    icon = Icons.Outlined.ChromeReaderMode
+                    icon = Icons.AutoMirrored.Outlined.ChromeReaderMode
                 )
             }
+
             
             item {
                 SettingsItemWithTrailing(
@@ -250,11 +248,12 @@ fun SettingsReaderScreen(
                 SettingsSwitchItem(
                     title = localizeHelper.localize(Res.string.volume_key_navigation),
                     description = "Use volume keys to navigate pages",
-                    icon = Icons.Outlined.VolumeUp,
+                    icon = Icons.AutoMirrored.Outlined.VolumeUp,
                     checked = volumeKeysEnabled,
                     onCheckedChange = viewModel::setVolumeKeysEnabled
                 )
             }
+
             
             item {
                 SettingsSwitchItem(

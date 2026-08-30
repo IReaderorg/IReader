@@ -18,8 +18,9 @@ class FontScreenViewModel(
     private val fileSystemService: ireader.domain.services.platform.FileSystemService,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), FontScreenState by fontScreenState {
 
-    val font = androidUiPreferences.font()?.asState()
+    val font = androidUiPreferences.font().asState()
     val previewMode = mutableStateOf(false)
+
 
     init {
         setup()
@@ -93,7 +94,8 @@ class FontScreenViewModel(
                         name = fontName,
                         fontFamily = ireader.domain.models.common.FontFamilyModel.Default
                     )
-                    androidUiPreferences.font()?.set(fontType)
+                    androidUiPreferences.font().set(fontType)
+
                     showSnackBar(ireader.i18n.UiText.DynamicString("Custom font selected: $fontName"))
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {

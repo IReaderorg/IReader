@@ -54,5 +54,6 @@ interface UserSourceRepository {
     suspend fun exportToJson(): String
     
     /** Import sources from JSON */
-    suspend fun importFromJson(json: String): Result<Int>
+    suspend fun importFromJson(jsonString: String): Result<Int>
+
 }

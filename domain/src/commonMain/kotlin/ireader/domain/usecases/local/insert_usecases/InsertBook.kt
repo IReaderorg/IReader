@@ -11,8 +11,9 @@ class InsertBook(private val bookRepository: BookRepository) {
     suspend operator fun invoke(book: Book?): Long {
         if (book == null) return -1
         return withIOContext {
-            return@withIOContext bookRepository.upsert(book) ?: -1
+            return@withIOContext bookRepository.upsert(book)
         }
+
     }
 }
 

@@ -1143,8 +1143,9 @@ class ReaderScreenViewModel(
             bookId = currentBook.id,
             bookTitle = currentBook.title,
             chapterTitle = currentChapter.name,
-            chapterNumber = currentChapter.number?.toInt(),
+            chapterNumber = currentChapter.number.toInt(),
             author = currentBook.author,
+
             currentChapterId = currentChapter.id,
             prevChapterId = chapters.getOrNull(currentIndex - 1)?.id,
             nextChapterId = chapters.getOrNull(currentIndex + 1)?.id
@@ -1281,7 +1282,7 @@ class ReaderScreenViewModel(
             // Get the font and apply it
             val font = fontManagementUseCase.getFontById(fontId)
             if (font != null) {
-                platformUiPreferences.font()?.set(
+                platformUiPreferences.font().set(
                     ireader.domain.preferences.models.FontType(
                         name = font.name,
                         fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(font.name)
@@ -1295,12 +1296,13 @@ class ReaderScreenViewModel(
         scope.launch {
             try {
                 // Set the font preference directly - Google Fonts are loaded dynamically
-                platformUiPreferences.font()?.set(
+                platformUiPreferences.font().set(
                     ireader.domain.preferences.models.FontType(
                         name = fontName,
                         fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
                     )
                 )
+
             } catch (e: Exception) {
                 showSnackBar(ireader.i18n.UiText.DynamicString("Failed to load font: ${e.message}"))
             }

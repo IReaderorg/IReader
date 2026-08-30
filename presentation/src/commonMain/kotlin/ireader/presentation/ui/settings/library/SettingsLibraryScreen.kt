@@ -5,10 +5,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.automirrored.outlined.Sort
+import androidx.compose.material.icons.automirrored.outlined.ViewList
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
@@ -32,12 +34,8 @@ fun SettingsLibraryScreen(
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val listState = rememberSaveable(
-        key = "settings_library_scroll_state",
-        saver = LazyListState.Saver
-    ) {
-        LazyListState()
-    }
+    val listState = rememberLazyListState()
+
 
     // Library preferences state
     val defaultSort by viewModel.defaultSort.collectAsState()
@@ -81,7 +79,7 @@ fun SettingsLibraryScreen(
             item {
                 SettingsSectionHeader(
                     title = localizeHelper.localize(Res.string.display),
-                    icon = Icons.Outlined.ViewList
+                    icon = Icons.AutoMirrored.Outlined.ViewList
                 )
             }
             
@@ -89,7 +87,7 @@ fun SettingsLibraryScreen(
                 SettingsItemWithTrailing(
                     title = localizeHelper.localize(Res.string.default_sort),
                     description = "Default sorting method for library",
-                    icon = Icons.Outlined.Sort,
+                    icon = Icons.AutoMirrored.Outlined.Sort,
                     onClick = { viewModel.showDefaultSortDialog() }
                 ) {
                     Text(
@@ -152,9 +150,10 @@ fun SettingsLibraryScreen(
             item {
                 SettingsSectionHeader(
                     title = localizeHelper.localize(Res.string.badges),
-                    icon = Icons.Outlined.Label
+                    icon = Icons.AutoMirrored.Outlined.Label
                 )
             }
+
             
             item {
                 SettingsSwitchItem(

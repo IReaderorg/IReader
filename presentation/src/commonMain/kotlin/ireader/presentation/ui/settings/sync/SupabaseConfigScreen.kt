@@ -16,8 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Book
+
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ExpandLess
@@ -658,9 +659,10 @@ private fun MultiEndpointCard(
                 EndpointSection(
                     title = localizeHelper.localize(Res.string.progress_endpoint),
                     description = "Separate project for reading progress",
-                    icon = Icons.Default.TrendingUp,
+                    icon = Icons.AutoMirrored.Filled.TrendingUp,
                     url = progressUrl,
                     apiKey = progressApiKey,
+
                     onUrlChanged = onProgressUrlChanged,
                     onApiKeyChanged = onProgressApiKeyChanged
                 )
@@ -957,9 +959,10 @@ private fun MultiProjectCard(
                 EndpointSection(
                     title = localizeHelper.localize(Res.string.project_2_reading),
                     description = "Reading progress tracking (500MB)",
-                    icon = Icons.Default.TrendingUp,
+                    icon = Icons.AutoMirrored.Filled.TrendingUp,
                     url = readingUrl,
                     apiKey = readingApiKey,
+
                     onUrlChanged = onReadingUrlChanged,
                     onApiKeyChanged = onReadingApiKeyChanged
                 )
@@ -1022,9 +1025,10 @@ private fun MultiProjectCard(
                 EndpointSection(
                     title = localizeHelper.localize(Res.string.project_7_analytics),
                     description = "Leaderboard and statistics (500MB)",
-                    icon = Icons.Default.TrendingUp,
+                    icon = Icons.AutoMirrored.Filled.TrendingUp,
                     url = analyticsUrl,
                     apiKey = analyticsApiKey,
+
                     onUrlChanged = onAnalyticsUrlChanged,
                     onApiKeyChanged = onAnalyticsApiKeyChanged
                 )

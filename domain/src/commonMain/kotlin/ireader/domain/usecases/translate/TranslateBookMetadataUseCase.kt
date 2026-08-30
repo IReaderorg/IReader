@@ -285,10 +285,11 @@ class TranslateBookMetadataUseCase(
                     }
                 )
 
-                if (translatedTexts != null && translatedTexts!!.size == uncachedTexts.size) {
+                val translations = translatedTexts
+                if (translations != null && translations.size == uncachedTexts.size) {
                     // Update results and cache
                     uncachedIndices.forEachIndexed { i, originalIndex ->
-                        val translated = translatedTexts!![i]
+                        val translated = translations[i]
                         results[originalIndex] = translated
                         val cacheKey = "${uncachedTexts[i]}_${sourceLang}_$targetLang"
                         translationCache[cacheKey] = CachedTranslation(translated, Clock.System.now().toEpochMilliseconds())
@@ -296,6 +297,7 @@ class TranslateBookMetadataUseCase(
                 } else if (error != null) {
                     Log.error { "$TAG: Batch translation error: $error" }
                 }
+
             }
         } catch (e: CancellationException) {
             Log.info { "$TAG: Batch translation cancelled" }

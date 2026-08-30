@@ -3,8 +3,11 @@ package ireader.presentation.ui.sourcecreator.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,11 +57,12 @@ fun HelpfulTextField(
                 {
                     IconButton(onClick = { showHelp = !showHelp }) {
                         Icon(
-                            if (showHelp) Icons.Default.Close else Icons.Default.Help,
+                            if (showHelp) Icons.Default.Close else Icons.AutoMirrored.Filled.Help,
                             contentDescription = localizeHelper.localize(Res.string.help),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
+
                 }
             } else null
         )
@@ -182,10 +186,11 @@ fun FloatingHelpButton(
         modifier = modifier
     ) {
         Icon(
-            Icons.Default.HelpOutline,
+            Icons.AutoMirrored.Filled.HelpOutline,
             contentDescription = localizeHelper.localize(Res.string.help),
             tint = MaterialTheme.colorScheme.primary
         )
+
     }
     
     if (showDialog && topic != null) {
@@ -353,11 +358,12 @@ fun SelectorInput(
                     if (helpTopic != null) {
                         IconButton(onClick = { showHelp = !showHelp }) {
                             Icon(
-                                Icons.Default.Help,
+                                Icons.AutoMirrored.Filled.Help,
                                 contentDescription = localizeHelper.localize(Res.string.help),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
+
                     }
                     IconButton(onClick = { expanded = !expanded }) {
                         Icon(

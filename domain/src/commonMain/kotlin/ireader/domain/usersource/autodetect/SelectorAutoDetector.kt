@@ -131,14 +131,16 @@ class SelectorAutoDetector {
             if (children.size < 3) continue
             
             // Check if children have similar structure
-            val firstChildTag = children.first()?.tagName() ?: continue
+            val firstChildTag = children.firstOrNull()?.tagName() ?: continue
             val similarChildren = children.filter { it.tagName() == firstChildTag }
             
             if (similarChildren.size >= 3 && similarChildren.size.toFloat() / children.size > 0.7f) {
                 val selector = buildSelector(parent) + " > " + firstChildTag
-                val sample = similarChildren.first()?.text()?.take(50) ?: ""
+                val sample = similarChildren.firstOrNull()?.text()?.take(50) ?: ""
                 return DetectionResult(selector, 0.7f, sample, similarChildren.size)
             }
+
+
         }
         return null
     }
@@ -384,9 +386,10 @@ class SelectorAutoDetector {
                     href.isNotBlank() && !href.startsWith("#") && !href.startsWith("javascript")
                 }
                 if (validLinks.size >= 3) {
-                    val sample = validLinks.first()?.attr(attr)?.take(60) ?: ""
+                    val sample = validLinks.first().attr(attr).take(60)
                     candidates.add(DetectionResult(pattern, 0.7f, sample, validLinks.size))
                 }
+
             } catch (e: Exception) { }
         }
         

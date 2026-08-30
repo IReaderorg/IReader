@@ -510,16 +510,17 @@ class ReaderContentViewModel(
         val currentChapterIndex = currentState.currentChapterIndex
         val current = currentState.currentChapter
 
-        Log.debug { "dispatchPrevChapter: currentChapter=${current?.name}, currentIndex=$currentChapterIndex, totalChapters=${chaptersList.size}" }
+        Log.debug { "dispatchPrevChapter: currentChapter=${current.name}, currentIndex=$currentChapterIndex, totalChapters=${chaptersList.size}" }
 
         if (currentChapterIndex > 0) {
             val prevChapter = chaptersList.getOrNull(currentChapterIndex - 1)
             Log.debug { "dispatchPrevChapter: prevChapter=${prevChapter?.name}, prevChapterId=${prevChapter?.id}" }
             if (prevChapter != null) {
-                Log.debug { "dispatchPrevChapter: navigating from '${current?.name}' (index $currentChapterIndex) to '${prevChapter.name}' (index ${currentChapterIndex - 1})" }
+                Log.debug { "dispatchPrevChapter: navigating from '${current.name}' (index $currentChapterIndex) to '${prevChapter.name}' (index ${currentChapterIndex - 1})" }
                 updateSuccessState { it.copy(scrollToEndOnChapterChange = true) }
                 navigateToChapter(prevChapter.id, next = false)
             }
+
         } else {
             Log.debug { "dispatchPrevChapter: already at first chapter (index $currentChapterIndex)" }
         }

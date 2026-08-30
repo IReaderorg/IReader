@@ -25,6 +25,7 @@ data class SyncUseCases(
      * Check if sync functionality is available
      */
     fun isSyncAvailable(): Boolean {
-        return checkSyncAvailability?.invoke() ?: (isUserAuthenticated != null)
+        return checkSyncAvailability?.invoke() ?: true
     }
+
 }

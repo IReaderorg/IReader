@@ -7,7 +7,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.*
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -404,10 +408,11 @@ private fun getPluginIcon(plugin: FeaturePlugin): ImageVector {
     val id = plugin.manifest.id.lowercase()
     return when {
         id.contains("summarizer") || id.contains("summary") -> Icons.Default.AutoAwesome
-        id.contains("dictionary") -> Icons.Default.MenuBook
+        id.contains("dictionary") -> Icons.AutoMirrored.Filled.MenuBook
         id.contains("translate") -> Icons.Default.Translate
-        id.contains("note") -> Icons.Default.Note
+        id.contains("note") -> Icons.AutoMirrored.Filled.Note
         id.contains("bookmark") -> Icons.Default.Bookmark
+
         id.contains("timer") -> Icons.Default.Timer
         id.contains("stats") -> Icons.Default.BarChart
         id.contains("goal") -> Icons.Default.Flag

@@ -18,10 +18,14 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
+
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Label
+
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Source
+
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -525,9 +529,10 @@ private fun AutoRuleChip(
         ) {
             Icon(
                 imageVector = when (rule.ruleType) {
-                    CategoryAutoRule.RuleType.GENRE -> Icons.Default.Label
+                    CategoryAutoRule.RuleType.GENRE -> Icons.AutoMirrored.Filled.Label
                     CategoryAutoRule.RuleType.SOURCE -> Icons.Default.Source
                 },
+
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
                 tint = if (rule.isEnabled) 
@@ -657,10 +662,11 @@ private fun AutoCategorizationRulesDialog(
                                 label = { Text("Genre") },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = Icons.Default.Label,
+                                        imageVector = Icons.AutoMirrored.Filled.Label,
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp)
                                     )
+
                                 }
                             )
                             FilterChip(
@@ -790,9 +796,10 @@ private fun AutoRuleItem(
         ) {
             Icon(
                 imageVector = when (rule.ruleType) {
-                    CategoryAutoRule.RuleType.GENRE -> Icons.Default.Label
+                    CategoryAutoRule.RuleType.GENRE -> Icons.AutoMirrored.Filled.Label
                     CategoryAutoRule.RuleType.SOURCE -> Icons.Default.Source
                 },
+
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
                 tint = if (rule.isEnabled)

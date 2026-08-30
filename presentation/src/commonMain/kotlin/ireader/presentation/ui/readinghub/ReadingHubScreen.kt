@@ -12,8 +12,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.ChromeReaderMode
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
+
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -505,7 +509,7 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
-                        icon = Icons.Filled.MenuBook,
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
                         label = localizeHelper.localize(Res.string.currently_reading),
                         value = statistics.currentlyReading.toString(),
                         modifier = Modifier.weight(1f)
@@ -535,13 +539,14 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     DetailStatItem(
-                        icon = Icons.Filled.TrendingUp,
+                        icon = Icons.AutoMirrored.Filled.TrendingUp,
                         label = localizeHelper.localize(Res.string.avgday),
                         value = formatDetailedTime(
                             if (statistics.readingStreak > 0) statistics.totalReadingTimeMinutes / statistics.readingStreak else 0
                         ),
                         modifier = Modifier.weight(1f)
                     )
+
                     DetailStatItem(
                         icon = Icons.Filled.EmojiEvents,
                         label = localizeHelper.localize(Res.string.longest_streak),
@@ -884,15 +889,16 @@ private fun formatLastRead(timestamp: Long): String {
 
 private fun getAchievementIcon(name: String): ImageVector {
     return when {
-        name.contains("BOOK", ignoreCase = true) -> Icons.Filled.MenuBook
-        name.contains("CHAPTER", ignoreCase = true) -> Icons.Filled.ChromeReaderMode
+        name.contains("BOOK", ignoreCase = true) -> Icons.AutoMirrored.Filled.MenuBook
+        name.contains("CHAPTER", ignoreCase = true) -> Icons.AutoMirrored.Filled.ChromeReaderMode
         name.contains("STREAK", ignoreCase = true) -> Icons.Filled.LocalFireDepartment
         name.contains("SPEED", ignoreCase = true) -> Icons.Filled.Speed
         name.contains("REVIEW", ignoreCase = true) -> Icons.Filled.RateReview
         name.contains("SOCIAL", ignoreCase = true) -> Icons.Filled.People
         name.contains("VOTE", ignoreCase = true) -> Icons.Filled.HowToVote
         name.contains("GENRE", ignoreCase = true) -> Icons.Filled.Category
-        name.contains("DISCORD", ignoreCase = true) -> Icons.Filled.Chat
+        name.contains("DISCORD", ignoreCase = true) -> Icons.AutoMirrored.Filled.Chat
         else -> Icons.Filled.Star
     }
 }
+

@@ -115,8 +115,8 @@ private class SwipeRefreshNestedScrollConnection(
         // If another connection is handling the swipe, don't interfere
         state.isSwipeInProgress && !isActiveSwipe -> Offset.Zero
         // If the user is swiping and there's y remaining, handle it
-        scrollFromTop && source == NestedScrollSource.Drag && available.y < 0f -> onScroll(available)
-        !scrollFromTop && source == NestedScrollSource.Drag && available.y > 0f -> onScroll(
+        scrollFromTop && source == NestedScrollSource.UserInput && available.y < 0f -> onScroll(available)
+        !scrollFromTop && source == NestedScrollSource.UserInput && available.y > 0f -> onScroll(
             available
         )
         else -> Offset.Zero
@@ -135,13 +135,14 @@ private class SwipeRefreshNestedScrollConnection(
             // If another connection is handling the swipe, don't interfere
             state.isSwipeInProgress && !isActiveSwipe -> Offset.Zero
             // If the user is swiping and there's y remaining, handle it
-            scrollFromTop && source == NestedScrollSource.Drag && available.y > 0f -> onScroll(available)
-            !scrollFromTop && source == NestedScrollSource.Drag && available.y < 0f -> onScroll(
+            scrollFromTop && source == NestedScrollSource.UserInput && available.y > 0f -> onScroll(available)
+            !scrollFromTop && source == NestedScrollSource.UserInput && available.y < 0f -> onScroll(
                 available
             )
             else -> Offset.Zero
         }
     }
+
 
     private fun onScroll(available: Offset): Offset {
         // Mark this connection as the active one handling the swipe

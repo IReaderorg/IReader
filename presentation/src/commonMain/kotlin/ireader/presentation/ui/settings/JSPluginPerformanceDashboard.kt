@@ -76,9 +76,10 @@ private fun PluginMetricsCard(
                 style = MaterialTheme.typography.titleMedium
             )
             
-            Divider()
+            HorizontalDivider()
             
             MetricRow("Load Time", "${metrics.loadTime}ms")
+
             MetricRow("Avg Execution", "${metrics.avgExecutionTime}ms")
             MetricRow("Max Execution", "${metrics.maxExecutionTime}ms")
             MetricRow("Total Calls", "${metrics.totalCalls}")

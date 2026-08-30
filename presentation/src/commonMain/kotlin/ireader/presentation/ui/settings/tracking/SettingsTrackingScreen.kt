@@ -8,10 +8,15 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.PlaylistAddCheck
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -241,7 +246,7 @@ fun SettingsTrackingScreen(
                 SettingsSwitchItem(
                     title = localizeHelper.localize(Res.string.auto_update_status),
                     description = "Automatically update reading status (reading, completed, etc.)",
-                    icon = Icons.Outlined.PlaylistAddCheck,
+                    icon = Icons.AutoMirrored.Outlined.PlaylistAddCheck,
                     checked = autoUpdateStatus,
                     onCheckedChange = viewModel::setAutoUpdateStatus,
                     enabled = autoSyncEnabled
@@ -252,7 +257,7 @@ fun SettingsTrackingScreen(
                 SettingsSwitchItem(
                     title = localizeHelper.localize(Res.string.auto_update_progress),
                     description = "Automatically update chapter progress",
-                    icon = Icons.Outlined.TrendingUp,
+                    icon = Icons.AutoMirrored.Outlined.TrendingUp,
                     checked = autoUpdateProgress,
                     onCheckedChange = viewModel::setAutoUpdateProgress,
                     enabled = autoSyncEnabled
@@ -283,10 +288,11 @@ fun SettingsTrackingScreen(
                 SettingsItemWithTrailing(
                     title = "Tracked Books",
                     description = "Total books being tracked across all services",
-                    icon = Icons.Outlined.LibraryBooks,
+                    icon = Icons.AutoMirrored.Outlined.LibraryBooks,
                     onClick = { },
                     enabled = true
                 ) {
+
                     Text(
                         text = "$trackedBooksCount",
                         style = MaterialTheme.typography.bodyMedium,
@@ -496,6 +502,7 @@ fun SettingsTrackingScreen(
  * Shows instructions and a button to open browser for authentication.
  * The app will automatically capture the access token via deeplink callback.
  */
+@Suppress("DEPRECATION")
 @Composable
 private fun AniListLoginDialog(
     authUrl: String?,
@@ -504,6 +511,7 @@ private fun AniListLoginDialog(
     onTokenSubmit: (String) -> Unit,
     onOpenBrowser: () -> Unit = {}
 ) {
+
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     var tokenInput by remember { mutableStateOf("") }
@@ -1243,10 +1251,11 @@ private fun SyncHistoryDialog(
                 
                 // MyNovelList
                 ServiceStatusRow(
-                    icon = Icons.Outlined.MenuBook,
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
                     serviceName = "MyNovelList",
                     isConnected = myNovelListLoggedIn
                 )
+
             }
         },
         confirmButton = {

@@ -50,9 +50,11 @@ import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.core.constants.DonationConstants
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutSettingScreen(
+
     modifier: Modifier = Modifier,
     getFormattedBuildTime: () -> String,
     onPopBackStack: () -> Unit,

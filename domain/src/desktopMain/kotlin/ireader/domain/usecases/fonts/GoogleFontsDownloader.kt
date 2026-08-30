@@ -58,34 +58,33 @@ class GoogleFontsDownloader(
                 fontUrl = "https://cdn.jsdelivr.net/fontsource/fonts/${fontNameLower}@latest/latin-400-normal.ttf"
             }
             
-            if (fontUrl != null) {
-                try {
-                    // Download the actual font file
-                    val fontBytes: ByteArray = httpClients.default.get(fontUrl, block = {}).body()
-                    
-                    // Verify it's a valid TTF file (starts with specific magic bytes)
-                    if (fontBytes.size > 4) {
-                        val header = String(fontBytes.take(4).toByteArray())
-                        // TTF files start with 0x00 0x01 0x00 0x00 or "OTTO" for OTF
-                        // WOFF files start with "wOFF", WOFF2 files start with "wOF2"
-                        if (header.startsWith("wOF")) {
-                            Log.error("Font $fontName is WOFF/WOFF2 format, not supported by Compose Desktop")
-                            return@withContext null
-                        }
-                    }
-                    
-                    fontFile.writeBytes(fontBytes)
-                    
-                    if (!fontFile.canRead()) {
-                        Log.error("Font file is not readable: ${fontFile.absolutePath}")
+            try {
+                // Download the actual font file
+                val fontBytes: ByteArray = httpClients.default.get(fontUrl, block = {}).body()
+                
+                // Verify it's a valid TTF file (starts with specific magic bytes)
+                if (fontBytes.size > 4) {
+                    val header = String(fontBytes.take(4).toByteArray())
+                    // TTF files start with 0x00 0x01 0x00 0x00 or "OTTO" for OTF
+                    // WOFF files start with "wOFF", WOFF2 files start with "wOF2"
+                    if (header.startsWith("wOF")) {
+                        Log.error("Font $fontName is WOFF/WOFF2 format, not supported by Compose Desktop")
                         return@withContext null
                     }
-                    
-                    return@withContext fontFile
-                } catch (e: Exception) {
-                    Log.error("Failed to download font $fontName", e)
                 }
+                
+                fontFile.writeBytes(fontBytes)
+                
+                if (!fontFile.canRead()) {
+                    Log.error("Font file is not readable: ${fontFile.absolutePath}")
+                    return@withContext null
+                }
+                
+                return@withContext fontFile
+            } catch (e: Exception) {
+                Log.error("Failed to download font $fontName", e)
             }
+
             
             Log.warn("Failed to download font: $fontName")
             null

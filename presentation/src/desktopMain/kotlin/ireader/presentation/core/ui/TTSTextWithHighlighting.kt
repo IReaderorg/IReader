@@ -17,7 +17,7 @@ fun TTSTextWithHighlighting(
     ttsService: DesktopTTSService,
     modifier: Modifier = Modifier
 ) {
-    val ttsState = ttsService.state as ireader.domain.services.tts_service.DesktopTTSState
+    val ttsState = ttsService.state
     
     // Poll for word boundary changes
     var currentBoundary by remember { mutableStateOf(ttsState.currentWordBoundary) }
@@ -29,11 +29,12 @@ fun TTSTextWithHighlighting(
         }
     }
     
-    val annotatedText = if (currentBoundary != null && ttsState.isPlaying.value) {
+    val boundary = currentBoundary
+    val annotatedText = if (boundary != null && ttsState.isPlaying.value) {
         buildAnnotatedString {
-            val boundary = currentBoundary!!
             val startOffset = boundary.startOffset
             val endOffset = boundary.endOffset
+
             
             if (startOffset >= 0 && endOffset < text.length && startOffset <= endOffset) {
                 // Text before highlight

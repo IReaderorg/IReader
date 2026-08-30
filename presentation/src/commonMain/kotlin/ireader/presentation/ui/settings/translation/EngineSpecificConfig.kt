@@ -27,16 +27,25 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
+
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+
 import androidx.compose.material3.CircularProgressIndicator
+
 import androidx.compose.material3.DropdownMenuItem
+
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+
+
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -1407,8 +1416,9 @@ private fun LanguageDropdown(
             label = { Text(label, maxLines = 1) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
-                .menuAnchor()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .fillMaxWidth(),
+
 
 
             singleLine = true,
@@ -1513,7 +1523,8 @@ private fun GeminiConfig(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+
 
 
                     textStyle = MaterialTheme.typography.bodyMedium
@@ -1630,7 +1641,8 @@ private fun OpenRouterConfig(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+
 
 
                     textStyle = MaterialTheme.typography.bodyMedium
@@ -1747,7 +1759,8 @@ private fun NvidiaConfig(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+
 
 
                     textStyle = MaterialTheme.typography.bodyMedium
@@ -1996,7 +2009,7 @@ private fun RenderConfigField(
             val dynamicOptions = remember(plugin, config.key, refreshKey, reloadTrigger) {
                 if (config.key == "model") {
                     // Get models list from a special config value
-                    (plugin.getConfigValue("cached_models_list") as? List<String>) ?: emptyList()
+                    (plugin.getConfigValue("cached_models_list") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
                 } else {
                     config.options
                 }
@@ -2037,7 +2050,8 @@ private fun RenderConfigField(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(),
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+
 
 
                             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()

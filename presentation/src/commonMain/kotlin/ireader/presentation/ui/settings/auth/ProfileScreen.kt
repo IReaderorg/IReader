@@ -24,8 +24,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Security
+
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.safePopBackStack
@@ -123,9 +124,10 @@ class ProfileScreen {
                             viewModel.clearError(); viewModel.signOut()
                             navController.navigate(NavigationRoutes.auth)
                         }) {
-                            Icon(Icons.Filled.Login, null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.AutoMirrored.Filled.Login, null, modifier = Modifier.size(18.dp))
                             Text("  Sign in again")
                         }
+
                     } else {
                         TextButton(onClick = { viewModel.clearError() }) { Text("Dismiss") }
                     }

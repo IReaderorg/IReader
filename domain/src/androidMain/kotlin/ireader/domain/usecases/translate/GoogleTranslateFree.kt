@@ -170,7 +170,8 @@ actual class GoogleTranslateFree actual constructor() : TranslateEngine(), KoinC
     /**
      * Translate a single text using Google Translate free API with automatic backoff retry
      */
-    private suspend fun translateSingleWithRetry(text: String, source: String, target: String): String? {
+    internal suspend fun translateSingleWithRetry(text: String, source: String, target: String): String? {
+
         if (text.isBlank()) return text
         
         var attempt = 0

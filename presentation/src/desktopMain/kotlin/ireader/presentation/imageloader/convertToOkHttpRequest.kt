@@ -47,9 +47,10 @@ suspend fun Call.await(): Response {
                         return
                     }
 
-                    continuation.resume(response) {
-                        response.body?.closeQuietly()
+                    continuation.resume(response) { _, resp, _ ->
+                        resp.body.closeQuietly()
                     }
+
                 }
 
                 override fun onFailure(call: Call, e: IOException) {

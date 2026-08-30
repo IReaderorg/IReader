@@ -112,8 +112,9 @@ class ReaderTranslationViewModel(
         }
         
         // Check if chapter has content
-        val content = chapter.content ?: emptyList()
+        val content = chapter.content
         val texts = content.filterIsInstance<ireader.core.source.model.Text>()
+
         
         if (texts.isEmpty()) {
             showSnackBar(UiText.MStringResource(Res.string.no_text_to_translate))
@@ -163,9 +164,10 @@ class ReaderTranslationViewModel(
                     }
                     is ServiceResult.Error -> {
                         Log.error { "ReaderTranslationViewModel: Translation failed: ${result.message}" }
-                        showSnackBar(UiText.DynamicString("Translation failed: ${result.message ?: "Unknown error"}"))
+                        showSnackBar(UiText.DynamicString("Translation failed: ${result.message}"))
                         isTranslating = false
                     }
+
                     else -> {
                         isTranslating = false
                     }
@@ -258,8 +260,9 @@ class ReaderTranslationViewModel(
         }
         
         // Check if next chapter has content
-        val content = nextChapter.content ?: emptyList()
+        val content = nextChapter.content
         val texts = content.filterIsInstance<ireader.core.source.model.Text>()
+
         
         if (texts.isEmpty()) {
             Log.info { "ReaderTranslationViewModel: Next chapter has no content, queuing for download and translation" }

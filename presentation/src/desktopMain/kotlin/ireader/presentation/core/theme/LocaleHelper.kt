@@ -58,18 +58,7 @@ actual class LocaleHelper(
      * Parses a language code into a Locale object.
      */
     private fun parseLocale(languageCode: String): Locale {
-        return when {
-            languageCode.contains("-") -> {
-                val parts = languageCode.split("-")
-                Locale(parts[0], parts.getOrElse(1) { "" })
-            }
-            languageCode.contains("_") -> {
-                val parts = languageCode.split("_")
-                Locale(parts[0], parts.getOrElse(1) { "" })
-            }
-            else -> {
-                Locale(languageCode)
-            }
-        }
+        return Locale.forLanguageTag(languageCode.replace('_', '-'))
     }
 }
+
