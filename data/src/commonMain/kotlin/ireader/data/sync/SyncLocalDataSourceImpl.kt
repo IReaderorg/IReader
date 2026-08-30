@@ -447,4 +447,24 @@ class SyncLocalDataSourceImpl(
             }
         }
     }
+
+    override suspend fun deleteBooksByGlobalIds(globalIds: List<String>) {
+        if (globalIds.isEmpty()) return
+        handler.await(inTransaction = true) {
+            globalIds.forEach { globalId ->
+                try {
+                    val sourceId = globalId.substringBefore("|").toLongOrNull() ?: 0L
+                    val bookKey = globalId.substringAfter("|")
+                    val book = bookQueries.findBookBySourceAndUrl(sourceId, bookKey).executeAsOneOrNull()
+                    if (book != null) {
+                        Log.info { "[SyncLocalDataSource] Deleting tombstoned book: ${book.title} (ID: ${book._id})" }
+                        chapterQueries.deleteChaptersByBookId(book._id)
+                        bookQueries.deleteBook(book._id)
+                    }
+                } catch (e: Exception) {
+                    Log.error(e, "[SyncLocalDataSource] Failed to delete book for globalId $globalId: ${e.message}")
+                }
+            }
+        }
+    }
 }

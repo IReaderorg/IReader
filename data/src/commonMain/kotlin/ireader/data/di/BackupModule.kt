@@ -20,6 +20,16 @@ val backupModule = module {
             authenticator = get()
         )
     }
+    
+    // Google Drive Delta Sync Service
+    single<ireader.domain.services.backup.GoogleDriveSyncService> {
+        ireader.data.backup.GoogleDriveSyncServiceImpl(
+            authenticator = get(),
+            localDataSource = get(),
+            platformConfig = get(),
+            libraryController = getOrNull()
+        )
+    }
 }
 
 /**

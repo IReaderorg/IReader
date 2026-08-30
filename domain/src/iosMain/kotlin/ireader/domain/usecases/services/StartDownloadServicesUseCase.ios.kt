@@ -38,6 +38,7 @@ actual class StartDownloadServicesUseCase : KoinComponent {
     private val extensions: CatalogStore by inject()
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by inject()
     private val downloadUseCases: DownloadUseCases by inject()
+    private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences by inject()
     private val downloadServiceState: DownloadStateHolder by inject()
     private val notificationManager: PlatformNotificationManager by inject()
     
@@ -144,7 +145,7 @@ actual class StartDownloadServicesUseCase : KoinComponent {
                         println("[DownloadService] $title")
                     },
                     updateNotification = { /* iOS handles notifications differently */ },
-                    downloadDelayMs = 1000L
+                    downloadDelayMs = downloadPreferences.downloadDelayMs().get()
                 )
                 
                 println("[DownloadService] Download service finished with result: $result")

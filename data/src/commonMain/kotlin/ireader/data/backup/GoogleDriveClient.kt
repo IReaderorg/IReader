@@ -316,6 +316,41 @@ class GoogleDriveClient(
     }
     
     /**
+     * Update an existing file content in Google Drive
+     * 
+     * @param fileId ID of the file to update
+     * @param content New content as ByteArray
+     * @param mimeType MIME type
+     * @return File ID on success
+     */
+    suspend fun updateFile(
+        fileId: String,
+        content: ByteArray,
+        mimeType: String = "application/json"
+    ): Result<String> = withRetry {
+        val token = getAccessToken()
+            ?: return@withRetry Result.failure(Exception("Not authenticated"))
+        
+        try {
+            val response: HttpResponse = httpClient.patch("$UPLOAD_API_BASE/files/$fileId?uploadType=media") {
+                bearerAuth(token)
+                contentType(ContentType.parse(mimeType))
+                setBody(content)
+            }
+            
+            if (response.status.isSuccess()) {
+                val fileResponse = response.body<DriveFileResponse>()
+                Result.success(fileResponse.id)
+            } else {
+                val errorBody = response.bodyAsText()
+                Result.failure(Exception("Update failed: ${response.status} - $errorBody"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Update failed: ${e.message}", e))
+        }
+    }
+    
+    /**
      * Execute an operation with exponential backoff retry
      */
     private suspend fun <T> withRetry(

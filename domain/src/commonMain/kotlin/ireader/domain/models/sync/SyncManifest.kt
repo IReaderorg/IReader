@@ -39,7 +39,9 @@ data class SyncManifestItem(
     val itemId: String,
     val itemType: SyncItemType,
     val hash: String,
-    val lastModified: Long
+    val lastModified: Long,
+    val isDeleted: Boolean = false,
+    val deletedAt: Long? = null
 ) {
     init {
         require(itemId.isNotBlank()) { "Item ID cannot be empty or blank" }

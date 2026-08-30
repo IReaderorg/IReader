@@ -15,5 +15,7 @@ data class SyncData(
     val books: List<BookSyncData>,
     val chapters: List<ChapterSyncData>,
     val history: List<HistorySyncData>,
-    val metadata: SyncMetadata
+    val metadata: SyncMetadata,
+    val deletedBookIds: List<Long> = emptyList(),
+    val deletedChapterIds: List<Long> = emptyList()
 )

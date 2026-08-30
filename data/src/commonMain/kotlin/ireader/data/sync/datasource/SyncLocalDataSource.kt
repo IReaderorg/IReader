@@ -117,6 +117,13 @@ interface SyncLocalDataSource {
      * @param history List of history records to apply
      */
     suspend fun applyHistory(history: List<ireader.domain.models.sync.HistorySyncData>)
+
+    /**
+     * Delete books specified by global IDs (sourceId + key) from local database.
+     * 
+     * @param globalIds List of book global IDs to delete
+     */
+    suspend fun deleteBooksByGlobalIds(globalIds: List<String>)
 }
 
 /**

@@ -832,14 +832,18 @@ class SyncRepositoryImpl(
         localManifest: SyncManifest,
         remoteManifest: SyncManifest
     ): List<SyncManifestItem> {
-        val remoteItemIds = remoteManifest.items.map { it.itemId }.toSet()
-        val remoteItemHashes = remoteManifest.items.associate { it.itemId to it.hash }
+        val remoteItemsById = remoteManifest.items.associateBy { it.itemId }
         
         return localManifest.items.filter { localItem ->
-            // Send if remote doesn't have it
-            !remoteItemIds.contains(localItem.itemId) ||
-            // Or if local version is newer (different hash)
-            remoteItemHashes[localItem.itemId] != localItem.hash
+            val remoteItem = remoteItemsById[localItem.itemId]
+            if (remoteItem == null) {
+                !localItem.isDeleted
+            } else if (remoteItem.isDeleted) {
+                val remoteDeletedAt = remoteItem.deletedAt ?: remoteItem.lastModified
+                localItem.lastModified > remoteDeletedAt
+            } else {
+                remoteItem.hash != localItem.hash && localItem.lastModified > remoteItem.lastModified
+            }
         }
     }
     
@@ -847,14 +851,18 @@ class SyncRepositoryImpl(
         localManifest: SyncManifest,
         remoteManifest: SyncManifest
     ): List<SyncManifestItem> {
-        val localItemIds = localManifest.items.map { it.itemId }.toSet()
-        val localItemHashes = localManifest.items.associate { it.itemId to it.hash }
+        val localItemsById = localManifest.items.associateBy { it.itemId }
         
         return remoteManifest.items.filter { remoteItem ->
-            // Receive if local doesn't have it
-            !localItemIds.contains(remoteItem.itemId) ||
-            // Or if remote version is newer (different hash)
-            localItemHashes[remoteItem.itemId] != remoteItem.hash
+            val localItem = localItemsById[remoteItem.itemId]
+            if (localItem == null) {
+                !remoteItem.isDeleted
+            } else if (localItem.isDeleted) {
+                val localDeletedAt = localItem.deletedAt ?: localItem.lastModified
+                remoteItem.lastModified > localDeletedAt
+            } else {
+                localItem.hash != remoteItem.hash && remoteItem.lastModified > localItem.lastModified
+            }
         }
     }
     

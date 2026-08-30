@@ -33,15 +33,6 @@ fun JSPluginSettingsScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Enable/Disable JS Plugins
-        item {
-            SwitchPreferenceItem(
-                title = localizeHelper.localize(Res.string.enable_javascript_plugins),
-                subtitle = localizeHelper.localize(Res.string.allow_loading_lnreader_compatible_javascript),
-                preference = uiPreferences.enableJSPlugins()
-            )
-        }
-        
         // Auto Update
         item {
             SwitchPreferenceItem(

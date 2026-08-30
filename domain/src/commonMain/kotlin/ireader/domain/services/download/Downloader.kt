@@ -232,15 +232,22 @@ class Downloader(
      */
     @OptIn(ExperimentalTime::class)
     private suspend fun waitForRateLimit(delayMs: Long) {
-        if (lastDownloadTime == 0L) return
+        if (lastDownloadTime == 0L || delayMs <= 0L) return
         
         val now = Clock.System.now().toEpochMilliseconds()
         val elapsed = now - lastDownloadTime
         
         if (elapsed < delayMs) {
-            val waitTime = delayMs - elapsed
+            var waitTime = delayMs - elapsed
             Log.debug { "Downloader: Rate limiting - waiting ${waitTime}ms" }
-            delay(waitTime)
+            while (waitTime > 0L && isActive()) {
+                val step = minOf(waitTime, 200L)
+                delay(step)
+                waitTime -= step
+                while (_isPaused.value && _isRunning.value && isActive()) {
+                    delay(500L)
+                }
+            }
         }
     }
     

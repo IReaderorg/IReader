@@ -456,9 +456,9 @@ class SupabaseRemoteRepository(
     }
     
     private fun parseTimestamp(timestamp: String?): Long {
-        if (timestamp == null) return currentTimeToLong()
+        if (timestamp.isNullOrBlank()) return currentTimeToLong()
         return try {
-            currentTimeToLong()
+            timestamp.toLongOrNull() ?: kotlin.time.Instant.parse(timestamp).toEpochMilliseconds()
         } catch (e: Exception) {
             currentTimeToLong()
         }

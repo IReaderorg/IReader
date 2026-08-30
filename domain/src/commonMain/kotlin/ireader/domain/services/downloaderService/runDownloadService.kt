@@ -360,9 +360,17 @@ suspend fun runDownloadService(
                 ireader.core.log.Log.error { "Failed to download ${download.chapterName}: $errorMessage" }
             }
 
-            // Delay between downloads
-            if (success) {
-                delay(downloadDelayMs)
+            // Delay between chapter downloads with responsive pause/cancel checking
+            if (downloadDelayMs > 0L && !checkCancellation() && downloadServiceState.isRunning.value) {
+                var remaining = downloadDelayMs
+                while (remaining > 0L && !checkCancellation() && downloadServiceState.isRunning.value) {
+                    val step = minOf(remaining, 200L)
+                    delay(step)
+                    remaining -= step
+                    while (downloadServiceState.isPaused.value && downloadServiceState.isRunning.value && !checkCancellation()) {
+                        delay(500L)
+                    }
+                }
             }
         }
 

@@ -399,8 +399,8 @@ fun GeneralSettingScreen(
                     title = localizeHelper.localize(Res.string.download_delay),
                     subtitle = localizeHelper.localize(Res.string.delay_between_chapter_downloads_to),
                     icon = Icons.Filled.Download,
-                    valueRange = 0f..10000f,
-                    steps = 19,
+                    valueRange = 0f..100000f,
+                    steps = 199,
                     trailingFormatter = { value -> vm.formatDownloadDelay(value.toLong()) }
                 ),
 
@@ -448,12 +448,6 @@ fun GeneralSettingScreen(
                         onClick = onJSPluginSettingsClick
                     )
                 },
-                Components.Switch(
-                        preference = vm.enableJSPlugins,
-                        title = localizeHelper.localize(Res.string.enable_javascript_plugins),
-                        subtitle = localizeHelper.localize(Res.string.allow_loading_lnreader_compatible_javascript),
-                        icon = Icons.Filled.Code
-                ),
                 Components.Switch(
                         preference = vm.autoInstaller,
                         title = localizeHelper.localize(Res.string.auto_installer),
