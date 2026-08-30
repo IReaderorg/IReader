@@ -112,6 +112,10 @@ class NativeTTSPlayer(
     override fun isReady(): Boolean = isInitialized && tts != null
     
     override suspend fun speak(text: String, utteranceId: String): Result<Unit> {
+        if (text.isBlank()) {
+            callback?.onDone(utteranceId)
+            return Result.success(Unit)
+        }
         return try {
             if (!isReady()) {
                 return Result.failure(Exception("TTS not initialized"))

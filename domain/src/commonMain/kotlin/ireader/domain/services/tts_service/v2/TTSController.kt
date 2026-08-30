@@ -374,6 +374,22 @@ class TTSController(
         // Use displayContent which respects showTranslation setting
         val text = currentState.displayContent.getOrNull(paragraphIndex)
         if (text != null) {
+            if (text.isBlank()) {
+                // If paragraph is blank (e.g. empty line or stripped by regex), advance immediately
+                if (currentState.canGoNext) {
+                    _state.update { 
+                        it.copy(
+                            previousParagraphIndex = it.currentParagraphIndex,
+                            currentParagraphIndex = it.currentParagraphIndex + 1,
+                            loadingParagraphs = it.loadingParagraphs - paragraphIndex
+                        ) 
+                    }
+                    play()
+                } else {
+                    handleParagraphCompleted()
+                }
+                return
+            }
             val utteranceId = "p_${paragraphIndex}"
             currentUtteranceId = utteranceId
             
@@ -384,6 +400,8 @@ class TTSController(
             prefetchNextChapter()
             
             engine?.speak(text, utteranceId)
+        } else {
+            handleParagraphCompleted()
         }
     }
     
@@ -697,7 +715,7 @@ class TTSController(
         nextChapterWatchJob?.cancel()
         nextChapterWatchJob = null
 
-        val wasPlaying = _state.value.isPlaying
+        val wasPlaying = _state.value.isPlaying || _state.value.playbackState == PlaybackState.PLAYING || _state.value.playbackState == PlaybackState.LOADING
         engine?.stop()
 
         // Give the native TTS engine time to fully process the stop command before the next
@@ -718,7 +736,9 @@ class TTSController(
                 if (_state.value.hasContent) {
                     // Content is present (already in DB or fetched synchronously by
                     // loadChapter) — resume playback as before.
-                    if (wasPlaying) { play() }
+                    if (wasPlaying || _state.value.autoNextChapter) { 
+                        play() 
+                    }
                 } else if (_state.value.autoNextChapter) {
                     // The next chapter row exists but its content has not been fetched
                     // yet (empty paragraphs after loadChapter, e.g. the remote fetch is
@@ -1051,9 +1071,16 @@ class TTSController(
         val bookId = currentState.book?.id
         val chapterId = currentState.chapter?.id
         val currentParagraph = currentState.currentParagraphIndex
+        val wasPlaying = currentState.isPlaying || currentState.playbackState == PlaybackState.PLAYING
         
         if (bookId == null || chapterId == null) {
             Log.debug { "$TAG: refreshContent - no chapter loaded, skipping" }
+            return
+        }
+        
+        // If content is already present and actively playing, do not interrupt playback
+        if (currentState.hasContent && wasPlaying) {
+            Log.debug { "$TAG: refreshContent - chapter already has content and is playing, skipping reload to prevent interruption" }
             return
         }
         
@@ -1064,6 +1091,10 @@ class TTSController(
         
         // Reload the chapter (content filter will be applied by contentLoader)
         loadChapter(bookId, chapterId, currentParagraph)
+        
+        if (wasPlaying && _state.value.hasContent) {
+            play()
+        }
     }
     
     // ========== Translation ==========

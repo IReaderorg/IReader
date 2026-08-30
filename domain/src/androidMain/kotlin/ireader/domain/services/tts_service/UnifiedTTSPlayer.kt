@@ -123,6 +123,12 @@ class NativeTTSPlayer(
     }
     
     override fun speak(text: String, utteranceId: String) {
+        if (text.isBlank()) {
+            scope.launch {
+                callback?.onDone(utteranceId)
+            }
+            return
+        }
         if (!isReady()) {
             // Queue the request to be executed when TTS is ready
             Log.info { "Native TTS not ready yet, queuing speak request: $utteranceId" }

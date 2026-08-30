@@ -323,4 +323,61 @@ class TTSControllerTest {
         
         controller.destroy()
     }
+    
+    @Test
+    fun `blank paragraphs are skipped automatically during playback`() = runTest(testDispatcher) {
+        val mockLoader = MockContentLoader().apply {
+            mockParagraphs = listOf("   ", "Valid Paragraph", "Third Paragraph")
+        }
+        val engine = MockEngine()
+        val controller = TTSController(
+            contentLoader = mockLoader,
+            nativeEngineFactory = { engine }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 0))
+        testScheduler.advanceUntilIdle()
+        
+        controller.dispatch(TTSCommand.Play)
+        testScheduler.advanceUntilIdle()
+        
+        // Should have skipped the blank paragraph 0 and started playing paragraph 1
+        assertEquals(1, controller.state.value.currentParagraphIndex)
+        assertEquals("Valid Paragraph", engine.lastText)
+        assertEquals("p_1", engine.lastUtteranceId)
+        
+        controller.destroy()
+    }
+
+    @Test
+    fun `refreshContent does not interrupt playing audio when chapter already has content`() = runTest(testDispatcher) {
+        val mockLoader = MockContentLoader()
+        val engine = MockEngine()
+        val controller = TTSController(
+            contentLoader = mockLoader,
+            nativeEngineFactory = { engine }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 0))
+        testScheduler.advanceUntilIdle()
+        
+        controller.dispatch(TTSCommand.Play)
+        testScheduler.advanceUntilIdle()
+        
+        assertTrue(controller.state.value.isPlaying)
+        assertEquals(0, controller.state.value.currentParagraphIndex)
+        
+        // Dispatch RefreshContent while playing
+        controller.dispatch(TTSCommand.RefreshContent)
+        testScheduler.advanceUntilIdle()
+        
+        // Playback should NOT be interrupted/reset
+        assertTrue(controller.state.value.isPlaying)
+        assertEquals(0, controller.state.value.currentParagraphIndex)
+        
+        controller.destroy()
+    }
 }
+

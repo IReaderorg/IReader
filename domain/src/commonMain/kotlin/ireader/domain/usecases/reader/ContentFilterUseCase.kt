@@ -57,6 +57,7 @@ class ContentFilterUseCase(
     // Cache compiled patterns for performance  
     private var cachedPatterns: List<Regex>? = null
     private var cachedExactStrings: List<String>? = null
+    private var cachedFlexibleRegexes: List<Regex>? = null
     private var cacheBookId: Long? = null
     
     /**
@@ -66,12 +67,12 @@ class ContentFilterUseCase(
     fun filterPages(pages: List<Page>, bookId: Long? = null): List<Page> {
         val filterEnabled = readerPreferences.contentFilterEnabled().get()
         
-        // Get patterns - hardcoded strings are always included
-        val (patterns, exactStrings) = getCompiledPatternsAndStrings(bookId, forceHardcoded = true)
+        val compiled = getCompiledFilterBundle(bookId)
         
         // If filter is disabled, only apply hardcoded exact strings
-        val effectivePatterns = if (filterEnabled) patterns else emptyList()
-        val effectiveExactStrings = if (filterEnabled) exactStrings else HARDCODED_EXACT_STRINGS.toList()
+        val effectivePatterns = if (filterEnabled) compiled.patterns else emptyList()
+        val effectiveExactStrings = if (filterEnabled) compiled.exactStrings else HARDCODED_EXACT_STRINGS
+        val effectiveFlexibleRegexes = if (filterEnabled) compiled.flexibleRegexes else emptyList()
         
         if (effectivePatterns.isEmpty() && effectiveExactStrings.isEmpty()) {
             return pages
@@ -83,7 +84,7 @@ class ContentFilterUseCase(
             when (page) {
                 is Text -> {
                     val originalText = page.text
-                    val filteredText = applyFilters(originalText, effectivePatterns, effectiveExactStrings)
+                    val filteredText = applyFilters(originalText, effectivePatterns, effectiveExactStrings, effectiveFlexibleRegexes)
                     if (originalText != filteredText) {
                         Log.debug { "$TAG: Filtered text changed from ${originalText.length} to ${filteredText.length} chars" }
                     }
@@ -105,12 +106,12 @@ class ContentFilterUseCase(
     fun filterStrings(content: List<String>, bookId: Long? = null): List<String> {
         val filterEnabled = readerPreferences.contentFilterEnabled().get()
         
-        // Get patterns - hardcoded strings are always included
-        val (patterns, exactStrings) = getCompiledPatternsAndStrings(bookId, forceHardcoded = true)
+        val compiled = getCompiledFilterBundle(bookId)
         
         // If filter is disabled, only apply hardcoded exact strings
-        val effectivePatterns = if (filterEnabled) patterns else emptyList()
-        val effectiveExactStrings = if (filterEnabled) exactStrings else HARDCODED_EXACT_STRINGS.toList()
+        val effectivePatterns = if (filterEnabled) compiled.patterns else emptyList()
+        val effectiveExactStrings = if (filterEnabled) compiled.exactStrings else HARDCODED_EXACT_STRINGS
+        val effectiveFlexibleRegexes = if (filterEnabled) compiled.flexibleRegexes else emptyList()
         
         if (effectivePatterns.isEmpty() && effectiveExactStrings.isEmpty()) {
             return content
@@ -119,7 +120,7 @@ class ContentFilterUseCase(
         Log.debug { "$TAG: Filtering ${content.size} strings with ${effectivePatterns.size} patterns and ${effectiveExactStrings.size} exact strings" }
         
         return content.mapNotNull { text ->
-            val filteredText = applyFilters(text, effectivePatterns, effectiveExactStrings)
+            val filteredText = applyFilters(text, effectivePatterns, effectiveExactStrings, effectiveFlexibleRegexes)
             if (filteredText.isBlank()) {
                 null // Remove empty paragraphs after filtering
             } else {
@@ -135,40 +136,41 @@ class ContentFilterUseCase(
     fun filterText(text: String, bookId: Long? = null): String {
         val filterEnabled = readerPreferences.contentFilterEnabled().get()
         
-        // Get patterns - hardcoded strings are always included
-        val (patterns, exactStrings) = getCompiledPatternsAndStrings(bookId, forceHardcoded = true)
+        val compiled = getCompiledFilterBundle(bookId)
         
-        // If filter is disabled, only apply hardcoded exact strings
-        val effectivePatterns = if (filterEnabled) patterns else emptyList()
-        val effectiveExactStrings = if (filterEnabled) exactStrings else HARDCODED_EXACT_STRINGS.toList()
+        val effectivePatterns = if (filterEnabled) compiled.patterns else emptyList()
+        val effectiveExactStrings = if (filterEnabled) compiled.exactStrings else HARDCODED_EXACT_STRINGS
+        val effectiveFlexibleRegexes = if (filterEnabled) compiled.flexibleRegexes else emptyList()
         
         if (effectivePatterns.isEmpty() && effectiveExactStrings.isEmpty()) {
             return text
         }
         
-        return applyFilters(text, effectivePatterns, effectiveExactStrings)
+        return applyFilters(text, effectivePatterns, effectiveExactStrings, effectiveFlexibleRegexes)
     }
     
-    /**
-     * Get compiled regex patterns and exact strings from repository or preferences (fallback)
-     * Returns a Pair of (regex patterns, exact strings to remove)
-     * @param forceHardcoded If true, always include hardcoded strings even if cache exists
-     */
-    private fun getCompiledPatternsAndStrings(bookId: Long? = null, forceHardcoded: Boolean = false): Pair<List<Regex>, List<String>> {
-        // Check cache first (but always include hardcoded strings)
-        if (cachedPatterns != null && cachedExactStrings != null && cacheBookId == bookId && !forceHardcoded) {
-            return Pair(cachedPatterns!!, cachedExactStrings!!)
+    private data class FilterBundle(
+        val patterns: List<Regex>,
+        val exactStrings: List<String>,
+        val flexibleRegexes: List<Regex>
+    )
+
+    private fun getCompiledFilterBundle(bookId: Long? = null): FilterBundle {
+        val patterns = cachedPatterns
+        val exactStrings = cachedExactStrings
+        val flexRegexes = cachedFlexibleRegexes
+        if (patterns != null && exactStrings != null && flexRegexes != null && cacheBookId == bookId) {
+            return FilterBundle(patterns, exactStrings, flexRegexes)
         }
         
         val regexPatterns = mutableListOf<Regex>()
-        val exactStrings = mutableListOf<String>()
+        val exactList = mutableListOf<String>()
+        val flexibleList = mutableListOf<Regex>()
         
         // Always add hardcoded exact strings
-        exactStrings.addAll(HARDCODED_EXACT_STRINGS)
-        Log.debug { "$TAG: Added ${HARDCODED_EXACT_STRINGS.size} hardcoded exact strings" }
+        exactList.addAll(HARDCODED_EXACT_STRINGS)
         
         if (repository != null) {
-            // Use repository if available
             try {
                 val filters = runBlocking {
                     if (bookId != null) {
@@ -181,16 +183,14 @@ class ContentFilterUseCase(
                     try {
                         regexPatterns.add(Regex(filter.pattern, RegexOption.IGNORE_CASE))
                     } catch (e: Exception) {
-                        // If regex is invalid, treat it as exact string match
                         Log.warn { "$TAG: Invalid regex, using as exact string: ${filter.pattern}" }
-                        exactStrings.add(filter.pattern)
+                        exactList.add(filter.pattern)
                     }
                 }
             } catch (e: Exception) {
                 Log.warn { "$TAG: Failed to load patterns from repository: ${e.message}" }
             }
         } else {
-            // Fallback to preferences (legacy)
             val patternsString = readerPreferences.contentFilterPatterns().get()
             if (patternsString.isNotBlank()) {
                 patternsString
@@ -201,20 +201,31 @@ class ContentFilterUseCase(
                         try {
                             regexPatterns.add(Regex(pattern, RegexOption.IGNORE_CASE))
                         } catch (e: Exception) {
-                            // If regex is invalid, treat it as exact string match
                             Log.warn { "$TAG: Invalid regex, using as exact string: $pattern" }
-                            exactStrings.add(pattern)
+                            exactList.add(pattern)
                         }
                     }
             }
         }
         
-        // Update cache
+        for (exact in exactList) {
+            try {
+                val flexiblePattern = Regex.escape(exact)
+                    .replace("\\ ", "\\s+")
+                    .replace("\\(", "\\(?")
+                    .replace("\\)", "\\)?")
+                flexibleList.add(Regex(flexiblePattern, RegexOption.IGNORE_CASE))
+            } catch (e: Exception) {
+                // Ignore pattern conversion errors
+            }
+        }
+        
         cachedPatterns = regexPatterns
-        cachedExactStrings = exactStrings
+        cachedExactStrings = exactList
+        cachedFlexibleRegexes = flexibleList
         cacheBookId = bookId
         
-        return Pair(regexPatterns, exactStrings)
+        return FilterBundle(regexPatterns, exactList, flexibleList)
     }
     
     /**
@@ -223,13 +234,19 @@ class ContentFilterUseCase(
     fun invalidateCache() {
         cachedExactStrings = null
         cachedPatterns = null
+        cachedFlexibleRegexes = null
         cacheBookId = null
     }
     
     /**
      * Apply all filter patterns and exact strings to text
      */
-    private fun applyFilters(text: String, patterns: List<Regex>, exactStrings: List<String> = emptyList()): String {
+    private fun applyFilters(
+        text: String,
+        patterns: List<Regex>,
+        exactStrings: List<String> = emptyList(),
+        flexibleRegexes: List<Regex> = emptyList()
+    ): String {
         var result = text
         
         // First apply hardcoded regex patterns (most flexible matching)
@@ -237,23 +254,14 @@ class ContentFilterUseCase(
             result = pattern.replace(result, "")
         }
         
-        // Then apply exact string removal (case-insensitive)
-        // Also handle variations in whitespace by converting exact strings to flexible regex
+        // Then apply exact string removal
         for (exactString in exactStrings) {
-            // Direct replacement first
             result = result.replace(exactString, "", ignoreCase = true)
-            
-            // Also try regex with flexible whitespace (handles multiple spaces, tabs, etc.)
-            try {
-                val flexiblePattern = Regex.escape(exactString)
-                    .replace("\\ ", "\\s+")  // Allow any whitespace between words
-                    .replace("\\(", "\\(?")  // Make parentheses optional
-                    .replace("\\)", "\\)?")
-                val flexibleRegex = Regex(flexiblePattern, RegexOption.IGNORE_CASE)
-                result = flexibleRegex.replace(result, "")
-            } catch (e: Exception) {
-                // Ignore regex errors, direct replacement already attempted
-            }
+        }
+        
+        // Then apply precompiled flexible regexes
+        for (flexibleRegex in flexibleRegexes) {
+            result = flexibleRegex.replace(result, "")
         }
         
         // Then apply user-defined regex patterns

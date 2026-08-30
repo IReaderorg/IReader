@@ -796,7 +796,7 @@ class TTSV2ScreenSpec(
                         }
                     }
                     is ChapterNotifier.ChangeType.ContentFetched -> {
-                        if (change.chapterId == state.chapter?.id) {
+                        if (change.chapterId == state.chapter?.id && !state.hasContent) {
                             Log.warn { "TTSV2ScreenSpec: ChapterNotifier - Content fetched for current chapter ${change.chapterId}" }
                             // Refresh content from controller
                             viewModel.adapter.refreshContent()
@@ -810,8 +810,8 @@ class TTSV2ScreenSpec(
                         } catch (e: Exception) {
                             Log.error { "TTSV2ScreenSpec: Failed to reload chapters: ${e.message}" }
                         }
-                        // If current chapter was updated, refresh content
-                        if (change.chapterId == state.chapter?.id) {
+                        // If current chapter was updated and has no content yet, refresh content
+                        if (change.chapterId == state.chapter?.id && !state.hasContent) {
                             viewModel.adapter.refreshContent()
                         }
                     }
@@ -823,8 +823,8 @@ class TTSV2ScreenSpec(
                         } catch (e: Exception) {
                             Log.error { "TTSV2ScreenSpec: Failed to reload chapters: ${e.message}" }
                         }
-                        // If current chapter was updated, refresh content
-                        if (change.chapterIds.contains(state.chapter?.id)) {
+                        // If current chapter was updated and has no content yet, refresh content
+                        if (change.chapterIds.contains(state.chapter?.id) && !state.hasContent) {
                             viewModel.adapter.refreshContent()
                         }
                     }
