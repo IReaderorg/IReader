@@ -70,9 +70,10 @@ fun VoiceSelectionDialog(
                     }
                 }
                 
-                Divider()
+                HorizontalDivider()
                 
                 // Content - Scrollable
+
                 Box(
                     modifier = Modifier
                         .weight(1f)

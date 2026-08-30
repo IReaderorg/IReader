@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,13 +78,15 @@ fun UserSourcesListScreen(
                 title = { Text(localizeHelper.localize(Res.string.user_sources)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onShowHelpDialog) {
-                        Icon(Icons.Default.Help, contentDescription = localizeHelper.localize(Res.string.help))
+                        Icon(Icons.AutoMirrored.Filled.Help, contentDescription = localizeHelper.localize(Res.string.help))
                     }
+
+
                     IconButton(onClick = onShowImportDialog) {
                         Icon(Icons.Default.FileDownload, contentDescription = localizeHelper.localize(Res.string.import_action))
                     }
@@ -296,10 +301,12 @@ private fun EmptyState(
             }
             
             TextButton(onClick = onHelp) {
-                Icon(Icons.Default.Help, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.Help, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(localizeHelper.localize(Res.string.learn_how_to_create_sources))
             }
+
+
         }
     }
 }

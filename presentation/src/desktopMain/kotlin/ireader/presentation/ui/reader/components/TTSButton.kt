@@ -1,9 +1,9 @@
 package ireader.presentation.ui.reader.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import ireader.domain.services.tts_service.DesktopTTSService
@@ -28,8 +28,9 @@ fun TTSButton(
         imageVector = when {
             state.isPlaying.value -> Icons.Default.Pause
             state.ttsChapter.value != null -> Icons.Default.PlayArrow
-            else -> Icons.Default.VolumeUp
+            else -> Icons.AutoMirrored.Filled.VolumeUp
         },
+
         contentDescription = localizeHelper.localize(Res.string.text_to_speech),
         tint = if (state.isPlaying.value) 
             MaterialTheme.colorScheme.primary 

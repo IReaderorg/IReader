@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,9 +74,10 @@ fun SourceCreatorScreen(
                 title = { Text(if (state.isEditing) "Edit Source" else "Create Source") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
+
                 actions = {
                     IconButton(onClick = onShowJson) {
                         Icon(Icons.Default.Code, contentDescription = localizeHelper.localize(Res.string.viewimport_json))
@@ -128,10 +131,11 @@ fun SourceCreatorScreen(
             }
             
             // Tabs
-            ScrollableTabRow(
+            PrimaryScrollableTabRow(
                 selectedTabIndex = state.currentTab,
                 modifier = Modifier.fillMaxWidth()
             ) {
+
                 tabs.forEachIndexed { index, tab ->
                     Tab(
                         selected = state.currentTab == index,

@@ -244,9 +244,10 @@ fun VoiceModelManagementPanel(
                 }
             }
             
-            Divider()
+            HorizontalDivider()
             
             // Loading state
+
             if (isLoading) {
                 Box(
                     modifier = Modifier
@@ -494,8 +495,9 @@ private fun FilterChipDropdown(
                         Icon(Icons.Default.Clear, contentDescription = null)
                     }
                 )
-                Divider()
+                HorizontalDivider()
             }
+
             
             // Options
             options.forEach { option ->

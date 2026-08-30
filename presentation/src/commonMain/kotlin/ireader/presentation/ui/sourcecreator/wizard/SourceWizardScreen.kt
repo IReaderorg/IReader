@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -221,7 +224,7 @@ private fun WizardBottomBar(
         ) {
             if (canGoBack) {
                 OutlinedButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(localizeHelper.localize(Res.string.back))
                 }
@@ -236,10 +239,12 @@ private fun WizardBottomBar(
                 Text(if (isLastStep) "Save Source" else "Next")
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
-                    if (isLastStep) Icons.Default.Check else Icons.Default.ArrowForward,
+                    if (isLastStep) Icons.Default.Check else Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null
                 )
             }
+
+
         }
     }
 }

@@ -16,13 +16,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
-import androidx.compose.material.icons.filled.FormatAlignLeft
-import androidx.compose.material.icons.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Settings
+
+
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -367,7 +369,7 @@ fun TTSSettingsDrawer(
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 AlignmentButton(
-                                    icon = Icons.Default.FormatAlignLeft,
+                                    icon = Icons.AutoMirrored.Filled.FormatAlignLeft,
                                     isSelected = textAlignment == TextAlign.Start,
                                     onClick = { onTextAlignmentChange(TextAlign.Start) }
                                 )
@@ -377,7 +379,7 @@ fun TTSSettingsDrawer(
                                     onClick = { onTextAlignmentChange(TextAlign.Center) }
                                 )
                                 AlignmentButton(
-                                    icon = Icons.Default.FormatAlignRight,
+                                    icon = Icons.AutoMirrored.Filled.FormatAlignRight,
                                     isSelected = textAlignment == TextAlign.End,
                                     onClick = { onTextAlignmentChange(TextAlign.End) }
                                 )
@@ -386,6 +388,9 @@ fun TTSSettingsDrawer(
                                     isSelected = textAlignment == TextAlign.Justify,
                                     onClick = { onTextAlignmentChange(TextAlign.Justify) }
                                 )
+
+
+
                             }
                         }
                         

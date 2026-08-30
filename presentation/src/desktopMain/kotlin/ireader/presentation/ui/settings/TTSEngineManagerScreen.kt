@@ -38,9 +38,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -243,9 +244,10 @@ fun TTSEngineManagerScreen(
                 }
             }
             
-            Divider()
+            HorizontalDivider()
             
             // Piper TTS Card
+
             EngineCard(
                 name = "Piper TTS",
                 description = "High-performance neural TTS with 30+ voices in 20+ languages",
@@ -1121,9 +1123,10 @@ private fun VoiceCard(
             if (isDownloading) {
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(
-                    progress = downloadProgress / 100f,
+                    progress = { downloadProgress / 100f },
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 Text(
                     text = "Downloading... $downloadProgress%",
                     style = MaterialTheme.typography.bodySmall,
@@ -1279,7 +1282,7 @@ private fun GradioTTSSectionDesktop(
             }
             
             if (useGradioTTS) {
-                Divider()
+                HorizontalDivider()
                 
                 // Global speed control
                 Text(
@@ -1299,9 +1302,10 @@ private fun GradioTTSSectionDesktop(
                     steps = 15
                 )
                 
-                Divider()
+                HorizontalDivider()
                 
                 Text(
+
                     text = localizeHelper.localize(Res.string.available_engines),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary

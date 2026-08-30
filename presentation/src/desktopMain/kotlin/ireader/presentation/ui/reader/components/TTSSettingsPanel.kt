@@ -9,8 +9,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,9 +76,10 @@ fun TTSSettingsPanel(
                     }
                 }
                 
-                Divider()
+                HorizontalDivider()
                 
                 // Settings content
+
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -163,7 +167,7 @@ fun TTSSettingsPanel(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             AlignmentButton(
-                                icon = Icons.Default.FormatAlignLeft,
+                                icon = Icons.AutoMirrored.Filled.FormatAlignLeft,
                                 label = localizeHelper.localize(Res.string.left),
                                 isSelected = textAlignment == TextAlign.Start,
                                 onClick = { onTextAlignmentChange(TextAlign.Start) }
@@ -175,11 +179,12 @@ fun TTSSettingsPanel(
                                 onClick = { onTextAlignmentChange(TextAlign.Center) }
                             )
                             AlignmentButton(
-                                icon = Icons.Default.FormatAlignRight,
+                                icon = Icons.AutoMirrored.Filled.FormatAlignRight,
                                 label = localizeHelper.localize(Res.string.right),
                                 isSelected = textAlignment == TextAlign.End,
                                 onClick = { onTextAlignmentChange(TextAlign.End) }
                             )
+
                             AlignmentButton(
                                 icon = Icons.Default.FormatAlignJustify,
                                 label = localizeHelper.localize(Res.string.justify),

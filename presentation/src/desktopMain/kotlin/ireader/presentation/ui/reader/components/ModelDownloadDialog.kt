@@ -82,13 +82,16 @@ fun ModelDownloadDialog(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             LinearProgressIndicator(
-                                progress = if (prog.total > 0) {
-                                    prog.downloaded.toFloat() / prog.total.toFloat()
-                                } else {
-                                    0f
+                                progress = {
+                                    if (prog.total > 0) {
+                                        prog.downloaded.toFloat() / prog.total.toFloat()
+                                    } else {
+                                        0f
+                                    }
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             )
+
                             
                             Row(
                                 modifier = Modifier.fillMaxWidth(),

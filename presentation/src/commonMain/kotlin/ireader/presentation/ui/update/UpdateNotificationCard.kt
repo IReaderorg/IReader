@@ -183,7 +183,7 @@ private fun DownloadingCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CircularProgressIndicator(
-                    progress = progress,
+                    progress = { progress },
                     modifier = Modifier.size(32.dp)
                 )
                 
@@ -206,9 +206,10 @@ private fun DownloadingCard(
             Spacer(modifier = Modifier.height(12.dp))
             
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth()
             )
+
         }
     }
 }

@@ -6,8 +6,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,9 +45,11 @@ fun SourceImportScreen(
                 title = { Text(localizeHelper.localize(Res.string.import_sources)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 }
+
+
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -135,8 +139,9 @@ private fun ImportOptions(
         Spacer(modifier = Modifier.height(16.dp))
         
         // Tab selection
-        TabRow(selectedTabIndex = selectedTab) {
+        PrimaryTabRow(selectedTabIndex = selectedTab) {
             Tab(
+
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
                 text = { Text(localizeHelper.localize(Res.string.paste_json)) },

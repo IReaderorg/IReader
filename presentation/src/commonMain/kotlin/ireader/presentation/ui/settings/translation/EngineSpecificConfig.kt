@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -21,8 +22,8 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Memory
+
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
@@ -1117,10 +1118,11 @@ private fun WebViewLoginConfig(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Login,
+                    imageVector = Icons.AutoMirrored.Filled.Login,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp)
                 )
+
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Sign in", style = MaterialTheme.typography.labelMedium)
             }
@@ -1259,11 +1261,12 @@ private fun GoogleMlKitConfig(
                 )
                 
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(16.dp)
                 )
+
                 
                 // Target language dropdown
                 LanguageDropdown(
@@ -1406,6 +1409,8 @@ private fun LanguageDropdown(
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
+
+
             singleLine = true,
             textStyle = MaterialTheme.typography.bodySmall
         )
@@ -1509,6 +1514,8 @@ private fun GeminiConfig(
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
+
+
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -1624,6 +1631,8 @@ private fun OpenRouterConfig(
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
+
+
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -1739,6 +1748,8 @@ private fun NvidiaConfig(
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
+
+
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -2027,6 +2038,8 @@ private fun RenderConfigField(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .menuAnchor(),
+
+
                             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                         )
                         
@@ -2213,10 +2226,11 @@ private fun RenderConfigField(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
+
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(horizontalAlignment = Alignment.Start) {
                     Text(config.name)
