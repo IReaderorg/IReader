@@ -26,7 +26,7 @@ class PreferenceMutableState<T>(
     private var debounceJob: Job? = null
 
     init {
-        scope.launch(DefaultDispatcher) {
+        scope.launch {
             preference.changes()
                 .collect {
                     kotlin.runCatching {

@@ -1,7 +1,7 @@
 [versions]
 # Compose
 apkParser = "2.6.10"
-composeGradle = "1.11.0"
+composeGradle = "1.11.1"
 composeHotReload = "1.1.1"
 # Static Analysis
 detekt = "1.23.8"

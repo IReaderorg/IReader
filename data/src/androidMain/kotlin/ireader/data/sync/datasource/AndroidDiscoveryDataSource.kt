@@ -10,14 +10,18 @@ import android.net.nsd.NsdServiceInfo
 import ireader.domain.models.sync.DeviceInfo
 import ireader.domain.models.sync.DeviceType
 import ireader.domain.models.sync.DiscoveredDevice
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.InetSocketAddress
 import java.net.Socket
 import kotlin.coroutines.resume
@@ -34,6 +38,9 @@ class AndroidDiscoveryDataSource(
     private val context: Context
 ) : DiscoveryDataSource {
     
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var restartJob: Job? = null
+    
     private val nsdManager: NsdManager by lazy {
         context.getSystemService(Context.NSD_SERVICE) as NsdManager
     }
@@ -49,8 +56,11 @@ class AndroidDiscoveryDataSource(
     private var discoveryListener: NsdManager.DiscoveryListener? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     
+    @kotlin.concurrent.Volatile
     private var currentDeviceInfo: DeviceInfo? = null
+    @kotlin.concurrent.Volatile
     private var isDiscoveryActive = false
+    @kotlin.concurrent.Volatile
     private var isBroadcastingActive = false
     
     companion object {
@@ -88,11 +98,8 @@ class AndroidDiscoveryDataSource(
                     }
                 }
                 
-                // Restart services (with delay to ensure network is fully ready)
-                GlobalScope.launch {
-                    delay(2000) // Wait 2 seconds for network to stabilize
-                    restartServicesIfNeeded()
-                }
+                // Restart services with debounce
+                scheduleServiceRestart()
             }
             
             override fun onLost(network: Network) {
@@ -113,10 +120,7 @@ class AndroidDiscoveryDataSource(
                     discoveredDevicesMap.clear()
                     discoveredDevicesFlow.value = emptyList()
                 }
-                GlobalScope.launch {
-                    delay(2000)
-                    restartServicesIfNeeded()
-                }
+                scheduleServiceRestart()
             }
         }
         
@@ -128,7 +132,15 @@ class AndroidDiscoveryDataSource(
         }
     }
     
-    private fun restartServicesIfNeeded() {
+    private fun scheduleServiceRestart() {
+        restartJob?.cancel()
+        restartJob = scope.launch {
+            delay(2000) // Wait 2 seconds for network to stabilize
+            restartServicesIfNeeded()
+        }
+    }
+    
+    private suspend fun restartServicesIfNeeded() {
         // Clear cache first
         synchronized(discoveredDevicesMap) {
             discoveredDevicesMap.clear()
@@ -138,28 +150,24 @@ class AndroidDiscoveryDataSource(
         // Restart discovery if it was active
         if (isDiscoveryActive) {
             println("[AndroidDiscovery] Restarting discovery...")
-            GlobalScope.launch {
-                try {
-                    stopDiscovery()
-                    delay(1500) // Wait for cleanup
-                    startDiscovery()
-                } catch (e: Exception) {
-                    println("[AndroidDiscovery] Error restarting discovery: ${e.message}")
-                }
+            try {
+                stopDiscovery()
+                delay(1500) // Wait for cleanup
+                startDiscovery()
+            } catch (e: Exception) {
+                println("[AndroidDiscovery] Error restarting discovery: ${e.message}")
             }
         }
         
         // Restart broadcasting if it was active
         if (isBroadcastingActive && currentDeviceInfo != null) {
             println("[AndroidDiscovery] Restarting broadcasting...")
-            GlobalScope.launch {
-                try {
-                    stopBroadcasting()
-                    delay(1500) // Wait for cleanup
-                    currentDeviceInfo?.let { startBroadcasting(it) }
-                } catch (e: Exception) {
-                    println("[AndroidDiscovery] Error restarting broadcasting: ${e.message}")
-                }
+            try {
+                stopBroadcasting()
+                delay(1500) // Wait for cleanup
+                currentDeviceInfo?.let { startBroadcasting(it) }
+            } catch (e: Exception) {
+                println("[AndroidDiscovery] Error restarting broadcasting: ${e.message}")
             }
         }
     }
@@ -397,6 +405,9 @@ class AndroidDiscoveryDataSource(
     }
     
     fun cleanup() {
+        // Cancel all coroutines
+        scope.cancel()
+        
         // Unregister network callback when done
         networkCallback?.let {
             try {

@@ -40,11 +40,13 @@ actual class PlatformReaderSettingReader {
         }
         
         stateChapter?.let { chapter ->
-            scope.launch(kotlinx.coroutines.NonCancellable) {
-                ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: scrollPosition=$scrollPosition" }
-                // Use the dedicated updateLastPageRead method for efficient update
-                saveScrollPosition(scrollPosition)
-                getChapterUseCase.updateLastReadTime(chapter)
+            scope.launch {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                    ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: scrollPosition=$scrollPosition" }
+                    // Use the dedicated updateLastPageRead method for efficient update
+                    saveScrollPosition(scrollPosition)
+                    getChapterUseCase.updateLastReadTime(chapter)
+                }
             }
         }
     }

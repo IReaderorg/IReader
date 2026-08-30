@@ -9,6 +9,7 @@ import ireader.domain.services.tts_service.GradioTTSConfig
 import ireader.domain.services.tts_service.NativeTTSPlayer
 import ireader.domain.services.tts_service.TTSCallback
 import ireader.domain.services.tts_service.TTSEngineCallback
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -70,6 +71,7 @@ class AndroidNativeTTSEngineV2(private val context: Context) : TTSEngine, KoinCo
         private const val TAG = "AndroidNativeTTSV2"
     }
     
+    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main.immediate)
     private val player = NativeTTSPlayer(context)
     private val _events = MutableSharedFlow<EngineEvent>(extraBufferCapacity = 10)
     private val textReaderPrefUseCase: ireader.domain.usecases.preferences.TextReaderPrefUseCase by inject()
@@ -99,7 +101,7 @@ class AndroidNativeTTSEngineV2(private val context: Context) : TTSEngine, KoinCo
                 _events.tryEmit(EngineEvent.Ready)
                 
                 // Apply saved voice and pitch preferences after TTS is ready
-                kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+                scope.launch {
                     applySavedPreferences()
                 }
             }
@@ -159,7 +161,7 @@ class AndroidNativeTTSEngineV2(private val context: Context) : TTSEngine, KoinCo
     override fun setSpeed(speed: Float) {
         player.setSpeed(speed)
         // Save to preferences
-        kotlinx.coroutines.GlobalScope.launch {
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             textReaderPrefUseCase.saveRate(speed)
         }
     }
@@ -167,7 +169,7 @@ class AndroidNativeTTSEngineV2(private val context: Context) : TTSEngine, KoinCo
     override fun setPitch(pitch: Float) {
         player.setPitch(pitch)
         // Save to preferences
-        kotlinx.coroutines.GlobalScope.launch {
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             textReaderPrefUseCase.savePitch(pitch)
         }
     }
@@ -176,6 +178,7 @@ class AndroidNativeTTSEngineV2(private val context: Context) : TTSEngine, KoinCo
     
     override fun release() {
         Log.warn { "$TAG: release()" }
+        scope.cancel()
         player.cleanup()
     }
 }
@@ -221,9 +224,6 @@ class AndroidGradioTTSEngineV2(
         audioPlayer = audioPlayer
     )
     
-    // Track current text for caching
-    private var currentText: String? = null
-    
     override val events: Flow<EngineEvent> = _events
     override val name: String = config.name
     
@@ -253,7 +253,6 @@ class AndroidGradioTTSEngineV2(
     
     override suspend fun speak(text: String, utteranceId: String) {
         Log.warn { "$TAG: speak($utteranceId) - text length=${text.length}" }
-        currentText = text
         
         // Check disk cache first
         if (audioCache != null) {
@@ -317,6 +316,7 @@ class AndroidGradioTTSEngineV2(
     
     override fun release() {
         Log.warn { "$TAG: release()" }
+        scope.cancel()
         engine.cleanup()
     }
     
@@ -397,6 +397,8 @@ class AndroidGradioTTSEngineV2(
         engine.clearCache()
     }
     
+    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO)
+    
     /**
      * Pre-cache upcoming chunks/paragraphs for smoother playback
      * Uses disk cache for persistence across sessions
@@ -406,7 +408,7 @@ class AndroidGradioTTSEngineV2(
         
         // If we have disk cache, use it for prefetching
         if (audioCache != null) {
-            kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            scope.launch {
                 for ((utteranceId, text) in items) {
                     // Skip if already cached
                     if (audioCache.isCached(text, config.id)) {

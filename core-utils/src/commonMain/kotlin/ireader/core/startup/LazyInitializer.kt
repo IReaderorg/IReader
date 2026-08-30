@@ -20,9 +20,14 @@ object LazyInitializer {
     private const val TAG = "LazyInitializer"
     
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val lock = Any()
     private val tasks = mutableListOf<InitTask>()
-    private val mutex = Mutex()
+    
+    @kotlin.concurrent.Volatile
     private var isStarted = false
+    
+    @kotlin.concurrent.Volatile
+    private var isCompleted = false
     
     data class InitTask(
         val name: String,
@@ -38,13 +43,12 @@ object LazyInitializer {
     
     /**
      * Register a task for lazy initialization.
+     * Synchronous and thread-safe to ensure tasks are registered before start().
      */
     fun register(name: String, priority: Priority = Priority.MEDIUM, task: suspend () -> Unit) {
-        scope.launch {
-            mutex.withLock {
-                tasks.add(InitTask(name, priority, task))
-                Log.debug("Registered lazy init task: $name (priority: $priority)", TAG)
-            }
+        synchronized(lock) {
+            tasks.add(InitTask(name, priority, task))
+            Log.debug("Registered lazy init task: $name (priority: $priority)", TAG)
         }
     }
     
@@ -53,17 +57,16 @@ object LazyInitializer {
      * Call this after the main UI is visible.
      */
     fun start() {
-        if (isStarted) return
-        isStarted = true
+        val tasksToExecute = synchronized(lock) {
+            if (isStarted) return
+            isStarted = true
+            tasks.sortedBy { it.priority.ordinal }
+        }
         
-        Log.info("Starting lazy initialization...", TAG)
+        Log.info("Starting lazy initialization with ${tasksToExecute.size} tasks...", TAG)
         
         scope.launch {
-            val sortedTasks = mutex.withLock {
-                tasks.sortedBy { it.priority.ordinal }
-            }
-            
-            sortedTasks.forEach { task ->
+            tasksToExecute.forEach { task ->
                 try {
                     val start = currentTimeMillis()
                     task.task()
@@ -74,6 +77,7 @@ object LazyInitializer {
                 }
             }
             
+            isCompleted = true
             Log.info("All lazy initialization tasks completed", TAG)
         }
     }
@@ -81,15 +85,16 @@ object LazyInitializer {
     /**
      * Check if all tasks are completed.
      */
-    suspend fun isCompleted(): Boolean = mutex.withLock {
-        tasks.isEmpty()
-    }
+    fun isCompleted(): Boolean = isCompleted
     
     /**
      * Clear all registered tasks.
      */
-    suspend fun clear() = mutex.withLock {
-        tasks.clear()
-        isStarted = false
+    fun clear() {
+        synchronized(lock) {
+            tasks.clear()
+            isStarted = false
+            isCompleted = false
+        }
     }
 }

@@ -397,7 +397,6 @@ composeCompiler {
     
     // Enable live literals for hot reload
     enableIntrinsicRemember.set(true)
-    enableNonSkippingGroupOptimization.set(true)
     
     // Generate reports only when explicitly requested
     if (project.findProperty("composeCompilerReports") == "true") {

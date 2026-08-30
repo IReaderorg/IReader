@@ -9,7 +9,6 @@ import ireader.domain.services.tts_service.piper.AudioPlaybackEngine
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -270,6 +269,7 @@ class DesktopGradioTTSEngineV2(
     private val _events = MutableSharedFlow<EngineEvent>(extraBufferCapacity = 10)
     private val httpClient = io.ktor.client.HttpClient()
     private val audioPlayer = DesktopGradioAudioPlayer()
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
     // Track the current utterance to prevent stale completions
     @Volatile
@@ -402,6 +402,7 @@ class DesktopGradioTTSEngineV2(
         Log.warn { "$TAG: release()" }
         wasStopped = true
         currentUtteranceId = null
+        scope.cancel()
         engine.cleanup()
         httpClient.close()
     }
@@ -470,7 +471,7 @@ class DesktopGradioTTSEngineV2(
         
         // If we have disk cache, use it for prefetching
         if (audioCache != null) {
-            GlobalScope.launch(Dispatchers.IO) {
+            scope.launch {
                 for ((utteranceId, text) in items) {
                     // Skip if already cached
                     if (audioCache.isCached(text, config.id)) {

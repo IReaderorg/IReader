@@ -69,11 +69,12 @@ class CatalogStore(
     private val stubSourceIds: MutableSet<Long> = synchronizedSetOf()
     private val loadingSourceIds: MutableSet<Long> = synchronizedSetOf()
     
-    // Efficient lookup map for catalogs by source ID
-    private val catalogsBySourceMap: SynchronizedMap<Long, CatalogLocal> = synchronizedMapOf()
+    // Lock-free atomic map references for O(1) lookup without race conditions
+    @kotlin.concurrent.Volatile
+    private var catalogsBySourceMap: Map<Long, CatalogLocal> = emptyMap()
     
-    // Efficient lookup map for catalogs by package name
-    private val catalogsByPkgName: SynchronizedMap<String, CatalogLocal> = synchronizedMapOf()
+    @kotlin.concurrent.Volatile
+    private var catalogsByPkgName: Map<String, CatalogLocal> = emptyMap()
     
     // Semaphore to limit concurrent plugin loading
     private val loadingSemaphore = Semaphore(MAX_CONCURRENT_LOADS)
@@ -104,10 +105,9 @@ class CatalogStore(
 
     private var remoteCatalogs = emptyList<CatalogRemote>()
     
-    // Lazy-initialized remote catalog lookup map
-    private val remoteCatalogsByPkgName: SynchronizedMap<String, CatalogRemote> by lazy {
-        synchronizedMapOf()
-    }
+    // Atomic remote catalog lookup map
+    @kotlin.concurrent.Volatile
+    private var remoteCatalogsByPkgName: Map<String, CatalogRemote> = emptyMap()
 
     // Deprecated: Use catalogsBySourceMap instead
     private var catalogsBySource = emptyMap<Long, CatalogLocal>()
@@ -125,8 +125,27 @@ class CatalogStore(
     private var initializationStarted = false
     
     init {
-        // Only start batch update processor - everything else is deferred
+        // Start batch update processor and persistent listeners once
         startBatchUpdateProcessor()
+        
+        scope.launch {
+            // Listen for installation changes
+            launch {
+                installationChanges.flow.collect { change ->
+                    handleInstallationChange(change)
+                }
+            }
+            
+            // Listen for remote catalog updates with debouncing
+            launch {
+                catalogRemoteRepository.getRemoteCatalogsFlow()
+                    .debounce(FLOW_DEBOUNCE_MS)
+                    .distinctUntilChanged()
+                    .collect { remotes ->
+                        updateRemoteCatalogs(remotes)
+                    }
+            }
+        }
     }
     
     /**
@@ -181,68 +200,23 @@ class CatalogStore(
     /**
      * Trigger lazy initialization - call this when catalogs are first needed.
      * This is safe to call multiple times - only the first call will initialize.
-     * Uses double-checked locking pattern with coroutine mutex.
-     * 
-     * If initialization was started but failed (catalogs still empty after timeout),
-     * allows retry by resetting the initialization flag.
      */
     fun ensureInitialized() {
-        if (initializationStarted && _isInitialized.value) return
+        if (_isInitialized.value || initializationStarted) return
         
-        // Allow retry if initialization was started but never completed
-        if (initializationStarted && !_isInitialized.value) {
-            scope.launch {
-                kotlinx.coroutines.delay(3000)
-                if (!_isInitialized.value) {
-                    lock.withLock {
-                        if (!_isInitialized.value) {
-                            Log.warn { "CatalogStore: Initialization timed out, allowing retry" }
-                            initializationStarted = false
-                        }
-                    }
-                    ensureInitialized()
-                }
-            }
-            return
-        }
-        
-        // Use scope.launch to handle the mutex-based initialization
         scope.launch {
             lock.withLock {
                 if (initializationStarted) return@withLock
                 initializationStarted = true
                 
-                // Load catalogs with optimized initialization
-                launch {
-                    try {
-                        initializeCatalogs()
-                    } catch (e: Exception) {
-                        Log.error("CatalogStore: Initialization failed", e)
-                        // Don't set initializationStarted back to false here to prevent races
-                        // The retry mechanism above will handle it
-                    }
-                }
-                
-                // Listen for installation changes
-                launch {
-                    installationChanges.flow.collect { change ->
-                        handleInstallationChange(change)
-                    }
-                }
-                
-                // Listen for remote catalog updates with debouncing
-                launch {
-                    catalogRemoteRepository.getRemoteCatalogsFlow()
-                        .debounce(FLOW_DEBOUNCE_MS)
-                        .distinctUntilChanged()
-                        .collect { remotes ->
-                            updateRemoteCatalogs(remotes)
-                        }
-                }
-                
-                // Cache pinned IDs
-                launch {
+                try {
+                    // Cache pinned IDs
                     cachedPinnedIds = pinnedCatalogsPreference.get()
+                    initializeCatalogs()
+                } catch (e: Exception) {
+                    Log.error("CatalogStore: Initialization failed", e)
+                } finally {
+                    _isInitialized.value = true
                 }
             }
         }
@@ -328,27 +302,27 @@ class CatalogStore(
     }
     
     /**
-     * Update lookup maps efficiently.
+     * Update lookup maps efficiently with atomic reference swap.
      */
     private fun updateLookupMaps(catalogList: List<CatalogLocal>) {
-        // Clear and rebuild maps
-        catalogsBySourceMap.clear()
-        catalogsByPkgName.clear()
+        val bySource = HashMap<Long, CatalogLocal>(catalogList.size)
+        val byPkg = HashMap<String, CatalogLocal>(catalogList.size)
         
         catalogList.forEach { catalog ->
-            catalogsBySourceMap[catalog.sourceId] = catalog
+            bySource[catalog.sourceId] = catalog
             
-            // Add to package name map if applicable
             when (catalog) {
-                is CatalogInstalled -> catalogsByPkgName[catalog.pkgName] = catalog
+                is CatalogInstalled -> byPkg[catalog.pkgName] = catalog
                 is ireader.domain.models.entities.JSPluginCatalog -> 
-                    catalogsByPkgName[catalog.pkgName] = catalog
+                    byPkg[catalog.pkgName] = catalog
                 else -> {}
             }
         }
         
-        // Update legacy map for compatibility
-        catalogsBySource = catalogsBySourceMap.toMap()
+        // Single atomic reference swap - readers never see empty or partial maps
+        catalogsBySourceMap = bySource
+        catalogsByPkgName = byPkg
+        catalogsBySource = bySource
     }
     
     /**
@@ -507,9 +481,6 @@ class CatalogStore(
             
             loadingSemaphore.withPermit {
                 lock.withLock {
-                    // Remove old catalog from in-memory cache
-                    catalogsByPkgName.remove(pkgName)
-
                     // Clear the DEX cache before loading to ensure fresh code is used
                     loader.clearCatalogCache(pkgName)
 
@@ -611,9 +582,10 @@ class CatalogStore(
     private suspend fun updateRemoteCatalogs(remotes: List<CatalogRemote>) {
         remoteCatalogs = remotes
         
-        // Update lookup map
-        remoteCatalogsByPkgName.clear()
-        remotes.forEach { remoteCatalogsByPkgName[it.pkgName] = it }
+        // Update lookup map atomically
+        val byPkg = HashMap<String, CatalogRemote>(remotes.size)
+        remotes.forEach { byPkg[it.pkgName] = it }
+        remoteCatalogsByPkgName = byPkg
         
         // Check for updates in parallel
         lock.withLock {

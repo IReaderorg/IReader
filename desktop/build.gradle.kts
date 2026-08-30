@@ -17,6 +17,12 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
+composeCompiler {
+    stabilityConfigurationFile.set(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
+    enableStrongSkippingMode.set(true)
+    enableIntrinsicRemember.set(true)
+}
+
 // Load local.properties for local development
 val localProperties = Properties().apply {
     val localPropertiesFile = rootProject.file("local.properties")

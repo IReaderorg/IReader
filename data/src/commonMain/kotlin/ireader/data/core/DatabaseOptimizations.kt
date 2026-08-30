@@ -402,27 +402,27 @@ private class PerformanceStats {
         var maxTime: Long = 0
     )
     
+    private val lock = Any()
     private val queryStats = mutableMapOf<String, QueryStats>()
     private var cacheHits = 0L
     private var cacheMisses = 0L
-    private val mutex = Mutex()
     
-    suspend fun recordQuery(key: String, duration: Long) = mutex.withLock {
+    fun recordQuery(key: String, duration: Long) = synchronized(lock) {
         val stats = queryStats.getOrPut(key) { QueryStats() }
         stats.count++
         stats.totalTime += duration
         stats.maxTime = maxOf(stats.maxTime, duration)
     }
     
-    suspend fun recordCacheHit(key: String) = mutex.withLock {
+    fun recordCacheHit(key: String) = synchronized(lock) {
         cacheHits++
     }
     
-    suspend fun recordCacheMiss(key: String) = mutex.withLock {
+    fun recordCacheMiss(key: String) = synchronized(lock) {
         cacheMisses++
     }
     
-    fun getReport(): PerformanceReport {
+    fun getReport(): PerformanceReport = synchronized(lock) {
         val totalQueries = queryStats.values.sumOf { it.count }
         val totalTime = queryStats.values.sumOf { it.totalTime }
         val avgTime = if (totalQueries > 0) totalTime / totalQueries else 0
@@ -431,7 +431,7 @@ private class PerformanceStats {
             (cacheHits * 100) / (cacheHits + cacheMisses)
         } else 0
         
-        return PerformanceReport(
+        PerformanceReport(
             totalQueries = totalQueries,
             cacheHits = cacheHits,
             cacheMisses = cacheMisses,
@@ -441,7 +441,7 @@ private class PerformanceStats {
         )
     }
     
-    fun reset() {
+    fun reset() = synchronized(lock) {
         queryStats.clear()
         cacheHits = 0
         cacheMisses = 0

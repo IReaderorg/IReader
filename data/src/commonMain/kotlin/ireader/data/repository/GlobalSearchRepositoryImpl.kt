@@ -34,6 +34,7 @@ class GlobalSearchRepositoryImpl(
     private val uiPreferences: UiPreferences
 ) : GlobalSearchRepository {
 
+    private val historyLock = Any()
     private val searchHistory = mutableListOf<String>()
     private val maxHistorySize = 50
     
@@ -223,15 +224,17 @@ class GlobalSearchRepositoryImpl(
         try {
             if (query.isBlank()) return
             
-            // Remove if already exists
-            searchHistory.remove(query)
-            
-            // Add to front
-            searchHistory.add(0, query)
-            
-            // Trim to max size
-            if (searchHistory.size > maxHistorySize) {
-                searchHistory.removeAt(searchHistory.size - 1)
+            synchronized(historyLock) {
+                // Remove if already exists
+                searchHistory.remove(query)
+                
+                // Add to front
+                searchHistory.add(0, query)
+                
+                // Trim to max size
+                if (searchHistory.size > maxHistorySize) {
+                    searchHistory.removeAt(searchHistory.size - 1)
+                }
             }
             
             Log.debug { "Search history saved: $query" }
@@ -242,7 +245,9 @@ class GlobalSearchRepositoryImpl(
 
     override suspend fun getSearchHistory(limit: Int): List<String> {
         return try {
-            searchHistory.take(limit)
+            synchronized(historyLock) {
+                searchHistory.take(limit)
+            }
         } catch (e: Exception) {
             Log.error { "Failed to get search history: ${e.message}" }
             emptyList()
@@ -251,7 +256,9 @@ class GlobalSearchRepositoryImpl(
 
     override suspend fun clearSearchHistory() {
         try {
-            searchHistory.clear()
+            synchronized(historyLock) {
+                searchHistory.clear()
+            }
             Log.info { "Search history cleared" }
         } catch (e: Exception) {
             Log.error { "Failed to clear search history: ${e.message}" }

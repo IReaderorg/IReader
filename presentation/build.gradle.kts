@@ -29,10 +29,6 @@ composeCompiler {
     
     // Enable intrinsic remember optimization
     enableIntrinsicRemember = true
-    
-    // Enable non-skipping group optimization (default in newer versions)
-    // This reduces the overhead of non-skippable composables
-    enableNonSkippingGroupOptimization = true
 }
 
 kotlin {
