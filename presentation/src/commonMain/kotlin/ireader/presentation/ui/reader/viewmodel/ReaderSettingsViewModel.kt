@@ -250,10 +250,11 @@ class ReaderSettingsViewModel(
      */
     fun selectFont(index: Int) {
         val fontName = fonts.getOrNull(index) ?: return
-        font?.value = ireader.domain.preferences.models.FontType(
+        font.value = ireader.domain.preferences.models.FontType(
             name = fontName,
             fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
         )
+
     }
     
     /**
@@ -290,10 +291,11 @@ class ReaderSettingsViewModel(
         readerPreferences.betweenLetterSpaces().set(preset.letterSpacing)
         
         // Set font
-        font?.value = ireader.domain.preferences.models.FontType(
+        font.value = ireader.domain.preferences.models.FontType(
             name = preset.fontName,
             fontFamily = preset.fontFamily
         )
+
     }
     
     /**

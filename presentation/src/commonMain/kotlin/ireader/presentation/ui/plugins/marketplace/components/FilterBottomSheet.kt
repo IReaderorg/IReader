@@ -77,7 +77,7 @@ fun FilterBottomSheet(
                 )
             }
             
-            Divider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
             
             // Price filter section
             Text(
@@ -97,7 +97,8 @@ fun FilterBottomSheet(
                 )
             }
             
-            Divider(modifier = Modifier.padding(vertical = 16.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
             
             // Rating filter section
             Text(

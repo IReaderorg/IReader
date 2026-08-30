@@ -316,9 +316,10 @@ fun ReaderText(
                 } else false
                 val result = isLastItemVisible && isLastItemFullyVisible
                 // Debug logging
-                if (isLastItemVisible) {
-                    ireader.core.log.Log.debug { "isAtBottom check: lastIndex=${lastVisibleItem?.index}, totalItems=$totalItems, viewportEnd=$viewportEnd, itemEnd=${lastVisibleItem?.let { it.offset + it.size }}, result=$result" }
+                if (isLastItemVisible && lastVisibleItem != null) {
+                    ireader.core.log.Log.debug { "isAtBottom check: lastIndex=${lastVisibleItem.index}, totalItems=$totalItems, viewportEnd=$viewportEnd, itemEnd=${lastVisibleItem.offset + lastVisibleItem.size}, result=$result" }
                 }
+
                 result
             }
         }}

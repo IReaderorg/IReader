@@ -64,14 +64,17 @@ fun TTSControlPanel(
             
             // Progress bar
             LinearProgressIndicator(
-                progress = if (duration.inWholeMilliseconds > 0) {
-                    (currentPosition.inWholeMilliseconds.toFloat() / duration.inWholeMilliseconds.toFloat())
-                        .coerceIn(0f, 1f)
-                } else {
-                    0f
+                progress = {
+                    if (duration.inWholeMilliseconds > 0) {
+                        (currentPosition.inWholeMilliseconds.toFloat() / duration.inWholeMilliseconds.toFloat())
+                            .coerceIn(0f, 1f)
+                    } else {
+                        0f
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
             
             Spacer(modifier = Modifier.height(8.dp))
             
@@ -143,9 +146,10 @@ fun TTSControlPanel(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            Divider()
+            HorizontalDivider()
             
             Spacer(modifier = Modifier.height(16.dp))
+
             
             // Speed control
             Row(

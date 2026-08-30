@@ -382,8 +382,9 @@ class RequiredPluginViewModel(
             name = manifest.name,
             version = manifest.version,
             description = manifest.description,
-            fileSize = fileSize ?: 0L,
+            fileSize = fileSize,
             author = manifest.author.name
+
         )
     }
 }

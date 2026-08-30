@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+
 
 
 
@@ -265,10 +265,10 @@ class SettingsNotificationViewModel(
     
     private fun getCurrentTime(): Pair<Int, Int> {
         val now = Clock.System.now()
-        val instant = Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
-        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+        val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
         return localDateTime.hour to localDateTime.minute
     }
+
 
 
     

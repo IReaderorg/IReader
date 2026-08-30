@@ -84,7 +84,8 @@ fun ChapterReviewsBottomSheet(
             }
         }
         
-        Divider()
+        HorizontalDivider()
+
         
         // Reviews list
         if (reviews.isEmpty()) {

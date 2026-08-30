@@ -5,9 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +55,7 @@ fun ReaderScreenDrawer(
                     onMap(drawerScrollState)
                 })
                 AppIconButton(
-                    imageVector = Icons.Default.Sort,
+                    imageVector = Icons.AutoMirrored.Filled.Sort,
                     contentDescription = localize(Res.string.reverse),
                     onClick = {
                         onReverseIcon()
@@ -64,7 +65,8 @@ fun ReaderScreenDrawer(
         }
 
         Spacer(modifier = modifier.height(5.dp))
-        Divider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
+        HorizontalDivider(modifier = modifier.fillMaxWidth(), thickness = 1.dp)
+
         IVerticalFastScroller(listState = drawerScrollState) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

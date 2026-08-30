@@ -26,7 +26,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
+
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -294,14 +296,15 @@ fun AddGlossaryEntryDialog(
                         readOnly = true,
                         label = { Text(localizeHelper.localize(Res.string.type)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
                     
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        GlossaryTermType.values().forEach { type ->
+                        GlossaryTermType.entries.forEach { type ->
+
                             DropdownMenuItem(
                                 text = { Text(type.toString().lowercase().replaceFirstChar { it.uppercase() }) },
                                 onClick = {
@@ -395,14 +398,15 @@ fun EditGlossaryEntryDialog(
                         readOnly = true,
                         label = { Text(localizeHelper.localize(Res.string.type)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                        modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
                     
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        GlossaryTermType.values().forEach { type ->
+                        GlossaryTermType.entries.forEach { type ->
+
                             DropdownMenuItem(
                                 text = { Text(type.toString().lowercase().replaceFirstChar { it.uppercase() }) },
                                 onClick = {

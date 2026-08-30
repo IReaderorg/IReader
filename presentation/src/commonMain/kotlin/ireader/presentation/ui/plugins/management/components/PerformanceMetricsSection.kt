@@ -74,13 +74,14 @@ fun PerformanceMetricsSection(
             
             // Summary
             Spacer(modifier = Modifier.height(8.dp))
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.height(8.dp))
             
-            val totalMemory = resourceUsage.values.sumOf { it.memoryUsageMB.toDouble() }
+            val totalMemory = resourceUsage.values.sumOf { it.memoryUsageMB }
             val avgCpu = if (resourceUsage.isNotEmpty()) {
-                resourceUsage.values.sumOf { it.cpuUsagePercent.toDouble() } / resourceUsage.size
+                resourceUsage.values.sumOf { it.cpuUsagePercent } / resourceUsage.size
             } else 0.0
+
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -156,7 +157,7 @@ private fun PluginMetricItem(
                     )
                 }
                 LinearProgressIndicator(
-                    progress = { (usage.memoryUsageMB.toDouble() / usage.memoryLimitMB.toDouble()).toFloat().coerceIn(0f, 1f) },
+                    progress = { (usage.memoryUsageMB / usage.memoryLimitMB).toFloat().coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
                     color = if (usage.memoryUsageMB > usage.memoryLimitMB * 0.8f) {
                         MaterialTheme.colorScheme.error
@@ -184,7 +185,7 @@ private fun PluginMetricItem(
                     )
                 }
                 LinearProgressIndicator(
-                    progress = { (usage.cpuUsagePercent.toDouble() / 100.0).toFloat().coerceIn(0f, 1f) },
+                    progress = { (usage.cpuUsagePercent / 100.0).toFloat().coerceIn(0f, 1f) },
                     modifier = Modifier.fillMaxWidth(),
                     color = if (usage.cpuUsagePercent > 80f) {
                         MaterialTheme.colorScheme.error
@@ -192,6 +193,7 @@ private fun PluginMetricItem(
                         MaterialTheme.colorScheme.primary
                     }
                 )
+
             }
         }
     }

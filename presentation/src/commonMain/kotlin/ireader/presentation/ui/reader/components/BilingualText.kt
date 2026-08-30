@@ -121,12 +121,13 @@ private fun SideBySideText(
         }
         
         // Divider
-        Divider(
+        VerticalDivider(
             modifier = Modifier
                 .width(1.dp)
                 .fillMaxHeight(),
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
         )
+
         
         // Translated text column
         Column(

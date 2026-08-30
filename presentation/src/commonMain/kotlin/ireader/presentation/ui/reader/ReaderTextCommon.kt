@@ -114,7 +114,8 @@ fun rememberReaderTextPreferencesState(vm: ReaderScreenViewModel): ReaderTextPre
     val paragraphIndent = vm.paragraphsIndent.lazyValue
     val textAlignment = vm.textAlignment.value
     val textColor = vm.textColor.value.toComposeColor()
-    val fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily()
+    val fontFamily = vm.font.value.fontFamily.toComposeFontFamily()
+
     val topContentPadding = vm.topContentPadding.lazyValue
     val distanceBetweenParagraphs = vm.distanceBetweenParagraphs.lazyValue
     val bottomContentPadding = vm.bottomContentPadding.lazyValue

@@ -234,8 +234,9 @@ private fun ResourceUsageIndicator(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             LinearProgressIndicator(
-                progress = { (usage.cpuUsagePercent.toDouble() / 100.0).toFloat().coerceIn(0f, 1f) },
+                progress = { (usage.cpuUsagePercent / 100.0).toFloat().coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth(),
+
                 color = if (usage.cpuUsagePercent > 80f) {
                     MaterialTheme.colorScheme.error
                 } else {
