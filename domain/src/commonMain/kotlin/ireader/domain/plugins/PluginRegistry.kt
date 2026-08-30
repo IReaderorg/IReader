@@ -11,7 +11,8 @@ import ireader.domain.utils.extensions.currentTimeToLong
 class PluginRegistry(
     private val database: PluginDatabase
 ) {
-    private val plugins = mutableMapOf<String, Plugin>()
+    @kotlin.concurrent.Volatile
+    private var plugins = mapOf<String, Plugin>()
     private val lock = Mutex()
     
     /**
@@ -19,10 +20,12 @@ class PluginRegistry(
      */
     suspend fun registerAll(pluginList: List<Plugin>) {
         lock.withLock {
+            val updated = plugins.toMutableMap()
             pluginList.forEach { plugin ->
-                plugins[plugin.manifest.id] = plugin
+                updated[plugin.manifest.id] = plugin
                 database.insertOrUpdate(plugin.manifest)
             }
+            plugins = updated
         }
     }
     
@@ -35,20 +38,19 @@ class PluginRegistry(
      * Get all registered plugins with their info
      */
     suspend fun getAll(): List<PluginInfo> {
-        return lock.withLock {
-            plugins.values.map { plugin ->
-                val dbInfo = database.getPluginInfo(plugin.manifest.id)
-                dbInfo ?: PluginInfo(
-                    id = plugin.manifest.id,
-                    manifest = plugin.manifest,
-                    status = PluginStatus.DISABLED,
-                    installDate = currentTimeToLong(),
-                    lastUpdate = null,
-                    isPurchased = false,
-                    rating = null,
-                    downloadCount = 0
-                )
-            }
+        val currentPlugins = plugins.values
+        return currentPlugins.map { plugin ->
+            val dbInfo = database.getPluginInfo(plugin.manifest.id)
+            dbInfo ?: PluginInfo(
+                id = plugin.manifest.id,
+                manifest = plugin.manifest,
+                status = PluginStatus.DISABLED,
+                installDate = currentTimeToLong(),
+                lastUpdate = null,
+                isPurchased = false,
+                rating = null,
+                downloadCount = 0
+            )
         }
     }
     
@@ -64,7 +66,9 @@ class PluginRegistry(
      */
     suspend fun remove(pluginId: String) {
         lock.withLock {
-            plugins.remove(pluginId)
+            val updated = plugins.toMutableMap()
+            updated.remove(pluginId)
+            plugins = updated
             database.delete(pluginId)
         }
     }
@@ -74,7 +78,9 @@ class PluginRegistry(
      */
     suspend fun register(plugin: Plugin) {
         lock.withLock {
-            plugins[plugin.manifest.id] = plugin
+            val updated = plugins.toMutableMap()
+            updated[plugin.manifest.id] = plugin
+            plugins = updated
             database.insertOrUpdate(plugin.manifest)
         }
     }

@@ -8,13 +8,17 @@ import ireader.core.log.IReaderLog
  */
 class DeepLinkHandler {
     
-    private val handlers = mutableMapOf<String, (DeepLink) -> Unit>()
+    private val lock = Any()
+    @kotlin.concurrent.Volatile
+    private var handlers = mapOf<String, (DeepLink) -> Unit>()
     
     /**
      * Register a handler for a specific deep link type
      */
     fun registerHandler(type: DeepLinkType, handler: (DeepLink) -> Unit) {
-        handlers[type.name] = handler
+        synchronized(lock) {
+            handlers = handlers + (type.name to handler)
+        }
         IReaderLog.info("Registered deep link handler for ${type.name}", tag = "DeepLink")
     }
     

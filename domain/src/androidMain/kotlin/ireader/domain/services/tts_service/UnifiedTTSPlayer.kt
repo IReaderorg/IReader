@@ -241,6 +241,7 @@ class CoquiTTSPlayer(
     private val mainScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
     // Cache for pre-synthesized audio
+    private val cacheLock = Any()
     private val audioCache = mutableMapOf<String, ireader.domain.models.tts.AudioData>()
     private val cacheSize = 3
     
@@ -281,7 +282,13 @@ class CoquiTTSPlayer(
                 Log.info { "Gradio TTS speaking: $utteranceId - ${text.take(50)}..." }
                 
                 // Check if audio is already cached
-                val audioData = audioCache[utteranceId] ?: run {
+                val cachedAudio = synchronized(cacheLock) {
+                    val data = audioCache.remove(utteranceId)
+                    cacheStatus.remove(utteranceId)
+                    data
+                }
+                
+                val audioData = cachedAudio ?: run {
                     Log.info { "Gradio TTS synthesizing (not cached): $utteranceId" }
                     val result = coquiService?.synthesize(
                         text = text,
@@ -297,10 +304,6 @@ class CoquiTTSPlayer(
                         return@launch
                     }
                 }
-                
-                // Remove from cache after use
-                audioCache.remove(utteranceId)
-                cacheStatus.remove(utteranceId)
                 
                 Log.info { "Gradio TTS audio: ${audioData.samples.size} bytes, duration: ${audioData.duration}" }
                 
@@ -420,12 +423,15 @@ class CoquiTTSPlayer(
         scope.launch {
             paragraphs.take(cacheSize).forEach { (utteranceId, text) ->
                 // Skip if already cached or loading
-                if (audioCache.containsKey(utteranceId) || cacheStatus[utteranceId] == CacheStatus.LOADING) {
-                    return@forEach
+                val shouldSkip = synchronized(cacheLock) {
+                    audioCache.containsKey(utteranceId) || cacheStatus[utteranceId] == CacheStatus.LOADING
                 }
+                if (shouldSkip) return@forEach
                 
                 try {
-                    cacheStatus[utteranceId] = CacheStatus.LOADING
+                    synchronized(cacheLock) {
+                        cacheStatus[utteranceId] = CacheStatus.LOADING
+                    }
                     
                     val result = coquiService?.synthesize(
                         text = text,
@@ -435,14 +441,20 @@ class CoquiTTSPlayer(
                     )
                     
                     result?.onSuccess { audioData ->
-                        audioCache[utteranceId] = audioData
-                        cacheStatus[utteranceId] = CacheStatus.CACHED
+                        synchronized(cacheLock) {
+                            audioCache[utteranceId] = audioData
+                            cacheStatus[utteranceId] = CacheStatus.CACHED
+                        }
                     }?.onFailure { error ->
-                        cacheStatus[utteranceId] = CacheStatus.FAILED
+                        synchronized(cacheLock) {
+                            cacheStatus[utteranceId] = CacheStatus.FAILED
+                        }
                         Log.error { "Gradio TTS cache failed: ${error.message}" }
                     }
                 } catch (e: Exception) {
-                    cacheStatus[utteranceId] = CacheStatus.FAILED
+                    synchronized(cacheLock) {
+                        cacheStatus[utteranceId] = CacheStatus.FAILED
+                    }
                     Log.error { "Gradio TTS cache error: ${e.message}" }
                 }
             }
@@ -452,7 +464,7 @@ class CoquiTTSPlayer(
     /**
      * Get cache status for a specific utterance ID
      */
-    fun getCacheStatus(utteranceId: String): CacheStatus? = cacheStatus[utteranceId]
+    fun getCacheStatus(utteranceId: String): CacheStatus? = synchronized(cacheLock) { cacheStatus[utteranceId] }
     
     /**
      * Get all cached utterance IDs

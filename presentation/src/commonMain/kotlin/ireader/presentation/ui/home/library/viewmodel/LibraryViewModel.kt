@@ -93,21 +93,12 @@ class LibraryViewModel(
     private val _searchResults = MutableStateFlow<List<LibraryBook>>(emptyList())
     private val _searchTotalCount = MutableStateFlow(0)
     
-    // Loaded manga cache
-    private val loadedManga = mutableMapOf<Long, List<BookItem>>()
-    
-    // MutableStateFlow for each category's books - cached to avoid recreation
-    private val categoryBooksState = mutableMapOf<Long, MutableStateFlow<List<BookItem>>>()
-    
-    // Cached category book lists to avoid recomputation
-    private val categoryBooksCache = mutableMapOf<Long, List<BookItem>>()
-    private var lastBooksCacheKey: Int = 0
-    
     // ==================== True DB Pagination State ====================
     // Paginated books loaded directly from database (bypasses LibraryController for initial load)
     private val _paginatedBooks = MutableStateFlow<Map<Long, List<LibraryBook>>>(emptyMap())
     private val _paginatedTotalCounts = MutableStateFlow<Map<Long, Int>>(emptyMap())
-    private var paginationLoadJobs = mutableMapOf<Long, Job?>()
+    private val paginationLock = Any()
+    private val paginationLoadJobs = mutableMapOf<Long, Job?>()
     
     // Track categories that are currently loading to prevent duplicate loads
     private val loadingCategories = mutableSetOf<Long>()
@@ -573,14 +564,19 @@ class LibraryViewModel(
     // Scroll positions kept OUT of observable state: written on every scroll frame,
     // and pushing them through _uiState re-ran the whole combine pipeline per frame
     // (new LibraryScreenState + immutable list rebuild -> visible scroll jank).
+    private val scrollLock = Any()
     private val categoryScrollPositions = mutableMapOf<Long, Pair<Int, Int>>()
 
     fun saveScrollPosition(categoryId: Long, index: Int, offset: Int) {
-        categoryScrollPositions[categoryId] = index to offset
+        synchronized(scrollLock) {
+            categoryScrollPositions[categoryId] = index to offset
+        }
     }
 
     fun getScrollPosition(categoryId: Long): Pair<Int, Int> {
-        return categoryScrollPositions[categoryId] ?: (0 to 0)
+        return synchronized(scrollLock) {
+            categoryScrollPositions[categoryId] ?: (0 to 0)
+        }
     }
 
     // ==================== Category Management ====================

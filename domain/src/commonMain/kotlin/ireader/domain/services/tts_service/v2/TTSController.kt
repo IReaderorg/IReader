@@ -125,6 +125,12 @@ class TTSController(
     // Pending chunk mode configuration (applied after content loads)
     private var pendingChunkWordCount: Int? = null
     
+    // Active utterance ID to filter out stale completion events from cancelled or superseded utterances
+    private var currentUtteranceId: String? = null
+    
+    // User translation preference preserved across chapters
+    private var userWantsTranslation: Boolean = false
+    
     /**
      * Process a command - ALL interactions go through here
      * Commands are processed sequentially using a mutex to prevent race conditions
@@ -308,9 +314,18 @@ class TTSController(
                 _events.emit(TTSEvent.PlaybackStarted)
             }
             is EngineEvent.Completed -> {
+                // Ignore stale completion events from old/cancelled utterances
+                if (event.utteranceId.isNotEmpty() && currentUtteranceId != null && event.utteranceId != currentUtteranceId) {
+                    Log.warn { "$TAG: Ignoring stale EngineEvent.Completed(utteranceId=${event.utteranceId}, current=$currentUtteranceId)" }
+                    return
+                }
                 handleParagraphCompleted()
             }
             is EngineEvent.Error -> {
+                if (event.utteranceId.isNotEmpty() && currentUtteranceId != null && event.utteranceId != currentUtteranceId) {
+                    Log.warn { "$TAG: Ignoring stale EngineEvent.Error(utteranceId=${event.utteranceId}, current=$currentUtteranceId)" }
+                    return
+                }
                 handleError(TTSError.SpeechFailed(event.message))
             }
         }
@@ -360,6 +375,7 @@ class TTSController(
         val text = currentState.displayContent.getOrNull(paragraphIndex)
         if (text != null) {
             val utteranceId = "p_${paragraphIndex}"
+            currentUtteranceId = utteranceId
             
             // Pre-cache next paragraphs in background
             precacheUpcomingParagraphs(paragraphIndex)
@@ -499,13 +515,16 @@ class TTSController(
             // ends up with two concurrent speak() calls — which makes native TTS read only the
             // first syllable and then stop.
             commandMutex.withLock {
-                _state.update {
-                    it.copy(
-                        previousParagraphIndex = it.currentParagraphIndex,
-                        currentParagraphIndex = it.currentParagraphIndex + 1
-                    )
+                val stateInLock = _state.value
+                if (stateInLock.canGoNext && stateInLock.isPlaying) {
+                    _state.update {
+                        it.copy(
+                            previousParagraphIndex = it.currentParagraphIndex,
+                            currentParagraphIndex = it.currentParagraphIndex + 1
+                        )
+                    }
+                    play()
                 }
-                play()
             }
         } else if (!currentState.canGoNext) {
             // Chapter finished
@@ -529,25 +548,28 @@ class TTSController(
         
         Log.debug { "$TAG: handleChunkCompleted() - chunk ${currentState.currentChunkIndex}/${result.chunks.size}" }
         
-        if (currentState.canGoNextChunk) {
+        if (currentState.canGoNextChunk && currentState.isPlaying) {
             // Auto-advance to next chunk.
             // Guard with the command mutex for the same reason as paragraph auto-advance:
             // this runs on the engine-event collector and must not issue a concurrent speak().
             commandMutex.withLock {
-                val nextChunkIndex = currentState.currentChunkIndex + 1
-                val nextChunk = result.chunks.getOrNull(nextChunkIndex)
+                val stateInLock = _state.value
+                if (stateInLock.canGoNextChunk && stateInLock.isPlaying) {
+                    val nextChunkIndex = stateInLock.currentChunkIndex + 1
+                    val nextChunk = result.chunks.getOrNull(nextChunkIndex)
 
-                _state.update {
-                    it.copy(
-                        currentChunkIndex = nextChunkIndex,
-                        currentChunkParagraphs = nextChunk?.paragraphIndices ?: emptyList(),
-                        currentParagraphIndex = nextChunk?.startParagraph ?: it.currentParagraphIndex
-                    )
+                    _state.update {
+                        it.copy(
+                            currentChunkIndex = nextChunkIndex,
+                            currentChunkParagraphs = nextChunk?.paragraphIndices ?: emptyList(),
+                            currentParagraphIndex = nextChunk?.startParagraph ?: it.currentParagraphIndex
+                        )
+                    }
+
+                    playChunk()
                 }
-
-                playChunk()
             }
-        } else {
+        } else if (!currentState.canGoNextChunk) {
             // All chunks finished - chapter complete
             _events.emit(TTSEvent.ChapterCompleted)
             
@@ -564,10 +586,15 @@ class TTSController(
     
     private suspend fun nextParagraph() {
         val currentState = _state.value
+        if (currentState.chunkModeEnabled && mergeResult != null) {
+            nextChunk()
+            return
+        }
         if (!currentState.canGoNext) return
         
         val wasPlaying = currentState.isPlaying
         engine?.stop()
+        currentUtteranceId = null
         
         _state.update { 
             it.copy(
@@ -583,10 +610,15 @@ class TTSController(
     
     private suspend fun previousParagraph() {
         val currentState = _state.value
+        if (currentState.chunkModeEnabled && mergeResult != null) {
+            previousChunk()
+            return
+        }
         if (!currentState.canGoPrevious) return
         
         val wasPlaying = currentState.isPlaying
         engine?.stop()
+        currentUtteranceId = null
         
         _state.update { 
             it.copy(
@@ -957,7 +989,7 @@ class TTSController(
                     currentParagraphIndex = startParagraph.coerceIn(0, content.paragraphs.lastIndex.coerceAtLeast(0)),
                     playbackState = PlaybackState.IDLE,
                     error = null,
-                    // Reset translation state for new chapter
+                    // Translation state for new chapter (preserves user preference if translation is loaded later)
                     translatedParagraphs = null,
                     showTranslation = false,
                     isTranslationAvailable = false,
@@ -1038,16 +1070,19 @@ class TTSController(
     
     private fun setTranslatedContent(paragraphs: List<String>?) {
         Log.debug { "$TAG: setTranslatedContent(${paragraphs?.size ?: 0} paragraphs)" }
+        val hasTrans = !paragraphs.isNullOrEmpty()
         _state.update { 
             it.copy(
                 translatedParagraphs = paragraphs,
-                isTranslationAvailable = paragraphs != null && paragraphs.isNotEmpty()
+                isTranslationAvailable = hasTrans,
+                showTranslation = if (hasTrans && userWantsTranslation) true else it.showTranslation
             )
         }
     }
     
     private fun toggleTranslation(show: Boolean) {
         Log.debug { "$TAG: toggleTranslation($show)" }
+        userWantsTranslation = show
         _state.update { it.copy(showTranslation = show) }
     }
     
@@ -1362,6 +1397,7 @@ class TTSController(
         
         Log.debug { "$TAG: playChunk() - chunk $chunkIndex, text length=${textToSpeak.length}, useTranslation=${currentState.showTranslation}" }
         
+        currentUtteranceId = utteranceId
         engine?.speak(textToSpeak, utteranceId)
         
         // Pre-cache next chunk(s) for smoother playback

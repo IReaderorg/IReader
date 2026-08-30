@@ -90,7 +90,9 @@ class JSLibraryProvider(
                                 val doc = cheerioApi.load(html)
                                 
                                 // Store document in a map for later queries
-                                parsedDocuments[requestId] = doc
+                                synchronized(docLock) {
+                                    parsedDocuments[requestId] = doc
+                                }
                             } catch (e: Exception) {
                                 println("[JSLibraryProvider] [$pluginId] Cheerio parse error: ${e.message}")
                             }
@@ -100,7 +102,7 @@ class JSLibraryProvider(
                             val docId = request["docId"]?.toString()?.trim('"')?.toIntOrNull() ?: return@forEach
                             val selector = request["selector"]?.toString()?.trim('"') ?: ""
                             
-                            val doc = parsedDocuments[docId] ?: return@forEach
+                            val doc = synchronized(docLock) { parsedDocuments[docId] } ?: return@forEach
                             
                             try {
                                 // Query the document
@@ -165,6 +167,7 @@ class JSLibraryProvider(
     }
     
     // Store parsed documents for querying
+    private val docLock = Any()
     private val parsedDocuments = mutableMapOf<Int, JSCheerioApi.CheerioObject>()
     
     /**

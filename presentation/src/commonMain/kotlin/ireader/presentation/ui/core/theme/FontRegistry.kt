@@ -8,6 +8,7 @@ import ireader.domain.models.fonts.CustomFont
  * Registry for managing custom fonts and their FontFamily objects
  */
 object FontRegistry {
+    private val lock = Any()
     private val fontFamilyCache = mutableMapOf<String, FontFamily>()
     
     /**
@@ -17,7 +18,9 @@ object FontRegistry {
      */
     suspend fun loadFontFamily(font: CustomFont, fontFile: VirtualFile): FontFamily? {
         // Check cache first
-        fontFamilyCache[font.id]?.let { return it }
+        synchronized(lock) {
+            fontFamilyCache[font.id]?.let { return it }
+        }
         
         return try {
             if (!fontFile.exists()) {
@@ -28,7 +31,9 @@ object FontRegistry {
             val fontFamily = createFontFamilyFromFile(fontFile)
             
             // Cache it
-            fontFamilyCache[font.id] = fontFamily
+            synchronized(lock) {
+                fontFamilyCache[font.id] = fontFamily
+            }
             fontFamily
         } catch (e: Exception) {
             e.printStackTrace()
@@ -40,21 +45,25 @@ object FontRegistry {
      * Get a cached FontFamily by font ID
      */
     fun getFontFamily(fontId: String): FontFamily? {
-        return fontFamilyCache[fontId]
+        return synchronized(lock) { fontFamilyCache[fontId] }
     }
     
     /**
      * Remove a font from the cache
      */
     fun removeFontFamily(fontId: String) {
-        fontFamilyCache.remove(fontId)
+        synchronized(lock) {
+            fontFamilyCache.remove(fontId)
+        }
     }
     
     /**
      * Clear all cached fonts
      */
     fun clearCache() {
-        fontFamilyCache.clear()
+        synchronized(lock) {
+            fontFamilyCache.clear()
+        }
     }
     
     /**

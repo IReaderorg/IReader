@@ -17,7 +17,10 @@ actual class AITTSManager(
     private val gradioTTSManager: GradioTTSManager
 ) {
     
-    private val providers = mutableMapOf<AITTSProvider, AITTSService>()
+    private val lock = Any()
+    @kotlin.concurrent.Volatile
+    private var providers = mapOf<AITTSProvider, AITTSService>()
+    @kotlin.concurrent.Volatile
     private var gradioService: GradioTTSService? = null
     
     init {
@@ -44,8 +47,11 @@ actual class AITTSManager(
      * @param apiKey Optional API key for private spaces
      */
     actual fun configureGradio(spaceUrl: String, apiKey: String?) {
-        gradioService = GradioTTSService(context, spaceUrl, apiKey)
-        providers[AITTSProvider.GRADIO_TTS] = gradioService!!
+        val service = GradioTTSService(context, spaceUrl, apiKey)
+        synchronized(lock) {
+            gradioService = service
+            providers = providers + (AITTSProvider.GRADIO_TTS to service)
+        }
         Log.info { "Gradio TTS configured with space: $spaceUrl" }
     }
 
@@ -187,6 +193,9 @@ actual class AITTSManager(
      */
     fun cleanup() {
         gradioService?.cleanup()
-        providers.clear()
+        synchronized(lock) {
+            providers = emptyMap()
+            gradioService = null
+        }
     }
 }

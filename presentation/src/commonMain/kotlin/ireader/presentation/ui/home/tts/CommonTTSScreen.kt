@@ -207,6 +207,7 @@ object SentenceHighlighter {
     }
     
     private const val MAX_CACHE_SIZE = 512
+    private val cacheLock = Any()
     private val sentenceCache = mutableMapOf<String, List<String>>()
 
     /**
@@ -217,7 +218,8 @@ object SentenceHighlighter {
     fun splitIntoSentences(text: String): List<String> {
         if (text.isBlank()) return emptyList()
         
-        sentenceCache[text]?.let { return it }
+        val cached = synchronized(cacheLock) { sentenceCache[text] }
+        if (cached != null) return cached
         
         // Split by sentence endings
         val sentences = text.split(SENTENCE_END_PATTERN)
@@ -252,10 +254,12 @@ object SentenceHighlighter {
         }
         
         val finalResult = if (result.isEmpty()) listOf(text.trim()) else result
-        if (sentenceCache.size >= MAX_CACHE_SIZE) {
-            sentenceCache.clear()
+        synchronized(cacheLock) {
+            if (sentenceCache.size >= MAX_CACHE_SIZE) {
+                sentenceCache.clear()
+            }
+            sentenceCache[text] = finalResult
         }
-        sentenceCache[text] = finalResult
         return finalResult
     }
     

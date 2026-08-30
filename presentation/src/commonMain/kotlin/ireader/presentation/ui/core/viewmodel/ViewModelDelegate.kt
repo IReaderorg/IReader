@@ -13,6 +13,7 @@ class ViewModelDelegate(
     private val scope: CoroutineScope,
     private val showSnackBar: (UiText) -> Unit
 ) {
+    private val lock = Any()
     private val jobs = mutableMapOf<String, Job>()
     
     /**
@@ -34,7 +35,11 @@ class ViewModelDelegate(
             }
         }
         
-        key?.let { jobs[it] = job }
+        if (key != null) {
+            synchronized(lock) {
+                jobs[key] = job
+            }
+        }
         return job
     }
     
@@ -42,16 +47,22 @@ class ViewModelDelegate(
      * Cancel a specific job by key
      */
     fun cancelJob(key: String) {
-        jobs[key]?.cancel()
-        jobs.remove(key)
+        val job = synchronized(lock) {
+            jobs.remove(key)
+        }
+        job?.cancel()
     }
     
     /**
      * Cancel all jobs
      */
     fun cancelAllJobs() {
-        jobs.values.forEach { it.cancel() }
-        jobs.clear()
+        val allJobs = synchronized(lock) {
+            val list = jobs.values.toList()
+            jobs.clear()
+            list
+        }
+        allJobs.forEach { it.cancel() }
     }
 }
 

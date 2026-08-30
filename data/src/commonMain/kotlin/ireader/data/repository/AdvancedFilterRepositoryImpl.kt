@@ -26,6 +26,7 @@ class AdvancedFilterRepositoryImpl(
     private val json: Json = Json { prettyPrint = true }
 ) : AdvancedFilterRepository {
 
+    private val lock = Any()
     private val filterPresets = mutableMapOf<String, AdvancedFilterState>()
 
     override suspend fun applyFilters(filterState: AdvancedFilterState): List<BookItem> {
@@ -81,13 +82,19 @@ class AdvancedFilterRepositoryImpl(
                 }
             }
 
-            // Apply chapter count filters
-            val booksWithChapterCounts = books.map { book ->
-                val chapters = chapterRepository.findChaptersByBookId(book.id)
-                book to chapters.size
+            // Memoized chapter cache during filtering to avoid redundant DB queries per book
+            val chapterCache = mutableMapOf<Long, List<ireader.domain.models.entities.Chapter>>()
+            suspend fun getBookChapters(bookId: Long): List<ireader.domain.models.entities.Chapter> {
+                return chapterCache.getOrPut(bookId) {
+                    chapterRepository.findChaptersByBookId(bookId)
+                }
             }
 
-            var filteredBooks = booksWithChapterCounts
+            // Apply chapter count filters
+            var filteredBooks = books.map { book ->
+                val chapters = getBookChapters(book.id)
+                book to chapters.size
+            }
             
             filterState.minChapters?.let { minChapters ->
                 filteredBooks = filteredBooks.filter { (_, chapterCount) ->
@@ -104,7 +111,7 @@ class AdvancedFilterRepositoryImpl(
             // Apply completion status filters
             if (filterState.completionStatus.isNotEmpty()) {
                 filteredBooks = filteredBooks.filter { (book, _) ->
-                    val chapters = chapterRepository.findChaptersByBookId(book.id)
+                    val chapters = getBookChapters(book.id)
                     val completionStatus = when {
                         chapters.isEmpty() -> CompletionStatus.NOT_STARTED
                         chapters.all { it.read } -> CompletionStatus.COMPLETED
@@ -147,7 +154,7 @@ class AdvancedFilterRepositoryImpl(
                 }
                 SortOption.CHAPTERS_READ -> {
                     val booksWithReadCounts = filteredBooks.map { (book, _) ->
-                        val chapters = chapterRepository.findChaptersByBookId(book.id)
+                        val chapters = getBookChapters(book.id)
                         val readCount = chapters.count { it.read }
                         book to readCount
                     }
@@ -166,7 +173,7 @@ class AdvancedFilterRepositoryImpl(
                 }
                 SortOption.COMPLETION_RATE -> {
                     val booksWithCompletionRate = filteredBooks.map { (book, totalChapters) ->
-                        val chapters = chapterRepository.findChaptersByBookId(book.id)
+                        val chapters = getBookChapters(book.id)
                         val readCount = chapters.count { it.read }
                         val completionRate = if (totalChapters > 0) {
                             readCount.toFloat() / totalChapters
@@ -208,12 +215,10 @@ class AdvancedFilterRepositoryImpl(
 
     override suspend fun saveFilterPreset(name: String, filterState: AdvancedFilterState) {
         try {
-            filterPresets[name] = filterState
+            synchronized(lock) {
+                filterPresets[name] = filterState
+            }
             Log.info { "Filter preset saved: $name" }
-            
-            // Persist to preferences
-            val presetsJson = json.encodeToString(filterPresets)
-            // Would save to preferences here
         } catch (e: Exception) {
             Log.error { "Failed to save filter preset: ${e.message}" }
         }
@@ -221,7 +226,7 @@ class AdvancedFilterRepositoryImpl(
 
     override suspend fun getFilterPresets(): List<Pair<String, AdvancedFilterState>> {
         return try {
-            filterPresets.toList()
+            synchronized(lock) { filterPresets.toList() }
         } catch (e: Exception) {
             Log.error { "Failed to get filter presets: ${e.message}" }
             emptyList()
@@ -230,7 +235,9 @@ class AdvancedFilterRepositoryImpl(
 
     override suspend fun deleteFilterPreset(name: String) {
         try {
-            filterPresets.remove(name)
+            synchronized(lock) {
+                filterPresets.remove(name)
+            }
             Log.info { "Filter preset deleted: $name" }
         } catch (e: Exception) {
             Log.error { "Failed to delete filter preset: ${e.message}" }

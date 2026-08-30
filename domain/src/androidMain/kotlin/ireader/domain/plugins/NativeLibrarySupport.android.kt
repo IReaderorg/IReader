@@ -11,14 +11,18 @@ import java.util.zip.ZipFile
  */
 
 // Cache for plugin package paths (set during plugin loading)
-private val pluginPackagePaths = mutableMapOf<String, String>()
+private val packagePathLock = Any()
+@kotlin.concurrent.Volatile
+private var pluginPackagePaths = mapOf<String, String>()
 
 /**
  * Register a plugin's package path for native library extraction.
  * Called by PluginLoader when loading a plugin.
  */
 fun registerPluginPackagePath(pluginId: String, packagePath: String) {
-    pluginPackagePaths[pluginId] = packagePath
+    synchronized(packagePathLock) {
+        pluginPackagePaths = pluginPackagePaths + (pluginId to packagePath)
+    }
     Log.info { "Registered plugin package path: $pluginId -> $packagePath" }
 }
 

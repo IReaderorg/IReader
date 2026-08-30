@@ -66,6 +66,7 @@ class PluginManager(
     private val loadLock = kotlinx.coroutines.sync.Mutex()
     
     // Cache of plugin preferences stores to ensure same instance is reused
+    private val storeLock = Any()
     private val pluginPreferencesStores = mutableMapOf<String, PluginPreferencesStore>()
     
     /**
@@ -504,8 +505,10 @@ class PluginManager(
      * Caches stores per plugin to ensure same instance is reused
      */
     private fun createPluginPreferencesStore(pluginId: String): PluginPreferencesStore {
-        return pluginPreferencesStores.getOrPut(pluginId) {
-            PersistentPluginPreferencesStore(preferenceStore, pluginId)
+        return synchronized(storeLock) {
+            pluginPreferencesStores.getOrPut(pluginId) {
+                PersistentPluginPreferencesStore(preferenceStore, pluginId)
+            }
         }
     }
     
@@ -881,70 +884,103 @@ private class PersistentPluginPreferencesStore(
  * Used as fallback when persistent storage is not available
  */
 private class InMemoryPluginPreferencesStore : PluginPreferencesStore {
+    private val lock = Any()
     private val data = mutableMapOf<String, Any>()
     
     override fun getString(key: String, defaultValue: String): String {
-        return data[key] as? String ?: defaultValue
+        return synchronized(lock) {
+            data[key] as? String ?: defaultValue
+        }
     }
     
     override fun putString(key: String, value: String) {
-        data[key] = value
+        synchronized(lock) {
+            data[key] = value
+        }
     }
     
     override fun getInt(key: String, defaultValue: Int): Int {
-        return data[key] as? Int ?: defaultValue
+        return synchronized(lock) {
+            data[key] as? Int ?: defaultValue
+        }
     }
     
     override fun putInt(key: String, value: Int) {
-        data[key] = value
+        synchronized(lock) {
+            data[key] = value
+        }
     }
     
     override fun getBoolean(key: String, defaultValue: Boolean): Boolean {
-        return data[key] as? Boolean ?: defaultValue
+        return synchronized(lock) {
+            data[key] as? Boolean ?: defaultValue
+        }
     }
     
     override fun putBoolean(key: String, value: Boolean) {
-        data[key] = value
+        synchronized(lock) {
+            data[key] = value
+        }
     }
     
     override fun getLong(key: String, defaultValue: Long): Long {
-        return data[key] as? Long ?: defaultValue
+        return synchronized(lock) {
+            data[key] as? Long ?: defaultValue
+        }
     }
     
     override fun putLong(key: String, value: Long) {
-        data[key] = value
+        synchronized(lock) {
+            data[key] = value
+        }
     }
     
     override fun getFloat(key: String, defaultValue: Float): Float {
-        return data[key] as? Float ?: defaultValue
+        return synchronized(lock) {
+            data[key] as? Float ?: defaultValue
+        }
     }
     
     override fun putFloat(key: String, value: Float) {
-        data[key] = value
+        synchronized(lock) {
+            data[key] = value
+        }
     }
     
     @Suppress("UNCHECKED_CAST")
     override fun getStringSet(key: String, defaultValue: Set<String>): Set<String> {
-        return data[key] as? Set<String> ?: defaultValue
+        return synchronized(lock) {
+            data[key] as? Set<String> ?: defaultValue
+        }
     }
     
     override fun putStringSet(key: String, value: Set<String>) {
-        data[key] = value
+        synchronized(lock) {
+            data[key] = value
+        }
     }
     
     override fun remove(key: String) {
-        data.remove(key)
+        synchronized(lock) {
+            data.remove(key)
+        }
     }
     
     override fun clear() {
-        data.clear()
+        synchronized(lock) {
+            data.clear()
+        }
     }
     
     override fun contains(key: String): Boolean {
-        return data.containsKey(key)
+        return synchronized(lock) {
+            data.containsKey(key)
+        }
     }
     
     override fun getAllKeys(): Set<String> {
-        return data.keys.toSet()
+        return synchronized(lock) {
+            data.keys.toSet()
+        }
     }
 }

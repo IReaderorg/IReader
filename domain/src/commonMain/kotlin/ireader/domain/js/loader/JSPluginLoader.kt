@@ -64,6 +64,7 @@ class JSPluginLoader(
     private val pluginsDirectory: Path
         get() = pluginsDirectoryProvider()
     
+    private val cacheLock = Any()
     private val pluginCache = mutableMapOf<String, LoadedPlugin>()
     private val stubManager = JSPluginStubManager(preferenceStoreFactory.create("js_plugin_stubs"))
 
@@ -497,7 +498,7 @@ class JSPluginLoader(
         try {
             // Check cache
             val lastModified = fileSystem.metadata(file).lastModifiedAtMillis ?: 0L
-            val cached = pluginCache[pluginId]
+            val cached = synchronized(cacheLock) { pluginCache[pluginId] }
             if (cached != null && cached.lastModified == lastModified) {
                 return cached.catalog
             }
@@ -563,8 +564,8 @@ class JSPluginLoader(
             
             // Create dependencies for the source wrapper
             val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
-                override val default: HttpClient = httpClient
-                override val cloudflareClient: HttpClient = httpClient
+                override val default: io.ktor.client.HttpClient = httpClient
+                override val cloudflareClient: io.ktor.client.HttpClient = httpClient
                 override val browser: ireader.core.http.BrowserEngine = ireader.core.http.BrowserEngine()
                 override val config: ireader.core.http.NetworkConfig = ireader.core.http.NetworkConfig()
                 override val sslConfig: ireader.core.http.SSLConfiguration = ireader.core.http.SSLConfiguration()
@@ -586,8 +587,10 @@ class JSPluginLoader(
             )
             
             // Cache the loaded plugin
-            pluginCache[pluginId] = LoadedPlugin(catalog, plugin, engine, lastModified)
-            loadErrors.remove(pluginId)
+            synchronized(cacheLock) {
+                pluginCache[pluginId] = LoadedPlugin(catalog, plugin, engine, lastModified)
+                loadErrors.remove(pluginId)
+            }
             
             // Save stub for future fast loading
             stubManager.savePluginStub(metadata, file.name.substringBeforeLast("."))
@@ -615,11 +618,15 @@ class JSPluginLoader(
             throw e
         } catch (e: PluginLoadException) {
             Log.warn { "JSPluginLoader: Plugin load error for ${file.name}: ${e.message}" }
-            loadErrors[pluginId] = e.message ?: "Plugin load error"
+            synchronized(cacheLock) {
+                loadErrors[pluginId] = e.message ?: "Plugin load error"
+            }
             return null
         } catch (e: Exception) {
             Log.warn { "JSPluginLoader: Unexpected error loading ${file.name}: ${e.message}" }
-            loadErrors[pluginId] = e.message ?: e::class.simpleName ?: "Unknown error"
+            synchronized(cacheLock) {
+                loadErrors[pluginId] = e.message ?: e::class.simpleName ?: "Unknown error"
+            }
             return null
         }
     }
@@ -630,9 +637,9 @@ class JSPluginLoader(
      */
     private val loadErrors = mutableMapOf<String, String>()
 
-    fun getLoadError(pluginId: String): String? = loadErrors[pluginId]
+    fun getLoadError(pluginId: String): String? = synchronized(cacheLock) { loadErrors[pluginId] }
 
-    fun getLoadErrors(): Map<String, String> = loadErrors.toMap()
+    fun getLoadErrors(): Map<String, String> = synchronized(cacheLock) { loadErrors.toMap() }
     
     /**
      * Unloads a plugin and cleans up its resources.
@@ -640,7 +647,9 @@ class JSPluginLoader(
      */
     suspend fun unloadPlugin(pluginId: String) {
         // Remove from cache
-        pluginCache.remove(pluginId)
+        synchronized(cacheLock) {
+            pluginCache.remove(pluginId)
+        }
         
         // Remove stub
         stubManager.removePluginStub(pluginId)
@@ -650,22 +659,28 @@ class JSPluginLoader(
      * Clears all cached plugins and closes all engines.
      */
     fun clearCache() {
-        pluginCache.values.forEach { it.engine.close() }
-        pluginCache.clear()
+        val engines = synchronized(cacheLock) {
+            val list = pluginCache.values.map { it.engine }
+            pluginCache.clear()
+            list
+        }
+        engines.forEach { it.close() }
     }
     
     /**
      * Gets the number of cached plugins.
      */
-    fun getCacheSize(): Int = pluginCache.size
+    fun getCacheSize(): Int = synchronized(cacheLock) { pluginCache.size }
     
     /**
      * Gets a map of installed plugins with their metadata.
      * @return Map of plugin ID to metadata
      */
     fun getInstalledPlugins(): Map<String, PluginMetadata> {
-        return pluginCache.mapValues { (_, loaded) ->
-            loaded.catalog.metadata
+        return synchronized(cacheLock) {
+            pluginCache.mapValues { (_, loaded) ->
+                loaded.catalog.metadata
+            }
         }
     }
     

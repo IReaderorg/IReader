@@ -14,6 +14,7 @@ class AndroidNotificationService(
 ) : NotificationService {
     
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val lock = Any()
     private val activeNotifications = mutableMapOf<Int, NotificationCompat.Builder>()
     
     override suspend fun initialize() {}
@@ -39,7 +40,9 @@ class AndroidNotificationService(
             }
             .setAutoCancel(true)
         
-        activeNotifications[id] = builder
+        synchronized(lock) {
+            activeNotifications[id] = builder
+        }
         notificationManager.notify(id, builder.build())
     }
     
@@ -58,7 +61,9 @@ class AndroidNotificationService(
             .setProgress(maxProgress, progress, indeterminate)
             .setOngoing(true)
         
-        activeNotifications[id] = builder
+        synchronized(lock) {
+            activeNotifications[id] = builder
+        }
         notificationManager.notify(id, builder.build())
     }
     
@@ -69,7 +74,7 @@ class AndroidNotificationService(
         progress: Int?,
         maxProgress: Int?
     ) {
-        val builder = activeNotifications[id] ?: return
+        val builder = synchronized(lock) { activeNotifications[id] } ?: return
         
         title?.let { builder.setContentTitle(it) }
         message?.let { builder.setContentText(it) }
@@ -83,12 +88,16 @@ class AndroidNotificationService(
     
     override fun cancelNotification(id: Int) {
         notificationManager.cancel(id)
-        activeNotifications.remove(id)
+        synchronized(lock) {
+            activeNotifications.remove(id)
+        }
     }
     
     override fun cancelAllNotifications() {
         notificationManager.cancelAll()
-        activeNotifications.clear()
+        synchronized(lock) {
+            activeNotifications.clear()
+        }
     }
     
     override fun areNotificationsEnabled(): Boolean {

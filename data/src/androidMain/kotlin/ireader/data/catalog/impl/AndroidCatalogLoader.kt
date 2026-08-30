@@ -963,13 +963,15 @@ class AndroidCatalogLoader(
     /**
      * Gets the list of failed catalogs for diagnostics and retry.
      */
-    fun getFailedCatalogs(): Map<String, CatalogLoadError> = failedCatalogs.toMap()
+    fun getFailedCatalogs(): Map<String, CatalogLoadError> = synchronized(failedCatalogs) { failedCatalogs.toMap() }
     
     /**
      * Clears the failed catalogs list, allowing retry on next load.
      */
     fun clearFailedCatalogs() {
-        failedCatalogs.clear()
+        synchronized(failedCatalogs) {
+            failedCatalogs.clear()
+        }
     }
 
     private companion object {

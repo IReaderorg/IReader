@@ -1,100 +1,81 @@
 package ireader.core.utils
 
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-
 /**
  * A thread-safe LRU (Least Recently Used) cache implementation.
- * Uses a simple map-based approach that works across all KMP targets.
+ * Uses a LinkedHashMap for true O(1) access and eviction across all KMP targets.
  */
 class LruCache<K, V>(
     private val maxSize: Int,
     private val onEvicted: ((key: K, value: V) -> Unit)? = null
 ) {
-    private val mutex = Mutex()
-    private val cache = mutableMapOf<K, V>()
-    private val accessOrder = mutableListOf<K>()
+    private val lock = Any()
+    private val cache = LinkedHashMap<K, V>(maxSize, 0.75f)
     
-    suspend fun get(key: K): V? = mutex.withLock {
-        val value = cache[key]
+    suspend fun get(key: K): V? = synchronized(lock) {
+        val value = cache.remove(key)
         if (value != null) {
             // Move to end (most recently used)
-            accessOrder.remove(key)
-            accessOrder.add(key)
+            cache[key] = value
         }
         value
     }
     
-    fun getOrNull(key: K): V? {
-        return if (mutex.tryLock()) {
-            try {
-                val value = cache[key]
-                if (value != null) {
-                    accessOrder.remove(key)
-                    accessOrder.add(key)
-                }
-                value
-            } finally {
-                mutex.unlock()
-            }
-        } else {
-            null
+    fun getOrNull(key: K): V? = synchronized(lock) {
+        val value = cache.remove(key)
+        if (value != null) {
+            cache[key] = value
         }
+        value
     }
     
-    suspend fun put(key: K, value: V): V? = mutex.withLock {
-        val oldValue = cache.put(key, value)
-        
-        if (oldValue == null) {
-            accessOrder.add(key)
-        } else {
-            accessOrder.remove(key)
-            accessOrder.add(key)
-        }
+    suspend fun put(key: K, value: V): V? = synchronized(lock) {
+        val oldValue = cache.remove(key)
+        cache[key] = value
         
         // Evict oldest entries if over capacity
-        while (cache.size > maxSize && accessOrder.isNotEmpty()) {
-            val eldestKey = accessOrder.removeAt(0)
-            val evictedValue = cache.remove(eldestKey)
-            if (evictedValue != null) {
+        while (cache.size > maxSize) {
+            val iterator = cache.iterator()
+            if (iterator.hasNext()) {
+                val (eldestKey, evictedValue) = iterator.next()
+                iterator.remove()
                 onEvicted?.invoke(eldestKey, evictedValue)
+            } else {
+                break
             }
         }
         
         oldValue
     }
     
-    suspend fun remove(key: K): V? = mutex.withLock {
-        accessOrder.remove(key)
+    suspend fun remove(key: K): V? = synchronized(lock) {
         cache.remove(key)
     }
     
-    suspend fun containsKey(key: K): Boolean = mutex.withLock {
+    suspend fun containsKey(key: K): Boolean = synchronized(lock) {
         cache.containsKey(key)
     }
     
-    suspend fun clear() = mutex.withLock {
+    suspend fun clear() = synchronized(lock) {
         cache.clear()
-        accessOrder.clear()
     }
     
-    suspend fun size(): Int = mutex.withLock {
+    suspend fun size(): Int = synchronized(lock) {
         cache.size
     }
     
-    suspend fun keys(): Set<K> = mutex.withLock {
+    suspend fun keys(): Set<K> = synchronized(lock) {
         cache.keys.toSet()
     }
     
-    suspend fun values(): List<V> = mutex.withLock {
+    suspend fun values(): List<V> = synchronized(lock) {
         cache.values.toList()
     }
     
-    suspend fun entries(): Map<K, V> = mutex.withLock {
+    suspend fun entries(): Map<K, V> = synchronized(lock) {
         cache.toMap()
     }
     
-    suspend fun <R> withLock(block: (Map<K, V>) -> R): R = mutex.withLock {
-        block(cache)
+    suspend fun <R> withLock(block: (Map<K, V>) -> R): R = synchronized(lock) {
+        block(cache.toMap())
     }
 }

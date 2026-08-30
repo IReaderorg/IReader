@@ -15,7 +15,9 @@ class ResourceTracker(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 ) {
     
-    private val monitors = mutableMapOf<String, PluginResourceMonitor>()
+    private val lock = Any()
+    @kotlin.concurrent.Volatile
+    private var monitors = mapOf<String, PluginResourceMonitor>()
     private val _usageFlow = MutableStateFlow<Map<String, PluginResourceUsage>>(emptyMap())
     val usageFlow: StateFlow<Map<String, PluginResourceUsage>> = _usageFlow.asStateFlow()
     
@@ -27,12 +29,14 @@ class ResourceTracker(
      * Requirements: 4.1
      */
     fun startTracking(pluginId: String, limits: PluginResourceLimits = PluginResourceLimits()) {
-        if (monitors.containsKey(pluginId)) {
-            return // Already tracking
+        synchronized(lock) {
+            if (monitors.containsKey(pluginId)) {
+                return // Already tracking
+            }
+            
+            val monitor = PluginResourceMonitor(pluginId, limits)
+            monitors = monitors + (pluginId to monitor)
         }
-        
-        val monitor = PluginResourceMonitor(pluginId, limits)
-        monitors[pluginId] = monitor
         
         resourceMonitor.startMonitoring(pluginId)
         
@@ -47,11 +51,14 @@ class ResourceTracker(
      * Requirements: 4.1
      */
     fun stopTracking(pluginId: String) {
-        monitors.remove(pluginId)
+        val isEmpty = synchronized(lock) {
+            monitors = monitors - pluginId
+            monitors.isEmpty()
+        }
         resourceMonitor.stopMonitoring(pluginId)
         
         // Stop background tracking if no plugins are being tracked
-        if (monitors.isEmpty()) {
+        if (isEmpty) {
             stopBackgroundTracking()
         }
     }
@@ -179,10 +186,14 @@ class ResourceTracker(
      */
     fun shutdown() {
         stopBackgroundTracking()
-        monitors.keys.toList().forEach { pluginId ->
+        val allMonitors = synchronized(lock) {
+            val list = monitors.keys.toList()
+            monitors = emptyMap()
+            list
+        }
+        allMonitors.forEach { pluginId ->
             resourceMonitor.stopMonitoring(pluginId)
         }
-        monitors.clear()
         scope.cancel()
     }
 }

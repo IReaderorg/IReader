@@ -17,7 +17,8 @@ class PluginPermissionManager(
     private val mutex = Mutex()
     
     // Cache of granted permissions per plugin
-    private val grantedPermissions = mutableMapOf<String, MutableSet<PluginPermission>>()
+    @kotlin.concurrent.Volatile
+    private var grantedPermissions = mapOf<String, Set<PluginPermission>>()
     
     // Pending permission requests
     private val _pendingRequests = MutableStateFlow<List<PermissionRequest>>(emptyList())
@@ -29,10 +30,7 @@ class PluginPermissionManager(
     suspend fun initialize() {
         mutex.withLock {
             val permissions = database.getAllGrantedPermissions()
-            grantedPermissions.clear()
-            permissions.forEach { (pluginId, permissionList) ->
-                grantedPermissions[pluginId] = permissionList.toMutableSet()
-            }
+            grantedPermissions = permissions.mapValues { it.value.toSet() }
         }
     }
     
@@ -95,8 +93,8 @@ class PluginPermissionManager(
         permission: PluginPermission
     ): PermissionRequestResult {
         mutex.withLock {
-            val permissions = grantedPermissions.getOrPut(pluginId) { mutableSetOf() }
-            permissions.add(permission)
+            val current = grantedPermissions[pluginId] ?: emptySet()
+            grantedPermissions = grantedPermissions + (pluginId to (current + permission))
             
             // Save to database
             database.saveGrantedPermission(pluginId, permission)
@@ -135,7 +133,13 @@ class PluginPermissionManager(
      */
     suspend fun revokePermission(pluginId: String, permission: PluginPermission) {
         mutex.withLock {
-            grantedPermissions[pluginId]?.remove(permission)
+            val current = grantedPermissions[pluginId] ?: emptySet()
+            val newSet = current - permission
+            grantedPermissions = if (newSet.isEmpty()) {
+                grantedPermissions - pluginId
+            } else {
+                grantedPermissions + (pluginId to newSet)
+            }
             database.revokeGrantedPermission(pluginId, permission)
         }
     }
@@ -146,7 +150,7 @@ class PluginPermissionManager(
      */
     suspend fun revokeAllPermissions(pluginId: String) {
         mutex.withLock {
-            grantedPermissions.remove(pluginId)
+            grantedPermissions = grantedPermissions - pluginId
             database.revokeAllGrantedPermissions(pluginId)
         }
     }
@@ -156,7 +160,7 @@ class PluginPermissionManager(
      * Requirements: 10.1
      */
     fun getGrantedPermissions(pluginId: String): Set<PluginPermission> {
-        return grantedPermissions[pluginId]?.toSet() ?: emptySet()
+        return grantedPermissions[pluginId] ?: emptySet()
     }
     
     /**

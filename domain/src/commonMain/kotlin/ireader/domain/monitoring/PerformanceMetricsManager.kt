@@ -9,6 +9,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 class PerformanceMetricsManager(
     private val memoryTracker: MemoryTracker
 ) {
+    private val lock = Any()
     private val metricsMap = mutableMapOf<String, PluginPerformanceMetrics>()
 
     /**
@@ -17,8 +18,10 @@ class PerformanceMetricsManager(
     fun startOperation(pluginId: String, operation: String) {
         memoryTracker.startTracking(pluginId)
 
-        val metrics = metricsMap.getOrPut(pluginId) {
-            PluginPerformanceMetrics(pluginId)
+        val metrics = synchronized(lock) {
+            metricsMap.getOrPut(pluginId) {
+                PluginPerformanceMetrics(pluginId)
+            }
         }
 
         metrics.startOperation(operation)
@@ -30,7 +33,7 @@ class PerformanceMetricsManager(
     fun endOperation(pluginId: String, operation: String, success: Boolean) {
         memoryTracker.stopTracking(pluginId)
 
-        val metrics = metricsMap[pluginId] ?: return
+        val metrics = synchronized(lock) { metricsMap[pluginId] } ?: return
         metrics.endOperation(operation, success)
 
         // Update memory usage
@@ -42,8 +45,10 @@ class PerformanceMetricsManager(
      * Record an error for a plugin
      */
     fun recordError(pluginId: String, error: Throwable) {
-        val metrics = metricsMap.getOrPut(pluginId) {
-            PluginPerformanceMetrics(pluginId)
+        val metrics = synchronized(lock) {
+            metricsMap.getOrPut(pluginId) {
+                PluginPerformanceMetrics(pluginId)
+            }
         }
         metrics.recordError(error)
     }
@@ -52,7 +57,7 @@ class PerformanceMetricsManager(
      * Get performance metrics for a specific plugin
      */
     fun getMetrics(pluginId: String): PluginPerformanceInfo {
-        val metrics = metricsMap[pluginId] ?: return PluginPerformanceInfo(pluginId)
+        val metrics = synchronized(lock) { metricsMap[pluginId] } ?: return PluginPerformanceInfo(pluginId)
         return metrics.toPerformanceInfo()
     }
 
@@ -60,21 +65,26 @@ class PerformanceMetricsManager(
      * Get performance metrics for all tracked plugins
      */
     fun getAllMetrics(): List<PluginPerformanceInfo> {
-        return metricsMap.values.map { it.toPerformanceInfo() }
+        val allMetrics = synchronized(lock) { metricsMap.values.toList() }
+        return allMetrics.map { it.toPerformanceInfo() }
     }
 
     /**
      * Clear metrics for a specific plugin
      */
     fun clearMetrics(pluginId: String) {
-        metricsMap.remove(pluginId)
+        synchronized(lock) {
+            metricsMap.remove(pluginId)
+        }
     }
 
     /**
      * Clear all metrics
      */
     fun clearAllMetrics() {
-        metricsMap.clear()
+        synchronized(lock) {
+            metricsMap.clear()
+        }
     }
 }
 
@@ -84,6 +94,7 @@ class PerformanceMetricsManager(
 private class PluginPerformanceMetrics(
     val pluginId: String
 ) {
+    private val lock = Any()
     private val operationTimes = mutableListOf<Long>()
     private val operationStarts = mutableMapOf<String, Long>()
     private var errorCount = 0
@@ -93,55 +104,62 @@ private class PluginPerformanceMetrics(
     private var loadTime = 0L
 
     fun startOperation(operation: String) {
-        operationStarts[operation] = currentTimeToLong()
+        synchronized(lock) {
+            operationStarts[operation] = currentTimeToLong()
+        }
     }
 
     fun endOperation(operation: String, success: Boolean) {
-        val startTime = operationStarts.remove(operation) ?: return
-        val duration = currentTimeToLong() - startTime
-
-        operationTimes.add(duration)
-        totalOperations++
-
-        if (!success) {
-            errorCount++
-        }
-        
-        // Track load time separately
-        if (operation == "load") {
-            loadTime = duration
+        val (startTime, duration) = synchronized(lock) {
+            val start = operationStarts.remove(operation) ?: return
+            val dur = currentTimeToLong() - start
+            operationTimes.add(dur)
+            totalOperations++
+            if (!success) {
+                errorCount++
+            }
+            if (operation == "load") {
+                loadTime = dur
+            }
+            start to dur
         }
     }
 
     fun recordError(error: Throwable) {
-        errorCount++
+        synchronized(lock) {
+            errorCount++
+        }
     }
 
     fun updateMemoryUsage(usage: Long) {
-        memoryUsage = usage
-        maxMemoryUsage = maxOf(maxMemoryUsage, usage)
+        synchronized(lock) {
+            memoryUsage = usage
+            maxMemoryUsage = maxOf(maxMemoryUsage, usage)
+        }
     }
 
     fun toPerformanceInfo(): PluginPerformanceInfo {
-        val avgTime = if (operationTimes.isNotEmpty()) {
-            operationTimes.average().toLong()
-        } else 0L
+        return synchronized(lock) {
+            val avgTime = if (operationTimes.isNotEmpty()) {
+                operationTimes.average().toLong()
+            } else 0L
 
-        val maxTime = operationTimes.maxOrNull() ?: 0L
+            val maxTime = operationTimes.maxOrNull() ?: 0L
 
-        val errorRate = if (totalOperations > 0) {
-            errorCount.toFloat() / totalOperations.toFloat()
-        } else 0f
+            val errorRate = if (totalOperations > 0) {
+                errorCount.toFloat() / totalOperations.toFloat()
+            } else 0f
 
-        return PluginPerformanceInfo(
-            pluginId = pluginId,
-            memoryUsageMB = memoryUsage / (1024.0 * 1024.0),
-            memoryLimitMB = 64.0, // Configurable limit
-            loadTime = loadTime,
-            avgExecutionTime = avgTime,
-            maxExecutionTime = maxTime,
-            errorRate = errorRate,
-            lastUpdated = currentTimeToLong()
-        )
+            PluginPerformanceInfo(
+                pluginId = pluginId,
+                memoryUsageMB = memoryUsage / (1024.0 * 1024.0),
+                memoryLimitMB = 64.0, // Configurable limit
+                loadTime = loadTime,
+                avgExecutionTime = avgTime,
+                maxExecutionTime = maxTime,
+                errorRate = errorRate,
+                lastUpdated = currentTimeToLong()
+            )
+        }
     }
 }

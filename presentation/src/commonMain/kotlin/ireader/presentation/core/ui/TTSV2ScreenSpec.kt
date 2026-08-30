@@ -397,7 +397,7 @@ class TTSV2ScreenSpec(
             if (alreadyLoaded) {
                 Log.warn { "TTSV2ScreenSpec: Same book/chapter already loaded in controller, skipping reload" }
                 // Just load translations if needed
-                if (readTranslatedText && currentState.translatedParagraphs.isNullOrEmpty()) {
+                if (readTranslatedText) {
                     try {
                         val translations = getAllTranslationsUseCase.execute(chapterId)
                         if (translations.isNotEmpty()) {
@@ -412,6 +412,20 @@ class TTSV2ScreenSpec(
                                     viewModel.adapter.setShowTranslation(true)
                                 }
                             }
+                        } else {
+                            // Automatically queue translation for current chapter
+                            val engineId = translationEnginesManager.get().id
+                            val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                            val targetLang = readerPreferences.translatorTargetLanguage().get()
+                            translationService.queueChapters(
+                                bookId = bookId,
+                                chapterIds = listOf(chapterId),
+                                sourceLanguage = sourceLang,
+                                targetLanguage = targetLang,
+                                engineId = engineId,
+                                bypassWarning = true,
+                                priority = true
+                            )
                         }
                     } catch (e: Exception) {
                         Log.warn { "TTSV2ScreenSpec: Translation not available: ${e.message}" }
@@ -451,6 +465,20 @@ class TTSV2ScreenSpec(
                                     viewModel.adapter.setShowTranslation(true)
                                 }
                             }
+                        } else {
+                            // Automatically queue translation for current chapter
+                            val engineId = translationEnginesManager.get().id
+                            val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                            val targetLang = readerPreferences.translatorTargetLanguage().get()
+                            translationService.queueChapters(
+                                bookId = bookId,
+                                chapterIds = listOf(chapterId),
+                                sourceLanguage = sourceLang,
+                                targetLanguage = targetLang,
+                                engineId = engineId,
+                                bypassWarning = true,
+                                priority = true
+                            )
                         }
                     } catch (e: Exception) {
                         Log.warn { "TTSV2ScreenSpec: Translation not available: ${e.message}" }
@@ -512,7 +540,6 @@ class TTSV2ScreenSpec(
             
             // Clear and reload translation for new chapter
             viewModel.adapter.setTranslatedContent(null)
-            viewModel.adapter.setShowTranslation(false)
             
             try {
                 val translations = getAllTranslationsUseCase.execute(chapter.id)
@@ -530,9 +557,54 @@ class TTSV2ScreenSpec(
                             }
                         }
                     }
+                } else if (readTranslatedText) {
+                    // Automatically queue translation for the newly loaded chapter
+                    val engineId = translationEnginesManager.get().id
+                    val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                    val targetLang = readerPreferences.translatorTargetLanguage().get()
+                    
+                    Log.info { "TTSV2ScreenSpec: Auto-translating new chapter ${chapter.id}" }
+                    translationService.queueChapters(
+                        bookId = bookId,
+                        chapterIds = listOf(chapter.id),
+                        sourceLanguage = sourceLang,
+                        targetLanguage = targetLang,
+                        engineId = engineId,
+                        bypassWarning = true,
+                        priority = true
+                    )
                 }
             } catch (e: Exception) {
-                Log.warn { "TTSV2ScreenSpec: Translation not available for chapter ${chapter.id}" }
+                Log.warn { "TTSV2ScreenSpec: Translation not available for chapter ${chapter.id}: ${e.message}" }
+            }
+            
+            // Also pre-queue the next upcoming chapter for background translation
+            if (readTranslatedText || autoTranslateNextChapter) {
+                try {
+                    val currentIndex = chapters.indexOfFirst { it.id == chapter.id }
+                    if (currentIndex != -1 && currentIndex < chapters.size - 1) {
+                        val nextChapter = chapters[currentIndex + 1]
+                        val nextTranslations = getAllTranslationsUseCase.execute(nextChapter.id)
+                        if (nextTranslations.isEmpty()) {
+                            val engineId = translationEnginesManager.get().id
+                            val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                            val targetLang = readerPreferences.translatorTargetLanguage().get()
+                            
+                            Log.info { "TTSV2ScreenSpec: Pre-translating next chapter ${nextChapter.id}" }
+                            translationService.queueChapters(
+                                bookId = bookId,
+                                chapterIds = listOf(nextChapter.id),
+                                sourceLanguage = sourceLang,
+                                targetLanguage = targetLang,
+                                engineId = engineId,
+                                bypassWarning = true,
+                                priority = false
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.warn { "TTSV2ScreenSpec: Failed to pre-queue next chapter translation: ${e.message}" }
+                }
             }
             
             // Reset calibration for new chapter
@@ -967,8 +1039,43 @@ class TTSV2ScreenSpec(
             override fun onNextChapter() { viewModel.adapter.nextChapter() }
             override fun onPreviousChapter() { viewModel.adapter.previousChapter() }
             override fun onParagraphClick(index: Int) { viewModel.adapter.jumpToParagraph(index) }
-            override fun onToggleTranslation() { viewModel.adapter.toggleTranslation() }
             override fun onToggleBilingualMode() { viewModel.adapter.toggleBilingualMode() }
+            override fun onToggleTranslation() {
+                val newShow = !state.showTranslation
+                readerPreferences.useTTSWithTranslatedText().set(newShow)
+                viewModel.adapter.setShowTranslation(newShow)
+                if (newShow && state.translatedParagraphs.isNullOrEmpty()) {
+                    val chId = state.chapter?.id ?: chapterId
+                    scope.launch {
+                        try {
+                            val translations = getAllTranslationsUseCase.execute(chId)
+                            if (translations.isNotEmpty()) {
+                                val latest = translations.maxByOrNull { it.updatedAt }
+                                val strings = latest?.translatedContent?.filterIsInstance<Text>()?.map { it.text }?.filter { it.isNotBlank() }
+                                if (!strings.isNullOrEmpty()) {
+                                    viewModel.adapter.setTranslatedContent(strings)
+                                    viewModel.adapter.setShowTranslation(true)
+                                }
+                            } else {
+                                val engineId = translationEnginesManager.get().id
+                                val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                                val targetLang = readerPreferences.translatorTargetLanguage().get()
+                                translationService.queueChapters(
+                                    bookId = bookId,
+                                    chapterIds = listOf(chId),
+                                    sourceLanguage = sourceLang,
+                                    targetLanguage = targetLang,
+                                    engineId = engineId,
+                                    bypassWarning = true,
+                                    priority = true
+                                )
+                            }
+                        } catch (e: Exception) {
+                            Log.error { "TTSV2ScreenSpec: Failed on onToggleTranslation: ${e.message}" }
+                        }
+                    }
+                }
+            }
             override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
             override fun onSpeedChange(speed: Float) { viewModel.adapter.setSpeed(speed) }
             override fun onAutoNextChange(enabled: Boolean) { viewModel.adapter.setAutoNextChapter(enabled) }

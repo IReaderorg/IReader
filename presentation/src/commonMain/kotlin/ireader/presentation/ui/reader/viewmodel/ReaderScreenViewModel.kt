@@ -916,6 +916,14 @@ class ReaderScreenViewModel(
                 translationProgress = translationState.translationProgress
             )
         }
+        
+        // If user wants translated content or auto-translate is on, and no translation exists yet, auto-translate!
+        if ((showTranslatedContent.value || autoTranslateNextChapter.value) && !translationState.hasTranslation) {
+            val successState = _state.value as? ReaderState.Success
+            if (successState != null && successState.currentChapter.id == chapterId) {
+                translateCurrentChapter(forceRetranslate = false)
+            }
+        }
     }
 
     // ==================== Glossary ====================

@@ -253,4 +253,74 @@ class TTSControllerTest {
         
         controller.destroy()
     }
+    
+    @Test
+    fun `stale utterance completion does not advance paragraph`() = runTest(testDispatcher) {
+        val engine = MockEngine()
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            nativeEngineFactory = { engine }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 0))
+        testScheduler.advanceUntilIdle()
+        
+        controller.dispatch(TTSCommand.Play)
+        testScheduler.advanceUntilIdle()
+        
+        assertEquals(0, controller.state.value.currentParagraphIndex)
+        
+        // Emit a stale completion event with wrong utteranceId
+        engine.completeUtterance("stale_old_id")
+        testScheduler.advanceUntilIdle()
+        
+        // Should NOT advance paragraph on stale utterance
+        assertEquals(0, controller.state.value.currentParagraphIndex)
+        
+        // Emit matching completion event
+        engine.completeUtterance("p_0")
+        testScheduler.advanceUntilIdle()
+        
+        // Should advance to next paragraph
+        assertEquals(1, controller.state.value.currentParagraphIndex)
+        
+        controller.destroy()
+    }
+    
+    @Test
+    fun `translation state is preserved across chapters when translated content is loaded`() = runTest(testDispatcher) {
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            nativeEngineFactory = { MockEngine() }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 0))
+        testScheduler.advanceUntilIdle()
+        
+        // User enables translation
+        controller.dispatch(TTSCommand.ToggleTranslation(true))
+        controller.dispatch(TTSCommand.SetTranslatedContent(listOf("Trans 1", "Trans 2", "Trans 3")))
+        testScheduler.advanceUntilIdle()
+        
+        assertTrue(controller.state.value.showTranslation)
+        assertTrue(controller.state.value.isTranslationAvailable)
+        
+        // Load next chapter
+        controller.dispatch(TTSCommand.LoadChapter(1, 2, 0))
+        testScheduler.advanceUntilIdle()
+        
+        // Immediately after loadChapter, showTranslation is false until translations arrive
+        assertFalse(controller.state.value.showTranslation)
+        
+        // When new chapter translations arrive, showTranslation automatically turns back on!
+        controller.dispatch(TTSCommand.SetTranslatedContent(listOf("Next Trans 1", "Next Trans 2", "Next Trans 3")))
+        testScheduler.advanceUntilIdle()
+        
+        assertTrue(controller.state.value.showTranslation)
+        assertTrue(controller.state.value.isTranslationAvailable)
+        
+        controller.destroy()
+    }
 }

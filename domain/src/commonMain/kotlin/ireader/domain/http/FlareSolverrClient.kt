@@ -52,6 +52,7 @@ class FlareSolverrClient(
     }
     
     // Cookie storage per domain
+    private val cookieLock = Any()
     private val cookieStore = mutableMapOf<String, List<FlareSolverrCookie>>()
     
     /**
@@ -111,7 +112,9 @@ class FlareSolverrClient(
                 // Store cookies for future use
                 solverrResponse.solution?.cookies?.let { cookies ->
                     val domain = extractDomain(url)
-                    cookieStore[domain] = cookies
+                    synchronized(cookieLock) {
+                        cookieStore[domain] = cookies
+                    }
                     Log.info { "[FlareSolverr] Stored ${cookies.size} cookies for domain: $domain" }
                     cookies.forEach { cookie ->
                         Log.debug { "[FlareSolverr] Cookie: ${cookie.name}=${cookie.value.take(20)}... (domain=${cookie.domain})" }
@@ -150,7 +153,9 @@ class FlareSolverrClient(
      */
     fun getCookies(url: String): List<FlareSolverrCookie> {
         val domain = extractDomain(url)
-        return cookieStore[domain] ?: emptyList()
+        return synchronized(cookieLock) {
+            cookieStore[domain] ?: emptyList()
+        }
     }
     
     /**
@@ -168,7 +173,9 @@ class FlareSolverrClient(
      */
     fun clearCookies(url: String) {
         val domain = extractDomain(url)
-        cookieStore.remove(domain)
+        synchronized(cookieLock) {
+            cookieStore.remove(domain)
+        }
         Log.info { "[FlareSolverr] Cleared cookies for domain: $domain" }
     }
     
@@ -176,7 +183,9 @@ class FlareSolverrClient(
      * Clears all stored cookies.
      */
     fun clearAllCookies() {
-        cookieStore.clear()
+        synchronized(cookieLock) {
+            cookieStore.clear()
+        }
         Log.info { "[FlareSolverr] Cleared all stored cookies" }
     }
     

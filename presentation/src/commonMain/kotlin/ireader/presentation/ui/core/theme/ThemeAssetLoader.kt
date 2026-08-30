@@ -31,6 +31,7 @@ expect object PlatformImageDecoder {
 class ThemeAssetLoader(
     private val fileSystem: FileSystem
 ) {
+    private val lock = Any()
     private val cache = mutableMapOf<String, ImageBitmap>()
     
     /**
@@ -40,8 +41,10 @@ class ThemeAssetLoader(
     suspend fun loadImage(path: String): Result<ImageBitmap> {
         return try {
             // Check cache first
-            cache[path]?.let {
-                return Result.success(it)
+            synchronized(lock) {
+                cache[path]?.let {
+                    return Result.success(it)
+                }
             }
             
             val image = withContext(ioDispatcher) {
@@ -58,7 +61,9 @@ class ThemeAssetLoader(
             
             // Cache the loaded image
             if (image != null) {
-                cache[path] = image
+                synchronized(lock) {
+                    cache[path] = image
+                }
                 Result.success(image)
             } else {
                 Result.failure(IllegalStateException("Failed to decode image: $path"))
@@ -95,14 +100,18 @@ class ThemeAssetLoader(
      * Clear the image cache
      */
     fun clearCache() {
-        cache.clear()
+        synchronized(lock) {
+            cache.clear()
+        }
     }
     
     /**
      * Remove a specific image from cache
      */
     fun removeFromCache(path: String) {
-        cache.remove(path)
+        synchronized(lock) {
+            cache.remove(path)
+        }
     }
 }
 

@@ -43,6 +43,7 @@ private val googleFontProvider: GoogleFont.Provider by lazy {
 }
 
 // Cache for loaded font families to avoid recreating them
+private val fontCacheLock = Any()
 private val fontFamilyCache = mutableMapOf<String, FontFamily>()
 
 @OptIn(ExperimentalTextApi::class)
@@ -55,9 +56,11 @@ actual fun FontFamilyModel.toComposeFontFamily(): FontFamily {
         is FontFamilyModel.Cursive -> FontFamily.Cursive
         is FontFamilyModel.Custom -> {
             // Check cache first - this ensures fonts are reused and not re-downloaded
-            fontFamilyCache[name]?.let { 
-                ireader.core.log.Log.debug("Using cached font: $name")
-                return it 
+            synchronized(fontCacheLock) {
+                fontFamilyCache[name]?.let { 
+                    ireader.core.log.Log.debug("Using cached font: $name")
+                    return it 
+                }
             }
             
             try {
@@ -89,7 +92,9 @@ actual fun FontFamilyModel.toComposeFontFamily(): FontFamily {
                 
                 // Cache the font family in memory to avoid recreating FontFamily objects
                 // The actual font files are cached by Google Play Services
-                fontFamilyCache[name] = fontFamily
+                synchronized(fontCacheLock) {
+                    fontFamilyCache[name] = fontFamily
+                }
                 ireader.core.log.Log.debug("Successfully loaded and cached font: $name")
                 fontFamily
             } catch (e: Exception) {

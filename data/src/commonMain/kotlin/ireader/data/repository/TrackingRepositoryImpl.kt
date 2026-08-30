@@ -32,6 +32,7 @@ class TrackingRepositoryImpl(
     private val mangaBakaRepository: MangaBakaRepositoryImpl? = null
 ) : TrackingRepository {
     
+    private val syncStatusLock = Any()
     private val _syncStatusFlows = mutableMapOf<Long, MutableStateFlow<List<TrackingSyncStatus>>>()
     
     override suspend fun getAvailableServices(): List<TrackerService> {
@@ -401,8 +402,10 @@ class TrackingRepositoryImpl(
     }
     
     override fun getSyncStatus(bookId: Long): Flow<List<TrackingSyncStatus>> {
-        return _syncStatusFlows.getOrPut(bookId) {
-            MutableStateFlow(emptyList())
+        return synchronized(syncStatusLock) {
+            _syncStatusFlows.getOrPut(bookId) {
+                MutableStateFlow(emptyList())
+            }
         }.asStateFlow()
     }
     

@@ -106,12 +106,14 @@ interface PluginDataStore {
  * In production, this would be backed by persistent storage (database or preferences)
  */
 class InMemoryPluginDataStorage : PluginDataStorage {
+    private val lock = Any()
     private val stores = mutableMapOf<String, PluginDataStore>()
-    private val mutex = Mutex()
     
     override fun getDataStore(pluginId: String): PluginDataStore {
-        return stores.getOrPut(pluginId) {
-            InMemoryPluginDataStore()
+        return synchronized(lock) {
+            stores.getOrPut(pluginId) {
+                InMemoryPluginDataStore()
+            }
         }
     }
 }
@@ -121,101 +123,107 @@ class InMemoryPluginDataStorage : PluginDataStorage {
  * In production, this would be backed by persistent storage
  */
 private class InMemoryPluginDataStore : PluginDataStore {
+    private val lock = Any()
     private val data = mutableMapOf<String, Any>()
-    private val mutex = Mutex()
     private val flows = mutableMapOf<String, MutableStateFlow<Any?>>()
     
     override suspend fun putString(key: String, value: String) {
-        mutex.withLock {
+        synchronized(lock) {
             data[key] = value
             flows.getOrPut(key) { MutableStateFlow(null) }.value = value
         }
     }
     
     override suspend fun getString(key: String, defaultValue: String): String {
-        return mutex.withLock {
+        return synchronized(lock) {
             data[key] as? String ?: defaultValue
         }
     }
     
     override suspend fun putInt(key: String, value: Int) {
-        mutex.withLock {
+        synchronized(lock) {
             data[key] = value
             flows.getOrPut(key) { MutableStateFlow(null) }.value = value
         }
     }
     
     override suspend fun getInt(key: String, defaultValue: Int): Int {
-        return mutex.withLock {
+        return synchronized(lock) {
             data[key] as? Int ?: defaultValue
         }
     }
     
     override suspend fun putBoolean(key: String, value: Boolean) {
-        mutex.withLock {
+        synchronized(lock) {
             data[key] = value
             flows.getOrPut(key) { MutableStateFlow(null) }.value = value
         }
     }
     
     override suspend fun getBoolean(key: String, defaultValue: Boolean): Boolean {
-        return mutex.withLock {
+        return synchronized(lock) {
             data[key] as? Boolean ?: defaultValue
         }
     }
     
     override suspend fun putLong(key: String, value: Long) {
-        mutex.withLock {
+        synchronized(lock) {
             data[key] = value
             flows.getOrPut(key) { MutableStateFlow(null) }.value = value
         }
     }
     
     override suspend fun getLong(key: String, defaultValue: Long): Long {
-        return mutex.withLock {
+        return synchronized(lock) {
             data[key] as? Long ?: defaultValue
         }
     }
     
     override suspend fun putFloat(key: String, value: Float) {
-        mutex.withLock {
+        synchronized(lock) {
             data[key] = value
             flows.getOrPut(key) { MutableStateFlow(null) }.value = value
         }
     }
     
     override suspend fun getFloat(key: String, defaultValue: Float): Float {
-        return mutex.withLock {
+        return synchronized(lock) {
             data[key] as? Float ?: defaultValue
         }
     }
     
     override suspend fun remove(key: String) {
-        mutex.withLock {
+        synchronized(lock) {
             data.remove(key)
             flows[key]?.value = null
         }
     }
     
     override suspend fun clear() {
-        mutex.withLock {
+        synchronized(lock) {
             data.clear()
             flows.values.forEach { it.value = null }
         }
     }
     
     override fun observeString(key: String, defaultValue: String): Flow<String> {
-        val flow = flows.getOrPut(key) { MutableStateFlow(data[key]) }
+        val flow = synchronized(lock) {
+            flows.getOrPut(key) { MutableStateFlow(data[key]) }
+        }
         return flow.map { it as? String ?: defaultValue }
     }
     
     override fun observeInt(key: String, defaultValue: Int): Flow<Int> {
-        val flow = flows.getOrPut(key) { MutableStateFlow(data[key]) }
+        val flow = synchronized(lock) {
+            flows.getOrPut(key) { MutableStateFlow(data[key]) }
+        }
         return flow.map { it as? Int ?: defaultValue }
     }
     
     override fun observeBoolean(key: String, defaultValue: Boolean): Flow<Boolean> {
-        val flow = flows.getOrPut(key) { MutableStateFlow(data[key]) }
+        val flow = synchronized(lock) {
+            flows.getOrPut(key) { MutableStateFlow(data[key]) }
+        }
         return flow.map { it as? Boolean ?: defaultValue }
     }
 }

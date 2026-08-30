@@ -20,11 +20,6 @@ import kotlin.time.ExperimentalTime
 class LibraryRepositoryImpl(
     private val handler: DatabaseHandler,
 ) : LibraryRepository {
-    
-    // Cache for chapter counts to avoid repeated queries
-    private val chapterCountCache = mutableMapOf<Long, Pair<Int, Int>>() // bookId -> (unread, read)
-    private var lastCacheUpdate = 0L
-    private val cacheValidityMs = 30_000L // Cache valid for 30 seconds
 
     override suspend fun findAll(sort: LibrarySort, includeArchived: Boolean): List<LibraryBook> {
         ScreenProfiler.mark("Library", "db_query_start")

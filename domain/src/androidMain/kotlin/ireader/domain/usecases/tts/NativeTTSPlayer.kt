@@ -117,7 +117,7 @@ class NativeTTSPlayer(
                 return Result.failure(Exception("TTS not initialized"))
             }
             
-            val result = tts?.speak(text, TextToSpeech.QUEUE_ADD, null, utteranceId)
+            val result = tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
             
             if (result == TextToSpeech.SUCCESS) {
                 Result.success(Unit)

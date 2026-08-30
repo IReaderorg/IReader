@@ -19,6 +19,7 @@ object GlobalExceptionHandler {
     private var isInitialized = false
     
     // Track recent errors to avoid spam
+    private val lock = Any()
     private val recentErrors = mutableMapOf<String, Long>()
     private const val ERROR_COOLDOWN_MS = 5000L // 5 seconds between same errors
     
@@ -50,18 +51,25 @@ object GlobalExceptionHandler {
         // Check if this is a duplicate error within cooldown period
         val errorKey = "${throwable::class.simpleName}:${throwable.message?.take(50)}"
         val now = kotlin.time.TimeSource.Monotonic.markNow().elapsedNow().inWholeMilliseconds
-        val lastOccurrence = recentErrors[errorKey]
         
-        if (lastOccurrence != null && (now - lastOccurrence) < ERROR_COOLDOWN_MS) {
+        val isDuplicate = synchronized(lock) {
+            val lastOccurrence = recentErrors[errorKey]
+            if (lastOccurrence != null && (now - lastOccurrence) < ERROR_COOLDOWN_MS) {
+                true
+            } else {
+                recentErrors[errorKey] = now
+                // Clean up old entries
+                if (recentErrors.size > 100) {
+                    val cutoff = now - ERROR_COOLDOWN_MS * 2
+                    recentErrors.entries.removeAll { it.value < cutoff }
+                }
+                false
+            }
+        }
+        
+        if (isDuplicate) {
             // Skip duplicate error logging
             return
-        }
-        recentErrors[errorKey] = now
-        
-        // Clean up old entries
-        if (recentErrors.size > 100) {
-            val cutoff = now - ERROR_COOLDOWN_MS * 2
-            recentErrors.entries.removeAll { it.value < cutoff }
         }
         
         IReaderLog.error(

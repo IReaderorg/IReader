@@ -17,7 +17,8 @@ import ireader.data.core.DatabaseHandler
 class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     DownloadRepository, BaseDao<Download>() {
     
-    // In-memory state for enhanced features (can be persisted to preferences later)
+    // In-memory state for enhanced features (thread-safe guarded by lock)
+    private val lock = Any()
     private var downloadQueueConfig = DownloadQueueConfig()
     private val downloadStatusMap = mutableMapOf<Long, DownloadStatus>()
     private val downloadProgressMap = mutableMapOf<Long, Float>()
@@ -39,7 +40,9 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
         handler.await {
             downloadQueries.upsert(savedDownload.chapterId, savedDownload.bookId, savedDownload.priority)
         }
-        downloadStatusMap[savedDownload.chapterId] = DownloadStatus.QUEUED
+        synchronized(lock) {
+            downloadStatusMap[savedDownload.chapterId] = DownloadStatus.QUEUED
+        }
     }
 
     override suspend fun insertDownloads(savedDownloads: List<Download>) {
@@ -48,8 +51,10 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
                 downloadQueries.upsert(it.chapterId, it.bookId, it.priority)
             }
         }
-        savedDownloads.forEach { download ->
-            downloadStatusMap[download.chapterId] = DownloadStatus.QUEUED
+        synchronized(lock) {
+            savedDownloads.forEach { download ->
+                downloadStatusMap[download.chapterId] = DownloadStatus.QUEUED
+            }
         }
     }
 
@@ -57,8 +62,10 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
         handler.await {
             downloadQueries.deleteByChapterId(savedDownload.chapterId)
         }
-        downloadStatusMap.remove(savedDownload.chapterId)
-        downloadProgressMap.remove(savedDownload.chapterId)
+        synchronized(lock) {
+            downloadStatusMap.remove(savedDownload.chapterId)
+            downloadProgressMap.remove(savedDownload.chapterId)
+        }
     }
 
     override suspend fun deleteSavedDownload(savedDownloads: List<Download>) {
@@ -67,9 +74,11 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
                 downloadQueries.deleteByChapterId(savedDownload.chapterId)
             }
         }
-        savedDownloads.forEach { download ->
-            downloadStatusMap.remove(download.chapterId)
-            downloadProgressMap.remove(download.chapterId)
+        synchronized(lock) {
+            savedDownloads.forEach { download ->
+                downloadStatusMap.remove(download.chapterId)
+                downloadProgressMap.remove(download.chapterId)
+            }
         }
     }
 
@@ -83,8 +92,10 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
         handler.await {
             downloadQueries.deleteAll()
         }
-        downloadStatusMap.clear()
-        downloadProgressMap.clear()
+        synchronized(lock) {
+            downloadStatusMap.clear()
+            downloadProgressMap.clear()
+        }
     }
 
     override suspend fun updateDownloadPriority(chapterId: Long, priority: Int) {
@@ -94,12 +105,16 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     }
 
     override suspend fun markDownloadAsFailed(chapterId: Long, errorMessage: String) {
-        downloadStatusMap[chapterId] = DownloadStatus.FAILED
+        synchronized(lock) {
+            downloadStatusMap[chapterId] = DownloadStatus.FAILED
+        }
     }
 
     override suspend fun retryFailedDownload(chapterId: Long) {
-        downloadStatusMap[chapterId] = DownloadStatus.QUEUED
-        downloadProgressMap[chapterId] = 0f
+        synchronized(lock) {
+            downloadStatusMap[chapterId] = DownloadStatus.QUEUED
+            downloadProgressMap[chapterId] = 0f
+        }
     }
 
     // Enhanced methods following Mihon's pattern
@@ -144,7 +159,9 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     }
 
     override suspend fun updateDownloadStatus(chapterId: Long, status: DownloadStatus) {
-        downloadStatusMap[chapterId] = status
+        synchronized(lock) {
+            downloadStatusMap[chapterId] = status
+        }
         if (status == DownloadStatus.COMPLETED) {
             // Remove from queue when completed
             removeFromQueue(chapterId)
@@ -158,27 +175,34 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
         totalBytes: Long,
         speed: Float
     ) {
-        downloadProgressMap[chapterId] = progress
-        if (downloadStatusMap[chapterId] != DownloadStatus.DOWNLOADING) {
-            downloadStatusMap[chapterId] = DownloadStatus.DOWNLOADING
+        synchronized(lock) {
+            downloadProgressMap[chapterId] = progress
+            if (downloadStatusMap[chapterId] != DownloadStatus.DOWNLOADING) {
+                downloadStatusMap[chapterId] = DownloadStatus.DOWNLOADING
+            }
         }
     }
 
     override suspend fun markDownloadFailed(chapterId: Long, errorMessage: String, retryCount: Int) {
-        downloadStatusMap[chapterId] = DownloadStatus.FAILED
+        synchronized(lock) {
+            downloadStatusMap[chapterId] = DownloadStatus.FAILED
+        }
     }
 
     override suspend fun markDownloadCompleted(chapterId: Long, filePath: String) {
-        downloadStatusMap[chapterId] = DownloadStatus.COMPLETED
-        downloadProgressMap[chapterId] = 1f
+        synchronized(lock) {
+            downloadStatusMap[chapterId] = DownloadStatus.COMPLETED
+            downloadProgressMap[chapterId] = 1f
+        }
         // Remove from download queue
         removeFromQueue(chapterId)
     }
 
     override suspend fun getDownloadsByStatus(status: DownloadStatus): List<DownloadItem> {
+        val snapshot = synchronized(lock) { downloadStatusMap.toMap() }
         return getDownloadQueue().filter { 
-            downloadStatusMap[it.chapterId] == status || 
-            (status == DownloadStatus.QUEUED && !downloadStatusMap.containsKey(it.chapterId))
+            snapshot[it.chapterId] == status || 
+            (status == DownloadStatus.QUEUED && !snapshot.containsKey(it.chapterId))
         }
     }
 
@@ -188,8 +212,9 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
 
     override suspend fun getDownloadStats(): DownloadStats {
         val allDownloads = getDownloadQueue()
+        val snapshot = synchronized(lock) { downloadStatusMap.toMap() }
         val statusCounts = allDownloads.groupBy { 
-            downloadStatusMap[it.chapterId] ?: DownloadStatus.QUEUED 
+            snapshot[it.chapterId] ?: DownloadStatus.QUEUED 
         }
         
         return DownloadStats(
@@ -205,20 +230,26 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     }
 
     override suspend fun clearCompletedDownloads() {
-        val completedChapterIds = downloadStatusMap.entries
-            .filter { it.value == DownloadStatus.COMPLETED }
-            .map { it.key }
+        val completedChapterIds = synchronized(lock) {
+            downloadStatusMap.entries
+                .filter { it.value == DownloadStatus.COMPLETED }
+                .map { it.key }
+        }
         
-        completedChapterIds.forEach { chapterId ->
-            downloadStatusMap.remove(chapterId)
-            downloadProgressMap.remove(chapterId)
+        synchronized(lock) {
+            completedChapterIds.forEach { chapterId ->
+                downloadStatusMap.remove(chapterId)
+                downloadProgressMap.remove(chapterId)
+            }
         }
     }
 
     override suspend fun clearFailedDownloads() {
-        val failedChapterIds = downloadStatusMap.entries
-            .filter { it.value == DownloadStatus.FAILED }
-            .map { it.key }
+        val failedChapterIds = synchronized(lock) {
+            downloadStatusMap.entries
+                .filter { it.value == DownloadStatus.FAILED }
+                .map { it.key }
+        }
         
         removeFromQueue(failedChapterIds)
     }
@@ -230,19 +261,23 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     }
 
     override suspend fun pauseAllDownloads() {
-        downloadStatusMap.entries
-            .filter { it.value == DownloadStatus.DOWNLOADING }
-            .forEach { entry ->
-                downloadStatusMap[entry.key] = DownloadStatus.PAUSED
-            }
+        synchronized(lock) {
+            downloadStatusMap.entries
+                .filter { it.value == DownloadStatus.DOWNLOADING }
+                .forEach { entry ->
+                    downloadStatusMap[entry.key] = DownloadStatus.PAUSED
+                }
+        }
     }
 
     override suspend fun resumeAllDownloads() {
-        downloadStatusMap.entries
-            .filter { it.value == DownloadStatus.PAUSED }
-            .forEach { entry ->
-                downloadStatusMap[entry.key] = DownloadStatus.QUEUED
-            }
+        synchronized(lock) {
+            downloadStatusMap.entries
+                .filter { it.value == DownloadStatus.PAUSED }
+                .forEach { entry ->
+                    downloadStatusMap[entry.key] = DownloadStatus.QUEUED
+                }
+        }
     }
 
     override suspend fun cancelAllDownloads() {
@@ -250,34 +285,46 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     }
 
     override suspend fun getDownloadCacheEntries(): List<DownloadCacheEntry> {
-        return downloadCacheEntries.toList()
+        return synchronized(lock) { downloadCacheEntries.toList() }
     }
 
     override suspend fun addDownloadCacheEntry(entry: DownloadCacheEntry) {
-        downloadCacheEntries.removeAll { it.chapterId == entry.chapterId }
-        downloadCacheEntries.add(entry)
+        synchronized(lock) {
+            downloadCacheEntries.removeAll { it.chapterId == entry.chapterId }
+            downloadCacheEntries.add(entry)
+        }
     }
 
     override suspend fun removeDownloadCacheEntry(chapterId: Long) {
-        downloadCacheEntries.removeAll { it.chapterId == chapterId }
+        synchronized(lock) {
+            downloadCacheEntries.removeAll { it.chapterId == chapterId }
+        }
     }
 
     override suspend fun cleanupInvalidCacheEntries() {
-        downloadCacheEntries.removeAll { !it.isValid }
+        synchronized(lock) {
+            downloadCacheEntries.removeAll { !it.isValid }
+        }
     }
 
     override suspend fun getDownloadQueueConfig(): DownloadQueueConfig {
-        return downloadQueueConfig
+        return synchronized(lock) { downloadQueueConfig }
     }
 
     override suspend fun saveDownloadQueueConfig(config: DownloadQueueConfig) {
-        downloadQueueConfig = config
+        synchronized(lock) { downloadQueueConfig = config }
     }
     
     /**
      * Convert SavedDownloadWithInfo to DownloadItem
      */
     private fun SavedDownloadWithInfo.toDownloadItem(): DownloadItem {
+        val (status, progress) = synchronized(lock) {
+            Pair(
+                downloadStatusMap[this@toDownloadItem.chapterId] ?: DownloadStatus.QUEUED,
+                downloadProgressMap[this@toDownloadItem.chapterId] ?: 0f
+            )
+        }
         return DownloadItem(
             chapterId = this.chapterId,
             bookId = this.bookId,
@@ -286,8 +333,8 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
             chapterTitle = this.chapterName,
             chapterUrl = this.chapterKey,
             priority = this.priority,
-            status = downloadStatusMap[this.chapterId] ?: DownloadStatus.QUEUED,
-            progress = downloadProgressMap[this.chapterId] ?: 0f
+            status = status,
+            progress = progress
         )
     }
 }

@@ -77,6 +77,7 @@ class ReaderContentViewModel(
     private var chapterNavigationJob: Job? = null
     private var chapterControllerEventJob: Job? = null
     private var chapterNotifierJob: Job? = null
+    private val preloadLock = Any()
     private val preloadedChapters = mutableMapOf<Long, Chapter>()
 
     // ==================== Initialization ====================
@@ -602,7 +603,9 @@ class ReaderContentViewModel(
         updateSuccessState { it.copy(isLoadingContent = true) }
 
         return try {
-            preloadedChapters.remove(chapterId)
+            synchronized(preloadLock) {
+                preloadedChapters.remove(chapterId)
+            }
             loadChapter(
                 book = book,
                 catalog = catalog,
@@ -668,7 +671,10 @@ class ReaderContentViewModel(
                 delay(ReaderConstants.PRELOAD_AFTER_FETCH_DELAY_MS)
 
                 val next = getNextChapter()
-                if (next != null && !preloadedChapters.containsKey(next.id)) {
+                val isCached = synchronized(preloadLock) {
+                    next != null && preloadedChapters.containsKey(next.id)
+                }
+                if (next != null && !isCached) {
                     preloadChapter(next)
                 }
             } catch (_: Exception) {
@@ -691,7 +697,9 @@ class ReaderContentViewModel(
                 chapter = chapter,
                 catalog = currentState.catalog,
                 onSuccess = { preloadedChapter ->
-                    preloadedChapters[chapter.id] = preloadedChapter
+                    synchronized(preloadLock) {
+                        preloadedChapters[chapter.id] = preloadedChapter
+                    }
                     Log.debug { "preloadChapter: [SAVED] Preloaded chapter ${chapter.id} '${chapter.name}' saved to DB with ${preloadedChapter.content.size} pages" }
                     updateSuccessState { it.copy(isPreloading = false) }
                 },
@@ -702,7 +710,9 @@ class ReaderContentViewModel(
             )
         } else if (dbChapter != null && !dbChapter.isEmpty()) {
             Log.debug { "preloadChapter: [CACHE-HIT] Chapter ${chapter.id} '${chapter.name}' already in DB with ${dbChapter.content.size} pages" }
-            preloadedChapters[chapter.id] = dbChapter
+            synchronized(preloadLock) {
+                preloadedChapters[chapter.id] = dbChapter
+            }
         }
     }
 
@@ -718,7 +728,10 @@ class ReaderContentViewModel(
 
                 if (currentIndex != -1) {
                     currentState.chapters.drop(currentIndex + 1).take(count).forEach { chapter ->
-                        if (!preloadedChapters.containsKey(chapter.id)) {
+                        val isCached = synchronized(preloadLock) {
+                            preloadedChapters.containsKey(chapter.id)
+                        }
+                        if (!isCached) {
                             preloadChapter(chapter)
                             delay(ReaderConstants.PRELOAD_AFTER_FETCH_DELAY_MS)
                         }
@@ -731,7 +744,9 @@ class ReaderContentViewModel(
     }
 
     fun clearPreloadCache() {
-        preloadedChapters.clear()
+        synchronized(preloadLock) {
+            preloadedChapters.clear()
+        }
     }
 
     // ==================== Chapter Health ====================

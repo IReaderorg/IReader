@@ -5,14 +5,14 @@ import ireader.domain.models.entities.CatalogLocal
 
 class UserLanguagesComparator : Comparator<Language> {
 
-    private val userLanguages = mutableMapOf<String, Int>()
-
-    init {
+    private val userLanguages: Map<String, Int> = run {
         val userLocales = LocaleList.current.localeList
         val size = userLocales.size
+        val map = mutableMapOf<String, Int>()
         for (locale in userLocales) {
-            userLanguages[locale.language] = size - userLanguages.size
+            map[locale.language] = size - map.size
         }
+        map
     }
 
     override fun compare(a: Language, b: Language): Int {

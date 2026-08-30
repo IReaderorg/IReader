@@ -21,6 +21,7 @@ class SourceHealthCheckerImpl(
 ) : SourceHealthChecker {
     
     // Cache for storing health check results
+    private val lock = Any()
     private val statusCache = mutableMapOf<Long, SourceHealth>()
     
     // Cache expiration time (5 minutes)
@@ -37,7 +38,9 @@ class SourceHealthCheckerImpl(
         val health = performHealthCheck(sourceId)
         
         // Cache the result
-        statusCache[sourceId] = health
+        synchronized(lock) {
+            statusCache[sourceId] = health
+        }
         
         return health
     }
@@ -51,7 +54,7 @@ class SourceHealthCheckerImpl(
     }
     
     override suspend fun getCachedStatus(sourceId: Long): SourceHealth? {
-        val cached = statusCache[sourceId]
+        val cached = synchronized(lock) { statusCache[sourceId] }
         return if (cached != null && !isCacheExpired(cached)) {
             cached
         } else {
@@ -60,11 +63,15 @@ class SourceHealthCheckerImpl(
     }
     
     override suspend fun clearCache(sourceId: Long) {
-        statusCache.remove(sourceId)
+        synchronized(lock) {
+            statusCache.remove(sourceId)
+        }
     }
     
     override suspend fun clearAllCache() {
-        statusCache.clear()
+        synchronized(lock) {
+            statusCache.clear()
+        }
     }
     
     /**

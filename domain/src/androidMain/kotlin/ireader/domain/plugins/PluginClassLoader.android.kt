@@ -26,7 +26,9 @@ actual class PluginClassLoader(
     companion object {
         // Store classloaders for each plugin so they can be accessed later
         // This is needed for plugins that bundle additional classes (like J2V8)
-        private val pluginClassLoaders = mutableMapOf<String, ClassLoader>()
+        private val lock = Any()
+        @kotlin.concurrent.Volatile
+        private var pluginClassLoaders = mapOf<String, ClassLoader>()
         
         /**
          * Get the ClassLoader for a specific plugin.
@@ -40,14 +42,25 @@ actual class PluginClassLoader(
          * Get all registered plugin IDs.
          */
         fun getRegisteredPluginIds(): Set<String> {
-            return pluginClassLoaders.keys.toSet()
+            return pluginClassLoaders.keys
+        }
+        
+        /**
+         * Store classloader for a plugin in a thread-safe manner.
+         */
+        fun setClassLoader(pluginId: String, classLoader: ClassLoader) {
+            synchronized(lock) {
+                pluginClassLoaders = pluginClassLoaders + (pluginId to classLoader)
+            }
         }
         
         /**
          * Clear all stored classloaders.
          */
         fun clearAll() {
-            pluginClassLoaders.clear()
+            synchronized(lock) {
+                pluginClassLoaders = emptyMap()
+            }
         }
     }
     
@@ -75,7 +88,7 @@ actual class PluginClassLoader(
             val classLoader = createClassLoader(dexFile, manifest.id, nativeLibraryDir)
             
             // Store the classloader for later access
-            pluginClassLoaders[manifest.id] = classLoader
+            setClassLoader(manifest.id, classLoader)
             Log.info("Stored ClassLoader for plugin: ${manifest.id}")
             
             // Determine the class name to load

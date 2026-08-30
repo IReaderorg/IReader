@@ -37,6 +37,7 @@ class PluginRepositoryViewModel(
     val state: State<PluginRepositoryState> = _state
 
     // Cache of fetched plugins per repository
+    private val cacheLock = Any()
     private val pluginCache = mutableMapOf<String, List<PluginIndexEntry>>()
     
     // Job for debounced auto-fetch - cancel previous before starting new
@@ -99,7 +100,9 @@ class PluginRepositoryViewModel(
                 )
 
                 repository.add(entity)
-                pluginCache[trimmedUrl] = index.plugins
+                synchronized(cacheLock) {
+                    pluginCache[trimmedUrl] = index.plugins
+                }
 
                 _state.value = _state.value.copy(error = null, isRefreshing = false)
                 
@@ -125,7 +128,9 @@ class PluginRepositoryViewModel(
                 }
 
                 repository.deleteByUrl(url)
-                pluginCache.remove(url)
+                synchronized(cacheLock) {
+                    pluginCache.remove(url)
+                }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     error = "Failed to remove repository: ${e.message}"
@@ -161,7 +166,9 @@ class PluginRepositoryViewModel(
                 val indexResult = indexFetcher.fetchIndex(url)
 
                 indexResult.onSuccess { index ->
-                    pluginCache[url] = index.plugins
+                    synchronized(cacheLock) {
+                        pluginCache[url] = index.plugins
+                    }
 
                     repository.updatePluginCount(
                         id = entity.id,
@@ -214,16 +221,20 @@ class PluginRepositoryViewModel(
      * Get cached plugins for a repository
      */
     fun getPluginsForRepository(url: String): List<PluginIndexEntry> {
-        return pluginCache[url] ?: emptyList()
+        return synchronized(cacheLock) {
+            pluginCache[url] ?: emptyList()
+        }
     }
 
     /**
      * Get all available plugins from enabled repositories
      */
     fun getAllAvailablePlugins(): List<PluginIndexEntry> {
-        return _state.value.repositories
-            .filter { it.enabled }
-            .flatMap { pluginCache[it.url] ?: emptyList() }
+        return synchronized(cacheLock) {
+            _state.value.repositories
+                .filter { it.enabled }
+                .flatMap { pluginCache[it.url] ?: emptyList() }
+        }
     }
 
     private fun extractRepoName(url: String, index: ireader.domain.plugins.PluginRepositoryIndex? = null): String {
@@ -301,7 +312,9 @@ class PluginRepositoryViewModel(
                     
                     val indexResult = indexFetcher.fetchIndex(repo.url)
                     indexResult.onSuccess { index ->
-                        pluginCache[repo.url] = index.plugins
+                        synchronized(cacheLock) {
+                            pluginCache[repo.url] = index.plugins
+                        }
                         repository.updatePluginCount(
                             id = repo.id,
                             count = index.plugins.size,

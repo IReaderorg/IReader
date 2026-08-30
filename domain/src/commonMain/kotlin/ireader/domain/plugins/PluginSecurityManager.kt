@@ -17,7 +17,8 @@ class PluginSecurityManager(
     private val httpClient: HttpClient? = null
 ) {
     private val mutex = Mutex()
-    private val sandboxes = mutableMapOf<String, PluginSandbox>()
+    @kotlin.concurrent.Volatile
+    private var sandboxes = mapOf<String, PluginSandbox>()
     private val contextFactory = PluginContextFactory(permissionManager, fileSystem, httpClient)
     
     /**
@@ -52,7 +53,7 @@ class PluginSecurityManager(
                     permissionManager = permissionManager,
                     fileSystem = fileSystem
                 )
-                sandboxes[pluginId] = sandbox
+                sandboxes = sandboxes + (pluginId to sandbox)
             }
         }
         
@@ -204,7 +205,7 @@ class PluginSecurityManager(
             sandbox.resetResourceUsage()
             
             // Remove sandbox
-            sandboxes.remove(pluginId)
+            sandboxes = sandboxes - pluginId
             
             return Result.success(Unit)
         }
@@ -216,7 +217,7 @@ class PluginSecurityManager(
      */
     suspend fun cleanupPlugin(pluginId: String) {
         mutex.withLock {
-            sandboxes.remove(pluginId)
+            sandboxes = sandboxes - pluginId
         }
     }
     

@@ -14,6 +14,7 @@ class AndroidBackgroundTaskService(
 ) : BackgroundTaskService {
     
     private val workManager = WorkManager.getInstance(context)
+    private val lock = Any()
     private val taskStatusMap = mutableMapOf<String, MutableStateFlow<TaskStatus?>>()
     
     override suspend fun initialize() {
@@ -31,7 +32,9 @@ class AndroidBackgroundTaskService(
     override fun isRunning(): Boolean = true
     
     override suspend fun cleanup() {
-        taskStatusMap.clear()
+        synchronized(lock) {
+            taskStatusMap.clear()
+        }
     }
     
     override suspend fun scheduleOneTimeTask(
@@ -97,7 +100,9 @@ class AndroidBackgroundTaskService(
     override suspend fun cancelTask(taskId: String): ServiceResult<Unit> {
         return try {
             workManager.cancelUniqueWork(taskId)
-            taskStatusMap[taskId]?.value = TaskStatus.Cancelled
+            synchronized(lock) {
+                taskStatusMap[taskId]?.value = TaskStatus.Cancelled
+            }
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to cancel task: ${e.message}", e)
@@ -114,8 +119,10 @@ class AndroidBackgroundTaskService(
     }
     
     override fun getTaskStatus(taskId: String): StateFlow<TaskStatus?> {
-        return taskStatusMap.getOrPut(taskId) {
-            MutableStateFlow(null)
+        return synchronized(lock) {
+            taskStatusMap.getOrPut(taskId) {
+                MutableStateFlow(null)
+            }
         }
     }
     
@@ -132,8 +139,10 @@ class AndroidBackgroundTaskService(
     }
     
     private fun observeWorkStatus(taskId: String, workId: java.util.UUID) {
-        val statusFlow = taskStatusMap.getOrPut(taskId) {
-            MutableStateFlow(TaskStatus.Enqueued)
+        val statusFlow = synchronized(lock) {
+            taskStatusMap.getOrPut(taskId) {
+                MutableStateFlow(TaskStatus.Enqueued)
+            }
         }
         
         workManager.getWorkInfoByIdLiveData(workId).observeForever { workInfo ->

@@ -17,7 +17,7 @@ class AndroidResourceMonitor(
 ) : ResourceMonitor {
     
     private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    private val mutex = Mutex()
+    private val lock = Any()
     
     // Track plugin-specific data
     private val pluginMemoryBaselines = mutableMapOf<String, Long>()
@@ -32,7 +32,7 @@ class AndroidResourceMonitor(
     override fun getCpuUsage(pluginId: String): Double {
         // Get current system CPU stats
         val currentSnapshot = getSystemCpuSnapshot()
-        val baseline = pluginCpuBaselines[pluginId]
+        val baseline = synchronized(lock) { pluginCpuBaselines[pluginId] }
         
         if (baseline == null) {
             // No baseline, return 0
@@ -56,7 +56,7 @@ class AndroidResourceMonitor(
     }
     
     override fun getMemoryUsage(pluginId: String): Long {
-        val baseline = pluginMemoryBaselines[pluginId] ?: 0L
+        val baseline = synchronized(lock) { pluginMemoryBaselines[pluginId] } ?: 0L
         
         // Get current memory info
         val memoryInfo = Debug.MemoryInfo()
@@ -71,31 +71,36 @@ class AndroidResourceMonitor(
     }
     
     override fun getNetworkUsage(pluginId: String): Long {
-        return pluginNetworkUsage[pluginId] ?: 0L
+        return synchronized(lock) { pluginNetworkUsage[pluginId] } ?: 0L
     }
     
     override fun startMonitoring(pluginId: String) {
         // Record baseline memory
         val memoryInfo = Debug.MemoryInfo()
         Debug.getMemoryInfo(memoryInfo)
-        pluginMemoryBaselines[pluginId] = memoryInfo.totalPss * 1024L
+        val memoryBytes = memoryInfo.totalPss * 1024L
+        val cpuSnapshot = getSystemCpuSnapshot()
         
-        // Record baseline CPU
-        pluginCpuBaselines[pluginId] = getSystemCpuSnapshot()
-        
-        // Initialize network usage
-        pluginNetworkUsage[pluginId] = 0L
+        synchronized(lock) {
+            pluginMemoryBaselines[pluginId] = memoryBytes
+            pluginCpuBaselines[pluginId] = cpuSnapshot
+            pluginNetworkUsage[pluginId] = 0L
+        }
     }
     
     override fun stopMonitoring(pluginId: String) {
-        pluginMemoryBaselines.remove(pluginId)
-        pluginCpuBaselines.remove(pluginId)
-        pluginNetworkUsage.remove(pluginId)
+        synchronized(lock) {
+            pluginMemoryBaselines.remove(pluginId)
+            pluginCpuBaselines.remove(pluginId)
+            pluginNetworkUsage.remove(pluginId)
+        }
     }
     
     override fun recordNetworkUsage(pluginId: String, bytes: Long) {
-        val current = pluginNetworkUsage[pluginId] ?: 0L
-        pluginNetworkUsage[pluginId] = current + bytes
+        synchronized(lock) {
+            val current = pluginNetworkUsage[pluginId] ?: 0L
+            pluginNetworkUsage[pluginId] = current + bytes
+        }
     }
     
     /**
