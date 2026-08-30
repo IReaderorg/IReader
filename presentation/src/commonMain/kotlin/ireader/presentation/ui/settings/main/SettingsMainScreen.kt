@@ -180,9 +180,9 @@ fun SettingsMainScreen(
             
             item(key = "item_wifi_sync") {
                 SettingsItem(
-                    title = "WiFi Sync",
-                    description = "Sync books and progress between devices on local network",
-                    icon = Icons.Outlined.Wifi,
+                    title = "Sync & Cloud Backup",
+                    description = "Sync library & progress across Google Drive, Supabase, and devices",
+                    icon = Icons.Outlined.CloudSync,
                     onClick = clickHandlers["wifiSync"]!!
                 )
             }

@@ -1,20 +1,14 @@
 package ireader.data.sync.datasource
 
+import ireader.domain.repositories.SyncLocalRepository
 import kotlinx.coroutines.flow.Flow
+
 
 /**
  * Data source interface for local database operations related to sync.
- * 
- * This interface defines the contract for accessing and manipulating sync-related
- * data in the local SQLDelight database. It provides methods for managing:
- * - Sync metadata (device sync history)
- * - Sync logs (operation history)
- * 
- * Implementation will use SQLDelight queries defined in:
- * - data/sync_metadata.sq
- * - data/sync_log.sq
  */
-interface SyncLocalDataSource {
+interface SyncLocalDataSource : SyncLocalRepository {
+
     
     // ========== Sync Metadata Operations ==========
     
@@ -78,21 +72,21 @@ interface SyncLocalDataSource {
      * 
      * @return List of book sync data
      */
-    suspend fun getBooks(): List<ireader.domain.models.sync.BookSyncData>
+    override suspend fun getBooks(): List<ireader.domain.models.sync.BookSyncData>
     
     /**
      * Get all chapters for synchronization.
      * 
      * @return List of chapter sync data
      */
-    suspend fun getChapters(): List<ireader.domain.models.sync.ChapterSyncData>
+    override suspend fun getChapters(): List<ireader.domain.models.sync.ChapterSyncData>
     
     /**
      * Get all history records for synchronization.
      * 
      * @return List of history sync data
      */
-    suspend fun getHistory(): List<ireader.domain.models.sync.HistorySyncData>
+    override suspend fun getHistory(): List<ireader.domain.models.sync.HistorySyncData>
     
     /**
      * Apply synced books to the local database.
@@ -100,7 +94,7 @@ interface SyncLocalDataSource {
      * 
      * @param books List of books to apply
      */
-    suspend fun applyBooks(books: List<ireader.domain.models.sync.BookSyncData>)
+    override suspend fun applyBooks(books: List<ireader.domain.models.sync.BookSyncData>)
     
     /**
      * Apply synced chapters to the local database.
@@ -108,7 +102,7 @@ interface SyncLocalDataSource {
      * 
      * @param chapters List of chapters to apply
      */
-    suspend fun applyChapters(chapters: List<ireader.domain.models.sync.ChapterSyncData>)
+    override suspend fun applyChapters(chapters: List<ireader.domain.models.sync.ChapterSyncData>)
     
     /**
      * Apply synced history to the local database.
@@ -116,15 +110,16 @@ interface SyncLocalDataSource {
      * 
      * @param history List of history records to apply
      */
-    suspend fun applyHistory(history: List<ireader.domain.models.sync.HistorySyncData>)
+    override suspend fun applyHistory(history: List<ireader.domain.models.sync.HistorySyncData>)
 
     /**
      * Delete books specified by global IDs (sourceId + key) from local database.
      * 
      * @param globalIds List of book global IDs to delete
      */
-    suspend fun deleteBooksByGlobalIds(globalIds: List<String>)
+    override suspend fun deleteBooksByGlobalIds(globalIds: List<String>)
 }
+
 
 /**
  * Entity representing sync metadata in the database.

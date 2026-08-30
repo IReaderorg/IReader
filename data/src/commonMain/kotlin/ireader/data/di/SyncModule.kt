@@ -59,7 +59,30 @@ val syncDataModule = module {
             handler = get()
         )
     }
+
+    // ========== Unified Sync Engine & Providers ==========
+    
+    single { ireader.data.sync.providers.GoogleDriveSyncProvider(get()) }
+    single { ireader.data.sync.providers.SupabaseSyncProvider(get()) }
+    single { ireader.data.sync.providers.LocalWiFiSyncProvider(get()) }
+
+    single {
+        ireader.domain.services.sync.UnifiedSyncEngine(
+            syncPreferences = get(),
+            providers = listOf(
+                get<ireader.data.sync.providers.GoogleDriveSyncProvider>(),
+                get<ireader.data.sync.providers.SupabaseSyncProvider>(),
+                get<ireader.data.sync.providers.LocalWiFiSyncProvider>()
+            ),
+            localRepository = get<SyncLocalDataSource>(),
+            deviceId = "ireader-client",
+            libraryController = getOrNull()
+        )
+    }
 }
+
+
+
 
 /**
  * Platform-specific sync module.

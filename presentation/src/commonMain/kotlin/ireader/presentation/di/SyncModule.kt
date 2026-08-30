@@ -23,4 +23,17 @@ val syncPresentationModule = module {
             syncPreferences = get()
         )
     }
+
+    // UnifiedSyncViewModel - Central ViewModel for all sync providers
+    factory {
+        ireader.presentation.ui.settings.sync.UnifiedSyncViewModel(
+            unifiedSyncEngine = get(),
+            syncPreferences = get(),
+            supabasePreferences = get(),
+            googleDriveAuthenticator = getOrNull(),
+            remoteRepository = getOrNull()
+        )
+    }
 }
+
+
