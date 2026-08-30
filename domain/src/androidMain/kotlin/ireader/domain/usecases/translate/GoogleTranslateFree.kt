@@ -6,27 +6,21 @@ import io.ktor.http.isSuccess
 import ireader.core.http.HttpClients
 import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.UiText
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.net.URLEncoder
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Free Google Translate Web API Engine (Android implementation)
  *
- * Uses the same free Google Translate API that Chrome and iOS use.
- * This is faster and more reliable than Google ML Kit on Android.
- *
- * Advantages over GoogleML:
- * - No model download required
- * - Better translation quality (same as Chrome)
- * - No mixed language issues
- * - Works immediately without initialization
- *
- * Note: This uses an unofficial API that may have rate limits.
+ * Highly optimized with parallel requests, automated retries, and zero text drops.
  */
 actual class GoogleTranslateFree actual constructor() : TranslateEngine(), KoinComponent {
 
@@ -42,9 +36,10 @@ actual class GoogleTranslateFree actual constructor() : TranslateEngine(), KoinC
         isLenient = true
     }
     
-    // Rate limiting
-    private var lastRequestTime = 0L
-    private val minRequestInterval = 100L // 100ms between requests
+    companion object {
+        private const val MAX_CONCURRENT_HTTP = 4
+        private const val MAX_RETRIES = 3
+    }
     
     override val supportedLanguages: List<Pair<String, String>> = listOf(
         "auto" to "Auto-detect",
@@ -127,22 +122,33 @@ actual class GoogleTranslateFree actual constructor() : TranslateEngine(), KoinC
         
         try {
             onProgress(0)
-            val results = mutableListOf<String>()
             val total = texts.size
+            val results = Array(total) { "" }
+            val completedCount = AtomicInteger(0)
+            val semaphore = Semaphore(MAX_CONCURRENT_HTTP)
             
-            texts.forEachIndexed { index, text ->
-                if (text.isBlank()) {
-                    results.add(text)
-                } else {
-                    val translated = translateSingle(text, source, target)
-                    results.add(translated ?: text)
+            coroutineScope {
+                val deferreds = texts.mapIndexed { index, text ->
+                    async(Dispatchers.Default) {
+                        if (text.isBlank()) {
+                            results[index] = text
+                            val done = completedCount.incrementAndGet()
+                            onProgress((done * 100) / total)
+                        } else {
+                            val translated = semaphore.withPermit {
+                                translateSingleWithRetry(text, source, target)
+                            }
+                            results[index] = translated ?: text
+                            val done = completedCount.incrementAndGet()
+                            onProgress((done * 100) / total)
+                        }
+                    }
                 }
-                
-                val progress = ((index + 1) * 100) / total
-                onProgress(progress)
+                deferreds.awaitAll()
             }
             
-            onSuccess(results)
+            onProgress(100)
+            onSuccess(results.toList())
             
         } catch (e: Exception) {
             println("[GoogleTranslateFree] Translation error: ${e.message}")
@@ -162,69 +168,65 @@ actual class GoogleTranslateFree actual constructor() : TranslateEngine(), KoinC
     }
     
     /**
-     * Translate a single text using Google Translate free API
+     * Translate a single text using Google Translate free API with automatic backoff retry
      */
-    private suspend fun translateSingle(text: String, source: String, target: String): String? {
+    private suspend fun translateSingleWithRetry(text: String, source: String, target: String): String? {
         if (text.isBlank()) return text
         
-        // Rate limiting
-        enforceRateLimit()
-        
-        try {
-            val encodedText = URLEncoder.encode(text, "UTF-8")
-            val url = "https://translate.googleapis.com/translate_a/single" +
-                    "?client=gtx" +
-                    "&sl=$source" +
-                    "&tl=$target" +
-                    "&dt=t" +
-                    "&q=$encodedText"
-            
-            val response = httpClients.default.get(url)
-            
-            // Check for rate limiting
-            if (response.status.value == 429) {
-                println("[GoogleTranslateFree] Rate limit exceeded")
-                delay(1000) // Wait 1 second and retry once
-                return translateSingle(text, source, target)
-            }
-            
-            if (!response.status.isSuccess()) {
-                println("[GoogleTranslateFree] HTTP error: ${response.status}")
-                return null
-            }
-            
-            val responseText = response.bodyAsText()
-            
-            // Parse the response (it's a nested JSON array)
-            val jsonArray = json.parseToJsonElement(responseText).jsonArray
-            
-            // Extract translated text from the response
-            val translations = StringBuilder()
-            jsonArray.firstOrNull()?.jsonArray?.forEach { item ->
-                item.jsonArray.firstOrNull()?.jsonPrimitive?.content?.let {
-                    translations.append(it)
+        var attempt = 0
+        while (attempt <= MAX_RETRIES) {
+            try {
+                val encodedText = URLEncoder.encode(text, "UTF-8")
+                val url = "https://translate.googleapis.com/translate_a/single" +
+                        "?client=gtx" +
+                        "&sl=$source" +
+                        "&tl=$target" +
+                        "&dt=t" +
+                        "&q=$encodedText"
+                
+                val response = httpClients.default.get(url)
+                
+                if (response.status.value == 429) {
+                    println("[GoogleTranslateFree] Rate limit exceeded, backing off...")
+                    attempt++
+                    if (attempt <= MAX_RETRIES) {
+                        delay(600L * attempt)
+                        continue
+                    }
+                    return null
+                }
+                
+                if (!response.status.isSuccess()) {
+                    attempt++
+                    if (attempt <= MAX_RETRIES) {
+                        delay(300L * attempt)
+                        continue
+                    }
+                    return null
+                }
+                
+                val responseText = response.bodyAsText()
+                val jsonArray = json.parseToJsonElement(responseText).jsonArray
+                
+                val translations = StringBuilder()
+                jsonArray.firstOrNull()?.jsonArray?.forEach { item ->
+                    item.jsonArray.firstOrNull()?.jsonPrimitive?.content?.let {
+                        translations.append(it)
+                    }
+                }
+                
+                val result = translations.toString()
+                if (result.isNotBlank()) {
+                    return result
+                }
+                
+            } catch (e: Exception) {
+                attempt++
+                if (attempt <= MAX_RETRIES) {
+                    delay(300L * attempt)
                 }
             }
-            
-            return translations.toString().ifEmpty { null }
-            
-        } catch (e: Exception) {
-            println("[GoogleTranslateFree] Single text translation error: ${e.message}")
-            return null
         }
-    }
-    
-    /**
-     * Enforce rate limiting between requests
-     */
-    private suspend fun enforceRateLimit() {
-        val now = System.currentTimeMillis()
-        val timeSinceLastRequest = now - lastRequestTime
-        
-        if (timeSinceLastRequest < minRequestInterval) {
-            delay(minRequestInterval - timeSinceLastRequest)
-        }
-        
-        lastRequestTime = System.currentTimeMillis()
+        return null
     }
 }

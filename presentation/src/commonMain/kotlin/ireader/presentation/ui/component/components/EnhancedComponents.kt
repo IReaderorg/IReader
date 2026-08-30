@@ -26,8 +26,10 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -436,11 +438,12 @@ fun PreferenceDivider(
     thickness: Dp = 1.dp,
     startIndent: Dp = 0.dp
 ) {
-    Divider(
+    HorizontalDivider(
         modifier = modifier.padding(vertical = 8.dp),
         thickness = thickness,
         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     )
+
 }
 
 /**

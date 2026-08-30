@@ -77,7 +77,7 @@ fun BasicInfoTab(
             )
         }
         
-        Divider()
+        HorizontalDivider()
         SectionTitle("URLs")
         
         RuleTextField(
@@ -96,7 +96,8 @@ fun BasicInfoTab(
             helperText = "URL for browsing/discovery"
         )
         
-        Divider()
+        HorizontalDivider()
+
         SectionTitle("Custom Headers (Optional)")
         
         RuleTextField(

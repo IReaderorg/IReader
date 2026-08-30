@@ -168,12 +168,13 @@ class SettingScreenSpec {
                 ))
                 add(SearchableSettingItem(
                     id = "tts",
-                    title = localizeHelper.localize(Res.string.tts_engine_manager),
-                    description = localizeHelper.localize(Res.string.tts_engine_manager_description),
+                    title = "Audio & Voice Studio",
+                    description = "Configure TTS voices, speeds, sleep timers, and highlight styles",
                     icon = Icons.Default.RecordVoiceOver,
                     section = localizeHelper.localize(Res.string.reader),
                     onClick = { navController.navigate(NavigationRoutes.ttsEngineManager) }
                 ))
+
                 add(SearchableSettingItem(
                     id = "statistics",
                     title = localizeHelper.localize(Res.string.statistics),
@@ -548,12 +549,13 @@ class SettingScreenSpec {
                     
                     item {
                         SettingsItem(
-                            title = localizeHelper.localize(Res.string.tts_engine_manager),
-                            description = localizeHelper.localize(Res.string.tts_engine_manager_description),
+                            title = "Audio & Voice Studio",
+                            description = "Configure TTS voices, speeds, sleep timers, and highlight styles",
                             icon = Icons.Default.RecordVoiceOver,
                             onClick = { navController.navigate(NavigationRoutes.ttsEngineManager) }
                         )
                     }
+
                     
                     item {
                         SettingsItem(

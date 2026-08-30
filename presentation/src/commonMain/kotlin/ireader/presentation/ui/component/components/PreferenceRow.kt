@@ -34,10 +34,11 @@ import ireader.presentation.ui.core.utils.horizontalPadding
 fun Divider(
         modifier: Modifier = Modifier,
 ) {
-    androidx.compose.material3.Divider(
+    androidx.compose.material3.HorizontalDivider(
             modifier = modifier,
             color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
     )
+
 }
 //@OptIn(ExperimentalFoundationApi::class)
 //@Composable

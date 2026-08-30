@@ -325,4 +325,22 @@ val screenModelModule = module {
             textReplacementUseCase = get()
         )
     }
+
+    // ==================== Audio Studio ====================
+    factory {
+        ireader.presentation.ui.settings.audio.AudioStudioViewModel(
+            readerPreferences = get(),
+            appPreferences = get()
+        )
+    }
+
+    // ==================== Translation Suite ====================
+    factory {
+        ireader.presentation.ui.settings.translation_suite.TranslationSuiteViewModel(
+            readerPreferences = get(),
+            translationPreferences = get(),
+            textReplacementUseCase = getOrNull()
+        )
+    }
 }
+

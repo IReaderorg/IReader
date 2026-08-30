@@ -475,7 +475,7 @@ class CoquiTTSPlayer(
     /**
      * Get all cached utterance IDs
      */
-    fun getCachedParagraphs(): Set<String> = audioCache.keys.toSet()
+    fun getCachedParagraphs(): Set<String> = synchronized(cacheLock) { audioCache.keys.toSet() }
     
     override fun stop() {
         coquiService?.stopAudio()

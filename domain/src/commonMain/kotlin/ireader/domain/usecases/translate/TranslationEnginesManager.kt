@@ -73,8 +73,9 @@ class TranslationEnginesManager(
             return PluginTranslateEngineAdapter(plugin, this)
         }
         
-        // Fall back to first built-in engine
-        return builtInEngines.first()
+        // Fall back to first available built-in engine
+        val available = builtInEngines.find { it.supportedLanguages.isNotEmpty() }
+        return available ?: builtInEngines.first()
     }
     
     /**
@@ -96,9 +97,11 @@ class TranslationEnginesManager(
             return engineId
         }
         
-        // Fall back to first built-in engine
-        return builtInEngines.first().id
+        // Fall back to first available built-in engine
+        val available = builtInEngines.find { it.supportedLanguages.isNotEmpty() }
+        return available?.id ?: builtInEngines.first().id
     }
+
     
     /**
      * Get all available translation engines combining built-in and plugin engines

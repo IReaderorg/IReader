@@ -556,11 +556,12 @@ fun Components.Build() {
         }
         is Components.Divider -> {
             if (this.visible) {
-                androidx.compose.material3.Divider(
+                androidx.compose.material3.HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
                     thickness = this.thickness,
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                 )
+
             }
         }
         is Components.Space -> {

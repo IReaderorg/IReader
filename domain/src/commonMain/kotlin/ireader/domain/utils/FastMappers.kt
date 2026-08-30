@@ -4,14 +4,10 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 
-@OptIn(ExperimentalContracts::class)
 fun <T> MutableList<T>.removeIf(predicate: (T) -> Boolean) {
-    this.toList().fastMap {
-        if (predicate(it)) {
-            this.remove(it)
-        }
-    }
+    this.removeAll(predicate)
 }
+
 
 /**
  * Iterates through a [List] using the index and calls [action] for each item.

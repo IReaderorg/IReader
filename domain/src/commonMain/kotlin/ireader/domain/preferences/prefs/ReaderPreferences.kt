@@ -220,15 +220,22 @@ Visit.*for more chapters"""
         return preferenceStore.getBoolean(TEXT_READER_AUTO_NEXT, false)
     }
 
+    fun autoNextChapter(): Preference<Boolean> {
+        return preferenceStore.getBoolean(TEXT_READER_AUTO_NEXT, false)
+    }
+
     fun speechPitch(): Preference<Float> {
         return preferenceStore.getFloat(TEXT_READER_SPEECH_PITCH, .8f)
     }
 
-
+    fun speechVoice(): Preference<String> {
+        return preferenceStore.getString(TEXT_READER_SPEECH_VOICE, "")
+    }
 
     fun speechLanguage(): Preference<String> {
         return preferenceStore.getString(TEXT_READER_SPEECH_LANGUAGE, "")
     }
+
 
     fun showChapterNumberPreferences(): Preference<ChapterDisplayMode> {
         return preferenceStore.getEnum("chapter_layout_mode", ChapterDisplayMode.Default)

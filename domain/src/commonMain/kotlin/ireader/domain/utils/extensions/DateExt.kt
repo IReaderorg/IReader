@@ -1,6 +1,15 @@
 package ireader.domain.utils.extensions
 
-import kotlinx.datetime.*
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
@@ -19,13 +28,12 @@ expect fun LocalDate.asRelativeTimeString(
  */
 @OptIn(ExperimentalTime::class)
 fun currentTimeToLong(): Long {
-    return kotlin.time.Clock.System.now().toEpochMilliseconds()
+    return Clock.System.now().toEpochMilliseconds()
 }
 
 /**
  * Convert epoch milliseconds to LocalDateTime.
  */
-@OptIn(ExperimentalTime::class)
 fun Long.toLocalDate(): LocalDateTime {
     return Instant.fromEpochMilliseconds(this)
         .toLocalDateTime(TimeZone.currentSystemDefault())
@@ -34,7 +42,6 @@ fun Long.toLocalDate(): LocalDateTime {
 /**
  * Convert epoch milliseconds to LocalDate (date only, no time).
  */
-@OptIn(ExperimentalTime::class)
 fun Long.toLocalDateOnly(): LocalDate {
     return Instant.fromEpochMilliseconds(this)
         .toLocalDateTime(TimeZone.currentSystemDefault())
@@ -44,9 +51,8 @@ fun Long.toLocalDateOnly(): LocalDate {
 /**
  * Get current Instant.
  */
-@OptIn(ExperimentalTime::class)
 fun currentInstant(): Instant {
-    return kotlin.time.Clock.System.now()
+    return Instant.fromEpochMilliseconds(currentTimeToLong())
 }
 
 /**
@@ -54,8 +60,9 @@ fun currentInstant(): Instant {
  */
 @OptIn(ExperimentalTime::class)
 fun todayStartMillis(): Long {
-    val now = kotlin.time.Clock.System.now()
-    val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val now = Clock.System.now()
+    val today = Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
+        .toLocalDateTime(TimeZone.currentSystemDefault()).date
     return today.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 }
 
@@ -64,8 +71,9 @@ fun todayStartMillis(): Long {
  */
 @OptIn(ExperimentalTime::class)
 fun yesterdayStartMillis(): Long {
-    val now = kotlin.time.Clock.System.now()
-    val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val now = Clock.System.now()
+    val today = Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
+        .toLocalDateTime(TimeZone.currentSystemDefault()).date
     val yesterday = today.minus(1, DateTimeUnit.DAY)
     return yesterday.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 }
@@ -75,8 +83,9 @@ fun yesterdayStartMillis(): Long {
  */
 @OptIn(ExperimentalTime::class)
 fun daysAgoStartMillis(days: Int): Long {
-    val now = kotlin.time.Clock.System.now()
-    val today = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val now = Clock.System.now()
+    val today = Instant.fromEpochMilliseconds(now.toEpochMilliseconds())
+        .toLocalDateTime(TimeZone.currentSystemDefault()).date
     val targetDate = today.minus(days, DateTimeUnit.DAY)
     return targetDate.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 }
@@ -86,14 +95,13 @@ fun daysAgoStartMillis(days: Int): Long {
  * Format: "yyyy.MM.dd HH:mm"
  * This is a platform-agnostic basic formatter.
  */
-@OptIn(ExperimentalTime::class)
 fun convertLongToTime(time: Long): String {
     val dateTime = Instant.fromEpochMilliseconds(time)
         .toLocalDateTime(TimeZone.currentSystemDefault())
     
     val year = dateTime.year
-    val month = dateTime.month.number.toString().padStart(2, '0')
-    val day = dateTime.day.toString().padStart(2, '0')
+    val month = (dateTime.month.ordinal + 1).toString().padStart(2, '0')
+    val day = dateTime.dayOfMonth.toString().padStart(2, '0')
     val hour = dateTime.hour.toString().padStart(2, '0')
     val minute = dateTime.minute.toString().padStart(2, '0')
     
@@ -104,8 +112,8 @@ fun convertLongToTime(time: Long): String {
  * Format LocalDateTime to ISO date string (yyyy-MM-dd).
  */
 fun LocalDateTime.toIsoDateString(): String {
-    val month = month.number.toString().padStart(2, '0')
-    val day = day.toString().padStart(2, '0')
+    val month = (month.ordinal + 1).toString().padStart(2, '0')
+    val day = dayOfMonth.toString().padStart(2, '0')
     return "$year-$month-$day"
 }
 
@@ -113,8 +121,8 @@ fun LocalDateTime.toIsoDateString(): String {
  * Format LocalDateTime to ISO date-time string.
  */
 fun LocalDateTime.toIsoDateTimeString(): String {
-    val month = month.number.toString().padStart(2, '0')
-    val day = day.toString().padStart(2, '0')
+    val month = (month.ordinal + 1).toString().padStart(2, '0')
+    val day = dayOfMonth.toString().padStart(2, '0')
     val h = hour.toString().padStart(2, '0')
     val m = minute.toString().padStart(2, '0')
     val s = second.toString().padStart(2, '0')
@@ -124,7 +132,6 @@ fun LocalDateTime.toIsoDateTimeString(): String {
 /**
  * Check if a timestamp (in millis) is from today.
  */
-@OptIn(ExperimentalTime::class)
 fun Long.isToday(): Boolean {
     val todayStart = todayStartMillis()
     val tomorrowStart = todayStart + 24 * 60 * 60 * 1000
@@ -134,7 +141,6 @@ fun Long.isToday(): Boolean {
 /**
  * Check if a timestamp (in millis) is from yesterday.
  */
-@OptIn(ExperimentalTime::class)
 fun Long.isYesterday(): Boolean {
     val yesterdayStart = yesterdayStartMillis()
     val todayStart = todayStartMillis()
@@ -144,7 +150,6 @@ fun Long.isYesterday(): Boolean {
 /**
  * Check if a timestamp (in millis) is within the last N days.
  */
-@OptIn(ExperimentalTime::class)
 fun Long.isWithinDays(days: Int): Boolean {
     val startMillis = daysAgoStartMillis(days)
     val now = currentTimeToLong()
@@ -158,8 +163,8 @@ fun Long.isWithinDays(days: Int): Boolean {
 fun Long.formatDateTime(): String {
     val dt = this.toLocalDate()
     val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-    val month = monthNames[dt.month.number - 1]
-    val day = dt.day.toString().padStart(2, '0')
+    val month = monthNames[dt.month.ordinal]
+    val day = dt.dayOfMonth.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     return "$month $day, ${dt.year} $hour:$minute"
@@ -172,8 +177,8 @@ fun Long.formatDateTime(): String {
 fun Long.formatDate(): String {
     val dt = this.toLocalDate()
     val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-    val month = monthNames[dt.month.number - 1]
-    return "$month ${dt.day}, ${dt.year}"
+    val month = monthNames[dt.month.ordinal]
+    return "$month ${dt.dayOfMonth}, ${dt.year}"
 }
 
 /**
@@ -194,8 +199,8 @@ fun Long.formatTime12Hour(): String {
  */
 fun Long.formatForFilename(): String {
     val dt = this.toLocalDate()
-    val month = dt.month.number.toString().padStart(2, '0')
-    val day = dt.day.toString().padStart(2, '0')
+    val month = (dt.month.ordinal + 1).toString().padStart(2, '0')
+    val day = dt.dayOfMonth.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     val second = dt.second.toString().padStart(2, '0')
@@ -208,8 +213,8 @@ fun Long.formatForFilename(): String {
  */
 fun Long.formatIsoDate(): String {
     val dt = this.toLocalDate()
-    val month = dt.month.number.toString().padStart(2, '0')
-    val day = dt.day.toString().padStart(2, '0')
+    val month = (dt.month.ordinal + 1).toString().padStart(2, '0')
+    val day = dt.dayOfMonth.toString().padStart(2, '0')
     return "${dt.year}-$month-$day"
 }
 
@@ -219,8 +224,8 @@ fun Long.formatIsoDate(): String {
  */
 fun Long.formatIsoDateTime(): String {
     val dt = this.toLocalDate()
-    val month = dt.month.number.toString().padStart(2, '0')
-    val day = dt.day.toString().padStart(2, '0')
+    val month = (dt.month.ordinal + 1).toString().padStart(2, '0')
+    val day = dt.dayOfMonth.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     val second = dt.second.toString().padStart(2, '0')
