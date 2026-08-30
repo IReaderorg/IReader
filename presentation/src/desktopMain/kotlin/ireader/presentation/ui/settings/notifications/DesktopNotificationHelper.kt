@@ -27,19 +27,19 @@ class DesktopNotificationHelper : NotificationHelper {
             when {
                 os.contains("win") -> {
                     // Windows: Open notification settings
-                    Runtime.getRuntime().exec("cmd /c start ms-settings:notifications")
+                    ProcessBuilder("cmd", "/c", "start", "ms-settings:notifications").start()
                 }
                 os.contains("mac") -> {
                     // macOS: Open notification preferences
-                    Runtime.getRuntime().exec(arrayOf("open", "x-apple.systempreferences:com.apple.preference.notifications"))
+                    ProcessBuilder("open", "x-apple.systempreferences:com.apple.preference.notifications").start()
                 }
                 os.contains("linux") -> {
                     // Linux: Try to open GNOME settings or KDE settings
                     try {
-                        Runtime.getRuntime().exec("gnome-control-center notifications")
+                        ProcessBuilder("gnome-control-center", "notifications").start()
                     } catch (e: Exception) {
                         try {
-                            Runtime.getRuntime().exec("systemsettings5 kcm_notifications")
+                            ProcessBuilder("systemsettings5", "kcm_notifications").start()
                         } catch (e2: Exception) {
                             Log.warn { "Could not open notification settings on Linux" }
                         }

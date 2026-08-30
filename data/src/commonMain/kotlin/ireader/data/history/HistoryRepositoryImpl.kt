@@ -86,32 +86,38 @@ class HistoryRepositoryImpl constructor(
     }
 
     override suspend fun deleteHistories(histories: List<History>) {
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
         return handler.await(inTransaction = true) {
             for (i in histories) {
-                historyQueries.deleteByBookId(i.id)
+                historyQueries.deleteHistoryByChapterId(i.chapterId)
             }
         }
     }
 
     override suspend fun deleteHistory(chapterId: Long) {
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
         return handler.await { historyQueries.deleteHistoryByChapterId(chapterId) }
     }
 
     override suspend fun deleteHistoryByBookId(bookId: Long) {
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
         return handler.await {
             historyQueries.deleteByBookId(bookId)
         }
     }
 
     override suspend fun deleteAllHistories() {
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
         return handler.await { historyQueries.deleteAllHistories() }
     }
 
     override suspend fun resetHistoryById(historyId: Long) {
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
         return handler.await { historyQueries.resetHistoryById(historyId) }
     }
 
     override suspend fun resetHistoryByBookId(historyId: Long) {
+        ireader.domain.data.cache.HistoryDataCache.invalidate()
         return handler.await { historyQueries.resetHistoryByMangaId(historyId) }
     }
 

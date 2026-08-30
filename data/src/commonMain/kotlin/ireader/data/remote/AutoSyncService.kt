@@ -16,13 +16,15 @@ class AutoSyncService(
     private val networkMonitor: NetworkConnectivityMonitor,
     private val remoteRepository: SupabaseRemoteRepository
 ) {
+    private val lock = Any()
     private var monitoringJob: Job? = null
-    private val scope = CoroutineScope(ioDispatcher)
+    private val scope = CoroutineScope(kotlinx.coroutines.SupervisorJob() + ioDispatcher)
     
     /**
      * Starts monitoring network connectivity and auto-syncing
      */
-    fun start() {
+    fun start() = synchronized(lock) {
+        monitoringJob?.cancel()
         networkMonitor.startMonitoring()
         
         var wasConnected = false
@@ -47,7 +49,7 @@ class AutoSyncService(
     /**
      * Stops monitoring and auto-syncing
      */
-    fun stop() {
+    fun stop() = synchronized(lock) {
         monitoringJob?.cancel()
         monitoringJob = null
         networkMonitor.stopMonitoring()

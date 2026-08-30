@@ -215,9 +215,11 @@ class ChapterRepositoryImpl(
 
 
     override suspend fun deleteChaptersByBookId(bookId: Long) {
+        dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         handler.await {
             chapterQueries.deleteChaptersByBookId(bookId)
         }
+        dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         
         // Refresh cached chapter counts for the book (used by smart categories)
         handler.await {
@@ -229,11 +231,18 @@ class ChapterRepositoryImpl(
         if (chapters.isEmpty()) return
         
         val bookIds = chapters.map { it.bookId }.distinct()
+        bookIds.forEach { bookId ->
+            dbOptimizations?.invalidateCache("book_${bookId}_chapters")
+        }
         
         handler.await(inTransaction = true) {
             chapters.forEach { chapter ->
                 chapterQueries.delete(chapter.id)
             }
+        }
+        
+        bookIds.forEach { bookId ->
+            dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         }
         
         // Refresh cached chapter counts for affected books (used by smart categories)
@@ -245,9 +254,11 @@ class ChapterRepositoryImpl(
     }
 
     override suspend fun deleteChapter(chapter: Chapter) {
+        dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
         handler.await {
             chapterQueries.delete(chapter.id)
         }
+        dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
         
         // Refresh cached chapter counts for the book (used by smart categories)
         handler.await {
@@ -257,6 +268,7 @@ class ChapterRepositoryImpl(
 
 
     override suspend fun deleteAllChapters() {
+        dbOptimizations?.clearAllCache()
         handler.await {
             chapterQueries.delelteAllChapters()
         }
@@ -281,6 +293,7 @@ class ChapterRepositoryImpl(
         
         Log.debug { "ChapterRepositoryImpl: clearChapterContent called for ${chapterIds.size} chapters" }
         
+        dbOptimizations?.clearAllCache()
         handler.await {
             chapterQueries.clearChapterContent(chapterIds)
         }

@@ -20,8 +20,8 @@ class ChapterCacheServiceImpl(
     private val maxMemoryMB: Int = 50
 ) : ChapterCacheService {
     
+    private val lock = Any()
     private val cache = linkedMapOf<Long, CacheEntry>()
-    private val mutex = Mutex()
     
     // Statistics
     private var hitCount = 0L
@@ -34,28 +34,27 @@ class ChapterCacheServiceImpl(
         val cachedAt: Long = currentTimeToLong()
     )
     
-    override suspend fun getChapter(chapterId: Long): Chapter? = mutex.withLock {
+    override suspend fun getChapter(chapterId: Long): Chapter? = synchronized(lock) {
         val entry = cache[chapterId]
         
         if (entry != null) {
             hitCount++
             Log.debug("Cache hit for chapter $chapterId")
-            return entry.chapter
+            entry.chapter
         } else {
             missCount++
             Log.debug("Cache miss for chapter $chapterId")
-            return null
+            null
         }
     }
     
-    override suspend fun cacheChapter(chapter: Chapter) = mutex.withLock {
+    override suspend fun cacheChapter(chapter: Chapter) = synchronized(lock) {
         val sizeBytes = estimateChapterSize(chapter)
         
         // Check if we need to evict entries
-        // Prevent infinite loop: stop if we can't evict anymore or if the cache is empty
         while (shouldEvict(sizeBytes) && cache.isNotEmpty()) {
             val evicted = evictOldest()
-            if (!evicted) break // Should not happen if cache.isNotEmpty(), but safe guard
+            if (!evicted) break
         }
         
         // Add to cache
@@ -69,22 +68,12 @@ class ChapterCacheServiceImpl(
         // The service just manages the cache
     }
     
-    override suspend fun removeChapter(chapterId: Long) = mutex.withLock {
+    override suspend fun removeChapter(chapterId: Long) = synchronized(lock) {
         cache.remove(chapterId)
         Log.debug("Removed chapter $chapterId from cache")
     }
     
-    override fun clearCache() {
-        // Note: clearCache is not suspend, but we should probably protect it. 
-        // However, changing signature might break interface. 
-        // Assuming single threaded access or accepting race condition for clear() 
-        // OR we can use runBlocking if we really must, but that's bad.
-        // Ideally the interface should be suspend.
-        // For now, let's just synchronize on the map if possible, or leave as is if we can't change interface.
-        // Wait, the interface is defined in ChapterCacheService. Let's check if we can change it.
-        // But for now, let's at least try to make the internal map operations atomic if possible.
-        // Since we use LinkedHashMap, it's not thread safe.
-        // Let's assume for this task we stick to the signature.
+    override fun clearCache() = synchronized(lock) {
         cache.clear()
         hitCount = 0
         missCount = 0
@@ -92,19 +81,11 @@ class ChapterCacheServiceImpl(
         Log.debug("Cache cleared")
     }
     
-    override fun getCacheStats(): CacheStats {
-        // This should ideally be suspend or use a thread-safe structure.
-        // Accessing cache.values.sumOf without lock is risky.
-        // We can't easily make it suspend without changing interface.
-        // Let's try to grab a snapshot safely if possible, or just accept the risk for this non-critical stat method.
-        // BETTER: Use synchronized(cache) or similar if we weren't using coroutines Mutex.
-        // Since we mix Mutex and non-suspend, it's tricky.
-        // Let's leave it for now but fix the logic in shouldEvict which IS called under lock.
-        
+    override fun getCacheStats(): CacheStats = synchronized(lock) {
         val memoryUsed = cache.values.sumOf { it.sizeBytes }
         val maxMemory = maxMemoryMB * 1024L * 1024L
         
-        return CacheStats(
+        CacheStats(
             cachedChapters = cache.size,
             maxCapacity = maxCapacity,
             memoryUsedBytes = memoryUsed,
@@ -115,20 +96,20 @@ class ChapterCacheServiceImpl(
         )
     }
     
-    override fun isCacheFull(): Boolean {
-        return cache.size >= maxCapacity || getMemoryUsage() >= maxMemoryMB * 1024L * 1024L
+    override fun isCacheFull(): Boolean = synchronized(lock) {
+        cache.size >= maxCapacity || getMemoryUsage() >= maxMemoryMB * 1024L * 1024L
     }
     
-    override fun getMemoryUsage(): Long {
-        return cache.values.sumOf { it.sizeBytes }
+    override fun getMemoryUsage(): Long = synchronized(lock) {
+        cache.values.sumOf { it.sizeBytes }
     }
     
     /**
      * Check if we should evict entries before adding new one
-     * Must be called under mutex lock
+     * Must be called under lock
      */
     private fun shouldEvict(newEntrySizeBytes: Long): Boolean {
-        val currentMemory = cache.values.sumOf { it.sizeBytes } // Calculate directly to be safe under lock
+        val currentMemory = cache.values.sumOf { it.sizeBytes }
         val maxMemory = maxMemoryMB * 1024L * 1024L
         
         // Evict if:

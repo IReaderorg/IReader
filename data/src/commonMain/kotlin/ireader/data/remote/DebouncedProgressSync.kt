@@ -17,8 +17,11 @@ class DebouncedProgressSync(
     private val syncOperation: suspend (ReadingProgress) -> Result<Unit>,
     private val delayMs: Long = 2000
 ) {
+    private val lock = Any()
+    @kotlin.concurrent.Volatile
+    private var pendingProgress: ReadingProgress? = null
     private var syncJob: Job? = null
-    private val scope = CoroutineScope(ioDispatcher)
+    private val scope = CoroutineScope(kotlinx.coroutines.SupervisorJob() + ioDispatcher)
     
     /**
      * Schedules a sync operation with debouncing
@@ -27,10 +30,20 @@ class DebouncedProgressSync(
      * @param progress The reading progress to sync
      */
     fun scheduleSync(progress: ReadingProgress) {
-        syncJob?.cancel()
-        syncJob = scope.launch {
-            delay(delayMs)
-            syncOperation(progress)
+        synchronized(lock) {
+            pendingProgress = progress
+            syncJob?.cancel()
+            syncJob = scope.launch {
+                delay(delayMs)
+                val current = synchronized(lock) {
+                    val p = pendingProgress
+                    pendingProgress = null
+                    p
+                }
+                if (current != null) {
+                    syncOperation(current)
+                }
+            }
         }
     }
     
@@ -38,13 +51,25 @@ class DebouncedProgressSync(
      * Immediately executes any pending sync operation
      */
     suspend fun flushPending() {
-        syncJob?.join()
+        val toFlush = synchronized(lock) {
+            syncJob?.cancel()
+            val p = pendingProgress
+            pendingProgress = null
+            p
+        }
+        if (toFlush != null) {
+            syncOperation(toFlush)
+        }
     }
     
     /**
      * Cancels any pending sync operation
      */
     fun cancel() {
-        syncJob?.cancel()
+        synchronized(lock) {
+            pendingProgress = null
+            syncJob?.cancel()
+            syncJob = null
+        }
     }
 }

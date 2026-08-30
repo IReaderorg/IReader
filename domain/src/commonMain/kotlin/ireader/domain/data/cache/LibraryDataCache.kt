@@ -17,6 +17,7 @@ object LibraryDataCache {
     private val _isPreloaded = MutableStateFlow(false)
     val isPreloaded: StateFlow<Boolean> = _isPreloaded.asStateFlow()
     
+    @kotlin.concurrent.Volatile
     private var lastUpdateTime = 0L
     
     /**
@@ -43,6 +44,7 @@ object LibraryDataCache {
      * Invalidate the cache (e.g., after data changes).
      */
     fun invalidate() {
+        _libraryBooks.value = emptyList()
         _isPreloaded.value = false
     }
 }

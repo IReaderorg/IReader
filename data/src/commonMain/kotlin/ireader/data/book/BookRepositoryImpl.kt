@@ -97,11 +97,14 @@ class BookRepositoryImpl(
 
     override suspend fun deleteBooks(book: List<Book>) {
         val bookIds = book.map { it.id }
+        dbOptimizations?.invalidateCache("library_books_all")
+        ireader.domain.data.cache.LibraryDataCache.invalidate()
         handler.await(inTransaction = true) {
             dbOperation(book) { book ->
                 bookQueries.deleteBook(book.id)
             }
         }
+        dbOptimizations?.invalidateCache("library_books_all")
         // Notify deletions
         if (bookIds.size <= 100) {
             bookIds.forEach { bookId ->
@@ -113,10 +116,14 @@ class BookRepositoryImpl(
     }
 
     override suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>) {
+        dbOptimizations?.invalidateCache("library_books_all")
+        ireader.domain.data.cache.LibraryDataCache.invalidate()
         insertBooksOperation(books)
     }
 
     override suspend fun deleteBookById(id: Long) {
+        dbOptimizations?.invalidateCache("library_books_all")
+        ireader.domain.data.cache.LibraryDataCache.invalidate()
         handler.await {
             bookQueries.deleteBook(id)
         }
@@ -134,12 +141,16 @@ class BookRepositoryImpl(
     }
 
     override suspend fun deleteAllBooks() {
+        dbOptimizations?.clearAllCache()
+        ireader.domain.data.cache.LibraryDataCache.invalidate()
         handler.await {
             bookQueries.deleteAll()
         }
     }
 
     override suspend fun deleteNotInLibraryBooks() {
+        dbOptimizations?.invalidateCache("library_books_all")
+        ireader.domain.data.cache.LibraryDataCache.invalidate()
         handler.await {
             bookQueries.deleteNotInLibraryBooks()
         }

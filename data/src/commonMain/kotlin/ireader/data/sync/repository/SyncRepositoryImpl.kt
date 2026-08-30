@@ -55,6 +55,7 @@ class SyncRepositoryImpl(
     private val concurrencyManager = ConcurrencyManager(maxConcurrentTransfers = 3)
     
     private val _syncStatus = MutableStateFlow<SyncStatus>(SyncStatus.Idle)
+    @kotlin.concurrent.Volatile
     private var isCancelled = false
     
     // Shared Flow for discovered devices to prevent duplicate subscriptions (Task 10.1.3)
