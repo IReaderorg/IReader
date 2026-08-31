@@ -72,10 +72,11 @@ kotlin {
          commonMain {
             dependencies {
                 api(project(Modules.domain))
-                api(project(Modules.coreApi))
-                api(project(Modules.sourceApi))
-                api(project(Modules.data))
+                implementation(project(Modules.coreApi))
+                implementation(project(Modules.sourceApi))
+                implementation(project(Modules.data))
                 api(project(Modules.commonResources))
+
 
                 api(compose.foundation)
                 api(compose.runtime)
