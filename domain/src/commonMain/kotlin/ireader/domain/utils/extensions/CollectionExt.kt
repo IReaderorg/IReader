@@ -12,9 +12,7 @@ fun <T> List<T>.replace(position: Int, newItem: T): List<T> {
 }
 
 fun <T> List<T>.replaceAll(newItems: List<T>): List<T> {
-    var newList = toMutableList()
-    newList = newItems.toMutableList()
-    return newList
+    return newItems.toList()
 }
 
 /**
@@ -63,16 +61,13 @@ inline fun <T, K> List<T>.next(mapBy: (T) -> K, currentItem: K): Pair<Int, T> {
 
     val index = items.indexOf(currentItem)
     return when {
-        index == null -> {
-            throw NullPointerException("index is $index")
-        }
         index == -1 -> {
             throw IndexIsInvalidException("index is $index")
         }
         index < 0 -> {
             throw IndexLessThanZeroException("index is $index")
         }
-        index > this.lastIndex -> {
+        index >= this.lastIndex -> {
             throw IndexGreaterThanCollectionSizeException("index is $index")
         }
         else -> {
@@ -100,7 +95,7 @@ inline fun <T, K> List<T>.previous(item: K, mapBy: (T) -> K): Pair<Int, T> {
         index == -1 -> {
             throw IndexIsInvalidException("index is $index")
         }
-        index < 0 -> {
+        index <= 0 -> {
             throw IndexLessThanZeroException("index is $index")
         }
         index > this.lastIndex -> {
@@ -111,6 +106,7 @@ inline fun <T, K> List<T>.previous(item: K, mapBy: (T) -> K): Pair<Int, T> {
         }
     }
 }
+
 
 /**
  * Returns first index of [element], or -1 if the collection does not contain element.

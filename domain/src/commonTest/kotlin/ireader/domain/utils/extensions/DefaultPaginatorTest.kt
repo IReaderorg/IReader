@@ -100,8 +100,9 @@ class DefaultPaginatorTest {
             onInit = { initCallCount++ },
             onLoadUpdated = {},
             onRequest = { Result.success("Data") },
-            getNextKey = { currentKey -> currentKey as? Int ?: 1 + 1 },
+            getNextKey = { 2 },
             onError = {},
+
             onSuccess = { _, _ -> }
         )
         
@@ -326,8 +327,9 @@ class DefaultPaginatorTest {
         
         paginator.loadNextItems()
         
-        assertNotNull(successResult)
-        assertEquals(listOf("a", "b"), successResult?.items)
-        assertTrue(successResult?.hasMore == true)
+        val result = assertNotNull(successResult)
+        assertEquals(listOf("a", "b"), result.items)
+        assertTrue(result.hasMore)
+
     }
 }

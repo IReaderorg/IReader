@@ -17,7 +17,9 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UnifiedSyncEngineTest {
@@ -197,11 +199,12 @@ class UnifiedSyncEngineTest {
         assertEquals(2, localRepo.books.size)
 
         // Uploaded manifest should contain both books
-        val uploaded = provider.lastUploadedManifest
-        assertEquals(2, uploaded?.books?.size)
-        assertTrue(uploaded?.books?.any { it.globalId == "1-book-remote" } == true)
-        assertTrue(uploaded?.books?.any { it.globalId == "1-book-local" } == true)
+        val uploaded = assertNotNull(provider.lastUploadedManifest)
+        assertEquals(2, uploaded.books.size)
+        assertTrue(uploaded.books.any { it.globalId == "1-book-remote" })
+        assertTrue(uploaded.books.any { it.globalId == "1-book-local" })
     }
+
 
     @Test
     fun `tombstones delete local books without resurrecting`() = runTest(testDispatcher) {

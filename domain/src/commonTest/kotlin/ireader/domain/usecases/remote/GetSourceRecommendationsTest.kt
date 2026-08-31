@@ -87,12 +87,13 @@ class GetSourceRecommendationsTest {
             onSuccess = { result = it }
         )
 
-        assertNotNull(result)
-        assertEquals(2, result!!.size)
-        assertEquals("rec-1", result!![0].key)
-        assertEquals("Rec 1", result!![0].title)
-        assertEquals("rec-2", result!![1].key)
+        val nonNullResult = assertNotNull(result)
+        assertEquals(2, nonNullResult.size)
+        assertEquals("rec-1", nonNullResult[0].key)
+        assertEquals("Rec 1", nonNullResult[0].title)
+        assertEquals("rec-2", nonNullResult[1].key)
     }
+
 
     @Test
     fun `calls onError on source exception`() = runTest {

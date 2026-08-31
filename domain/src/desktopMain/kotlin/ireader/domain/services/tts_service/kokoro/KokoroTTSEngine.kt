@@ -355,10 +355,11 @@ class KokoroTTSEngine(
             val audioData = outputFile.readBytes()
             
             // Cleanup temporary files
-            inputFile?.delete()
-            outputFile?.delete()
+            inputFile.delete()
+            outputFile.delete()
             
             Log.debug { "Synthesis completed: ${audioData.size} bytes" }
+
             Result.success(audioData)
             
         } catch (e: Exception) {

@@ -461,13 +461,16 @@ private fun ModernPluginDetailsContent(
         }
         
         // Resource usage (if installed)
-        if (state.resourceUsage != null && state.resourcePercentages != null) {
+        val resourceUsage = state.resourceUsage
+        val resourcePercentages = state.resourcePercentages
+        if (resourceUsage != null && resourcePercentages != null) {
             item {
                 ModernSection(title = localizeHelper.localize(Res.string.resource_usage), icon = Icons.Outlined.Memory) {
-                    ResourceUsageSection(usage = state.resourceUsage!!, percentages = state.resourcePercentages!!)
+                    ResourceUsageSection(usage = resourceUsage, percentages = resourcePercentages)
                 }
             }
         }
+
         
         // Reviews section
         item {
@@ -727,8 +730,11 @@ private fun InfoGrid(plugin: PluginInfo) {
         InfoRow(label = localizeHelper.localize(Res.string.version), value = plugin.manifest.version)
         InfoRow(label = localizeHelper.localize(Res.string.min_ireader_version), value = plugin.manifest.minIReaderVersion)
         InfoRow(label = localizeHelper.localize(Res.string.platforms), value = plugin.manifest.platforms.joinToString(", ") { it.name })
-        plugin.fileSize?.let { InfoRow(label = localizeHelper.localize(Res.string.size), value = formatFileSize(it)) }
+        if (plugin.fileSize > 0) {
+            InfoRow(label = localizeHelper.localize(Res.string.size), value = formatFileSize(plugin.fileSize))
+        }
     }
+
 }
 
 @Composable

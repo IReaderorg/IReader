@@ -5,8 +5,11 @@ import ireader.domain.models.tts.VoiceModel
 import okio.FileSystem
 import okio.Path
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import ireader.domain.utils.extensions.currentTimeToLong
+
 
 /**
  * Service for managing local storage of voice models.
@@ -142,6 +145,7 @@ class VoiceStorage(
 
 /**
  * LRU cache for managing loaded voice instances
+
  * Requirements: 5.3, 5.5
  */
 class VoiceModelCache<T>(
@@ -149,7 +153,7 @@ class VoiceModelCache<T>(
 ) {
     private val cache = mutableMapOf<String, CacheEntry<T>>()
     private val accessOrder = mutableListOf<String>()
-    private val lock = kotlinx.coroutines.sync.Mutex()
+    private val lock = Mutex()
     
     data class CacheEntry<T>(
         val value: T,
@@ -159,20 +163,20 @@ class VoiceModelCache<T>(
     /**
      * Get a value from the cache
      */
-    fun get(key: String): T? {
+    suspend fun get(key: String): T? = lock.withLock {
         val entry = cache[key]
         if (entry != null) {
             // Update access order for LRU
             accessOrder.remove(key)
             accessOrder.add(key)
         }
-        return entry?.value
+        entry?.value
     }
     
     /**
      * Put a value in the cache
      */
-    fun put(key: String, value: T) {
+    suspend fun put(key: String, value: T) = lock.withLock {
         // Remove oldest entry if cache is full
         if (cache.size >= maxCacheSize && !cache.containsKey(key)) {
             val oldestKey = accessOrder.firstOrNull()
@@ -190,15 +194,15 @@ class VoiceModelCache<T>(
     /**
      * Remove a value from the cache
      */
-    fun remove(key: String): T? {
+    suspend fun remove(key: String): T? = lock.withLock {
         accessOrder.remove(key)
-        return cache.remove(key)?.value
+        cache.remove(key)?.value
     }
     
     /**
      * Clear the entire cache
      */
-    fun clear() {
+    suspend fun clear() = lock.withLock {
         cache.clear()
         accessOrder.clear()
     }
@@ -206,31 +210,32 @@ class VoiceModelCache<T>(
     /**
      * Get the current size of the cache
      */
-    fun size(): Int {
-        return cache.size
+    suspend fun size(): Int = lock.withLock {
+        cache.size
     }
     
     /**
      * Check if a key exists in the cache
      */
-    fun contains(key: String): Boolean {
-        return cache.containsKey(key)
+    suspend fun contains(key: String): Boolean = lock.withLock {
+        cache.containsKey(key)
     }
     
     /**
      * Get all keys in the cache
      */
-    fun keys(): Set<String> {
-        return cache.keys.toSet()
+    suspend fun keys(): Set<String> = lock.withLock {
+        cache.keys.toSet()
     }
     
     /**
      * Evict least recently used entry
      */
-    fun evictLeastUsed(): T? {
+    suspend fun evictLeastUsed(): T? = lock.withLock {
         if (cache.isEmpty()) return null
         val oldestKey = accessOrder.firstOrNull() ?: return null
         accessOrder.removeAt(0)
-        return cache.remove(oldestKey)?.value
+        cache.remove(oldestKey)?.value
     }
 }
+

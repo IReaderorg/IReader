@@ -306,12 +306,8 @@ class EpubBuilderContentProcessingTest {
         val content = (1..paragraphCount).map { Text("Paragraph $it") }
         
         // When: Processing
-        val extractedText = content.mapNotNull {
-            when (it) {
-                is Text -> it.text
-                else -> null
-            }
-        }.joinToString("\n\n")
+        val extractedText = content.joinToString("\n\n") { it.text }
+
         
         // Then: All paragraphs should be included
         val resultParagraphs = extractedText.split("\n\n")

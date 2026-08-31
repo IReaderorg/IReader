@@ -298,7 +298,7 @@ class CollectionExtTest {
     fun `next throws IndexGreaterThanCollectionSizeException at last element`() {
         val list = listOf("a", "b", "c")
         
-        assertFailsWith<IndexOutOfBoundsException> {
+        assertFailsWith<IndexGreaterThanCollectionSizeException> {
             list.next({ it }, "c")
         }
     }
@@ -324,11 +324,12 @@ class CollectionExtTest {
     }
 
     @Test
-    fun `previous throws at first element`() {
+    fun `previous throws IndexLessThanZeroException at first element`() {
         val list = listOf("a", "b", "c")
         
-        assertFailsWith<IndexOutOfBoundsException> {
+        assertFailsWith<IndexLessThanZeroException> {
             list.previous("a") { it }
         }
     }
 }
+

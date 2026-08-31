@@ -69,10 +69,10 @@ import ireader.presentation.ui.book.viewmodel.BookDetailState
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.isTableUi
+import ireader.presentation.core.util.shouldExpandFAB
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.TransparentStatusBar
-import ireader.presentation.ui.core.utils.isScrolledToEnd
-import ireader.presentation.ui.core.utils.isScrollingUp
+
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -461,11 +461,10 @@ data class BookDetailScreenSpec constructor(
                                     }
                                 }
                                 
-                                val isScrollingUp = scrollState.isScrollingUp()
-                                val isScrolledToEnd = scrollState.isScrolledToEnd()
-                                val isExpanded = isScrollingUp || isScrolledToEnd
+                                val isExpanded = scrollState.shouldExpandFAB()
                                 
                                 ExtendedFloatingActionButton(
+
                                     text = { Text(text = localize(fabTextRes)) },
                                     icon = {
                                         Icon(

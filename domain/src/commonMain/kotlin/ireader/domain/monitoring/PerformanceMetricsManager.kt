@@ -113,6 +113,9 @@ private class PluginPerformanceMetrics(
         val (startTime, duration) = synchronized(lock) {
             val start = operationStarts.remove(operation) ?: return
             val dur = currentTimeToLong() - start
+            if (operationTimes.size >= 500) {
+                operationTimes.removeAt(0)
+            }
             operationTimes.add(dur)
             totalOperations++
             if (!success) {
@@ -124,6 +127,7 @@ private class PluginPerformanceMetrics(
             start to dur
         }
     }
+
 
     fun recordError(error: Throwable) {
         synchronized(lock) {

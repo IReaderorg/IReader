@@ -101,9 +101,19 @@ class TranslationQueueManager {
      * @param description Human-readable description for debugging
      * @return Request ID if the translation should proceed, null if it should be skipped
      */
+    /**
+     * Register a translation request and get a request ID.
+     * Returns null if the request should be skipped (e.g., metadata when content is translating).
+     * 
+     * @param priority The priority level of the translation
+     * @param description Human-readable description for debugging
+     * @param job Optional Job associated with this request
+     * @return Request ID if the translation should proceed, null if it should be skipped
+     */
     suspend fun registerRequest(
         priority: TranslationPriority,
-        description: String = ""
+        description: String = "",
+        job: Job? = null
     ): String? {
         return mutex.withLock {
             // If CONTENT translation is starting, cancel all METADATA translations
@@ -121,6 +131,10 @@ class TranslationQueueManager {
             
             val requestId = "trans_${priority.name}_${requestCounter++}"
             val request = TranslationRequest(requestId, priority, description)
+            
+            if (job != null) {
+                requestMap[requestId] = job
+            }
             
             // Update active requests list
             val currentRequests = _activeRequests.value.toMutableList()
@@ -173,18 +187,37 @@ class TranslationQueueManager {
         description: String = "",
         block: suspend () -> Unit
     ): Result<Unit>? {
-        val requestId = registerRequest(priority, description) ?: return null
-        
-        return try {
+        var runningJob: Job? = null
+        val requestId = mutex.withLock {
+            if (priority == TranslationPriority.CONTENT) {
+                cancelMetadataTranslations()
+                _isContentTranslating.value = true
+            } else {
+                if (_isContentTranslating.value) {
+                    Log.info { "$TAG: Skipping METADATA translation '$description' - CONTENT translation is active" }
+                    return null
+                }
+                _isMetadataTranslating.value = true
+            }
+            
+            val id = "trans_${priority.name}_${requestCounter++}"
+            val request = TranslationRequest(id, priority, description)
+            val currentRequests = _activeRequests.value.toMutableList()
+            currentRequests.add(request)
+            _activeRequests.value = currentRequests
+            
             val job = scope.launch {
                 block()
             }
-            
-            // Track the job for potential cancellation
-            mutex.withLock {
-                requestMap[requestId] = job
-            }
-            
+            runningJob = job
+            requestMap[id] = job
+            Log.info { "$TAG: Registered and started $priority translation: $id - $description" }
+            id
+        }
+        
+        val job = runningJob ?: return null
+        
+        return try {
             // Wait for completion
             job.join()
             
@@ -204,6 +237,7 @@ class TranslationQueueManager {
             unregisterRequest(requestId)
         }
     }
+
     
     /**
      * Cancel all metadata translations.

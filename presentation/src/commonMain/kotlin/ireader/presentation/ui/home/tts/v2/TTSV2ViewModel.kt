@@ -1,31 +1,18 @@
 package ireader.presentation.ui.home.tts.v2
 
 import ireader.domain.services.tts_service.v2.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import ireader.presentation.ui.core.viewmodel.BaseViewModel
 
 /**
- * TTS V2 ViewModel - Example ViewModel using the new TTS v2 architecture
- * 
- * This ViewModel demonstrates how to:
- * - Create and manage TTSViewModelAdapter
- * - Initialize TTS controller
- * - Load chapter content
- * - Use sleep timer and notifications
- * - Handle lifecycle
- * 
- * In a real implementation, this would extend your platform's ViewModel class
- * (e.g., AndroidX ViewModel) and use viewModelScope.
+ * TTS V2 ViewModel - ViewModel using the TTS v2 architecture
  */
 class TTSV2ViewModel(
+
     private val controller: TTSController,
     private val sleepTimerUseCase: TTSSleepTimerUseCase? = null,
     private val notificationUseCase: TTSNotificationUseCase? = null,
     private val preferencesUseCase: TTSPreferencesUseCase? = null
-) {
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+) : BaseViewModel() {
     
     // Create adapter with the controller
     val adapter = TTSViewModelAdapter(controller, scope)
@@ -46,6 +33,7 @@ class TTSV2ViewModel(
         // Start notification management
         notificationUseCase?.start(controller, scope)
     }
+
     
     /**
      * Load a chapter for TTS playback
@@ -157,14 +145,12 @@ class TTSV2ViewModel(
      * The controller state should persist while the service is running.
      * Call destroyController() only when you want to fully stop TTS.
      */
-    fun onCleared() {
+    override fun onDestroy() {
         preferencesUseCase?.cleanup()
         sleepTimerUseCase?.cleanup()
         notificationUseCase?.cleanup()
-        // Don't call adapter.cleanup() - it would reset the controller state
-        // The controller is managed by the service lifecycle
-        scope.cancel()
     }
+
     
     /**
      * Fully destroy the controller and release all resources.

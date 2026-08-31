@@ -1,6 +1,9 @@
 package ireader.data.repository.consolidated
 
+import ir.kazemcodes.infinityreader.Database
 import ireader.core.log.IReaderLog
+
+
 import ireader.data.book.booksMapper
 import ireader.data.book.getLibraryMapper
 import ireader.data.core.DatabaseHandler
@@ -134,7 +137,9 @@ class BookRepositoryImpl(
 
     override suspend fun update(update: BookUpdate): Boolean {
         return try {
-            partialUpdate(update)
+            handler.await {
+                applyPartialUpdate(update)
+            }
             IReaderLog.debug("Successfully updated book: ${update.id}", "BookRepository")
             true
         } catch (e: Exception) {
@@ -147,7 +152,7 @@ class BookRepositoryImpl(
         return try {
             handler.await(inTransaction = true) {
                 updates.forEach { update ->
-                    partialUpdate(update)
+                    applyPartialUpdate(update)
                 }
             }
             IReaderLog.debug("Successfully updated ${updates.size} books", "BookRepository")
@@ -157,6 +162,7 @@ class BookRepositoryImpl(
             false
         }
     }
+
 
     override suspend fun insertNetworkBooks(books: List<Book>): List<Book> {
         return try {
@@ -227,30 +233,28 @@ class BookRepositoryImpl(
         }
     }
 
-    private suspend fun partialUpdate(update: BookUpdate) {
-        handler.await {
-            bookQueries.update(
-                id = update.id,
-                source = update.sourceId,
-                url = update.key,
-                title = update.title,
-                author = update.author,
-                description = update.description,
-                genre = update.genres?.joinToString(";"),
-                status = update.status,
-                thumbnailUrl = update.cover,
-                customCover = null, // Preserve existing customCover on partial updates
-                favorite = update.favorite,
-                lastUpdate = update.lastUpdate,
-                dateAdded = update.dateAdded,
-                viewer = update.viewer,
-                chapterFlags = update.flags,
-                coverLastModified = 0L, // Not in BookUpdate
-                initialized = update.initialized,
-                isPinned = update.isPinned,
-                pinnedOrder = update.pinnedOrder?.toLong(),
-                isArchived = update.isArchived
-            )
-        }
+    private fun Database.applyPartialUpdate(update: BookUpdate) {
+        bookQueries.update(
+            id = update.id,
+            source = update.sourceId,
+            url = update.key,
+            title = update.title,
+            author = update.author,
+            description = update.description,
+            genre = update.genres?.joinToString(";"),
+            status = update.status,
+            thumbnailUrl = update.cover,
+            customCover = null, // Preserve existing customCover on partial updates
+            favorite = update.favorite,
+            lastUpdate = update.lastUpdate,
+            dateAdded = update.dateAdded,
+            viewer = update.viewer,
+            chapterFlags = update.flags,
+            coverLastModified = 0L, // Not in BookUpdate
+            initialized = update.initialized,
+            isPinned = update.isPinned,
+            pinnedOrder = update.pinnedOrder?.toLong(),
+            isArchived = update.isArchived
+        )
     }
-}
+}

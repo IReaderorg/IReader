@@ -180,8 +180,10 @@ class PiperVoiceService(
             repository.upsertAll(voicesWithStatus)
         }
         
+        lastFetchTime = currentTimeToLong()
         return voices.size
     }
+
     
     /**
      * Parse the Piper voices JSON format

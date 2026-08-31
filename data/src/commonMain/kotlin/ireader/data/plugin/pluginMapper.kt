@@ -32,9 +32,10 @@ fun Plugin.toPluginInfo(): PluginInfo {
         id = id,
         manifest = manifest,
         status = PluginStatus.valueOf(status),
-        installDate = install_date ?: 0L,
+        installDate = install_date,
         lastUpdate = last_update,
         isPurchased = false, // Will be set by repository based on purchase records
+
         rating = null, // Will be calculated by repository from reviews
         downloadCount = 0 // Will be fetched from remote source
     )

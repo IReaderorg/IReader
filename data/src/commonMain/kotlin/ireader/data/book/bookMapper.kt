@@ -52,8 +52,9 @@ val mangaChapterMapper: (Long, Long, String, String?, String?, String?, List<Str
             author = author?: "",
             description = description?: "",
             genres = genre ?: emptyList(),
-            status = status ?: MangaInfo.UNKNOWN,
+            status = status,
             cover = thumbnailUrl ?:"",
+
             initialized = initialized,
         ) to Chapter(
             id = chapterId,
@@ -91,7 +92,7 @@ val libraryManga:
             this.unreadCount = cached_unread_count.toInt()
             this.readCount = cached_read_count.toInt()
             this.totalChapters = cached_total_chapters.toInt()
-            this.lastRead = max?.toLong() ?: last_read_at
+            this.lastRead = max ?: last_read_at
             this.isPinned = is_pinned
             this.pinnedOrder = pinned_order.toInt()
             this.isArchived = is_archived
@@ -139,7 +140,7 @@ val booksMapper= { _id: Long,
         author = author?: "",
         description = description?: "",
         genres = genre ?: emptyList(),
-        status = status ?: MangaInfo.UNKNOWN,
+        status = status,
         cover = thumbnail_url ?:"",
         customCover = custom_cover,
         initialized = initialized,
@@ -148,6 +149,7 @@ val booksMapper= { _id: Long,
         isArchived = is_archived,
         chapterPage = chapter_page.toInt(),
     )
+
 
 
 

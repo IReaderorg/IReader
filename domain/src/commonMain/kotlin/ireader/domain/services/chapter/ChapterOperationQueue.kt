@@ -77,8 +77,12 @@ class ChapterOperationQueue {
 
         // Get or create per-chapter mutex
         val chapterMutex = mutexMapLock.withLock {
+            if (chapterMutexes.size > 200) {
+                chapterMutexes.entries.removeAll { !it.value.isLocked }
+            }
             chapterMutexes.getOrPut(chapterKey) { Mutex() }
         }
+
 
         // Acquire per-chapter mutex (serializes operations for same chapter)
         return chapterMutex.withLock {
@@ -112,6 +116,9 @@ class ChapterOperationQueue {
         operation: suspend () -> T
     ): T {
         val chapterMutex = mutexMapLock.withLock {
+            if (chapterMutexes.size > 200) {
+                chapterMutexes.entries.removeAll { !it.value.isLocked }
+            }
             chapterMutexes.getOrPut(chapterKey) { Mutex() }
         }
 
@@ -155,7 +162,11 @@ class ChapterOperationQueue {
         recentFetchLock.withLock {
             recentlyFetchedChapters.clear()
         }
+        mutexMapLock.withLock {
+            chapterMutexes.entries.removeAll { !it.value.isLocked }
+        }
     }
+
 
     /**
      * Check if a chapter operation is currently in progress.

@@ -168,8 +168,10 @@ class BackupPayloadTest {
         assertTrue(options.restoreSettings)
     }
 
+    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
     @Test
     fun testBookContentSnapshotSerializationAndDeserialization() {
+
         val snapshot = BookContentSnapshot(
             bookKey = "book-1",
             bookSourceId = 1L,

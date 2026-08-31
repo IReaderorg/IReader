@@ -112,8 +112,8 @@ class BookPrefetchService(
      */
     suspend fun invalidate(bookId: Long) = mutex.withLock {
         prefetchCache.remove(bookId)
-        ongoingPrefetches[bookId]?.cancel()
-        ongoingPrefetches.remove(bookId)
+        cacheAccessOrder.remove(bookId)
+        ongoingPrefetches.remove(bookId)?.cancel()
     }
     
     /**
@@ -121,68 +121,62 @@ class BookPrefetchService(
      */
     suspend fun clearAll() = mutex.withLock {
         prefetchCache.clear()
+        cacheAccessOrder.clear()
         ongoingPrefetches.values.forEach { it.cancel() }
         ongoingPrefetches.clear()
     }
     
     private suspend fun prefetchInternal(bookId: Long) {
-        // Check if already cached or being prefetched
         mutex.withLock {
-            if (prefetchCache.containsKey(bookId)) {
-                return // Already cached
+            if (prefetchCache.containsKey(bookId) || ongoingPrefetches.containsKey(bookId)) {
+                return
             }
-            if (ongoingPrefetches.containsKey(bookId)) {
-                return // Already being prefetched
-            }
-        }
-        
-        val job = scope.launch {
-            try {
-                Log.debug("Prefetching book $bookId", TAG)
-                val startTime = currentTimeToLong()
-                
-                // Fetch book data
-                val book = getBookUseCases.findBookById(bookId) ?: return@launch
-                val chapters = getChapterUseCase.findChaptersByBookId(bookId)
-                val history = historyUseCase.findHistoryByBookId(bookId)
-                
-                val data = PrefetchedBookData(
-                    book = book,
-                    chapters = chapters,
-                    lastReadChapterId = history?.chapterId
-                )
-                
-                // Store in cache
-                mutex.withLock {
-                    // Enforce cache size limit using LRU
-                    while (prefetchCache.size >= MAX_CACHE_SIZE) {
-                        val oldestKey = cacheAccessOrder.firstOrNull()
-                        if (oldestKey != null) {
-                            prefetchCache.remove(oldestKey)
-                            cacheAccessOrder.removeAt(0)
-                        } else {
-                            break
+            
+            ongoingPrefetches[bookId] = scope.launch {
+                try {
+                    Log.debug("Prefetching book $bookId", TAG)
+                    val startTime = currentTimeToLong()
+                    
+                    // Fetch book data
+                    val book = getBookUseCases.findBookById(bookId) ?: return@launch
+                    val chapters = getChapterUseCase.findChaptersByBookId(bookId)
+                    val history = historyUseCase.findHistoryByBookId(bookId)
+                    
+                    val data = PrefetchedBookData(
+                        book = book,
+                        chapters = chapters,
+                        lastReadChapterId = history?.chapterId
+                    )
+                    
+                    // Store in cache
+                    mutex.withLock {
+                        // Enforce cache size limit using LRU
+                        while (prefetchCache.size >= MAX_CACHE_SIZE) {
+                            val oldestKey = cacheAccessOrder.firstOrNull()
+                            if (oldestKey != null) {
+                                prefetchCache.remove(oldestKey)
+                                cacheAccessOrder.removeAt(0)
+                            } else {
+                                break
+                            }
                         }
+                        prefetchCache[bookId] = data
+                        cacheAccessOrder.remove(bookId)
+                        cacheAccessOrder.add(bookId)
+                        ongoingPrefetches.remove(bookId)
                     }
-                    prefetchCache[bookId] = data
-                    cacheAccessOrder.remove(bookId)
-                    cacheAccessOrder.add(bookId)
-                    ongoingPrefetches.remove(bookId)
-                }
-                
-                val duration = currentTimeToLong() - startTime
-                Log.debug("Prefetched book $bookId in ${duration}ms (${chapters.size} chapters)", TAG)
-                
-            } catch (e: Exception) {
-                Log.error("Failed to prefetch book $bookId: ${e.message}", TAG)
-                mutex.withLock {
-                    ongoingPrefetches.remove(bookId)
+                    
+                    val duration = currentTimeToLong() - startTime
+                    Log.debug("Prefetched book $bookId in ${duration}ms (${chapters.size} chapters)", TAG)
+                    
+                } catch (e: Exception) {
+                    Log.error("Failed to prefetch book $bookId: ${e.message}", TAG)
+                    mutex.withLock {
+                        ongoingPrefetches.remove(bookId)
+                    }
                 }
             }
-        }
-        
-        mutex.withLock {
-            ongoingPrefetches[bookId] = job
         }
     }
 }
+

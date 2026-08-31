@@ -286,17 +286,14 @@ class TranslationServiceImpl(
         _state.value = ServiceState.RUNNING
         stateHolder.setRunning(true)
         
-        // Register content translation with queue manager (cancels metadata translations)
-        val requestId = translationQueueManager?.let { manager ->
-            kotlinx.coroutines.runBlocking {
-                manager.registerRequest(
-                    priority = TranslationPriority.CONTENT,
-                    description = "Chapter content translation"
-                )
-            }
-        }
-        
         translationJob = scope.launch {
+            // Register content translation with queue manager (cancels metadata translations)
+            val requestId = translationQueueManager?.registerRequest(
+                priority = TranslationPriority.CONTENT,
+                description = "Chapter content translation",
+                job = coroutineContext[kotlinx.coroutines.Job]
+            )
+            
             try {
                 processQueue()
             } catch (e: CancellationException) {
@@ -309,15 +306,12 @@ class TranslationServiceImpl(
                 
                 // Unregister from queue manager
                 if (requestId != null) {
-                    translationQueueManager?.let { manager ->
-                        kotlinx.coroutines.runBlocking {
-                            manager.unregisterRequest(requestId)
-                        }
-                    }
+                    translationQueueManager?.unregisterRequest(requestId)
                 }
             }
         }
     }
+
 
     private suspend fun processQueue() {
         val delayMs = translationPreferences.translationRateLimitDelayMs().get()

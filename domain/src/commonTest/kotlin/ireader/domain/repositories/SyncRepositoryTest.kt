@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+
 
 /**
  * Tests for SyncRepository interface contract.
@@ -52,13 +54,14 @@ class SyncRepositoryTest {
         // Act & Assert - Verify all methods can be called
         assertTrue(repository.startDiscovery().isSuccess)
         assertTrue(repository.stopDiscovery().isSuccess)
-        assertTrue(repository.observeDiscoveredDevices() is Flow)
+        assertNotNull(repository.observeDiscoveredDevices())
         assertTrue(repository.getDeviceInfo("test").isSuccess)
         assertTrue(repository.connectToDevice(createTestDeviceInfo()).isSuccess)
         assertTrue(repository.disconnectFromDevice(createTestConnection()).isSuccess)
         assertTrue(repository.exchangeManifests(createTestConnection()).isSuccess)
         assertTrue(repository.performSync(createTestConnection(), createTestManifest(), createTestManifest()).isSuccess)
-        assertTrue(repository.observeSyncStatus() is Flow)
+        assertNotNull(repository.observeSyncStatus())
+
         assertTrue(repository.cancelSync().isSuccess)
         assertTrue(repository.getBooksToSync().isSuccess)
         assertTrue(repository.getChaptersToSync().isSuccess)

@@ -12,8 +12,8 @@ import ireader.domain.models.quote.LocalQuote
 import ireader.domain.models.quote.QuoteCardStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
+
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

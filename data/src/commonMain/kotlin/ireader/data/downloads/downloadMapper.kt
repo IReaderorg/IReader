@@ -7,9 +7,10 @@ val downloadMapper = {  chapterId: Long, bookId: Long, priority: Int, _id: Long,
     SavedDownloadWithInfo(
         chapterId,
         bookId,
-        priority.toInt(),
+        priority,
         _id,
         sourceId = source,
+
         bookName = title,
         url,
         name,

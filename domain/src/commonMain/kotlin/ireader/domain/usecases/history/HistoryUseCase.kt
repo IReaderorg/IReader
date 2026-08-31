@@ -35,12 +35,12 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
 
     fun findHistoriesByFlow(query:String = ""): Flow<Map<LocalDateTime, List<HistoryWithRelations>>> {
         return historyRepository.findHistoriesByFlow(query).map { list ->
-            list.groupBy { it.readAt?.toLocalDate() ?: (0L).toLocalDate() }
+            list.groupBy { it.readAt.toLocalDate() }
         }
     }
     fun findHistoriesByFlowLongType(query:String = ""): Flow<Map<Long, List<HistoryWithRelations>>> {
         return historyRepository.findHistoriesByFlow(query).map { list ->
-            list.groupBy { it.readAt ?: 0L }
+            list.groupBy { it.readAt }
         }
     }
     
@@ -64,7 +64,8 @@ class HistoryUseCase(private val historyRepository: HistoryRepository) {
         } else {
             historyRepository.getHistoryCount(query)
         }
-        val grouped = items.groupBy { it.readAt ?: 0L }
+        val grouped = items.groupBy { it.readAt }
+
         if (offset == 0 && query.isEmpty()) {
             ireader.domain.data.cache.HistoryDataCache.updateCache(grouped)
         }

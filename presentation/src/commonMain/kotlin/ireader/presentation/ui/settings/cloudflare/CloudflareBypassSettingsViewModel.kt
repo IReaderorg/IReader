@@ -6,9 +6,9 @@ import ireader.domain.plugins.Plugin
 import ireader.domain.plugins.PluginManager
 import ireader.presentation.ui.component.DownloadPhase
 import ireader.presentation.ui.component.ExternalResourceDownloadProgress
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import ireader.presentation.ui.core.viewmodel.BaseViewModel
+
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,8 +22,8 @@ class CloudflareBypassSettingsViewModel(
     val bypassManager: CloudflareBypassPluginManager,
     private val preferenceStore: PreferenceStore,
     private val pluginManager: PluginManager
-) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+) : BaseViewModel() {
+
     
     // FlareSolverr URL preference
     private val flareSolverrUrlPref = preferenceStore.getString(

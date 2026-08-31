@@ -1,6 +1,8 @@
 package ireader.data.repository.consolidated
 
+import ir.kazemcodes.infinityreader.Database
 import ireader.core.log.IReaderLog
+
 import ireader.data.chapter.chapterMapper
 import ireader.data.core.DatabaseHandler
 import ireader.data.util.toDB
@@ -114,7 +116,9 @@ class ChapterRepositoryImpl(
 
     override suspend fun update(update: ChapterUpdate): Boolean {
         return try {
-            partialUpdate(update)
+            handler.await {
+                applyPartialUpdate(update)
+            }
             IReaderLog.debug("Successfully updated chapter: ${update.id}", "ChapterRepository")
             true
         } catch (e: Exception) {
@@ -127,7 +131,7 @@ class ChapterRepositoryImpl(
         return try {
             handler.await(inTransaction = true) {
                 updates.forEach { update ->
-                    partialUpdate(update)
+                    applyPartialUpdate(update)
                 }
             }
             IReaderLog.debug("Successfully updated ${updates.size} chapters", "ChapterRepository")
@@ -166,25 +170,21 @@ class ChapterRepositoryImpl(
         }
     }
 
-    private suspend fun partialUpdate(update: ChapterUpdate) {
-        // Get existing chapter and merge updates
-        val existing = getChapterById(update.id) ?: return
-        
-        handler.await {
-            chapterQueries.update(
-                chapterId = update.id,
-                mangaId = update.bookId ?: existing.bookId,
-                url = update.key ?: existing.key,
-                name = update.name ?: existing.name,
-                scanlator = update.translator ?: existing.translator,
-                read = update.read ?: existing.read,
-                bookmark = update.bookmark ?: existing.bookmark,
-                lastPageRead = update.lastPageRead ?: existing.lastPageRead,
-                chapterNumber = (update.number ?: existing.number).toDouble(),
-                sourceOrder = update.sourceOrder ?: existing.sourceOrder,
-                dateFetch = update.dateFetch ?: existing.dateFetch,
-                dateUpload = update.dateUpload ?: existing.dateUpload
-            )
-        }
+    private fun Database.applyPartialUpdate(update: ChapterUpdate) {
+        val existing = chapterQueries.getChapterById(update.id, chapterMapper).executeAsOneOrNull() ?: return
+        chapterQueries.update(
+            chapterId = update.id,
+            mangaId = update.bookId ?: existing.bookId,
+            url = update.key ?: existing.key,
+            name = update.name ?: existing.name,
+            scanlator = update.translator ?: existing.translator,
+            read = update.read ?: existing.read,
+            bookmark = update.bookmark ?: existing.bookmark,
+            lastPageRead = update.lastPageRead ?: existing.lastPageRead,
+            chapterNumber = (update.number ?: existing.number).toDouble(),
+            sourceOrder = update.sourceOrder ?: existing.sourceOrder,
+            dateFetch = update.dateFetch ?: existing.dateFetch,
+            dateUpload = update.dateUpload ?: existing.dateUpload
+        )
     }
-}
+}

@@ -44,15 +44,15 @@ actual class JSValue private constructor(private val value: Any?) {
         }
     }
     
-    @Suppress("UNCHECKED_CAST")
     actual fun asList(): List<Any?> {
         return when (value) {
-            is List<*> -> value as List<Any?>
+            is List<*> -> value
             is Array<*> -> value.toList()
             null -> throw JSException("Cannot convert null to List")
             else -> throw JSException("Cannot convert ${value::class.simpleName} to List")
         }
     }
+
     
     actual fun isNull(): Boolean {
         return value == null

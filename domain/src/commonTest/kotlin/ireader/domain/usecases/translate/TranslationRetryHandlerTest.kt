@@ -26,7 +26,7 @@ class TranslationRetryHandlerTest {
         
         // Assert
         assertTrue(result is TranslationRetryHandler.RetryResult.Success)
-        assertEquals("success", (result as TranslationRetryHandler.RetryResult.Success).value)
+        assertEquals("success", result.value)
         assertEquals(1, callCount)
     }
     
@@ -72,9 +72,9 @@ class TranslationRetryHandlerTest {
         
         // Assert
         assertTrue(result is TranslationRetryHandler.RetryResult.Failure)
-        val failure = result as TranslationRetryHandler.RetryResult.Failure
-        assertTrue(failure.isPermanent)
+        assertTrue(result.isPermanent)
         assertEquals(1, callCount) // Should not retry
+
     }
     
     @Test

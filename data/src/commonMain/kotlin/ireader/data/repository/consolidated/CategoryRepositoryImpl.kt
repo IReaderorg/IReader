@@ -1,6 +1,8 @@
 package ireader.data.repository.consolidated
 
+import ir.kazemcodes.infinityreader.Database
 import ireader.core.log.IReaderLog
+
 import ireader.data.category.categoryMapper
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.consolidated.CategoryRepository
@@ -98,7 +100,9 @@ class CategoryRepositoryImpl(
 
     override suspend fun update(update: CategoryUpdate): Boolean {
         return try {
-            partialUpdate(update)
+            handler.await {
+                applyPartialUpdate(update)
+            }
             IReaderLog.debug("Successfully updated category: ${update.id}", "CategoryRepository")
             true
         } catch (e: Exception) {
@@ -111,7 +115,7 @@ class CategoryRepositoryImpl(
         return try {
             handler.await(inTransaction = true) {
                 updates.forEach { update ->
-                    partialUpdate(update)
+                    applyPartialUpdate(update)
                 }
             }
             IReaderLog.debug("Successfully updated ${updates.size} categories", "CategoryRepository")
@@ -172,14 +176,12 @@ class CategoryRepositoryImpl(
         }
     }
 
-    private suspend fun partialUpdate(update: CategoryUpdate) {
-        handler.await {
-            categoryQueries.update(
-                categoryId = update.id,
-                name = update.name,
-                order = update.order,
-                flags = update.flags
-            )
-        }
+    private fun Database.applyPartialUpdate(update: CategoryUpdate) {
+        categoryQueries.update(
+            categoryId = update.id,
+            name = update.name,
+            order = update.order,
+            flags = update.flags
+        )
     }
-}
+}

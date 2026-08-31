@@ -211,8 +211,9 @@ private fun ResourceUsageIndicator(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             LinearProgressIndicator(
-                progress = { (usage.memoryUsageMB.toDouble() / usage.memoryLimitMB.toDouble()).toFloat().coerceIn(0f, 1f) },
+                progress = { (usage.memoryUsageMB / usage.memoryLimitMB).toFloat().coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth(),
+
                 color = if (usage.memoryUsageMB > usage.memoryLimitMB * 0.8f) {
                     MaterialTheme.colorScheme.error
                 } else {

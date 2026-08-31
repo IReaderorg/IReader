@@ -102,7 +102,7 @@ class ResourceTest {
 
     @Test
     fun `Success is instance of Resource`() {
-        val resource: Resource<String> = Resource.Success("data")
+        val resource: Any = Resource.Success("data")
         
         assertTrue(resource is Resource.Success<*>)
         assertFalse(resource is Resource.Error<*>)
@@ -110,11 +110,12 @@ class ResourceTest {
 
     @Test
     fun `Error is instance of Resource`() {
-        val resource: Resource<String> = Resource.Error(UiText.DynamicString("error"))
+        val resource: Any = Resource.Error<String>(UiText.DynamicString("error"))
         
         assertTrue(resource is Resource.Error<*>)
         assertFalse(resource is Resource.Success<*>)
     }
+
 
     // ==================== When Expression Tests ====================
 
@@ -228,9 +229,10 @@ class ResourceTest {
         
         val result = fetchWithCache()
         
-        assertTrue(result is Resource.Error)
-        assertNotNull(result.data)
-        assertEquals(2, result.data?.items?.size)
-        assertFalse(result.data?.isFresh == true)
+        val error = result as Resource.Error
+        val data = assertNotNull(error.data)
+        assertEquals(2, data.items.size)
+        assertFalse(data.isFresh)
     }
+
 }

@@ -6,7 +6,6 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import kotlinx.datetime.Clock
 
 /**
  * Unit tests for SourceHealth and SourceStatus
@@ -57,9 +56,11 @@ class SourceHealthTest {
             status = SourceStatus.Error("Connection timeout")
         )
         
-        assertTrue(health.status is SourceStatus.Error)
-        assertEquals("Connection timeout", (health.status as SourceStatus.Error).errorMessage)
+        val status = health.status
+        assertTrue(status is SourceStatus.Error)
+        assertEquals("Connection timeout", status.errorMessage)
     }
+
 
     @Test
     fun `SourceHealth lastChecked has default value`() {

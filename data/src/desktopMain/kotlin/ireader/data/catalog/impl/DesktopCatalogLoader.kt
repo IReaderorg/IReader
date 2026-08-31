@@ -104,15 +104,14 @@ class DesktopCatalogLoader(
         bundled.add(localSourceCatalog)
         
         // Add Community Source for community-translated content
-        communitySource?.let { source ->
-            val communityCatalog = ireader.domain.models.entities.CommunityCatalog(
-                source = source,
-                description = "Browse and read community-translated novels"
-            )
-            bundled.add(communityCatalog)
-        }
+        val communityCatalog = ireader.domain.models.entities.CommunityCatalog(
+            source = communitySource,
+            description = "Browse and read community-translated novels"
+        )
+        bundled.add(communityCatalog)
         
         val localPkgs = ExtensionDir.listFiles()
+
             .orEmpty()
             .filter { it.isDirectory }
             .map { File(it, it.name + ".apk") }

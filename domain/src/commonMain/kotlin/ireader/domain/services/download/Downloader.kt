@@ -91,13 +91,12 @@ class Downloader(
         onComplete: () -> Unit,
         onError: (Download, String) -> Unit
     ) {
-        if (_isRunning.value) {
+        if (!_isRunning.compareAndSet(expect = false, update = true)) {
             Log.debug { "Downloader: Already running, ignoring start request" }
             return
         }
         
         scope = CoroutineScope(SupervisorJob() + ioDispatcher)
-        _isRunning.value = true
         _isPaused.value = false
         _isPausedDueToNetwork.value = false
         _isPausedDueToDiskSpace.value = false
@@ -139,6 +138,7 @@ class Downloader(
         lastDownloadTime = 0
         Log.debug { "Downloader: Stopped" }
     }
+
 
     
     /**

@@ -5,8 +5,10 @@ import ireader.plugin.api.PluginManifest
 import ireader.plugin.api.PluginType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+
 
 /**
  * Tests for [GradioTTSPluginLoader.convertFromManifestMetadata].
@@ -49,8 +51,8 @@ class GradioTTSPluginLoaderTest {
 
         val config = GradioTTSPluginLoader.convertFromManifestMetadata(m)
 
-        assertTrue(config != null, "Legacy prefixed metadata should convert")
-        config?.let {
+        assertNotNull(config, "Legacy prefixed metadata should convert")
+        config.let {
             assertEquals("plugin_legacy", it.id)
             assertEquals("Plugin legacy", it.name)
             assertEquals("https://legacy.hf.space", it.spaceUrl)
@@ -69,8 +71,8 @@ class GradioTTSPluginLoaderTest {
 
         val config = GradioTTSPluginLoader.convertFromManifestMetadata(m)
 
-        assertTrue(config != null)
-        config?.let {
+        assertNotNull(config)
+        config.let {
             assertEquals("/predict", it.apiName)
             assertEquals(GradioApiType.AUTO, it.apiType)
             assertEquals(0, it.audioOutputIndex)
@@ -104,17 +106,17 @@ class GradioTTSPluginLoaderTest {
     }
 
     @Test
-    fun `converts bare apiName and params keys`() {
-        val m = manifest("bare", PluginType.GRADIO_TTS, metadata = mapOf(
-            "spaceUrl" to "https://bare.hf.space",
+    fun `parses modern root keys correctly`() {
+        val m = manifest("modern", PluginType.GRADIO_TTS, metadata = mapOf(
+            "spaceUrl" to "https://modern.hf.space",
             "apiName" to "/tts",
             "params" to """[{"type":"speed","name":"speed"}]""",
         ))
 
         val config = GradioTTSPluginLoader.convertFromManifestMetadata(m)
 
-        assertTrue(config != null)
-        config?.let {
+        assertNotNull(config)
+        config.let {
             assertEquals("/tts", it.apiName)
             assertEquals(1, it.parameters.size)
             assertTrue(it.parameters[0].isSpeedInput)
@@ -135,8 +137,8 @@ class GradioTTSPluginLoaderTest {
 
         val params = GradioTTSPluginLoader.convertFromManifestMetadata(m)?.parameters
 
-        assertTrue(params != null)
-        params?.let {
+        assertNotNull(params)
+        params.let {
             assertEquals(2, it.size)
             assertEquals(1.5f, it[0].defaultValue?.toFloat())
             assertEquals("a", it[1].defaultValue)
@@ -153,8 +155,8 @@ class GradioTTSPluginLoaderTest {
 
         val config = GradioTTSPluginLoader.convertFromManifestMetadata(m)
 
-        assertTrue(config != null)
-        assertEquals(1, config?.parameters?.size)
+        assertNotNull(config)
+        assertEquals(1, config.parameters.size)
     }
 
     // ── Missing / invalid metadata ─────────────────────────────────────

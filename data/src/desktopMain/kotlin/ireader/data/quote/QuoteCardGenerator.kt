@@ -65,13 +65,14 @@ class DesktopQuoteCardGenerator : QuoteCardGenerator {
                 val maxWidth = width - (QuoteCardConstants.HORIZONTAL_MARGIN * 2)
                 val lines = wrapText(quoteText, g2d.font, g2d.fontMetrics, maxWidth)
                 
-                var y = centerY - (lines.size * QuoteCardConstants.LINE_HEIGHT.toInt() / 2)
+                var y = centerY - (lines.size * QuoteCardConstants.LINE_HEIGHT / 2)
                 lines.forEach { line ->
                     val lineWidth = g2d.fontMetrics.stringWidth(line)
                     val x = (width - lineWidth) / 2
                     g2d.drawString(line, x, y)
-                    y += QuoteCardConstants.LINE_HEIGHT.toInt()
+                    y += QuoteCardConstants.LINE_HEIGHT
                 }
+
                 
                 // Draw book title (centered, bold)
                 g2d.color = Color(textColor.red, textColor.green, textColor.blue, (255 * 0.9).toInt())

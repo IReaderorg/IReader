@@ -90,12 +90,13 @@ fun MenuScope.TTSTrayMenu(
             if (data.isPlaying) "⏸ Pause" else "▶ Play",
             onClick = {
                 if (data.isPlaying) {
-                    (ttsNotification as? DesktopTTSNotificationImpl)?.let {
+                    ttsNotification.let {
                         // Callback will be triggered
                     }
                 }
             }
         )
+
         
         Item(
             "⏮ Previous Paragraph",

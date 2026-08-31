@@ -54,11 +54,14 @@ class ContentFilterUseCase(
         )
     }
     
-    // Cache compiled patterns for performance  
-    private var cachedPatterns: List<Regex>? = null
-    private var cachedExactStrings: List<String>? = null
-    private var cachedFlexibleRegexes: List<Regex>? = null
-    private var cacheBookId: Long? = null
+    // Cache compiled patterns for performance
+    private data class CachedBundle(
+        val bookId: Long?,
+        val bundle: FilterBundle
+    )
+    
+    @kotlin.concurrent.Volatile
+    private var cachedBundle: CachedBundle? = null
     
     /**
      * Filter a list of Page objects (for Reader screen)
@@ -156,11 +159,9 @@ class ContentFilterUseCase(
     )
 
     private fun getCompiledFilterBundle(bookId: Long? = null): FilterBundle {
-        val patterns = cachedPatterns
-        val exactStrings = cachedExactStrings
-        val flexRegexes = cachedFlexibleRegexes
-        if (patterns != null && exactStrings != null && flexRegexes != null && cacheBookId == bookId) {
-            return FilterBundle(patterns, exactStrings, flexRegexes)
+        val current = cachedBundle
+        if (current != null && current.bookId == bookId) {
+            return current.bundle
         }
         
         val regexPatterns = mutableListOf<Regex>()
@@ -220,23 +221,18 @@ class ContentFilterUseCase(
             }
         }
         
-        cachedPatterns = regexPatterns
-        cachedExactStrings = exactList
-        cachedFlexibleRegexes = flexibleList
-        cacheBookId = bookId
-        
-        return FilterBundle(regexPatterns, exactList, flexibleList)
+        val bundle = FilterBundle(regexPatterns, exactList, flexibleList)
+        cachedBundle = CachedBundle(bookId, bundle)
+        return bundle
     }
     
     /**
      * Invalidate the pattern cache (call when patterns are modified)
      */
     fun invalidateCache() {
-        cachedExactStrings = null
-        cachedPatterns = null
-        cachedFlexibleRegexes = null
-        cacheBookId = null
+        cachedBundle = null
     }
+
     
     /**
      * Apply all filter patterns and exact strings to text

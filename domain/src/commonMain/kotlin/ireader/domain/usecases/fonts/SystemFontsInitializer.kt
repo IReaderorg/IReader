@@ -31,10 +31,10 @@ class SystemFontsInitializer(
     
     /**
      * Get list of system fonts to initialize
-     * This is platform-specific and should be overridden
      */
-    protected open fun getSystemFontsList(): List<CustomFont> {
+    private fun getSystemFontsList(): List<CustomFont> {
         return listOf(
+
             CustomFont(
                 id = "system_default",
                 name = "Default",

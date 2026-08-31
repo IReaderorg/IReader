@@ -492,9 +492,10 @@ class PluginDetailsViewModel(
                             return@launch
                         }
                         pluginToInstall = plugin.copy(
-                            downloadUrl = remoteInfo?.downloadUrl,
-                            repositoryUrl = remoteInfo?.repositoryUrl
+                            downloadUrl = remoteInfo.downloadUrl,
+                            repositoryUrl = remoteInfo.repositoryUrl
                         )
+
                     }
                     
                     // Use download service if available for progress tracking

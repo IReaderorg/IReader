@@ -837,9 +837,9 @@ class CatalogFilteringLogicTest {
         val english = TestDataFactory.createCatalogInstalledLocally(sourceId = 1L, lang = "en", isPinned = true)
         val japanese = TestDataFactory.createCatalogInstalledLocally(sourceId = 2L, lang = "jp", isPinned = true)
         val catalogs = listOf(english, japanese)
-        val filtered = catalogs.filter { it.source?.lang in setOf("en") }
+        val filtered = catalogs.filter { it.source.lang in setOf("en") }
         assertEquals(1, filtered.size)
-        assertEquals("en", filtered.first().source?.lang)
+        assertEquals("en", filtered.first().source.lang)
     }
 
     @Test
@@ -872,9 +872,10 @@ class CatalogFilteringLogicTest {
             TestDataFactory.createCatalogRemote(sourceId = 2L, lang = "jp")
         )
         val codes: Set<String> = emptySet()
-        val filtered = if (codes == null || codes.isEmpty()) catalogs else catalogs.filter { it.lang in codes }
+        val filtered = if (codes.isEmpty()) catalogs else catalogs.filter { it.lang in codes }
         assertEquals(2, filtered.size)
     }
+
 
     @Test
     fun `filtering catalogs by query should match name case-insensitively`() {
@@ -945,8 +946,9 @@ class CatalogFilteringLogicTest {
         val local = listOf(TestDataFactory.createCatalogInstalledLocally(sourceId = 4L, lang = "es"))
         val languages = mutableSetOf<String>()
         remote.forEach { languages.add(it.lang) }
-        local.forEach { it.source?.lang?.let { lang -> languages.add(lang) } }
+        local.forEach { languages.add(it.source.lang) }
         assertEquals(3, languages.size)
+
         assertTrue(languages.contains("en"))
         assertTrue(languages.contains("jp"))
         assertTrue(languages.contains("es"))
@@ -1138,7 +1140,10 @@ class ExtensionStateUpdateSimulationTest {
         assertEquals("en", state.pinnedCatalogs.first().source?.lang)
         assertEquals(1, state.remoteCatalogs.size)
         assertEquals("en", state.remoteCatalogs.first().lang)
+
+
     }
+
 
     @Test
     fun `state update with search query should filter by name`() {
@@ -1235,9 +1240,11 @@ class ExtensionEventFlowTest {
         advanceUntilIdle()
         assertEquals(1, events.size)
         val errorEvent = events[0] as ExtensionEvent.Error
-        assertTrue(errorEvent.error is ExtensionError.InstallFailed)
-        assertEquals("com.test", (errorEvent.error as ExtensionError.InstallFailed).pkgName)
+        val err = errorEvent.error
+        assertTrue(err is ExtensionError.InstallFailed)
+        assertEquals("com.test", err.pkgName)
         job.cancel()
+
     }
 
     @Test

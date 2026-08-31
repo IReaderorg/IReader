@@ -156,7 +156,6 @@ class MultiSupabaseClientProvider(
             SupabaseEndpoint.BOOKS -> libraryClient
             SupabaseEndpoint.REVIEWS -> bookReviewsClient // Book reviews
             SupabaseEndpoint.COMMUNITY -> analyticsClient // Leaderboard
-            else -> authClient // Default fallback
         }
     }
     
@@ -168,13 +167,13 @@ class MultiSupabaseClientProvider(
                 SupabaseEndpoint.BOOKS -> libraryUrl.isNotEmpty() && libraryKey.isNotEmpty()
                 SupabaseEndpoint.REVIEWS -> bookReviewsUrl.isNotEmpty() && bookReviewsKey.isNotEmpty()
                 SupabaseEndpoint.COMMUNITY -> analyticsUrl.isNotEmpty() && analyticsKey.isNotEmpty()
-                else -> false
             }
         } catch (e: Exception) {
             Log.error(e, "Failed to check endpoint availability for $endpoint")
             false
         }
     }
+
     
     override fun getSupabaseUrl(): String = authUrl
     

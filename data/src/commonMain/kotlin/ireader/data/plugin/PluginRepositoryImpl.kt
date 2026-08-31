@@ -234,25 +234,20 @@ class PluginRepositoryImpl(
         val result = handler.awaitOneOrNull {
             pluginReviewQueries.getAverageRating(pluginId)
         }
-        return when (result) {
-            is Double -> result.toFloat()
-            is Float -> result
-            is Number -> result.toFloat()
-            else -> null
-        }
+        return result?.AVG?.toFloat()
     }
+
+
+
+
 
     override suspend fun getReviewCount(pluginId: String): Int {
         val result = handler.awaitOne {
             pluginReviewQueries.getReviewCount(pluginId)
         }
-        return when (result) {
-            is Long -> result.toInt()
-            is Int -> result
-            is Number -> result.toInt()
-            else -> 0
-        }
+        return result.toInt()
     }
+
 
     // Helper methods
     

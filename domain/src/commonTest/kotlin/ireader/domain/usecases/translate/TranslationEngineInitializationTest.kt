@@ -204,8 +204,10 @@ class MockStringSetPreference(
     private val defaultValue: Set<String>,
     private val prefs: MutableMap<String, Any>
 ) : Preference<Set<String>> {
+    @Suppress("UNCHECKED_CAST")
     override fun get(): Set<String> = prefs[key] as? Set<String> ?: defaultValue
     override fun set(value: Set<String>) { prefs[key] = value }
+
     override fun isSet(): Boolean = prefs.containsKey(key)
     override fun delete() { prefs.remove(key) }
     override fun defaultValue(): Set<String> = defaultValue

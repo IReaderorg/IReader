@@ -222,9 +222,10 @@ actual class ImportEpub(
         val textList = mutableListOf<Text>()
         
         // Get the body element
-        val body = doc.body() ?: return emptyList()
+        val body = doc.body()
         
         // Traverse all child nodes (including text nodes)
+
         fun traverseNodes(node: com.fleeksoft.ksoup.nodes.Node) {
             when (node) {
                 is com.fleeksoft.ksoup.nodes.TextNode -> {

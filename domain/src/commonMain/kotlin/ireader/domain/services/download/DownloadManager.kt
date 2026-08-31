@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 
 /**
  * Central manager for all download operations.
@@ -117,7 +119,7 @@ class DownloadManager(
         if (newDownloads.isEmpty()) return
         
         val newStates = newDownloads.map { DownloadState(it) }
-        _queue.value = _queue.value + newStates
+        _queue.update { current -> current + newStates }
         
         // Persist queue
         persistQueue()
@@ -152,11 +154,11 @@ class DownloadManager(
      * Remove a download from the queue.
      */
     suspend fun removeFromQueue(chapterId: Long) {
-        _queue.value = _queue.value.filter { it.download.chapterId != chapterId }
+        val download = _queue.value.find { it.download.chapterId == chapterId }?.download
+        _queue.update { list -> list.filter { it.download.chapterId != chapterId } }
         persistQueue()
         
         // Remove from database - find the download first
-        val download = _queue.value.find { it.download.chapterId == chapterId }?.download
         if (download != null) {
             downloadUseCases.deleteSavedDownload(
                 ireader.domain.models.entities.Download(
@@ -169,6 +171,7 @@ class DownloadManager(
         
         Log.debug { "DownloadManager: Removed chapter $chapterId from queue" }
     }
+
     
     /**
      * Clear the entire queue.
@@ -339,27 +342,40 @@ class DownloadManager(
      * Reorder downloads in the queue.
      */
     fun reorderDownloads(fromIndex: Int, toIndex: Int) {
-        val mutableQueue = _queue.value.toMutableList()
-        if (fromIndex in mutableQueue.indices && toIndex in mutableQueue.indices) {
-            val item = mutableQueue.removeAt(fromIndex)
-            mutableQueue.add(toIndex, item)
-            _queue.value = mutableQueue
-            scope.launch { persistQueue() }
+        _queue.update { current ->
+            if (fromIndex in current.indices && toIndex in current.indices) {
+                val mutableQueue = current.toMutableList()
+                val item = mutableQueue.removeAt(fromIndex)
+                mutableQueue.add(toIndex, item)
+                mutableQueue
+            } else {
+                current
+            }
         }
+        scope.launch { persistQueue() }
     }
     
     private fun updateDownloadInQueue(download: Download) {
-        val index = _queue.value.indexOfFirst { it.download.chapterId == download.chapterId }
-        if (index >= 0) {
-            val mutableQueue = _queue.value.toMutableList()
-            mutableQueue[index] = DownloadState(download)
-            _queue.value = mutableQueue
-            
-            if (download.status == DownloadStatus.DOWNLOADED) {
-                _completedCount.value++
+        var statusChangedToDownloaded = false
+        _queue.update { currentList ->
+            val index = currentList.indexOfFirst { it.download.chapterId == download.chapterId }
+            if (index >= 0) {
+                val previousStatus = currentList[index].download.status
+                if (previousStatus != DownloadStatus.DOWNLOADED && download.status == DownloadStatus.DOWNLOADED) {
+                    statusChangedToDownloaded = true
+                }
+                val mutableQueue = currentList.toMutableList()
+                mutableQueue[index] = DownloadState(download)
+                mutableQueue
+            } else {
+                currentList
             }
         }
+        if (statusChangedToDownloaded) {
+            _completedCount.update { it + 1 }
+        }
     }
+
     
     private suspend fun persistQueue() {
         val items = _queue.value.map { state ->
