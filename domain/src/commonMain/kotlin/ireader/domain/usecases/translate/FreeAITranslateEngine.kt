@@ -24,7 +24,7 @@ class FreeAITranslateEngine(
     private val client: HttpClients
 ) : TranslateEngine() {
 
-    override val id: Long = 9 // Unique ID for Free AI Translation
+    override val id: Long = FREE_AI
     override val engineName: String = "Free AI Translation"
     override val supportsAI: Boolean = true
     override val requiresApiKey: Boolean = false

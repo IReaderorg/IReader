@@ -24,11 +24,40 @@ class TranslationScreenSpec {
         TranslationSuiteScreen(
             state = state,
             onNavigateUp = { navController.safePopBackStack() },
-            onSelectEngine = { viewModel.setEngine(it) },
+            onSelectEngineId = { viewModel.setEngineId(it) },
             onSelectLanguage = { viewModel.setTargetLanguage(it) },
-            onApiKeyChange = { viewModel.setApiKey(it) },
+            onOpenAIApiKeyChange = { viewModel.setOpenAIApiKey(it) },
+            onDeepSeekApiKeyChange = { viewModel.setDeepSeekApiKey(it) },
+            onGeminiApiKeyChange = { viewModel.setGeminiApiKey(it) },
+            onGeminiModelChange = { viewModel.setGeminiModel(it) },
+            onRefreshGeminiModels = { viewModel.refreshGeminiModels() },
+            onClaudeApiKeyChange = { viewModel.setClaudeApiKey(it) },
+            onClaudeModelChange = { viewModel.setClaudeModel(it) },
+            onOpenRouterApiKeyChange = { viewModel.setOpenRouterApiKey(it) },
+            onOpenRouterModelChange = { viewModel.setOpenRouterModel(it) },
+            onLoadOpenRouterModels = { viewModel.loadOpenRouterModels() },
+            onNvidiaApiKeyChange = { viewModel.setNvidiaApiKey(it) },
+            onNvidiaModelChange = { viewModel.setNvidiaModel(it) },
+            onLoadNvidiaModels = { viewModel.loadNvidiaModels() },
+            onOllamaUrlChange = { viewModel.setOllamaUrl(it) },
+            onOllamaModelChange = { viewModel.setOllamaModel(it) },
+            onTestConnection = { viewModel.testConnection() },
+            onResetTestConnectionState = { viewModel.resetTestConnectionState() },
+            onInitializeGoogleMlKit = { src, tgt -> viewModel.initializeGoogleMlKit(src, tgt) },
+            onNavigateToLogin = { loginType ->
+                when (loginType) {
+                    "chatgpt" -> navController.navigate(ChatGptLoginScreenSpec())
+                    "deepseek" -> navController.navigate(DeepSeekLoginScreenSpec())
+                }
+            },
+            onContentTypeChange = { viewModel.setContentType(it) },
+            onToneTypeChange = { viewModel.setToneType(it) },
+            onPreserveStyleChange = { viewModel.setPreserveStyle(it) },
+            onCustomPromptChange = { viewModel.setCustomPrompt(it) },
             onToggleAutoTranslateChapters = { viewModel.toggleAutoTranslateChapters(it) },
             onToggleAutoTranslateNovelNames = { viewModel.toggleAutoTranslateNovelNames(it) },
+            onToggleAutoShareTranslations = { viewModel.toggleAutoShareTranslations(it) },
+            onContributorNameChange = { viewModel.setContributorName(it) },
             onTogglePreset = { id, enabled -> viewModel.togglePreset(id, enabled) },
             onGlossarySearch = { viewModel.setGlossarySearch(it) },
             onAddGlossaryTerm = { src, tgt, notes -> viewModel.addGlossaryTerm(src, tgt, notes) },
@@ -40,3 +69,4 @@ class TranslationScreenSpec {
         )
     }
 }
+

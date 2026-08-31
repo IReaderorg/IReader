@@ -103,14 +103,16 @@ class AudioStudioViewModelTest {
 
         val viewModel = AudioStudioViewModel(readerPrefs, appPrefs)
 
-        assertEquals(AudioEngineType.DEVICE_TTS, viewModel.state.value.selectedEngine)
+        assertEquals(AudioEngineType.PIPER_NEURAL, viewModel.state.value.selectedEngine)
+        assertEquals(3, viewModel.state.value.availableEngines.size)
 
         viewModel.setEngine(AudioEngineType.GRADIO_AI)
         assertEquals(AudioEngineType.GRADIO_AI, viewModel.state.value.selectedEngine)
         assertTrue(appPrefs.useAITTS().get())
+        assertTrue(appPrefs.useGradioTTS().get())
 
-        viewModel.setEngine(AudioEngineType.DEVICE_TTS)
-        assertEquals(AudioEngineType.DEVICE_TTS, viewModel.state.value.selectedEngine)
+        viewModel.setEngine(AudioEngineType.PIPER_NEURAL)
+        assertEquals(AudioEngineType.PIPER_NEURAL, viewModel.state.value.selectedEngine)
         assertFalse(appPrefs.useAITTS().get())
     }
 
@@ -160,8 +162,33 @@ class AudioStudioViewModelTest {
         assertTrue(viewModel.state.value.autoNextChapter)
         assertTrue(readerPrefs.autoNextChapter().get())
 
-        viewModel.setSleepTimer(30)
-        assertEquals(30, viewModel.state.value.sleepTimerMinutes)
-        assertEquals(30L, readerPrefs.sleepTime().get())
+        viewModel.setSleepTimer(45)
+        assertEquals(45, viewModel.state.value.sleepTimerMinutes)
+        assertEquals(45L, readerPrefs.sleepTime().get())
+    }
+
+    @Test
+    fun testTextMergingAndCaching() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val appPrefs = AppPreferences(prefStore)
+
+        val viewModel = AudioStudioViewModel(readerPrefs, appPrefs)
+
+        viewModel.setMergeWordsRemote(60)
+        assertEquals(60, viewModel.state.value.mergeWordsRemote)
+        assertEquals(60, readerPrefs.ttsMergeWordsRemote().get())
+
+        viewModel.setMergeWordsNative(30)
+        assertEquals(30, viewModel.state.value.mergeWordsNative)
+        assertEquals(30, readerPrefs.ttsMergeWordsNative().get())
+
+        viewModel.setChapterCacheEnabled(true)
+        assertTrue(viewModel.state.value.chapterCacheEnabled)
+        assertTrue(readerPrefs.ttsChapterCacheEnabled().get())
+
+        viewModel.setChapterCacheDays(14)
+        assertEquals(14, viewModel.state.value.chapterCacheDays)
+        assertEquals(14, readerPrefs.ttsChapterCacheDays().get())
     }
 }

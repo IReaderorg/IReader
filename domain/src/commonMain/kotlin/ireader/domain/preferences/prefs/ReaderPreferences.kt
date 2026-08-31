@@ -275,6 +275,13 @@ Visit.*for more chapters"""
         return preferenceStore.getString("gemini_api_key", "")
     }
     
+    fun claudeApiKey(): Preference<String> {
+        return preferenceStore.getString("claude_api_key", "")
+    }
+    fun claudeModel(): Preference<String> {
+        return preferenceStore.getString("claude_model", "claude-3-5-sonnet-20241022")
+    }
+    
     fun pollinationsApiKey(): Preference<String> {
         return preferenceStore.getString("pollinations_api_key", "")
     }

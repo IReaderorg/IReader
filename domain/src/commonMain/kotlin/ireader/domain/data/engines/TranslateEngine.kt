@@ -214,15 +214,22 @@ abstract class TranslateEngine {
     companion object {
         // Define engine IDs as constants for easier reference
         const val BUILT_IN = 0L
+        const val ML_KIT = 0L
         const val GOOGLE = 1L
         const val BING = 2L
-        const val OPENAI = 3L
-        const val DEEPSEEK = 4L
+        const val OPENAI = 2L
+        const val DEEPSEEK = 3L
+        const val LIBRE = 4L
         const val OLLAMA = 5L
         const val WEBSCRAPING = 6L
         const val DEEPSEEK_WEBVIEW = 7L
+        const val FREE_AI = 7L
         const val GEMINI = 8L
         const val OPENROUTER = 9L
+        const val NVIDIA = 10L
+        const val GOOGLE_FREE = 11L
+        const val GEMINI_NANO = 12L
+        const val CLAUDE = 13L
         
         /** The paragraph break marker used in translation prompts */
         const val PARAGRAPH_BREAK_MARKER = "---PARAGRAPH_BREAK---"
@@ -276,22 +283,37 @@ abstract class TranslateEngine {
         
         // Add new engines to the values() method
         fun values(): Array<Long> {
-            return arrayOf(BUILT_IN, GOOGLE, BING, OPENAI, DEEPSEEK, OLLAMA, WEBSCRAPING, DEEPSEEK_WEBVIEW, GEMINI, OPENROUTER)
+            return arrayOf(
+                BUILT_IN,
+                GOOGLE_FREE,
+                GEMINI_NANO,
+                CLAUDE,
+                GEMINI,
+                OPENAI,
+                DEEPSEEK,
+                OPENROUTER,
+                NVIDIA,
+                OLLAMA,
+                LIBRE,
+                FREE_AI
+            )
         }
         
         // Map engine ID to name for display
         fun valueOf(id: Long): String {
             return when (id) {
-                BUILT_IN -> "BuiltIn"
-                GOOGLE -> "Google"
-                BING -> "Bing"
-                OPENAI -> "OpenAI"
-                DEEPSEEK -> "DeepSeek"
-                OLLAMA -> "Ollama"
-                WEBSCRAPING -> "AI Translation (No API Key)"
-                DEEPSEEK_WEBVIEW -> "DeepSeek WebView (No API Key)"
+                BUILT_IN -> "Google ML Kit (Offline)"
+                GOOGLE_FREE -> "Google Translate (Free)"
+                GEMINI_NANO -> "Gemini Nano (Offline)"
+                CLAUDE -> "Claude AI (Anthropic)"
                 GEMINI -> "Google Gemini"
+                OPENAI -> "OpenAI (ChatGPT)"
+                DEEPSEEK -> "DeepSeek AI"
                 OPENROUTER -> "OpenRouter AI"
+                NVIDIA -> "NVIDIA NIM"
+                OLLAMA -> "Ollama (Local LLM)"
+                LIBRE -> "LibreTranslate"
+                FREE_AI -> "AI Translation (No API Key)"
                 else -> "Unknown"
             }
         }

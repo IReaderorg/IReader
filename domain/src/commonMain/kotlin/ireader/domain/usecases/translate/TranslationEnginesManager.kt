@@ -36,20 +36,19 @@ class TranslationEnginesManager(
 ) {
 
     // Built-in translation engines:
-    // - Google ML Kit (offline, requires model download)
-    // - Google Translate Free (online, no setup required)
-    // - Gemini Nano (offline AI, Android 14+ only, best quality) - NEW!
-    // - Gemini API (requires API key, for users who prefer Google's AI)
-    // - OpenRouter AI (requires API key, access to multiple AI models)
-    // - NVIDIA NIM (requires API key, access to NVIDIA-optimized AI models)
-    // Other engines (like Ollama) are available as plugins from the Feature Store
     val builtInEngines = listOf(
-        GoogleTranslateML(),  // id=0, offline, default
-        GoogleTranslateFree(),  // id=11, online, no setup - RECOMMENDED
-        GeminiNano(),  // id=12, offline AI, Android 14+, best quality
-        GeminiTranslateEngine(httpClients, readerPreferences),  // id=8, requires API key
-        OpenRouterTranslateEngine(httpClients, readerPreferences),  // id=9, requires API key
-        NvidiaTranslateEngine(httpClients, readerPreferences)  // id=10, requires API key
+        GoogleTranslateML(),  // id=0, offline
+        GoogleTranslateFree(),  // id=11, online free, no setup required
+        GeminiNano(),  // id=12, offline AI, Android 14+
+        ClaudeTranslateEngine(httpClients, readerPreferences),  // id=13, Claude AI (Anthropic)
+        GeminiTranslateEngine(httpClients, readerPreferences),  // id=8, Google Gemini API
+        OpenAITranslateEngine(httpClients, readerPreferences),  // id=2, OpenAI (ChatGPT)
+        DeepSeekTranslateEngine(httpClients, readerPreferences),  // id=3, DeepSeek AI
+        OpenRouterTranslateEngine(httpClients, readerPreferences),  // id=9, OpenRouter AI
+        NvidiaTranslateEngine(httpClients, readerPreferences),  // id=10, NVIDIA NIM
+        OllamaTranslateEngine(httpClients, readerPreferences),  // id=5, Ollama Local LLM
+        LibreTranslateEngine(httpClients),  // id=4, LibreTranslate
+        FreeAITranslateEngine(httpClients)  // id=7, AI Webscraping
     )
     
     // Cache for translation results to improve performance

@@ -330,17 +330,31 @@ val screenModelModule = module {
     factory {
         ireader.presentation.ui.settings.audio.AudioStudioViewModel(
             readerPreferences = get(),
-            appPreferences = get()
+            appPreferences = get(),
+            platformCapabilities = getOrNull(),
+            gradioTTSManager = getOrNull(),
+            piperVoiceService = getOrNull(),
+            piperVoiceDownloader = getOrNull(),
+            chapterCache = getOrNull(),
+            ttsController = getOrNull(),
+            pluginManager = getOrNull(),
+            pluginTTSManager = getOrNull()
         )
     }
+
 
     // ==================== Translation Suite ====================
     factory {
         ireader.presentation.ui.settings.translation_suite.TranslationSuiteViewModel(
             readerPreferences = get(),
             translationPreferences = get(),
-            textReplacementUseCase = getOrNull()
+            translationEnginesManager = getOrNull(),
+            textReplacementUseCase = getOrNull(),
+            communityPreferences = getOrNull(),
+            localizeHelper = getOrNull(),
+            httpClient = getOrNull()
         )
     }
 }
+
 

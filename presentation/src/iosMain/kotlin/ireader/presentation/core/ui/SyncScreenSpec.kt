@@ -5,10 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.sync.UnifiedSyncScreen
 import ireader.presentation.ui.settings.sync.UnifiedSyncViewModel
-
 
 actual class SyncScreenSpec {
 
@@ -29,8 +29,11 @@ actual class SyncScreenSpec {
             onCancelSync = { viewModel.cancelSync() },
             onToggleAutoSyncOnLaunch = { viewModel.toggleAutoSyncOnLaunch(it) },
             onToggleAutoSyncOnChapterFinish = { viewModel.toggleAutoSyncOnChapterFinish(it) },
-            onToggleSyncOnWifiOnly = { viewModel.toggleSyncOnWifiOnly(it) }
+            onToggleSyncOnWifiOnly = { viewModel.toggleSyncOnWifiOnly(it) },
+            onOpenGoogleDriveAuth = { navController.navigate(NavigationRoutes.googleDriveBackup) },
+            onOpenSupabaseAuth = { navController.navigate(NavigationRoutes.supabaseConfig) }
         )
     }
 }
+
 

@@ -102,16 +102,54 @@ class TranslationSuiteViewModelTest {
 
         val viewModel = TranslationSuiteViewModel(readerPrefs, translationPrefs)
 
-        viewModel.setEngine(TranslationEngineChoice.DEEPL)
-        assertEquals(TranslationEngineChoice.DEEPL, viewModel.state.value.selectedEngine)
+        viewModel.setEngineId(8L)
+        assertEquals(8L, viewModel.state.value.selectedEngineId)
 
         viewModel.setTargetLanguage("Spanish")
         assertEquals("Spanish", viewModel.state.value.targetLanguage)
 
-        viewModel.setApiKey("test-key-123")
-        assertEquals("test-key-123", viewModel.state.value.apiKey)
-        assertEquals("test-key-123", readerPrefs.openAIApiKey().get())
+        viewModel.setOpenAIApiKey("test-openai-key")
+        assertEquals("test-openai-key", viewModel.state.value.openAIApiKey)
+        assertEquals("test-openai-key", readerPrefs.openAIApiKey().get())
+
+        viewModel.setGeminiApiKey("test-gemini-key")
+        assertEquals("test-gemini-key", viewModel.state.value.geminiApiKey)
+        assertEquals("test-gemini-key", readerPrefs.geminiApiKey().get())
+
+        viewModel.setDeepSeekApiKey("test-deepseek-key")
+        assertEquals("test-deepseek-key", viewModel.state.value.deepSeekApiKey)
+        assertEquals("test-deepseek-key", readerPrefs.deepSeekApiKey().get())
+
+        viewModel.setClaudeApiKey("test-claude-key")
+        assertEquals("test-claude-key", viewModel.state.value.claudeApiKey)
+        assertEquals("test-claude-key", readerPrefs.claudeApiKey().get())
+
+        viewModel.setClaudeModel("claude-3-opus-20240229")
+        assertEquals("claude-3-opus-20240229", viewModel.state.value.claudeModel)
+        assertEquals("claude-3-opus-20240229", readerPrefs.claudeModel().get())
     }
+
+    @Test
+    fun testContextAndStyleSettings() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val translationPrefs = TranslationPreferences(prefStore)
+
+        val viewModel = TranslationSuiteViewModel(readerPrefs, translationPrefs)
+
+        viewModel.setContentType(ireader.domain.data.engines.ContentType.LITERARY)
+        assertEquals(ireader.domain.data.engines.ContentType.LITERARY, viewModel.state.value.contentType)
+
+        viewModel.setToneType(ireader.domain.data.engines.ToneType.FORMAL)
+        assertEquals(ireader.domain.data.engines.ToneType.FORMAL, viewModel.state.value.toneType)
+
+        viewModel.setPreserveStyle(true)
+        assertTrue(viewModel.state.value.preserveStyle)
+
+        viewModel.setCustomPrompt("Translate in elegant wuxia prose")
+        assertEquals("Translate in elegant wuxia prose", viewModel.state.value.customPrompt)
+    }
+
 
     @Test
     fun testGlossaryOperations() {
@@ -149,3 +187,4 @@ class TranslationSuiteViewModelTest {
         assertFalse(updatedNavPreset.isEnabled)
     }
 }
+

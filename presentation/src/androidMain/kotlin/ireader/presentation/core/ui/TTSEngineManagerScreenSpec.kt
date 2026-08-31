@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.audio.AudioStudioScreen
 import ireader.presentation.ui.settings.audio.AudioStudioViewModel
@@ -33,7 +34,26 @@ actual class TTSEngineManagerScreenSpec {
             onToggleSkipBlankLines = { viewModel.toggleSkipBlankLines(it) },
             onSleepTimerChange = { viewModel.setSleepTimer(it) },
             onTogglePlaySample = { viewModel.togglePlaySample() },
-            onResetRateAndPitch = { viewModel.resetRateAndPitch() }
+            onResetRateAndPitch = { viewModel.resetRateAndPitch() },
+            onSelectCloudConfig = { viewModel.selectCloudConfig(it) },
+            onTestCloudConfig = { viewModel.testCloudConfig(it) },
+            onOpenEditCloudDialog = { viewModel.openEditCloudDialog(it) },
+            onDismissEditCloudDialog = { viewModel.dismissEditCloudDialog() },
+            onSaveCloudConfig = { viewModel.saveCloudConfig(it) },
+            onDeleteCloudConfig = { viewModel.deleteCloudConfig(it) },
+            onClearCloudTestResult = { viewModel.clearCloudTestResult() },
+            onFilterPiperLanguage = { viewModel.filterPiperLanguage(it) },
+            onSelectPiperVoice = { viewModel.selectPiperVoice(it) },
+            onDownloadPiperVoice = { viewModel.downloadPiperVoice(it) },
+            onDeletePiperVoice = { viewModel.deletePiperVoice(it) },
+            onRefreshPiperVoices = { viewModel.refreshPiperVoices() },
+            onMergeWordsRemoteChange = { viewModel.setMergeWordsRemote(it) },
+            onMergeWordsNativeChange = { viewModel.setMergeWordsNative(it) },
+            onChapterCacheEnabledChange = { viewModel.setChapterCacheEnabled(it) },
+            onChapterCacheDaysChange = { viewModel.setChapterCacheDays(it) },
+            onClearChapterCache = { viewModel.clearChapterCache() },
+            onNavigateToFeatureStore = { navController.navigate(NavigationRoutes.featureStore) }
         )
+
     }
 }
