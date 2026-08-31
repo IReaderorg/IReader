@@ -2,6 +2,10 @@ package ireader.presentation.ui.settings.audio
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -78,6 +82,8 @@ fun AudioStudioScreen(
     onChapterCacheDaysChange: (Int) -> Unit = {},
     onClearChapterCache: () -> Unit = {},
     onNavigateToFeatureStore: () -> Unit = {},
+    onAutoDetectCloudSpace: ((String, String?, (Result<GradioTTSConfig>) -> Unit) -> Unit)? = null,
+    onTestCustomCloudConfig: ((GradioTTSConfig, (Result<ByteArray>) -> Unit) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableStateOf(0) }
@@ -270,13 +276,21 @@ fun AudioStudioScreen(
         }
     }
 
-    // Cloud Config Edit Dialog
-    if (state.isEditCloudDialogOpen && state.editingCloudConfig != null) {
-        GradioConfigEditDialog(
-            config = state.editingCloudConfig,
-            onDismiss = onDismissEditCloudDialog,
-            onSave = onSaveCloudConfig
-        )
+    // Custom Cloud TTS Engine Studio Screen / Overlay
+    AnimatedVisibility(
+        visible = state.isEditCloudDialogOpen && state.editingCloudConfig != null,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+    ) {
+        state.editingCloudConfig?.let { config ->
+            CustomTTSEngineScreen(
+                config = config,
+                onDismiss = onDismissEditCloudDialog,
+                onSave = onSaveCloudConfig,
+                onAutoDetect = onAutoDetectCloudSpace,
+                onTestCustomConfig = onTestCustomCloudConfig
+            )
+        }
     }
 
     // Piper Catalog Dialog (Desktop)
@@ -854,14 +868,18 @@ private fun FeatureStoreTTSPluginsCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.weight(1f, fill = false),
+                    verticalAlignment = Alignment.CenterVertically, 
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Icon(Icons.Outlined.Storefront, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Text("Feature Store Voice Plugins", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("Voice Plugins", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 }
-                FilledTonalButton(onClick = onOpenFeatureStore) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Browse Store")
+                FilledTonalIconButton(
+                    onClick = onOpenFeatureStore
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Browse Feature Store")
                 }
             }
 

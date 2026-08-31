@@ -52,7 +52,9 @@ actual class TTSEngineManagerScreenSpec {
             onChapterCacheEnabledChange = { viewModel.setChapterCacheEnabled(it) },
             onChapterCacheDaysChange = { viewModel.setChapterCacheDays(it) },
             onClearChapterCache = { viewModel.clearChapterCache() },
-            onNavigateToFeatureStore = { navController.navigate(NavigationRoutes.featureStore) }
+            onNavigateToFeatureStore = { navController.navigate(NavigationRoutes.featureStore) },
+            onAutoDetectCloudSpace = viewModel::autoDetectCloudSpace,
+            onTestCustomCloudConfig = viewModel::testCustomCloudConfig
         )
 
     }

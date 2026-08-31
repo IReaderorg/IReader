@@ -214,6 +214,11 @@ class ReaderScreenViewModel(
     val autoTranslateNextChapter = readerPreferences.autoTranslateNextChapter().asState()
     val openAIApiKey = readerPreferences.openAIApiKey().asState()
     val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()
+    val geminiApiKey = readerPreferences.geminiApiKey().asState()
+    val claudeApiKey = readerPreferences.claudeApiKey().asState()
+    val openRouterApiKey = readerPreferences.openRouterApiKey().asState()
+    val nvidiaApiKey = readerPreferences.nvidiaApiKey().asState()
+    val ollamaServerUrl = readerPreferences.ollamaServerUrl().asState()
     
     // Content filter preferences
     val contentFilterEnabled = readerPreferences.contentFilterEnabled().asState()

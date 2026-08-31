@@ -108,6 +108,7 @@ class TranslationServiceImpl(
         0L,  // Google ML Kit (offline)
         4L,  // LibreTranslate (can be self-hosted)
         5L,  // Ollama (local)
+        12L, // Gemini Nano (offline AI)
     )
     
     // Engines that require rate limiting (web-based AI)
@@ -119,6 +120,7 @@ class TranslationServiceImpl(
         8L,  // Gemini API
         9L,  // OpenRouter
         10L, // NVIDIA NIM
+        13L, // Claude AI
     )
 
     override suspend fun initialize() {
@@ -215,7 +217,8 @@ class TranslationServiceImpl(
                     bookName = book.title,
                     needsDownload = chapter.isEmpty(),
                     sourceLang = currentSourceLang,
-                    targetLang = currentTargetLang
+                    targetLang = currentTargetLang,
+                    engineId = currentEngineId
                 )
             }
             // Insert at front of queue
@@ -260,7 +263,8 @@ class TranslationServiceImpl(
                 bookName = book.title,
                 needsDownload = chapter.isEmpty(),
                 sourceLang = currentSourceLang,
-                targetLang = currentTargetLang
+                targetLang = currentTargetLang,
+                engineId = currentEngineId
             )
             translationQueue.add(task)
             stateHolder.updateChapterProgress(
@@ -533,7 +537,15 @@ class TranslationServiceImpl(
         task: TranslationTask,
         totalParagraphs: Int
     ): List<String> {
-        val engine = translationEnginesManager.get()
+        val engine = (if (task.engineId > 0) {
+            translationEnginesManager.getEngineById(task.engineId.toString())?.let {
+                when (it) {
+                    is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> it.engine
+                    is ireader.domain.usecases.translate.TranslationEngineSource.Plugin -> 
+                        ireader.domain.usecases.translate.PluginTranslateEngineAdapter(it.plugin, translationEnginesManager)
+                }
+            }
+        } else null) ?: translationEnginesManager.get()
         val maxChars = engine.maxCharsPerRequest
         val delayMs = if (engine.isOffline) 0L else maxOf(engine.rateLimitDelayMs, 3000L)
         
@@ -979,5 +991,6 @@ private data class TranslationTask(
     val bookName: String,
     val needsDownload: Boolean,
     val sourceLang: String = "en",
-    val targetLang: String = "en"
+    val targetLang: String = "en",
+    val engineId: Long = 0L
 )

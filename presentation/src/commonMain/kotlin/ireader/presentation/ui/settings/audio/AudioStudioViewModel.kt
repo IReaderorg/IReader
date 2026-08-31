@@ -7,20 +7,26 @@ import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.platform.PlatformCapabilities
 import ireader.domain.services.platform.PlatformType
+import ireader.domain.services.tts_service.GenericGradioTTSEngine
 import ireader.domain.services.tts_service.GradioTTSConfig
 import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.domain.services.tts_service.GradioTTSPresets
 import ireader.domain.services.tts_service.PiperVoiceDownloader
 import ireader.domain.services.tts_service.PiperVoiceService
 import ireader.domain.services.tts_service.TTSChapterCache
+import ireader.domain.services.tts_service.TTSEngineCallback
+import ireader.domain.services.tts_service.v2.EngineType
+import ireader.domain.services.tts_service.v2.GradioConfig
 import ireader.domain.services.tts_service.v2.TTSCommand
 import ireader.domain.services.tts_service.v2.TTSController
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import ireader.presentation.ui.settings.viewmodels.TestResult
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 enum class AudioEngineType {
     DEVICE_TTS,
@@ -91,6 +97,7 @@ class AudioStudioViewModel(
 ) : StateViewModel<AudioStudioState>(AudioStudioState()) {
 
     private var samplePlaybackJob: Job? = null
+    private var sampleGradioEngine: GenericGradioTTSEngine? = null
 
     init {
         val platform = platformCapabilities?.platformType ?: PlatformType.DESKTOP
@@ -176,6 +183,36 @@ class AudioStudioViewModel(
                 chapterCacheDays = cacheDays
             )
         }
+
+        syncEngineToController(defaultEngine)
+    }
+
+    private fun syncEngineToController(engine: AudioEngineType) {
+        ttsController?.let { controller ->
+            when (engine) {
+                AudioEngineType.GRADIO_AI -> {
+                    val activeConfig = state.value.activeCloudConfigId?.let { gradioTTSManager?.getConfigById(it) }
+                        ?: gradioTTSManager?.getActiveConfig()
+                        ?: state.value.cloudConfigs.firstOrNull()
+
+                    if (activeConfig != null) {
+                        val gradioConfig = GradioConfig(
+                            id = activeConfig.id,
+                            name = activeConfig.name,
+                            spaceUrl = activeConfig.spaceUrl,
+                            apiName = activeConfig.apiName,
+                            enabled = activeConfig.enabled,
+                            originalConfig = activeConfig
+                        )
+                        controller.dispatch(TTSCommand.SetGradioConfig(gradioConfig))
+                    }
+                    controller.dispatch(TTSCommand.SetEngine(EngineType.GRADIO))
+                }
+                else -> {
+                    controller.dispatch(TTSCommand.SetEngine(EngineType.NATIVE))
+                }
+            }
+        }
     }
 
     private fun observeCloudConfigs() {
@@ -188,6 +225,9 @@ class AudioStudioViewModel(
             scope.launch {
                 manager.activeConfigId.collectLatest { activeId ->
                     updateState { it.copy(activeCloudConfigId = activeId) }
+                    if (state.value.selectedEngine == AudioEngineType.GRADIO_AI) {
+                        syncEngineToController(AudioEngineType.GRADIO_AI)
+                    }
                 }
             }
         }
@@ -221,6 +261,7 @@ class AudioStudioViewModel(
         appPreferences.useAITTS().set(isAI)
         appPreferences.useGradioTTS().set(isAI)
         updateState { it.copy(selectedEngine = engine) }
+        syncEngineToController(engine)
     }
 
     fun setSpeechRate(rate: Float) {
@@ -265,29 +306,84 @@ class AudioStudioViewModel(
     fun togglePlaySample() {
         if (state.value.isPlayingSample) {
             samplePlaybackJob?.cancel()
+            samplePlaybackJob = null
+            sampleGradioEngine?.stop()
+            sampleGradioEngine?.cleanup()
+            sampleGradioEngine = null
             ttsController?.dispatch(TTSCommand.Stop)
             updateState { it.copy(isPlayingSample = false) }
         } else {
             samplePlaybackJob?.cancel()
+            updateState { it.copy(isPlayingSample = true) }
             samplePlaybackJob = scope.launch {
-                updateState { it.copy(isPlayingSample = true) }
                 try {
-                    if (ttsController != null) {
-                        ttsController.dispatch(TTSCommand.SetSpeed(state.value.speechRate))
-                        ttsController.dispatch(TTSCommand.SetPitch(state.value.speechPitch))
-                        ttsController.dispatch(TTSCommand.SetContent(listOf(state.value.sampleText)))
-                        ttsController.dispatch(TTSCommand.Play)
+                    val sampleText = state.value.sampleText.ifBlank { "The quick brown fox jumps over the lazy dog." }
+                    
+                    if (state.value.selectedEngine == AudioEngineType.GRADIO_AI) {
+                        // 1. Cloud AI Audio Synthesis
+                        val activeConfig = state.value.activeCloudConfigId?.let { gradioTTSManager?.getConfigById(it) }
+                            ?: gradioTTSManager?.getActiveConfig()
+                            ?: state.value.cloudConfigs.firstOrNull()
 
-                        val wordCount = state.value.sampleText.split("\\s+".toRegex()).size.coerceAtLeast(1)
-                        val estimatedDurationMs = ((wordCount * 60_000f / (150f * state.value.speechRate)).toLong()).coerceIn(2000L, 8000L)
-                        delay(estimatedDurationMs)
+                        if (activeConfig != null && gradioTTSManager != null) {
+                            val engine = gradioTTSManager.createEngine(activeConfig)
+                            sampleGradioEngine = engine
+                            engine.setSpeed(state.value.speechRate)
+                            engine.setPitch(state.value.speechPitch)
+
+                            val completer = CompletableDeferred<Unit>()
+                            engine.setCallback(object : TTSEngineCallback {
+                                override fun onStart(utteranceId: String) {}
+                                override fun onDone(utteranceId: String) {
+                                    completer.complete(Unit)
+                                }
+                                override fun onError(utteranceId: String, error: String) {
+                                    Log.error { "Gradio sample playback error: $error" }
+                                    completer.complete(Unit)
+                                }
+                            })
+                            engine.speak(sampleText, "sample_preview")
+
+                            withTimeoutOrNull(25_000L) {
+                                completer.await()
+                            }
+                        } else if (ttsController != null) {
+                            syncEngineToController(AudioEngineType.GRADIO_AI)
+                            ttsController.dispatch(TTSCommand.SetSpeed(state.value.speechRate))
+                            ttsController.dispatch(TTSCommand.SetPitch(state.value.speechPitch))
+                            ttsController.dispatch(TTSCommand.SetContent(listOf(sampleText)))
+                            ttsController.dispatch(TTSCommand.Play)
+
+                            val wordCount = sampleText.split("\\s+".toRegex()).size.coerceAtLeast(1)
+                            val estimatedDurationMs = ((wordCount * 60_000f / (150f * state.value.speechRate)).toLong()).coerceIn(2000L, 15000L)
+                            delay(estimatedDurationMs)
+                        } else {
+                            val durationMs = ((3000f / state.value.speechRate).toLong()).coerceAtLeast(500L)
+                            delay(durationMs)
+                        }
                     } else {
-                        val durationMs = ((3000f / state.value.speechRate).toLong()).coerceAtLeast(500L)
-                        delay(durationMs)
+                        // 2. Native System TTS or Desktop Neural Piper
+                        if (ttsController != null) {
+                            syncEngineToController(state.value.selectedEngine)
+                            ttsController.dispatch(TTSCommand.SetSpeed(state.value.speechRate))
+                            ttsController.dispatch(TTSCommand.SetPitch(state.value.speechPitch))
+                            ttsController.dispatch(TTSCommand.SetContent(listOf(sampleText)))
+                            ttsController.dispatch(TTSCommand.Play)
+
+                            val wordCount = sampleText.split("\\s+".toRegex()).size.coerceAtLeast(1)
+                            val estimatedDurationMs = ((wordCount * 60_000f / (150f * state.value.speechRate)).toLong()).coerceIn(2000L, 8000L)
+                            delay(estimatedDurationMs)
+                        } else {
+                            val durationMs = ((3000f / state.value.speechRate).toLong()).coerceAtLeast(500L)
+                            delay(durationMs)
+                        }
                     }
                 } catch (e: Exception) {
                     Log.error { "Sample playback failed: ${e.message}" }
                 } finally {
+                    sampleGradioEngine?.stop()
+                    sampleGradioEngine?.cleanup()
+                    sampleGradioEngine = null
                     ttsController?.dispatch(TTSCommand.Stop)
                     updateState { it.copy(isPlayingSample = false) }
                 }
@@ -310,6 +406,18 @@ class AudioStudioViewModel(
             val voiceName = config?.name ?: "Cloud Model: $configId"
             readerPreferences.speechVoice().set(voiceName)
             updateState { it.copy(activeCloudConfigId = configId, selectedVoiceName = voiceName) }
+
+            if (config != null && state.value.selectedEngine == AudioEngineType.GRADIO_AI) {
+                val gradioConfig = GradioConfig(
+                    id = config.id,
+                    name = config.name,
+                    spaceUrl = config.spaceUrl,
+                    apiName = config.apiName,
+                    enabled = config.enabled,
+                    originalConfig = config
+                )
+                ttsController?.dispatch(TTSCommand.SetGradioConfig(gradioConfig))
+            }
         }
     }
 
@@ -351,6 +459,22 @@ class AudioStudioViewModel(
                 gradioTTSManager?.addCustomConfig(config)
             }
             updateState { it.copy(editingCloudConfig = null, isEditCloudDialogOpen = false) }
+        }
+    }
+
+    fun autoDetectCloudSpace(rawUrl: String, apiKey: String? = null, onResult: (Result<GradioTTSConfig>) -> Unit) {
+        scope.launch {
+            val result = gradioTTSManager?.autoDetectSpace(rawUrl, apiKey)
+                ?: Result.failure(Exception("Gradio manager not initialized"))
+            onResult(result)
+        }
+    }
+
+    fun testCustomCloudConfig(config: GradioTTSConfig, onResult: (Result<ByteArray>) -> Unit) {
+        scope.launch {
+            val result = gradioTTSManager?.testCustomConfig(config)
+                ?: Result.failure(Exception("Gradio manager not initialized"))
+            onResult(result)
         }
     }
 

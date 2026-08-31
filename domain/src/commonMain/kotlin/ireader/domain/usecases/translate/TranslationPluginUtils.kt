@@ -69,7 +69,7 @@ fun TranslationEngineSource.getSupportedLanguages(): List<Pair<String, String>> 
  * This allows plugins to work with existing code that expects TranslateEngine
  */
 class PluginTranslateEngineAdapter(
-    private val plugin: TranslationPlugin,
+    val plugin: TranslationPlugin,
     private val manager: TranslationEnginesManager
 ) : TranslateEngine() {
     
@@ -82,6 +82,8 @@ class PluginTranslateEngineAdapter(
     override val maxCharsPerRequest: Int = plugin.maxCharsPerRequest
     override val rateLimitDelayMs: Long = plugin.rateLimitDelayMs
     override val isOffline: Boolean = plugin.isOffline
+    
+    fun getApiKey(): String? = plugin.getApiKey()
     
     override val supportedLanguages: List<Pair<String, String>> = plugin.getAvailableLanguages()
     

@@ -113,4 +113,58 @@ class TranslationEnginesManagerTest {
         assertEquals(2L, selectedOpenAI.id)
         assertEquals("OpenAI (GPT)", selectedOpenAI.engineName)
     }
+
+    @Test
+    fun testDefaultEngineIsGoogleTranslateFree() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val httpClients = HttpClients(prefStore)
+
+        val manager = TranslationEnginesManager(readerPrefs, httpClients)
+
+        // Without setting preference, default should resolve to Google Translate Free (11L)
+        assertEquals(11L, readerPrefs.translatorEngine().get())
+        assertEquals(11L, manager.getSelectedEngineId())
+        assertEquals(11L, manager.get().id)
+        assertEquals("Google Translate (Free)", manager.get().engineName)
+    }
+
+    @Test
+    fun testApiKeyResolutionForAllAIEngines() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val httpClients = HttpClients(prefStore)
+
+        val manager = TranslationEnginesManager(readerPrefs, httpClients)
+
+        // Test Claude API Key
+        readerPrefs.translatorEngine().set(13L)
+        readerPrefs.claudeApiKey().set("sk-ant-claude-test-key")
+        assertEquals("sk-ant-claude-test-key", manager.getApiKeyForCurrentEngine())
+
+        // Test DeepSeek API Key
+        readerPrefs.translatorEngine().set(3L)
+        readerPrefs.deepSeekApiKey().set("sk-deepseek-test-key")
+        assertEquals("sk-deepseek-test-key", manager.getApiKeyForCurrentEngine())
+
+        // Test OpenAI API Key
+        readerPrefs.translatorEngine().set(2L)
+        readerPrefs.openAIApiKey().set("sk-openai-test-key")
+        assertEquals("sk-openai-test-key", manager.getApiKeyForCurrentEngine())
+
+        // Test Gemini API Key
+        readerPrefs.translatorEngine().set(8L)
+        readerPrefs.geminiApiKey().set("gemini-test-key")
+        assertEquals("gemini-test-key", manager.getApiKeyForCurrentEngine())
+
+        // Test OpenRouter API Key
+        readerPrefs.translatorEngine().set(9L)
+        readerPrefs.openRouterApiKey().set("sk-or-test-key")
+        assertEquals("sk-or-test-key", manager.getApiKeyForCurrentEngine())
+
+        // Test NVIDIA NIM API Key
+        readerPrefs.translatorEngine().set(10L)
+        readerPrefs.nvidiaApiKey().set("nvapi-test-key")
+        assertEquals("nvapi-test-key", manager.getApiKeyForCurrentEngine())
+    }
 }

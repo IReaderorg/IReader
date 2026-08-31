@@ -26,35 +26,47 @@ class TranslationController(
     val dialogState = TranslationDialogState()
     
     // Available engines - combines built-in and plugin engines
-    val availableEngines: List<TranslationEngine> by lazy {
-        val engines = mutableListOf<TranslationEngine>()
-        
-        // Add built-in engines
-        engines.addAll(TranslationEngines.BUILT_IN)
-        
-        // Add plugin engines from TranslationEnginesManager
-        translationEnginesManager?.getAvailableEngines()?.forEach { source ->
-            when (source) {
-                is TranslationEngineSource.Plugin -> {
-                    val plugin = source.plugin
-                    engines.add(TranslationEngine(
-                        id = plugin.manifest.id.hashCode().toLong(),
-                        name = plugin.manifest.name,
-                        isOffline = plugin.isOffline,
-                        requiresApiKey = plugin.requiresApiKey(),
-                        requiresRateLimiting = !plugin.isOffline,
-                        isPlugin = true,
-                        pluginId = plugin.manifest.id
-                    ))
+    val availableEngines: List<TranslationEngine>
+        get() {
+            val engines = mutableListOf<TranslationEngine>()
+            val managerEngines = translationEnginesManager?.getAvailableEngines()
+            if (!managerEngines.isNullOrEmpty()) {
+                managerEngines.forEach { source ->
+                    when (source) {
+                        is TranslationEngineSource.BuiltIn -> {
+                            val e = source.engine
+                            engines.add(
+                                TranslationEngine(
+                                    id = e.id,
+                                    name = e.engineName,
+                                    isOffline = e.isOffline,
+                                    requiresApiKey = e.requiresApiKey,
+                                    requiresRateLimiting = !e.isOffline && e.id != 11L,
+                                    isPlugin = false
+                                )
+                            )
+                        }
+                        is TranslationEngineSource.Plugin -> {
+                            val plugin = source.plugin
+                            engines.add(
+                                TranslationEngine(
+                                    id = plugin.manifest.id.hashCode().toLong(),
+                                    name = "${plugin.manifest.name} (Plugin)",
+                                    isOffline = plugin.isOffline,
+                                    requiresApiKey = plugin.requiresApiKey(),
+                                    requiresRateLimiting = !plugin.isOffline,
+                                    isPlugin = true,
+                                    pluginId = plugin.manifest.id
+                                )
+                            )
+                        }
+                    }
                 }
-                is TranslationEngineSource.BuiltIn -> {
-                    // Already added from BUILT_IN
-                }
+            } else {
+                engines.addAll(TranslationEngines.BUILT_IN)
             }
+            return engines
         }
-        
-        engines
-    }
     
     // Check if service is available
     val isServiceAvailable: Boolean get() = translationService != null

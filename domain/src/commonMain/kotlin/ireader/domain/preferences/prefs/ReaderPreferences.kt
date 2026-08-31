@@ -241,7 +241,7 @@ Visit.*for more chapters"""
         return preferenceStore.getEnum("chapter_layout_mode", ChapterDisplayMode.Default)
     }
     fun translatorEngine(): Preference<Long> {
-        return preferenceStore.getLong("translatorEngine", -1)
+        return preferenceStore.getLong("translatorEngine", 11L)
     }
     
     // Plugin-based translation engine ID (if using a plugin)

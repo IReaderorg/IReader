@@ -191,4 +191,26 @@ class AudioStudioViewModelTest {
         assertEquals(14, viewModel.state.value.chapterCacheDays)
         assertEquals(14, readerPrefs.ttsChapterCacheDays().get())
     }
+
+    @Test
+    fun testCloudAISamplePlaybackToggle() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val appPrefs = AppPreferences(prefStore)
+
+        val viewModel = AudioStudioViewModel(readerPrefs, appPrefs)
+        viewModel.setEngine(AudioEngineType.GRADIO_AI)
+        assertEquals(AudioEngineType.GRADIO_AI, viewModel.state.value.selectedEngine)
+
+        viewModel.setSampleText("This is a custom test preview.")
+        assertEquals("This is a custom test preview.", viewModel.state.value.sampleText)
+
+        // Starting sample playback
+        viewModel.togglePlaySample()
+        assertTrue(viewModel.state.value.isPlayingSample)
+
+        // Stopping sample playback
+        viewModel.togglePlaySample()
+        assertFalse(viewModel.state.value.isPlayingSample)
+    }
 }

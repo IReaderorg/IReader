@@ -662,14 +662,23 @@ data class TranslationEngine(
  * Additional engines are available as plugins from the Feature Store
  */
 object TranslationEngines {
-    // Only built-in engines - plugins are loaded dynamically
+    // Built-in engines - plugins are loaded dynamically via TranslationEnginesManager
     val BUILT_IN = listOf(
-        TranslationEngine(0L, "Google ML Kit", isOffline = true),
-        TranslationEngine(8L, "Gemini API", requiresApiKey = true, requiresRateLimiting = true),
-        TranslationEngine(9L, "OpenRouter AI", requiresApiKey = true, requiresRateLimiting = true)
+        TranslationEngine(11L, "Google Translate (Free)", isOffline = false, requiresApiKey = false, requiresRateLimiting = false),
+        TranslationEngine(0L, "Google ML Kit", isOffline = true, requiresApiKey = false, requiresRateLimiting = false),
+        TranslationEngine(13L, "Claude AI (Anthropic)", isOffline = false, requiresApiKey = true, requiresRateLimiting = true),
+        TranslationEngine(8L, "Google Gemini API", isOffline = false, requiresApiKey = true, requiresRateLimiting = true),
+        TranslationEngine(2L, "OpenAI (ChatGPT)", isOffline = false, requiresApiKey = true, requiresRateLimiting = true),
+        TranslationEngine(3L, "DeepSeek AI", isOffline = false, requiresApiKey = true, requiresRateLimiting = true),
+        TranslationEngine(9L, "OpenRouter AI", isOffline = false, requiresApiKey = true, requiresRateLimiting = true),
+        TranslationEngine(10L, "NVIDIA NIM", isOffline = false, requiresApiKey = true, requiresRateLimiting = true),
+        TranslationEngine(5L, "Ollama (Local LLM)", isOffline = true, requiresApiKey = false, requiresRateLimiting = false),
+        TranslationEngine(12L, "Gemini Nano (On-Device AI)", isOffline = true, requiresApiKey = false, requiresRateLimiting = false),
+        TranslationEngine(4L, "LibreTranslate", isOffline = true, requiresApiKey = false, requiresRateLimiting = false),
+        TranslationEngine(7L, "Free AI Webscraping", isOffline = false, requiresApiKey = false, requiresRateLimiting = true)
     )
     
-    // For backward compatibility - returns only built-in engines
+    // For backward compatibility - returns all built-in engines
     // Use TranslationEnginesManager.getAvailableEngines() for full list including plugins
     val ALL: List<TranslationEngine> get() = BUILT_IN
     

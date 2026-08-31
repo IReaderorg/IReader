@@ -349,16 +349,33 @@ private fun EngineSelectionHeader(
                 0L to "Google ML Kit (Offline)"
             )
 
+            val engines = if (state.availableEngines.isNotEmpty()) {
+                state.availableEngines.map { it.id to it.engineName }
+            } else {
+                defaultEngineNames
+            }
+
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(defaultEngineNames) { (id, name) ->
+                items(engines) { (id, name) ->
                     val isSelected = state.selectedEngineId == id
+                    val isPluginEngine = id !in listOf(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L)
                     FilterChip(
                         selected = isSelected,
                         onClick = { onSelectEngineId(id) },
-                        label = { Text(name) }
+                        label = { Text(name, maxLines = 1) },
+                        leadingIcon = if (isPluginEngine) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Default.Extension,
+                                    contentDescription = "Plugin Engine",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        } else null
                     )
                 }
             }
@@ -534,10 +551,49 @@ private fun ActiveEngineDetailCard(
                         Text(if (state.mlKitInitState is MlKitInitState.Initializing) "Downloading (${state.mlKitInitProgress}%)..." else "Download Offline Language Pack")
                     }
                 }
-                else -> {
+                11L -> {
                     // Google Translate Free / Default
                     Text("Online Free Translation", style = MaterialTheme.typography.titleSmall)
                     Text("Ready to use out of the box with zero setup or API keys required.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                else -> {
+                    val pluginEngine = state.availableEngines.find { it.id == state.selectedEngineId }
+                    if (pluginEngine != null) {
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Default.Extension, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                    Text(pluginEngine.engineName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                    ) {
+                                        Text(
+                                            text = "Plugin Engine",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Text(
+                                    text = "Translation engine provided by an installed plugin. Supports ${pluginEngine.supportedLanguages.size} language pair(s).",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+                    } else {
+                        Text("Custom Translation Engine", style = MaterialTheme.typography.titleSmall)
+                        Text("Active translation engine configured and ready.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
 

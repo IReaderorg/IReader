@@ -294,47 +294,60 @@ class GradioTTSManager(
     }
     
     /**
+     * Automatically inspect and detect a Gradio Space configuration from a URL or space ID
+     */
+    suspend fun autoDetectSpace(rawUrl: String, apiKey: String? = null): Result<GradioTTSConfig> {
+        return GradioSpaceDetector.detectSpace(httpClient, rawUrl, apiKey)
+    }
+
+    /**
+     * Test an unsaved or in-flight custom configuration directly
+     */
+    suspend fun testCustomConfig(config: GradioTTSConfig, testText: String = "Testing custom voice space."): Result<ByteArray> {
+        if (config.spaceUrl.isEmpty()) {
+            return Result.failure(IllegalArgumentException("Space URL is empty"))
+        }
+
+        return try {
+            val engine = createEngine(config)
+            var error: String? = null
+
+            val completer = kotlinx.coroutines.CompletableDeferred<Unit>()
+            engine.setCallback(object : TTSEngineCallback {
+                override fun onStart(utteranceId: String) {}
+                override fun onDone(utteranceId: String) {
+                    completer.complete(Unit)
+                }
+                override fun onError(utteranceId: String, errorMsg: String) {
+                    error = errorMsg
+                    completer.complete(Unit)
+                }
+            })
+
+            engine.speak(testText, "test_custom")
+            kotlinx.coroutines.withTimeoutOrNull(20_000L) {
+                completer.await()
+            }
+            engine.cleanup()
+
+            if (error != null) {
+                Result.failure(Exception(error))
+            } else {
+                Result.success(ByteArray(0))
+            }
+        } catch (e: Exception) {
+            Log.error { "$TAG: Test custom config failed for ${config.name}: ${e.message}" }
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Test a configuration by synthesizing a sample text
      */
     suspend fun testConfig(configId: String, testText: String = "Hello, this is a test."): Result<ByteArray> {
         val config = getConfigById(configId)
             ?: return Result.failure(IllegalArgumentException("Config not found: $configId"))
-        
-        if (config.spaceUrl.isEmpty()) {
-            return Result.failure(IllegalArgumentException("Space URL is empty"))
-        }
-        
-        return try {
-            val engine = createEngine(config)
-            var result: ByteArray? = null
-            var error: String? = null
-            
-            engine.setCallback(object : TTSEngineCallback {
-                override fun onStart(utteranceId: String) {}
-                override fun onDone(utteranceId: String) {}
-                override fun onError(utteranceId: String, errorMsg: String) {
-                    error = errorMsg
-                }
-            })
-            
-            // Use internal method to just generate audio without playing
-            // For testing, we'll speak and capture the result
-            engine.speak(testText, "test")
-            
-            // Wait a bit for the result
-            kotlinx.coroutines.delay(5000)
-            
-            engine.cleanup()
-            
-            if (error != null) {
-                Result.failure(Exception(error))
-            } else {
-                Result.success(ByteArray(0)) // Success indicator
-            }
-        } catch (e: Exception) {
-            Log.error { "$TAG: Test failed for $configId: ${e.message}" }
-            Result.failure(e)
-        }
+        return testCustomConfig(config, testText)
     }
     
     /**

@@ -56,6 +56,14 @@ class TranslationEnginesManager(
     private val translationCache = mutableMapOf<String, String>()
 
     fun get(): TranslateEngine {
+        val pluginId = readerPreferences.translatorPluginId().get()
+        if (pluginId.isNotEmpty()) {
+            val plugin = getTranslationPlugins().find { it.manifest.id == pluginId }
+            if (plugin != null) {
+                return PluginTranslateEngineAdapter(plugin, this)
+            }
+        }
+
         val engineId = readerPreferences.translatorEngine().get()
         
         // First check built-in engines
@@ -72,9 +80,10 @@ class TranslationEnginesManager(
             return PluginTranslateEngineAdapter(plugin, this)
         }
         
-        // Fall back to first available built-in engine
-        val available = builtInEngines.find { it.supportedLanguages.isNotEmpty() }
-        return available ?: builtInEngines.first()
+        // Fall back to Google Translate Free (11L) or first available built-in engine
+        val defaultEngine = builtInEngines.find { it.id == 11L }
+            ?: builtInEngines.find { it.supportedLanguages.isNotEmpty() }
+        return defaultEngine ?: builtInEngines.first()
     }
     
     /**
@@ -82,6 +91,14 @@ class TranslationEnginesManager(
      * This handles both built-in and plugin engines
      */
     fun getSelectedEngineId(): Long {
+        val pluginId = readerPreferences.translatorPluginId().get()
+        if (pluginId.isNotEmpty()) {
+            val plugin = getTranslationPlugins().find { it.manifest.id == pluginId }
+            if (plugin != null) {
+                return plugin.manifest.id.hashCode().toLong()
+            }
+        }
+
         val engineId = readerPreferences.translatorEngine().get()
         
         // Check if it's a built-in engine
@@ -96,9 +113,9 @@ class TranslationEnginesManager(
             return engineId
         }
         
-        // Fall back to first available built-in engine
-        val available = builtInEngines.find { it.supportedLanguages.isNotEmpty() }
-        return available?.id ?: builtInEngines.first().id
+        // Fall back to Google Translate Free (11L)
+        val defaultEngine = builtInEngines.find { it.id == 11L }
+        return defaultEngine?.id ?: builtInEngines.first().id
     }
 
     
@@ -126,7 +143,7 @@ class TranslationEnginesManager(
     /**
      * Get a specific translation engine source by ID
      * For built-in engines, use the engine ID
-     * For plugin engines, use the plugin manifest ID
+     * For plugin engines, use the plugin manifest ID or hash ID
      * Requirements: 4.2
      */
     fun getEngineById(id: String): TranslationEngineSource? {
@@ -136,6 +153,10 @@ class TranslationEnginesManager(
             val builtIn = builtInEngines.find { it.id == engineId }
             if (builtIn != null) {
                 return TranslationEngineSource.BuiltIn(builtIn)
+            }
+            val pluginByHash = getTranslationPlugins().find { it.manifest.id.hashCode().toLong() == engineId }
+            if (pluginByHash != null) {
+                return TranslationEngineSource.Plugin(pluginByHash)
             }
         }
         
@@ -158,8 +179,14 @@ class TranslationEnginesManager(
             }
         }
         
-        // Fall back to built-in engine
+        // Check if engineId is a plugin hash
         val engineId = readerPreferences.translatorEngine().get()
+        val pluginByHash = getTranslationPlugins().find { it.manifest.id.hashCode().toLong() == engineId }
+        if (pluginByHash != null) {
+            return TranslationEngineSource.Plugin(pluginByHash)
+        }
+
+        // Fall back to built-in engine
         val engine = builtInEngines.find { it.id == engineId } ?: builtInEngines.first()
         return TranslationEngineSource.BuiltIn(engine)
     }
@@ -176,6 +203,7 @@ class TranslationEnginesManager(
             }
             is TranslationEngineSource.Plugin -> {
                 readerPreferences.translatorPluginId().set(engine.plugin.manifest.id)
+                readerPreferences.translatorEngine().set(engine.plugin.manifest.id.hashCode().toLong())
             }
         }
     }
@@ -501,12 +529,16 @@ class TranslationEnginesManager(
      */
     fun getApiKeyForCurrentEngine(): String {
         val engine = get()
+        if (engine is PluginTranslateEngineAdapter) {
+            return engine.getApiKey() ?: ""
+        }
         return when (engine.id) {
             2L -> readerPreferences.openAIApiKey().get()
             3L -> readerPreferences.deepSeekApiKey().get()
             8L -> readerPreferences.geminiApiKey().get()
             9L -> readerPreferences.openRouterApiKey().get()
             10L -> readerPreferences.nvidiaApiKey().get()
+            13L -> readerPreferences.claudeApiKey().get()
             else -> ""
         }
     }
@@ -626,6 +658,11 @@ class TranslationEnginesManager(
      * @return TranslationError if API key is not configured, null if valid
      */
     private fun validateApiKey(engine: TranslateEngine): TranslationError? {
+        if (engine is PluginTranslateEngineAdapter) {
+            return if (engine.requiresApiKey && engine.getApiKey().isNullOrBlank()) {
+                TranslationError.ApiKeyNotSet(engine.engineName)
+            } else null
+        }
         return when (engine.id) {
             2L -> { // OpenAI
                 val apiKey = readerPreferences.openAIApiKey().get()
@@ -646,6 +683,10 @@ class TranslationEnginesManager(
             10L -> { // NVIDIA NIM
                 val apiKey = readerPreferences.nvidiaApiKey().get()
                 if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("NVIDIA NIM") else null
+            }
+            13L -> { // Claude AI
+                val apiKey = readerPreferences.claudeApiKey().get()
+                if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("Claude AI") else null
             }
             else -> null
         }

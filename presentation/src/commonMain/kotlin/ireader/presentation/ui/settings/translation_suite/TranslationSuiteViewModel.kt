@@ -14,6 +14,7 @@ import ireader.domain.preferences.prefs.TranslationPreferences
 import ireader.domain.usecases.reader.TextReplacementUseCase
 import ireader.domain.usecases.translate.TranslationEngineSource
 import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.domain.usecases.translate.PluginTranslateEngineAdapter
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import ireader.domain.usecases.translate.OpenRouterTranslateEngine
 import ireader.domain.usecases.translate.NvidiaTranslateEngine
@@ -179,10 +180,10 @@ class TranslationSuiteViewModel(
 
     private fun loadEngines() {
         val manager = translationEnginesManager ?: return
-        val engines = manager.getAvailableEngines().mapNotNull { source ->
+        val engines = manager.getAvailableEngines().map { source ->
             when (source) {
                 is TranslationEngineSource.BuiltIn -> source.engine
-                is TranslationEngineSource.Plugin -> null
+                is TranslationEngineSource.Plugin -> PluginTranslateEngineAdapter(source.plugin, manager)
             }
         }
         val currentEngine = manager.get()
@@ -207,7 +208,22 @@ class TranslationSuiteViewModel(
     }
 
     fun setEngineId(engineId: Long) {
-        readerPreferences.translatorEngine().set(engineId)
+        val manager = translationEnginesManager
+        if (manager != null) {
+            val source = manager.getAvailableEngines().find {
+                when (it) {
+                    is TranslationEngineSource.BuiltIn -> it.engine.id == engineId
+                    is TranslationEngineSource.Plugin -> it.plugin.manifest.id.hashCode().toLong() == engineId
+                }
+            }
+            if (source != null) {
+                manager.setSelectedEngine(source)
+            } else {
+                readerPreferences.translatorEngine().set(engineId)
+            }
+        } else {
+            readerPreferences.translatorEngine().set(engineId)
+        }
         val engine = state.value.availableEngines.find { it.id == engineId }
         val name = engine?.engineName ?: "Engine #$engineId"
         updateState { it.copy(selectedEngineId = engineId, selectedEngineName = name) }

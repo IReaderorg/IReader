@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -155,6 +156,22 @@ fun ReaderScreenTopBar(
                                 onClick = { onPluginMenu() }
                             )
                         }
+                        AppIconButton(
+                            imageVector = Icons.Default.Translate,
+                            contentDescription = localizeHelper.localize(Res.string.translate_action),
+                            tint = if (vm.showTranslatedContent.value || vm.translationViewModel.isTranslating)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            onClick = {
+                                val successState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+                                if (successState?.hasTranslation == true) {
+                                    vm.showTranslatedContent.value = !vm.showTranslatedContent.value
+                                } else {
+                                    vm.translateCurrentChapter(forceRetranslate = false)
+                                }
+                            }
+                        )
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,

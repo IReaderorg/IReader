@@ -21,14 +21,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.foundation.layout.size
 
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -43,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.models.prefs.PreferenceValues
@@ -611,21 +623,63 @@ fun GeneralScreenTab(
             )
         }
         item {
+            val currentEngine = remember(vm.translatorEngine.value) {
+                vm.translationEnginesManager.get()
+            }
+            TranslationEngineStatusCard(
+                engine = currentEngine,
+                vm = vm
+            )
+        }
+        item {
+            val currentEngine = remember(vm.translatorEngine.value) {
+                vm.translationEnginesManager.get()
+            }
+            val originChoices = remember(currentEngine) {
+                val langs = currentEngine.supportedLanguages.associate { it.first to it.second }
+                if (!langs.containsKey("auto")) {
+                    mapOf("auto" to "Auto-detect") + langs
+                } else {
+                    langs
+                }
+            }
             ChipChoicePreference(
                 preference = vm.translatorOriginLanguage,
-                choices = vm.translationEnginesManager.get().supportedLanguages.associate { it.first to it.second },
+                choices = originChoices,
                 title = localize(
                     Res.string.origin_language
                 )
             )
         }
         item {
+            val currentEngine = remember(vm.translatorEngine.value) {
+                vm.translationEnginesManager.get()
+            }
+            val targetChoices = remember(currentEngine) {
+                currentEngine.supportedLanguages.associate { it.first to it.second }
+            }
             ChipChoicePreference(
                 preference = vm.translatorTargetLanguage,
-                choices = vm.translationEnginesManager.get().supportedLanguages.associate { it.first to it.second },
+                choices = targetChoices,
                 title = localize(
                     Res.string.target_language
                 )
+            )
+        }
+        item {
+            SwitchPreference(
+                preference = vm.showTranslatedContent.value,
+                title = "Show Translated Content",
+                subtitle = "Display translated chapter text instead of original source text",
+                onValueChange = { vm.showTranslatedContent.value = it }
+            )
+        }
+        item {
+            SwitchPreference(
+                preference = vm.bilingualModeEnabled.value,
+                title = "Bilingual Mode",
+                subtitle = "Show original and translated text together",
+                onValueChange = { vm.bilingualModeEnabled.value = it }
             )
         }
         item {
@@ -637,12 +691,16 @@ fun GeneralScreenTab(
         }
         
         item {
+            val currentEngine = remember(vm.translatorEngine.value) {
+                vm.translationEnginesManager.get()
+            }
             TranslateButton(
-                onClick = {
-                    vm.translateCurrentChapter()
+                onClick = { forceRetranslate ->
+                    vm.translateCurrentChapter(forceRetranslate = forceRetranslate)
                 },
                 isTranslating = vm.translationViewModel.isTranslating,
-                engine = vm.translationEnginesManager.get(),
+                translationProgress = vm.translationViewModel.translationProgress,
+                engine = currentEngine,
                 vm = vm
             )
         }
@@ -1073,87 +1131,247 @@ fun Boolean.isTrue(): Int {
 }
 
 @Composable
-fun TranslateButton(
-    onClick: () -> Unit,
-    isTranslating: Boolean,
+fun TranslationEngineStatusCard(
     engine: TranslateEngine,
-    vm: ReaderScreenViewModel,
+    vm: ReaderScreenViewModel
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    
-    Box(
+    val currentKey = when (engine.id) {
+        2L -> vm.openAIApiKey.value
+        3L -> vm.deepSeekApiKey.value
+        8L -> vm.geminiApiKey.value
+        9L -> vm.openRouterApiKey.value
+        10L -> vm.nvidiaApiKey.value
+        13L -> vm.claudeApiKey.value
+        else -> null
+    }
+
+    var showKeyInputDialog by remember { mutableStateOf(false) }
+    var tempKey by remember(currentKey) { mutableStateOf(currentKey ?: "") }
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        ),
+        shape = RoundedCornerShape(10.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Button(
-                onClick = { if (!isTranslating) onClick() },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isTranslating,
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Translate,
+                        imageVector = if (engine.supportsAI) Icons.Default.SmartToy else if (engine.isOffline) Icons.Default.CloudOff else Icons.Default.Cloud,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
                     )
-                    
-                    Spacer(modifier = Modifier.width(8.dp))
-                    
                     Text(
-                        text = if (isTranslating) 
-                            localizeHelper.localize(Res.string.translating) 
-                        else 
-                            try {
-                                localizeHelper.localize(Res.string.translate_now)
-                            } catch (e: Exception) {
-                                "Translate Now"
-                            },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        text = engine.engineName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = if (engine.supportsAI) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer
+                ) {
+                    Text(
+                        text = if (engine.supportsAI) "AI Engine" else if (engine.isOffline) "Offline" else "Online Free",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        color = if (engine.supportsAI) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }
-            
-            // Show current engine
-            Text(
-                text = engine.engineName,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            
+
             if (engine.requiresApiKey) {
-                val apiStatus = when (engine.id) {
-                    2L -> if (vm.openAIApiKey.value.isBlank()) "API key required" else "API key set"  
-                    3L -> if (vm.deepSeekApiKey.value.isBlank()) "API key required" else "API key set"
-                    else -> null
+                val isSet = !currentKey.isNullOrBlank()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Key,
+                            contentDescription = null,
+                            tint = if (isSet) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = if (isSet) "API Key Set (${currentKey.take(4)}...)" else "API Key Required",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isSet) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    TextButton(
+                        onClick = { showKeyInputDialog = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(if (isSet) "Change Key" else "Set Key")
+                    }
                 }
-                
-                if (apiStatus != null) {
+            }
+        }
+    }
+
+    if (showKeyInputDialog) {
+        AlertDialog(
+            onDismissRequest = { showKeyInputDialog = false },
+            title = { Text("Set ${engine.engineName} API Key") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = apiStatus,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (apiStatus.contains("required")) 
-                            MaterialTheme.colorScheme.error
-                        else 
-                            MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        text = "Enter your API key below. The key is saved locally in preferences.",
+                        style = MaterialTheme.typography.bodySmall
                     )
+                    OutlinedTextField(
+                        value = tempKey,
+                        onValueChange = { tempKey = it },
+                        label = { Text("API Key") },
+                        placeholder = { Text("sk-...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val key = tempKey.trim()
+                        when (engine.id) {
+                            2L -> vm.openAIApiKey.value = key
+                            3L -> vm.deepSeekApiKey.value = key
+                            8L -> vm.geminiApiKey.value = key
+                            9L -> vm.openRouterApiKey.value = key
+                            10L -> vm.nvidiaApiKey.value = key
+                            13L -> vm.claudeApiKey.value = key
+                        }
+                        showKeyInputDialog = false
+                    }
+                ) {
+                    Text("Save Key")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showKeyInputDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun TranslateButton(
+    onClick: (forceRetranslate: Boolean) -> Unit,
+    isTranslating: Boolean,
+    translationProgress: Float,
+    engine: TranslateEngine,
+    vm: ReaderScreenViewModel,
+) {
+    val successState = vm.state.value as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+    val hasExistingTranslation = successState?.hasTranslation == true
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (isTranslating) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Translating with ${engine.engineName}...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "${(translationProgress * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                LinearProgressIndicator(
+                    progress = { translationProgress },
+                    modifier = Modifier.fillMaxWidth().height(6.dp),
+                )
+            } else {
+                Button(
+                    onClick = { onClick(false) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Translate,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (hasExistingTranslation) "Re-translate Chapter" else "Translate Chapter Now",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+
+                if (hasExistingTranslation) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "✓ Translation ready",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        TextButton(
+                            onClick = { onClick(true) },
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                        ) {
+                            Text("Force Cloud Refresh", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
                 }
             }
         }
