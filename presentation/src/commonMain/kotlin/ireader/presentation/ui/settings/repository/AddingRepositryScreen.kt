@@ -61,8 +61,8 @@ internal fun AddingRepositoryScreen(
                 "https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/repo/plugins/plugins.min.json",
                 "LNReader", "https://github.com/kazemcodes/lnreader-plugins-unminified", RepositoryType.LNREADER),
             QuickAddPreset("Tsundoku Extensions",
-                "https://raw.githubusercontent.com/novelsourcery/extensions/repo/index.min.json",
-                "novelsourcery", "https://github.com/novelsourcery/extensions", RepositoryType.TSUNDOKU)
+                "https://raw.githubusercontent.com/NovelSourcery/extensions/repo/index.json",
+                "NovelSourcery", "https://github.com/NovelSourcery/extensions", RepositoryType.TSUNDOKU)
         )
     }
 

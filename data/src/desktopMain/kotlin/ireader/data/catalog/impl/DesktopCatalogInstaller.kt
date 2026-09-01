@@ -96,11 +96,17 @@ class DesktopCatalogInstaller(
                     }.body()
                     apkResponse.saveTo(apkFile.absolutePath.toPath(), FileSystem.SYSTEM)
                     
-                    // Download JAR
-                    val jarResponse: ByteReadChannel = client.get(catalog.jarUrl) {
-                        headers.append(HttpHeaders.CacheControl, "no-store")
-                    }.body()
-                    jarResponse.saveTo(jarFile.absolutePath.toPath(), FileSystem.SYSTEM)
+                    // Download JAR if available
+                    if (catalog.jarUrl.isNotBlank()) {
+                        try {
+                            val jarResponse: ByteReadChannel = client.get(catalog.jarUrl) {
+                                headers.append(HttpHeaders.CacheControl, "no-store")
+                            }.body()
+                            jarResponse.saveTo(jarFile.absolutePath.toPath(), FileSystem.SYSTEM)
+                        } catch (e: Exception) {
+                            Log.warn(e, "Could not download JAR for ${catalog.pkgName}, will rely on dex2jar")
+                        }
+                    }
                     
                     // No need to download icon - Coil will handle it via iconUrl with caching
                     

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.RefreshContext
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
@@ -31,6 +32,7 @@ interface CatalogueSource : Source {
         filters: FilterList,
     ): MangasPage = fetchSearchManga(page, query, filters).awaitSingle()
 
+    @Suppress("DEPRECATION")
     override suspend fun getMangaUpdate(
         manga: SManga,
         chapters: List<SChapter>,
@@ -40,8 +42,29 @@ interface CatalogueSource : Source {
         // Delegate to the suspend getMangaDetails/getChapterList so sources that only
         // override those (e.g. novel sources) work. The suspend defaults themselves fall
         // back to the deprecated fetch* Observables for legacy extensions.
+        //
+        // Chapters route through the (fork-only, deprecated) context-aware overload so
+        // extensions still on that API keep getting existingChapters with zero functional
+        // loss until they migrate to reading it straight from this method's `chapters` param.
+        // mangaId/lastFetchTime have no equivalent at this layer, so they're passed as dummy
+        // values; forceRefresh is inferred the same way callers already signal it upstream,
+        // by passing an empty chapters list.
         val asyncManga = if (fetchDetails) async { getMangaDetails(manga) } else null
-        val asyncChapters = if (fetchChapters) async { getChapterList(manga) } else null
+        val asyncChapters = if (fetchChapters) {
+            async {
+                getChapterList(
+                    manga,
+                    RefreshContext(
+                        mangaId = 0L,
+                        existingChapters = chapters,
+                        lastFetchTime = 0L,
+                        forceRefresh = chapters.isEmpty(),
+                    ),
+                )
+            }
+        } else {
+            null
+        }
         SMangaUpdate(asyncManga?.await() ?: manga, asyncChapters?.await() ?: chapters)
     }
 

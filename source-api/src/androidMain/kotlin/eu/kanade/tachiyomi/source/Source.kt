@@ -108,6 +108,10 @@ interface Source {
      * @param manga the manga to update.
      * @return the updated manga.
      */
+    @Deprecated(
+        "deprecated in 1.6, Only CatalogueSource's getMangaUpdate default calls this.",
+        ReplaceWith("getMangaUpdate"),
+    )
     @Suppress("DEPRECATION")
     suspend fun getMangaDetails(manga: SManga): SManga {
         return fetchMangaDetails(manga).awaitSingle()
@@ -120,6 +124,10 @@ interface Source {
      * @param manga the manga to look for chapters.
      * @return the chapters for the manga.
      */
+    @Deprecated(
+        "deprecated in 1.6, Only CatalogueSource's getMangaUpdate default calls this.",
+        ReplaceWith("getMangaUpdate"),
+    )
     @Suppress("DEPRECATION")
     suspend fun getChapterList(manga: SManga): List<SChapter> {
         return fetchChapterList(manga).awaitSingle()
@@ -128,11 +136,16 @@ interface Source {
     /**
      * Get all the available chapters for a manga.
      *
-     * @since extensions-lib 1.6
+     * @since extensions-lib 1.6 (tsundoku fork only, superseded by [getMangaUpdate])
      * @param manga the manga to update.
      * @param context refresh context containing existing local state
      * @return the chapters for the manga.
      */
+    @Deprecated(
+        "Fork-only API superseded by upstream's getMangaUpdate, which now accepts existing chapters directly. " +
+            "Kept temporarily so already-published extensions keep working; migrate to getMangaUpdate.",
+        ReplaceWith("getMangaUpdate"),
+    )
     @Suppress("DEPRECATION")
     suspend fun getChapterList(manga: SManga, context: RefreshContext): List<SChapter> {
         // Default implementation falls back to original method for backwards compatibility

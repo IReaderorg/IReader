@@ -18,6 +18,8 @@ import ireader.core.source.model.MangasPageInfo
 import ireader.core.source.model.Page
 import ireader.core.source.model.PageUrl
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Protocol
@@ -28,10 +30,27 @@ import eu.kanade.tachiyomi.source.model.Filter as TFilter
 import eu.kanade.tachiyomi.source.model.Page as TPage
 
 class TsundokuCatalogSource(
-    private val source: CatalogueSource
+    val source: CatalogueSource
 ) : BaseTsundokuCatalogSource() {
 
-    override val id: Long get() = source.id
+    private val updateMutex = Mutex()
+    private val chaptersCache = java.util.concurrent.ConcurrentHashMap<String, List<SChapter>>()
+
+    override val id: Long get() = try {
+        val sId = source.id
+        if (sId != 0L && sId != -1L) sId else fallbackId()
+    } catch (e: Throwable) {
+        fallbackId()
+    }
+
+    private fun fallbackId(): Long {
+        val key = "${name.lowercase()}/$lang"
+        var hash = 0L
+        for (char in key) {
+            hash = 31 * hash + char.code
+        }
+        return hash and Long.MAX_VALUE
+    }
     override val name: String get() = source.name
     override val lang: String get() = source.lang
     override val supportsLatest: Boolean get() = source.supportsLatest
@@ -161,22 +180,13 @@ class TsundokuCatalogSource(
                     )
                 }
 
-                // 2. Resilient DOM & Metadata Fallback
+                // 2. Resilient DOM Fallback
                 val doc = Ksoup.parse(cmd.html)
-                val title = doc.selectFirst("h1, .title, .novel-title, .book-title, [itemprop=name]")?.text()?.trim()
-                    ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
-                    ?: manga.title
-                val cover = doc.selectFirst("img.cover, .thumbnail img, [itemprop=image], .novel-cover img")?.let {
-                    it.attr("src").ifBlank { it.attr("data-src") }
-                }?.trim()
-                    ?: doc.selectFirst("meta[property=og:image]")?.attr("content")?.trim()
-                    ?: manga.cover
-                val description = doc.selectFirst(".description, .summary, [itemprop=description], .novel-summary, #novel-summary")?.text()?.trim()
-                    ?: doc.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
-                    ?: manga.description
-                val author = doc.selectFirst(".author, [itemprop=author], .novel-author, a[href*=/author/]")?.text()?.trim()
-                    ?: manga.author
-                val genres = doc.select(".genre a, .genres a, .tags a, .tag a, [itemprop=genre]").map { it.text().trim() }.filter { it.isNotBlank() }
+                val title = doc.selectFirst("h1, .novel-title, .entry-title, .book-title, .title")?.text()?.trim().orEmpty()
+                val cover = doc.selectFirst(".novel-cover img, .book-cover img, .entry-thumb img, img[src*=/cover]")?.attr("src")?.trim().orEmpty()
+                val description = doc.selectFirst(".description, .summary, .entry-content, #synopsis, .synopsis")?.text()?.trim().orEmpty()
+                val author = doc.selectFirst(".author, .book-author, span:contains(Author) + *")?.text()?.trim().orEmpty()
+                val genres = doc.select(".genres a, .genre a, .tags a, .tag a").map { it.text().trim() }.filter { it.isNotBlank() }
 
                 return manga.copy(
                     title = title.ifBlank { manga.title },
@@ -189,7 +199,23 @@ class TsundokuCatalogSource(
         }
 
         return try {
-            val result = withContext(Dispatchers.IO) { source.getMangaDetails(manga.toSManga()) }
+            val result = withContext(Dispatchers.IO) {
+                updateMutex.withLock {
+                    try {
+                        val update = source.getMangaUpdate(manga.toSManga(), emptyList(), fetchDetails = true, fetchChapters = true)
+                        if (update.chapters.isNotEmpty()) {
+                            chaptersCache[manga.key] = update.chapters
+                        }
+                        update.manga
+                    } catch (e: NoSuchMethodError) {
+                        @Suppress("DEPRECATION")
+                        source.getMangaDetails(manga.toSManga())
+                    } catch (e: AbstractMethodError) {
+                        @Suppress("DEPRECATION")
+                        source.getMangaDetails(manga.toSManga())
+                    }
+                }
+            }
             result.toMangaInfo()
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getMangaDetails failed", e)
@@ -243,8 +269,26 @@ class TsundokuCatalogSource(
             }
         }
 
+        val cached = chaptersCache.remove(manga.key)
+        if (!cached.isNullOrEmpty()) {
+            Log.info { "Tsundoku[$name]: getChapterList returning ${cached.size} chapters from getMangaUpdate cache" }
+            return cached.map { it.toChapterInfo() }.reversed()
+        }
+
         return try {
-            val result = withContext(Dispatchers.IO) { source.getChapterList(manga.toSManga()) }
+            val result = withContext(Dispatchers.IO) {
+                updateMutex.withLock {
+                    try {
+                        source.getMangaUpdate(manga.toSManga(), emptyList(), fetchDetails = false, fetchChapters = true).chapters
+                    } catch (e: NoSuchMethodError) {
+                        @Suppress("DEPRECATION")
+                        source.getChapterList(manga.toSManga())
+                    } catch (e: AbstractMethodError) {
+                        @Suppress("DEPRECATION")
+                        source.getChapterList(manga.toSManga())
+                    }
+                }
+            }
             Log.info { "Tsundoku[$name]: got ${result.size} chapters" }
             result.map { it.toChapterInfo() }.reversed()
         } catch (e: Exception) {
@@ -348,8 +392,19 @@ class TsundokuCatalogSource(
     // ==================== Model Conversions ====================
 
     private fun MangaInfo.toSManga(): SManga {
-        val url = this.key
-        val relativeUrl = if (baseUrl.isNotBlank() && url.startsWith(baseUrl)) url.removePrefix(baseUrl) else url
+        var url = this.key
+        // Resilient fix for StorySeedling: If a URL was saved as https://storyseedling.com/slug without /series/,
+        // insert /series/ so the extension's SlugPath doesn't resolve to a 404.
+        if (baseUrl.contains("storyseedling.com") && !url.contains("/series/")) {
+            url = url.replace("storyseedling.com/", "storyseedling.com/series/")
+        }
+
+        val relativeUrl = if (url.startsWith("http://") || url.startsWith("https://")) {
+            val path = url.replaceFirst(Regex("^https?://[^/]+"), "")
+            if (path.startsWith("/")) path else "/$path"
+        } else {
+            if (url.startsWith("/")) url else "/$url"
+        }
         return SManga.create().also {
             it.url = relativeUrl
             it.title = this.title
@@ -365,9 +420,15 @@ class TsundokuCatalogSource(
 
     private fun SManga.toMangaInfo(): MangaInfo {
         val url = try { this.url } catch (_: UninitializedPropertyAccessException) { "" }
-        val fullUrl = if (url.isNotBlank() && !url.startsWith("http") && baseUrl.isNotBlank()) {
-            baseUrl.trimEnd('/') + "/" + url.trimStart('/')
-        } else url
+        val mangaUrl = try {
+            (source as? HttpSource)?.getMangaUrl(this)
+        } catch (_: Throwable) { null }?.takeIf { it.isNotBlank() }
+
+        val fullUrl = mangaUrl
+            ?: if (url.isNotBlank() && !url.startsWith("http://") && !url.startsWith("https://") && baseUrl.isNotBlank()) {
+                baseUrl.trimEnd('/') + "/" + url.trimStart('/')
+            } else url
+
         return MangaInfo(
             key = fullUrl,
             title = try { this.title } catch (_: UninitializedPropertyAccessException) { "" },
@@ -382,7 +443,12 @@ class TsundokuCatalogSource(
 
     private fun ChapterInfo.toSChapter(): SChapter {
         val url = this.key
-        val relativeUrl = if (baseUrl.isNotBlank() && url.startsWith(baseUrl)) url.removePrefix(baseUrl) else url
+        val relativeUrl = if (url.startsWith("http://") || url.startsWith("https://")) {
+            val path = url.replaceFirst(Regex("^https?://[^/]+"), "")
+            if (path.startsWith("/")) path else "/$path"
+        } else {
+            if (url.startsWith("/")) url else "/$url"
+        }
         return SChapter.create().also {
             it.url = relativeUrl
             it.name = this.name
@@ -392,8 +458,12 @@ class TsundokuCatalogSource(
         }
     }
 
-    private val baseUrl: String
+    override val baseUrl: String
         get() = (source as? HttpSource)?.baseUrl ?: ""
+
+    override val userAgent: String
+        get() = (source as? HttpSource)?.headers?.get("User-Agent")
+            ?: super.userAgent
 
     /** Build an absolute URL from a possibly relative path. */
     private fun buildAbsoluteUrl(path: String): String {

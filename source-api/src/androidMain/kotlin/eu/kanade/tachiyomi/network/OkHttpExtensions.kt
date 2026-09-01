@@ -2,12 +2,15 @@ package eu.kanade.tachiyomi.network
 
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
+val jsonMime = "application/json; charset=utf-8".toMediaType()
 
 fun Call.asObservable(): Observable<Response> = Observable.fromCallable { execute() }
 
@@ -43,15 +46,30 @@ suspend fun Call.awaitSuccess(): Response {
     return response
 }
 
-fun OkHttpClient.newCachelessCallWithProgress(request: Request, listener: ProgressListener): Call {
-    return newBuilder()
+fun OkHttpClient.newCachelessCallWithProgress(
+    request: Request,
+    listener: ProgressListener,
+    existingSize: Long = 0L,
+): Call {
+    val progressClient = newBuilder()
         .cache(null)
         .addNetworkInterceptor { chain ->
-            val originalResponse = chain.proceed(chain.request())
+            val req = chain.request()
+                .newBuilder()
+                .apply {
+                    if (existingSize > 0 && chain.request().header("Range") == null) {
+                        header("Range", "bytes=$existingSize-")
+                    }
+                }
+                .build()
+
+            val originalResponse = chain.proceed(req)
+            val actualExistingSize = if (originalResponse.code == 206) existingSize else 0L
             originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body, listener))
+                .body(ProgressResponseBody(originalResponse.body, listener, actualExistingSize))
                 .build()
         }
         .build()
-        .newCall(request)
+
+    return progressClient.newCall(request)
 }

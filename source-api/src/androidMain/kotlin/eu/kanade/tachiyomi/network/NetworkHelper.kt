@@ -21,7 +21,9 @@ class NetworkHelper(
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .callTimeout(2, TimeUnit.MINUTES)
+            .addInterceptor(UncaughtExceptionInterceptor())
             .addInterceptor(UserAgentInterceptor { _userAgent })
+            .addInterceptor(CloudflareInterceptor())
             .apply {
                 if (cookieJar != null) {
                     cookieJar(cookieJar)
@@ -36,6 +38,26 @@ class NetworkHelper(
     companion object {
         const val DEFAULT_USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+}
+
+class UncaughtExceptionInterceptor : okhttp3.Interceptor {
+    override fun intercept(chain: okhttp3.Interceptor.Chain): okhttp3.Response {
+        return try {
+            chain.proceed(chain.request())
+        } catch (e: Exception) {
+            if (e is java.io.IOException) {
+                throw e
+            } else {
+                throw java.io.IOException(e)
+            }
+        }
+    }
+}
+
+class CloudflareInterceptor : okhttp3.Interceptor {
+    override fun intercept(chain: okhttp3.Interceptor.Chain): okhttp3.Response {
+        return chain.proceed(chain.request())
     }
 }
 

@@ -249,7 +249,9 @@ class AndroidCatalogLoader(
             emptyList()
         }
 
-        val result = (bundled + deduplicated + tsundokuCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        val result = (bundled + deduplicated + tsundokuCatalogs + jsPlugins).distinctBy {
+            if (it.sourceId > 0) "id_${it.sourceId}" else "pkg_${(it as? CatalogInstalled)?.pkgName ?: it.name}"
+        }.toList()
         
         // Log diagnostics
         if (failedCatalogs.isNotEmpty()) {
@@ -442,12 +444,15 @@ class AndroidCatalogLoader(
         // Fallback: try loading as Tsundoku extension
         val tsundokuData = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo)
         if (tsundokuData != null) {
+            Log.info { "AndroidCatalogLoader: Local APK $pkgName validated as Tsundoku (isNovel=${tsundokuData.isNovel})" }
             // IReader is a novel app: skip Mihon/Tachiyomi manga-only extensions
             if (!tsundokuData.isNovel) {
-                Log.info { "AndroidCatalogLoader: Skipping manga tsundoku extension $pkgName" }
+                Log.info { "AndroidCatalogLoader: Skipping local manga tsundoku extension $pkgName" }
                 return null
             }
             return loadLocalTsundokuCatalog(pkgName, pkgInfo, file, tsundokuData)
+        } else {
+            Log.warn { "AndroidCatalogLoader: Local APK $pkgName is neither IReader nor valid Tsundoku catalog" }
         }
 
         return null
@@ -463,6 +468,7 @@ class AndroidCatalogLoader(
         data: TsundokuValidatedData
     ): CatalogInstalled.Locally? {
         try {
+            Log.info { "AndroidCatalogLoader: Loading local Tsundoku APK for $pkgName from ${file.absolutePath} (${file.length()} bytes)" }
             if (!file.exists() || !file.canRead() || file.length() == 0L) {
                 Log.warn { "AndroidCatalogLoader: Tsundoku APK file not accessible for $pkgName" }
                 return null
@@ -479,6 +485,8 @@ class AndroidCatalogLoader(
                 return null
             }
 
+            Log.info { "AndroidCatalogLoader: Successfully loaded ${sources.size} source(s) from local Tsundoku APK $pkgName: ${sources.map { it.name }}" }
+
             val source = sources.first()
             // Extract and save the APK icon
             val iconUrl = extractAndSaveLocalIcon(file, pkgName)
@@ -494,7 +502,7 @@ class AndroidCatalogLoader(
                 installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
                 iconUrl = iconUrl
             )
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.error("AndroidCatalogLoader: Failed to load local tsundoku catalog $pkgName", e)
             return null
         }
@@ -692,6 +700,7 @@ class AndroidCatalogLoader(
      * and metadata keys. They are loaded via reflection and wrapped in [TsundokuCatalogSource].
      */
     private fun loadTsundokuExtensions(): List<CatalogLocal> {
+        Log.info { "AndroidCatalogLoader: Querying installed Tsundoku extensions from PackageManager..." }
         val tsundokuPkgs = try {
             TsundokuExtensionLoader.getInstalledTsundokuExtensions(pkgManager)
         } catch (e: Exception) {
@@ -699,9 +708,12 @@ class AndroidCatalogLoader(
             emptyList()
         }
 
-        if (tsundokuPkgs.isEmpty()) return emptyList()
+        if (tsundokuPkgs.isEmpty()) {
+            Log.info { "AndroidCatalogLoader: No Tsundoku extensions found by PackageManager" }
+            return emptyList()
+        }
 
-        Log.info("AndroidCatalogLoader: Found ${tsundokuPkgs.size} tsundoku extensions")
+        Log.info { "AndroidCatalogLoader: Found ${tsundokuPkgs.size} Tsundoku extension(s): ${tsundokuPkgs.map { it.packageName }}" }
 
         // Initialize tsundoku DI dependencies (Injekt, NetworkHelper, etc.)
         TsundokuExtensionLoader.initializeDependencies(context)
@@ -717,11 +729,18 @@ class AndroidCatalogLoader(
      */
     private fun loadTsundokuCatalog(pkgInfo: PackageInfo): List<CatalogInstalled.SystemWide> {
         val pkgName = pkgInfo.packageName
-        val data = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo) ?: return emptyList()
+        Log.info { "AndroidCatalogLoader: Validating metadata for Tsundoku package $pkgName..." }
+        val data = TsundokuExtensionLoader.validateMetadata(pkgName, pkgInfo)
+        if (data == null) {
+            Log.warn { "AndroidCatalogLoader: Tsundoku metadata validation failed for $pkgName" }
+            return emptyList()
+        }
+
+        Log.info { "AndroidCatalogLoader: $pkgName metadata valid: isNovel=${data.isNovel}, libVersion=${data.libVersion}, classToLoad=${data.classToLoad}" }
 
         // IReader is a novel app: skip Mihon/Tachiyomi manga-only extensions
         if (!data.isNovel) {
-            Log.info { "AndroidCatalogLoader: Skipping manga tsundoku extension $pkgName" }
+            Log.info { "AndroidCatalogLoader: Skipping manga tsundoku extension $pkgName (isNovel=false)" }
             return emptyList()
         }
 
@@ -729,6 +748,7 @@ class AndroidCatalogLoader(
             Log.warn { "AndroidCatalogLoader: No sourceDir for tsundoku package $pkgName" }
             return emptyList()
         }
+        Log.info { "AndroidCatalogLoader: Loading sources from $pkgName (sourceDir: $sourceDir)..." }
 
         // Extract and save the APK icon as PNG
         val iconUrl = extractAndSaveSystemIcon(pkgName, pkgInfo)
@@ -742,7 +762,7 @@ class AndroidCatalogLoader(
                 return emptyList()
             }
 
-            Log.info { "AndroidCatalogLoader: Loaded ${sources.size} source(s) from tsundoku extension $pkgName" }
+            Log.info { "AndroidCatalogLoader: Successfully loaded ${sources.size} source(s) from tsundoku extension $pkgName: ${sources.map { "${it.name} (id: ${it.id})" }}" }
 
             val installDir = simpleStorage.extensionDirectory().toFile().let {
                 File(it, pkgName).apply { mkdirs() }
@@ -761,7 +781,7 @@ class AndroidCatalogLoader(
                     installDir = installDir.absolutePath.toOkioPath()
                 )
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.error("AndroidCatalogLoader: Failed to load tsundoku catalog $pkgName", e)
             emptyList()
         }

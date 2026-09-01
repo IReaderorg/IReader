@@ -92,6 +92,8 @@ kotlin {
                 // Platform-specific Ktor engines and JVM-only serialization
                 api(libs.ktor.okhttp)
                 api(libs.ktor.core.android)
+                api(libs.okhttp.brotli)
+                api(libs.okhttp.zstd)
                 implementation(libs.ktor.contentNegotiation.gson)
                 
                 implementation(androidx.core)
@@ -108,6 +110,8 @@ kotlin {
             dependencies {
                 // Platform-specific Ktor engine and JVM-only serialization
                 api(libs.ktor.okhttp)
+                api(libs.okhttp.brotli)
+                api(libs.okhttp.zstd)
                 implementation(libs.ktor.contentNegotiation.gson)
                 
                 // android-compat provides Android API stubs for Desktop

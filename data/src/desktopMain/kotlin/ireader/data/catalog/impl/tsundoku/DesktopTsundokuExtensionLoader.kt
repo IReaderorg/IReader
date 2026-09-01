@@ -39,7 +39,12 @@ object DesktopTsundokuExtensionLoader {
      * Check if an APK is a Tsundoku extension by its manifest metadata.
      */
     fun isTsundokuExtension(pkgInfo: ApkMeta): Boolean {
-        return pkgInfo.usesFeatures.orEmpty().any { it.name in EXTENSION_FEATURES }
+        val hasFeature = pkgInfo.usesFeatures.orEmpty().any { it.name in EXTENSION_FEATURES }
+        val hasPkgPrefix = pkgInfo.packageName.startsWith("eu.kanade.tachiyomi.extension.") ||
+            pkgInfo.packageName.startsWith("eu.kanade.tachiyomi.novelextension.") ||
+            pkgInfo.packageName.startsWith("app.tsundoku.extension.") ||
+            pkgInfo.packageName.startsWith("app.tsundoku.novelextension.")
+        return hasFeature || hasPkgPrefix
     }
 
     /**
@@ -48,6 +53,7 @@ object DesktopTsundokuExtensionLoader {
     fun validateMetadata(pkgName: String, apkFile: ApkFile): TsundokuValidatedData? {
         val pkgInfo = apkFile.apkMeta
         if (!isTsundokuExtension(pkgInfo)) {
+            Log.warn { "TsundokuDesktopLoader: $pkgName is not a Tsundoku extension (missing features/prefix)" }
             return null
         }
 
@@ -82,11 +88,15 @@ object DesktopTsundokuExtensionLoader {
             name to value
         }
 
-        val isNovel = meta.any { it.first == METADATA_NOVEL && it.second == "1" } ||
-            pkgInfo.usesFeatures.orEmpty().any { it.name == EXTENSION_FEATURE_NOVEL }
+        val isNovel = meta.any { (it.first == METADATA_NOVEL || it.first == "tachiyomi.novelextension.novel") && it.second == "1" } ||
+            meta.any { it.first == "tachiyomi.novelextension.class" } ||
+            pkgInfo.usesFeatures.orEmpty().any { it.name == EXTENSION_FEATURE_NOVEL } ||
+            pkgName.contains(".novelextension.")
 
         val metaNs = if (isNovel) "tachiyomi.novelextension" else "tachiyomi.extension"
-        val sourceClassName = meta.find { it.first == "$metaNs.class" }?.second
+        val sourceClassName = meta.find { it.first == "tachiyomi.novelextension.class" }?.second
+            ?: meta.find { it.first == "tachiyomi.extension.class" }?.second
+            ?: meta.find { it.first == "$metaNs.class" }?.second
             ?: meta.find { it.first == METADATA_SOURCE_CLASS }?.second
             ?: meta.find { it.first == METADATA_SOURCE_CLASS_NOVEL }?.second
             ?: run {
@@ -102,6 +112,8 @@ object DesktopTsundokuExtensionLoader {
             sourceClassName
         }
 
+        Log.info { "TsundokuDesktopLoader: Validated $pkgName: isNovel=$isNovel, classToLoad=$classToLoad, libVersion=$libVersion" }
+
         return TsundokuValidatedData(
             versionCode = versionCode.toInt(),
             versionName = versionName,
@@ -114,7 +126,7 @@ object DesktopTsundokuExtensionLoader {
     }
 
     /**
-     * Load Tsundoku sources from an APK file using dex2jar + URLClassLoader.
+     * Load Tsundoku sources from an APK file using direct JAR (if available) or dex2jar + URLClassLoader.
      * Matches the Android TsundokuExtensionLoader.loadSources() logic exactly:
      * 1. Split source classes by ";" (one APK can have multiple sources)
      * 2. Prepend package name for relative class names (starting with ".")
@@ -125,12 +137,19 @@ object DesktopTsundokuExtensionLoader {
         initializeDependencies()
 
         return try {
-            // Convert APK DEX to JAR using dex2jar
-            val jarFile = File(apkFile.parentFile, "${pkgName}_tsundoku.jar")
-            Dex2JarConverter.convert(apkFile, jarFile)
+            // Check if a pre-compiled JAR exists in parent dir (e.g. downloaded directly or alongside APK)
+            val directJar = File(apkFile.parentFile, "${pkgName}.jar")
+            val jarFile = if (directJar.exists() && directJar.length() > 0L) {
+                Log.info { "TsundokuDesktopLoader: Using pre-compiled JAR for $pkgName: ${directJar.name}" }
+                directJar
+            } else {
+                val convertedJar = File(apkFile.parentFile, "${pkgName}_tsundoku.jar")
+                Dex2JarConverter.convert(apkFile, convertedJar)
+                convertedJar
+            }
 
             if (!jarFile.exists() || jarFile.length() == 0L) {
-                Log.error { "TsundokuDesktopLoader: dex2jar conversion failed for $pkgName" }
+                Log.error { "TsundokuDesktopLoader: JAR file not available for $pkgName" }
                 return emptyList()
             }
 
@@ -242,7 +261,7 @@ object DesktopTsundokuExtensionLoader {
                 }
             }
 
-            allSources.map { wrapSource(it) }
+            allSources.mapNotNull { wrapSource(it) }
         } catch (e: Throwable) {
             Log.error { "TsundokuDesktopLoader: Failed to load $pkgName: ${e::class.simpleName}: ${e.message}" }
             e.printStackTrace()
@@ -285,26 +304,48 @@ object DesktopTsundokuExtensionLoader {
         }
     }
 
-    // ==================== Helpers ====================
-
-    private fun wrapSource(tsundokuSource: Any): Source {
-        return TsundokuCatalogSource(tsundokuSource as eu.kanade.tachiyomi.source.CatalogueSource)
+    private fun wrapSource(tsundokuSource: Any): Source? {
+        return try {
+            if (tsundokuSource is eu.kanade.tachiyomi.source.CatalogueSource) {
+                TsundokuCatalogSource(tsundokuSource)
+            } else {
+                Log.warn { "TsundokuDesktopLoader: Source ${tsundokuSource.javaClass.name} is not direct CatalogueSource instance, attempting cast" }
+                TsundokuCatalogSource(tsundokuSource as eu.kanade.tachiyomi.source.CatalogueSource)
+            }
+        } catch (e: Throwable) {
+            Log.error { "TsundokuDesktopLoader: Failed to wrap source ${tsundokuSource.javaClass.name}: ${e.message}" }
+            null
+        }
     }
 
     private fun isTsundokuSource(obj: Any): Boolean {
+        if (obj is eu.kanade.tachiyomi.source.Source) return true
         return try {
-            Class.forName("eu.kanade.tachiyomi.source.Source").isInstance(obj)
+            val sourceClass = Class.forName("eu.kanade.tachiyomi.source.Source", false, obj.javaClass.classLoader)
+            sourceClass.isInstance(obj)
         } catch (e: Exception) {
             false
-        }
+        } || hasInterfaceOrSuperclass(obj.javaClass, "eu.kanade.tachiyomi.source.Source")
     }
 
     private fun isSourceFactory(obj: Any): Boolean {
+        if (obj is eu.kanade.tachiyomi.source.SourceFactory) return true
         return try {
-            Class.forName("eu.kanade.tachiyomi.source.SourceFactory").isInstance(obj)
+            val factoryClass = Class.forName("eu.kanade.tachiyomi.source.SourceFactory", false, obj.javaClass.classLoader)
+            factoryClass.isInstance(obj)
         } catch (e: Exception) {
             false
+        } || hasInterfaceOrSuperclass(obj.javaClass, "eu.kanade.tachiyomi.source.SourceFactory")
+    }
+
+    private fun hasInterfaceOrSuperclass(clazz: Class<*>?, targetName: String): Boolean {
+        var current = clazz
+        while (current != null && current != Any::class.java) {
+            if (current.name == targetName) return true
+            if (current.interfaces.any { it.name == targetName || hasInterfaceOrSuperclass(it, targetName) }) return true
+            current = current.superclass
         }
+        return false
     }
 
     @Suppress("UNCHECKED_CAST")

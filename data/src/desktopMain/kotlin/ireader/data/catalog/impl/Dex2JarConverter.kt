@@ -39,6 +39,7 @@ object Dex2JarConverter {
                 .printIR(false)
                 .noCode(false)
                 .skipExceptions(false)
+                .computeFrames(true)
                 .to(jarFile.toPath())
             true
         } catch (e: Exception) {

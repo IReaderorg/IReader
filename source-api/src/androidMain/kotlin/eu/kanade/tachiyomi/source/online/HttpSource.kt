@@ -285,7 +285,7 @@ abstract class HttpSource : CatalogueSource {
      *
      * @param manga the manga to look for chapters.
      */
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override suspend fun getChapterList(manga: SManga): List<SChapter> {
         return fetchChapterList(manga).awaitSingle()
     }
@@ -299,6 +299,12 @@ abstract class HttpSource : CatalogueSource {
      * @param context refresh context containing existing local state
      * @return the chapters for the manga
      */
+    @Suppress("OVERRIDE_DEPRECATION")
+    @Deprecated(
+        "Fork-only API superseded by upstream's getMangaUpdate, which now accepts existing chapters directly. " +
+            "Kept temporarily so already-published extensions keep working; migrate to getMangaUpdate.",
+        ReplaceWith("getMangaUpdate"),
+    )
     override suspend fun getChapterList(manga: SManga, context: RefreshContext): List<SChapter> {
         return getChapterList(manga)
     }
@@ -447,7 +453,7 @@ abstract class HttpSource : CatalogueSource {
      * @since extensions-lib 1.5
      * @param page the page whose source image has to be downloaded.
      */
-    open suspend fun getImage(page: Page): Response {
+    open suspend fun getImage(page: Page, existingSize: Long = 0L): Response {
         if (this.isNovelSource()) {
             return Response.Builder()
                 .request(imageRequest(page)) // still need a Request object, but it won't be executed
@@ -457,7 +463,7 @@ abstract class HttpSource : CatalogueSource {
                 .body(ResponseBody.create(null, ""))
                 .build()
         }
-        return client.newCachelessCallWithProgress(imageRequest(page), page)
+        return client.newCachelessCallWithProgress(imageRequest(page), page, existingSize)
             .awaitSuccess()
     }
 

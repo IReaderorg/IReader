@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
  * A simple implementation for sources from a website.
  */
 @Suppress("unused", "unused_parameter")
-abstract class HttpSource(private val dependencies: ireader.core.source.Dependencies) :
+abstract class HttpSource(private val dependencies: ireader.core.source.Dependencies? = null) :
     ireader.core.source.CatalogSource {
 
     /**
@@ -46,7 +46,7 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
      * Default network client for doing requests.
      */
     open val client: HttpClient
-        get() = dependencies.httpClients.default
+        get() = dependencies?.httpClients?.default ?: defaultFallbackClient
 
     open val type: Int = TYPE_NOVEL
 
@@ -99,6 +99,10 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
     }
     
     companion object {
+        val defaultFallbackClient by lazy {
+            HttpClient()
+        }
+
         /**
          * Generate a source ID from a key string using a simple hash
          */

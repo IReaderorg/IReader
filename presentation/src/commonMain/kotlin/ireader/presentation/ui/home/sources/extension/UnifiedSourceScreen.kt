@@ -416,7 +416,7 @@ private fun InstalledSourcesContent(
                     }
                 },
             ) { catalog ->
-                val catalogItem = remember { catalog.second }
+                val catalogItem = catalog.second
                 
                 when (catalogItem) {
                     is SourceUiModel.Header -> {

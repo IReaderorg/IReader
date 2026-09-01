@@ -1,6 +1,10 @@
 package ireader.data.catalog.impl.tsundoku
 
 import com.fleeksoft.ksoup.Ksoup
+import io.ktor.client.HttpClient
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.url
+import io.ktor.http.HttpHeaders
 import ireader.core.log.Log
 import ireader.core.source.CatalogSource
 import ireader.core.source.model.Command
@@ -18,10 +22,13 @@ import ireader.core.source.model.Text
  * model conversions and network calls, which cannot live in commonMain because
  * eu.kanade.tachiyomi types exist only in platform-specific source sets.
  */
-abstract class BaseTsundokuCatalogSource : CatalogSource {
+abstract class BaseTsundokuCatalogSource : ireader.core.source.HttpSource() {
 
     /** Whether the underlying source supports fetching latest updates. */
     protected abstract val supportsLatest: Boolean
+
+    /** Base URL of the source for WebView and HTTP calls. */
+    abstract override val baseUrl: String
 
     // ── Trivial overrides (no eu.kanade dependency) ─────────────────
 
@@ -42,9 +49,19 @@ abstract class BaseTsundokuCatalogSource : CatalogSource {
     override fun supportsPaginatedChapters(): Boolean = false
 
     override fun getListings(): List<Listing> {
-        val listings = mutableListOf<Listing>(PopularListing(), SearchListing())
+        val listings = mutableListOf<Listing>(PopularListing())
         if (supportsLatest) listings.add(LatestListing())
         return listings
+    }
+
+    open val userAgent: String
+        get() = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+    override fun getCoverRequest(url: String): Pair<HttpClient, HttpRequestBuilder> {
+        return client to HttpRequestBuilder().apply {
+            if (url.isNotBlank()) url(url)
+            headers.append(HttpHeaders.UserAgent, userAgent)
+        }
     }
 
     override fun toString(): String = "TsundokuSource($name, $lang, id=$id)"

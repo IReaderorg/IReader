@@ -149,7 +149,9 @@ class DesktopCatalogLoader(
             emptyList()
         }
 
-        return (bundled + installedCatalogs + tsundokuCatalogs + jsPlugins).distinctBy { it.sourceId }.toSet().toList()
+        return (bundled + installedCatalogs + tsundokuCatalogs + jsPlugins).distinctBy {
+            if (it.sourceId > 0) "id_${it.sourceId}" else "pkg_${(it as? CatalogInstalled)?.pkgName ?: it.name}"
+        }.toList()
     }
 
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {

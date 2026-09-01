@@ -107,12 +107,53 @@ fun CleanCatalogCard(
                 }
             }
 
-            if (lang != null) {
-                Text(
-                    text = lang.code.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (lang != null && lang.code.isNotBlank()) {
+                    Text(
+                        text = lang.code.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                val version = when (catalog) {
+                    is CatalogInstalled -> catalog.versionName
+                    is CatalogRemote -> catalog.versionName
+                    else -> null
+                }
+                if (!version.isNullOrBlank()) {
+                    Text(
+                        text = "v$version",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                val typeBadge = when {
+                    catalog.description.contains("Tsundoku", ignoreCase = true) || 
+                        (catalog as? CatalogRemote)?.repositoryType.equals("TSUNDOKU", ignoreCase = true) -> "Tsundoku"
+                    catalog is JSPluginCatalog -> "JS"
+                    catalog is UserSourceCatalog -> "Custom"
+                    catalog is CatalogInstalled -> "IReader"
+                    else -> null
+                }
+                if (typeBadge != null) {
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
+                    ) {
+                        Text(
+                            text = typeBadge,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                        )
+                    }
+                }
             }
         }
 

@@ -132,19 +132,24 @@ enum class SourceState {
 }
 
 fun Catalog.key(state: SourceState, index: Long, repoId: Long): String {
-    if (sourceId == -1L) return  "$index-installed"
-    val name = when(this) {
+    if (sourceId == -1L) return "$index-installed"
+    val pkg = (this as? CatalogInstalled)?.pkgName 
+        ?: (this as? CatalogRemote)?.pkgName 
+        ?: (this as? JSPluginCatalog)?.pkgName 
+        ?: ""
+    val name = when (this) {
         is CatalogInstalled.SystemWide -> "system-"
         is CatalogInstalled.Locally -> "local-"
         is CatalogRemote -> "remote-"
         else -> ""
     }
+    val pkgPart = if (pkg.isNotBlank()) "$pkg-" else ""
     return when (state) {
-        SourceState.LastUsed -> "$repoId-$name-$sourceId-lastused"
-        SourceState.Pinned -> "$repoId-$name-$sourceId-pinned"
-        SourceState.UnPinned -> "$repoId-$name-$sourceId-unpinned"
-        SourceState.Installed -> "$repoId-$name-$sourceId-installed"
-        SourceState.Remote -> "$repoId-$name-$sourceId-remote"
-        else -> "$repoId-$name-$sourceId"
+        SourceState.LastUsed -> "$repoId-$name$pkgPart$sourceId-lastused"
+        SourceState.Pinned -> "$repoId-$name$pkgPart$sourceId-pinned"
+        SourceState.UnPinned -> "$repoId-$name$pkgPart$sourceId-unpinned"
+        SourceState.Installed -> "$repoId-$name$pkgPart$sourceId-installed"
+        SourceState.Remote -> "$repoId-$name$pkgPart$sourceId-remote"
+        else -> "$repoId-$name$pkgPart$sourceId"
     }
 }

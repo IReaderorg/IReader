@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 
 class CatalogGithubApi(
@@ -170,23 +172,60 @@ class CatalogGithubApi(
 
     /**
      * Parse Tsundoku extension repository format.
-     * Tsundoku's index.min.json has different field types than IReader:
-     * - nsfw: Int (0/1) instead of Boolean
-     * - isNovel: Boolean (tsundoku-specific)
-     * - sources: List (tsundoku-specific)
+     * Supports both modern NovelSourcery format (object with extensionList) and legacy flat list format.
      */
     private fun parseTsundokuFormat(response: String, repo: ireader.domain.models.entities.ExtensionSource): List<CatalogRemote> {
+        val trimmed = response.trim()
+        val repoUrl = (repo.key.substringBefore("index.min.json", "").takeIf { it.isNotBlank() }
+            ?: repo.key.substringBefore("index.json", "").takeIf { it.isNotBlank() })?.trimEnd('/')
+            ?: "https://raw.githubusercontent.com/NovelSourcery/extensions/repo"
+
+        if (trimmed.startsWith("{")) {
+            val root = json.decodeFromString<NovelSourceryRepoModel>(trimmed)
+            val extensionList = root.extensionList?.extensions ?: root.extensions ?: emptyList()
+            if (extensionList.isEmpty()) {
+                throw CatalogNotFoundException("No extensions found in NovelSourcery repository")
+            }
+
+            return extensionList.filter { it.isNovel }.map { ext ->
+                val apkUrl = ext.resources?.apkUrl ?: "$repoUrl/apk/${ext.packageName}.apk"
+                val iconUrl = ext.resources?.iconUrl ?: "$repoUrl/icon/${ext.packageName}.png"
+                val jarUrl = ext.resources?.jarUrl ?: ""
+                val firstSource = ext.sources?.firstOrNull()
+                val sourceId = (firstSource?.id as? JsonPrimitive)?.content?.toLongOrNull() ?: 0L
+                val lang = firstSource?.language ?: "all"
+                val vCode = (ext.versionCode as? JsonPrimitive)?.content?.toIntOrNull() ?: 1
+                val isNsfw = ext.contentWarning?.contains("NSFW", ignoreCase = true) == true
+
+                CatalogRemote(
+                    name = ext.name,
+                    description = ext.description ?: "Tsundoku novel extension",
+                    sourceId = sourceId,
+                    pkgName = ext.packageName,
+                    versionName = ext.versionName ?: "1.0.0",
+                    versionCode = vCode,
+                    lang = lang,
+                    pkgUrl = apkUrl,
+                    iconUrl = iconUrl,
+                    nsfw = isNsfw,
+                    source = CatalogRemote.DEFAULT_ID,
+                    jarUrl = jarUrl,
+                    repositoryId = repo.id,
+                    repositoryType = "TSUNDOKU"
+                )
+            }
+        }
+
         val catalogs = json.decodeFromString<List<TsundokuRemoteApiModel>>(response)
         if (catalogs.isEmpty()) {
             throw CatalogNotFoundException("No catalogs found in Tsundoku repository")
         }
 
-        val repoUrl = repo.key.substringBefore("index.min.json", "").takeIf { it.isNotBlank() }?.trimEnd('/')
-            ?: "https://raw.githubusercontent.com/novelsourcery/extensions/repo"
-        return catalogs.filter {catalog -> catalog.isNovel == true }.map { catalog ->
+        return catalogs.filter { catalog -> catalog.isNovel }.map { catalog ->
             val iconUrl = "$repoUrl/icon/${catalog.pkg}.png"
             val appUrl = "$repoUrl/apk/${catalog.apk}"
-            // Use the first source's id as unique identifier, fallback to pkg hash
+
+            val jarUrl = "$repoUrl/jar/${catalog.apk.replace(".apk", ".jar")}"
 
             CatalogRemote(
                 name = catalog.name,
@@ -200,7 +239,7 @@ class CatalogGithubApi(
                 iconUrl = iconUrl,
                 nsfw = catalog.nsfw == 1,
                 source = CatalogRemote.DEFAULT_ID,
-                jarUrl = "", // Tsundoku uses APKs, not JARs
+                jarUrl = jarUrl,
                 repositoryId = repo.id,
                 repositoryType = "TSUNDOKU"
             )
@@ -455,5 +494,46 @@ class CatalogGithubApi(
         @SerialName("lang") val lang: String,
         @SerialName("id") val id: Long,
         @SerialName("baseUrl") val baseUrl: String? = null,
+    )
+
+    @Serializable
+    private data class NovelSourceryRepoModel(
+        @SerialName("name") val name: String? = null,
+        @SerialName("extensionList") val extensionList: NovelSourceryExtensionList? = null,
+        @SerialName("extensions") val extensions: List<NovelSourceryExtensionModel>? = null,
+    )
+
+    @Serializable
+    private data class NovelSourceryExtensionList(
+        @SerialName("extensions") val extensions: List<NovelSourceryExtensionModel> = emptyList()
+    )
+
+    @Serializable
+    private data class NovelSourceryExtensionModel(
+        @SerialName("name") val name: String,
+        @SerialName("packageName") val packageName: String,
+        @SerialName("resources") val resources: NovelSourceryResources? = null,
+        @SerialName("extensionLib") val extensionLib: String? = null,
+        @SerialName("versionCode") val versionCode: JsonElement? = null,
+        @SerialName("versionName") val versionName: String? = null,
+        @SerialName("contentWarning") val contentWarning: String? = null,
+        @SerialName("sources") val sources: List<NovelSourcerySourceModel>? = null,
+        @SerialName("isNovel") val isNovel: Boolean = true,
+        @SerialName("description") val description: String? = null,
+    )
+
+    @Serializable
+    private data class NovelSourceryResources(
+        @SerialName("apkUrl") val apkUrl: String? = null,
+        @SerialName("iconUrl") val iconUrl: String? = null,
+        @SerialName("jarUrl") val jarUrl: String? = null,
+    )
+
+    @Serializable
+    private data class NovelSourcerySourceModel(
+        @SerialName("id") val id: JsonElement? = null,
+        @SerialName("name") val name: String? = null,
+        @SerialName("language") val language: String? = null,
+        @SerialName("homeUrl") val homeUrl: String? = null,
     )
 }

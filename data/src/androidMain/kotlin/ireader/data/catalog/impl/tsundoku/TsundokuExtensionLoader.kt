@@ -39,17 +39,38 @@ object TsundokuExtensionLoader {
     private const val LIB_VERSION_MAX = 2.0
 
     /**
-     * Check if a package is a Tsundoku extension (has tachiyomi.extension or tachiyomi.novelextension feature).
+     * Check if a package is a Tsundoku extension (has tachiyomi.extension or tachiyomi.novelextension feature or metadata).
      */
     fun isTsundokuExtension(pkgInfo: PackageInfo): Boolean {
-        return pkgInfo.reqFeatures.orEmpty().any { it.name in EXTENSION_FEATURES }
+        val hasFeature = pkgInfo.reqFeatures.orEmpty().any { it.name in EXTENSION_FEATURES }
+        val metadata = pkgInfo.applicationInfo?.metaData
+        val hasMetadata = metadata?.containsKey("tachiyomi.extension.class") == true ||
+            metadata?.containsKey("tachiyomi.novelextension.class") == true ||
+            metadata?.containsKey("tachiyomi.extension") == true ||
+            metadata?.containsKey("tachiyomi.novelextension") == true ||
+            metadata?.containsKey("tachiyomix.name") == true
+        val hasPkgPrefix = pkgInfo.packageName.startsWith("eu.kanade.tachiyomi.extension.") ||
+            pkgInfo.packageName.startsWith("eu.kanade.tachiyomi.novelextension.") ||
+            pkgInfo.packageName.startsWith("app.tsundoku.extension.") ||
+            pkgInfo.packageName.startsWith("app.tsundoku.novelextension.")
+        val result = hasFeature || hasMetadata || hasPkgPrefix
+        if (result) {
+            Log.info { "TsundokuLoader: Package ${pkgInfo.packageName} recognized as Tsundoku (hasFeature=$hasFeature, hasMetadata=$hasMetadata, hasPkgPrefix=$hasPkgPrefix)" }
+        }
+        return result
     }
 
     /**
      * Check if a package is a Tsundoku novel extension specifically.
      */
     fun isNovelExtension(pkgInfo: PackageInfo): Boolean {
-        return pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE_NOVEL }
+        val hasFeature = pkgInfo.reqFeatures.orEmpty().any { it.name == EXTENSION_FEATURE_NOVEL }
+        val metadata = pkgInfo.applicationInfo?.metaData
+        val hasNovelMeta = metadata?.getInt("tachiyomi.novelextension.novel") == 1 ||
+            metadata?.getInt("tachiyomi.extension.novel") == 1 ||
+            metadata?.containsKey("tachiyomi.novelextension.class") == true
+        val hasPkg = pkgInfo.packageName.contains(".novelextension.")
+        return hasFeature || hasNovelMeta || hasPkg
     }
 
     /**
@@ -58,6 +79,7 @@ object TsundokuExtensionLoader {
      */
     fun validateMetadata(pkgName: String, pkgInfo: PackageInfo): TsundokuValidatedData? {
         if (!isTsundokuExtension(pkgInfo)) {
+            Log.warn { "TsundokuLoader: $pkgName is not a Tsundoku extension (missing features/metadata/prefix)" }
             return null
         }
 
@@ -67,7 +89,11 @@ object TsundokuExtensionLoader {
         }
 
         @Suppress("DEPRECATION")
-        val versionCode = pkgInfo.versionCode
+        val versionCode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            pkgInfo.longVersionCode.toInt()
+        } else {
+            pkgInfo.versionCode
+        }
 
         // Validate lib version (format: "1.4.xxx" or "1.6.xxx")
         val libVersion = try {
@@ -92,13 +118,21 @@ object TsundokuExtensionLoader {
         }
 
         // Get source class name from the appropriate metadata key
-        val isNovel = isNovelExtension(pkgInfo) || metadata.getInt(METADATA_NOVEL) == 1
+        val isNovel = isNovelExtension(pkgInfo) ||
+            metadata.getInt("tachiyomi.novelextension.novel") == 1 ||
+            metadata.getInt("tachiyomi.extension.novel") == 1 ||
+            metadata.getInt(METADATA_NOVEL) == 1 ||
+            metadata.containsKey("tachiyomi.novelextension.class") ||
+            pkgName.contains(".novelextension.")
+
         val metaNs = if (isNovel) "tachiyomi.novelextension" else "tachiyomi.extension"
-        val sourceClassName = metadata.getString("$metaNs.class")
+        val sourceClassName = metadata.getString("tachiyomi.novelextension.class")
+            ?: metadata.getString("tachiyomi.extension.class")
+            ?: metadata.getString("$metaNs.class")
             ?: metadata.getString(METADATA_SOURCE_CLASS)
             ?: metadata.getString(METADATA_SOURCE_CLASS_NOVEL)
             ?: run {
-                Log.warn { "TsundokuLoader: Missing source class metadata for $pkgName" }
+                Log.warn { "TsundokuLoader: Missing source class metadata for $pkgName. Metadata keys: ${metadata.keySet()}" }
                 return null
             }
 
@@ -110,6 +144,8 @@ object TsundokuExtensionLoader {
         } else {
             sourceClassName
         }
+
+        Log.info { "TsundokuLoader: Validated $pkgName: isNovel=$isNovel, classToLoad=$classToLoad, libVersion=$libVersion, versionCode=$versionCode" }
 
         return TsundokuValidatedData(
             versionCode = versionCode,
@@ -167,15 +203,25 @@ object TsundokuExtensionLoader {
 
             for (classToTry in classesToTry) {
                 try {
+                    Log.info { "TsundokuLoader: Attempting to load class: $classToTry in $pkgName" }
                     val clazz = Class.forName(classToTry, false, classLoader)
                     val obj = clazz.getDeclaredConstructor().newInstance()
+                    Log.info { "TsundokuLoader: Instantiated $classToTry (${obj.javaClass.name})" }
 
                     // Check what type of source this is
                     val sources = when {
-                        isTsundokuSource(obj) -> listOf(obj)
-                        isSourceFactory(obj) -> invokeCreateSources(obj)
+                        isTsundokuSource(obj) -> {
+                            Log.info { "TsundokuLoader: Matched Tsundoku Source: $classToTry" }
+                            listOf(obj)
+                        }
+                        isSourceFactory(obj) -> {
+                            Log.info { "TsundokuLoader: Matched Tsundoku SourceFactory: $classToTry" }
+                            invokeCreateSources(obj)
+                        }
                         else -> {
-                            Log.error { "TsundokuLoader: Unknown source class type: ${obj.javaClass.name}" }
+                            val interfaces = obj.javaClass.interfaces.map { it.name }
+                            val superclass = obj.javaClass.superclass?.name
+                            Log.error { "TsundokuLoader: Unknown source class type: ${obj.javaClass.name}, superclass=$superclass, interfaces=$interfaces" }
                             emptyList<Any>()
                         }
                     }
@@ -209,7 +255,8 @@ object TsundokuExtensionLoader {
             }
         }
 
-        return allSources.map { wrapSource(it) }
+        Log.info { "TsundokuLoader: $pkgName finished loading. Total sources found: ${allSources.size}" }
+        return allSources.mapNotNull { wrapSourceSafe(it) }
     }
 
     // ==================== Source Wrapping ====================
@@ -217,30 +264,54 @@ object TsundokuExtensionLoader {
     /**
      * Wrap a tsundoku source instance in an IReader CatalogSource.
      */
-    private fun wrapSource(tsundokuSource: Any): Source {
-        return TsundokuCatalogSource(tsundokuSource as eu.kanade.tachiyomi.source.CatalogueSource)
+    private fun wrapSourceSafe(tsundokuSource: Any): Source? {
+        return try {
+            if (tsundokuSource is eu.kanade.tachiyomi.source.CatalogueSource) {
+                TsundokuCatalogSource(tsundokuSource)
+            } else {
+                Log.warn { "TsundokuLoader: Source ${tsundokuSource.javaClass.name} is not direct CatalogueSource instance, attempting cast" }
+                TsundokuCatalogSource(tsundokuSource as eu.kanade.tachiyomi.source.CatalogueSource)
+            }
+        } catch (e: Throwable) {
+            Log.error { "TsundokuLoader: Failed to wrap source ${tsundokuSource.javaClass.name}: ${e.message}" }
+            null
+        }
     }
 
     /**
      * Check if an object implements the Tsundoku Source interface.
      */
     private fun isTsundokuSource(obj: Any): Boolean {
+        if (obj is eu.kanade.tachiyomi.source.Source) return true
         return try {
-            Class.forName("eu.kanade.tachiyomi.source.Source").isInstance(obj)
+            val sourceClass = Class.forName("eu.kanade.tachiyomi.source.Source", false, obj.javaClass.classLoader)
+            sourceClass.isInstance(obj)
         } catch (e: Exception) {
             false
-        }
+        } || hasInterfaceOrSuperclass(obj.javaClass, "eu.kanade.tachiyomi.source.Source")
     }
 
     /**
      * Check if an object implements the Tsundoku SourceFactory interface.
      */
     private fun isSourceFactory(obj: Any): Boolean {
+        if (obj is eu.kanade.tachiyomi.source.SourceFactory) return true
         return try {
-            Class.forName("eu.kanade.tachiyomi.source.SourceFactory").isInstance(obj)
+            val factoryClass = Class.forName("eu.kanade.tachiyomi.source.SourceFactory", false, obj.javaClass.classLoader)
+            factoryClass.isInstance(obj)
         } catch (e: Exception) {
             false
+        } || hasInterfaceOrSuperclass(obj.javaClass, "eu.kanade.tachiyomi.source.SourceFactory")
+    }
+
+    private fun hasInterfaceOrSuperclass(clazz: Class<*>?, targetName: String): Boolean {
+        var current = clazz
+        while (current != null && current != Any::class.java) {
+            if (current.name == targetName) return true
+            if (current.interfaces.any { it.name == targetName || hasInterfaceOrSuperclass(it, targetName) }) return true
+            current = current.superclass
         }
+        return false
     }
 
     /**
@@ -261,7 +332,15 @@ object TsundokuExtensionLoader {
         @Suppress("DEPRECATION")
         val packageFlags = PackageManager.GET_CONFIGURATIONS or PackageManager.GET_META_DATA
         return try {
-            pkgManager.getInstalledPackages(packageFlags).filter { isTsundokuExtension(it) }
+            val allPackages = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                pkgManager.getInstalledPackages(PackageManager.PackageInfoFlags.of(packageFlags.toLong()))
+            } else {
+                pkgManager.getInstalledPackages(packageFlags)
+            }
+            Log.info { "TsundokuLoader: Total installed packages seen by PackageManager: ${allPackages.size}" }
+            val tsundokuPackages = allPackages.filter { isTsundokuExtension(it) }
+            Log.info { "TsundokuLoader: Matched ${tsundokuPackages.size} Tsundoku package(s): ${tsundokuPackages.map { it.packageName }}" }
+            tsundokuPackages
         } catch (e: Exception) {
             Log.error { "TsundokuLoader: Failed to query installed packages: ${e.message}" }
             emptyList()

@@ -370,4 +370,175 @@ class TsundokuCatalogSourceTest {
         val textPage = pages.first() as ireader.core.source.model.Text
         assertTrue(textPage.text.contains("Humans are clever"))
     }
+
+    @Test
+    fun testSafeIdGetterWhenSourceThrowsOrReturnsInvalid() {
+        val throwingSource = object : CatalogueSource {
+            override val id: Long get() = throw RuntimeException("Broken source.id")
+            override val name: String get() = "Broken Source"
+            override val lang: String get() = "en"
+            override val supportsLatest: Boolean get() = false
+            override fun getFilterList(): FilterList = FilterList()
+            override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getLatestUpdates(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getPageList(chapter: SChapter): List<Page> = emptyList()
+        }
+
+        val catalogSource = TsundokuCatalogSource(throwingSource)
+        val id = catalogSource.id
+        assertTrue(id > 0L, "Fallback id must be a positive Long")
+
+        val invalidIdSource = object : CatalogueSource {
+            override val id: Long get() = -1L
+            override val name: String get() = "Invalid Source"
+            override val lang: String get() = "en"
+            override val supportsLatest: Boolean get() = false
+            override fun getFilterList(): FilterList = FilterList()
+            override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getLatestUpdates(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getPageList(chapter: SChapter): List<Page> = emptyList()
+        }
+
+        val catalogSource2 = TsundokuCatalogSource(invalidIdSource)
+        val id2 = catalogSource2.id
+        assertTrue(id2 > 0L, "Fallback id for -1L must be a positive Long")
+    }
+
+    @Test
+    fun testRateLimitedInterface() {
+        val rateLimitedSource = object : CatalogueSource, eu.kanade.tachiyomi.source.RateLimited {
+            override val id: Long = 2002L
+            override val name: String = "Rate Limited Source"
+            override val lang: String = "en"
+            override val supportsLatest: Boolean = false
+            override val minimumDelayMillis: Long = 1500L
+            override fun getFilterList(): FilterList = FilterList()
+            override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getLatestUpdates(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getPageList(chapter: SChapter): List<Page> = emptyList()
+        }
+
+        assertTrue(rateLimitedSource is eu.kanade.tachiyomi.source.RateLimited)
+        assertEquals(1500L, rateLimitedSource.minimumDelayMillis)
+        assertEquals(1500L, rateLimitedSource.recommendedDelayMillis)
+        assertEquals(1, rateLimitedSource.recommendedPermits)
+    }
+
+    @Test
+    fun testMangaUpdateDelegationInTsundokuCatalogSource() = runTest {
+        var mangaUpdateCalled = false
+        val customSource = object : CatalogueSource {
+            override val id: Long = 3003L
+            override val name: String = "Update Test Source"
+            override val lang: String = "en"
+            override val supportsLatest: Boolean = false
+            override fun getFilterList(): FilterList = FilterList()
+            override suspend fun getPopularManga(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getLatestUpdates(page: Int): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getSearchManga(page: Int, query: String, filters: FilterList): MangasPage = MangasPage(emptyList(), false)
+            override suspend fun getPageList(chapter: SChapter): List<Page> = emptyList()
+
+            override suspend fun getMangaUpdate(
+                manga: SManga,
+                chapters: List<SChapter>,
+                fetchDetails: Boolean,
+                fetchChapters: Boolean,
+            ): eu.kanade.tachiyomi.source.model.SMangaUpdate {
+                mangaUpdateCalled = true
+                val updatedManga = manga.apply {
+                    title = "Overridden Title"
+                    author = "Overridden Author"
+                }
+                val updatedChapters = listOf(
+                    SChapter.create().apply {
+                        name = "Chapter 1 Overridden"
+                        url = "/ch1"
+                    }
+                )
+                return eu.kanade.tachiyomi.source.model.SMangaUpdate(updatedManga, updatedChapters)
+            }
+        }
+
+        val catalogSource = TsundokuCatalogSource(customSource)
+        val mangaInfo = ireader.core.source.model.MangaInfo(key = "/novel/test", title = "Original")
+        val details = catalogSource.getMangaDetails(mangaInfo, emptyList())
+        assertTrue(mangaUpdateCalled, "getMangaUpdate should have been called for getMangaDetails")
+        assertEquals("Overridden Title", details.title)
+        assertEquals("Overridden Author", details.author)
+
+        mangaUpdateCalled = false
+        val chapters = catalogSource.getChapterList(mangaInfo, emptyList())
+        assertTrue(mangaUpdateCalled, "getMangaUpdate should have been called for getChapterList")
+        assertEquals(1, chapters.size)
+        assertEquals("Chapter 1 Overridden", chapters.first().name)
+    }
+
+    @Test
+    fun testInspectStorySeedlingApk() {
+        val apkFile = java.io.File("../.gradle/tachiyomi-en.storyseedling-v1.6.3.apk")
+        if (!apkFile.exists()) {
+            val altFile = java.io.File(".gradle/tachiyomi-en.storyseedling-v1.6.3.apk")
+            if (!altFile.exists()) {
+                println("APK not found at $apkFile or $altFile")
+                return
+            }
+        }
+        val fileToUse = if (apkFile.exists()) apkFile else java.io.File(".gradle/tachiyomi-en.storyseedling-v1.6.3.apk")
+        val apk = net.dongliu.apk.parser.ApkFile(fileToUse)
+        println("=== APK MANIFEST ===")
+        println(apk.manifestXml)
+        println("=== APK META ===")
+        println("packageName: ${apk.apkMeta.packageName}")
+        println("name: ${apk.apkMeta.name}")
+        println("versionName: ${apk.apkMeta.versionName}")
+        println("versionCode: ${apk.apkMeta.versionCode}")
+        println("features: ${apk.apkMeta.usesFeatures.map { it.name }}")
+
+        val validated = DesktopTsundokuExtensionLoader.validateMetadata(apk.apkMeta.packageName, apk)
+        println("=== VALIDATED DATA ===")
+        println(validated)
+
+        val sources = DesktopTsundokuExtensionLoader.loadSources(apk.apkMeta.packageName, fileToUse, validated!!)
+        println("=== LOADED SOURCES ===")
+        println("count: ${sources.size}")
+        sources.forEach {
+            println("source: ${it.name}, id: ${it.id}")
+        }
+        apk.close()
+
+        assertTrue(sources.isNotEmpty(), "Expected at least 1 source to be loaded from StorySeedling")
+        assertEquals("StorySeedling", sources.first().name)
+
+        val listings = (sources.first() as ireader.core.source.CatalogSource).getListings()
+        println("listings: ${listings.map { it.name }}")
+        assertTrue(listings.isNotEmpty())
+
+        val tsundokuSource = sources.first() as TsundokuCatalogSource
+        val rawSource = tsundokuSource.source
+        println("rawSource class: ${rawSource.javaClass.name}")
+        val httpSource = rawSource as? eu.kanade.tachiyomi.source.online.HttpSource
+        println("httpSource baseUrl: ${httpSource?.baseUrl}")
+        val dummySManga = eu.kanade.tachiyomi.source.model.SManga.create().apply {
+            url = "blood-warlock-succubus-partner-in-the-apocalypse"
+        }
+        val mangaUrl = httpSource?.getMangaUrl(dummySManga)
+        println("getMangaUrl for slug: $mangaUrl")
+        assertEquals("https://storyseedling.com/series/blood-warlock-succubus-partner-in-the-apocalypse", mangaUrl)
+
+        val fullSManga = eu.kanade.tachiyomi.source.model.SManga.create().apply {
+            url = "/series/blood-warlock-succubus-partner-in-the-apocalypse"
+        }
+        val fullMangaUrl = httpSource?.getMangaUrl(fullSManga)
+        println("getMangaUrl for /series/...: $fullMangaUrl")
+        assertEquals("https://storyseedling.com/series/blood-warlock-succubus-partner-in-the-apocalypse", fullMangaUrl)
+
+        val coverReq = tsundokuSource.getCoverRequest("https://example.com/cover.jpg")
+        assertNotNull(coverReq.first)
+        assertNotNull(coverReq.second)
+        println("User-Agent from tsundokuSource: ${tsundokuSource.userAgent}")
+        assertTrue(tsundokuSource.userAgent.isNotBlank())
+    }
 }

@@ -131,19 +131,59 @@ fun ModernCatalogCard(
                     }
                 }
 
-                // Language badge
-                if (lang != null) {
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier.wrapContentWidth()
-                    ) {
+                // Metadata row (Language, Version, Type, Source ID)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    if (lang != null) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.wrapContentWidth()
+                        ) {
+                            Text(
+                                text = lang.code.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
+                    val version = when (catalog) {
+                        is CatalogInstalled -> catalog.versionName
+                        is CatalogRemote -> catalog.versionName
+                        else -> null
+                    }
+                    if (!version.isNullOrBlank()) {
                         Text(
-                            text = lang.code.uppercase(),
+                            text = "v$version",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+
+                    val typeBadge = when {
+                        catalog.description.contains("Tsundoku", ignoreCase = true) || 
+                            (catalog as? CatalogRemote)?.repositoryType.equals("TSUNDOKU", ignoreCase = true) -> "Tsundoku"
+                        catalog is JSPluginCatalog -> "JS"
+                        catalog is UserSourceCatalog -> "Custom"
+                        catalog is CatalogInstalled -> "IReader"
+                        else -> null
+                    }
+                    if (typeBadge != null) {
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
+                        ) {
+                            Text(
+                                text = typeBadge,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            )
+                        }
                     }
                 }
             }
