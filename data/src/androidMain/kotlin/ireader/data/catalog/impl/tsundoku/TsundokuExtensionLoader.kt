@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import ireader.core.log.Log
 import ireader.core.source.Source
+import ireader.domain.utils.AndroidCookieJar
 
 /**
  * Handles loading and validation of Tsundoku (Tachiyomi/Mihon) extension APKs.
@@ -280,7 +281,8 @@ object TsundokuExtensionLoader {
 
         try {
             val networkHelper = eu.kanade.tachiyomi.network.NetworkHelper(
-                cacheDir = context.cacheDir
+                cacheDir = context.cacheDir,
+                cookieJar = AndroidCookieJar()
             )
             val json = kotlinx.serialization.json.Json {
                 ignoreUnknownKeys = true

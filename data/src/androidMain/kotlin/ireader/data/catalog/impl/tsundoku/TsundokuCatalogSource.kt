@@ -19,6 +19,11 @@ import ireader.core.source.model.Page
 import ireader.core.source.model.PageUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
 import eu.kanade.tachiyomi.source.model.Filter as TFilter
 import eu.kanade.tachiyomi.source.model.Page as TPage
 
@@ -70,6 +75,35 @@ class TsundokuCatalogSource(
 
     override suspend fun getMangaList(filters: List<Filter<*>>, page: Int): MangasPageInfo = withContext(Dispatchers.IO) {
         try {
+            // Check for WebView Explore fetch command
+            filters.filterIsInstance<Command.Explore.Fetch>().firstOrNull()?.let { cmd ->
+                if (cmd.html.isNotBlank()) {
+                    Log.info { "Tsundoku[$name]: getMangaList using Explore Fetch HTML" }
+                    val doc = Ksoup.parse(cmd.html)
+                    val mangaCards = doc.select(".novel-item, .book-item, .manga-item, .list-novel .row, .col-novel, a[href*=/novel/], a[href*=/book/], a[href*=/manga/]")
+                    val mangas = mangaCards.mapNotNull { card ->
+                        val link = if (card.tagName() == "a") card else card.selectFirst("a[href]")
+                        val title = card.selectFirst(".title, h2, h3, h4, [itemprop=name]")?.text()?.trim()
+                            ?: link?.attr("title")?.trim()
+                            ?: link?.text()?.trim()
+                        val href = link?.attr("href")?.trim()
+                        val cover = card.selectFirst("img")?.let { it.attr("src").ifBlank { it.attr("data-src") } }?.trim() ?: ""
+                        if (!title.isNullOrBlank() && !href.isNullOrBlank()) {
+                            val fullUrl = if (!href.startsWith("http")) buildAbsoluteUrl(href) else href
+                            MangaInfo(
+                                key = fullUrl,
+                                title = title,
+                                cover = if (cover.isNotBlank()) buildAbsoluteUrl(cover) else ""
+                            )
+                        } else null
+                    }.distinctBy { it.key }
+
+                    if (mangas.isNotEmpty()) {
+                        return@withContext MangasPageInfo(mangas, hasNextPage = false)
+                    }
+                }
+            }
+
             // 1. Extract search query from Filter.Title or Filter.Text("Search" / "Title")
             val titleFilter = filters.filterIsInstance<Filter.Title>().firstOrNull()
                 ?: filters.filterIsInstance<Filter.Text>().firstOrNull {
@@ -107,31 +141,56 @@ class TsundokuCatalogSource(
     }
 
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
-        // Handle pre-fetched HTML via Command.Detail.Fetch
         commands.filterIsInstance<Command.Detail.Fetch>().firstOrNull()?.let { cmd ->
             if (cmd.html.isNotBlank()) {
                 Log.info { "Tsundoku[$name]: getMangaDetails using Fetch command HTML" }
+                val targetUrl = cmd.url.ifBlank { manga.key }
+
+                // 1. Try invoking extension's mangaDetailsParse method via reflection
+                val fromExtension = tryExtensionMangaDetailsParse(cmd.html, targetUrl)
+                if (fromExtension != null) {
+                    val converted = fromExtension.toMangaInfo()
+                    return manga.copy(
+                        title = converted.title.ifBlank { manga.title },
+                        cover = converted.cover.ifBlank { manga.cover },
+                        description = converted.description.ifBlank { manga.description },
+                        author = converted.author.ifBlank { manga.author },
+                        artist = converted.artist.ifBlank { manga.artist },
+                        genres = if (converted.genres.isNotEmpty()) converted.genres else manga.genres,
+                        status = if (converted.status != MangaInfo.UNKNOWN) converted.status else manga.status
+                    )
+                }
+
+                // 2. Resilient DOM & Metadata Fallback
                 val doc = Ksoup.parse(cmd.html)
-                // Extract basic manga info — title, cover, description from HTML
-                val title = doc.selectFirst("h1, .title, [itemprop=name]")?.text()?.trim() ?: manga.title
-                val cover = doc.selectFirst("img.cover, .thumbnail img, [itemprop=image]")?.attr("src")?.trim() ?: ""
-                val description = doc.selectFirst(".description, .summary, [itemprop=description]")?.text()?.trim() ?: ""
-                return manga.copy(title = title, cover = cover, description = description)
-            }
-            if (cmd.url.isNotBlank()) {
-                // Fallback: fetch from URL
-                manga.key.let { /* key is already set by caller */ }
+                val title = doc.selectFirst("h1, .title, .novel-title, .book-title, [itemprop=name]")?.text()?.trim()
+                    ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
+                    ?: manga.title
+                val cover = doc.selectFirst("img.cover, .thumbnail img, [itemprop=image], .novel-cover img")?.let {
+                    it.attr("src").ifBlank { it.attr("data-src") }
+                }?.trim()
+                    ?: doc.selectFirst("meta[property=og:image]")?.attr("content")?.trim()
+                    ?: manga.cover
+                val description = doc.selectFirst(".description, .summary, [itemprop=description], .novel-summary, #novel-summary")?.text()?.trim()
+                    ?: doc.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
+                    ?: manga.description
+                val author = doc.selectFirst(".author, [itemprop=author], .novel-author, a[href*=/author/]")?.text()?.trim()
+                    ?: manga.author
+                val genres = doc.select(".genre a, .genres a, .tags a, .tag a, [itemprop=genre]").map { it.text().trim() }.filter { it.isNotBlank() }
+
+                return manga.copy(
+                    title = title.ifBlank { manga.title },
+                    cover = if (cover.isNotBlank()) buildAbsoluteUrl(cover) else manga.cover,
+                    description = description.ifBlank { manga.description },
+                    author = author.ifBlank { manga.author },
+                    genres = if (genres.isNotEmpty()) genres else manga.genres
+                )
             }
         }
 
         return try {
-            Log.info { "Tsundoku[$name]: getMangaDetails(url=${manga.key})" }
-            val result = withContext(Dispatchers.IO) {
-                source.getMangaDetails(manga.toSManga())
-            }
-            val info = result.toMangaInfo()
-            Log.info { "Tsundoku[$name]: details: title=${info.title}" }
-            info
+            val result = withContext(Dispatchers.IO) { source.getMangaDetails(manga.toSManga()) }
+            result.toMangaInfo()
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getMangaDetails failed", e)
             manga
@@ -139,38 +198,54 @@ class TsundokuCatalogSource(
     }
 
     override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
-        // Handle pre-fetched HTML via Command.Chapter.Fetch
         commands.filterIsInstance<Command.Chapter.Fetch>().firstOrNull()?.let { cmd ->
             if (cmd.html.isNotBlank()) {
                 Log.info { "Tsundoku[$name]: getChapterList using Fetch command HTML" }
+                val targetUrl = cmd.url.ifBlank { manga.key }
+
+                // 1. Try invoking extension's chapterListParse method via reflection
+                val fromExtension = tryExtensionChapterListParse(cmd.html, targetUrl)
+                if (!fromExtension.isNullOrEmpty()) {
+                    return fromExtension.map { it.toChapterInfo() }.reversed()
+                }
+
+                // 2. Resilient DOM Fallback
                 val doc = Ksoup.parse(cmd.html)
-                // Extract chapters from HTML — look for link elements
-                val chapterElements = doc.select("a[href], li a, .chapter-list a, .chapters a")
-                return chapterElements.mapNotNull { el ->
+                val chapterElements = doc.select(
+                    "a[href*=/chapter], .chapter-list a, .chapters a, .wp-manga-chapter a, #chapter-list a, li.chapter a, .chapter a, .list-chapter a, a[href]"
+                )
+                val chapters = mutableListOf<ChapterInfo>()
+                val seenKeys = mutableSetOf<String>()
+                for (el in chapterElements) {
                     val name = el.text().trim()
                     val url = el.attr("href").trim()
-                    if (name.isBlank() || url.isBlank()) return@mapNotNull null
+                    if (name.isBlank() || url.isBlank()) continue
+                    val lower = url.lowercase()
+                    if (lower.startsWith("javascript:") || lower.startsWith("#") || lower.startsWith("mailto:")) continue
                     val fullUrl = if (!url.startsWith("http")) buildAbsoluteUrl(url) else url
-                    ChapterInfo(
-                        key = fullUrl,
-                        name = name,
-                        number = ChapterInfo.extractChapterNumber(name),
-                        dateUpload = 0L,
-                        scanlator = ""
-                    )
-                }.reversed()
+                    if (seenKeys.add(fullUrl)) {
+                        chapters.add(
+                            ChapterInfo(
+                                key = fullUrl,
+                                name = name,
+                                number = ChapterInfo.extractChapterNumber(name),
+                                dateUpload = 0L,
+                                scanlator = ""
+                            )
+                        )
+                    }
+                }
+                return if (chapters.size >= 2 && chapters.first().number > chapters.last().number) {
+                    chapters.reversed()
+                } else {
+                    chapters
+                }
             }
         }
 
         return try {
-            Log.info { "Tsundoku[$name]: getChapterList(manga=${manga.title})" }
-            val result = withContext(Dispatchers.IO) {
-                source.getChapterList(manga.toSManga())
-            }
+            val result = withContext(Dispatchers.IO) { source.getChapterList(manga.toSManga()) }
             Log.info { "Tsundoku[$name]: got ${result.size} chapters" }
-            if (result.isNotEmpty()) {
-                Log.info { "Tsundoku[$name]: first: name=${result.first().name}, url=${result.first().url}" }
-            }
             result.map { it.toChapterInfo() }.reversed()
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getChapterList failed", e)
@@ -179,44 +254,96 @@ class TsundokuCatalogSource(
     }
 
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
-        // Handle pre-fetched HTML via Command.Content.Fetch
         commands.filterIsInstance<Command.Content.Fetch>().firstOrNull()?.let { cmd ->
             if (cmd.html.isNotBlank()) {
                 Log.info { "Tsundoku[$name]: getPageList using Fetch command HTML" }
-                return parseNovelContent(cmd.html)
+                val novelPages = parseNovelContent(cmd.html)
+                if (novelPages.isNotEmpty()) return novelPages
+
+                // If no paragraphs detected, check for comic/manga image pages
+                val doc = Ksoup.parse(cmd.html)
+                val images = doc.select("img[src], img[data-src], img[data-lazy-src]")
+                    .mapNotNull { el ->
+                        val src = el.attr("src").ifBlank { el.attr("data-src").ifBlank { el.attr("data-lazy-src") } }.trim()
+                        if (src.isNotBlank() && !src.startsWith("data:") && !src.contains("logo") && !src.contains("icon")) {
+                            if (!src.startsWith("http")) buildAbsoluteUrl(src) else src
+                        } else null
+                    }
+                if (images.isNotEmpty()) {
+                    return images.map { imgUrl -> ImageUrl(imgUrl) }
+                }
+                return emptyList()
             }
         }
 
         return try {
-            Log.info { "Tsundoku[$name]: getPageList(chapter=${chapter.name}, key=${chapter.key})" }
-            val result = withContext(Dispatchers.IO) {
-                source.getPageList(chapter.toSChapter())
-            }
+            val result = withContext(Dispatchers.IO) { source.getPageList(chapter.toSChapter()) }
             Log.info { "Tsundoku[$name]: got ${result.size} pages" }
 
-            // Novel sources return URL-only pages — fetch text via fetchPageText
             val isNovel = try { source.isNovelSource } catch (_: Exception) { false }
             if (isNovel && result.isNotEmpty()) {
-                Log.info { "Tsundoku[$name]: Novel source, fetching page text..." }
-                val html = withContext(Dispatchers.IO) {
-                    source.fetchPageText(result.first())
-                }
-                Log.info { "Tsundoku[$name]: fetchPageText returned ${html.length} chars" }
-                if (html.isNotBlank()) {
-                    return parseNovelContent(html)
-                }
+                val html = withContext(Dispatchers.IO) { source.fetchPageText(result.first()) }
+                if (html.isNotBlank()) return parseNovelContent(html)
                 return emptyList()
             }
 
-            val mapped = result.map { it.toPage() }
-            Log.info { "Tsundoku[$name]: mapped ${mapped.size} pages" }
-            mapped
+            result.map { it.toPage() }
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getPageList failed", e)
             emptyList()
         }
     }
 
+    // ==================== Synthetic Responses & Reflection ====================
+
+    private fun createSyntheticResponse(url: String, html: String): Response {
+        val targetUrl = if (url.isNotBlank()) url else baseUrl.ifBlank { "https://localhost" }
+        val mediaType = "text/html; charset=utf-8".toMediaTypeOrNull()
+        return Response.Builder()
+            .request(Request.Builder().url(targetUrl).build())
+            .protocol(Protocol.HTTP_1_1)
+            .code(200)
+            .message("OK")
+            .body(html.toResponseBody(mediaType))
+            .build()
+    }
+
+    private fun tryExtensionMangaDetailsParse(html: String, url: String): SManga? {
+        val methods = source.javaClass.methods + source.javaClass.declaredMethods
+        val method = methods.firstOrNull {
+            it.name == "mangaDetailsParse" &&
+            it.parameterTypes.size == 1 &&
+            Response::class.java.isAssignableFrom(it.parameterTypes[0])
+        } ?: return null
+
+        return try {
+            method.isAccessible = true
+            val response = createSyntheticResponse(url, html)
+            method.invoke(source, response) as? SManga
+        } catch (e: Throwable) {
+            Log.warn { "Tsundoku[$name]: Reflection mangaDetailsParse failed, using DOM fallback: ${e.message}" }
+            null
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun tryExtensionChapterListParse(html: String, url: String): List<SChapter>? {
+        val methods = source.javaClass.methods + source.javaClass.declaredMethods
+        val method = methods.firstOrNull {
+            it.name == "chapterListParse" &&
+            it.parameterTypes.size == 1 &&
+            Response::class.java.isAssignableFrom(it.parameterTypes[0])
+        } ?: return null
+
+        return try {
+            method.isAccessible = true
+            val response = createSyntheticResponse(url, html)
+            method.invoke(source, response) as? List<SChapter>
+        } catch (e: Throwable) {
+            Log.warn { "Tsundoku[$name]: Reflection chapterListParse failed, using DOM fallback: ${e.message}" }
+            null
+        }
+    }
 
     // ==================== Model Conversions ====================
 

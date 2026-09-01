@@ -3,6 +3,7 @@ package ireader.data.catalog.impl.tsundoku
 import com.fleeksoft.ksoup.Ksoup
 import ireader.core.log.Log
 import ireader.core.source.CatalogSource
+import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
@@ -29,7 +30,14 @@ abstract class BaseTsundokuCatalogSource : CatalogSource {
      * to the Tsundoku source's [eu.kanade.tachiyomi.source.CatalogueSource.getFilterList].
      */
     abstract override fun getFilters(): List<Filter<*>>
-    override fun getCommands(): CommandList = emptyList()
+
+    override fun getCommands(): CommandList = listOf(
+        Command.Detail.Fetch(),
+        Command.Chapter.Fetch(),
+        Command.Content.Fetch(),
+        Command.Explore.Fetch()
+    )
+
     override suspend fun getChapterPageCount(manga: MangaInfo): Int = 1
     override fun supportsPaginatedChapters(): Boolean = false
 

@@ -10,7 +10,8 @@ import java.util.concurrent.TimeUnit
  */
 class NetworkHelper(
     val cacheDir: File? = null,
-    userAgent: String = DEFAULT_USER_AGENT
+    userAgent: String = DEFAULT_USER_AGENT,
+    val cookieJar: okhttp3.CookieJar? = null
 ) {
     private val _userAgent = userAgent
     fun defaultUserAgentProvider(): String = _userAgent
@@ -21,6 +22,11 @@ class NetworkHelper(
             .readTimeout(30, TimeUnit.SECONDS)
             .callTimeout(2, TimeUnit.MINUTES)
             .addInterceptor(UserAgentInterceptor { _userAgent })
+            .apply {
+                if (cookieJar != null) {
+                    cookieJar(cookieJar)
+                }
+            }
             .build()
     }
 

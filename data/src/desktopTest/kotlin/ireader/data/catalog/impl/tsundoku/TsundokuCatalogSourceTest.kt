@@ -256,4 +256,118 @@ class TsundokuCatalogSourceTest {
         assertTrue(fakeSource.popularCalled, "Expected fallback to popular when latest is unsupported")
         assertFalse(fakeSource.latestCalled)
     }
+
+    @Test
+    fun testCommandsAvailableForWebViewFetch() {
+        val fakeSource = FakeCatalogueSource()
+        val catalogSource = TsundokuCatalogSource(fakeSource)
+
+        val commands = catalogSource.getCommands()
+        assertTrue(commands.isNotEmpty(), "Tsundoku source must expose commands for WebView fetch")
+
+        assertNotNull(commands.find { it is ireader.core.source.model.Command.Detail.Fetch }, "Command.Detail.Fetch missing")
+        assertNotNull(commands.find { it is ireader.core.source.model.Command.Chapter.Fetch }, "Command.Chapter.Fetch missing")
+        assertNotNull(commands.find { it is ireader.core.source.model.Command.Content.Fetch }, "Command.Content.Fetch missing")
+        assertNotNull(commands.find { it is ireader.core.source.model.Command.Explore.Fetch }, "Command.Explore.Fetch missing")
+        assertTrue(catalogSource.hasCommands(), "hasCommands() should be true")
+    }
+
+    @Test
+    fun testDetailFetchFromWebViewHtml() = runTest {
+        val fakeSource = FakeCatalogueSource()
+        val catalogSource = TsundokuCatalogSource(fakeSource)
+
+        val sampleHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta property="og:title" content="Reverend Insanity" />
+                <meta property="og:description" content="A demon's path through cultivation." />
+                <meta property="og:image" content="https://example.com/cover.jpg" />
+            </head>
+            <body>
+                <h1 class="novel-title">Reverend Insanity</h1>
+                <div class="author">Gu Zhen Ren</div>
+                <div class="novel-summary">A demon's path through cultivation.</div>
+                <img class="cover" src="https://example.com/cover.jpg" />
+            </body>
+            </html>
+        """.trimIndent()
+
+        val manga = ireader.core.source.model.MangaInfo(key = "https://example.com/novel/1", title = "Old Title")
+        val command = ireader.core.source.model.Command.Detail.Fetch(
+            url = "https://example.com/novel/1",
+            html = sampleHtml
+        )
+
+        val details = catalogSource.getMangaDetails(manga, listOf(command))
+
+        assertEquals("Reverend Insanity", details.title)
+        assertEquals("https://example.com/cover.jpg", details.cover)
+        assertTrue(details.description.contains("demon's path"))
+    }
+
+    @Test
+    fun testChapterListFetchFromWebViewHtml() = runTest {
+        val fakeSource = FakeCatalogueSource()
+        val catalogSource = TsundokuCatalogSource(fakeSource)
+
+        val sampleHtml = """
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <ul class="chapter-list">
+                    <li><a href="/novel/1/chapter-1">Chapter 1: The Beginning</a></li>
+                    <li><a href="/novel/1/chapter-2">Chapter 2: The Heart of the Demon</a></li>
+                    <li><a href="/novel/1/chapter-3">Chapter 3: Moonlight Gu</a></li>
+                </ul>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val manga = ireader.core.source.model.MangaInfo(key = "https://example.com/novel/1", title = "Reverend Insanity")
+        val command = ireader.core.source.model.Command.Chapter.Fetch(
+            url = "https://example.com/novel/1",
+            html = sampleHtml
+        )
+
+        val chapters = catalogSource.getChapterList(manga, listOf(command))
+
+        assertEquals(3, chapters.size)
+        // Ascending order check
+        assertEquals("Chapter 1: The Beginning", chapters[0].name)
+        assertEquals(1f, chapters[0].number)
+        assertEquals("Chapter 3: Moonlight Gu", chapters[2].name)
+        assertEquals(3f, chapters[2].number)
+    }
+
+    @Test
+    fun testContentFetchFromWebViewHtml() = runTest {
+        val fakeSource = FakeCatalogueSource()
+        val catalogSource = TsundokuCatalogSource(fakeSource)
+
+        val sampleHtml = """
+            <!DOCTYPE html>
+            <html>
+            <body>
+                <div id="chapter-content">
+                    <p>Humans are clever in tens of thousands of ways, Gu are the refined essences of heaven and earth.</p>
+                    <p>The three realms are vast, mountains and rivers boundless.</p>
+                </div>
+            </body>
+            </html>
+        """.trimIndent()
+
+        val chapter = ireader.core.source.model.ChapterInfo(key = "https://example.com/novel/1/chapter-1", name = "Chapter 1")
+        val command = ireader.core.source.model.Command.Content.Fetch(
+            url = "https://example.com/novel/1/chapter-1",
+            html = sampleHtml
+        )
+
+        val pages = catalogSource.getPageList(chapter, listOf(command))
+
+        assertTrue(pages.isNotEmpty())
+        val textPage = pages.first() as ireader.core.source.model.Text
+        assertTrue(textPage.text.contains("Humans are clever"))
+    }
 }
