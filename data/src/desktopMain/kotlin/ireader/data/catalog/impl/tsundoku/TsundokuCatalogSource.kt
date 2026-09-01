@@ -33,140 +33,72 @@ class TsundokuCatalogSource(
 
     // ── Filter conversion ──────────────────────────────────────────
 
-    /** Cached Tsundoku filter list for state sync. */
-    private val tsundokuFilterList: List<TFilter<*>>
-        get() = source.getFilterList()
-
     override fun getFilters(): List<Filter<*>> {
-        val tsundokuFilters = tsundokuFilterList
-        if (tsundokuFilters.isEmpty()) return listOf(Filter.Title("Search"))
-
-        val result = mutableListOf<Filter<*>>(Filter.Title("Search"))
-        for (tf in tsundokuFilters) {
-            val converted = convertTsundokuFilter(tf) ?: continue
-            result.add(converted)
+        val tsundokuFilters = try {
+            source.getFilterList()
+        } catch (e: Exception) {
+            Log.warn { "Tsundoku[$name]: getFilterList() failed: ${e.message}" }
+            emptyList()
         }
-        return result
-    }
-
-    /** Convert a single Tsundoku filter to an IReader filter. */
-    private fun convertTsundokuFilter(tf: TFilter<*>): Filter<*>? {
-        return when (tf) {
-            is TFilter.Header -> Filter.Note(tf.name)
-            is TFilter.Separator -> null
-            is TFilter.Text -> Filter.Text(tf.name, tf.state)
-            is TFilter.CheckBox -> Filter.Check(tf.name, value = tf.state)
-            is TFilter.TriState -> Filter.Select(
-                name = tf.name,
-                options = arrayOf("Ignore", "Include", "Exclude"),
-                value = tf.state
-            )
-            is TFilter.Select<*> -> Filter.Select(
-                name = tf.name,
-                options = tf.values.map { it.toString() }.toTypedArray(),
-                value = tf.state
-            )
-            is TFilter.Sort -> Filter.Sort(
-                name = tf.name,
-                options = tf.values,
-                value = tf.state?.let { Filter.Sort.Selection(it.index, it.ascending) }
-            )
-            is TFilter.Group<*> -> {
-                @Suppress("UNCHECKED_CAST")
-                val groupFilters = tf.state as List<TFilter<*>>
-                Filter.Group(
-                    name = tf.name,
-                    filters = groupFilters.mapNotNull { convertTsundokuFilter(it) }
-                )
-            }
-        }
-    }
-
-    /** Sync IReader filter values back to the Tsundoku filter list. */
-    private fun syncFiltersToTsundoku(ireaderFilters: List<Filter<*>>) {
-        val tsundokuFilters = tsundokuFilterList
-        if (tsundokuFilters.isEmpty()) return
-
-        val flatTsundoku = flattenTsundokuFilters(tsundokuFilters)
-        val flatIReader = flattenIReaderFilters(ireaderFilters.drop(1)) // Skip Filter.Title
-
-        for ((index, ireaderFilter) in flatIReader.withIndex()) {
-            if (index >= flatTsundoku.size) break
-            syncFilterState(flatTsundoku[index], ireaderFilter)
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun flattenTsundokuFilters(filters: List<TFilter<*>>): List<TFilter<*>> {
-        val result = mutableListOf<TFilter<*>>()
-        for (f in filters) {
-            when (f) {
-                is TFilter.Separator -> continue
-                is TFilter.Group<*> -> result.addAll(flattenTsundokuFilters(f.state as List<TFilter<*>>))
-                else -> result.add(f)
-            }
-        }
-        return result
-    }
-
-    /** Flatten IReader filters by recursing into [Filter.Group] containers. */
-    private fun flattenIReaderFilters(filters: List<Filter<*>>): List<Filter<*>> {
-        val result = mutableListOf<Filter<*>>()
-        for (f in filters) {
-            when (f) {
-                is Filter.Group -> result.addAll(flattenIReaderFilters(f.filters))
-                else -> result.add(f)
-            }
-        }
-        return result
-    }
-
-    private fun syncFilterState(tsundoku: TFilter<*>, ireader: Filter<*>) {
-        when {
-            tsundoku is TFilter.Text && ireader is Filter.Text ->
-                tsundoku.state = ireader.value
-            tsundoku is TFilter.CheckBox && ireader is Filter.Check ->
-                ireader.value?.let { tsundoku.state = it }
-            tsundoku is TFilter.TriState && ireader is Filter.Select ->
-                tsundoku.state = ireader.value
-            tsundoku is TFilter.Select<*> && ireader is Filter.Select ->
-                tsundoku.state = ireader.value
-            tsundoku is TFilter.Sort && ireader is Filter.Sort ->
-                ireader.value?.let {
-                    tsundoku.state = TFilter.Sort.Selection(it.index, it.ascending)
-                }
-        }
+        return TsundokuFilterBridge.toIReaderFilters(tsundokuFilters)
     }
 
     // ── CatalogSource overrides ────────────────────────────────────
 
-    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        return try {
+    override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo = withContext(Dispatchers.IO) {
+        try {
             Log.info { "Tsundoku[$name]: getMangaList(sort=${sort?.let { it::class.simpleName }}, page=$page)" }
             val result = when {
-                sort == null || sort is PopularListing -> source.getPopularManga(page)
-                sort is LatestListing -> source.getLatestUpdates(page)
-                sort is SearchListing -> source.getPopularManga(page) // Show popular until query is typed
+                sort is LatestListing -> {
+                    if (supportsLatest) {
+                        source.getLatestUpdates(page)
+                    } else {
+                        Log.info { "Tsundoku[$name]: Source does not support latest updates, falling back to popular" }
+                        source.getPopularManga(page)
+                    }
+                }
+                sort is SearchListing -> source.getPopularManga(page)
                 else -> source.getPopularManga(page)
             }
             Log.info { "Tsundoku[$name]: got ${result.mangas.size} mangas, hasNextPage=${result.hasNextPage}" }
             result.toMangasPageInfo()
         } catch (e: Exception) {
-            Log.error("Tsundoku[$name]: getMangaList failed", e)
+            Log.error("Tsundoku[$name]: getMangaList(sort) failed", e)
             MangasPageInfo.empty()
         }
     }
 
-    override suspend fun getMangaList(filters: List<ireader.core.source.model.Filter<*>>, page: Int): MangasPageInfo {
-        return try {
-            syncFiltersToTsundoku(filters)
+    override suspend fun getMangaList(filters: List<Filter<*>>, page: Int): MangasPageInfo = withContext(Dispatchers.IO) {
+        try {
+            // 1. Extract search query from Filter.Title or Filter.Text("Search" / "Title")
+            val titleFilter = filters.filterIsInstance<Filter.Title>().firstOrNull()
+                ?: filters.filterIsInstance<Filter.Text>().firstOrNull {
+                    it.name.equals("Search", ignoreCase = true) || it.name.equals("Title", ignoreCase = true)
+                }
+            val query = titleFilter?.value?.trim().orEmpty()
 
-            val query = filters.filterIsInstance<ireader.core.source.model.Filter.Text>()
-                .firstOrNull { it.name.equals("Title", ignoreCase = true) || it.name.equals("Search", ignoreCase = true) }
-                ?.value ?: ""
-            val result = withContext(Dispatchers.IO) {
-                source.getSearchManga(page, query, FilterList(tsundokuFilterList))
+            // 2. Fetch a fresh FilterList instance from the source
+            val freshFilterList = try {
+                source.getFilterList()
+            } catch (e: Exception) {
+                Log.warn { "Tsundoku[$name]: getFilterList() failed: ${e.message}" }
+                FilterList()
             }
+
+            // 3. Synchronize modified filter values onto the fresh FilterList
+            val syncedFilterList = TsundokuFilterBridge.syncToTsundoku(freshFilterList, filters)
+
+            Log.info { "Tsundoku[$name]: getSearchManga(page=$page, query='$query', filters=${syncedFilterList.size})" }
+
+            // 4. If query is blank and all filters remain at default, fallback to popular
+            val result = if (query.isBlank() && TsundokuFilterBridge.isFilterListDefault(syncedFilterList)) {
+                Log.info { "Tsundoku[$name]: Blank query and default filters -> falling back to popular manga" }
+                source.getPopularManga(page)
+            } else {
+                source.getSearchManga(page, query, syncedFilterList)
+            }
+
+            Log.info { "Tsundoku[$name]: got ${result.mangas.size} search results, hasNextPage=${result.hasNextPage}" }
             result.toMangasPageInfo()
         } catch (e: Exception) {
             Log.error("Tsundoku[$name]: getMangaList(filters) failed", e)

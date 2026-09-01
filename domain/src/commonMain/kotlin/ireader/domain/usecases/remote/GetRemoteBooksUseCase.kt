@@ -33,18 +33,31 @@ class GetRemoteBooksUseCase() {
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
                 if (query != null) {
                     if (query.isNotBlank()) {
-                        item = source.getMangaList(
-                            filters = listOf(
+                        val searchFilters = if (!filters.isNullOrEmpty()) {
+                            val titleFilter = filters.filterIsInstance<Filter.Title>().firstOrNull()
+                                ?: filters.filterIsInstance<Filter.Text>().firstOrNull {
+                                    it.name.equals("Title", ignoreCase = true) || it.name.equals("Search", ignoreCase = true)
+                                }
+                            if (titleFilter != null) {
+                                titleFilter.value = query
+                                filters
+                            } else {
+                                listOf(Filter.Title().apply { this.value = query }) + filters
+                            }
+                        } else {
+                            listOf(
                                 Filter.Title()
                                     .apply { this.value = query }
-                            ),
+                            )
+                        }
+                        item = source.getMangaList(
+                            filters = searchFilters,
                             page = page
                         )
                     } else {
                         throw EmptyQuery()
                     }
-                }
- else if (!filters.isNullOrEmpty()) {
+                } else if (!filters.isNullOrEmpty()) {
                     // Only use filters path if filters are actually provided
                     // Empty list should fall through to listing path
                     item = source.getMangaList(filters = filters, page)
