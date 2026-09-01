@@ -297,6 +297,16 @@ class SettingScreenSpec {
                     onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
                 ))
                 
+                // Sync & Cloud Backup
+                add(SearchableSettingItem(
+                    id = "unified_sync",
+                    title = "Sync & Cloud Backup",
+                    description = "Sync library & progress across Google Drive, Supabase, and devices",
+                    icon = Icons.Default.CloudSync,
+                    section = localizeHelper.localize(Res.string.sync),
+                    onClick = { navController.navigate(NavigationRoutes.unifiedSync) }
+                ))
+
                 // WiFi Sync
                 add(SearchableSettingItem(
                     id = "wifi_sync",
@@ -605,6 +615,15 @@ class SettingScreenSpec {
                             description = localizeHelper.localize(Res.string.tracking_description),
                             icon = Icons.Default.Sync,
                             onClick = { navController.navigate(NavigationRoutes.trackingSettings) }
+                        )
+                    }
+                    
+                    item {
+                        SettingsItem(
+                            title = "Sync & Cloud Backup",
+                            description = "Sync library & progress across Google Drive, Supabase, and devices",
+                            icon = Icons.Default.CloudSync,
+                            onClick = { navController.navigate(NavigationRoutes.unifiedSync) }
                         )
                     }
                     

@@ -55,6 +55,7 @@ fun SettingsMainScreen(
     onDownloadSettings: () -> Unit,
     onTrackingSettings: () -> Unit,
     onWifiSyncSettings: () -> Unit,
+    onUnifiedSyncSettings: () -> Unit = onWifiSyncSettings,
     onBackupSettings: () -> Unit,
     onSecuritySettings: () -> Unit,
     onAdvancedSettings: () -> Unit,
@@ -78,6 +79,7 @@ fun SettingsMainScreen(
             "downloads" to onDownloadSettings,
             "tracking" to onTrackingSettings,
             "wifiSync" to onWifiSyncSettings,
+            "unifiedSync" to onUnifiedSyncSettings,
             "backup" to onBackupSettings,
             "data" to onDataSettings,
             "extensions" to onExtensionSettings,
@@ -177,11 +179,20 @@ fun SettingsMainScreen(
                 )
             }
             
-            item(key = "item_wifi_sync") {
+            item(key = "item_unified_sync") {
                 SettingsItem(
                     title = "Sync & Cloud Backup",
                     description = "Sync library & progress across Google Drive, Supabase, and devices",
                     icon = Icons.Outlined.CloudSync,
+                    onClick = clickHandlers["unifiedSync"]!!
+                )
+            }
+
+            item(key = "item_wifi_sync") {
+                SettingsItem(
+                    title = "Wi-Fi Device Sync",
+                    description = "Direct device-to-device synchronization, local discovery & pairing",
+                    icon = Icons.Outlined.Wifi,
                     onClick = clickHandlers["wifiSync"]!!
                 )
             }

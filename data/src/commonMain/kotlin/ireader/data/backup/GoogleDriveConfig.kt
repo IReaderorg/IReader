@@ -14,15 +14,30 @@ object GoogleDriveConfig {
      */
     var clientId: String? = null
         private set
+
+    /**
+     * Google OAuth2 client secret from Google Cloud Console (for Desktop/Web OAuth).
+     */
+    var clientSecret: String? = null
+        private set
     
     /**
      * Initialize the Google Drive configuration.
      * Call this from the app startup with the client ID from BuildConfig.
      * 
      * @param clientId The OAuth2 client ID from Google Cloud Console
+     * @param clientSecret Optional OAuth2 client secret
      */
-    fun initialize(clientId: String) {
-        this.clientId = clientId
+    fun initialize(clientId: String, clientSecret: String? = null) {
+        this.clientId = clientId.trim()
+        if (!clientSecret.isNullOrBlank()) {
+            this.clientSecret = clientSecret.trim()
+        }
+    }
+
+    fun setCredentials(clientId: String, clientSecret: String? = null) {
+        this.clientId = clientId.trim()
+        this.clientSecret = clientSecret?.trim()
     }
     
     /**

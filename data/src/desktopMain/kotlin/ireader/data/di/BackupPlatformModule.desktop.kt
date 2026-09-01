@@ -9,7 +9,6 @@ import org.koin.dsl.module
  * Desktop-specific backup dependencies
  */
 actual val backupPlatformModule: Module = module {
-    single<GoogleDriveAuthenticator> {
-        GoogleDriveAuthenticatorDesktop()
-    }
+    single { GoogleDriveAuthenticatorDesktop() }
+    single<GoogleDriveAuthenticator> { get<GoogleDriveAuthenticatorDesktop>() }
 }

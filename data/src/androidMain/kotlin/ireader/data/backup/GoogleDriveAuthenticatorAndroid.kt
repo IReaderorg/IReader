@@ -272,6 +272,10 @@ class GoogleDriveAuthenticatorAndroid : GoogleDriveAuthenticator {
         val context = _context ?: return null
         return getPrefs(context).getString(KEY_USER_EMAIL, null)
     }
+
+    override fun getUserEmail(): String? {
+        return getStoredEmail()
+    }
     
     companion object {
         private const val PREFS_NAME = "google_drive_auth"

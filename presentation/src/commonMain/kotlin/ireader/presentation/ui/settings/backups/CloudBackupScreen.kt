@@ -50,6 +50,7 @@ fun CloudBackupScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
+    val uiState by viewModel.state.collectAsState()
     val isConnected by viewModel.isConnected
     val accountEmail by viewModel.accountEmail
     val backups by viewModel.backups.collectAsState()
@@ -180,7 +181,8 @@ fun CloudBackupScreen(
                         accountEmail = accountEmail,
                         isLoading = isLoading && !isConnected,
                         onConnect = { viewModel.connect() },
-                        onDisconnect = { viewModel.disconnect() }
+                        onDisconnect = { viewModel.disconnect() },
+                        onConfigureCredentials = { viewModel.toggleCredentialsDialog(true) }
                     )
                 }
                 
@@ -263,6 +265,17 @@ fun CloudBackupScreen(
             onDismiss = { showDeleteDialog = null }
         )
     }
+
+    // Credentials Dialog
+    if (uiState.showCredentialsDialog) {
+        GoogleDriveCredentialsDialog(
+            initialClientId = uiState.customClientId,
+            initialClientSecret = uiState.customClientSecret,
+            onDismiss = { viewModel.toggleCredentialsDialog(false) },
+            onSave = { id, secret -> viewModel.setCustomCredentials(id, secret) },
+            onConnect = { viewModel.connect() }
+        )
+    }
 }
 
 
@@ -272,7 +285,8 @@ private fun GoogleDriveConnectionCard(
     accountEmail: String?,
     isLoading: Boolean,
     onConnect: () -> Unit,
-    onDisconnect: () -> Unit
+    onDisconnect: () -> Unit,
+    onConfigureCredentials: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -320,39 +334,57 @@ private fun GoogleDriveConnectionCard(
                     )
                 }
                 
-                // Status badge
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = if (isConnected)
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Credentials config button
+                    IconButton(
+                        onClick = onConfigureCredentials,
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
-                            imageVector = if (isConnected) Icons.Default.CheckCircle else Icons.Outlined.CloudOff,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = if (isConnected) 
-                                MaterialTheme.colorScheme.primary 
-                            else 
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Configure credentials",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            text = if (isConnected) 
-                                localizeHelper.localize(Res.string.connected) 
-                            else 
-                                localizeHelper.localize(Res.string.not_connected),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = if (isConnected) 
-                                MaterialTheme.colorScheme.primary 
-                            else 
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    }
+
+                    // Status badge
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (isConnected)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (isConnected) Icons.Default.CheckCircle else Icons.Outlined.CloudOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = if (isConnected) 
+                                    MaterialTheme.colorScheme.primary 
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = if (isConnected) 
+                                    localizeHelper.localize(Res.string.connected) 
+                                else 
+                                    localizeHelper.localize(Res.string.not_connected),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (isConnected) 
+                                    MaterialTheme.colorScheme.primary 
+                                else 
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -425,6 +457,22 @@ private fun GoogleDriveConnectionCard(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(localizeHelper.localize(Res.string.connect_to_google_drive))
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = onConfigureCredentials,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Key,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Configure Credentials / Setup Guide")
                 }
             }
 

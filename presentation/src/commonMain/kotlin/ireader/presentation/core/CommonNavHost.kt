@@ -2,6 +2,8 @@ package ireader.presentation.core
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -425,9 +427,38 @@ fun CommonNavHost(
             ireader.presentation.ui.settings.textreplacement.TextReplacementScreen(vm = viewModel)
         }
         
-        // WiFi Sync Settings
+        // WiFi Sync Settings (P2P Device Discovery, Server Mode, Pairing PIN, Device Settings)
         composable(NavigationRoutes.wifiSync) {
             SyncScreenSpec().Content()
+        }
+        
+        // Unified Sync & Cloud Backup Hub (Google Drive, Supabase, Local Wi-Fi, Auto-sync)
+        composable(NavigationRoutes.unifiedSync) {
+            val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+            val viewModel: ireader.presentation.ui.settings.sync.UnifiedSyncViewModel = getIViewModel()
+            val state by viewModel.state.collectAsState()
+
+            ireader.presentation.ui.settings.sync.UnifiedSyncScreen(
+                state = state,
+                onNavigateUp = {
+                    navController.safePopBackStack()
+                },
+                onSelectProvider = { viewModel.setProvider(it) },
+                onSyncNow = { viewModel.syncNow() },
+                onCancelSync = { viewModel.cancelSync() },
+                onToggleAutoSyncOnLaunch = { viewModel.toggleAutoSyncOnLaunch(it) },
+                onToggleAutoSyncOnChapterFinish = { viewModel.toggleAutoSyncOnChapterFinish(it) },
+                onToggleSyncOnWifiOnly = { viewModel.toggleSyncOnWifiOnly(it) },
+                onConnectGoogleDrive = { viewModel.connectGoogleDrive() },
+                onDisconnectGoogleDrive = { viewModel.disconnectGoogleDrive() },
+                onConfigureGoogleDrive = { viewModel.toggleGoogleDriveCredentialsDialog(true) },
+                onSaveGoogleDriveCredentials = { id, secret -> viewModel.setGoogleDriveCredentials(id, secret) },
+                onDismissGoogleDriveCredentials = { viewModel.toggleGoogleDriveCredentialsDialog(false) },
+                onClearGoogleDriveError = { viewModel.clearGoogleDriveError() },
+                onOpenSupabaseAuth = { navController.navigate(NavigationRoutes.supabaseConfig) },
+                onSignOutSupabase = { viewModel.signOutSupabase() },
+                onOpenWifiSync = { navController.navigate(NavigationRoutes.wifiSync) }
+            )
         }
         
         // Cloudflare Bypass Settings

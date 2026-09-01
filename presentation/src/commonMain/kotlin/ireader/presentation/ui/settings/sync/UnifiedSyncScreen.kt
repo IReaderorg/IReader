@@ -20,6 +20,8 @@ import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 
+import ireader.presentation.ui.settings.backups.GoogleDriveCredentialsDialog
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnifiedSyncScreen(
@@ -31,8 +33,15 @@ fun UnifiedSyncScreen(
     onToggleAutoSyncOnLaunch: (Boolean) -> Unit,
     onToggleAutoSyncOnChapterFinish: (Boolean) -> Unit,
     onToggleSyncOnWifiOnly: (Boolean) -> Unit,
-    onOpenGoogleDriveAuth: () -> Unit = {},
+    onConnectGoogleDrive: () -> Unit = {},
+    onDisconnectGoogleDrive: () -> Unit = {},
+    onConfigureGoogleDrive: () -> Unit = {},
+    onSaveGoogleDriveCredentials: (clientId: String, clientSecret: String) -> Unit = { _, _ -> },
+    onDismissGoogleDriveCredentials: () -> Unit = {},
+    onClearGoogleDriveError: () -> Unit = {},
     onOpenSupabaseAuth: () -> Unit = {},
+    onSignOutSupabase: () -> Unit = {},
+    onOpenWifiSync: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     IScaffold(
@@ -53,6 +62,46 @@ fun UnifiedSyncScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { Spacer(modifier = Modifier.height(4.dp)) }
+
+            // Error Banner if present
+            if (state.googleDriveError != null) {
+                item {
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Outlined.ErrorOutline,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = state.googleDriveError,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(
+                                onClick = onClearGoogleDriveError,
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    Icons.Outlined.Close,
+                                    contentDescription = "Dismiss",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+                }
+            }
 
             // 1. Sync Status Card
             item {
@@ -81,8 +130,12 @@ fun UnifiedSyncScreen(
                     isSelected = state.selectedProvider == SyncProviderType.GOOGLE_DRIVE,
                     accountStatus = if (state.isGoogleDriveConnected) "Connected as ${state.googleDriveEmail ?: "Google Account"}" else "Not connected",
                     isConnected = state.isGoogleDriveConnected,
+                    isLoading = state.isGoogleDriveConnecting,
                     onSelect = { onSelectProvider(SyncProviderType.GOOGLE_DRIVE) },
-                    onConfigure = onOpenGoogleDriveAuth
+                    primaryActionText = if (state.isGoogleDriveConnected) "Disconnect" else "Log In / Connect",
+                    onPrimaryAction = if (state.isGoogleDriveConnected) onDisconnectGoogleDrive else onConnectGoogleDrive,
+                    secondaryActionIcon = Icons.Outlined.Settings,
+                    onSecondaryAction = onConfigureGoogleDrive
                 )
             }
 
@@ -95,19 +148,24 @@ fun UnifiedSyncScreen(
                     accountStatus = if (state.isSupabaseConnected) "Signed in as ${state.supabaseEmail ?: "User"}" else "Not signed in",
                     isConnected = state.isSupabaseConnected,
                     onSelect = { onSelectProvider(SyncProviderType.SUPABASE) },
-                    onConfigure = onOpenSupabaseAuth
+                    primaryActionText = if (state.isSupabaseConnected) "Sign Out" else "Sign In / Setup",
+                    onPrimaryAction = if (state.isSupabaseConnected) onSignOutSupabase else onOpenSupabaseAuth,
+                    secondaryActionIcon = if (state.isSupabaseConnected) Icons.Outlined.Settings else null,
+                    onSecondaryAction = if (state.isSupabaseConnected) onOpenSupabaseAuth else null
                 )
             }
 
             item {
                 ProviderOptionCard(
                     title = "Local Wi-Fi P2P",
-                    subtitle = "Direct device-to-device sync over local network",
+                    subtitle = "Direct device-to-device sync over local network (Discovery, Pairing PIN, Server Mode)",
                     icon = Icons.Outlined.Wifi,
                     isSelected = state.selectedProvider == SyncProviderType.LOCAL_WIFI,
                     accountStatus = "Ready for local discovery",
                     isConnected = true,
-                    onSelect = { onSelectProvider(SyncProviderType.LOCAL_WIFI) }
+                    onSelect = { onSelectProvider(SyncProviderType.LOCAL_WIFI) },
+                    primaryActionText = "Open P2P Console",
+                    onPrimaryAction = onOpenWifiSync
                 )
             }
 
@@ -188,6 +246,19 @@ fun UnifiedSyncScreen(
             item { Spacer(modifier = Modifier.height(24.dp)) }
         }
     }
+
+    if (state.showGoogleDriveCredentialsDialog) {
+        GoogleDriveCredentialsDialog(
+            initialClientId = state.customClientId,
+            initialClientSecret = state.customClientSecret,
+            onDismiss = onDismissGoogleDriveCredentials,
+            onSave = onSaveGoogleDriveCredentials,
+            onConnect = {
+                onDismissGoogleDriveCredentials()
+                onConnectGoogleDrive()
+            }
+        )
+    }
 }
 
 @Composable
@@ -200,29 +271,26 @@ private fun SyncStatusCard(
     val isSyncing = syncState.isSyncing
 
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (syncState.errorMessage != null) {
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)
+            } else {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+            }
+        ),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column {
                     Text(
-                        text = when (state.selectedProvider) {
-                            SyncProviderType.GOOGLE_DRIVE -> "Google Drive Sync"
-                            SyncProviderType.SUPABASE -> "Supabase Cloud Sync"
-                            SyncProviderType.LOCAL_WIFI -> "Local Wi-Fi Sync"
-                            SyncProviderType.NONE -> "Sync Disabled"
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        text = "Status: ${state.selectedProvider.name.replace("_", " ")}",
+                        style = MaterialTheme.typography.titleMedium
                     )
                     Text(
                         text = if (state.lastSyncTimestamp > 0) "Last synced: ${formatTimestamp(state.lastSyncTimestamp)}" else "Not synced yet",
@@ -281,8 +349,12 @@ private fun ProviderOptionCard(
     isSelected: Boolean,
     accountStatus: String,
     isConnected: Boolean,
+    isLoading: Boolean = false,
     onSelect: () -> Unit,
-    onConfigure: (() -> Unit)? = null
+    primaryActionText: String? = null,
+    onPrimaryAction: (() -> Unit)? = null,
+    secondaryActionIcon: ImageVector? = null,
+    onSecondaryAction: (() -> Unit)? = null
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -293,43 +365,95 @@ private fun ProviderOptionCard(
             .fillMaxWidth()
             .clickable { onSelect() }
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(32.dp)
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(32.dp)
                 )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = accountStatus,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 2.dp)
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = accountStatus,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+
+                RadioButton(
+                    selected = isSelected,
+                    onClick = onSelect
                 )
             }
 
-            RadioButton(
-                selected = isSelected,
-                onClick = onSelect
-            )
+            // In-card Action Row
+            if (primaryActionText != null || secondaryActionIcon != null || isLoading) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (secondaryActionIcon != null && onSecondaryAction != null) {
+                        IconButton(
+                            onClick = onSecondaryAction,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                imageVector = secondaryActionIcon,
+                                contentDescription = "Settings",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else if (primaryActionText != null && onPrimaryAction != null) {
+                        if (isConnected) {
+                            OutlinedButton(
+                                onClick = onPrimaryAction,
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(primaryActionText, style = MaterialTheme.typography.labelMedium)
+                            }
+                        } else {
+                            Button(
+                                onClick = onPrimaryAction,
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(primaryActionText, style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

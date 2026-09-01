@@ -18,19 +18,24 @@ private object GoogleDriveSignInHandler : KoinComponent {
     
     // Store reference to current activity for sign-in flow
     private var currentActivity: Activity? = null
-    private var pendingViewModel: GoogleDriveViewModel? = null
+    private var pendingSuccessCallback: ((String) -> Unit)? = null
+    private var pendingErrorCallback: ((String) -> Unit)? = null
     
     fun setActivity(activity: Activity?) {
         currentActivity = activity
     }
     
-    fun startSignIn(viewModel: GoogleDriveViewModel) {
+    fun startSignIn(
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
         val activity = currentActivity
         if (activity != null && authenticator.isInitialized()) {
-            pendingViewModel = viewModel
+            pendingSuccessCallback = onSuccess
+            pendingErrorCallback = onError
             authenticator.startSignIn(activity, GoogleDriveAuthenticatorAndroid.REQUEST_CODE_SIGN_IN)
         } else {
-            viewModel.onOAuthError("Google Drive not initialized. Please restart the app.")
+            onError("Google Drive not initialized. Please restart the app.")
         }
     }
     
@@ -40,17 +45,17 @@ private object GoogleDriveSignInHandler : KoinComponent {
      */
     fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == GoogleDriveAuthenticatorAndroid.REQUEST_CODE_SIGN_IN) {
-            val viewModel = pendingViewModel
-            pendingViewModel = null
+            val successCb = pendingSuccessCallback
+            val errorCb = pendingErrorCallback
+            pendingSuccessCallback = null
+            pendingErrorCallback = null
             
-            if (viewModel != null) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    val result = authenticator.handleSignInResult(data)
-                    result.onSuccess { email ->
-                        viewModel.onOAuthSuccess(email)
-                    }.onFailure { error ->
-                        viewModel.onOAuthError(error.message ?: "Sign-in failed")
-                    }
+            CoroutineScope(Dispatchers.Main).launch {
+                val result = authenticator.handleSignInResult(data)
+                result.onSuccess { email ->
+                    successCb?.invoke(email)
+                }.onFailure { error ->
+                    errorCb?.invoke(error.message ?: "Sign-in failed")
                 }
             }
         }
@@ -64,6 +69,18 @@ private object GoogleDriveSignInHandler : KoinComponent {
         // With Google Sign-In SDK, we don't use auth codes
         // The sign-in is handled via onActivityResult
         viewModel.onOAuthError("Please use the Sign In button to authenticate with Google Drive.")
+    }
+}
+
+/**
+ * Android implementation of GoogleDriveOAuthLauncher
+ */
+actual object GoogleDriveOAuthLauncher {
+    actual fun launchOAuthFlow(
+        onSuccess: (email: String) -> Unit,
+        onError: (errorMessage: String) -> Unit
+    ) {
+        GoogleDriveSignInHandler.startSignIn(onSuccess, onError)
     }
 }
 
@@ -84,11 +101,11 @@ fun handleGoogleDriveActivityResult(requestCode: Int, resultCode: Int, data: Int
 }
 
 actual fun startOAuthFlow() {
-    // No-op - use startOAuthFlowWithViewModel instead
+    // No-op - use GoogleDriveOAuthLauncher.launchOAuthFlow instead
 }
 
 actual fun startOAuthFlowWithViewModel(viewModel: GoogleDriveViewModel) {
-    GoogleDriveSignInHandler.startSignIn(viewModel)
+    GoogleDriveOAuthLauncher.launchOAuthFlow(viewModel::onOAuthSuccess, viewModel::onOAuthError)
 }
 
 actual fun processOAuthCallback(viewModel: GoogleDriveViewModel, authCode: String) {

@@ -18,7 +18,12 @@ data class UnifiedSyncScreenState(
     val selectedProvider: SyncProviderType = SyncProviderType.NONE,
     val syncState: UnifiedSyncState = UnifiedSyncState(),
     val isGoogleDriveConnected: Boolean = false,
+    val isGoogleDriveConnecting: Boolean = false,
     val googleDriveEmail: String? = null,
+    val googleDriveError: String? = null,
+    val showGoogleDriveCredentialsDialog: Boolean = false,
+    val customClientId: String = ireader.data.backup.GoogleDriveConfig.clientId ?: "",
+    val customClientSecret: String = ireader.data.backup.GoogleDriveConfig.clientSecret ?: "",
     val isSupabaseConnected: Boolean = false,
     val supabaseEmail: String? = null,
     val autoSyncOnLaunch: Boolean = true,
@@ -77,8 +82,9 @@ class UnifiedSyncViewModel(
     fun checkAuthStatuses() {
         scope.launch {
             val isDriveAuth = googleDriveAuthenticator?.isAuthenticated() ?: false
-            val driveEmail = if (isDriveAuth) "Google Account" else null
-
+            val driveEmail = if (isDriveAuth) {
+                googleDriveAuthenticator.getUserEmail() ?: "Google Account"
+            } else null
 
             val user = remoteRepository?.getCurrentUser()?.getOrNull()
             val isSupaAuth = user != null
@@ -91,6 +97,86 @@ class UnifiedSyncViewModel(
                     isSupabaseConnected = isSupaAuth,
                     supabaseEmail = supaEmail
                 )
+            }
+        }
+    }
+
+    fun connectGoogleDrive() {
+        updateState { it.copy(isGoogleDriveConnecting = true, googleDriveError = null) }
+        ireader.presentation.core.ui.GoogleDriveOAuthLauncher.launchOAuthFlow(
+            onSuccess = { email ->
+                updateState {
+                    it.copy(
+                        isGoogleDriveConnected = true,
+                        isGoogleDriveConnecting = false,
+                        googleDriveEmail = email,
+                        googleDriveError = null,
+                        selectedProvider = SyncProviderType.GOOGLE_DRIVE
+                    )
+                }
+                unifiedSyncEngine.setProvider(SyncProviderType.GOOGLE_DRIVE)
+            },
+            onError = { error ->
+                updateState {
+                    it.copy(
+                        isGoogleDriveConnecting = false,
+                        googleDriveError = error
+                    )
+                }
+            }
+        )
+    }
+
+    fun disconnectGoogleDrive() {
+        scope.launch {
+            googleDriveAuthenticator?.disconnect()
+            updateState {
+                it.copy(
+                    isGoogleDriveConnected = false,
+                    googleDriveEmail = null,
+                    selectedProvider = if (it.selectedProvider == SyncProviderType.GOOGLE_DRIVE) SyncProviderType.NONE else it.selectedProvider
+                )
+            }
+            if (syncPreferences.getSelectedProviderType() == SyncProviderType.GOOGLE_DRIVE) {
+                unifiedSyncEngine.setProvider(SyncProviderType.NONE)
+            }
+        }
+    }
+
+    fun toggleGoogleDriveCredentialsDialog(show: Boolean) {
+        updateState { it.copy(showGoogleDriveCredentialsDialog = show) }
+    }
+
+    fun setGoogleDriveCredentials(clientId: String, clientSecret: String) {
+        ireader.data.backup.GoogleDriveConfig.setCredentials(clientId, clientSecret)
+        updateState {
+            it.copy(
+                customClientId = clientId,
+                customClientSecret = clientSecret,
+                showGoogleDriveCredentialsDialog = false
+            )
+        }
+    }
+
+    fun clearGoogleDriveError() {
+        updateState { it.copy(googleDriveError = null) }
+    }
+
+    fun signOutSupabase() {
+        scope.launch {
+            try {
+                remoteRepository?.signOut()
+            } catch (_: Exception) {
+            }
+            updateState {
+                it.copy(
+                    isSupabaseConnected = false,
+                    supabaseEmail = null,
+                    selectedProvider = if (it.selectedProvider == SyncProviderType.SUPABASE) SyncProviderType.NONE else it.selectedProvider
+                )
+            }
+            if (syncPreferences.getSelectedProviderType() == SyncProviderType.SUPABASE) {
+                unifiedSyncEngine.setProvider(SyncProviderType.NONE)
             }
         }
     }

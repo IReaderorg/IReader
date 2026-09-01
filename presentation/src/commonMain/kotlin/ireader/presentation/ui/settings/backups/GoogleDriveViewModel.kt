@@ -35,7 +35,10 @@ class GoogleDriveViewModel(
         val isRestoringBackup: Boolean = false,
         val errorMessage: String? = null,
         val successMessage: String? = null,
-        val needsOAuthFlow: Boolean = false
+        val needsOAuthFlow: Boolean = false,
+        val showCredentialsDialog: Boolean = false,
+        val customClientId: String = ireader.data.backup.GoogleDriveConfig.clientId ?: "",
+        val customClientSecret: String = ireader.data.backup.GoogleDriveConfig.clientSecret ?: ""
     )
     
     private val _isConnected = mutableStateOf(false)
@@ -146,6 +149,21 @@ class GoogleDriveViewModel(
     fun clearOAuthFlowFlag() {
         _needsOAuthFlow.value = false
         updateState { it.copy(needsOAuthFlow = false) }
+    }
+
+    fun toggleCredentialsDialog(show: Boolean) {
+        updateState { it.copy(showCredentialsDialog = show) }
+    }
+
+    fun setCustomCredentials(clientId: String, clientSecret: String) {
+        ireader.data.backup.GoogleDriveConfig.setCredentials(clientId, clientSecret)
+        updateState { 
+            it.copy(
+                customClientId = clientId,
+                customClientSecret = clientSecret,
+                showCredentialsDialog = false
+            )
+        }
     }
     
     fun disconnect() {

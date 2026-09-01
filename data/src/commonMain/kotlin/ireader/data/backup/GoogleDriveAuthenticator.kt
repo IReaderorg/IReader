@@ -48,4 +48,11 @@ interface GoogleDriveAuthenticator {
      * @return Result with success or failure
      */
     suspend fun refreshToken(): Result<Unit>
+
+    /**
+     * Get the email of the currently authenticated user
+     * 
+     * @return email address if known/stored, null otherwise
+     */
+    fun getUserEmail(): String? = null
 }
