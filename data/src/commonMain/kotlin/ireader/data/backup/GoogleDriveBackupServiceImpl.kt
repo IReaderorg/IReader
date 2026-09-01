@@ -269,4 +269,34 @@ class GoogleDriveBackupServiceImpl(
             0L
         }
     }
+
+    override suspend fun uploadRawBackup(
+        fileName: String,
+        content: ByteArray,
+        mimeType: String
+    ): Result<String> = withContext(ioDispatcher) {
+        return@withContext try {
+            if (!isAuthenticated()) {
+                return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
+            }
+            val client = driveClient
+                ?: return@withContext Result.failure(Exception("Drive client not initialized"))
+            client.uploadFile(fileName, content, mimeType)
+        } catch (e: Exception) {
+            Result.failure(Exception("Failed to upload raw backup: ${e.message}", e))
+        }
+    }
+
+    override suspend fun downloadRawBackup(fileId: String): Result<ByteArray> = withContext(ioDispatcher) {
+        return@withContext try {
+            if (!isAuthenticated()) {
+                return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
+            }
+            val client = driveClient
+                ?: return@withContext Result.failure(Exception("Drive client not initialized"))
+            client.downloadFile(fileId)
+        } catch (e: Exception) {
+            Result.failure(Exception("Failed to download raw backup: ${e.message}", e))
+        }
+    }
 }

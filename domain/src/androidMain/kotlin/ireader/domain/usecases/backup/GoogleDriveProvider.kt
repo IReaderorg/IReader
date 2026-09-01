@@ -2,8 +2,13 @@ package ireader.domain.usecases.backup
 
 import ireader.domain.models.BackupResult
 import ireader.domain.services.backup.GoogleDriveBackupService
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.buffer
+import okio.use
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -18,6 +23,7 @@ class GoogleDriveProvider : CloudStorageProvider, KoinComponent {
     
     // Use the service from data module via DI
     private val googleDriveService: GoogleDriveBackupService by inject()
+    private val fileSystem: FileSystem by inject()
     
     override suspend fun isAuthenticated(): Boolean = withContext(ioDispatcher) {
         try {
@@ -48,25 +54,49 @@ class GoogleDriveProvider : CloudStorageProvider, KoinComponent {
         localFilePath: String,
         fileName: String
     ): BackupResult = withContext(ioDispatcher) {
-        // Note: This method is not directly supported by GoogleDriveBackupService
-        // The service uses BackupData objects instead of file paths
-        // For now, return an error indicating to use the service directly
-        BackupResult.Error(
-            "Use GoogleDriveBackupService.createBackup() for backup operations. " +
-            "This provider is for CloudBackupManager compatibility."
-        )
+        try {
+            val path = localFilePath.toPath()
+            if (!fileSystem.exists(path)) {
+                return@withContext BackupResult.Error("Local file not found: $localFilePath")
+            }
+            val content = fileSystem.source(path).buffer().use { it.readByteArray() }
+            val result = googleDriveService.uploadRawBackup(fileName, content)
+            if (result.isSuccess) {
+                BackupResult.Success(filePath = localFilePath, timestamp = currentTimeToLong())
+            } else {
+                BackupResult.Error(result.exceptionOrNull()?.message ?: "Upload failed")
+            }
+        } catch (e: Exception) {
+            BackupResult.Error("Upload error: ${e.message}", e)
+        }
     }
     
     override suspend fun downloadBackup(
         cloudFileName: String,
         localFilePath: String
     ): BackupResult = withContext(ioDispatcher) {
-        // Note: This method is not directly supported by GoogleDriveBackupService
-        // The service returns BackupData objects instead of writing to file paths
-        BackupResult.Error(
-            "Use GoogleDriveBackupService.downloadBackup() for restore operations. " +
-            "This provider is for CloudBackupManager compatibility."
-        )
+        try {
+            val listResult = googleDriveService.listBackups()
+            if (listResult.isFailure) {
+                return@withContext BackupResult.Error(listResult.exceptionOrNull()?.message ?: "Failed to list backups")
+            }
+            val fileInfo = listResult.getOrThrow().find { it.name == cloudFileName }
+                ?: return@withContext BackupResult.Error("Cloud backup not found: $cloudFileName")
+
+            val downloadResult = googleDriveService.downloadRawBackup(fileInfo.id)
+            if (downloadResult.isFailure) {
+                return@withContext BackupResult.Error(downloadResult.exceptionOrNull()?.message ?: "Download failed")
+            }
+
+            val path = localFilePath.toPath()
+            path.parent?.let { parent ->
+                if (!fileSystem.exists(parent)) fileSystem.createDirectories(parent)
+            }
+            fileSystem.sink(path).buffer().use { it.write(downloadResult.getOrThrow()) }
+            BackupResult.Success(filePath = localFilePath, timestamp = fileInfo.timestamp.takeIf { it > 0 } ?: currentTimeToLong())
+        } catch (e: Exception) {
+            BackupResult.Error("Download error: ${e.message}", e)
+        }
     }
     
     override suspend fun listBackups(): Result<List<CloudBackupFile>> = withContext(ioDispatcher) {

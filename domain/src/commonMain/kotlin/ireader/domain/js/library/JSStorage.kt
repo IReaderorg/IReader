@@ -3,7 +3,9 @@ package ireader.domain.js.library
 import ireader.core.prefs.PreferenceStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -192,26 +194,62 @@ class JSSessionStorage : JSStorage(InMemoryPreferenceStore(), "session") {
 }
 
 /**
- * Dummy in-memory preference store for LocalStorage and SessionStorage.
+ * Full in-memory preference store for LocalStorage and SessionStorage.
  */
 private class InMemoryPreferenceStore : PreferenceStore {
-    override fun getString(key: String, defaultValue: String) = object : ireader.core.prefs.Preference<String> {
-        private var value = defaultValue
+    private val values = mutableMapOf<String, Any>()
+
+    private fun <T : Any> createPreference(key: String, defaultValue: T): ireader.core.prefs.Preference<T> = object : ireader.core.prefs.Preference<T> {
         override fun key() = key
-        override fun get() = value
-        override fun set(value: String) { this.value = value }
-        override fun isSet() = true
-        override fun delete() { value = defaultValue }
+        @Suppress("UNCHECKED_CAST")
+        override fun get(): T = (values[key] as? T) ?: defaultValue
+        override fun set(value: T) { values[key] = value }
+        override fun isSet() = key in values
+        override fun delete() { values.remove(key) }
         override fun defaultValue() = defaultValue
-        override fun changes(): Flow<String> = throw UnsupportedOperationException()
-        override fun stateIn(scope: CoroutineScope): StateFlow<String> = throw UnsupportedOperationException()
+        override fun changes(): Flow<T> = flowOf(get())
+        override fun stateIn(scope: CoroutineScope): StateFlow<T> = MutableStateFlow(get())
     }
-    
-    override fun getLong(key: String, defaultValue: Long) = throw UnsupportedOperationException()
-    override fun getInt(key: String, defaultValue: Int) = throw UnsupportedOperationException()
-    override fun getFloat(key: String, defaultValue: Float) = throw UnsupportedOperationException()
-    override fun getBoolean(key: String, defaultValue: Boolean) = throw UnsupportedOperationException()
-    override fun getStringSet(key: String, defaultValue: Set<String>) = throw UnsupportedOperationException()
-    override fun <T> getObject(key: String, defaultValue: T, serializer: (T) -> String, deserializer: (String) -> T) = throw UnsupportedOperationException()
-    override fun <T> getJsonObject(key: String, defaultValue: T, serializer: kotlinx.serialization.KSerializer<T>, serializersModule: kotlinx.serialization.modules.SerializersModule) = throw UnsupportedOperationException()
+
+    override fun getString(key: String, defaultValue: String) = createPreference(key, defaultValue)
+    override fun getLong(key: String, defaultValue: Long) = createPreference(key, defaultValue)
+    override fun getInt(key: String, defaultValue: Int) = createPreference(key, defaultValue)
+    override fun getFloat(key: String, defaultValue: Float) = createPreference(key, defaultValue)
+    override fun getBoolean(key: String, defaultValue: Boolean) = createPreference(key, defaultValue)
+    override fun getStringSet(key: String, defaultValue: Set<String>) = createPreference(key, defaultValue)
+
+    override fun <T> getObject(
+        key: String,
+        defaultValue: T,
+        serializer: (T) -> String,
+        deserializer: (String) -> T
+    ): ireader.core.prefs.Preference<T> = object : ireader.core.prefs.Preference<T> {
+        override fun key() = key
+        override fun get(): T = (values[key] as? String)?.let(deserializer) ?: defaultValue
+        override fun set(value: T) { values[key] = serializer(value) }
+        override fun isSet() = key in values
+        override fun delete() { values.remove(key) }
+        override fun defaultValue() = defaultValue
+        override fun changes(): Flow<T> = flowOf(get())
+        override fun stateIn(scope: CoroutineScope): StateFlow<T> = MutableStateFlow(get())
+    }
+
+    override fun <T> getJsonObject(
+        key: String,
+        defaultValue: T,
+        serializer: kotlinx.serialization.KSerializer<T>,
+        serializersModule: kotlinx.serialization.modules.SerializersModule
+    ): ireader.core.prefs.Preference<T> = object : ireader.core.prefs.Preference<T> {
+        private val json = Json { this.serializersModule = serializersModule; ignoreUnknownKeys = true }
+        override fun key() = key
+        override fun get(): T = (values[key] as? String)?.let {
+            runCatching { json.decodeFromString(serializer, it) }.getOrNull()
+        } ?: defaultValue
+        override fun set(value: T) { values[key] = json.encodeToString(serializer, value) }
+        override fun isSet() = key in values
+        override fun delete() { values.remove(key) }
+        override fun defaultValue() = defaultValue
+        override fun changes(): Flow<T> = flowOf(get())
+        override fun stateIn(scope: CoroutineScope): StateFlow<T> = MutableStateFlow(get())
+    }
 }

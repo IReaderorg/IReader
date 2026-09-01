@@ -48,4 +48,24 @@ interface GoogleDriveBackupService {
      * @param backupId The ID of the backup to delete
      */
     suspend fun deleteBackup(backupId: String): Result<Unit>
+
+    /**
+     * Upload raw backup file bytes directly to Google Drive
+     * @param fileName The name of the file
+     * @param content The byte content of the file
+     * @param mimeType The MIME type of the file
+     * @return Result containing file ID on success
+     */
+    suspend fun uploadRawBackup(
+        fileName: String,
+        content: ByteArray,
+        mimeType: String = "application/gzip"
+    ): Result<String>
+
+    /**
+     * Download raw backup file bytes directly from Google Drive
+     * @param fileId The ID of the file to download
+     * @return Result containing byte array on success
+     */
+    suspend fun downloadRawBackup(fileId: String): Result<ByteArray>
 }
