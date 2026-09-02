@@ -35,6 +35,8 @@ CREATE INDEX IF NOT EXISTS idx_chapter_read ON chapter(read);
 CREATE INDEX IF NOT EXISTS idx_chapter_book_number ON chapter(book_id, chapter_number);
 CREATE INDEX IF NOT EXISTS idx_chapter_date_upload ON chapter(date_upload DESC);
 CREATE INDEX IF NOT EXISTS idx_chapter_date_fetch ON chapter(date_fetch DESC);
+CREATE INDEX IF NOT EXISTS idx_chapter_book_date_upload ON chapter(book_id, date_upload DESC);
+CREATE INDEX IF NOT EXISTS idx_chapter_book_date_fetch ON chapter(book_id, date_fetch DESC);
 CREATE INDEX IF NOT EXISTS idx_chapter_bookmark ON chapter(bookmark) WHERE bookmark = 1;
 -- Composite indexes for common query patterns
 CREATE INDEX IF NOT EXISTS idx_chapter_book_source_order ON chapter(book_id, source_order);

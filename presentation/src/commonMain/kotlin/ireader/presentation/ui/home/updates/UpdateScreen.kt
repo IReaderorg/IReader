@@ -24,7 +24,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.check_for_updates
 import ireader.i18n.resources.refresh
-import ireader.presentation.ui.core.ui.LoadingScreen
+import ireader.presentation.ui.component.UpdatesShimmerLoading
 import ireader.presentation.ui.home.updates.component.UpdateEditBar
 import ireader.presentation.ui.home.updates.component.UpdateProgressIndicator
 import ireader.presentation.ui.home.updates.component.UpdatesContent
@@ -56,7 +56,7 @@ fun UpdateScreen(
     ) {
         Crossfade(targetState = Pair(isLoading, isEmpty)) { (loading, empty) ->
             when {
-                loading -> LoadingScreen()
+                loading -> UpdatesShimmerLoading()
                 empty -> UpdatesEmptyState()
                 else -> UpdatesContent(
                     state = state,

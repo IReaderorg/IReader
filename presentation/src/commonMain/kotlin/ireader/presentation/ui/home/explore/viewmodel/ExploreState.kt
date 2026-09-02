@@ -102,6 +102,18 @@ data class ExploreScreenState(
      */
     val isBrokenSourceError: Boolean
         get() = isLikelyBrokenSource && !isLoading
+        
+    /**
+     * Number of filters actively applied (non-default value).
+     */
+    val activeFilterCount: Int
+        get() = appliedFilters?.count { !it.isDefaultValue() } ?: 0
+
+    /**
+     * Whether any non-default filters are currently applied.
+     */
+    val hasActiveFilters: Boolean
+        get() = activeFilterCount > 0
 }
 
 /**

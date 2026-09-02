@@ -94,10 +94,15 @@ data class ExploreScreenSpec(
                             softwareKeyboardController = keyboardController,
                             focusManager
                         )
+                        scope.launch { sheetState.hide() }
                     },
                     filters = state.modifiedFilters,
                     onReset = {
-                        vm.modifiedFilter = source?.getFilters() ?: emptyList()
+                        val defaultFilters = source?.getFilters() ?: emptyList()
+                        vm.modifiedFilter = defaultFilters
+                        vm.stateFilters = null
+                        vm.loadItems(reset = true)
+                        scope.launch { sheetState.hide() }
                     },
                     onUpdate = { filters ->
                         vm.modifiedFilter = filters
@@ -120,16 +125,24 @@ data class ExploreScreenSpec(
                         searchQuery = state.searchQuery ?: "",
                         isSearchMode = state.isSearchModeEnabled,
                         onValueChange = { vm.searchQuery = it },
+                        onFilterClick = {
+                            scope.launchIO { sheetState.partialExpand() }
+                        },
+                        activeFilterCount = state.activeFilterCount,
+                        onClearSearch = {
+                            if (!state.searchQuery.isNullOrBlank()) {
+                                vm.searchQuery = null
+                                vm.stateListing = source?.getListings()?.firstOrNull()
+                                vm.loadItems(reset = true)
+                            }
+                        },
                         onSearch = {
                             val searchQuery = state.searchQuery
                             if (!searchQuery.isNullOrBlank()) {
                                 vm.loadItems(true)
                             } else {
-                                vm.stateListing = source?.getListings()?.first()
-                                vm.loadItems()
-                                scope.launch {
-                                    vm.showSnackBar(UiText.MStringResource(Res.string.query_must_not_be_empty))
-                                }
+                                vm.stateListing = source?.getListings()?.firstOrNull()
+                                vm.loadItems(reset = true)
                             }
                             focusManager.clearFocus()
                         },

@@ -426,26 +426,34 @@ fun UpdatesShimmerLoading(
 @Composable
 private fun UpdateItemShimmer() {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ShimmerBox(
-            width = 45.dp,
-            height = 65.dp,
-            shape = RoundedCornerShape(4.dp)
+            width = 48.dp,
+            height = 48.dp,
+            shape = RoundedCornerShape(8.dp)
         )
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             ShimmerBox(
-                modifier = Modifier.fillMaxWidth(0.7f),
+                modifier = Modifier.fillMaxWidth(0.65f),
                 height = 14.dp
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             ShimmerBox(
-                modifier = Modifier.fillMaxWidth(0.5f),
+                modifier = Modifier.fillMaxWidth(0.4f),
                 height = 12.dp
             )
         }
+        Spacer(modifier = Modifier.width(12.dp))
+        ShimmerBox(
+            width = 24.dp,
+            height = 24.dp,
+            shape = CircleShape
+        )
     }
 }
 

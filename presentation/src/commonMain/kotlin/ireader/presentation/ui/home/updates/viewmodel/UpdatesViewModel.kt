@@ -79,7 +79,7 @@ class UpdatesViewModel(
      */
     private fun loadInitialPage() {
         loadJob?.cancel()
-        loadJob = scope.launch {
+        loadJob = scope.launch(ioDispatcher) {
             _state.update { it.copy(isLoading = true) }
             
             try {
@@ -217,7 +217,7 @@ class UpdatesViewModel(
             current.copy(paginationState = currentPagination.copy(isLoadingMore = true))
         }
         
-        scope.launch {
+        scope.launch(ioDispatcher) {
             try {
                 val currentLoadedCount = currentPagination.loadedCount
                 

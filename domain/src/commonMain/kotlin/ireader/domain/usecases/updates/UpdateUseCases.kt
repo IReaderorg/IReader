@@ -48,7 +48,11 @@ class FindUpdatesPaginated(private val updatesRepository: UpdatesRepository) {
         offset: Int
     ): Pair<Map<LocalDateTime, List<UpdatesWithRelations>>, Int> {
         val items = updatesRepository.findUpdatesPaginated(after, limit, offset)
-        val totalCount = updatesRepository.getUpdatesCount(after)
+        val totalCount = if (items.size < limit) {
+            offset + items.size
+        } else {
+            offset + items.size + 1
+        }
         val grouped = items.groupBy { it.dateFetch.toLocalDate() }
         return Pair(grouped, totalCount)
     }

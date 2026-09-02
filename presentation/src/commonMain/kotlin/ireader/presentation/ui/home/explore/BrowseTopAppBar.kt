@@ -30,10 +30,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -84,7 +87,10 @@ fun BrowseTopAppBar(
         scrollBehavior: TopAppBarScrollBehavior?,
         onOpenLocalFolder: (() -> Unit)? = null,
         searchQuery: String = state.searchQuery ?: "",
-        isSearchMode: Boolean = state.isSearchModeEnable
+        isSearchMode: Boolean = state.isSearchModeEnable,
+        onFilterClick: (() -> Unit)? = null,
+        activeFilterCount: Int = 0,
+        onClearSearch: (() -> Unit)? = null
 ) {
     var topMenu by remember {
         mutableStateOf(false)
@@ -147,7 +153,10 @@ fun BrowseTopAppBar(
                 searchQuery = searchQuery,
                 onValueChange = onValueChange,
                 onSearch = onSearch,
-                onClose = onSearchDisable
+                onClose = onSearchDisable,
+                onClearSearch = onClearSearch,
+                onFilterClick = onFilterClick,
+                activeFilterCount = activeFilterCount
             )
         } else {
             // Normal toolbar
@@ -163,7 +172,9 @@ fun BrowseTopAppBar(
                 topMenu = topMenu,
                 onTopMenuChange = { topMenu = it },
                 layouts = layouts,
-                localizeHelper = localizeHelper
+                localizeHelper = localizeHelper,
+                onFilterClick = onFilterClick,
+                activeFilterCount = activeFilterCount
             )
         }
     }
@@ -179,7 +190,10 @@ private fun FullWidthSearchToolbar(
     searchQuery: String,
     onValueChange: (String) -> Unit,
     onSearch: () -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onClearSearch: (() -> Unit)? = null,
+    onFilterClick: (() -> Unit)? = null,
+    activeFilterCount: Int = 0
 ) {
     Toolbar(
         scrollBehavior = scrollBehavior,
@@ -225,12 +239,15 @@ private fun FullWidthSearchToolbar(
                 exit = scaleOut() + fadeOut()
             ) {
                 Surface(
-                    modifier = Modifier.padding(end = 8.dp),
+                    modifier = Modifier.padding(end = 4.dp),
                     color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f),
                     shape = CircleShape
                 ) {
                     IconButton(
-                        onClick = { onValueChange("") },
+                        onClick = {
+                            onValueChange("")
+                            onClearSearch?.invoke()
+                        },
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
@@ -239,6 +256,46 @@ private fun FullWidthSearchToolbar(
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.error
                         )
+                    }
+                }
+            }
+            
+            // Filter button in search mode
+            if (onFilterClick != null) {
+                Surface(
+                    modifier = Modifier.padding(end = 4.dp),
+                    color = if (activeFilterCount > 0)
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    BadgedBox(
+                        badge = {
+                            if (activeFilterCount > 0) {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ) {
+                                    Text("$activeFilterCount")
+                                }
+                            }
+                        }
+                    ) {
+                        IconButton(
+                            onClick = onFilterClick,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = localize(Res.string.filter),
+                                modifier = Modifier.size(20.dp),
+                                tint = if (activeFilterCount > 0)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -263,7 +320,9 @@ private fun NormalBrowseToolbar(
     topMenu: Boolean,
     onTopMenuChange: (Boolean) -> Unit,
     layouts: List<DisplayMode>,
-    localizeHelper: ireader.i18n.LocalizeHelper
+    localizeHelper: ireader.i18n.LocalizeHelper,
+    onFilterClick: (() -> Unit)? = null,
+    activeFilterCount: Int = 0
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Toolbar(
@@ -334,6 +393,42 @@ private fun NormalBrowseToolbar(
                             onClick = onOpenLocalFolder,
                             tint = MaterialTheme.colorScheme.tertiary
                         )
+                    }
+                }
+                
+                // Filter button
+                if (onFilterClick != null && source?.getFilters()?.isNotEmpty() == true) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Surface(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        color = if (activeFilterCount > 0)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        BadgedBox(
+                            badge = {
+                                if (activeFilterCount > 0) {
+                                    Badge(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    ) {
+                                        Text("$activeFilterCount")
+                                    }
+                                }
+                            }
+                        ) {
+                            AppIconButton(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = localize(Res.string.filter),
+                                onClick = onFilterClick,
+                                tint = if (activeFilterCount > 0)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
                 

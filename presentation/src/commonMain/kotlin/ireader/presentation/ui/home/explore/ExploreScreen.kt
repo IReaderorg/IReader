@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -201,24 +202,61 @@ fun ExploreScreen(
         modifier = modifier,
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
+            val activeFilterCount = state.activeFilterCount
+            val hasActiveFilters = state.hasActiveFilters
+            
             ExtendedFloatingActionButton(
                 modifier = Modifier.testTag("filter_button"),
                 text = {
                     Text(
-                        text = localize(Res.string.filter),
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        text = if (hasActiveFilters) {
+                            "${localize(Res.string.filter)} ($activeFilterCount)"
+                        } else {
+                            localize(Res.string.filter)
+                        },
+                        color = if (hasActiveFilters) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        },
+                        fontWeight = if (hasActiveFilters) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
                     )
                 },
                 onClick = showmodalSheet,
                 icon = {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
+                    BadgedBox(
+                        badge = {
+                            if (hasActiveFilters) {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ) {
+                                    Text("$activeFilterCount")
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.FilterList,
+                            contentDescription = localize(Res.string.filter),
+                            tint = if (hasActiveFilters) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            }
+                        )
+                    }
                 },
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                containerColor = if (hasActiveFilters) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.secondaryContainer
+                },
+                contentColor = if (hasActiveFilters) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                },
                 shape = CircleShape
             )
         },

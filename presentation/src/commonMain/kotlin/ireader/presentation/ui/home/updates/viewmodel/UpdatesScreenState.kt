@@ -59,7 +59,7 @@ sealed interface UpdatesDialog {
 @Immutable
 data class UpdatesScreenState(
     // Loading states
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     
     // Update progress
