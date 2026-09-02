@@ -11,17 +11,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.LocalPerformanceConfig
-import ireader.presentation.ui.component.rememberIsGridScrollingFast
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 
@@ -68,9 +64,6 @@ fun ComfortableGridLayout(
     // Get performance config
     val performanceConfig = LocalPerformanceConfig.current
     
-    // Track fast scrolling for deferred operations
-    val isScrollingFast = rememberIsGridScrollingFast(scrollState)
-    
     // CRITICAL: Cache selection set with remember to avoid O(n) recreation on every recomposition
     // This is essential for 800+ books where selection changes are frequent
     val selectionSet = remember(selection) { 
@@ -106,11 +99,8 @@ fun ComfortableGridLayout(
                         book.id in selectionSet 
                     }
                     
-                    // Stable height state
-                    val height = remember { mutableStateOf(IntSize(0, 0)) }
-                    
                     BookImage(
-                        modifier = Modifier.onGloballyPositioned { height.value = it.size },
+                        modifier = Modifier,
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 2f / 3f,
@@ -119,14 +109,12 @@ fun ComfortableGridLayout(
                         onlyCover = true,
                         comfortableMode = true,
                         onLongClick = { onLongClick(book) },
-                        isScrollingFast = isScrollingFast,
                         performanceConfig = performanceConfig,
                     ) {
                         // Badges - only render if needed
                         if (showGoToLastChapterBadge) {
                             GoToLastReadComposable(
-                                onClick = { goToLatestChapter(book) },
-                                size = (height.value.height / 20).dp
+                                onClick = { goToLatestChapter(book) }
                             )
                         }
                         

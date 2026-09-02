@@ -10,18 +10,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.LocalPerformanceConfig
-import ireader.presentation.ui.component.rememberIsGridScrollingFast
 
 /**
  * NATIVE-LIKE COVER-ONLY GRID
@@ -55,7 +51,6 @@ fun CoverOnlyGrid(
     footer: (@Composable () -> Unit)? = null
 ) {
     val performanceConfig = LocalPerformanceConfig.current
-    val isScrollingFast = rememberIsGridScrollingFast(scrollState)
     
     // CRITICAL: Cache selection set with remember to avoid O(n) recreation on every recomposition
     // This is essential for 800+ books where selection changes are frequent
@@ -93,11 +88,8 @@ fun CoverOnlyGrid(
                         book.id in selectionSet 
                     }
                     
-                    // Stable height state
-                    val height = remember { mutableStateOf(IntSize(0, 0)) }
-                    
                     BookImage(
-                        modifier = Modifier.onGloballyPositioned { height.value = it.size },
+                        modifier = Modifier,
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 2f / 3f,
@@ -105,13 +97,11 @@ fun CoverOnlyGrid(
                         header = header,
                         onlyCover = true,
                         onLongClick = { onLongClick(book) },
-                        isScrollingFast = isScrollingFast,
                         performanceConfig = performanceConfig,
                     ) {
                         if (showGoToLastChapterBadge) {
                             GoToLastReadComposable(
-                                onClick = { goToLatestChapter(book) },
-                                size = (height.value.height / 20).dp
+                                onClick = { goToLatestChapter(book) }
                             )
                         }
                         if (showAnyBadge || book.isArchived) {

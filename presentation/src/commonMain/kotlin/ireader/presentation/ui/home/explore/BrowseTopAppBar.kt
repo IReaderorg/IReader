@@ -30,13 +30,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -259,45 +256,6 @@ private fun FullWidthSearchToolbar(
                     }
                 }
             }
-            
-            // Filter button in search mode
-            if (onFilterClick != null) {
-                Surface(
-                    modifier = Modifier.padding(end = 4.dp),
-                    color = if (activeFilterCount > 0)
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                    else
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    BadgedBox(
-                        badge = {
-                            if (activeFilterCount > 0) {
-                                Badge(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                ) {
-                                    Text("$activeFilterCount")
-                                }
-                            }
-                        }
-                    ) {
-                        IconButton(
-                            onClick = onFilterClick,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = localize(Res.string.filter),
-                                modifier = Modifier.size(20.dp),
-                                tint = if (activeFilterCount > 0)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
             }
         }
     )
@@ -393,42 +351,6 @@ private fun NormalBrowseToolbar(
                             onClick = onOpenLocalFolder,
                             tint = MaterialTheme.colorScheme.tertiary
                         )
-                    }
-                }
-                
-                // Filter button
-                if (onFilterClick != null && source?.getFilters()?.isNotEmpty() == true) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Surface(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        color = if (activeFilterCount > 0)
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                        else
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        BadgedBox(
-                            badge = {
-                                if (activeFilterCount > 0) {
-                                    Badge(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    ) {
-                                        Text("$activeFilterCount")
-                                    }
-                                }
-                            }
-                        ) {
-                            AppIconButton(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = localize(Res.string.filter),
-                                onClick = onFilterClick,
-                                tint = if (activeFilterCount > 0)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.onSurface
-                            )
-                        }
                     }
                 }
                 

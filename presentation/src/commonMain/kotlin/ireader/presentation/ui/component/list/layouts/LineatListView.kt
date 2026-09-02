@@ -17,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.BookCover
@@ -25,7 +24,6 @@ import ireader.domain.models.entities.BookItem
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.components.IBookImageComposable
-import ireader.presentation.ui.component.rememberIsScrollingFast
 
 /**
  * NATIVE-LIKE LINEAR BOOK ITEM
@@ -38,7 +36,6 @@ fun LinearBookItem(
     selected: Boolean = false,
     book: BookItem,
     headers: ((url: String) -> Map<String, String>?)? = null,
-    isScrollingFast: Boolean = false,
     performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
 ) {
     // Cache BookCover to prevent recreation
@@ -52,9 +49,7 @@ fun LinearBookItem(
 
     Box(
         modifier = modifier
-            .padding(vertical = 4.dp, horizontal = 8.dp)
-            // GPU layer promotion for smooth scrolling
-            .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Auto },
+            .padding(vertical = 4.dp, horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -63,16 +58,17 @@ fun LinearBookItem(
                 .height(72.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Book cover - always show (no placeholder during scroll for native feel)
+            // Book cover with placeholder background and smooth crossfade
             IBookImageComposable(
                 image = bookCover,
                 modifier = Modifier
                     .width(48.dp)
                     .height(64.dp)
                     .clip(RoundedCornerShape(4.dp))
+                    .background(androidx.compose.ui.graphics.Color(0x1F888888))
                     .border(1.dp, borderColor, RoundedCornerShape(4.dp)),
                 headers = headers,
-                crossfadeDurationMs = 0 // Instant display
+                crossfadeDurationMs = 150
             )
             
             Spacer(modifier = Modifier.width(12.dp))
@@ -147,7 +143,6 @@ fun LinearListDisplay(
     footer: (@Composable () -> Unit)? = null
 ) {
     val performanceConfig = LocalPerformanceConfig.current
-    val isScrollingFast = rememberIsScrollingFast(scrollState)
     
     // CRITICAL: Cache selection set with remember to avoid O(n) recreation on every recomposition
     // This is essential for 800+ books where selection changes are frequent
@@ -178,7 +173,6 @@ fun LinearListDisplay(
                 ),
                 selected = isSelected,
                 headers = headers,
-                isScrollingFast = isScrollingFast,
                 performanceConfig = performanceConfig
             )
         }

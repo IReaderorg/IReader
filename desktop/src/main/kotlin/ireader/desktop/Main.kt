@@ -12,6 +12,7 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.LocalPlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
 import coil3.request.crossfade
 import ireader.core.http.HttpClients
 import ireader.core.http.okhttp
@@ -204,8 +205,15 @@ fun newImageLoader(context: PlatformContext, simpleStorage: GetSimpleStorage, cl
                 )
             )
         }
+        memoryCache {
+            MemoryCache.Builder()
+                .maxSizePercent(context, 0.25)
+                .strongReferencesEnabled(true)
+                .weakReferencesEnabled(true)
+                .build()
+        }
         diskCache(diskCacheInit)
-        crossfade((300).toInt())
+        crossfade(150)
 
     }.build()
 }

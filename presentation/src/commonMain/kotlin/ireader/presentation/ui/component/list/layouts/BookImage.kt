@@ -57,7 +57,6 @@ fun BookImage(
     header: ((url: String) -> Map<String, String>?)? = null,
     onlyCover: Boolean = false,
     comfortableMode: Boolean = false,
-    isScrollingFast: Boolean = false,
     performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
     badge: @Composable BoxScope.() -> Unit,
 ) {
@@ -69,8 +68,8 @@ fun BookImage(
         if (selected) Color(0xFF6200EE) else Color(0x1A000000)
     }
     
-    // ZERO crossfade for native-like instant display
-    val crossfadeDuration = 0
+    // Smooth 150ms crossfade for disk/network loads (instant 0ms for memory cache)
+    val crossfadeDuration = 150
     
     // Cache gradient for title overlay
     val titleGradient = remember {
@@ -82,12 +81,7 @@ fun BookImage(
     }
     
     Column(
-        modifier = modifier
-            // GPU layer promotion for smooth scrolling
-            .graphicsLayer {
-                // Promote to separate layer - reduces recomposition impact
-                compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Auto
-            },
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -99,7 +93,9 @@ fun BookImage(
                     onClick = { onClick(book) },
                     onLongClick = { onLongClick(book) }
                 )
-                .border(2.dp, borderColor),
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color(0x1F888888))
+                .border(2.dp, borderColor, RoundedCornerShape(4.dp)),
         ) {
             // Image - always rendered, no conditional logic
             IBookImageComposable(

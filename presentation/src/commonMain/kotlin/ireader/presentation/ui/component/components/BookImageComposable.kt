@@ -38,6 +38,7 @@ fun IBookImageComposable(
             modifier = modifier,
             contentScale = contentScale,
             model = image, // Pass BookCover directly for better cache key management
+            placeholder = ColorPainter(CoverPlaceholderColor),
             contentDescription = localizeHelper.localize(Res.string.an_image),
             alignment = alignment,
             crossfadeDurationMs = crossfadeDurationMs,

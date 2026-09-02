@@ -961,28 +961,15 @@ class LibraryViewModel(
             }
         }
         
-        // Create a stable cache key based on paginated data
-        val cacheKey = remember(
-            paginatedBooksMap[categoryId]?.size ?: 0,
-            category?.id,
-            paginationState?.loadedCount ?: 0
-        ) {
-            Triple(
-                paginatedBooksMap[categoryId]?.hashCode() ?: 0,
-                category?.id,
-                paginationState?.loadedCount ?: 0
-            )
-        }
-        
-        // Use derivedStateOf for efficient recomputation only when needed
-        val booksState = remember(cacheKey) {
+        // Memoize mapped BookItems based on the paginated books list reference for this category
+        val paginatedBooks = paginatedBooksMap[categoryId]
+        val booksState = remember(paginatedBooks, categoryId) {
             androidx.compose.runtime.derivedStateOf {
-                if (category == null) {
+                if (category == null || paginatedBooks == null) {
                     emptyList()
                 } else {
                     // Use paginated books from database
                     // Use distinctBy to ensure no duplicate book IDs (prevents LazyColumn key errors)
-                    val paginatedBooks = paginatedBooksMap[categoryId] ?: emptyList()
                     paginatedBooks.distinctBy { it.id }.map { it.toBookItem() }
                 }
             }
@@ -1005,26 +992,14 @@ class LibraryViewModel(
         val category = currentState.categories.getOrNull(categoryIndex)
         val categoryId = category?.id ?: 0L
         
-        val cacheKey = remember(
-            paginatedBooksMap[categoryId]?.size ?: 0,
-            totalCountsMap[categoryId] ?: 0,
-            category?.id
-        ) {
-            Triple(
-                paginatedBooksMap[categoryId]?.hashCode() ?: 0,
-                totalCountsMap[categoryId] ?: 0,
-                category?.id
-            )
-        }
-        
-        val booksState = remember(cacheKey) {
+        val paginatedBooks = paginatedBooksMap[categoryId]
+        val booksState = remember(paginatedBooks, categoryId) {
             androidx.compose.runtime.derivedStateOf {
-                if (category == null) {
+                if (category == null || paginatedBooks == null) {
                     emptyList()
                 } else {
                     // Return currently loaded paginated books
                     // Use distinctBy to ensure no duplicate book IDs (prevents LazyColumn key errors)
-                    val paginatedBooks = paginatedBooksMap[categoryId] ?: emptyList()
                     paginatedBooks.distinctBy { it.id }.map { it.toBookItem() }
                 }
             }

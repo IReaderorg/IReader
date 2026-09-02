@@ -156,11 +156,13 @@ internal fun LibraryPager(
                 }
             }
             
-            // Save scroll position when it changes - debounced to avoid excessive saves
+            // Save scroll position when it changes - debounced with distinctUntilChanged to avoid excessive saves
             LaunchedEffect(gridState, categoryId) {
                 snapshotFlow { 
                     gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset 
-                }.collect { (index, offset) ->
+                }
+                .distinctUntilChanged()
+                .collect { (index, offset) ->
                     onSaveScrollPosition(categoryId, index, offset)
                 }
             }
@@ -207,11 +209,12 @@ internal fun LibraryPager(
             }
             
             // Separate effect for prefetching - only when scroll settles
-            LaunchedEffect(gridState, books, bookPrefetchService, page, currentPage) {
-                if (bookPrefetchService != null && books.isNotEmpty() && page == currentPage) {
+            LaunchedEffect(gridState, page, currentPage) {
+                if (bookPrefetchService != null && page == currentPage) {
                     snapshotFlow { gridState.isScrollInProgress }
+                        .distinctUntilChanged()
                         .collect { isScrolling ->
-                            if (!isScrolling) {
+                            if (!isScrolling && books.isNotEmpty()) {
                                 // Prefetch visible and upcoming books when scroll settles
                                 val index = gridState.firstVisibleItemIndex
                                 val visibleRange = index until minOf(index + 6, books.size)
@@ -227,7 +230,9 @@ internal fun LibraryPager(
             LaunchedEffect(lazyListState, categoryId) {
                 snapshotFlow { 
                     lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset 
-                }.collect { (index, offset) ->
+                }
+                .distinctUntilChanged()
+                .collect { (index, offset) ->
                     onSaveScrollPosition(categoryId, index, offset)
                 }
             }

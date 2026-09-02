@@ -158,14 +158,14 @@ fun ImageLoaderImage(
     enableMemoryCache: Boolean = true,
     enableDiskCache: Boolean = true,
     placeholder: ColorPainter? = null,
-    crossfadeDurationMs: Int = 0, // ZERO by default for instant display
+    crossfadeDurationMs: Int = 0,
 ) {
     val performanceConfig = LocalPerformanceConfig.current
     
-    // CRITICAL: Always use zero crossfade for native-like feel
-    // Only enable if user explicitly wants high quality mode
-    val effectiveCrossfade = if (performanceConfig.enableImageCrossfade && crossfadeDurationMs > 0) {
-        minOf(crossfadeDurationMs, performanceConfig.crossfadeDurationMs)
+    val effectiveCrossfade = if (crossfadeDurationMs > 0) {
+        crossfadeDurationMs
+    } else if (performanceConfig.enableImageCrossfade) {
+        performanceConfig.crossfadeDurationMs
     } else {
         0
     }
@@ -178,68 +178,49 @@ fun ImageLoaderImage(
     }
     
     Box(modifier.fillMaxSize(), contentAlignment) {
-        // Stable key prevents unnecessary recomposition
-        val stableKey = remember(data) {
-            when (data) {
-                is ireader.domain.models.BookCover -> "${data.cover};${data.lastModified}"
-                is String -> data
-                else -> data.hashCode()
+        val context = LocalPlatformContext.current
+        
+        // Build optimized request - cached for performance
+        val request = remember(data, effectiveCrossfade, performanceConfig.thumbnailSize) {
+            val builder = when (data) {
+                is ImageRequest -> data.newBuilder()
+                else -> ImageRequest.Builder(context = context).data(data)
             }
+            
+            builder
+                .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .crossfade(effectiveCrossfade)
+                .size(Size(performanceConfig.thumbnailSize, performanceConfig.thumbnailSize))
+                .precision(coil3.size.Precision.INEXACT)
+                .build()
         }
         
-        key(stableKey) {
-            val context = LocalPlatformContext.current
-            
-            // Build optimized request - cached for performance
-            val request = remember(data, effectiveCrossfade, performanceConfig.thumbnailSize) {
-                val builder = when (data) {
-                    is ImageRequest -> data.newBuilder()
-                    else -> ImageRequest.Builder(context = context).data(data)
-                }
-                
-                builder
-                    .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
-                    .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
-                    .crossfade(effectiveCrossfade)
-                    .size(Size(performanceConfig.thumbnailSize, performanceConfig.thumbnailSize))
-                    .precision(coil3.size.Precision.INEXACT)
-                    .build()
+        var error by remember { mutableStateOf<Throwable?>(null) }
+        
+        val painter = rememberAsyncImagePainter(
+            model = request,
+            contentScale = contentScale,
+            filterQuality = effectiveFilterQuality,
+            onError = { error = it.result.throwable },
+            onSuccess = {
+                if (error != null) error = null
             }
-            
-            // Track loading state - but don't show loading UI for native feel
-            var loadingState by remember { mutableStateOf(ImageLoaderImageState.Loading) }
-            val error = remember { mutableStateOf<Throwable?>(null) }
-            
-            val painter = rememberAsyncImagePainter(
-                request,
-                contentScale = contentScale,
-                filterQuality = effectiveFilterQuality,
-                onLoading = { loadingState = ImageLoaderImageState.Loading },
-                onError = {
-                    error.value = it.result.throwable
-                    loadingState = ImageLoaderImageState.Failure
-                },
-                onSuccess = { loadingState = ImageLoaderImageState.Success }
+        )
+        
+        // Render placeholder underneath while image loads
+        if (placeholder != null) {
+            Image(
+                painter = placeholder,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = contentScale
             )
-            
-            // NATIVE-LIKE BEHAVIOR:
-            // - Always render the image immediately (no loading state UI)
-            // - Only show error state if image fails to load
-            // - Success callback for any additional UI
-            when (loadingState) {
-                ImageLoaderImageState.Failure -> {
-                    onFailure?.invoke(this, error.value ?: Exception("Unknown error"))
-                }
-                ImageLoaderImageState.Success -> {
-                    onSuccess()
-                }
-                ImageLoaderImageState.Loading -> {
-                    // NO loading indicator - image will appear when ready
-                    // This is the key to native-like feel
-                }
-            }
-            
-            // Always render the image - shows immediately when cached
+        }
+        
+        if (error != null) {
+            onFailure?.invoke(this, error ?: Exception("Unknown error"))
+        } else {
             Image(
                 painter = painter,
                 contentDescription = contentDescription,
@@ -249,6 +230,7 @@ fun ImageLoaderImage(
                 alpha = alpha,
                 colorFilter = colorFilter
             )
+            onSuccess()
         }
     }
 }
