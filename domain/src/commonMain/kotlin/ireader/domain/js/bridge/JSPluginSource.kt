@@ -100,12 +100,14 @@ class JSPluginSource(
         
         // If we have a baseUrl and the URL starts with it, extract the path
         if (_baseUrl.isNotBlank() && url.startsWith(_baseUrl)) {
-            return url.substring(_baseUrl.length)
+            val path = url.substring(_baseUrl.length)
+            return if (_baseUrl.endsWith("/")) path.trimStart('/') else (if (path.startsWith("/")) path else "/$path")
         }
         
         // Otherwise, try to extract path from any absolute URL
         val regex = Regex("^https?://[^/]+(/.*)$")
-        return regex.find(url)?.groupValues?.get(1) ?: url
+        val path = regex.find(url)?.groupValues?.get(1) ?: url
+        return if (_baseUrl.endsWith("/")) path.trimStart('/') else path
     }
 
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {

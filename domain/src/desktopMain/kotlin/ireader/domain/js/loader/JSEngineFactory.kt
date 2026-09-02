@@ -18,6 +18,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -1007,7 +1008,7 @@ private object AdapterCodeCache {
             var wrapper = {};
             
             // Cache for parseNovel results to avoid duplicate network requests
-            // Key: URL path, Value: { data: novelData, timestamp: Date.now() }
+            // Key: URL path, Value: { promise: Promise<novelData>, timestamp: Date.now() }
             var parseNovelCache = {};
             var CACHE_TTL = 60000; // Cache for 60 seconds
             
@@ -1016,16 +1017,17 @@ private object AdapterCodeCache {
                 var cached = parseNovelCache[pathUrl];
                 var now = Date.now();
                 
-                // Return cached data if still valid
+                // Return cached promise if still valid
                 if (cached && (now - cached.timestamp) < CACHE_TTL) {
-                    return Promise.resolve(cached.data);
+                    return cached.promise;
                 }
                 
-                // Fetch new data and cache it
-                return Promise.resolve(plugin.parseNovel(pathUrl)).then(function(data) {
-                    parseNovelCache[pathUrl] = { data: data, timestamp: now };
-                    return data;
+                // Fetch new data and cache the in-flight Promise immediately so concurrent callers share it
+                var p = Promise.resolve().then(function() {
+                    return plugin.parseNovel(pathUrl);
                 });
+                parseNovelCache[pathUrl] = { promise: p, timestamp: now };
+                return p;
             }
             
             // Helper to extract path from URL
@@ -1033,12 +1035,19 @@ private object AdapterCodeCache {
                 var pathUrl = url;
                 if (plugin.site && url.indexOf(plugin.site) === 0) {
                     pathUrl = url.substring(plugin.site.length);
-                    if (pathUrl.indexOf('/') !== 0) pathUrl = '/' + pathUrl;
                 } else if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
                     try {
                         var urlObj = new URL(url);
                         pathUrl = urlObj.pathname + urlObj.search + urlObj.hash;
                     } catch(e) {}
+                }
+                // Normalize path depending on plugin.site trailing slash
+                // If site ends with '/', path must NOT start with '/' (prevents double slash // 404s)
+                // If site does not end with '/', path MUST start with '/'
+                if (plugin.site && plugin.site.endsWith('/')) {
+                    pathUrl = pathUrl.replace(/^\/+/, '');
+                } else if (pathUrl.indexOf('/') !== 0) {
+                    pathUrl = '/' + pathUrl;
                 }
                 return pathUrl;
             }
@@ -1242,7 +1251,7 @@ private object AdapterCodeCache {
                         
                         // If source has parsePage and totalPages > 1, load first page only
                         if (typeof plugin.parsePage === 'function' && novel && novel.totalPages > 1) {
-                            return Promise.resolve(plugin.parsePage(pathUrl, 1)).then(function(pageResult) {
+                            return Promise.resolve(plugin.parsePage(pathUrl, "1")).then(function(pageResult) {
                                 if (pageResult && Array.isArray(pageResult.chapters)) {
                                     return pageResult.chapters.map(function(c) {
                                         var chapterUrl = c.url || c.path || "";
@@ -1278,9 +1287,9 @@ private object AdapterCodeCache {
                             return { chapters: [], totalPages: 1, currentPage: 1 };
                         }
                         
-                        // Source supports pagination - use parsePage
+                        // Source supports pagination - use parsePage with page as String
                         var totalPages = novel.totalPages;
-                        return Promise.resolve(plugin.parsePage(pathUrl, page)).then(function(pageResult) {
+                        return Promise.resolve(plugin.parsePage(pathUrl, String(page))).then(function(pageResult) {
                             var chapters = [];
                             if (pageResult && Array.isArray(pageResult.chapters)) {
                                 chapters = pageResult.chapters.map(function(c) {
@@ -1327,16 +1336,7 @@ private object AdapterCodeCache {
 
             wrapper.getChapterContent = function(url) {
                 if (typeof plugin.parseChapter === 'function') {
-                    var pathUrl = url;
-                    if (plugin.site && url.indexOf(plugin.site) === 0) {
-                        pathUrl = url.substring(plugin.site.length);
-                        if (pathUrl.indexOf('/') !== 0) pathUrl = '/' + pathUrl;
-                    } else if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
-                        try {
-                            var urlObj = new URL(url);
-                            pathUrl = urlObj.pathname + urlObj.search + urlObj.hash;
-                        } catch(e) {}
-                    }
+                    var pathUrl = extractPathUrl(url);
                     return Promise.resolve(plugin.parseChapter(pathUrl)).then(function(content) {
                         var text = typeof content === 'string' ? content : (content.text || "");
                         // Remove newlines, carriage returns, and tabs without regex
@@ -1560,15 +1560,23 @@ private class GraalVMReflectionEngine(
                         }
                     }
                     
-                    globalThis.__pendingFetch = {
+                    if (!globalThis.__fetchQueue) globalThis.__fetchQueue = [];
+                    if (!globalThis.__pendingFetches) globalThis.__pendingFetches = {};
+                    if (typeof globalThis.__fetchIdCounter === 'undefined') globalThis.__fetchIdCounter = 0;
+
+                    var fetchId = ++globalThis.__fetchIdCounter;
+                    globalThis.__pendingFetches[fetchId] = {
+                        resolve: resolve,
+                        reject: reject
+                    };
+                    globalThis.__fetchQueue.push({
+                        id: fetchId,
                         url: requestUrl,
                         method: (options && options.method) || 'GET',
                         headers: headersObj,
                         body: bodyStr,
-                        resolve: resolve,
-                        reject: reject,
                         requestUrl: requestUrl
-                    };
+                    });
                     globalThis.__fetchReady = true;
                 });
             };
@@ -1853,50 +1861,70 @@ private class GraalVMPluginWrapper(
 
     private suspend fun processPendingFetch() {
         try {
-            val fetchReadyStr = engine.evaluateStringScript("String(globalThis.__fetchReady || false)")
-            if (fetchReadyStr != "true") return
+            while (true) {
+                val fetchReadyStr = engine.evaluateStringScript("String(globalThis.__fetchReady || false)")
+                if (fetchReadyStr != "true") break
 
-            engine.evaluateVoidScript("globalThis.__fetchReady = false;")
+                val fetchJson = engine.evaluateStringScript("""
+                    (function() {
+                        if (!globalThis.__fetchQueue || globalThis.__fetchQueue.length === 0) {
+                            globalThis.__fetchReady = false;
+                            return null;
+                        }
+                        var item = globalThis.__fetchQueue.shift();
+                        if (globalThis.__fetchQueue.length === 0) {
+                            globalThis.__fetchReady = false;
+                        }
+                        return JSON.stringify(item);
+                    })()
+                """.trimIndent()) ?: break
 
-            val fetchJson = engine.evaluateStringScript("JSON.stringify(globalThis.__pendingFetch)") ?: return
-            val fetchData = json.parseToJsonElement(fetchJson).jsonObject
+                val fetchData = json.parseToJsonElement(fetchJson).jsonObject
+                val fetchId = fetchData["id"]?.jsonPrimitive?.content?.toIntOrNull() ?: break
+                val url = fetchData["url"]?.jsonPrimitive?.content ?: break
+                val requestUrl = fetchData["requestUrl"]?.jsonPrimitive?.content ?: url
+                val method = fetchData["method"]?.jsonPrimitive?.content ?: "GET"
+                
+                // Extract headers
+                val headersObj = fetchData["headers"]?.jsonObject
+                val headers = headersObj?.mapValues { it.value.jsonPrimitive.content } ?: emptyMap()
+                
+                // Extract body for POST requests
+                val body = fetchData["body"]?.jsonPrimitive?.content
 
-            val url = fetchData["url"]?.jsonPrimitive?.content ?: return
-            val requestUrl = fetchData["requestUrl"]?.jsonPrimitive?.content ?: url
-            val method = fetchData["method"]?.jsonPrimitive?.content ?: "GET"
-            
-            // Extract headers
-            val headersObj = fetchData["headers"]?.jsonObject
-            val headers = headersObj?.mapValues { it.value.jsonPrimitive.content } ?: emptyMap()
-            
-            // Extract body for POST requests
-            val body = fetchData["body"]?.jsonPrimitive?.content
-
-            val response = withContext(Dispatchers.IO) {
-                bridgeService.fetch(url, FetchOptions(method = method, headers = headers, body = body))
-            }
-
-            // Store response and resolve promise
-            val responseBodyVar = "__rb_${System.nanoTime()}"
-            engine.evaluateVoidScript("globalThis.$responseBodyVar = ${Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(response.text))};")
-
-            // Include url property in response for redirect detection
-            val responseUrl = response.url ?: url
-            engine.evaluateVoidScript("""
-                if (globalThis.__pendingFetch && globalThis.__pendingFetch.resolve) {
-                    var bodyText = globalThis.$responseBodyVar;
-                    delete globalThis.$responseBodyVar;
-                    globalThis.__pendingFetch.resolve({
-                        ok: ${response.status in 200..299},
-                        status: ${response.status},
-                        url: '${responseUrl.replace("'", "\\'")}',
-                        text: function() { return Promise.resolve(bodyText); },
-                        json: function() { return Promise.resolve(JSON.parse(bodyText)); }
-                    });
-                    delete globalThis.__pendingFetch;
+                val response = withContext(Dispatchers.IO) {
+                    bridgeService.fetch(url, FetchOptions(method = method, headers = headers, body = body))
                 }
-            """.trimIndent())
 
+                // Store response and resolve promise for this specific fetchId
+                val responseBodyVar = "__rb_${System.nanoTime()}"
+                engine.evaluateVoidScript("globalThis.$responseBodyVar = ${Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(response.text))};")
+
+                val responseUrl = response.url ?: url
+                val responseHeadersJson = JsonObject(response.headers.mapValues { JsonPrimitive(it.value) }).toString()
+                engine.evaluateVoidScript("""
+                    (function() {
+                        var pending = globalThis.__pendingFetches ? globalThis.__pendingFetches[$fetchId] : null;
+                        if (pending && pending.resolve) {
+                            var bodyText = globalThis.$responseBodyVar;
+                            delete globalThis.$responseBodyVar;
+                            delete globalThis.__pendingFetches[$fetchId];
+                            var headersObj = $responseHeadersJson;
+                            var headers = typeof Headers !== 'undefined' ? new Headers(headersObj) : {
+                                get: function(k) { return headersObj[k] || headersObj[k.toLowerCase()] || null; }
+                            };
+                            pending.resolve({
+                                ok: ${response.status in 200..299},
+                                status: ${response.status},
+                                url: '${responseUrl.replace("'", "\\'")}',
+                                headers: headers,
+                                text: function() { return Promise.resolve(bodyText); },
+                                json: function() { return Promise.resolve(JSON.parse(bodyText)); }
+                            });
+                        }
+                    })();
+                """.trimIndent())
+            }
         } catch (e: Exception) {
             Log.error { "GraalVMPluginWrapper: Error processing fetch: ${e.message}" }
         }

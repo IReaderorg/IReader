@@ -651,7 +651,7 @@ class BookDetailViewModel(
     private suspend fun getRemoteBookDetailSilent(book: Book, catalog: CatalogLocal?) {
         updateSuccessState { it.copy(isRefreshingBook = true) }
         getBookDetailJob?.cancel()
-        getBookDetailJob = scope.launch {
+        val job = scope.launch {
             remoteUseCases.getBookDetail(
                 book = book,
                 catalog = catalog,
@@ -671,6 +671,8 @@ class BookDetailViewModel(
                 }
             )
         }
+        getBookDetailJob = job
+        job.join()
     }
     
     private suspend fun getRemoteChapterDetailSilent(book: Book, catalog: CatalogLocal?) {
