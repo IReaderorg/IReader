@@ -149,6 +149,22 @@ class DownloadServiceIntegrationTest {
         override fun getDownloadStatus(chapterId: Long): DownloadStatus? {
             return _downloadProgress.value[chapterId]?.status
         }
+
+        override suspend fun retryAllFailed(): ServiceResult<Unit> {
+            val failed = _downloadProgress.value.filter { it.value.status == DownloadStatus.FAILED }.keys
+            failed.forEach { retryDownload(it) }
+            return ServiceResult.Success(Unit)
+        }
+
+        override suspend fun clearCompleted(): ServiceResult<Unit> {
+            _downloadProgress.value = _downloadProgress.value.filterValues { it.status != DownloadStatus.COMPLETED }
+            return ServiceResult.Success(Unit)
+        }
+
+        override suspend fun clearFailed(): ServiceResult<Unit> {
+            _downloadProgress.value = _downloadProgress.value.filterValues { it.status != DownloadStatus.FAILED }
+            return ServiceResult.Success(Unit)
+        }
         
         // Helper to simulate download progress updates from DownloaderService
         fun simulateDownloadProgressUpdate(chapterId: Long, status: DownloadStatus, progress: Float = 0f, errorMessage: String? = null) {

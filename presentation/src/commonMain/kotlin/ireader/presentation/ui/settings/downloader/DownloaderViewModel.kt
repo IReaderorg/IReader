@@ -53,34 +53,42 @@ class DownloaderViewModel(
     val downloads: StateFlow<List<SavedDownloadWithInfo>> = _downloads.asStateFlow()
     
     /**
-     * Download queue converted to Download model for UI.
-     */
-    val downloadQueue: StateFlow<List<Download>> = _downloads
-        .map { list ->
-            list.map { saved ->
-                Download(
-                    chapterId = saved.chapterId,
-                    bookId = saved.bookId,
-                    sourceId = 0L, // Not available in SavedDownloadWithInfo
-                    chapterName = saved.chapterName,
-                    bookTitle = saved.bookName,
-                    coverUrl = "",
-                    status = getDownloadStatus(saved.chapterId),
-                    progress = getDownloadProgress(saved.chapterId),
-                    errorMessage = getDownloadError(saved.chapterId)
-                )
-            }
-        }
-        .stateIn(scope, SharingStarted.Eagerly, emptyList())
-    
-    /**
      * Progress map from service.
      */
-    val progressMap = downloadService.downloadProgress.stateIn(
+    val progressMap: StateFlow<Map<Long, ireader.domain.services.common.DownloadProgress>> = downloadService.downloadProgress.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
         initialValue = emptyMap()
     )
+    
+    /**
+     * Download queue converted to Download model for UI.
+     * Reacts to both database changes and real-time download progress updates.
+     */
+    val downloadQueue: StateFlow<List<Download>> = combine(_downloads, progressMap) { list, progress ->
+        list.map { saved ->
+            val p = progress[saved.chapterId]
+            val status = when (p?.status) {
+                ireader.domain.services.common.DownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
+                ireader.domain.services.common.DownloadStatus.COMPLETED -> DownloadStatus.DOWNLOADED
+                ireader.domain.services.common.DownloadStatus.FAILED -> DownloadStatus.ERROR
+                ireader.domain.services.common.DownloadStatus.PAUSED -> DownloadStatus.QUEUE
+                ireader.domain.services.common.DownloadStatus.QUEUED -> DownloadStatus.QUEUE
+                else -> DownloadStatus.QUEUE
+            }
+            Download(
+                chapterId = saved.chapterId,
+                bookId = saved.bookId,
+                sourceId = 0L, // Not available in SavedDownloadWithInfo
+                chapterName = saved.chapterName,
+                bookTitle = saved.bookName,
+                coverUrl = "",
+                status = status,
+                progress = ((p?.progress ?: 0f) * 100).toInt(),
+                errorMessage = p?.errorMessage
+            )
+        }
+    }.stateIn(scope, SharingStarted.Eagerly, emptyList())
     
     // ═══════════════════════════════════════════════════════════════
     // Service State
@@ -189,26 +197,24 @@ class DownloaderViewModel(
     /**
      * Current download being processed.
      */
-    val currentDownload: StateFlow<Download?> = progressMap
-        .map { map ->
-            map.entries.find { it.value.status == ireader.domain.services.common.DownloadStatus.DOWNLOADING }
-                ?.let { entry ->
-                    val saved = _downloads.value.find { it.chapterId == entry.key }
-                    if (saved != null) {
-                        Download(
-                            chapterId = entry.key,
-                            bookId = saved.bookId,
-                            sourceId = 0L,
-                            chapterName = saved.chapterName,
-                            bookTitle = saved.bookName,
-                            coverUrl = "",
-                            status = DownloadStatus.DOWNLOADING,
-                            progress = (entry.value.progress * 100).toInt()
-                        )
-                    } else null
-                }
-        }
-        .stateIn(scope, SharingStarted.WhileSubscribed(5000), null)
+    val currentDownload: StateFlow<Download?> = combine(progressMap, _downloads) { map, downloads ->
+        map.entries.find { it.value.status == ireader.domain.services.common.DownloadStatus.DOWNLOADING }
+            ?.let { entry ->
+                val saved = downloads.find { it.chapterId == entry.key }
+                if (saved != null) {
+                    Download(
+                        chapterId = entry.key,
+                        bookId = saved.bookId,
+                        sourceId = 0L,
+                        chapterName = saved.chapterName,
+                        bookTitle = saved.bookName,
+                        coverUrl = "",
+                        status = DownloadStatus.DOWNLOADING,
+                        progress = (entry.value.progress * 100).toInt()
+                    )
+                } else null
+            }
+    }.stateIn(scope, SharingStarted.WhileSubscribed(5000), null)
     
     init {
         scope.launch {
@@ -313,18 +319,8 @@ class DownloaderViewModel(
      * Remove a single download from queue.
      */
     fun removeDownload(chapterId: Long) {
-        scope.launch(ioDispatcher) {
+        scope.launch {
             downloadService.cancelDownload(chapterId)
-            val download = _downloads.value.find { it.chapterId == chapterId }
-            if (download != null) {
-                downloadUseCases.deleteSavedDownload(
-                    ireader.domain.models.entities.Download(
-                        chapterId = download.chapterId,
-                        bookId = download.bookId,
-                        priority = 0
-                    )
-                )
-            }
         }
     }
     
@@ -332,21 +328,12 @@ class DownloaderViewModel(
      * Remove selected downloads.
      */
     fun removeSelectedDownloads() {
-        scope.launch(ioDispatcher) {
-            selection.forEach { chapterId ->
-                downloadService.cancelDownload(chapterId)
-                val download = _downloads.value.find { it.chapterId == chapterId }
-                if (download != null) {
-                    downloadUseCases.deleteSavedDownload(
-                        ireader.domain.models.entities.Download(
-                            chapterId = download.chapterId,
-                            bookId = download.bookId,
-                            priority = 0
-                        )
-                    )
-                }
-            }
+        scope.launch {
+            val toRemove = selection.toList()
             selection.clear()
+            toRemove.forEach { chapterId ->
+                downloadService.cancelDownload(chapterId)
+            }
         }
     }
     
@@ -364,12 +351,7 @@ class DownloaderViewModel(
      */
     fun retryAllFailed() {
         scope.launch {
-            val failedIds = progressMap.value
-                .filter { it.value.status == ireader.domain.services.common.DownloadStatus.FAILED }
-                .keys
-            failedIds.forEach { chapterId ->
-                downloadService.retryDownload(chapterId)
-            }
+            downloadService.retryAllFailed()
         }
     }
     
@@ -377,22 +359,8 @@ class DownloaderViewModel(
      * Clear completed downloads from queue.
      */
     fun clearCompleted() {
-        scope.launch(ioDispatcher) {
-            val completedIds = progressMap.value
-                .filter { it.value.status == ireader.domain.services.common.DownloadStatus.COMPLETED }
-                .keys
-            completedIds.forEach { chapterId ->
-                val download = _downloads.value.find { it.chapterId == chapterId }
-                if (download != null) {
-                    downloadUseCases.deleteSavedDownload(
-                        ireader.domain.models.entities.Download(
-                            chapterId = download.chapterId,
-                            bookId = download.bookId,
-                            priority = 0
-                        )
-                    )
-                }
-            }
+        scope.launch {
+            downloadService.clearCompleted()
         }
     }
     
@@ -400,22 +368,8 @@ class DownloaderViewModel(
      * Clear failed downloads from queue.
      */
     fun clearFailed() {
-        scope.launch(ioDispatcher) {
-            val failedIds = progressMap.value
-                .filter { it.value.status == ireader.domain.services.common.DownloadStatus.FAILED }
-                .keys
-            failedIds.forEach { chapterId ->
-                val download = _downloads.value.find { it.chapterId == chapterId }
-                if (download != null) {
-                    downloadUseCases.deleteSavedDownload(
-                        ireader.domain.models.entities.Download(
-                            chapterId = download.chapterId,
-                            bookId = download.bookId,
-                            priority = 0
-                        )
-                    )
-                }
-            }
+        scope.launch {
+            downloadService.clearFailed()
         }
     }
     

@@ -62,6 +62,21 @@ interface DownloadService : PlatformService {
      * Get download status for a chapter
      */
     fun getDownloadStatus(chapterId: Long): DownloadStatus?
+    
+    /**
+     * Retry all failed downloads
+     */
+    suspend fun retryAllFailed(): ServiceResult<Unit>
+    
+    /**
+     * Clear completed downloads from queue
+     */
+    suspend fun clearCompleted(): ServiceResult<Unit>
+    
+    /**
+     * Clear failed downloads from queue
+     */
+    suspend fun clearFailed(): ServiceResult<Unit>
 }
 
 /**

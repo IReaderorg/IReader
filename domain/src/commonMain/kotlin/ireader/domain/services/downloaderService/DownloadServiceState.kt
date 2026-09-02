@@ -4,6 +4,7 @@ import ireader.domain.models.entities.SavedDownload
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * Represents the download status of a chapter
@@ -74,6 +75,10 @@ class DownloadStateHolder : DownloadServiceState {
         _downloads.value = value
     }
     
+    fun updateDownloads(transform: (List<SavedDownload>) -> List<SavedDownload>) {
+        _downloads.update(transform)
+    }
+    
     fun setRunning(value: Boolean) {
         _isRunning.value = value
     }
@@ -84,6 +89,18 @@ class DownloadStateHolder : DownloadServiceState {
     
     fun setDownloadProgress(value: Map<Long, DownloadProgress>) {
         _downloadProgress.value = value
+    }
+    
+    fun updateDownloadProgress(transform: (Map<Long, DownloadProgress>) -> Map<Long, DownloadProgress>) {
+        _downloadProgress.update(transform)
+    }
+    
+    fun updateChapterProgress(chapterId: Long, progress: DownloadProgress) {
+        _downloadProgress.update { current -> current + (chapterId to progress) }
+    }
+    
+    fun removeChapterProgress(chapterId: Long) {
+        _downloadProgress.update { current -> current - chapterId }
     }
     
     /**

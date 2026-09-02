@@ -505,7 +505,7 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     /**
      * Retry all failed downloads.
      */
-    suspend fun retryAllFailed(): ServiceResult<Unit> {
+    override suspend fun retryAllFailed(): ServiceResult<Unit> {
         return try {
             downloadManager.retryAllFailed()
             ServiceResult.Success(Unit)
@@ -517,7 +517,7 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     /**
      * Clear completed downloads from the queue.
      */
-    suspend fun clearCompleted(): ServiceResult<Unit> {
+    override suspend fun clearCompleted(): ServiceResult<Unit> {
         return try {
             downloadManager.clearCompleted()
             ServiceResult.Success(Unit)
@@ -529,7 +529,7 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     /**
      * Clear failed downloads from the queue.
      */
-    suspend fun clearFailed(): ServiceResult<Unit> {
+    override suspend fun clearFailed(): ServiceResult<Unit> {
         return try {
             downloadManager.clearFailed()
             ServiceResult.Success(Unit)
