@@ -53,6 +53,7 @@ fun GradioConfigEditDialog(
     var audioOutputIndex by remember { mutableStateOf(config.audioOutputIndex.toString()) }
     var apiType by remember { mutableStateOf(config.apiType) }
     var parameters by remember { mutableStateOf(config.parameters) }
+    var availableEndpoints by remember { mutableStateOf(config.availableEndpoints) }
 
     // Auto-detect & Test State
     var rawInputUrl by remember { mutableStateOf(config.spaceUrl) }
@@ -201,7 +202,8 @@ fun GradioConfigEditDialog(
                                                     description = detected.description
                                                     parameters = detected.parameters
                                                     apiType = detected.apiType
-                                                    autoDetectMessage = "✓ Detected ${detected.parameters.size} parameter(s) on ${detected.apiName}"
+                                                    availableEndpoints = detected.availableEndpoints
+                                                    autoDetectMessage = "✓ Detected endpoint ${detected.apiName} with ${detected.parameters.size} parameter(s)${if (detected.availableEndpoints.size > 1) " (${detected.availableEndpoints.size} endpoints found)" else ""}"
                                                     isAutoDetectSuccess = true
                                                 }.onFailure { err ->
                                                     autoDetectMessage = "Could not auto-detect: ${err.message ?: "Space offline"}. You can pick a starter template above."
@@ -221,7 +223,8 @@ fun GradioConfigEditDialog(
                                                     description = detected.description
                                                     parameters = detected.parameters
                                                     apiType = detected.apiType
-                                                    autoDetectMessage = "✓ Detected ${detected.parameters.size} parameter(s) on ${detected.apiName}"
+                                                    availableEndpoints = detected.availableEndpoints
+                                                    autoDetectMessage = "✓ Detected endpoint ${detected.apiName} with ${detected.parameters.size} parameter(s)${if (detected.availableEndpoints.size > 1) " (${detected.availableEndpoints.size} endpoints found)" else ""}"
                                                     isAutoDetectSuccess = true
                                                 }.onFailure { err ->
                                                     autoDetectMessage = "Could not auto-detect: ${err.message ?: "Space offline"}. You can pick a starter template above."
@@ -475,6 +478,33 @@ fun GradioConfigEditDialog(
                     }
                 }
 
+                if (availableEndpoints.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Discovered Space Endpoints (${availableEndpoints.size}):",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            availableEndpoints.forEach { ep ->
+                                FilterChip(
+                                    selected = apiName == ep,
+                                    onClick = { apiName = ep },
+                                    label = { Text(ep) }
+                                )
+                            }
+                        }
+                    }
+                }
+
                 if (showAdvanced) {
                     item {
                         OutlinedTextField(
@@ -544,7 +574,8 @@ fun GradioConfigEditDialog(
                             audioOutputIndex = audioOutputIndex.toIntOrNull() ?: 0,
                             parameters = parameters,
                             apiType = apiType,
-                            isCustom = true
+                            isCustom = true,
+                            availableEndpoints = availableEndpoints
                         )
                     )
                 },

@@ -723,9 +723,11 @@ class GenericGradioTTSEngine(
                 else -> when (param.type) {
                     GradioParamType.STRING -> {
                         val default = param.defaultValue ?: ""
-                        // Send null for empty reference/audio parameters
-                        if (default.isEmpty() && param.name.contains("reference")) {
+                        val nameLower = param.name.lowercase()
+                        if (default.isEmpty() && (nameLower.contains("reference") || nameLower.contains("audio") || nameLower.contains("file"))) {
                             "null"
+                        } else if (default.isEmpty() && (nameLower.contains("description") || nameLower.contains("instruction") || nameLower.contains("style"))) {
+                            "\"A clear, natural, and expressive speaking voice\""
                         } else {
                             "\"${escapeJsonString(default)}\""
                         }
@@ -786,15 +788,38 @@ class GenericGradioTTSEngine(
             return null
         }
         
-        // Download audio
+        // Download audio with smart URL resolution
         val downloadUrl = when {
-            !audioUrl.isNullOrEmpty() -> if (audioUrl!!.startsWith("http")) audioUrl!! else "$baseUrl$audioUrl"
-            !audioPath.isNullOrEmpty() -> "$baseUrl/file=$audioPath"
+            !audioUrl.isNullOrEmpty() -> {
+                if (audioUrl!!.startsWith("http://") || audioUrl!!.startsWith("https://")) {
+                    audioUrl!!
+                } else if (audioUrl!!.startsWith("/")) {
+                    "$baseUrl$audioUrl"
+                } else {
+                    "$baseUrl/$audioUrl"
+                }
+            }
+            !audioPath.isNullOrEmpty() -> {
+                if (audioPath!!.startsWith("http://") || audioPath!!.startsWith("https://")) {
+                    audioPath!!
+                } else {
+                    "$baseUrl/gradio_api/file=$audioPath"
+                }
+            }
             else -> return null
         }
         
         Log.warn { "$TAG: Downloading audio from: $downloadUrl" }
-        return downloadAudio(downloadUrl)
+        val audioBytes = downloadAudio(downloadUrl)
+        if (audioBytes != null) return audioBytes
+        
+        // Fallback for legacy file URL if modern gradio_api/file failed
+        if (!audioPath.isNullOrEmpty() && downloadUrl.contains("/gradio_api/file=")) {
+            val fallbackUrl = "$baseUrl/file=$audioPath"
+            Log.warn { "$TAG: Retrying audio with fallback: $fallbackUrl" }
+            return downloadAudio(fallbackUrl)
+        }
+        return null
     }
     
     /**

@@ -50,7 +50,9 @@ data class GradioTTSConfig(
     /** Description of the TTS engine */
     val description: String = "",
     /** API type to use - AUTO will try all endpoints */
-    val apiType: GradioApiType = GradioApiType.AUTO
+    val apiType: GradioApiType = GradioApiType.AUTO,
+    /** All available endpoints discovered on this space */
+    val availableEndpoints: List<String> = emptyList()
 )
 
 /**

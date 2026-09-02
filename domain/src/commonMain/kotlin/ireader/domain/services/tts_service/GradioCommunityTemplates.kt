@@ -1,4 +1,4 @@
-﻿package ireader.domain.services.tts_service
+package ireader.domain.services.tts_service
 
 import ireader.domain.utils.extensions.currentTimeToLong
 
@@ -9,6 +9,46 @@ import ireader.domain.utils.extensions.currentTimeToLong
 object GradioCommunityTemplates {
 
     val TEMPLATES = listOf(
+        GradioTTSConfig(
+            id = "template_breezeblue",
+            name = "BreezeBlue TTS 2",
+            spaceUrl = "https://breezeblue-breeze-tts-2-demo.hf.space",
+            apiName = "/voice_design",
+            parameters = listOf(
+                GradioParam.textParam("Text to speak"),
+                GradioParam.stringParam("Voice description", "A clear, natural, and friendly speaking voice"),
+                GradioParam(name = "CFG scale", type = GradioParamType.FLOAT, defaultValue = "4.0", minValue = 1.0f, maxValue = 10.0f),
+                GradioParam(name = "Seed", type = GradioParamType.INT, defaultValue = "42")
+            ),
+            audioOutputIndex = 0,
+            isCustom = true,
+            description = "Breeze-TTS-2 high quality natural text-to-speech with voice design from description.",
+            apiType = GradioApiType.AUTO,
+            availableEndpoints = listOf("/voice_design", "/voice_clone", "/voice_direction")
+        ),
+        GradioTTSConfig(
+            id = "template_omnivoice",
+            name = "OmniVoice Demo",
+            spaceUrl = "https://k2-fsa-omnivoice.hf.space",
+            apiName = "/_design_fn",
+            parameters = listOf(
+                GradioParam.textParam("Text to Synthesize"),
+                GradioParam.choiceParam("Language (optional)", listOf("Auto", "en", "zh", "ja", "ko", "de", "fr", "es"), "Auto"),
+                GradioParam(name = "Inference Steps", type = GradioParamType.INT, defaultValue = "32"),
+                GradioParam(name = "Guidance Scale (CFG)", type = GradioParamType.FLOAT, defaultValue = "2.0"),
+                GradioParam(name = "Denoise", type = GradioParamType.BOOLEAN, defaultValue = "true"),
+                GradioParam(name = "Speed", type = GradioParamType.FLOAT, defaultValue = "1.0", isSpeedInput = true, minValue = 0.5f, maxValue = 2.0f),
+                GradioParam.choiceParam("Gender", listOf("Auto", "Female", "Male"), "Auto"),
+                GradioParam.choiceParam("Age", listOf("Auto", "Youth", "Middle-aged", "Elderly"), "Auto"),
+                GradioParam.choiceParam("Pitch", listOf("Auto", "Very Low", "Low", "Moderate", "High", "Very High"), "Auto"),
+                GradioParam.choiceParam("Style", listOf("Auto", "Neutral", "Happy", "Sad", "Angry", "Calm"), "Auto")
+            ),
+            audioOutputIndex = 0,
+            isCustom = true,
+            description = "K2-FSA OmniVoice advanced multilingual speech synthesis with controllable timbre and style.",
+            apiType = GradioApiType.AUTO,
+            availableEndpoints = listOf("/_design_fn", "/_clone_fn")
+        ),
         GradioTTSConfig(
             id = "template_kokoro",
             name = "Kokoro 82M Neural TTS",

@@ -181,7 +181,7 @@ val PresentationModules = module {
     factory  { CategoryScreenViewModel(get(), get(), get(), get(), get()) }
     // DownloaderViewModel - Uses DownloadService for download operations
     // Dependencies: downloadService, downloadUseCases, networkStateProvider, downloadPreferences
-    factory  { DownloaderViewModel(get(), get(), get(), get()) }
+    factory  { DownloaderViewModel(get(), get(), get(), get(), get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get(),get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get(), getOrNull(), get(),get()) }

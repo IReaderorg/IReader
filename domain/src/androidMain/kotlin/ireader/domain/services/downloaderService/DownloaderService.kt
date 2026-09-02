@@ -102,7 +102,16 @@ class DownloaderService constructor(
         val completedCount = downloadServiceState.downloadProgress.value.values
             .count { it.status == DownloadStatus.COMPLETED }
         
-        downloadServiceState.setDownloadProgress(emptyMap())
+        // Mark any in-flight download as queued or paused rather than wiping
+        downloadServiceState.updateDownloadProgress { current ->
+            current.mapValues { (_, progress) ->
+                if (progress.status == DownloadStatus.DOWNLOADING) {
+                    progress.copy(status = DownloadStatus.QUEUED)
+                } else {
+                    progress
+                }
+            }
+        }
         
         // Cancel all download-related notifications
         notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
