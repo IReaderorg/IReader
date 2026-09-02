@@ -232,11 +232,11 @@ class MyQuotesViewModel(
         quoteToShare = quote
         // Calculate share validation (Discord has no length limit, but we validate for UX)
         shareValidation = ireader.domain.models.quote.ShareValidation(
-            canShare = quote.text.length >= QuoteCardConstants.MIN_QUOTE_LENGTH,
+            canShare = quote.text.isNotBlank(),
             currentLength = quote.text.length,
             maxLength = Int.MAX_VALUE, // Discord has no practical limit
-            minLength = 10,
-            reason = if (quote.text.length < 10) "Quote too short" else null
+            minLength = 1,
+            reason = if (quote.text.isBlank()) "Quote cannot be empty" else null
         )
         showShareDialog = true
     }
@@ -308,29 +308,24 @@ class MyQuotesViewModel(
      * Create a new quote manually (without book context)
      */
     fun createQuote(text: String, bookTitle: String, author: String) {
-        if (text.length < 10) {
+        if (text.isBlank()) {
             scope.launch {
-                showSnackBar(UiText.DynamicString("Quote must be at least 10 characters"))
+                showSnackBar(UiText.DynamicString("Quote cannot be empty"))
             }
             return
         }
         
-        if (bookTitle.isBlank()) {
-            scope.launch {
-                showSnackBar(UiText.DynamicString("Book title is required"))
-            }
-            return
-        }
+        val cleanBookTitle = bookTitle.ifBlank { "General" }
         
         isCreating = true
         scope.launch {
             val result = localQuoteUseCases.saveQuote(
-                text = text,
+                text = text.trim(),
                 bookId = 0L, // No book context
-                bookTitle = bookTitle,
+                bookTitle = cleanBookTitle,
                 chapterTitle = "Manual Entry",
                 chapterNumber = null,
-                author = author.ifBlank { null },
+                author = author.trim().ifBlank { null },
                 includeContext = false,
                 currentChapterId = null,
                 prevChapterId = null,
@@ -355,19 +350,14 @@ class MyQuotesViewModel(
      * Show share confirmation dialog (with rate limit check)
      */
     fun showShareConfirmation(text: String, bookTitle: String, author: String, style: QuoteCardStyle) {
-        if (text.length < 10) {
+        if (text.isBlank()) {
             scope.launch {
-                showSnackBar(UiText.DynamicString("Quote must be at least 10 characters"))
+                showSnackBar(UiText.DynamicString("Quote cannot be empty"))
             }
             return
         }
         
-        if (bookTitle.isBlank()) {
-            scope.launch {
-                showSnackBar(UiText.DynamicString("Book title is required"))
-            }
-            return
-        }
+        val cleanBookTitle = bookTitle.ifBlank { "General" }
         
         // Check rate limit
         val currentTime = Clock.System.now().toEpochMilliseconds()
@@ -382,7 +372,12 @@ class MyQuotesViewModel(
         }
         
         // Show confirmation dialog
-        pendingShareData = PendingShare(text, bookTitle, author, style)
+        pendingShareData = PendingShare(
+            text = text.trim(),
+            bookTitle = cleanBookTitle,
+            author = author.trim(),
+            style = style
+        )
         showShareConfirmDialog = true
     }
     
@@ -458,31 +453,26 @@ class MyQuotesViewModel(
      * Update an existing quote
      */
     fun updateQuote(quoteId: Long, text: String, bookTitle: String, author: String) {
-        if (text.length < 10) {
+        if (text.isBlank()) {
             scope.launch {
-                showSnackBar(UiText.DynamicString("Quote must be at least 10 characters"))
+                showSnackBar(UiText.DynamicString("Quote cannot be empty"))
             }
             return
         }
         
-        if (bookTitle.isBlank()) {
-            scope.launch {
-                showSnackBar(UiText.DynamicString("Book title is required"))
-            }
-            return
-        }
+        val cleanBookTitle = bookTitle.ifBlank { "General" }
         
         scope.launch {
             // Delete old quote and create new one with updated data
             localQuoteUseCases.deleteQuote(quoteId)
             
             val result = localQuoteUseCases.saveQuote(
-                text = text,
+                text = text.trim(),
                 bookId = 0L,
-                bookTitle = bookTitle,
+                bookTitle = cleanBookTitle,
                 chapterTitle = "Manual Entry",
                 chapterNumber = null,
-                author = author.ifBlank { null },
+                author = author.trim().ifBlank { null },
                 includeContext = false,
                 currentChapterId = null,
                 prevChapterId = null,

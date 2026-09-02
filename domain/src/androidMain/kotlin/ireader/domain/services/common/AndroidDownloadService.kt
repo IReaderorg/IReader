@@ -120,7 +120,9 @@ class AndroidDownloadService(
     
     override suspend fun start() {
         _state.value = ServiceState.RUNNING
-        // Start is handled by queueChapters/queueBooks which call startWorkManager
+        downloadServiceState.setRunning(true)
+        downloadServiceState.setPaused(false)
+        startWorkManager()
     }
     
     override suspend fun stop() {
@@ -251,7 +253,9 @@ class AndroidDownloadService(
     }
 
     override suspend fun pause() {
+        _state.value = ServiceState.PAUSED
         downloadServiceState.setPaused(true)
+        downloadServiceState.setRunning(false)
         
         val currentProgress = downloadServiceState.downloadProgress.value
         val updatedProgress = currentProgress.mapValues { (_, progress) ->
@@ -262,10 +266,13 @@ class AndroidDownloadService(
             }
         }
         downloadServiceState.setDownloadProgress(updatedProgress)
+        workManager.cancelAllWorkByTag(DOWNLOADER_SERVICE_NAME)
     }
     
     override suspend fun resume() {
+        _state.value = ServiceState.RUNNING
         downloadServiceState.setPaused(false)
+        downloadServiceState.setRunning(true)
         
         val currentProgress = downloadServiceState.downloadProgress.value
         val updatedProgress = currentProgress.mapValues { (_, progress) ->
@@ -276,20 +283,7 @@ class AndroidDownloadService(
             }
         }
         downloadServiceState.setDownloadProgress(updatedProgress)
-        
-        // Check if there are pending downloads that need to be restarted
-        val pendingChapterIds = currentProgress
-            .filter { 
-                it.value.status == LegacyDownloadStatus.QUEUED ||
-                it.value.status == LegacyDownloadStatus.PAUSED
-            }
-            .keys
-            .toList()
-        
-        if (pendingChapterIds.isNotEmpty() && !downloadServiceState.isRunning.value) {
-            // Restart WorkManager
-            startWorkManager()
-        }
+        startWorkManager()
     }
     
     override suspend fun cancelDownload(chapterId: Long): ServiceResult<Unit> {
@@ -492,7 +486,7 @@ class AndroidDownloadService(
         
         workManager.enqueueUniqueWork(
             DOWNLOADER_SERVICE_NAME,
-            ExistingWorkPolicy.KEEP,
+            ExistingWorkPolicy.REPLACE,
             workRequest
         )
     }

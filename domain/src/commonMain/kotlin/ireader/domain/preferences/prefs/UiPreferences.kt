@@ -541,4 +541,12 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun preferredQuoteStyle(): Preference<String> {
         return preferenceStore.getString("preferred_quote_style", "GRADIENT_SUNSET")
     }
+    
+    fun lastCheckinDate(): Preference<String> {
+        return preferenceStore.getString("last_daily_checkin_date", "")
+    }
+    
+    fun localSpiritStones(): Preference<Long> {
+        return preferenceStore.getLong("local_spirit_stones", 0L)
+    }
 }

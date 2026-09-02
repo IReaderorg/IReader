@@ -139,10 +139,12 @@ actual class QuoteCardSharer(
     private fun drawDecorativeElements(canvas: Canvas, width: Int, height: Int, colors: StyleColors, style: QuoteCardStyle) {
         when (style) {
             QuoteCardStyle.GRADIENT_SUNSET, QuoteCardStyle.GRADIENT_OCEAN,
-            QuoteCardStyle.GRADIENT_FOREST, QuoteCardStyle.GRADIENT_MIDNIGHT -> {
+            QuoteCardStyle.GRADIENT_FOREST, QuoteCardStyle.GRADIENT_MIDNIGHT,
+            QuoteCardStyle.AURORA_BOREALIS, QuoteCardStyle.CYBERPUNK,
+            QuoteCardStyle.COSMIC_PURPLE -> {
                 drawBokehEffect(canvas, width, height, colors)
             }
-            QuoteCardStyle.GRADIENT_LAVENDER -> {
+            QuoteCardStyle.GRADIENT_LAVENDER, QuoteCardStyle.ROSE_GOLD -> {
                 drawSoftShapes(canvas, width, height, colors)
             }
             QuoteCardStyle.MINIMAL_LIGHT, QuoteCardStyle.MINIMAL_DARK -> {
@@ -574,6 +576,54 @@ actual class QuoteCardSharer(
                 dividerColor = 0x80FFECB3.toInt(),
                 brandingTextColor = 0xFFFFF8E1.toInt(),
                 brandingSubtextColor = 0xB3FFF8E1.toInt()
+            )
+            QuoteCardStyle.AURORA_BOREALIS -> StyleColors(
+                startColor = 0xFF00C9FF.toInt(),
+                endColor = 0xFF92FE9D.toInt(),
+                textColor = 0xFF0D1B2A.toInt(),
+                secondaryTextColor = 0xE60D1B2A.toInt(),
+                tertiaryTextColor = 0xB30D1B2A.toInt(),
+                accentColor = 0xFF0077B6.toInt(),
+                quoteMarkColor = 0x500D1B2A.toInt(),
+                dividerColor = 0x700D1B2A.toInt(),
+                brandingTextColor = 0xFF0D1B2A.toInt(),
+                brandingSubtextColor = 0x990D1B2A.toInt()
+            )
+            QuoteCardStyle.CYBERPUNK -> StyleColors(
+                startColor = 0xFFFF007F.toInt(),
+                endColor = 0xFF00F0FF.toInt(),
+                textColor = 0xFFFFFFFF.toInt(),
+                secondaryTextColor = 0xE6FFFFFF.toInt(),
+                tertiaryTextColor = 0xB3FFFFFF.toInt(),
+                accentColor = 0xFF00F0FF.toInt(),
+                quoteMarkColor = 0x80FFFFFF.toInt(),
+                dividerColor = 0x99FFFFFF.toInt(),
+                brandingTextColor = 0xFFFFFFFF.toInt(),
+                brandingSubtextColor = 0xB3FFFFFF.toInt()
+            )
+            QuoteCardStyle.ROSE_GOLD -> StyleColors(
+                startColor = 0xFFF4C4F3.toInt(),
+                endColor = 0xFFFC67FA.toInt(),
+                textColor = 0xFF3D1E3A.toInt(),
+                secondaryTextColor = 0xE63D1E3A.toInt(),
+                tertiaryTextColor = 0xB33D1E3A.toInt(),
+                accentColor = 0xFF6A0572.toInt(),
+                quoteMarkColor = 0x503D1E3A.toInt(),
+                dividerColor = 0x703D1E3A.toInt(),
+                brandingTextColor = 0xFF3D1E3A.toInt(),
+                brandingSubtextColor = 0x993D1E3A.toInt()
+            )
+            QuoteCardStyle.COSMIC_PURPLE -> StyleColors(
+                startColor = 0xFF3A1C71.toInt(),
+                endColor = 0xFFD76D77.toInt(),
+                textColor = 0xFFFFFFFF.toInt(),
+                secondaryTextColor = 0xE6FFFFFF.toInt(),
+                tertiaryTextColor = 0xB3FFFFFF.toInt(),
+                accentColor = 0xFFFFD166.toInt(),
+                quoteMarkColor = 0x80FFFFFF.toInt(),
+                dividerColor = 0x99FFFFFF.toInt(),
+                brandingTextColor = 0xFFFFFFFF.toInt(),
+                brandingSubtextColor = 0xB3FFFFFF.toInt()
             )
         }
     }

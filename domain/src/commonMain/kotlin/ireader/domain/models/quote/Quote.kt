@@ -26,5 +26,9 @@ enum class QuoteCardStyle(val displayName: String) {
     MINIMAL_LIGHT("Minimal Light"),
     MINIMAL_DARK("Minimal Dark"),
     PAPER_TEXTURE("Paper"),
-    BOOK_COVER("Book Cover")
+    BOOK_COVER("Book Cover"),
+    AURORA_BOREALIS("Aurora"),
+    CYBERPUNK("Cyberpunk"),
+    ROSE_GOLD("Rose Gold"),
+    COSMIC_PURPLE("Cosmic Purple")
 }

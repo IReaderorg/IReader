@@ -137,19 +137,19 @@ class DownloaderViewModel(
      * Optimized: Compute all stats in a single pass through the progress map.
      * This replaces 4 separate StateFlows that each iterated the entire map.
      */
-    val stats: StateFlow<DownloadStats> = progressMap
-        .map { map ->
+    val stats: StateFlow<DownloadStats> = downloadQueue
+        .map { queue ->
             var downloading = 0
             var queued = 0
             var completed = 0
             var failed = 0
-            map.forEach { (_, progress) ->
-                when (progress.status) {
-                    ireader.domain.services.common.DownloadStatus.DOWNLOADING -> downloading++
-                    ireader.domain.services.common.DownloadStatus.QUEUED -> queued++
-                    ireader.domain.services.common.DownloadStatus.COMPLETED -> completed++
-                    ireader.domain.services.common.DownloadStatus.FAILED -> failed++
-                    else -> {}
+            queue.forEach { item ->
+                when (item.status) {
+                    DownloadStatus.DOWNLOADING -> downloading++
+                    DownloadStatus.QUEUE -> queued++
+                    DownloadStatus.DOWNLOADED -> completed++
+                    DownloadStatus.ERROR -> failed++
+                    else -> queued++
                 }
             }
             DownloadStats(downloading, queued, completed, failed)
@@ -285,6 +285,7 @@ class DownloaderViewModel(
             if (chapterIds.isNotEmpty()) {
                 downloadService.queueChapters(chapterIds)
             }
+            downloadService.start()
         }
     }
     

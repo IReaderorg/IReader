@@ -165,47 +165,87 @@ fun QuoteStoryEditorScreen(
         TopActionBar(
             onClose = onDismiss,
             onSave = {
-                if (quoteText.length >= QuoteCardConstants.MIN_QUOTE_LENGTH && bookTitle.isNotBlank()) {
-                    onSave(quoteText, bookTitle, author, currentStyle)
+                if (quoteText.isNotBlank()) {
+                    onSave(quoteText.trim(), bookTitle.ifBlank { "General" }, author.trim(), currentStyle)
                 }
             },
             onShare = onShare?.let { shareCallback ->
                 {
-                    if (quoteText.length >= QuoteCardConstants.MIN_QUOTE_LENGTH && bookTitle.isNotBlank()) {
-                        shareCallback(quoteText, bookTitle, author, currentStyle)
+                    if (quoteText.isNotBlank()) {
+                        shareCallback(quoteText.trim(), bookTitle.ifBlank { "General" }, author.trim(), currentStyle)
                     }
                 }
             },
-            canSave = quoteText.length >= QuoteCardConstants.MIN_QUOTE_LENGTH && bookTitle.isNotBlank(),
-            modifier = Modifier.align(Alignment.TopCenter)
+            canSave = quoteText.isNotBlank(),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
         )
         
-        // Style indicator dots
-        StyleIndicator(
-            currentPage = pagerState.currentPage,
-            pageCount = styles.size,
+        // Bottom controls container
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 100.dp)
-        )
-        
-        // Style name badge
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn() + slideInVertically(),
-            exit = fadeOut() + slideOutVertically(),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 140.dp)
+                .navigationBarsPadding()
+                .padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Quick-edit chips
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AssistChip(
+                    onClick = {
+                        editMode = EditMode.Quote
+                        showEditDialog = true
+                    },
+                    label = { Text("✏️ Quote") },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = Color.Black.copy(alpha = 0.65f),
+                        labelColor = Color.White
+                    )
+                )
+                AssistChip(
+                    onClick = {
+                        editMode = EditMode.Book
+                        showEditDialog = true
+                    },
+                    label = { Text("📖 ${if (bookTitle.isNotBlank()) bookTitle else "Book"}") },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = Color.Black.copy(alpha = 0.65f),
+                        labelColor = Color.White
+                    )
+                )
+                AssistChip(
+                    onClick = {
+                        editMode = EditMode.Author
+                        showEditDialog = true
+                    },
+                    label = { Text("✍️ ${if (author.isNotBlank()) author else "Author"}") },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = Color.Black.copy(alpha = 0.65f),
+                        labelColor = Color.White
+                    )
+                )
+            }
+            
+            // Style indicator dots
+            StyleIndicator(
+                currentPage = pagerState.currentPage,
+                pageCount = styles.size
+            )
+            
+            // Style name badge
             Surface(
                 shape = RoundedCornerShape(20.dp),
                 color = Color.Black.copy(alpha = 0.7f)
             ) {
                 Text(
                     text = currentStyle.displayName,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    style = MaterialTheme.typography.labelMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )

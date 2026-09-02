@@ -256,7 +256,6 @@ private fun FullWidthSearchToolbar(
                     }
                 }
             }
-            }
         }
     )
 }

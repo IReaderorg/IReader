@@ -50,6 +50,22 @@ object QuoteCardStyleColors {
                 Color(0xFF8B4513),
                 Color(0xFFD2691E)
             )
+            QuoteCardStyle.AURORA_BOREALIS -> Pair(
+                Color(0xFF00C9FF),
+                Color(0xFF92FE9D)
+            )
+            QuoteCardStyle.CYBERPUNK -> Pair(
+                Color(0xFFFF007F),
+                Color(0xFF00F0FF)
+            )
+            QuoteCardStyle.ROSE_GOLD -> Pair(
+                Color(0xFFF4C4F3),
+                Color(0xFFFC67FA)
+            )
+            QuoteCardStyle.COSMIC_PURPLE -> Pair(
+                Color(0xFF4A00E0),
+                Color(0xFF8E2DE2)
+            )
         }
     }
     
@@ -60,7 +76,9 @@ object QuoteCardStyleColors {
     fun getTextColor(style: QuoteCardStyle): Color {
         return when (style) {
             QuoteCardStyle.MINIMAL_LIGHT,
-            QuoteCardStyle.PAPER_TEXTURE -> Color.Black
+            QuoteCardStyle.PAPER_TEXTURE,
+            QuoteCardStyle.AURORA_BOREALIS,
+            QuoteCardStyle.ROSE_GOLD -> Color.Black
             else -> Color.White
         }
     }

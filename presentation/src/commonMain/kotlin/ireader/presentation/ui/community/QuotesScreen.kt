@@ -21,6 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -84,13 +86,14 @@ fun QuotesScreen(vm: MyQuotesViewModel, onBack: () -> Unit, onCreateQuote: () ->
     }
     
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.statusBarsPadding().navigationBarsPadding(),
         containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { vm.showCreateDialog() },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape,
                 modifier = Modifier.size(64.dp)
             ) {
                 Icon(Icons.Default.Add, "Create", Modifier.size(28.dp))
@@ -255,6 +258,7 @@ private fun InstagramQuoteCard(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val clipboardManager = LocalClipboardManager.current
     
     // Random gradient for visual variety
     val gradients = remember {
@@ -377,12 +381,25 @@ private fun InstagramQuoteCard(
                         leadingIcon = { Icon(Icons.Default.Edit, null) }
                     )
                     DropdownMenuItem(
+                        text = { Text("Copy Text") },
+                        onClick = {
+                            showMenu = false
+                            val quoteWithInfo = if (!quote.author.isNullOrBlank()) {
+                                "\"${quote.text}\" — ${quote.author}, ${quote.bookTitle}"
+                            } else {
+                                "\"${quote.text}\" — ${quote.bookTitle}"
+                            }
+                            clipboardManager.setText(AnnotatedString(quoteWithInfo))
+                        },
+                        leadingIcon = { Icon(Icons.Default.ContentCopy, null) }
+                    )
+                    DropdownMenuItem(
                         text = { Text("Share") },
                         onClick = { showMenu = false; onShare() },
                         leadingIcon = { Icon(Icons.Default.Share, null) }
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete") },
+                        text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
                         onClick = { showMenu = false; onDelete() },
                         leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) }
                     )

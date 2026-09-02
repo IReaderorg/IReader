@@ -153,7 +153,9 @@ class QuoteCardStyleColorsTest {
         // Arrange
         val lightStyles = listOf(
             QuoteCardStyle.MINIMAL_LIGHT,
-            QuoteCardStyle.PAPER_TEXTURE
+            QuoteCardStyle.PAPER_TEXTURE,
+            QuoteCardStyle.AURORA_BOREALIS,
+            QuoteCardStyle.ROSE_GOLD
         )
         
         // Act & Assert

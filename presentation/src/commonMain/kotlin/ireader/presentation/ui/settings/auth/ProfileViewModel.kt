@@ -20,6 +20,9 @@ import ireader.domain.models.gamification.ProfileComment
 import ireader.domain.models.gamification.ReadingActivityItem
 import ireader.domain.models.gamification.ReadingStatsSnapshot
 import ireader.domain.models.gamification.UnlockedAchievement
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.formatIsoDate
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -35,6 +38,7 @@ class ProfileViewModel(
     private val discordWidgetRepository: DiscordWidgetRepository? = null,
     private val leaderboardRepository: LeaderboardRepository? = null,
     private val bookRepository: BookRepository? = null,
+    private val uiPreferences: UiPreferences? = null,
 ) : StateViewModel<ProfileState>(ProfileState()) {
 
     init {
@@ -386,24 +390,26 @@ class ProfileViewModel(
             }
 
             repo.getProfile(userId).onSuccess { p ->
+                val todayStr = currentTimeToLong().formatIsoDate()
+                val checkedInToday = (p.lastCheckinDate?.startsWith(todayStr) == true) ||
+                        (uiPreferences?.lastCheckinDate()?.get() == todayStr)
+                val effectiveLevel = maxOf(rl.level, p.level)
+                val effectiveTitle = ReaderLevel.getLevelTitle(effectiveLevel)
+                val effectiveProgress = if (rl.level >= p.level) rl.progress else p.levelProgress
+                val effectiveXp = if (rl.level >= p.level) rl.currentXp else p.xp
                 updateState {
                     it.copy(
-                        level = p.level, xp = p.xp, levelTitle = p.levelTitle,
-                        levelProgress = p.levelProgress, spiritStones = p.spiritStones,
+                        level = effectiveLevel, xp = effectiveXp, levelTitle = effectiveTitle,
+                        levelProgress = effectiveProgress, spiritStones = p.spiritStones,
                         checkinStreak = p.checkinStreak, activeTitleId = p.activeTitleId,
                         discordLinked = p.discordLinked, discordUsername = p.discordUsername,
                         avatarUrl = p.avatarUrl, coverUrl = p.coverUrl, bio = p.bio,
                         joinedAt = p.joinedAt,
+                        hasCheckedInToday = checkedInToday
                     )
                 }
             }
 
-            // Check if user already checked in today (idempotent — won't double-reward)
-            repo.checkinDaily().onSuccess { result ->
-                if (result.already) {
-                    updateState { it.copy(hasCheckedInToday = true) }
-                }
-            }
             repo.getAchievements(userId).onSuccess { a -> updateState { it.copy(achievements = a) } }
             repo.getOwnedTitles(userId).onSuccess { t -> updateState { it.copy(ownedTitles = t) } }
 
@@ -451,15 +457,31 @@ class ProfileViewModel(
     }
 
     fun checkIn() {
+        if (currentState.hasCheckedInToday) return
         scope.launch {
             val repo = gamificationRepository ?: return@launch
+            val todayStr = currentTimeToLong().formatIsoDate()
+            uiPreferences?.lastCheckinDate()?.set(todayStr)
             updateState { it.copy(hasCheckedInToday = true) }
             repo.checkinDaily().onSuccess { result ->
                 if (!result.already) {
-                    updateState { it.copy(checkinStreak = result.streakDay, lastCheckinReward = result.reward) }
-                    currentState.currentUser?.id?.let { id -> repo.getProfile(id).onSuccess { p ->
-                        updateState { it.copy(spiritStones = p.spiritStones) } } }
+                    updateState { 
+                        it.copy(
+                            checkinStreak = result.streakDay, 
+                            lastCheckinReward = result.reward,
+                            hasCheckedInToday = true
+                        ) 
+                    }
+                    currentState.currentUser?.id?.let { id -> 
+                        repo.getProfile(id).onSuccess { p ->
+                            updateState { it.copy(spiritStones = p.spiritStones) } 
+                        } 
+                    }
+                } else {
+                    updateState { it.copy(hasCheckedInToday = true) }
                 }
+            }.onFailure {
+                updateState { it.copy(hasCheckedInToday = true) }
             }
         }
     }

@@ -42,6 +42,7 @@ import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.DownloadDone
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -118,7 +119,7 @@ fun DownloaderScreen(
         }
         
         // Stats Header
-        if (queue.isNotEmpty() || stats.completed > 0 || stats.failed > 0) {
+        if (queue.isNotEmpty() || stats.total > 0 || isRunning || isPaused) {
             DownloadStatsHeader(
                 stats = stats,
                 isRunning = isRunning,
@@ -134,7 +135,7 @@ fun DownloaderScreen(
         }
         
         // Content
-        if (queue.isEmpty() && stats.total == 0) {
+        if (queue.isEmpty() && stats.total == 0 && !isRunning) {
             EmptyDownloadState(modifier = Modifier.weight(1f))
         } else {
             DownloadQueueList(
@@ -253,128 +254,184 @@ private fun DownloadStatsHeader(
     onClearCompleted: () -> Unit
 ) {
     Surface(
-        tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
+        tonalElevation = 3.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Stats Row
+            // Status bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(
+                                when {
+                                    isRunning -> MaterialTheme.colorScheme.primary
+                                    isPaused -> MaterialTheme.colorScheme.error
+                                    stats.queued > 0 -> MaterialTheme.colorScheme.secondary
+                                    else -> MaterialTheme.colorScheme.outline
+                                }
+                            )
+                    )
+                    Text(
+                        text = when {
+                            isRunning -> "Downloading (${stats.downloading + stats.queued} left)"
+                            isPaused -> "Downloads Paused"
+                            stats.queued > 0 -> "Ready (${stats.queued} in queue)"
+                            stats.completed > 0 -> "Downloads Complete"
+                            else -> "Queue Idle"
+                        },
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                if (isRunning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            if (isRunning) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                )
+            }
+
+            // Stats grid
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 StatItem(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Outlined.Download,
                     count = stats.downloading,
                     label = "Active",
                     color = MaterialTheme.colorScheme.primary
                 )
                 StatItem(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Outlined.Schedule,
                     count = stats.queued,
                     label = "Queued",
                     color = MaterialTheme.colorScheme.secondary
                 )
                 StatItem(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Outlined.DownloadDone,
                     count = stats.completed,
                     label = "Done",
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 StatItem(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Default.Error,
                     count = stats.failed,
                     label = "Failed",
                     color = MaterialTheme.colorScheme.error
                 )
             }
-            
+
             // Action Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Start button (when not running)
-                if (!isRunning && !isPaused && stats.queued > 0) {
-                    FilledTonalButton(
-                        onClick = onStart,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Start")
+                // Primary Control: Start / Pause / Resume
+                when {
+                    isPaused -> {
+                        Button(
+                            onClick = onPauseResume,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Resume")
+                        }
+                    }
+                    isRunning -> {
+                        FilledTonalButton(
+                            onClick = onPauseResume,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Pause, contentDescription = null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Pause")
+                        }
+                    }
+                    else -> {
+                        Button(
+                            onClick = onStart,
+                            modifier = Modifier.weight(1f),
+                            enabled = stats.queued > 0 || stats.downloading > 0,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Start")
+                        }
                     }
                 }
-                
-                // Pause/Resume button
-                if (isRunning || isPaused) {
-                    FilledTonalButton(
-                        onClick = onPauseResume,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(if (isPaused) "Resume" else "Pause")
-                    }
-                }
-                
-                // Cancel All button
-                if (stats.hasActiveDownloads) {
-                    OutlinedButton(
-                        onClick = onCancelAll,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Cancel,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Cancel")
-                    }
-                }
-                
-                // Retry Failed button
+
+                // Secondary action
                 if (stats.failed > 0) {
                     FilledTonalButton(
                         onClick = onRetryFailed,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Retry")
+                        Icon(Icons.Default.Refresh, contentDescription = null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Retry (${stats.failed})")
                     }
-                }
-                
-                // Clear Completed button
-                if (stats.completed > 0 && !stats.hasActiveDownloads) {
+                } else if (stats.hasActiveDownloads) {
+                    OutlinedButton(
+                        onClick = onCancelAll,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Cancel, contentDescription = null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Cancel All")
+                    }
+                } else if (stats.completed > 0) {
                     OutlinedButton(
                         onClick = onClearCompleted,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Clear")
+                        Icon(Icons.Default.Delete, contentDescription = null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Clear Done")
                     }
                 }
             }
@@ -384,40 +441,40 @@ private fun DownloadStatsHeader(
 
 @Composable
 private fun StatItem(
+    modifier: Modifier = Modifier,
     icon: ImageVector,
     count: Int,
     label: String,
     color: androidx.compose.ui.graphics.Color
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = color.copy(alpha = 0.08f)
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(color.copy(alpha = 0.12f)),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 

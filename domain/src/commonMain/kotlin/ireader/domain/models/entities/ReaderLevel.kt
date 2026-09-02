@@ -86,7 +86,7 @@ data class ReaderLevel(
             )
         }
 
-        private fun getLevelTitle(level: Int): String {
+        fun getLevelTitle(level: Int): String {
             return when {
                 level <= 2 -> "Novice Reader"
                 level <= 5 -> "Curious Reader"

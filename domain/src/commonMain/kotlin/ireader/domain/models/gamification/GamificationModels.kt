@@ -13,6 +13,7 @@ data class GamificationProfile(
     val levelTitle: String = "Novice Reader",
     val spiritStones: Long = 0,
     val checkinStreak: Int = 0,
+    val lastCheckinDate: String? = null,
     val activeTitleId: String? = null,
     val discordLinked: Boolean = false,
     val discordUsername: String? = null,
