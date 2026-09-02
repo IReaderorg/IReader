@@ -48,23 +48,9 @@ fun UpdatesContent(
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberLazyListState()
     
-    // Calculate paginated updates
-    val paginatedUpdates by remember(updates, paginationState.loadedCount) {
+    val totalItemsCount by remember(updates) {
         derivedStateOf {
-            val allUpdates = updates.entries.flatMap { (date, list) -> 
-                list.map { date to it }
-            }
-            val paginatedList = allUpdates.take(paginationState.loadedCount)
-            
-            // Group back by date
-            paginatedList.groupBy({ it.first }, { it.second })
-        }
-    }
-    
-    // Calculate total visible items
-    val totalVisibleItems by remember(paginatedUpdates) {
-        derivedStateOf {
-            paginatedUpdates.values.sumOf { it.size }
+            if (updates.isEmpty()) 0 else 1 + updates.size + updates.values.sumOf { it.size }
         }
     }
     
@@ -73,7 +59,7 @@ fun UpdatesContent(
         snapshotFlow { 
             listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
         }.collect { lastVisibleIndex ->
-            state.checkAndLoadMore(lastVisibleIndex, totalVisibleItems)
+            state.checkAndLoadMore(lastVisibleIndex, totalItemsCount)
         }
     }
     
@@ -86,13 +72,13 @@ fun UpdatesContent(
             )
         ) {
             // New Updates Section
-            if (paginatedUpdates.isNotEmpty()) {
+            if (updates.isNotEmpty()) {
                 item {
                     TextSection(text = localizeHelper.localize(Res.string.new_updates))
                 }
             }
             
-            paginatedUpdates.entries.forEachIndexed { groupIndex, (date, updatesList) ->
+            updates.entries.forEachIndexed { groupIndex, (date, updatesList) ->
                 item(key = "date_${groupIndex}_${date.date}") {
                     TextSection(
                         text = date.date.asRelativeTimeString()
@@ -136,7 +122,7 @@ fun UpdatesContent(
             item(key = "pagination_footer") {
                 UpdatesPaginationFooter(
                     paginationState = paginationState,
-                    totalVisibleItems = totalVisibleItems
+                    totalVisibleItems = totalItemsCount
                 )
             }
         }

@@ -114,6 +114,7 @@ class AndroidAppUpdateChecker(
     override suspend fun downloadApk(
         url: String,
         fileName: String,
+        totalSize: Long,
         onProgress: (Float) -> Unit,
         onComplete: (String) -> Unit,
         onError: (String) -> Unit,
@@ -123,16 +124,13 @@ class AndroidAppUpdateChecker(
             val version = fileName.substringAfter("IReader-v").substringBefore("-release.apk")
                 .takeIf { it.isNotEmpty() } ?: fileName.substringBefore(".apk")
             
-            // Pre-resolve GitHub redirect to get direct CDN URL
-            // This reduces connection time by ~2-3 seconds
-            val directUrl = resolveGitHubRedirect(url) ?: url
-            
-            // Start the download service with resolved URL
+            // Start foreground download service immediately with full URL and total size
             ireader.domain.services.update_service.AppUpdateDownloadService.startDownload(
                 context = context,
-                downloadUrl = directUrl,
+                downloadUrl = url,
                 fileName = fileName,
-                version = version
+                version = version,
+                totalSize = totalSize
             )
             
             onProgress(0f)

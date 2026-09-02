@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import ireader.presentation.ui.update.AppUpdateState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * Android-specific broadcast receiver for handling app update download events
@@ -29,48 +30,70 @@ class AppUpdateDownloadReceiver(
     override fun onReceive(context: Context?, intent: Intent?) {
         when (intent?.action) {
             "ireader.UPDATE_DOWNLOAD_CONNECTING" -> {
-                updateState.tryEmit(updateState.value.copy(
-                    isConnecting = true,
-                    isDownloading = true,
-                    downloadProgress = 0f
-                ))
+                updateState.update { current ->
+                    current.copy(
+                        isConnecting = true,
+                        isDownloading = true,
+                        isDownloaded = false,
+                        downloadedFilePath = null,
+                        error = null,
+                        downloadProgress = 0f
+                    )
+                }
             }
             
             "ireader.UPDATE_DOWNLOAD_PROGRESS" -> {
                 val progress = intent.getFloatExtra("progress", 0f)
-                updateState.tryEmit(updateState.value.copy(
-                    isConnecting = false,
-                    downloadProgress = progress
-                ))
+                updateState.update { current ->
+                    current.copy(
+                        isConnecting = false,
+                        isDownloading = true,
+                        isDownloaded = false,
+                        error = null,
+                        downloadProgress = if (progress >= 0f) progress else current.downloadProgress
+                    )
+                }
             }
             
             "ireader.UPDATE_DOWNLOAD_COMPLETE" -> {
                 val filePath = intent.getStringExtra("file_path")
-                updateState.value = updateState.value.copy(
-                    isConnecting = false,
-                    isDownloading = false,
-                    isDownloaded = true,
-                    downloadedFilePath = filePath,
-                    downloadProgress = 1f
-                )
+                updateState.update { current ->
+                    current.copy(
+                        isConnecting = false,
+                        isDownloading = false,
+                        isDownloaded = true,
+                        downloadedFilePath = filePath,
+                        downloadProgress = 1f,
+                        error = null
+                    )
+                }
             }
             
             "ireader.UPDATE_DOWNLOAD_ERROR" -> {
                 val error = intent.getStringExtra("error")
-                updateState.value = updateState.value.copy(
-                    isConnecting = false,
-                    isDownloading = false,
-                    error = error,
-                    downloadProgress = 0f
-                )
+                updateState.update { current ->
+                    current.copy(
+                        isConnecting = false,
+                        isDownloading = false,
+                        isDownloaded = false,
+                        downloadedFilePath = null,
+                        error = error,
+                        downloadProgress = 0f
+                    )
+                }
             }
             
             "ireader.UPDATE_DOWNLOAD_CANCELLED" -> {
-                updateState.value = updateState.value.copy(
-                    isConnecting = false,
-                    isDownloading = false,
-                    downloadProgress = 0f
-                )
+                updateState.update { current ->
+                    current.copy(
+                        isConnecting = false,
+                        isDownloading = false,
+                        isDownloaded = false,
+                        downloadedFilePath = null,
+                        downloadProgress = 0f,
+                        error = null
+                    )
+                }
             }
         }
     }

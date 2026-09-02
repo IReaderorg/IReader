@@ -36,7 +36,15 @@ class GetRemoteChapters() {
                     val newChapters = source.getChapterList(manga = book.toBookInfo(), commands)
                             .map { it.toChapter(book.id) }
                     onRemoteSuccess(newChapters)
-                    onSuccess(newChapters.filter { it.key !in oldChapters.map { oldChapter -> oldChapter.key } })
+                    val oldKeys = oldChapters.mapTo(HashSet(oldChapters.size)) { it.key }
+                    val newlyDiscovered = newChapters.filter { it.key !in oldKeys }
+                    val chaptersToSave = if (oldChapters.isNotEmpty()) {
+                        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                        newlyDiscovered.map { it.copy(dateFetch = now) }
+                    } else {
+                        newlyDiscovered
+                    }
+                    onSuccess(chaptersToSave)
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }
                 } catch (e: CancellationException) {
                     throw e

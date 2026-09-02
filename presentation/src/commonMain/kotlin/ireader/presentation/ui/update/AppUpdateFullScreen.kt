@@ -91,6 +91,7 @@ fun AppUpdateFullScreen(
                 isDownloaded = state.isDownloaded,
                 isDownloading = state.isDownloading,
                 isConnecting = state.isConnecting,
+                hasError = state.error != null,
                 progress = state.downloadProgress
             )
             
@@ -99,6 +100,7 @@ fun AppUpdateFullScreen(
             // Title
             Text(
                 text = when {
+                    state.error != null -> "Update Failed"
                     state.isDownloaded -> "Update Ready!"
                     state.isConnecting -> "Connecting..."
                     state.isDownloading -> "Downloading Update..."
@@ -106,7 +108,7 @@ fun AppUpdateFullScreen(
                 },
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = if (state.error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -114,6 +116,7 @@ fun AppUpdateFullScreen(
             // Subtitle
             Text(
                 text = when {
+                    state.error != null -> state.error
                     state.isDownloaded -> "Ready to install ${state.newVersion}"
                     state.isConnecting -> "Establishing connection to server..."
                     state.isDownloading -> "Downloading ${state.newVersion}..."
@@ -201,6 +204,7 @@ private fun UpdateIcon(
     isDownloaded: Boolean,
     isDownloading: Boolean,
     isConnecting: Boolean,
+    hasError: Boolean = false,
     progress: Float
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -220,6 +224,12 @@ private fun UpdateIcon(
                 .clip(CircleShape)
                 .background(
                     when {
+                        hasError -> Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.error,
+                                MaterialTheme.colorScheme.errorContainer
+                            )
+                        )
                         isDownloaded -> Brush.linearGradient(
                             colors = listOf(
                                 Color(0xFF4CAF50),
@@ -264,6 +274,7 @@ private fun UpdateIcon(
         // Icon
         Icon(
             imageVector = when {
+                hasError -> Icons.Default.Warning
                 isDownloaded -> Icons.Default.CheckCircle
                 isConnecting -> Icons.Default.CloudSync
                 isDownloading -> Icons.Default.CloudDownload

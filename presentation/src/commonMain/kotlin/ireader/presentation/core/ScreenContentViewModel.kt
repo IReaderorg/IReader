@@ -8,6 +8,7 @@ import ireader.presentation.ui.update.AppUpdateState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 
@@ -172,57 +173,80 @@ class ScreenContentViewModel(
     fun startDownload() {
         val asset = _appUpdateState.value.apkAsset ?: return
         
-        // Immediately set connecting state for instant UI feedback
-        _appUpdateState.value = _appUpdateState.value.copy(
-            isConnecting = true,
-            isDownloading = true,
-            downloadProgress = 0f,
-            error = null,
-        )
+        // Immediately set connecting state for instant UI feedback and reset previous download state
+        _appUpdateState.update { current ->
+            current.copy(
+                isConnecting = true,
+                isDownloading = true,
+                isDownloaded = false,
+                downloadedFilePath = null,
+                downloadProgress = 0f,
+                error = null,
+            )
+        }
         
         scope.launch {
             try {
-                Log.info { "$TAG: Starting download for ${asset.name}" }
+                Log.info { "$TAG: Starting download for ${asset.name} (size: ${asset.size})" }
                 
                 appUpdateChecker.downloadApk(
                     url = asset.browserDownloadUrl,
                     fileName = asset.name,
+                    totalSize = asset.size,
                     onProgress = { progress ->
                         // This will be handled by broadcast receiver on Android
                         // On other platforms, we handle it here
-                        _appUpdateState.value = _appUpdateState.value.copy(
-                            isConnecting = false,
-                            downloadProgress = progress
-                        )
+                        _appUpdateState.update { current ->
+                            current.copy(
+                                isConnecting = false,
+                                isDownloading = true,
+                                isDownloaded = false,
+                                downloadProgress = progress
+                            )
+                        }
                     },
                     onComplete = { filePath ->
                         // Note: On Android, this will be handled by the broadcast receiver
                         // On other platforms, we handle it here
-                        _appUpdateState.value = _appUpdateState.value.copy(
-                            isConnecting = false,
-                            isDownloading = false,
-                            isDownloaded = true,
-                            downloadedFilePath = filePath,
-                        )
+                        _appUpdateState.update { current ->
+                            current.copy(
+                                isConnecting = false,
+                                isDownloading = false,
+                                isDownloaded = true,
+                                downloadedFilePath = filePath,
+                                downloadProgress = 1f,
+                                error = null
+                            )
+                        }
                         Log.info { "$TAG: Download complete: $filePath" }
                     },
                     onError = { error ->
                         // Note: On Android, this will be handled by the broadcast receiver
                         // On other platforms, we handle it here
-                        _appUpdateState.value = _appUpdateState.value.copy(
-                            isConnecting = false,
-                            isDownloading = false,
-                            error = error,
-                        )
+                        _appUpdateState.update { current ->
+                            current.copy(
+                                isConnecting = false,
+                                isDownloading = false,
+                                isDownloaded = false,
+                                downloadedFilePath = null,
+                                error = error,
+                                downloadProgress = 0f
+                            )
+                        }
                         Log.error { "$TAG: Download failed: $error" }
                     }
                 )
             } catch (e: Exception) {
-                _appUpdateState.value = _appUpdateState.value.copy(
-                    isConnecting = false,
-                    isDownloading = false,
-                    error = e.message,
-                )
+                _appUpdateState.update { current ->
+                    current.copy(
+                        isConnecting = false,
+                        isDownloading = false,
+                        isDownloaded = false,
+                        downloadedFilePath = null,
+                        error = e.message,
+                        downloadProgress = 0f
+                    )
+                }
                 Log.error("$TAG: Failed to start download", e)
             }
         }
@@ -237,7 +261,7 @@ class ScreenContentViewModel(
         try {
             appUpdateChecker.installApk(filePath)
         } catch (e: Exception) {
-            _appUpdateState.value = _appUpdateState.value.copy(error = e.message)
+            _appUpdateState.update { current -> current.copy(error = e.message) }
         }
     }
     
@@ -246,11 +270,15 @@ class ScreenContentViewModel(
      */
     fun cancelDownload() {
         appUpdateChecker.cancelDownload()
-        _appUpdateState.value = _appUpdateState.value.copy(
-            isConnecting = false,
-            isDownloading = false,
-            downloadProgress = 0f,
-        )
+        _appUpdateState.update { current ->
+            current.copy(
+                isConnecting = false,
+                isDownloading = false,
+                isDownloaded = false,
+                downloadedFilePath = null,
+                downloadProgress = 0f,
+            )
+        }
     }
     
     override fun onCleared() {

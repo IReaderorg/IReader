@@ -9,6 +9,7 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 
@@ -208,40 +209,70 @@ class AppUpdateViewModel(
         val asset = _state.value.apkAsset ?: return
         
         scope.launch {
-            _state.value = _state.value.copy(
-                isDownloading = true,
-                downloadProgress = 0f,
-                error = null,
-            )
+            _state.update { current ->
+                current.copy(
+                    isConnecting = true,
+                    isDownloading = true,
+                    isDownloaded = false,
+                    downloadedFilePath = null,
+                    downloadProgress = 0f,
+                    error = null,
+                )
+            }
             
             try {
                 updateChecker.downloadApk(
                     url = asset.browserDownloadUrl,
                     fileName = asset.name,
+                    totalSize = asset.size,
                     onProgress = { progress ->
-                        _state.value = _state.value.copy(downloadProgress = progress)
+                        _state.update { current ->
+                            current.copy(
+                                isConnecting = false,
+                                isDownloading = true,
+                                isDownloaded = false,
+                                downloadProgress = progress
+                            )
+                        }
                     },
                     onComplete = { filePath ->
-                        _state.value = _state.value.copy(
-                            isDownloading = false,
-                            isDownloaded = true,
-                            downloadedFilePath = filePath,
-                        )
+                        _state.update { current ->
+                            current.copy(
+                                isConnecting = false,
+                                isDownloading = false,
+                                isDownloaded = true,
+                                downloadedFilePath = filePath,
+                                downloadProgress = 1f,
+                                error = null
+                            )
+                        }
                         Log.info { "$TAG: Download complete: $filePath" }
                     },
                     onError = { error ->
-                        _state.value = _state.value.copy(
-                            isDownloading = false,
-                            error = error,
-                        )
+                        _state.update { current ->
+                            current.copy(
+                                isConnecting = false,
+                                isDownloading = false,
+                                isDownloaded = false,
+                                downloadedFilePath = null,
+                                error = error,
+                                downloadProgress = 0f
+                            )
+                        }
                         Log.error { "$TAG: Download failed: $error" }
                     }
                 )
             } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isDownloading = false,
-                    error = e.message,
-                )
+                _state.update { current ->
+                    current.copy(
+                        isConnecting = false,
+                        isDownloading = false,
+                        isDownloaded = false,
+                        downloadedFilePath = null,
+                        error = e.message,
+                        downloadProgress = 0f
+                    )
+                }
                 Log.error("$TAG: Download exception", e)
             }
         }
@@ -256,7 +287,7 @@ class AppUpdateViewModel(
         try {
             updateChecker.installApk(filePath)
         } catch (e: Exception) {
-            _state.value = _state.value.copy(error = e.message)
+            _state.update { current -> current.copy(error = e.message) }
             Log.error("$TAG: Install failed", e)
         }
     }
@@ -266,10 +297,15 @@ class AppUpdateViewModel(
      */
     fun cancelDownload() {
         updateChecker.cancelDownload()
-        _state.value = _state.value.copy(
-            isDownloading = false,
-            downloadProgress = 0f,
-        )
+        _state.update { current ->
+            current.copy(
+                isConnecting = false,
+                isDownloading = false,
+                isDownloaded = false,
+                downloadedFilePath = null,
+                downloadProgress = 0f,
+            )
+        }
     }
     
     /**

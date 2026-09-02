@@ -58,6 +58,24 @@ class UpdatesViewModel(
     private var loadJob: Job? = null
     
     init {
+        // Instant display from in-memory cache if available on cold boot
+        if (ireader.domain.data.cache.UpdatesDataCache.hasCache()) {
+            val cached = ireader.domain.data.cache.UpdatesDataCache.getCachedUpdates()
+            val cachedCount = cached.values.sumOf { it.size }
+            _state.update { current ->
+                current.copy(
+                    updates = cached,
+                    isLoading = false,
+                    paginationState = UpdatesPaginationState(
+                        loadedCount = cachedCount,
+                        isLoadingMore = false,
+                        hasMoreItems = true,
+                        totalItems = cachedCount
+                    )
+                )
+            }
+        }
+
         // Load initial page from database
         loadInitialPage()
         
@@ -77,10 +95,12 @@ class UpdatesViewModel(
     /**
      * Load initial page of updates from database.
      */
-    private fun loadInitialPage() {
+    fun loadInitialPage() {
         loadJob?.cancel()
         loadJob = scope.launch(ioDispatcher) {
-            _state.update { it.copy(isLoading = true) }
+            if (!ireader.domain.data.cache.UpdatesDataCache.hasCache()) {
+                _state.update { it.copy(isLoading = true) }
+            }
             
             try {
                 val (grouped, totalCount) = updateUseCases.findUpdatesPaginated(
@@ -88,6 +108,9 @@ class UpdatesViewModel(
                     limit = UpdatesPaginationState.INITIAL_PAGE_SIZE,
                     offset = 0
                 )
+                
+                // Update in-memory cache for instant display on next visit
+                ireader.domain.data.cache.UpdatesDataCache.updateCache(grouped)
                 
                 _state.update { current ->
                     current.copy(
@@ -146,6 +169,8 @@ class UpdatesViewModel(
                 getChapterUseCase.findChapterById(it)
             }.map(onChapter)
             insertUseCases.insertChapters(chapters)
+            // Reload page to reflect read/unread updates immediately
+            loadInitialPage()
         }
     }
     
@@ -180,10 +205,10 @@ class UpdatesViewModel(
     
     fun refreshUpdate() {
         _state.update { it.copy(isRefreshing = true) }
-        serviceUseCases.startLibraryUpdateServicesUseCase.start()
+        serviceUseCases.startLibraryUpdateServicesUseCase.start(forceUpdate = true)
         
-        scope.launch {
-            kotlinx.coroutines.delay(2000)
+        scope.launch(ioDispatcher) {
+            kotlinx.coroutines.delay(3000)
             // Reload from database after refresh
             loadInitialPage()
             _state.update { it.copy(isRefreshing = false) }
@@ -265,8 +290,9 @@ class UpdatesViewModel(
     fun checkAndLoadMore(lastVisibleIndex: Int, totalVisibleItems: Int) {
         val paginationState = getPaginationState()
         val threshold = 10 // Load more when within 10 items of the end
+        val limit = if (totalVisibleItems > 0) totalVisibleItems else paginationState.loadedCount
         
-        if (lastVisibleIndex >= paginationState.loadedCount - threshold && 
+        if (lastVisibleIndex >= limit - threshold && 
             paginationState.canLoadMore) {
             loadMoreUpdates()
         }

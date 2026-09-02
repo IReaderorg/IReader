@@ -254,6 +254,7 @@ object DatabaseVerifier {
                 book.source,
                 book.favorite,
                 book.thumbnail_url AS thumbnailUrl,
+                book.custom_cover AS customCover,
                 book.cover_last_modified AS coverLastModified,
                 chapter.date_upload AS dateUpload,
                 chapter.date_fetch AS datefetch,
@@ -265,8 +266,7 @@ object DatabaseVerifier {
             LEFT JOIN history
             ON chapter._id = history.chapter_id
             WHERE favorite = 1
-            AND date_fetch > date_added
-            ORDER BY date_fetch DESC;
+            AND date_fetch > date_added;
         """.trimIndent()
         
         stmt.execute(updatesViewSql)

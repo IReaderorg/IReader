@@ -22,6 +22,7 @@ class IosAppUpdateChecker : AppUpdateChecker {
     override suspend fun downloadApk(
         url: String,
         fileName: String,
+        totalSize: Long,
         onProgress: (Float) -> Unit,
         onComplete: (String) -> Unit,
         onError: (String) -> Unit,

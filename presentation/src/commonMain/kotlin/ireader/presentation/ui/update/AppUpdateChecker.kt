@@ -25,6 +25,7 @@ interface AppUpdateChecker {
     suspend fun downloadApk(
         url: String,
         fileName: String,
+        totalSize: Long = -1L,
         onProgress: (Float) -> Unit,
         onComplete: (String) -> Unit,
         onError: (String) -> Unit,

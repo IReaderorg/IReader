@@ -52,18 +52,21 @@ class AppUpdateDownloadService : Service() {
         const val EXTRA_DOWNLOAD_URL = "download_url"
         const val EXTRA_FILE_NAME = "file_name"
         const val EXTRA_VERSION = "version"
+        const val EXTRA_TOTAL_SIZE = "total_size"
         
         fun startDownload(
             context: Context,
             downloadUrl: String,
             fileName: String,
-            version: String
+            version: String,
+            totalSize: Long = -1L
         ) {
             val intent = Intent(context, AppUpdateDownloadService::class.java).apply {
                 action = ACTION_START_DOWNLOAD
                 putExtra(EXTRA_DOWNLOAD_URL, downloadUrl)
                 putExtra(EXTRA_FILE_NAME, fileName)
                 putExtra(EXTRA_VERSION, version)
+                putExtra(EXTRA_TOTAL_SIZE, totalSize)
             }
             context.startForegroundService(intent)
         }
@@ -94,9 +97,10 @@ class AppUpdateDownloadService : Service() {
                 val downloadUrl = intent.getStringExtra(EXTRA_DOWNLOAD_URL)
                 val fileName = intent.getStringExtra(EXTRA_FILE_NAME)
                 val version = intent.getStringExtra(EXTRA_VERSION)
+                val totalSize = intent.getLongExtra(EXTRA_TOTAL_SIZE, -1L)
                 
                 if (downloadUrl != null && fileName != null && version != null) {
-                    startDownload(downloadUrl, fileName, version)
+                    startDownload(downloadUrl, fileName, version, totalSize)
                 } else {
                     stopSelf()
                 }
@@ -133,7 +137,7 @@ class AppUpdateDownloadService : Service() {
         }
     }
     
-    private fun startDownload(downloadUrl: String, fileName: String, version: String) {
+    private fun startDownload(downloadUrl: String, fileName: String, version: String, totalSizeExtra: Long = -1L) {
         // Cancel any existing download
         downloadJob?.cancel()
         
@@ -152,7 +156,18 @@ class AppUpdateDownloadService : Service() {
         }
         
         downloadJob = serviceScope.launch {
+            val downloadDir = File(getExternalFilesDir(null), "updates")
+            if (!downloadDir.exists()) {
+                downloadDir.mkdirs()
+            }
+            val outputFile = File(downloadDir, fileName)
+
             try {
+                // Delete existing file if present before download starts
+                if (outputFile.exists()) {
+                    outputFile.delete()
+                }
+
                 // Broadcast connecting state
                 val connectingIntent = Intent("ireader.UPDATE_DOWNLOAD_CONNECTING").apply {
                     setPackage(packageName)
@@ -160,48 +175,30 @@ class AppUpdateDownloadService : Service() {
                 }
                 sendBroadcast(connectingIntent)
                 
-                // Create download directory
-                val downloadDir = File(getExternalFilesDir(null), "updates")
-                if (!downloadDir.exists()) {
-                    downloadDir.mkdirs()
-                }
-                
-                val outputFile = File(downloadDir, fileName)
-                
-                // Delete existing file if present
-                if (outputFile.exists()) {
-                    outputFile.delete()
-                }
-                
                 httpClients.default.prepareGet(downloadUrl) {
                     headers {
                         append(HttpHeaders.UserAgent, "IReader-App")
+                        append(HttpHeaders.AcceptEncoding, "identity")
                     }
                 }.execute { httpResponse ->
                     if (httpResponse.status.value !in 200..299) {
                         throw Exception("HTTP error: ${httpResponse.status}")
                     }
                     
-                    val contentLength = httpResponse.contentLength() ?: 0L
+                    val rawContentLength = httpResponse.contentLength() ?: 0L
+                    val effectiveTotal = when {
+                        rawContentLength > 0L -> rawContentLength
+                        totalSizeExtra > 0L -> totalSizeExtra
+                        else -> -1L
+                    }
+
                     val channel = httpResponse.bodyAsChannel()
                     var downloadedBytes = 0L
                     var lastProgressUpdate = 0L
                     var lastProgressTime = System.currentTimeMillis()
                     
-                    // Send immediate 0% progress update
-                    try {
-                        val initialProgressIntent = Intent("ireader.UPDATE_DOWNLOAD_PROGRESS").apply {
-                            setPackage(packageName)
-                            putExtra("progress", 0f)
-                            putExtra("version", version)
-                        }
-                        sendBroadcast(initialProgressIntent)
-                    } catch (e: Exception) {
-                        // Continue anyway
-                    }
-                    
                     outputFile.outputStream().use { output ->
-                        val buffer = ByteArray(4096)
+                        val buffer = ByteArray(8192)
                         
                         while (!channel.isClosedForRead && isActive) {
                             val bytesRead = try {
@@ -219,47 +216,44 @@ class AppUpdateDownloadService : Service() {
                                 throw Exception("File write error: ${e.message}")
                             }
                             
-                            if (contentLength > 0) {
-                                val currentTime = System.currentTimeMillis()
-                                val progressBytes = downloadedBytes - lastProgressUpdate
-                                val timeDiff = currentTime - lastProgressTime
+                            val currentTime = System.currentTimeMillis()
+                            val progressBytes = downloadedBytes - lastProgressUpdate
+                            val timeDiff = currentTime - lastProgressTime
+                            
+                            if (progressBytes >= 32 * 1024 || timeDiff >= 100) {
+                                lastProgressUpdate = downloadedBytes
+                                lastProgressTime = currentTime
                                 
-                                if (progressBytes >= 64 * 1024 || timeDiff >= 100) {
-                                    val progress = (downloadedBytes.toFloat() / contentLength.toFloat() * 100).toInt()
+                                if (effectiveTotal > 0L) {
+                                    val progress = (downloadedBytes.toFloat() / effectiveTotal.toFloat()).coerceIn(0f, 1f)
+                                    val progressPercent = (progress * 100).toInt()
                                     val progressMB = downloadedBytes / (1024 * 1024)
-                                    val totalMB = contentLength / (1024 * 1024)
+                                    val totalMB = effectiveTotal / (1024 * 1024)
                                     
                                     // Update notification
                                     try {
                                         val notification = createProgressNotification(
                                             version = version,
-                                            progress = progress,
+                                            progress = progressPercent,
                                             isIndeterminate = false,
-                                            status = "Downloading... ${progress}% (${progressMB}MB / ${totalMB}MB)"
+                                            status = "Downloading... ${progressPercent}% (${progressMB}MB / ${totalMB}MB)"
                                         )
                                         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                                         notificationManager.notify(NOTIFICATION_ID, notification)
-                                    } catch (e: Exception) {
-                                        // Continue anyway
-                                    }
+                                    } catch (_: Exception) {}
                                     
                                     // Broadcast progress
                                     try {
                                         val progressIntent = Intent("ireader.UPDATE_DOWNLOAD_PROGRESS").apply {
                                             setPackage(packageName)
-                                            putExtra("progress", downloadedBytes.toFloat() / contentLength.toFloat())
+                                            putExtra("progress", progress)
+                                            putExtra("downloaded_bytes", downloadedBytes)
+                                            putExtra("total_bytes", effectiveTotal)
                                             putExtra("version", version)
                                         }
                                         sendBroadcast(progressIntent)
-                                    } catch (e: Exception) {
-                                        // Continue anyway
-                                    }
-                                    
-                                    lastProgressUpdate = downloadedBytes
-                                    lastProgressTime = currentTime
-                                }
-                            } else {
-                                if (downloadedBytes - lastProgressUpdate >= 64 * 1024) {
+                                    } catch (_: Exception) {}
+                                } else {
                                     val progressMB = downloadedBytes / (1024 * 1024)
                                     try {
                                         val notification = createProgressNotification(
@@ -270,18 +264,46 @@ class AppUpdateDownloadService : Service() {
                                         )
                                         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                                         notificationManager.notify(NOTIFICATION_ID, notification)
-                                    } catch (e: Exception) {
-                                        // Continue anyway
-                                    }
-                                    lastProgressUpdate = downloadedBytes
+                                    } catch (_: Exception) {}
+                                    
+                                    try {
+                                        val progressIntent = Intent("ireader.UPDATE_DOWNLOAD_PROGRESS").apply {
+                                            setPackage(packageName)
+                                            putExtra("progress", -1f)
+                                            putExtra("downloaded_bytes", downloadedBytes)
+                                            putExtra("version", version)
+                                        }
+                                        sendBroadcast(progressIntent)
+                                    } catch (_: Exception) {}
                                 }
                             }
                         }
+                        output.flush()
                     }
                     
-                    // Verify file
+                    // Strict file verification
                     if (!outputFile.exists() || outputFile.length() != downloadedBytes) {
-                        throw Exception("File verification failed")
+                        outputFile.delete()
+                        throw Exception("File verification failed: size mismatch")
+                    }
+                    
+                    // Verify that download wasn't prematurely closed before expected size was received
+                    if (effectiveTotal > 0L && downloadedBytes < effectiveTotal) {
+                        outputFile.delete()
+                        throw Exception("Download incomplete: received $downloadedBytes bytes of expected $effectiveTotal bytes")
+                    }
+                    
+                    // Verify minimum valid APK size (at least 1MB)
+                    if (outputFile.length() < 1024 * 1024) {
+                        outputFile.delete()
+                        throw Exception("Downloaded file is too small to be a valid APK (${outputFile.length() / 1024} KB)")
+                    }
+                    
+                    // Verify valid APK package archive structure
+                    val archiveInfo = packageManager.getPackageArchiveInfo(outputFile.absolutePath, 0)
+                    if (archiveInfo == null) {
+                        outputFile.delete()
+                        throw Exception("Corrupt or invalid APK package archive")
                     }
                     
                     // Send final progress
@@ -289,17 +311,17 @@ class AppUpdateDownloadService : Service() {
                         val finalProgressIntent = Intent("ireader.UPDATE_DOWNLOAD_PROGRESS").apply {
                             setPackage(packageName)
                             putExtra("progress", 1.0f)
+                            putExtra("downloaded_bytes", downloadedBytes)
+                            putExtra("total_bytes", downloadedBytes)
                             putExtra("version", version)
                         }
                         sendBroadcast(finalProgressIntent)
-                    } catch (e: Exception) {
-                        // Continue anyway
-                    }
+                    } catch (_: Exception) {}
                     
                     httpResponse
                 }
                 
-                // Download completed
+                // Download completed successfully
                 try {
                     val completionNotification = createCompletionNotification(
                         version = version,
@@ -307,9 +329,7 @@ class AppUpdateDownloadService : Service() {
                     )
                     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     notificationManager.notify(NOTIFICATION_ID, completionNotification)
-                } catch (e: Exception) {
-                    // Continue anyway
-                }
+                } catch (_: Exception) {}
                 
                 // Broadcast completion
                 try {
@@ -319,39 +339,43 @@ class AppUpdateDownloadService : Service() {
                         putExtra("version", version)
                     }
                     sendBroadcast(completionIntent)
-                } catch (e: Exception) {
-                    // Continue anyway
-                }
+                } catch (_: Exception) {}
                 
                 delay(3000)
                 stopSelf()
                 
             } catch (e: kotlinx.coroutines.CancellationException) {
+                if (outputFile.exists()) {
+                    outputFile.delete()
+                }
+                
                 try {
                     val cancelNotification = createCancelNotification()
                     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     notificationManager.notify(NOTIFICATION_ID, cancelNotification)
-                } catch (notifError: Exception) {
-                    // Continue anyway
-                }
+                } catch (_: Exception) {}
                 
                 try {
                     val cancelIntent = Intent("ireader.UPDATE_DOWNLOAD_CANCELLED").apply {
                         setPackage(packageName)
                     }
                     sendBroadcast(cancelIntent)
-                } catch (broadcastError: Exception) {
-                    // Continue anyway
-                }
+                } catch (_: Exception) {}
                 
                 stopSelf()
             } catch (e: Exception) {
+                if (outputFile.exists()) {
+                    outputFile.delete()
+                }
+                
                 val errorMessage = when {
+                    e.message?.contains("incomplete", ignoreCase = true) == true -> e.message ?: "Download was incomplete"
+                    e.message?.contains("Corrupt", ignoreCase = true) == true -> "Corrupt package: download incomplete or invalid"
                     e.message?.contains("Network", ignoreCase = true) == true -> "Network connection lost"
                     e.message?.contains("timeout", ignoreCase = true) == true -> "Download timed out"
                     e.message?.contains("HTTP", ignoreCase = true) == true -> "Server error: ${e.message}"
                     e.message?.contains("File", ignoreCase = true) == true -> "Storage error: ${e.message}"
-                    else -> e.message ?: "Unknown download error"
+                    else -> e.message ?: "Download failed"
                 }
                 
                 try {
@@ -361,9 +385,7 @@ class AppUpdateDownloadService : Service() {
                     )
                     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     notificationManager.notify(NOTIFICATION_ID, errorNotification)
-                } catch (notifError: Exception) {
-                    // Continue anyway
-                }
+                } catch (_: Exception) {}
                 
                 try {
                     val errorIntent = Intent("ireader.UPDATE_DOWNLOAD_ERROR").apply {
@@ -372,9 +394,7 @@ class AppUpdateDownloadService : Service() {
                         putExtra("version", version)
                     }
                     sendBroadcast(errorIntent)
-                } catch (broadcastError: Exception) {
-                    // Continue anyway
-                }
+                } catch (_: Exception) {}
                 
                 delay(5000)
                 stopSelf()
@@ -384,6 +404,15 @@ class AppUpdateDownloadService : Service() {
     
     private fun cancelDownload() {
         downloadJob?.cancel()
+        
+        try {
+            val downloadDir = File(getExternalFilesDir(null), "updates")
+            downloadDir.listFiles()?.forEach { file ->
+                if (file.name.endsWith(".apk")) {
+                    file.delete()
+                }
+            }
+        } catch (_: Exception) {}
         
         val cancelNotification = createCancelNotification()
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

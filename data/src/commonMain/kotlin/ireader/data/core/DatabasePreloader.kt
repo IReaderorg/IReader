@@ -11,6 +11,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.toLocalDate
+import ireader.domain.data.cache.UpdatesDataCache
 
 /**
  * Preloads critical database data during app startup for faster initial access.
@@ -58,6 +60,7 @@ class DatabasePreloader(
             kotlinx.coroutines.coroutineScope {
                 launch { preloadLibraryBooks() }
                 launch { preloadRecentHistory() }
+                launch { preloadRecentUpdates() }
                 launch { preloadCategories() }
             }
             
@@ -229,11 +232,28 @@ class DatabasePreloader(
         }
     }
     
+    private suspend fun preloadRecentUpdates() {
+        try {
+            val limit = 30L
+            val updatesItems = handler.awaitList {
+                updateViewQueries.updatesPaginated(0L, limit, 0L, ireader.data.updates.updatesMapper)
+            }
+            if (updatesItems.isNotEmpty()) {
+                val grouped = updatesItems.groupBy { it.dateFetch.toLocalDate() }
+                UpdatesDataCache.updateCache(grouped)
+            }
+            Log.debug { "Recent updates preloaded: ${updatesItems.size} items" }
+        } catch (e: Exception) {
+            Log.error(e, "Failed to preload recent updates")
+        }
+    }
+    
     /**
      * Invalidate all preloaded caches.
      * Call this after major data changes (e.g., restore from backup).
      */
     suspend fun invalidateAllPreloadedData() {
+        UpdatesDataCache.invalidate()
         dbOptimizations.invalidateCache("preload_")
         Log.info { "All preloaded data invalidated" }
     }

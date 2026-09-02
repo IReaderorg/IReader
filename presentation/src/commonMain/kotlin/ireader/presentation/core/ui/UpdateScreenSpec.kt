@@ -68,6 +68,7 @@ object UpdateScreenSpec {
                     onClickDelete = {
                         vm.scope.launch {
                             vm.updateUseCases.deleteAllUpdates()
+                            vm.loadInitialPage()
                         }
                     },
                     onClickUpdateAll = if (updates.isNotEmpty()) {

@@ -28,6 +28,7 @@ class SubscribeUpdates(private val updatesRepository: UpdatesRepository) {
 class DeleteAllUpdates(private val prefs: UiPreferences) {
     @OptIn(ExperimentalTime::class)
     operator fun invoke() {
+        ireader.domain.data.cache.UpdatesDataCache.invalidate()
         return prefs.showUpdatesAfter().set(kotlin.time.Clock.System.now().toEpochMilliseconds())
     }
 }

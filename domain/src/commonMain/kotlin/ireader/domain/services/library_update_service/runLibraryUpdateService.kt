@@ -37,11 +37,12 @@ suspend fun runLibraryUpdateService(
     updateNotification(ID_LIBRARY_PROGRESS)
         try {
             libraryBooks.forEachIndexed { index, book ->
-                val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
-                if (chapters.any { !it.read } && chapters.isNotEmpty() && !forceUpdate) {
+                // Only skip books that are already marked completed unless forceUpdate is true
+                if (book.status == ireader.core.source.model.MangaInfo.COMPLETED && !forceUpdate) {
                     skippedBooks++
                     return@forEachIndexed
                 }
+                val chapters = getChapterUseCase.findChaptersByBookId(bookId = book.id)
                 val source = getLocalCatalog.get(book.sourceId)
                 if (source != null) {
                     val remoteChapters = mutableListOf<Chapter>()
