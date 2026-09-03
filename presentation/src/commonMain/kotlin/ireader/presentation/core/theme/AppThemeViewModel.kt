@@ -22,9 +22,9 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.domain.utils.removeIf
 import ireader.presentation.ui.core.theme.AppTypography
 import ireader.presentation.ui.core.theme.asState
+import ireader.presentation.ui.core.theme.defaultThemes
 import ireader.presentation.ui.core.theme.getAppUiFontFamily
 import ireader.presentation.ui.core.theme.getDarkColors
 import ireader.presentation.ui.core.theme.getLightColors
@@ -61,9 +61,9 @@ class AppThemeViewModel(
     private val darkColorsState = uiPreferences.getDarkColors().asState(scope)
 
     init {
-        themeRepository.subscribe().onEach {
-            themes.removeIf { baseTheme -> baseTheme.id > 0L }
-            themes.addAll(it)
+        themeRepository.subscribe().onEach { customThemes ->
+            val custom = customThemes.filter { it.id > 0L }
+            themes = defaultThemes + custom
         }.launchIn(scope)
 
         // Clear the published scheme when the feature is switched off
@@ -218,10 +218,12 @@ class AppThemeViewModel(
         themeMode: PreferenceValues.ThemeMode,
         colorTheme: Long,
     ): Theme {
+        val currentThemes = themes
         @Composable
         fun getTheme(fallbackIsLight: Boolean): Theme {
-            return themes.firstOrNull { it.id == colorTheme }
-                ?: themes.first { it.materialColors.toComposeColorScheme().isLight() == fallbackIsLight }
+            return currentThemes.firstOrNull { it.id == colorTheme }
+                ?: currentThemes.firstOrNull { it.materialColors.toComposeColorScheme().isLight() == fallbackIsLight }
+                ?: defaultThemes.first()
         }
 
         return when (themeMode) {

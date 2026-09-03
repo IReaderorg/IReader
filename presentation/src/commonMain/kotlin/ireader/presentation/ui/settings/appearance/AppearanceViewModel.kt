@@ -26,7 +26,7 @@ class AppearanceViewModel(
     private val _state = mutableStateOf(MainScreenState())
     val state = _state
 
-    val vmThemes = themes
+    val vmThemes: List<Theme> get() = themes
     var themeEditMode by mutableStateOf(false)
     var isSavable by mutableStateOf(false)
     

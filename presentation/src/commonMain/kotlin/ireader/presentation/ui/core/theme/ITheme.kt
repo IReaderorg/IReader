@@ -3,6 +3,7 @@ package ireader.presentation.ui.core.theme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import kotlin.concurrent.Volatile
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.models.common.DomainColor
@@ -49,7 +50,7 @@ import ireader.presentation.ui.core.theme.themes.GoldenEmpireDarkThemeColors
 import ireader.presentation.ui.core.ui.Colour
 
 
-val themes = listOf<Theme>(
+val defaultThemes: List<Theme> = listOf<Theme>(
     Theme(
         id = -1, 
         materialColors = LightThemeColorsTachiyomi.toDomainColorScheme(),
@@ -449,4 +450,7 @@ val themes = listOf<Theme>(
         ),
         isDark = true
     ),
-).toMutableList()
+)
+
+@Volatile
+var themes: List<Theme> = defaultThemes
