@@ -45,7 +45,8 @@ class SyncRepositoryImpl(
     private val localDataSource: SyncLocalDataSource,
     private val platformConfig: ireader.domain.config.PlatformConfig,
     private val syncPreferences: ireader.domain.preferences.prefs.SyncPreferences,
-    private val libraryController: ireader.domain.services.library.LibraryController? = null
+    private val libraryController: ireader.domain.services.library.LibraryController? = null,
+    private val deviceInfoService: ireader.domain.services.platform.DeviceInfoService? = null
 ) : SyncRepository {
     
     // Repository scope for Flow lifecycle management (Task 10.1.3)
@@ -67,21 +68,27 @@ class SyncRepositoryImpl(
             replay = 1 // Replay last value to new subscribers
         )
     
-    // Get persistent device info for this device
-    private val currentDeviceInfo = run {
+    /**
+     * Dynamically resolve current device info reflecting custom name or hardware platform model.
+     */
+    fun getCurrentDeviceInfo(): DeviceInfo {
         val deviceId = platformConfig.getDeviceId()
-        val deviceName = getDeviceName()
-        val deviceType = getDeviceType()
+        val customName = syncPreferences.deviceName().get().trim()
+        val deviceName = if (customName.isNotBlank()) {
+            customName
+        } else {
+            val model = deviceInfoService?.getDeviceModel()?.trim()
+            if (!model.isNullOrBlank()) model else "IReader Device"
+        }
+        val customTypeStr = syncPreferences.deviceType().get().trim()
+        val deviceType = if (customTypeStr.isNotBlank()) {
+            DeviceType.fromString(customTypeStr)
+        } else {
+            mapPlatformDeviceType()
+        }
         val appVersion = getAppVersion()
-        
-        // Debug logging
-        Log.debug { "[SyncRepository] Device Info:" }
-        Log.debug { "[SyncRepository]   ID: $deviceId" }
-        Log.debug { "[SyncRepository]   Name: $deviceName" }
-        Log.debug { "[SyncRepository]   Type: $deviceType" }
-        Log.debug { "[SyncRepository]   Version: $appVersion" }
-        
-        DeviceInfo(
+
+        return DeviceInfo(
             deviceId = deviceId,
             deviceName = deviceName,
             deviceType = deviceType,
@@ -91,22 +98,15 @@ class SyncRepositoryImpl(
             lastSeen = ireader.core.util.currentTimeMillis()
         )
     }
-    
-    /**
-     * Get the device name based on platform.
-     * Returns the actual device/computer name from the system.
-     * TODO: Move to platform-specific implementations
-     */
-    private fun getDeviceName(): String {
-        return "IReader Device" // Simplified for KMP compatibility
-    }
-    
-    /**
-     * Detect the current platform/device type.
-     * TODO: Move to platform-specific implementations
-     */
-    private fun getDeviceType(): DeviceType {
-        return DeviceType.DESKTOP // Default fallback for KMP
+
+    private fun mapPlatformDeviceType(): DeviceType {
+        return when (deviceInfoService?.getDeviceType()) {
+            ireader.domain.services.platform.DeviceType.TABLET -> DeviceType.TABLET
+            ireader.domain.services.platform.DeviceType.PHONE -> DeviceType.PHONE
+            ireader.domain.services.platform.DeviceType.DESKTOP -> DeviceType.DESKTOP
+            ireader.domain.services.platform.DeviceType.TV -> DeviceType.TV
+            else -> DeviceType.PHONE
+        }
     }
     
     /**
@@ -127,6 +127,7 @@ class SyncRepositoryImpl(
     
     override suspend fun startDiscovery(): Result<Unit> {
         return try {
+            val currentDeviceInfo = getCurrentDeviceInfo()
             Log.info { "[SyncRepository] ========== START DISCOVERY ==========" }
             Log.debug { "[SyncRepository] Broadcasting device info:" }
             Log.debug { "[SyncRepository]   Device ID: ${currentDeviceInfo.deviceId}" }
@@ -204,8 +205,9 @@ class SyncRepositoryImpl(
                 val shouldBeServer = syncPreferences.isServer()
                 
                 // Debug logging
+                val currentInfo = getCurrentDeviceInfo()
                 Log.debug { "[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode" }
-                Log.debug { "[SyncRepository] Current device ID: ${currentDeviceInfo.deviceId}" }
+                Log.debug { "[SyncRepository] Current device ID: ${currentInfo.deviceId}" }
                 Log.debug { "[SyncRepository] Remote device ID: ${device.deviceId}" }
                 Log.debug { "[SyncRepository] Should be server: $shouldBeServer" }
                 Log.debug { "[SyncRepository] Remote device: ${device.deviceName} at ${device.ipAddress}:${device.port}" }
@@ -334,8 +336,8 @@ class SyncRepositoryImpl(
         // Phase 10.4.1: Use IO dispatcher for network operations
         return withContext(ireader.domain.utils.extensions.ioDispatcher) {
             try {
-                // Determine role based on device ID comparison (same logic as connect)
-                val shouldBeServer = currentDeviceInfo.deviceId < connection.deviceId  // Desktop will be server, Android will be client
+                // Determine role based on user preference or device ID comparison
+                val shouldBeServer = syncPreferences.isServer()
                 
                 if (shouldBeServer) {
                     // This device was SERVER - stop the server
@@ -367,8 +369,9 @@ class SyncRepositoryImpl(
             
             // Determine role based on user manual selection
             val shouldBeServer = syncPreferences.isServer()
+            val currentInfo = getCurrentDeviceInfo()
             Log.debug { "[SyncRepository] User selection: ${if (shouldBeServer) "SERVER" else "CLIENT"} mode" }
-            Log.debug { "[SyncRepository] Role determination: currentDeviceId=${currentDeviceInfo.deviceId}, remoteDeviceId=${connection.deviceId}, shouldBeServer=$shouldBeServer" }
+            Log.debug { "[SyncRepository] Role determination: currentDeviceId=${currentInfo.deviceId}, remoteDeviceId=${connection.deviceId}, shouldBeServer=$shouldBeServer" }
             
             val remoteManifest = if (shouldBeServer) {
                 // SERVER: Receive client manifest first, then send ours
@@ -781,22 +784,27 @@ class SyncRepositoryImpl(
     
     private suspend fun buildLocalManifest(): SyncManifest {
         val items = mutableListOf<SyncManifestItem>()
+        val syncBooks = syncPreferences.syncLibrary().get()
+        val syncProgress = syncPreferences.syncReadingProgress().get()
+        val syncChapters = syncPreferences.syncDownloadedChapters().get()
         
-        // Add books to manifest
-        val books = localDataSource.getBooks()
-        books.forEach { book ->
-            items.add(
-                SyncManifestItem(
-                    itemId = book.globalId,
-                    itemType = SyncItemType.BOOK,
-                    hash = calculateItemHash(book),
-                    lastModified = book.updatedAt
+        // Add books to manifest if library sync is enabled
+        if (syncBooks) {
+            val books = localDataSource.getBooks()
+            books.forEach { book ->
+                items.add(
+                    SyncManifestItem(
+                        itemId = book.globalId,
+                        itemType = SyncItemType.BOOK,
+                        hash = calculateItemHash(book),
+                        lastModified = book.updatedAt
+                    )
                 )
-            )
+            }
         }
         
         // Add chapters to manifest
-        val chapters = localDataSource.getChapters()
+        val chapters = localDataSource.getChapters(includeDownloadedContent = syncChapters)
         chapters.forEach { chapter ->
             items.add(
                 SyncManifestItem(
@@ -808,21 +816,24 @@ class SyncRepositoryImpl(
             )
         }
         
-        // Add history to manifest
-        val history = localDataSource.getHistory()
-        history.forEach { hist ->
-            items.add(
-                SyncManifestItem(
-                    itemId = hist.chapterGlobalId,
-                    itemType = SyncItemType.HISTORY,
-                    hash = calculateItemHash(hist),
-                    lastModified = hist.lastRead
+        // Add history to manifest if reading progress sync is enabled
+        if (syncProgress) {
+            val history = localDataSource.getHistory()
+            history.forEach { hist ->
+                items.add(
+                    SyncManifestItem(
+                        itemId = hist.chapterGlobalId,
+                        itemType = SyncItemType.HISTORY,
+                        hash = calculateItemHash(hist),
+                        lastModified = hist.lastRead
+                    )
                 )
-            )
+            }
         }
         
+        val currentInfo = getCurrentDeviceInfo()
         return SyncManifest(
-            deviceId = currentDeviceInfo.deviceId,
+            deviceId = currentInfo.deviceId,
             timestamp = ireader.core.util.currentTimeMillis(),
             items = items
         )
@@ -870,10 +881,11 @@ class SyncRepositoryImpl(
         val books = mutableListOf<BookSyncData>()
         val chapters = mutableListOf<ChapterSyncData>()
         val history = mutableListOf<HistorySyncData>()
+        val syncChapters = syncPreferences.syncDownloadedChapters().get()
         
         // Get all local data
         val allBooks = localDataSource.getBooks()
-        val allChapters = localDataSource.getChapters()
+        val allChapters = localDataSource.getChapters(includeDownloadedContent = syncChapters)
         val allHistory = localDataSource.getHistory()
         
         Log.debug { "[SyncRepository] buildSyncData: Total local data: ${allBooks.size} books, ${allChapters.size} chapters, ${allHistory.size} history" }
@@ -917,12 +929,13 @@ class SyncRepositoryImpl(
         
         Log.info { "[SyncRepository] buildSyncData: Final counts - ${books.size} books, ${chapters.size} chapters, ${history.size} history" }
         
+        val currentInfo = getCurrentDeviceInfo()
         return SyncData(
             books = books,
             chapters = chapters,
             history = history,
             metadata = SyncMetadata(
-                deviceId = currentDeviceInfo.deviceId,
+                deviceId = currentInfo.deviceId,
                 timestamp = ireader.core.util.currentTimeMillis(),
                 version = 1,
                 checksum = calculateChecksum(books, chapters, history)

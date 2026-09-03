@@ -15,8 +15,10 @@ interface SyncLocalRepository {
 
     /**
      * Get all chapters for synchronization.
+     *
+     * @param includeDownloadedContent Whether to serialize and include full chapter page content
      */
-    suspend fun getChapters(): List<ChapterSyncData>
+    suspend fun getChapters(includeDownloadedContent: Boolean = false): List<ChapterSyncData>
 
     /**
      * Get all history records for synchronization.

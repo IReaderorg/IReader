@@ -5,8 +5,11 @@ import ireader.domain.models.sync.DataConflict
 import ireader.domain.models.sync.DeviceInfo
 import ireader.domain.models.sync.DeviceType
 import ireader.domain.models.sync.DiscoveredDevice
+import ireader.domain.models.sync.SavedDevice
 import ireader.domain.models.sync.SyncError
 import ireader.domain.models.sync.SyncStatus
+import ireader.domain.models.sync.SyncTransferScope
+import ireader.domain.models.sync.TransferPreset
 import ireader.domain.usecases.sync.CancelSyncUseCase
 import ireader.domain.usecases.sync.GetDiscoveredDevicesUseCase
 import ireader.domain.usecases.sync.GetSyncStatusUseCase
@@ -49,17 +52,21 @@ class SyncViewModel(
      */
     data class State(
         val discoveredDevices: List<DiscoveredDevice> = emptyList(),
+        val savedDevices: List<SavedDevice> = emptyList(),
         val syncStatus: SyncStatus = SyncStatus.Idle,
         val selectedDevice: DiscoveredDevice? = null,
         val isDiscovering: Boolean = false,
         val error: String? = null,
         val showPairingDialog: Boolean = false,
+        val showQuickShareSheet: Boolean = false,
+        val showDeviceSettings: Boolean = false,
         val showConflictDialog: Boolean = false,
         val conflicts: List<DataConflict> = emptyList(),
         val manualIp: String = "",
         val serverMode: String = "server", // "server" or "client", default to server for desktop
         val deviceName: String = "",
-        val deviceType: DeviceType = DeviceType.ANDROID,
+        val deviceType: DeviceType = DeviceType.PHONE,
+        val transferScope: SyncTransferScope = SyncTransferScope.LibraryAndProgress,
         val syncLibrary: Boolean = true,
         val syncReadingProgress: Boolean = true,
         val syncDownloadedChapters: Boolean = false,
@@ -72,8 +79,34 @@ class SyncViewModel(
             cancelSync()
         }
         
-        // Load server mode preference
-        updateState { it.copy(serverMode = syncPreferences.actAsServer().get()) }
+        // Load preferences into state
+        val saved = syncPreferences.getSavedDevices()
+        val customName = syncPreferences.deviceName().get()
+        val customTypeStr = syncPreferences.deviceType().get()
+        val devType = DeviceType.fromString(customTypeStr).let { if (it == DeviceType.UNKNOWN) DeviceType.PHONE else it }
+        val lib = syncPreferences.syncLibrary().get()
+        val prog = syncPreferences.syncReadingProgress().get()
+        val chaps = syncPreferences.syncDownloadedChapters().get()
+        val sett = syncPreferences.syncSettings().get()
+
+        updateState {
+            it.copy(
+                serverMode = syncPreferences.actAsServer().get(),
+                savedDevices = saved,
+                deviceName = customName,
+                deviceType = devType,
+                syncLibrary = lib,
+                syncReadingProgress = prog,
+                syncDownloadedChapters = chaps,
+                syncSettings = sett,
+                transferScope = SyncTransferScope(
+                    transferLibrary = lib,
+                    transferReadingProgress = prog,
+                    transferDownloadedChapters = chaps,
+                    transferSettings = sett
+                )
+            )
+        }
         
         observeDiscoveredDevices()
         observeSyncStatus()
@@ -226,11 +259,21 @@ class SyncViewModel(
     }
 
     /**
-     * Select a device for syncing.
+     * Select a device for Quick Share / syncing.
      */
     fun selectDevice(device: DiscoveredDevice) {
         logInfo("Selected device: ${device.deviceInfo.deviceName}")
-        updateState { it.copy(selectedDevice = device, showPairingDialog = true) }
+        updateState { 
+            it.copy(
+                selectedDevice = device,
+                showQuickShareSheet = true,
+                showPairingDialog = false
+            ) 
+        }
+    }
+
+    fun dismissQuickShareSheet() {
+        updateState { it.copy(showQuickShareSheet = false) }
     }
 
     /**
@@ -602,14 +645,131 @@ class SyncViewModel(
     }
     
     /**
+     * Update transfer scope configuration.
+     */
+    fun updateTransferScope(scope: SyncTransferScope) {
+        updateState {
+            it.copy(
+                transferScope = scope,
+                syncLibrary = scope.transferLibrary,
+                syncReadingProgress = scope.transferReadingProgress,
+                syncDownloadedChapters = scope.transferDownloadedChapters,
+                syncSettings = scope.transferSettings
+            )
+        }
+    }
+
+    /**
+     * Start transfer with the configured Quick Share scope.
+     */
+    fun startQuickShareTransfer(deviceId: String, scope: SyncTransferScope) {
+        screenModelScope.launch {
+            try {
+                logInfo("Starting Quick Share transfer to device: $deviceId with preset: ${scope.preset}")
+                
+                // Persist transfer settings so repository uses them during sync
+                syncPreferences.syncLibrary().set(scope.transferLibrary)
+                syncPreferences.syncReadingProgress().set(scope.transferReadingProgress)
+                syncPreferences.syncDownloadedChapters().set(scope.transferDownloadedChapters)
+                syncPreferences.syncSettings().set(scope.transferSettings)
+                
+                // Close the transfer sheet
+                updateState { it.copy(showQuickShareSheet = false) }
+                
+                // Start sync
+                syncWithDevice(deviceId)
+            } catch (e: Exception) {
+                logError("Failed to start Quick Share transfer", e)
+                updateState { it.copy(error = formatError(e)) }
+            }
+        }
+    }
+
+    // ========== Saved Devices ("Your Devices") Methods ==========
+
+    /**
+     * Save/bookmark a device into Your Devices.
+     */
+    fun saveDevice(device: DiscoveredDevice, alias: String? = null) {
+        try {
+            logInfo("Saving device to Your Devices: ${device.deviceInfo.deviceName}")
+            val saved = SavedDevice(
+                deviceId = device.deviceInfo.deviceId,
+                deviceName = device.deviceInfo.deviceName,
+                customAlias = alias?.trim()?.ifBlank { null },
+                deviceType = device.deviceInfo.deviceType,
+                lastKnownIp = device.deviceInfo.ipAddress,
+                lastKnownPort = device.deviceInfo.port,
+                lastConnected = currentTimeToLong()
+            )
+            syncPreferences.saveDevice(saved)
+            updateState { it.copy(savedDevices = syncPreferences.getSavedDevices()) }
+            logInfo("Device saved successfully")
+        } catch (e: Exception) {
+            logError("Failed to save device", e)
+            updateState { it.copy(error = formatError(e)) }
+        }
+    }
+
+    /**
+     * Remove a device from Your Devices.
+     */
+    fun removeSavedDevice(deviceId: String) {
+        try {
+            logInfo("Removing device from Your Devices: $deviceId")
+            syncPreferences.removeSavedDevice(deviceId)
+            updateState { it.copy(savedDevices = syncPreferences.getSavedDevices()) }
+        } catch (e: Exception) {
+            logError("Failed to remove saved device", e)
+            updateState { it.copy(error = formatError(e)) }
+        }
+    }
+
+    /**
+     * Update custom nickname/alias for a saved device.
+     */
+    fun updateSavedDeviceAlias(deviceId: String, alias: String) {
+        try {
+            logInfo("Updating alias for saved device: $deviceId -> $alias")
+            val existing = syncPreferences.getSavedDevices().find { it.deviceId == deviceId } ?: return
+            val updated = existing.copy(customAlias = alias.trim().ifBlank { null })
+            syncPreferences.saveDevice(updated)
+            updateState { it.copy(savedDevices = syncPreferences.getSavedDevices()) }
+        } catch (e: Exception) {
+            logError("Failed to update saved device alias", e)
+            updateState { it.copy(error = formatError(e)) }
+        }
+    }
+
+    /**
+     * 1-tap quick connect to a saved device.
+     */
+    fun connectToSavedDevice(savedDevice: SavedDevice) {
+        logInfo("Connecting to saved device: ${savedDevice.displayName} (${savedDevice.lastKnownIp})")
+        val online = state.value.discoveredDevices.find { it.deviceInfo.deviceId == savedDevice.deviceId }
+        if (online != null) {
+            selectDevice(online)
+        } else {
+            // Initiate connection directly to last known IP
+            connectToManualIp(savedDevice.lastKnownIp, savedDevice.lastKnownPort)
+        }
+    }
+
+    // ========== Device Settings Persistence ==========
+
+    /**
      * Save device settings to preferences.
      */
     fun saveDeviceSettings() {
         screenModelScope.launch {
             try {
-                logInfo("Saving device settings")
-                // Persist settings to preferences if needed
-                // For now, state is already updated via individual update methods
+                logInfo("Saving device settings: name=${state.value.deviceName}, type=${state.value.deviceType}")
+                syncPreferences.deviceName().set(state.value.deviceName.trim())
+                syncPreferences.deviceType().set(state.value.deviceType.name)
+                syncPreferences.syncLibrary().set(state.value.syncLibrary)
+                syncPreferences.syncReadingProgress().set(state.value.syncReadingProgress)
+                syncPreferences.syncDownloadedChapters().set(state.value.syncDownloadedChapters)
+                syncPreferences.syncSettings().set(state.value.syncSettings)
                 logInfo("Device settings saved successfully")
             } catch (e: Exception) {
                 logError("Failed to save device settings", e)

@@ -16,6 +16,13 @@ class SyncPreferences(private val preferenceStore: PreferenceStore) {
         const val SYNC_ON_WIFI_ONLY = "unified_sync_on_wifi_only"
         const val LAST_SYNC_TIMESTAMP = "unified_sync_last_timestamp"
         const val SYNC_ACT_AS_SERVER = "sync_act_as_server"
+        const val SYNC_DEVICE_NAME = "sync_custom_device_name"
+        const val SYNC_DEVICE_TYPE = "sync_custom_device_type"
+        const val SYNC_SAVED_DEVICES = "sync_saved_devices_json"
+        const val SYNC_TRANSFER_LIBRARY = "sync_transfer_library"
+        const val SYNC_TRANSFER_PROGRESS = "sync_transfer_progress"
+        const val SYNC_TRANSFER_DOWNLOADED_CHAPTERS = "sync_transfer_downloaded_chapters"
+        const val SYNC_TRANSFER_SETTINGS = "sync_transfer_settings"
     }
 
     /**
@@ -74,6 +81,90 @@ class SyncPreferences(private val preferenceStore: PreferenceStore) {
     
     fun isServer(): Boolean {
         return actAsServer().get() == "server"
+    }
+
+    // ========== Device Identity & Quick Share ==========
+
+    /**
+     * Custom name for this device broadcasted during Wi-Fi discovery.
+     */
+    fun deviceName(): Preference<String> {
+        return preferenceStore.getString(SYNC_DEVICE_NAME, "")
+    }
+
+    /**
+     * Custom device type override (e.g. PHONE, TABLET, DESKTOP, TV).
+     */
+    fun deviceType(): Preference<String> {
+        return preferenceStore.getString(SYNC_DEVICE_TYPE, "")
+    }
+
+    /**
+     * Serialized list of saved / trusted devices for fast reconnection ("Your Devices").
+     */
+    fun savedDevicesJson(): Preference<String> {
+        return preferenceStore.getString(SYNC_SAVED_DEVICES, "[]")
+    }
+
+    /**
+     * Whether to transfer library books and categories.
+     */
+    fun syncLibrary(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_TRANSFER_LIBRARY, true)
+    }
+
+    /**
+     * Whether to transfer reading history and chapter progress.
+     */
+    fun syncReadingProgress(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_TRANSFER_PROGRESS, true)
+    }
+
+    /**
+     * Whether to transfer full offline downloaded chapter content.
+     */
+    fun syncDownloadedChapters(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_TRANSFER_DOWNLOADED_CHAPTERS, false)
+    }
+
+    /**
+     * Whether to transfer reader and application settings.
+     */
+    fun syncSettings(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_TRANSFER_SETTINGS, false)
+    }
+
+    private val json = kotlinx.serialization.json.Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
+
+    fun getSavedDevices(): List<ireader.domain.models.sync.SavedDevice> {
+        val jsonStr = savedDevicesJson().get()
+        if (jsonStr.isBlank() || jsonStr == "[]") return emptyList()
+        return try {
+            json.decodeFromString(jsonStr)
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveDevice(device: ireader.domain.models.sync.SavedDevice) {
+        val current = getSavedDevices().toMutableList()
+        val index = current.indexOfFirst { it.deviceId == device.deviceId }
+        if (index >= 0) {
+            current[index] = device
+        } else {
+            current.add(0, device)
+        }
+        val newJson = json.encodeToString(current)
+        savedDevicesJson().set(newJson)
+    }
+
+    fun removeSavedDevice(deviceId: String) {
+        val current = getSavedDevices().filterNot { it.deviceId == deviceId }
+        val newJson = json.encodeToString(current)
+        savedDevicesJson().set(newJson)
     }
 }
 

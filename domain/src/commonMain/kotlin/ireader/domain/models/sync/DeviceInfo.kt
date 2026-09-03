@@ -38,9 +38,50 @@ data class DeviceInfo(
  */
 @Serializable
 enum class DeviceType {
-    /** Android mobile or tablet device */
-    ANDROID,
-    
+    /** Smartphone */
+    PHONE,
+
+    /** Tablet device */
+    TABLET,
+
     /** Desktop computer (Windows, macOS, or Linux) */
-    DESKTOP
+    DESKTOP,
+
+    /** Smart TV or Android TV device */
+    TV,
+
+    /** Android mobile or tablet device (legacy alias) */
+    ANDROID,
+
+    /** Unknown device type */
+    UNKNOWN;
+
+    val displayName: String
+        get() = when (this) {
+            PHONE, ANDROID -> "Phone"
+            TABLET -> "Tablet"
+            DESKTOP -> "PC / Desktop"
+            TV -> "TV"
+            UNKNOWN -> "Device"
+        }
+
+    companion object {
+        fun fromString(name: String?): DeviceType {
+            if (name.isNullOrBlank()) return UNKNOWN
+            return when (name.trim().uppercase()) {
+                "PHONE" -> PHONE
+                "TABLET" -> TABLET
+                "DESKTOP", "PC" -> DESKTOP
+                "TV" -> TV
+                "ANDROID" -> ANDROID
+                else -> {
+                    try {
+                        valueOf(name.trim().uppercase())
+                    } catch (_: Exception) {
+                        UNKNOWN
+                    }
+                }
+            }
+        }
+    }
 }

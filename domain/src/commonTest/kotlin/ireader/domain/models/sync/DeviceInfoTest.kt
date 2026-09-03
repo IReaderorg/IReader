@@ -171,15 +171,55 @@ class DeviceInfoTest {
     }
 
     @Test
-    fun `DeviceType should have ANDROID and DESKTOP values`() {
-        // Arrange & Act
-        val androidType = DeviceType.ANDROID
-        val desktopType = DeviceType.DESKTOP
-
+    fun `DeviceType should have refined device values and display names`() {
         // Assert
-        assertNotNull(androidType)
-        assertNotNull(desktopType)
-        assertTrue(DeviceType.values().contains(DeviceType.ANDROID))
+        assertTrue(DeviceType.values().contains(DeviceType.PHONE))
+        assertTrue(DeviceType.values().contains(DeviceType.TABLET))
         assertTrue(DeviceType.values().contains(DeviceType.DESKTOP))
+        assertTrue(DeviceType.values().contains(DeviceType.TV))
+        assertTrue(DeviceType.values().contains(DeviceType.ANDROID))
+
+        assertEquals("Phone", DeviceType.PHONE.displayName)
+        assertEquals("Tablet", DeviceType.TABLET.displayName)
+        assertEquals("PC / Desktop", DeviceType.DESKTOP.displayName)
+        assertEquals("TV", DeviceType.TV.displayName)
+
+        assertEquals(DeviceType.PHONE, DeviceType.fromString("phone"))
+        assertEquals(DeviceType.TABLET, DeviceType.fromString("tablet"))
+        assertEquals(DeviceType.DESKTOP, DeviceType.fromString("pc"))
+        assertEquals(DeviceType.DESKTOP, DeviceType.fromString("desktop"))
+        assertEquals(DeviceType.TV, DeviceType.fromString("tv"))
+        assertEquals(DeviceType.UNKNOWN, DeviceType.fromString("invalid"))
+    }
+
+    @Test
+    fun `SavedDevice should display custom alias when provided`() {
+        val device = SavedDevice(
+            deviceId = "dev-123",
+            deviceName = "Pixel 8 Pro",
+            customAlias = "My Daily Driver",
+            deviceType = DeviceType.PHONE,
+            lastKnownIp = "192.168.1.50"
+        )
+        assertEquals("My Daily Driver", device.displayName)
+
+        val deviceWithoutAlias = device.copy(customAlias = null)
+        assertEquals("Pixel 8 Pro", deviceWithoutAlias.displayName)
+    }
+
+    @Test
+    fun `SyncTransferScope presets should configure correct flags`() {
+        val everything = SyncTransferScope.Everything
+        assertTrue(everything.transferLibrary)
+        assertTrue(everything.transferReadingProgress)
+        assertTrue(everything.transferDownloadedChapters)
+        assertTrue(everything.transferSettings)
+        assertEquals(TransferPreset.EVERYTHING, everything.preset)
+
+        val progressOnly = SyncTransferScope.ProgressOnly
+        assertTrue(!progressOnly.transferLibrary)
+        assertTrue(progressOnly.transferReadingProgress)
+        assertTrue(!progressOnly.transferDownloadedChapters)
+        assertEquals(TransferPreset.PROGRESS_ONLY, progressOnly.preset)
     }
 }

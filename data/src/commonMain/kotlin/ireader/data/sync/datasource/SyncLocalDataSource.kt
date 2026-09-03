@@ -76,10 +76,11 @@ interface SyncLocalDataSource : SyncLocalRepository {
     
     /**
      * Get all chapters for synchronization.
-     * 
+     *
+     * @param includeDownloadedContent Whether to serialize and include full chapter page content
      * @return List of chapter sync data
      */
-    override suspend fun getChapters(): List<ireader.domain.models.sync.ChapterSyncData>
+    override suspend fun getChapters(includeDownloadedContent: Boolean): List<ireader.domain.models.sync.ChapterSyncData>
     
     /**
      * Get all history records for synchronization.

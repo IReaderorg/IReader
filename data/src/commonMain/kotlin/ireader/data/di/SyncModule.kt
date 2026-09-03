@@ -28,7 +28,8 @@ val syncDataModule = module {
             localDataSource = get(),
             platformConfig = ireader.domain.config.PlatformConfig,
             syncPreferences = get(),
-            libraryController = getOrNull() // Optional - may not be available in all contexts
+            libraryController = getOrNull(), // Optional - may not be available in all contexts
+            deviceInfoService = getOrNull() // Optional - platform device info service
         )
     }
     

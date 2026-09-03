@@ -441,11 +441,7 @@ class AndroidDiscoveryDataSource(
             val deviceTypeStr = serviceInfo.attributes?.get("deviceType")?.decodeToString() ?: return null
             val appVersion = serviceInfo.attributes?.get("appVersion")?.decodeToString() ?: return null
             
-            val deviceType = try {
-                DeviceType.valueOf(deviceTypeStr)
-            } catch (e: Exception) {
-                DeviceType.ANDROID
-            }
+            val deviceType = DeviceType.fromString(deviceTypeStr)
             
             val ipAddress = serviceInfo.host?.hostAddress ?: return null
             val port = serviceInfo.port

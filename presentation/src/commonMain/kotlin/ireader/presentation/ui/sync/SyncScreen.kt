@@ -23,15 +23,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.Edit
 import ireader.domain.models.sync.ConflictResolutionStrategy
 import ireader.domain.models.sync.DiscoveredDevice
 import ireader.domain.models.sync.DeviceType
+import ireader.domain.models.sync.SavedDevice
 import ireader.domain.models.sync.SyncStatus
+import ireader.domain.models.sync.SyncTransferScope
 import ireader.presentation.ui.sync.components.ConflictResolutionDialog
 import ireader.presentation.ui.sync.components.DeviceListItem
 import ireader.presentation.ui.sync.components.EmptyDeviceList
 import ireader.presentation.ui.sync.components.PairingDialog
+import ireader.presentation.ui.sync.components.QuickShareTransferSheet
+import ireader.presentation.ui.sync.components.SavedDevicesCard
 import ireader.presentation.ui.sync.components.SyncStatusCard
+import ireader.presentation.ui.sync.components.getDeviceIcon
 import ireader.presentation.ui.sync.viewmodel.SyncViewModel
 import org.koin.compose.koinInject
 
@@ -40,18 +46,6 @@ import org.koin.compose.koinInject
  * 
  * Displays discovered devices, sync status, and controls for managing sync operations.
  * Follows Material Design 3 guidelines and Compose best practices.
- * 
- * @param state Current sync state
- * @param onStartDiscovery Callback when user starts device discovery
- * @param onStopDiscovery Callback when user stops device discovery
- * @param onDeviceClick Callback when user clicks on a device
- * @param onNavigateBack Callback when user navigates back
- * @param onPairDevice Callback when user confirms device pairing
- * @param onDismissPairing Callback when user dismisses pairing dialog
- * @param onResolveConflicts Callback when user resolves conflicts
- * @param onDismissConflicts Callback when user dismisses conflict dialog
- * @param onCancelSync Callback when user cancels ongoing sync
- * @param modifier Optional modifier for the screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +71,12 @@ fun SyncScreen(
     onUpdateSyncDownloadedChapters: (Boolean) -> Unit,
     onUpdateSyncSettings: (Boolean) -> Unit,
     onSaveDeviceSettings: () -> Unit,
+    onSaveDevice: (DiscoveredDevice) -> Unit = {},
+    onRemoveSavedDevice: (String) -> Unit = {},
+    onUpdateSavedDeviceAlias: (String, String) -> Unit = { _, _ -> },
+    onConnectSavedDevice: (SavedDevice) -> Unit = {},
+    onStartQuickShareTransfer: (String, SyncTransferScope) -> Unit = { _, _ -> },
+    onDismissQuickShare: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -146,6 +146,68 @@ fun SyncScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // This Device Banner
+            item {
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = getDeviceIcon(state.deviceType),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (state.deviceName.isNotBlank()) state.deviceName else "IReader Device",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            Text(
+                                text = "This Device • ${state.deviceType.displayName}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = { showDeviceSettings = true },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Edit")
+                        }
+                    }
+                }
+            }
+
+            // Your Devices (Saved Devices)
+            item {
+                SavedDevicesCard(
+                    savedDevices = state.savedDevices,
+                    discoveredDevices = state.discoveredDevices,
+                    onConnect = onConnectSavedDevice,
+                    onRemove = onRemoveSavedDevice,
+                    onUpdateAlias = onUpdateSavedDeviceAlias
+                )
+            }
+
             // Discovery controls
             item {
                 ElevatedCard(
@@ -307,7 +369,7 @@ fun SyncScreen(
             // Device list header
             item {
                 Text(
-                    text = "Discovered Devices",
+                    text = "Nearby Devices",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(top = 8.dp)
@@ -327,9 +389,18 @@ fun SyncScreen(
                     items = state.discoveredDevices,
                     key = { device -> device.deviceInfo.deviceId }
                 ) { device ->
+                    val isSaved = state.savedDevices.any { it.deviceId == device.deviceInfo.deviceId }
                     DeviceListItem(
                         device = device,
                         onClick = { onDeviceClick(device) },
+                        onToggleSave = {
+                            if (isSaved) {
+                                onRemoveSavedDevice(device.deviceInfo.deviceId)
+                            } else {
+                                onSaveDevice(device)
+                            }
+                        },
+                        isSaved = isSaved,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -337,7 +408,29 @@ fun SyncScreen(
         }
     }
     
-    // Pairing dialog
+    // Quick Share Transfer Sheet
+    if (state.showQuickShareSheet && state.selectedDevice != null) {
+        val selected = state.selectedDevice
+        val isSaved = state.savedDevices.any { it.deviceId == selected.deviceInfo.deviceId }
+        QuickShareTransferSheet(
+            device = selected,
+            initialScope = state.transferScope,
+            isDeviceSaved = isSaved,
+            onToggleSaveDevice = {
+                if (isSaved) {
+                    onRemoveSavedDevice(selected.deviceInfo.deviceId)
+                } else {
+                    onSaveDevice(selected)
+                }
+            },
+            onStartTransfer = { scope ->
+                onStartQuickShareTransfer(selected.deviceInfo.deviceId, scope)
+            },
+            onDismiss = onDismissQuickShare
+        )
+    }
+
+    // Pairing dialog (legacy fallback if quick share sheet is not used)
     if (state.showPairingDialog && state.selectedDevice != null) {
         PairingDialog(
             device = state.selectedDevice,
@@ -418,6 +511,12 @@ fun SyncScreen(
         onUpdateSyncDownloadedChapters = viewModel::updateSyncDownloadedChapters,
         onUpdateSyncSettings = viewModel::updateSyncSettings,
         onSaveDeviceSettings = viewModel::saveDeviceSettings,
+        onSaveDevice = { device -> viewModel.saveDevice(device) },
+        onRemoveSavedDevice = viewModel::removeSavedDevice,
+        onUpdateSavedDeviceAlias = viewModel::updateSavedDeviceAlias,
+        onConnectSavedDevice = viewModel::connectToSavedDevice,
+        onStartQuickShareTransfer = viewModel::startQuickShareTransfer,
+        onDismissQuickShare = viewModel::dismissQuickShareSheet,
         modifier = modifier
     )
 }

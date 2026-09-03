@@ -65,7 +65,7 @@ fun DeviceSettingsDialog(
                 )
                 
                 Column(modifier = Modifier.selectableGroup()) {
-                    DeviceType.values().forEach { deviceType ->
+                    listOf(DeviceType.PHONE, DeviceType.TABLET, DeviceType.DESKTOP, DeviceType.TV).forEach { deviceType ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -74,7 +74,7 @@ fun DeviceSettingsDialog(
                                     onClick = { onDeviceTypeChange(deviceType) },
                                     role = Role.RadioButton
                                 )
-                                .padding(vertical = 8.dp),
+                                .padding(vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
@@ -83,10 +83,7 @@ fun DeviceSettingsDialog(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = when (deviceType) {
-                                    DeviceType.ANDROID -> "Android"
-                                    DeviceType.DESKTOP -> "Desktop"
-                                },
+                                text = deviceType.displayName,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

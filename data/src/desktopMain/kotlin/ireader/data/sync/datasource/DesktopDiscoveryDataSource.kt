@@ -225,11 +225,7 @@ class DesktopDiscoveryDataSource : DiscoveryDataSource {
             val deviceTypeStr = info.getPropertyString("deviceType") ?: return null
             val appVersion = info.getPropertyString("appVersion") ?: return null
             
-            val deviceType = try {
-                DeviceType.valueOf(deviceTypeStr)
-            } catch (e: Exception) {
-                DeviceType.DESKTOP
-            }
+            val deviceType = DeviceType.fromString(deviceTypeStr)
             
             val addresses = info.inet4Addresses
             val ipAddress = if (addresses.isNotEmpty()) {

@@ -3,8 +3,13 @@ package ireader.presentation.ui.sync.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.TabletAndroid
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,13 +31,17 @@ import ireader.domain.models.sync.DiscoveredDevice
  * 
  * @param device The discovered device to display
  * @param onClick Callback when the device is clicked
+ * @param onToggleSave Optional callback when user bookmarks/saves this device
+ * @param isSaved Whether this device is already saved in Your Devices
  * @param modifier Optional modifier for the item
  */
 @Composable
 fun DeviceListItem(
     device: DiscoveredDevice,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onToggleSave: (() -> Unit)? = null,
+    isSaved: Boolean = false
 ) {
     Card(
         modifier = modifier
@@ -65,11 +74,19 @@ fun DeviceListItem(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = device.deviceInfo.deviceName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = device.deviceInfo.deviceName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "• ${device.deviceInfo.deviceType.displayName}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
@@ -80,7 +97,19 @@ fun DeviceListItem(
                 )
             }
             
-            Spacer(modifier = Modifier.width(8.dp))
+            if (onToggleSave != null) {
+                IconButton(
+                    onClick = onToggleSave,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                        contentDescription = if (isSaved) "Remove from Your Devices" else "Save to Your Devices",
+                        tint = if (isSaved) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+            }
             
             // Reachability indicator
             ReachabilityIndicator(
@@ -95,10 +124,13 @@ fun DeviceListItem(
  * Returns the appropriate icon for the device type.
  */
 @Composable
-private fun getDeviceIcon(deviceType: DeviceType): ImageVector {
+fun getDeviceIcon(deviceType: DeviceType): ImageVector {
     return when (deviceType) {
-        DeviceType.ANDROID -> Icons.Default.PhoneAndroid
+        DeviceType.PHONE, DeviceType.ANDROID -> Icons.Default.PhoneAndroid
+        DeviceType.TABLET -> Icons.Default.TabletAndroid
         DeviceType.DESKTOP -> Icons.Default.Computer
+        DeviceType.TV -> Icons.Default.Tv
+        DeviceType.UNKNOWN -> Icons.Default.Devices
     }
 }
 

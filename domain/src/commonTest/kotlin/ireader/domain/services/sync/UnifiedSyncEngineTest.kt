@@ -92,7 +92,7 @@ class UnifiedSyncEngineTest {
             this.history.addAll(history)
         }
 
-        override suspend fun getChapters(): List<ChapterSyncData> = emptyList()
+        override suspend fun getChapters(includeDownloadedContent: Boolean): List<ChapterSyncData> = emptyList()
         override suspend fun applyChapters(chapters: List<ChapterSyncData>) {}
         override suspend fun deleteBooksByGlobalIds(globalIds: List<String>) {
             deletedIds.addAll(globalIds)

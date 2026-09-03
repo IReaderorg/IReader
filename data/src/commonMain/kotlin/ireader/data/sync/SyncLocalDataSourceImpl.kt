@@ -140,7 +140,7 @@ class SyncLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getChapters(): List<ChapterSyncData> {
+    override suspend fun getChapters(includeDownloadedContent: Boolean): List<ChapterSyncData> {
         return handler.await {
             // Get all chapters for all books
             chapterQueries.getAllChapters().executeAsList().map { chapter ->
@@ -149,12 +149,16 @@ class SyncLocalDataSourceImpl(
                 val bookGlobalId = if (book != null) "${book.source}|${book.url}" else ""
                 val chapterGlobalId = if (book != null) "${book.source}|${chapter.url}" else ""
                 
-                // Encode content to JSON string using extension function
-                val contentJson = try {
-                    chapter.content.encode()
-                } catch (e: Exception) {
-                    Log.error("Failed to encode chapter content for chapter ${chapter.name} (${chapter.url})", e)
-                    "[]" // Empty content if encoding fails
+                // Encode content to JSON string using extension function only when requested
+                val contentJson = if (includeDownloadedContent && chapter.content.isNotEmpty()) {
+                    try {
+                        chapter.content.encode()
+                    } catch (e: Exception) {
+                        Log.error("Failed to encode chapter content for chapter ${chapter.name} (${chapter.url})", e)
+                        "[]"
+                    }
+                } else {
+                    "[]"
                 }
                 
                 ChapterSyncData(
