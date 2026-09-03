@@ -38,10 +38,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import ireader.presentation.core.ui.AppTab
-import ireader.presentation.ui.component.ExtensionsShimmerLoading
-import ireader.presentation.ui.component.HistoryShimmerLoading
-import ireader.presentation.ui.component.SettingsShimmerLoading
-import ireader.presentation.ui.component.UpdatesShimmerLoading
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.getIViewModel
@@ -143,29 +139,13 @@ object MainStarterScreen {
             }
         }
         
-        // Track visited tabs - start EMPTY to defer all tab initialization
-        // This improves startup time by not loading Library data until after first frame
-        var visitedTabs by rememberSaveable { mutableStateOf(emptySet<Int>()) }
+        // Current tab starts initialized immediately - zero artificial delays or forced loading on startup!
+        var visitedTabs by rememberSaveable { mutableStateOf(setOf(currentTabIndex)) }
         
-        // Mark current tab as visited (but only after initial delay)
-        // This is handled by the LaunchedEffect below
-        
-        // Defer tab initialization until after first frame renders (cold start only).
-        // On return-from-detail the saveable visitedTabs is already complete, so this
-        // becomes a no-op instead of replaying staggered delays during the pop animation.
-        LaunchedEffect(Unit) {
-            if (visitedTabs.size >= 5) return@LaunchedEffect
-            // Wait for first frame to render (show shimmer)
-            delay(50)
-            // Initialize the current tab first (usually Library)
-            visitedTabs = visitedTabs + currentTabIndex
-            // Then pre-initialize remaining tabs with small delays
-            delay(100)
-            listOf(0, 3, 4, 1, 2).forEach { tabIndex ->
-                if (tabIndex !in visitedTabs) {
-                    delay(50) // Small delay between each tab
-                    visitedTabs = visitedTabs + tabIndex
-                }
+        // Initialize tabs on demand when visited. Keeps cold start 100% focused on active tab!
+        LaunchedEffect(currentTabIndex) {
+            if (currentTabIndex !in visitedTabs) {
+                visitedTabs = visitedTabs + currentTabIndex
             }
         }
         
@@ -427,7 +407,6 @@ private fun PersistentTabContainer(
             tabIndex = 0,
             isVisible = currentTabIndex == 0,
             isInitialized = 0 in visitedTabs,
-            shimmerContent = { CenteredLoadingIndicator() }
         ) {
             libraryContent()
         }
@@ -440,7 +419,6 @@ private fun PersistentTabContainer(
                 tabIndex = 1,
                 isVisible = currentTabIndex == 1,
                 isInitialized = 1 in visitedTabs,
-                shimmerContent = { UpdatesShimmerLoading() }
             ) {
                 updatesContent()
             }
@@ -454,7 +432,6 @@ private fun PersistentTabContainer(
                 tabIndex = 2,
                 isVisible = currentTabIndex == 2,
                 isInitialized = 2 in visitedTabs,
-                shimmerContent = { HistoryShimmerLoading() }
             ) {
                 historyContent()
             }
@@ -467,7 +444,6 @@ private fun PersistentTabContainer(
             tabIndex = 3,
             isVisible = currentTabIndex == 3,
             isInitialized = 3 in visitedTabs,
-            shimmerContent = { ExtensionsShimmerLoading() }
         ) {
             extensionsContent()
         }
@@ -479,7 +455,6 @@ private fun PersistentTabContainer(
             tabIndex = 4,
             isVisible = currentTabIndex == 4,
             isInitialized = 4 in visitedTabs,
-            shimmerContent = { SettingsShimmerLoading() }
         ) {
             moreContent()
         }
@@ -487,8 +462,7 @@ private fun PersistentTabContainer(
 }
 
 /**
- * Individual tab slot - lazy initialization with shimmer loading.
- * Shows shimmer while content is being initialized, then fades to actual content.
+ * Individual tab slot - lazy initialization with memory retention.
  * Hidden tabs are kept in composition but made invisible and non-interactive.
  * 
  * Key optimization: Content is always composed once initialized (not removed from tree)
@@ -502,7 +476,6 @@ private inline fun TabSlot(
     @Suppress("UNUSED_PARAMETER") tabIndex: Int, // Used for debugging/logging if needed
     isVisible: Boolean,
     isInitialized: Boolean,
-    crossinline shimmerContent: @Composable () -> Unit,
     crossinline content: @Composable () -> Unit
 ) {
     // Only compose content if initialized or currently visible
@@ -514,7 +487,6 @@ private inline fun TabSlot(
     
     // Use zIndex to layer tabs properly - visible tab on top receives all touches
     // Hidden tabs are pushed behind with zIndex 0, visible tab gets zIndex 1
-    // This prevents touch event conflicts without using translation hacks
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -524,15 +496,10 @@ private inline fun TabSlot(
                 alpha = if (isVisible) 1f else 0f
             }
     ) {
-        when {
-            isVisible && !isInitialized -> {
-                // Show shimmer while waiting for initialization
-                shimmerContent()
-            }
-            isInitialized -> {
-                // Show actual content - this stays composed even when hidden
-                content()
-            }
+        if (isInitialized) {
+            content()
+        } else if (isVisible) {
+            CenteredLoadingIndicator()
         }
     }
 }

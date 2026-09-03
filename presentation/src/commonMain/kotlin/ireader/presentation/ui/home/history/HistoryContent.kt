@@ -152,6 +152,7 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
+                        modifier = Modifier.animateItem(),
                         history = history,
                         timeString = formatTime(history.readAt),
                         onClickItem = onClickItem,
@@ -178,6 +179,7 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
+                        modifier = Modifier.animateItem(),
                         history = history,
                         timeString = formatTime(history.readAt),
                         onClickItem = onClickItem,
@@ -204,6 +206,7 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
+                        modifier = Modifier.animateItem(),
                         history = history,
                         timeString = formatDateStr(history.readAt),
                         onClickItem = onClickItem,
@@ -230,6 +233,7 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
+                        modifier = Modifier.animateItem(),
                         history = history,
                         timeString = formatDateStr(history.readAt),
                         onClickItem = onClickItem,

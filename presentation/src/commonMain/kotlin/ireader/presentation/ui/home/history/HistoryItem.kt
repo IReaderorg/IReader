@@ -74,6 +74,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HistoryItem(
+    modifier: Modifier = Modifier,
     history: HistoryWithRelations,
     timeString: String,
     onClickItem: (HistoryWithRelations) -> Unit,
@@ -112,24 +113,21 @@ fun HistoryItem(
         }
     }
     
-    LaunchedEffect(key1 = dismissState.currentValue) {
-        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-            delay(100)
-            dismissState.reset()
-        }
-    }
-    
-    val interactionSource = remember { MutableInteractionSource() }
+    // Animate card elevation on press
     var isPressed by remember { mutableStateOf(false) }
     val elevation by animateDpAsState(
-        targetValue = if (isPressed) 1.dp else 4.dp,
+        targetValue = if (isPressed) 8.dp else 2.dp,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
-        )
+        ),
+        label = "cardElevation"
     )
+    
+    val interactionSource = remember { MutableInteractionSource() }
 
     SwipeToDismissBox(
+        modifier = modifier,
         state = dismissState,
         backgroundContent = {
             DismissBackground(dismissState = dismissState)

@@ -1,5 +1,9 @@
 package ireader.presentation.ui.component.list.layouts
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,12 +16,19 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.LocalPerformanceConfig
+
+private val ItemPlacementSpec = spring<IntOffset>(
+    stiffness = Spring.StiffnessMedium,
+    dampingRatio = Spring.DampingRatioNoBouncy
+)
+private val ItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 /**
  * NATIVE-LIKE COMPACT GRID
@@ -90,7 +101,11 @@ fun CompactGridLayoutComposable(
                     }
 
                     BookImage(
-                        modifier = Modifier,
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 2f / 3f,

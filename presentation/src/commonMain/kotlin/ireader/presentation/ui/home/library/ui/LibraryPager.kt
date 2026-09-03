@@ -252,40 +252,39 @@ internal fun LibraryPager(
             ILazyColumnScrollbar(
                 listState = lazyListState,
             ) {
-                // No Crossfade animation - instant display for better navigation experience
-                LayoutComposable(
-                    books = books,
-                    layout = displayMode,
-                    isLocal = true,
-                    gridState = gridState,
-                    scrollState = lazyListState,
-                    selection = selection,
-                    goToLatestChapter = goToLatestChapter,
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                    showGoToLastChapterBadge = showGoToLastChapterBadge,
-                    showReadBadge = showReadBadge,
-                    showUnreadBadge = showUnreadBadge,
-                    showDownloadedChaptersBadge = showDownloadedChaptersBadge,
-                    showUnreadChaptersBadge = showUnreadChaptersBadge,
-                    showLocalMangaBadge = showLocalMangaBadge,
-                    showLanguageBadge = showLanguageBadge,
-                    columns = columns,
-                    keys = stableKeyFunction,
-                    // Pagination footer - only show when actively loading more items
-                    footer = if (paginationState.isLoadingMore) {
-                        {
-                            PaginationFooter(
-                                isLoading = paginationState.isLoadingMore,
-                                hasMore = paginationState.hasMoreItems,
-                                loadedCount = books.size,
-                                totalCount = paginationState.totalItems
-                            )
-                        }
-                    } else null
-                )
+                    LayoutComposable(
+                        books = books,
+                        layout = displayMode,
+                        isLocal = true,
+                        gridState = gridState,
+                        scrollState = lazyListState,
+                        selection = selection,
+                        goToLatestChapter = goToLatestChapter,
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        showGoToLastChapterBadge = showGoToLastChapterBadge,
+                        showReadBadge = showReadBadge,
+                        showUnreadBadge = showUnreadBadge,
+                        showDownloadedChaptersBadge = showDownloadedChaptersBadge,
+                        showUnreadChaptersBadge = showUnreadChaptersBadge,
+                        showLocalMangaBadge = showLocalMangaBadge,
+                        showLanguageBadge = showLanguageBadge,
+                        columns = columns,
+                        keys = stableKeyFunction,
+                        // Pagination footer - only show when actively loading more items
+                        footer = if (paginationState.isLoadingMore) {
+                            {
+                                PaginationFooter(
+                                    isLoading = paginationState.isLoadingMore,
+                                    hasMore = paginationState.hasMoreItems,
+                                    loadedCount = books.size,
+                                    totalCount = paginationState.totalItems
+                                )
+                            }
+                        } else null
+                    )
+                }
             }
-        }
     )
 }
 

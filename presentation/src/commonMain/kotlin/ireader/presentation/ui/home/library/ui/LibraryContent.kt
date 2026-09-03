@@ -2,17 +2,21 @@ package ireader.presentation.ui.home.library.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.presentation.ui.home.library.components.ScrollableTabs
 import ireader.presentation.ui.home.library.components.visibleName
@@ -43,13 +47,8 @@ internal fun LibraryContent(
     val inSearchMode = state.inSearchMode
     val searchBooks = state.books // This contains search results when in search mode
     
-    // Early return for empty categories when not in search mode
-    val hasCategories = remember(categories) { categories.isNotEmpty() }
-    if (!hasCategories && !inSearchMode) return
-    
     // Show search results when in search mode
     if (inSearchMode) {
-        // Convert LibraryBook to BookItem for display
         val searchBookItems = remember(searchBooks) {
             searchBooks.map { it.toBookItem() }
         }
@@ -71,6 +70,7 @@ internal fun LibraryContent(
         return
     }
     
+    // If categories not ready yet, return calmly without jarring placeholders
     val horizontalPager =
         rememberPagerState(
             initialPage = selectedCategoryIndex,
@@ -84,24 +84,12 @@ internal fun LibraryContent(
         }
     }
 
-    // Get books for the current category (not a delegate, just a value)
-    val currentCategoryBooks = remember(selectedCategoryIndex, state.books) {
-        vm.getLibraryForCategoryIndex(categoryIndex = selectedCategoryIndex)
-    }
-    
-    androidx.compose.foundation.layout.Column(
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Show loading screen (hides tabs too)
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-//                LoadingScreen()
-            }
-        } else {
-            // Show tabs only when not loading
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
             ScrollableTabs(
                 modifier = Modifier.fillMaxWidth(),
                 libraryTabs = categories
@@ -119,7 +107,6 @@ internal fun LibraryContent(
                 pageCount = categories.size,
                 layout = layout,
                 onPageChange = { page ->
-                    // Return books for the page as State<List<BookItem>>
                     vm.getLibraryForCategoryIndexAsState(categoryIndex = page)
                 },
                 selection = selectedBooks.toList(),
@@ -140,13 +127,22 @@ internal fun LibraryContent(
                 getScrollPosition = { categoryId ->
                     vm.getScrollPosition(categoryId)
                 },
-                // Pagination callbacks
                 onLoadMore = { categoryId ->
                     vm.loadMoreBooks(categoryId)
                 },
                 getPaginationState = { categoryId ->
-                    vm.getPaginationState(categoryId)
+                    state.categoryPaginationState[categoryId] ?: PaginationState()
                 }
+            )
+        }
+
+        // Subtle top progress line overlay - zero layout shifts!
+        if (isLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .align(Alignment.TopCenter)
             )
         }
     }

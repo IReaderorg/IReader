@@ -348,9 +348,8 @@ class LibraryViewModel(
                         )
                         current.copy(categoryPaginationState = newPaginationState)
                     }
-                    // Still load from DB to get accurate count and potentially more books
-                    // Use forceRefresh=true since we already have cached data
-                    loadInitialBooksForCategory(categoryId, forceRefresh = true)
+                    // Still load from DB in background to get accurate count and sync fresh data
+                    loadInitialBooksForCategory(categoryId, forceRefresh = false)
                 } else {
                     // No cache or different category - load from DB
                     loadInitialBooksForCategory(categoryId)
@@ -1233,10 +1232,21 @@ class LibraryViewModel(
         sortOverride: LibrarySort? = null,
         filtersOverride: List<LibraryFilter>? = null
     ) {
-        // Cancel any existing load job for this category
-        paginationLoadJobs[categoryId]?.cancel()
+        synchronized(paginationLock) {
+            val existingJob = paginationLoadJobs[categoryId]
+            if (!forceRefresh) {
+                if (existingJob?.isActive == true) {
+                    return
+                }
+                if (_paginatedBooks.value.containsKey(categoryId)) {
+                    return
+                }
+            } else {
+                existingJob?.cancel()
+            }
+        }
         
-        paginationLoadJobs[categoryId] = scope.launch {
+        val job = scope.launch {
             // Prevent duplicate loads - check if already loading or loaded (inside coroutine for thread safety)
             val shouldLoad = loadingCategoriesMutex.withLock {
                 when {
@@ -1316,6 +1326,9 @@ class LibraryViewModel(
                     loadingCategories.remove(categoryId)
                 }
             }
+        }
+        synchronized(paginationLock) {
+            paginationLoadJobs[categoryId] = job
         }
     }
     

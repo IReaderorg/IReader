@@ -91,6 +91,7 @@ fun UpdatesContent(
                 ) { index ->
                     val update = updatesList[index]
                     UpdatesItem(
+                        modifier = Modifier.animateItem(),
                         book = update,
                         isSelected = update.chapterId in selection,
                         onClickItem = onClickItem,
@@ -113,6 +114,7 @@ fun UpdatesContent(
                     contentType = { "history_item" }
                 ) { index ->
                     UpdateHistoryItem(
+                        modifier = Modifier.animateItem(),
                         history = updateHistory[index]
                     )
                 }

@@ -38,6 +38,7 @@ import ireader.presentation.ui.core.modifier.selectedBackground
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UpdatesItem(
+    modifier: Modifier = Modifier,
     book: UpdatesWithRelations,
     isSelected: Boolean,
     onClickItem: (UpdatesWithRelations) -> Unit,
@@ -49,7 +50,7 @@ fun UpdatesItem(
     val alpha = if (book.read) 0.38f else 1f
 
     BookListItem(
-        modifier = Modifier
+        modifier = modifier
             .combinedClickable(
                 onClick = { onClickItem(book) },
                 onLongClick = { onLongClickItem(book) }

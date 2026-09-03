@@ -86,29 +86,23 @@ fun ScrollableTabs(
     pagerState: androidx.compose.foundation.pager.PagerState,
     visible: Boolean = true,
 ) {
+    if (!visible) return
     val scope = rememberCoroutineScope()
-    // OR ScrollableTabRow()
-    AnimatedVisibility(
-        visible = visible,
-        enter = expandVertically(),
-        exit = shrinkVertically()
+    androidx.compose.material3.ScrollableTabRow(
+        modifier = modifier,
+        selectedTabIndex = pagerState.currentPage,
+        containerColor = AppColors.current.bars.toComposeColor(),
+        contentColor = AppColors.current.onBars.toComposeColor(),
+        edgePadding = 0.dp,
     ) {
-        androidx.compose.material3.ScrollableTabRow(
-            modifier = modifier,
-            selectedTabIndex = pagerState.currentPage,
-            containerColor = AppColors.current.bars.toComposeColor(),
-            contentColor = AppColors.current.onBars.toComposeColor(),
-            edgePadding = 0.dp,
-        ) {
-            libraryTabs.forEachIndexed { index, tab ->
-                Tab(
-                    text = { MidSizeTextComposable(text = tab) },
-                    selected = pagerState.currentPage == index,
-                    unselectedContentColor = MaterialTheme.colorScheme.onBackground,
-                    selectedContentColor = MaterialTheme.colorScheme.primary,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                )
-            }
+        libraryTabs.forEachIndexed { index, tab ->
+            Tab(
+                text = { MidSizeTextComposable(text = tab) },
+                selected = pagerState.currentPage == index,
+                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+                selectedContentColor = MaterialTheme.colorScheme.primary,
+                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+            )
         }
     }
 }
