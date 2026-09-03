@@ -1,5 +1,9 @@
 package ireader.presentation.ui.book
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -71,6 +76,12 @@ import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+
+private val ChapterItemPlacementSpec = spring<IntOffset>(
+    stiffness = Spring.StiffnessMedium,
+    dampingRatio = Spring.DampingRatioNoBouncy
+)
+private val ChapterItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 /**
  * Stable holder for chapter item click handlers to prevent recomposition
@@ -515,7 +526,11 @@ fun BookDetailScreen(
                             }
                             
                             ChapterRow(
-                                modifier = Modifier.animateItem(),
+                                modifier = Modifier.animateItem(
+                                    fadeInSpec = null,
+                                    placementSpec = ChapterItemPlacementSpec,
+                                    fadeOutSpec = ChapterItemFadeOutSpec
+                                ),
                                 chapter = chapter,
                                 onItemClick = itemClickHandler,
                                 isLastRead = chapter.id == displayConfig.lastReadId,
@@ -822,7 +837,11 @@ private fun ChapterListPanel(
                     val isSelected = chapter.id in selectionSet
                     
                     ChapterRow(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ChapterItemPlacementSpec,
+                            fadeOutSpec = ChapterItemFadeOutSpec
+                        ),
                         chapter = chapter,
                         onItemClick = itemClickHandler,
                         isLastRead = chapter.id == displayConfig.lastReadId,

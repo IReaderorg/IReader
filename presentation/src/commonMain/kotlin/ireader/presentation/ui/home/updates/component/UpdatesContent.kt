@@ -1,5 +1,9 @@
 package ireader.presentation.ui.home.updates.component
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,6 +33,12 @@ import ireader.presentation.ui.home.updates.viewmodel.UpdatesPaginationState
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+
+private val ItemPlacementSpec = spring<IntOffset>(
+    stiffness = Spring.StiffnessMedium,
+    dampingRatio = Spring.DampingRatioNoBouncy
+)
+private val ItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -91,7 +102,11 @@ fun UpdatesContent(
                 ) { index ->
                     val update = updatesList[index]
                     UpdatesItem(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         book = update,
                         isSelected = update.chapterId in selection,
                         onClickItem = onClickItem,
@@ -114,7 +129,11 @@ fun UpdatesContent(
                     contentType = { "history_item" }
                 ) { index ->
                     UpdateHistoryItem(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         history = updateHistory[index]
                     )
                 }

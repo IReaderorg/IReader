@@ -1,6 +1,7 @@
 package ireader.presentation.ui.home.sources.extension
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -81,6 +82,12 @@ import ireader.presentation.ui.home.sources.extension.composables.SourceLoginDia
 import ireader.presentation.ui.home.sources.extension.composables.UserSourcesCreatorCard
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
+private val ItemPlacementSpec = spring<IntOffset>(
+    stiffness = Spring.StiffnessMedium,
+    dampingRatio = Spring.DampingRatioNoBouncy
+)
+private val ItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 /**
  * Unified Source Screen with modern segmented control
@@ -396,7 +403,11 @@ private fun InstalledSourcesContent(
                 item(key = "user_sources_card") {
                     UserSourcesCreatorCard(
                         onClick = onNavigateToUserSources,
-                        modifier = Modifier.animateItem()
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        )
                     )
                 }
             }
@@ -421,12 +432,20 @@ private fun InstalledSourcesContent(
                 when (catalogItem) {
                     is SourceUiModel.Header -> {
                         CleanSourceHeader(
-                            modifier = Modifier.animateItem(),
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = null,
+                                placementSpec = ItemPlacementSpec,
+                                fadeOutSpec = ItemFadeOutSpec
+                            ),
                             language = catalogItem.language,
                         )
                     }
                     is SourceUiModel.Item -> CleanCatalogCard(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         catalog = catalogItem.source,
                         installStep = if (catalogItem.source is CatalogInstalled) 
                             state.installSteps[catalogItem.source.pkgName] else null,
@@ -570,7 +589,11 @@ private fun AvailableSourcesContent(
                 when (catalogItem) {
                     is SourceUiModel.Header -> {
                         CleanSourceHeader(
-                            modifier = Modifier.animateItem(),
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = null,
+                                placementSpec = ItemPlacementSpec,
+                                fadeOutSpec = ItemFadeOutSpec
+                            ),
                             language = catalogItem.language,
                         )
                     }
@@ -578,7 +601,11 @@ private fun AvailableSourcesContent(
                         when (catalogItem.source) {
                             is CatalogLocal -> {
                                 CleanCatalogCard(
-                                    modifier = Modifier.animateItem(),
+                                    modifier = Modifier.animateItem(
+                                        fadeInSpec = null,
+                                        placementSpec = ItemPlacementSpec,
+                                        fadeOutSpec = ItemFadeOutSpec
+                                    ),
                                     catalog = catalogItem.source,
                                     installStep = if (catalogItem.source is CatalogInstalled) 
                                         state.installSteps[catalogItem.source.pkgName] else null,
@@ -606,7 +633,11 @@ private fun AvailableSourcesContent(
                             }
                             is CatalogRemote -> {
                                 CleanCatalogCard(
-                                    modifier = Modifier.animateItem(),
+                                    modifier = Modifier.animateItem(
+                                        fadeInSpec = null,
+                                        placementSpec = ItemPlacementSpec,
+                                        fadeOutSpec = ItemFadeOutSpec
+                                    ),
                                     catalog = catalogItem.source,
                                     installStep = state.installSteps[catalogItem.source.pkgName],
                                     onInstall = { onClickInstall(catalogItem.source) },

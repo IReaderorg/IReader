@@ -1,8 +1,5 @@
 package ireader.presentation.ui.home.library.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,18 +25,13 @@ fun LibraryTabs(
     showCount: Boolean,
     onClickTab: (Int) -> Unit
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = expandVertically(),
-        exit = shrinkVertically()
+    if (!visible) return
+    androidx.compose.material3.ScrollableTabRow(
+        selectedTabIndex = state.currentPage,
+        contentColor = AppColors.current.onBars.toComposeColor(),
+        containerColor = AppColors.current.bars.toComposeColor(),
+        edgePadding = 0.dp,
     ) {
-        androidx.compose.material3.ScrollableTabRow(
-            selectedTabIndex = state.currentPage,
-            contentColor = AppColors.current.onBars.toComposeColor(),
-            containerColor = AppColors.current.bars.toComposeColor(),
-            edgePadding = 0.dp,
-
-            ) {
             categories.forEachIndexed { i, category ->
                 Tab(
                     selected = state.currentPage == i,
@@ -71,5 +63,4 @@ fun LibraryTabs(
                 )
             }
         }
-    }
 }

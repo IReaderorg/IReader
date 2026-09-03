@@ -70,9 +70,8 @@ data class PaginationState(
     val totalItems: Int = 0
 ) {
     companion object {
-        // Reduced for low-end devices with large libraries (10,000+ books)
-        const val INITIAL_PAGE_SIZE = 20
-        const val PAGE_SIZE = 15
+        const val INITIAL_PAGE_SIZE = 60
+        const val PAGE_SIZE = 50
     }
     
     val canLoadMore: Boolean get() = hasMoreItems && !isLoadingMore

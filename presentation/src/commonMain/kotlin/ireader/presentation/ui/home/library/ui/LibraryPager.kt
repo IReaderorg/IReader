@@ -167,20 +167,19 @@ internal fun LibraryPager(
                 }
             }
             
-            // PAGINATION: Detect when user scrolls near the end and load more
+            // PAGINATION: Detect when user scrolls near the end and load more proactively
             LaunchedEffect(gridState, categoryId, books.size, paginationState) {
                 snapshotFlow {
                     val layoutInfo = gridState.layoutInfo
                     val totalItems = layoutInfo.totalItemsCount
                     val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    Triple(lastVisibleItem, totalItems, gridState.isScrollInProgress)
+                    Pair(lastVisibleItem, totalItems)
                 }
                 .distinctUntilChanged()
-                .collect { (lastVisibleItem, totalItems, isScrolling) ->
-                    // Load more when within 10 items of the end
-                    val threshold = 10
-                    if (!isScrolling && 
-                        totalItems > 0 && 
+                .collect { (lastVisibleItem, totalItems) ->
+                    // Load more proactively when within 24 items of the end (EVEN while scrolling!)
+                    val threshold = 24
+                    if (totalItems > 0 && 
                         lastVisibleItem >= totalItems - threshold &&
                         paginationState.canLoadMore) {
                         onLoadMore(categoryId)
@@ -194,13 +193,12 @@ internal fun LibraryPager(
                     val layoutInfo = lazyListState.layoutInfo
                     val totalItems = layoutInfo.totalItemsCount
                     val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    Triple(lastVisibleItem, totalItems, lazyListState.isScrollInProgress)
+                    Pair(lastVisibleItem, totalItems)
                 }
                 .distinctUntilChanged()
-                .collect { (lastVisibleItem, totalItems, isScrolling) ->
-                    val threshold = 10
-                    if (!isScrolling && 
-                        totalItems > 0 && 
+                .collect { (lastVisibleItem, totalItems) ->
+                    val threshold = 24
+                    if (totalItems > 0 && 
                         lastVisibleItem >= totalItems - threshold &&
                         paginationState.canLoadMore) {
                         onLoadMore(categoryId)

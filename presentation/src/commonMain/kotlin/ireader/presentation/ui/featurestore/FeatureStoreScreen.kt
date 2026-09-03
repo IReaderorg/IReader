@@ -1,6 +1,10 @@
 package ireader.presentation.ui.featurestore
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,6 +43,12 @@ import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.plugins.marketplace.PriceFilter
 import ireader.presentation.ui.plugins.marketplace.components.FilterBottomSheet
+
+private val ItemPlacementSpec = spring<IntOffset>(
+    stiffness = Spring.StiffnessMedium,
+    dampingRatio = Spring.DampingRatioNoBouncy
+)
+private val ItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 /**
  * Modern Feature Store screen with hero section and improved UX
@@ -290,7 +301,11 @@ private fun ModernFeatureStoreContent(
                     onUpdate = { onUpdate(plugin.id) },
                     downloadProgress = state.downloadProgress[plugin.id],
                     updateInfo = state.availableUpdates[plugin.id],
-                    modifier = Modifier.animateItem()
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = null,
+                        placementSpec = ItemPlacementSpec,
+                        fadeOutSpec = ItemFadeOutSpec
+                    )
                 )
             }
         }

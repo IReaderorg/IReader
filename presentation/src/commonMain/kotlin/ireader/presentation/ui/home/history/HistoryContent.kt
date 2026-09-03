@@ -1,5 +1,9 @@
 package ireader.presentation.ui.home.history
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -41,6 +46,12 @@ import ireader.i18n.resources.yesterday
 import ireader.presentation.ui.home.history.viewmodel.DateFilter
 import ireader.presentation.ui.home.history.viewmodel.HistoryPaginationState
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
+
+private val ItemPlacementSpec = spring<IntOffset>(
+    stiffness = Spring.StiffnessMedium,
+    dampingRatio = Spring.DampingRatioNoBouncy
+)
+private val ItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 private fun stableHistoryKey(history: HistoryWithRelations): Any = history.id
 
@@ -152,7 +163,11 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         history = history,
                         timeString = formatTime(history.readAt),
                         onClickItem = onClickItem,
@@ -179,7 +194,11 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         history = history,
                         timeString = formatTime(history.readAt),
                         onClickItem = onClickItem,
@@ -206,7 +225,11 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         history = history,
                         timeString = formatDateStr(history.readAt),
                         onClickItem = onClickItem,
@@ -233,7 +256,11 @@ fun HistoryContent(
                     contentType = { "history_item" }
                 ) { history ->
                     HistoryItem(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = null,
+                            placementSpec = ItemPlacementSpec,
+                            fadeOutSpec = ItemFadeOutSpec
+                        ),
                         history = history,
                         timeString = formatDateStr(history.readAt),
                         onClickItem = onClickItem,

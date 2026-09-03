@@ -1,9 +1,5 @@
 package ireader.presentation.ui.component.list.layouts
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -18,19 +14,12 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-
-private val ItemPlacementSpec = spring<IntOffset>(
-    stiffness = Spring.StiffnessMedium,
-    dampingRatio = Spring.DampingRatioNoBouncy
-)
-private val ItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 /**
  * NATIVE-LIKE GRID LAYOUT
@@ -111,11 +100,7 @@ fun ComfortableGridLayout(
                     }
                     
                     BookImage(
-                        modifier = Modifier.animateItem(
-                            fadeInSpec = null,
-                            placementSpec = ItemPlacementSpec,
-                            fadeOutSpec = ItemFadeOutSpec
-                        ),
+                        modifier = Modifier,
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 2f / 3f,

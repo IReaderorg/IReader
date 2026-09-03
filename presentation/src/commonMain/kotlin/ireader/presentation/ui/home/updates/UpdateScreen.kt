@@ -1,6 +1,5 @@
 package ireader.presentation.ui.home.updates
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,7 +23,11 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.check_for_updates
 import ireader.i18n.resources.refresh
-import ireader.presentation.ui.component.UpdatesShimmerLoading
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import ireader.presentation.ui.home.updates.component.UpdateEditBar
 import ireader.presentation.ui.home.updates.component.UpdateProgressIndicator
 import ireader.presentation.ui.home.updates.component.UpdatesContent
@@ -54,26 +57,45 @@ fun UpdateScreen(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        Crossfade(targetState = Pair(isLoading, isEmpty)) { (loading, empty) ->
-            when {
-                loading -> UpdatesShimmerLoading()
-                empty -> UpdatesEmptyState()
-                else -> UpdatesContent(
-                    state = state,
-                    onClickItem = onUpdate,
-                    onLongClickItem = onLongUpdate,
-                    onClickCover = onCoverUpdate,
-                    onClickDownload = onDownloadUpdate
-                )
+        when {
+            isEmpty && isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        strokeWidth = 2.5.dp
+                    )
+                }
             }
-            if (hasSelection) {
-                UpdateEditBar(
-                    state = state,
-                    onBottomBarDownload = onBottomBarDownload,
-                    onBottomBarMarkAsRead = onBottomBarMarkAsRead,
-                    onBottomBookMark = onBottomBookMark
-                )
-            }
+            isEmpty -> UpdatesEmptyState()
+            else -> UpdatesContent(
+                state = state,
+                onClickItem = onUpdate,
+                onLongClickItem = onLongUpdate,
+                onClickCover = onCoverUpdate,
+                onClickDownload = onDownloadUpdate
+            )
+        }
+        
+        if (hasSelection) {
+            UpdateEditBar(
+                state = state,
+                onBottomBarDownload = onBottomBarDownload,
+                onBottomBarMarkAsRead = onBottomBarMarkAsRead,
+                onBottomBookMark = onBottomBookMark
+            )
+        }
+
+        // Subtle top progress line when loading in background - zero layout shift
+        if (isLoading && !isEmpty) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .align(Alignment.TopCenter)
+            )
         }
         
         // Progress indicator when refreshing

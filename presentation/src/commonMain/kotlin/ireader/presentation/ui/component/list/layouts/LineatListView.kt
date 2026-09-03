@@ -1,9 +1,5 @@
 package ireader.presentation.ui.component.list.layouts
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,19 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.BookItem
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.components.IBookImageComposable
-
-private val ItemPlacementSpec = spring<IntOffset>(
-    stiffness = Spring.StiffnessMedium,
-    dampingRatio = Spring.DampingRatioNoBouncy
-)
-private val ItemFadeOutSpec = tween<Float>(durationMillis = 180, easing = FastOutSlowInEasing)
 
 /**
  * NATIVE-LIKE LINEAR BOOK ITEM
@@ -178,16 +167,10 @@ fun LinearListDisplay(
             LinearBookItem(
                 title = book.title,
                 book = book,
-                modifier = Modifier
-                    .animateItem(
-                        fadeInSpec = null,
-                        placementSpec = ItemPlacementSpec,
-                        fadeOutSpec = ItemFadeOutSpec
-                    )
-                    .combinedClickable(
-                        onClick = { onClick(book) },
-                        onLongClick = { onLongClick(book) },
-                    ),
+                modifier = Modifier.combinedClickable(
+                    onClick = { onClick(book) },
+                    onLongClick = { onLongClick(book) },
+                ),
                 selected = isSelected,
                 headers = headers,
                 performanceConfig = performanceConfig
