@@ -49,7 +49,7 @@ class WebViewCookieJar(
     val cookies = manager.getCookie(url.toString())
 
     return if (cookies != null && cookies.isNotEmpty()) {
-      cookies.split(";").mapNotNull { Cookie.parse(url, it) }
+      cookies.split(";").mapNotNull { Cookie.parse(url, it.trim()) }
     } else {
       emptyList()
     }

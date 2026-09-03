@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -12,43 +15,42 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import ireader.core.log.Log
-import kotlinx.coroutines.delay
 import okhttp3.Cookie
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
+import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * OkHttp interceptor that handles Cloudflare anti-bot challenges.
- * Uses WebView to solve challenges and extract cookies.
+ * OkHttp interceptor that handles Cloudflare anti-bot and Turnstile challenges.
+ * Uses Android WebView to solve challenges and extract clearance cookies.
  */
 class CloudflareInterceptor(
     private val context: Context,
     private val webViewCookieJar: WebViewCookieJar,
-    private val webViewManager: WebViewManger? = null // Optional: use existing WebView manager
+    private val webViewManager: WebViewManger? = null,
+    private val defaultUserAgentProvider: () -> String = { DEFAULT_USER_AGENT }
 ) : Interceptor {
 
     private val executor = ContextCompat.getMainExecutor(context)
 
     /**
-     * When this is called, it initializes the WebView if it wasn't already. We use this to avoid
-     * blocking the main thread too much. If used too often we could consider moving it to the
-     * Application class.
+     * Initializes WebView on startup to avoid blocking subsequent network requests.
      */
     private val initWebView by lazy {
-        // Crashes on some devices. We skip this in some cases since the only impact is slower
-        // WebView init in those rare cases.
-        // See https://bugs.chromium.org/p/chromium/issues/detail?id=1279562
-        if (DeviceUtil.isMiui || Build.VERSION.SDK_INT == Build.VERSION_CODES.S && DeviceUtil.isSamsung) {
+        if (DeviceUtil.isMiui || (Build.VERSION.SDK_INT == Build.VERSION_CODES.S && DeviceUtil.isSamsung)) {
             return@lazy
         }
-
-        WebSettings.getDefaultUserAgent(context)
+        try {
+            WebSettings.getDefaultUserAgent(context)
+        } catch (_: Exception) {
+            // Avoid crashes when Chrome/WebView is actively updating
+        }
     }
 
     @Synchronized
@@ -56,8 +58,6 @@ class CloudflareInterceptor(
         val originalRequest = chain.request()
 
         if (!WebViewUtilLegeacy.supportsWebView(context)) {
-            // Throw exception directly instead of launching coroutine
-            // The caller should handle this exception appropriately
             throw NeedWebView()
         }
 
@@ -65,65 +65,124 @@ class CloudflareInterceptor(
 
         val response = chain.proceed(originalRequest)
 
-        // Check if Cloudflare anti-bot is on
-        if (response.code !in ERROR_CODES || response.header("Server") !in SERVER_CHECK) {
+        // Check if Cloudflare anti-bot challenge is triggered
+        if (!isCloudflareChallenge(response)) {
             return response
         }
 
         try {
             response.close()
-            webViewCookieJar.remove(originalRequest.url, COOKIE_NAMES, 0)
-            val oldCookie = webViewCookieJar.get(originalRequest.url)
-                .firstOrNull { it.name == "cf_clearance" }
-            resolveWithWebView(originalRequest, oldCookie)
 
-            return chain.proceed(originalRequest)
-        }
-        // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
-        // we don't crash the entire app
-        catch (e: CloudflareBypassException) {
-            throw CloudflareBypassFailed()
+            // 1. Capture existing cf_clearance before wiping
+            val oldCookie = webViewCookieJar.get(originalRequest.url)
+                .firstOrNull { it.name == CF_CLEARANCE_COOKIE }
+
+            // 2. Remove stale clearance cookie
+            webViewCookieJar.remove(originalRequest.url, COOKIE_NAMES, 0)
+            try {
+                CookieManager.getInstance().flush()
+            } catch (_: Exception) {}
+
+            // 3. Resolve challenge via WebView
+            val bypassed = resolveWithWebView(originalRequest, oldCookie)
+            if (!bypassed) {
+                throw CloudflareBypassException("Failed to bypass Cloudflare challenge")
+            }
+
+            try {
+                CookieManager.getInstance().flush()
+            } catch (_: Exception) {}
+
+            // 4. Build retry request with new clearance cookies and matching User-Agent
+            val freshCookies = webViewCookieJar.get(originalRequest.url)
+            val requestBuilder = originalRequest.newBuilder()
+
+            val userAgent = originalRequest.header("User-Agent") ?: getDefaultUserAgent()
+            requestBuilder.header("User-Agent", userAgent)
+
+            if (freshCookies.isNotEmpty()) {
+                requestBuilder.header("Cookie", freshCookies.joinToString("; ") { "${it.name}=${it.value}" })
+            }
+
+            return chain.proceed(requestBuilder.build())
+        } catch (e: CloudflareBypassException) {
+            // Wrap in IOException because OkHttp's RealCall$AsyncCall only catches IOExceptions.
+            // Throwing any non-IOException on a background thread terminates ThreadPoolExecutor and crashes the app!
+            val cfFailed = CloudflareBypassFailed(e.message, e)
+            throw IOException(e.message ?: "Cloudflare bypass failed", cfFailed)
+        } catch (e: CloudflareBypassFailed) {
+            throw IOException(e.message ?: "Cloudflare bypass failed", e)
+        } catch (e: IOException) {
+            throw e
         } catch (e: Exception) {
             throw IOException(e)
         }
     }
 
+    private fun isCloudflareChallenge(response: Response): Boolean {
+        // Official Cloudflare challenge header
+        if (response.header("cf-mitigated")?.equals("challenge", ignoreCase = true) == true) {
+            return true
+        }
+
+        val code = response.code
+        if (code in ERROR_CODES) {
+            val server = response.header("Server") ?: ""
+            if (SERVER_CHECK.any { server.contains(it, ignoreCase = true) }) {
+                return true
+            }
+            if (response.header("cf-ray") != null || response.header("cf-cache-status") != null) {
+                return true
+            }
+        }
+        return false
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
-    private fun resolveWithWebView(request: Request, oldCookie: Cookie?) {
-        // Try to use existing WebView manager if available (for seamless integration)
-        if (webViewManager != null && webViewManager.isInit) {
+    private fun resolveWithWebView(request: Request, oldCookie: Cookie?): Boolean {
+        return if (webViewManager != null && webViewManager.isInit) {
             resolveWithExistingWebView(request, oldCookie)
         } else {
             resolveWithNewWebView(request, oldCookie)
         }
     }
-    
+
     /**
-     * Use existing WebView manager for seamless bypass (no visible WebView)
+     * Use existing WebView manager for bypass when available
      */
     @SuppressLint("SetJavaScriptEnabled")
-    private fun resolveWithExistingWebView(request: Request, oldCookie: Cookie?) {
+    private fun resolveWithExistingWebView(request: Request, oldCookie: Cookie?): Boolean {
         val latch = CountDownLatch(1)
         val cloudflareBypassed = AtomicBoolean(false)
         val origRequestUrl = request.url.toString()
-        
+        val safeHeaders = parseHeaders(request.headers)
+
         webViewManager?.apply {
             isBackgroundMode = true
             inProgress = true
-            
-            // Set up callback for when cookies are ready
-            val checkInterval = 500L
-            var elapsedTime = 0L
-            
+
             executor.execute {
-                webView?.loadUrl(origRequestUrl, request.headers.toMultimap()
-                    .mapValues { it.value.firstOrNull() ?: "" }
-                    .toMutableMap())
+                webView?.loadUrl(origRequestUrl, safeHeaders.toMutableMap())
             }
-            
-            // Poll for cookie changes using a thread instead of coroutine
+
+            val checkInterval = 400L
+            val maxWaitTime = CLOUDFLARE_TIMEOUT_SECONDS * 1000
+            val startTime = System.currentTimeMillis()
+
             Thread {
-                while (elapsedTime < CLOUDFLARE_TIMEOUT_SECONDS * 1000 && !cloudflareBypassed.get()) {
+                while (System.currentTimeMillis() - startTime < maxWaitTime &&
+                    !cloudflareBypassed.get() &&
+                    latch.count > 0
+                ) {
+                    try {
+                        Thread.sleep(checkInterval)
+                    } catch (_: InterruptedException) {
+                        break
+                    }
+                    try {
+                        CookieManager.getInstance().flush()
+                    } catch (_: Exception) {}
+
                     if (isCloudFlareBypassed(origRequestUrl, oldCookie)) {
                         cloudflareBypassed.set(true)
                         isBackgroundMode = false
@@ -131,10 +190,8 @@ class CloudflareInterceptor(
                         latch.countDown()
                         break
                     }
-                    Thread.sleep(checkInterval)
-                    elapsedTime += checkInterval
                 }
-                
+
                 if (!cloudflareBypassed.get()) {
                     isBackgroundMode = false
                     inProgress = false
@@ -142,59 +199,123 @@ class CloudflareInterceptor(
                 }
             }.start()
         }
-        
-        val success = latch.await(CLOUDFLARE_TIMEOUT_SECONDS + 5, TimeUnit.SECONDS)
-        
-        if (!cloudflareBypassed.get()) {
-            if (!success) {
-                Log.error { "Cloudflare bypass timed out using existing WebView" }
-            }
-            throw CloudflareBypassException()
-        }
+
+        latch.await(CLOUDFLARE_TIMEOUT_SECONDS + 5, TimeUnit.SECONDS)
+        return cloudflareBypassed.get()
     }
-    
+
     /**
-     * Create new WebView for bypass (fallback method)
+     * Create isolated WebView to solve Cloudflare challenge and extract clearance cookies
      */
     @SuppressLint("SetJavaScriptEnabled")
-    private fun resolveWithNewWebView(request: Request, oldCookie: Cookie?) {
-        // We need to lock this thread until the WebView finds the challenge solution url, because
-        // OkHttp doesn't support asynchronous interceptors.
+    private fun resolveWithNewWebView(request: Request, oldCookie: Cookie?): Boolean {
         val latch = CountDownLatch(1)
 
         var webView: WebView? = null
         val cloudflareBypassed = AtomicBoolean(false)
         val challengeFound = AtomicBoolean(false)
+        val interactiveDetected = AtomicBoolean(false)
         val isWebViewOutdated = AtomicBoolean(false)
 
         val origRequestUrl = request.url.toString()
-        val headers = request.headers.toMultimap()
-            .mapValues { it.value.firstOrNull() ?: "" }
-            .toMutableMap()
+        val userAgent = request.header("User-Agent") ?: getDefaultUserAgent()
+        val safeHeaders = parseHeaders(request.headers)
 
         executor.execute {
             try {
                 val webview = WebView(context.applicationContext)
                 webView = webview
-                
-                // Configure WebView settings
+
+                // Configure WebView settings for modern Cloudflare & Turnstile
                 webview.settings.apply {
                     javaScriptEnabled = true
                     domStorageEnabled = true
                     databaseEnabled = true
                     useWideViewPort = true
                     loadWithOverviewMode = true
-                    userAgentString = request.header("User-Agent") ?: getDefaultUserAgent()
+                    javaScriptCanOpenWindowsAutomatically = true
+                    userAgentString = userAgent
                 }
+
+                // Layout with real dimensions to prevent Chromium throttling hidden/0x0 views
+                webview.layout(0, 0, 1080, 1920)
+                webview.resumeTimers()
+                webview.onResume()
+
+                // Bridge to capture interactive challenge signal from Turnstile
+                webview.addJavascriptInterface(
+                    object {
+                        @Suppress("unused")
+                        @JavascriptInterface
+                        fun interactiveDetected() {
+                            Log.warn { "Cloudflare interactive challenge detected (user interaction required)" }
+                            interactiveDetected.set(true)
+                            latch.countDown()
+                        }
+                    },
+                    "ireaderBridge"
+                )
 
                 webview.webViewClient = object : WebViewClient() {
                     override fun onPageFinished(view: WebView, url: String) {
+                        super.onPageFinished(view, url)
+                        try {
+                            CookieManager.getInstance().flush()
+                        } catch (_: Exception) {}
+
                         if (isCloudFlareBypassed(origRequestUrl, oldCookie)) {
                             cloudflareBypassed.set(true)
                             latch.countDown()
-                        } else if (url == origRequestUrl && !challengeFound.get()) {
-                            // The first request didn't return the challenge, abort.
-                            latch.countDown()
+                            return
+                        }
+
+                        if (url == origRequestUrl) {
+                            if (!challengeFound.get()) {
+                                // First request completed with 200 without reporting challenge error
+                                if (isCloudFlareBypassed(origRequestUrl, oldCookie)) {
+                                    cloudflareBypassed.set(true)
+                                }
+                                latch.countDown()
+                            } else {
+                                // Listen for interactive Turnstile challenge
+                                view.evaluateJavascript(
+                                    """
+                                    (function() {
+                                        window.addEventListener("message", function(e) {
+                                            if (e && e.data && e.data.source === "cloudflare-challenge" && e.data.event === "interactiveBegin") {
+                                                if (window.ireaderBridge) {
+                                                    window.ireaderBridge.interactiveDetected();
+                                                }
+                                            }
+                                        });
+                                    })();
+                                    """.trimIndent(),
+                                    null
+                                )
+                            }
+                        }
+                    }
+
+                    override fun onReceivedHttpError(
+                        view: WebView,
+                        request: WebResourceRequest,
+                        errorResponse: WebResourceResponse
+                    ) {
+                        super.onReceivedHttpError(view, request, errorResponse)
+                        if (request.isForMainFrame) {
+                            val code = errorResponse.statusCode
+                            val cfMitigated = errorResponse.responseHeaders?.get("cf-mitigated")
+                            val server = errorResponse.responseHeaders?.get("Server") ?: ""
+
+                            if (cfMitigated?.equals("challenge", ignoreCase = true) == true ||
+                                code in ERROR_CODES ||
+                                SERVER_CHECK.any { server.contains(it, ignoreCase = true) }
+                            ) {
+                                Log.info { "Cloudflare challenge detected on main frame in WebView (HTTP $code)" }
+                                challengeFound.set(true)
+                            } else {
+                                latch.countDown()
+                            }
                         }
                     }
 
@@ -205,31 +326,54 @@ class CloudflareInterceptor(
                         description: String?,
                         failingUrl: String
                     ) {
-                        if (errorCode in ERROR_CODES) {
-                            challengeFound.set(true)
-                        } else {
-                            latch.countDown()
-                        }
+                        Log.warn { "WebView connection error $errorCode: $description on $failingUrl" }
+                        latch.countDown()
                     }
                 }
 
-                webView?.loadUrl(origRequestUrl, headers)
+                webview.loadUrl(origRequestUrl, safeHeaders)
             } catch (e: Exception) {
                 Log.error { "Error creating WebView for Cloudflare bypass: ${e.message}" }
                 latch.countDown()
             }
         }
 
-        // Wait a reasonable amount of time to retrieve the solution. The minimum should be
-        // around 4 seconds but it can take more due to slow networks or server issues.
-        val success = latch.await(CLOUDFLARE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        // Active background poller checking CookieManager while challenge resolves
+        val checkInterval = 400L
+        val maxWaitTime = CLOUDFLARE_TIMEOUT_SECONDS * 1000
+        val startTime = System.currentTimeMillis()
+
+        Thread {
+            while (System.currentTimeMillis() - startTime < maxWaitTime &&
+                !cloudflareBypassed.get() &&
+                !interactiveDetected.get() &&
+                latch.count > 0
+            ) {
+                try {
+                    Thread.sleep(checkInterval)
+                } catch (_: InterruptedException) {
+                    break
+                }
+                try {
+                    CookieManager.getInstance().flush()
+                } catch (_: Exception) {}
+
+                if (isCloudFlareBypassed(origRequestUrl, oldCookie)) {
+                    Log.info { "Cloudflare clearance cookie detected via background poller!" }
+                    cloudflareBypassed.set(true)
+                    latch.countDown()
+                    break
+                }
+            }
+        }.start()
+
+        val completedInTime = latch.await(CLOUDFLARE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 
         executor.execute {
             try {
                 if (!cloudflareBypassed.get()) {
                     isWebViewOutdated.set(webView?.isOutdated() == true)
                 }
-
                 webView?.apply {
                     stopLoading()
                     destroy()
@@ -241,34 +385,72 @@ class CloudflareInterceptor(
             }
         }
 
-        // Throw exception if we failed to bypass Cloudflare
         if (!cloudflareBypassed.get()) {
-            if (!success) {
-                Log.error { "Cloudflare bypass timed out after $CLOUDFLARE_TIMEOUT_SECONDS seconds" }
-            }
-            
             if (isWebViewOutdated.get()) {
-                throw OutOfDateWebView()
+                executor.execute {
+                    context.toast("Android System WebView is outdated. Please update it.", Toast.LENGTH_LONG)
+                }
+                throw OutOfDateWebView("Android System WebView is outdated.")
             }
 
-            throw CloudflareBypassException()
+            if (interactiveDetected.get()) {
+                executor.execute {
+                    context.toast("Cloudflare verification required. Please open this source in WebView to solve.", Toast.LENGTH_LONG)
+                }
+                throw CloudflareBypassException("Cloudflare challenge requires manual verification. Please open the source in WebView.")
+            }
+
+            if (!completedInTime) {
+                Log.error { "Cloudflare bypass timed out after $CLOUDFLARE_TIMEOUT_SECONDS seconds" }
+                executor.execute {
+                    context.toast("Cloudflare bypass timed out. Please open this source in WebView to solve.", Toast.LENGTH_LONG)
+                }
+                throw CloudflareBypassException("Cloudflare bypass timed out after $CLOUDFLARE_TIMEOUT_SECONDS seconds. Please open the source in WebView.")
+            }
+
+            throw CloudflareBypassException("Failed to bypass Cloudflare protection. Please open the source in WebView to solve.")
         }
+
+        return true
     }
 
     private fun isCloudFlareBypassed(url: String, oldCookie: Cookie?): Boolean {
         return try {
-            webViewCookieJar.get(url.toHttpUrl())
-                .firstOrNull { it.name == CF_CLEARANCE_COOKIE }
-                .let { it != null && it != oldCookie }
+            val cookieStr = CookieManager.getInstance().getCookie(url) ?: return false
+            if (!cookieStr.contains(CF_CLEARANCE_COOKIE)) return false
+
+            val cookies = cookieStr.split(";").map { it.trim() }
+            val cfCookie = cookies.firstOrNull { it.startsWith("$CF_CLEARANCE_COOKIE=") } ?: return false
+            val value = cfCookie.substringAfter("=")
+
+            if (value.isBlank()) return false
+            if (oldCookie != null && oldCookie.value == value) return false
+
+            true
         } catch (e: Exception) {
             Log.error { "Error checking Cloudflare bypass status: ${e.message}" }
             false
         }
     }
 
+    private fun parseHeaders(headers: Headers): Map<String, String> {
+        return headers
+            .filter { (name, value) -> isRequestHeaderSafe(name, value) }
+            .groupBy(keySelector = { (name, _) -> name }) { (_, value) -> value }
+            .mapValues { it.value.firstOrNull().orEmpty() }
+    }
+
+    private fun isRequestHeaderSafe(_name: String, _value: String): Boolean {
+        val name = _name.lowercase(Locale.ENGLISH)
+        val value = _value.lowercase(Locale.ENGLISH)
+        if (name in UNSAFE_HEADER_NAMES || name.startsWith("proxy-")) return false
+        if (name == "connection" && value == "upgrade") return false
+        return true
+    }
+
     private fun getDefaultUserAgent(): String {
         return try {
-            WebSettings.getDefaultUserAgent(context)
+            defaultUserAgentProvider()
         } catch (e: Exception) {
             DEFAULT_USER_AGENT
         }
@@ -281,16 +463,14 @@ class CloudflareInterceptor(
         private const val CF_CLEARANCE_COOKIE = "cf_clearance"
         private const val CLOUDFLARE_TIMEOUT_SECONDS = 30L
         private const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.6478.71 Mobile Safari/537.36"
+        private val UNSAFE_HEADER_NAMES = listOf(
+            "content-length", "host", "trailer", "te", "upgrade", "cookie2", "keep-alive", "transfer-encoding", "set-cookie", "cookie"
+        )
     }
 }
 
-// Internal exception class for Cloudflare bypass (used within this file only)
-class CloudflareBypassException : IOException("Failed to bypass Cloudflare protection")
-
-// Public exception classes are defined in commonMain Exception.kt:
-// - CloudflareBypassFailed
-// - NeedWebView  
-// - OutOfDateWebView
+// Internal exception class for Cloudflare bypass
+class CloudflareBypassException(message: String = "Failed to bypass Cloudflare protection") : IOException(message)
 
 object DeviceUtil {
 
@@ -317,6 +497,7 @@ object DeviceUtil {
     val isSamsung by lazy {
         Build.MANUFACTURER.equals("samsung", ignoreCase = true)
     }
+
     @SuppressLint("PrivateApi")
     private fun getSystemProperty(key: String?): String? {
         return try {
@@ -329,11 +510,10 @@ object DeviceUtil {
         }
     }
 }
+
 object WebViewUtilLegeacy {
     fun supportsWebView(context: Context): Boolean {
         return try {
-            // May throw android.webkit.WebViewFactory$MissingWebViewPackageException if WebView
-            // is not installed
             CookieManager.getInstance()
             context.packageManager.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)
         } catch (e: Throwable) {
@@ -343,23 +523,16 @@ object WebViewUtilLegeacy {
     }
 }
 
-// WebViewUtil object is defined in commonMain/WebViewUtil.kt
-
 fun WebView.isOutdated(): Boolean {
     return getWebViewMajorVersion() < WebViewUtil.MINIMUM_WEBVIEW_VERSION
 }
-// Based on https://stackoverflow.com/a/29218966
+
 private fun WebView.getDefaultUserAgentString(): String {
     return try {
         val originalUA: String = settings.userAgentString
-        
-        // Next call to getUserAgentString() will get us the default
         settings.userAgentString = null
         val defaultUserAgentString = settings.userAgentString
-        
-        // Revert to original UA string
         settings.userAgentString = originalUA
-        
         defaultUserAgentString
     } catch (e: Exception) {
         Log.error { "Error getting default user agent: ${e.message}" }
@@ -371,13 +544,14 @@ private fun WebView.getWebViewMajorVersion(): Int {
     return try {
         val uaRegexMatch = """.*Chrome/(\d+)\..*""".toRegex()
             .matchEntire(getDefaultUserAgentString())
-        
+
         uaRegexMatch?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 0
     } catch (e: Exception) {
         Log.error { "Error getting WebView version: ${e.message}" }
         0
     }
 }
+
 // Extension functions for Toast
 fun Context.toast(
     @StringRes resource: Int,

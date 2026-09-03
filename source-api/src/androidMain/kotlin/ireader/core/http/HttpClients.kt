@@ -48,6 +48,7 @@ actual class HttpClients(
     actual override val cookieSynchronizer = CookieSynchronizer(webViewCookieJar, cookiesStorage)
 
     private val basicClient = OkHttpClient.Builder()
+        .addInterceptor(eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor())
         .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
         .readTimeout(config.readTimeoutMinutes, TimeUnit.MINUTES)
         .callTimeout(config.callTimeoutMinutes, TimeUnit.MINUTES)
@@ -96,7 +97,8 @@ actual class HttpClients(
                 CloudflareInterceptor(
                     context,
                     cookieJar,
-                    webViewManager // Pass WebViewManager for seamless integration
+                    webViewManager,
+                    { config.userAgent }
                 )
             ).build()
         }

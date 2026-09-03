@@ -30,13 +30,18 @@ class PersistentCookieJar(preferencesStore: PreferenceStore) : CookieJar {
         val storedCookies = runBlocking {
             store.getCookies(url.toString())
         }
-        return if (storedCookies.isNotEmpty()) {
-            storedCookies.mapNotNull { it.toOkHttpCookie(url) }
-        } else if (cookies != null && cookies.isNotEmpty()) {
-            cookies.split(";").mapNotNull { Cookie.parse(url, it) }
-        } else {
-            emptyList()
+        val cookieMap = mutableMapOf<String, Cookie>()
+        if (storedCookies.isNotEmpty()) {
+            storedCookies.mapNotNull { it.toOkHttpCookie(url) }.forEach { cookie ->
+                cookieMap[cookie.name] = cookie
+            }
         }
+        if (cookies != null && cookies.isNotEmpty()) {
+            cookies.split(";").mapNotNull { Cookie.parse(url, it.trim()) }.forEach { cookie ->
+                cookieMap[cookie.name] = cookie
+            }
+        }
+        return cookieMap.values.toList()
     }
 
     fun remove(url: HttpUrl, cookieNames: List<String>? = null, maxAge: Int = -1): Int {

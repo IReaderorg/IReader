@@ -26,6 +26,23 @@ fun exceptionHandler(e: Throwable): UiText? {
     
     Log.error(e, "exceptionHandler catch an exception")
 
+    // Check whole cause chain for specific domain errors (e.g. wrapped in IOException by OkHttp)
+    val causes = generateSequence(e) { it.cause }
+    for (cause in causes) {
+        val causeName = cause::class.simpleName ?: ""
+        when {
+            cause is CloudflareBypassFailed || causeName == "CloudflareBypassFailed" -> {
+                return UiText.MStringResource(Res.string.information_cloudflare_bypass_failure)
+            }
+            cause is NeedWebView || causeName == "NeedWebView" -> {
+                return UiText.MStringResource(Res.string.information_webview_required)
+            }
+            cause is OutOfDateWebView || causeName == "OutOfDateWebView" -> {
+                return UiText.MStringResource(Res.string.library_is_out_of_date)
+            }
+        }
+    }
+
     return when {
         // Network errors - check by class name for KMP compatibility
         exceptionName == "IOException" || exceptionName.contains("IOException") -> {
@@ -51,9 +68,6 @@ fun exceptionHandler(e: Throwable): UiText? {
         }
         e is EmptyQuery -> UiText.MStringResource(Res.string.query_must_not_be_empty)
         e is LocalSourceException -> null
-        e is OutOfDateWebView -> UiText.MStringResource(Res.string.query_must_not_be_empty)
-        e is NeedWebView -> UiText.MStringResource(Res.string.information_webview_required)
-        e is CloudflareBypassFailed -> UiText.MStringResource(Res.string.information_cloudflare_bypass_failure)
         e is SourceNotFoundException -> UiText.MStringResource(Res.string.the_source_is_not_found)
         else -> {
             UiText.ExceptionString(e)
