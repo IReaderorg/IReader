@@ -17,11 +17,24 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.isSuccess
+import io.ktor.util.encodeBase64
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+
 /**
  * Implementation of DiscordQuoteRepository that sends quotes to Discord webhook
+ * securely via Supabase Edge Function proxy, with direct webhook fallback.
  */
 class DiscordQuoteRepositoryImpl(
-    private val webhookUrl: String,
+    private val webhookUrl: String = "",
+    private val supabaseUrl: String = "",
+    private val supabaseKey: String = "",
     private val httpClient: HttpClient,
     private val quoteCardGenerator: QuoteCardGenerator
 ) : DiscordQuoteRepository {
@@ -37,8 +50,8 @@ class DiscordQuoteRepositoryImpl(
         style: QuoteCardStyle,
         username: String
     ): Result<Unit> = runCatching {
-        if (webhookUrl.isBlank()) {
-            throw Exception("Discord webhook URL not configured")
+        if (supabaseUrl.isBlank() && webhookUrl.isBlank()) {
+            throw Exception("Neither Supabase nor Discord webhook URL configured")
         }
         
         // Generate quote card image
@@ -46,52 +59,100 @@ class DiscordQuoteRepositoryImpl(
             quoteCardGenerator.generateQuoteCard(quote, style)
         }
         
-        // Build Discord embed
-        val embed = DiscordEmbed(
-            title = "📚 New Quote Shared",
-            description = "\"${quote.text.take(2000)}\"", // Discord limit
-            fields = buildList {
-                add(DiscordEmbedField("Book", quote.bookTitle, inline = true))
-                val authorValue = quote.author
-                if (!authorValue.isNullOrBlank()) {
-                    add(DiscordEmbedField("Author", authorValue, inline = true))
-                }
-                if (quote.chapterTitle.isNotBlank()) {
-                    add(DiscordEmbedField("Chapter", quote.chapterTitle, inline = false))
-                }
-                add(DiscordEmbedField("Shared by", "@$username", inline = false))
-            },
-            color = 5814783, // Purple color
-            timestamp = kotlin.time.Clock.System.now().toString(),
-            footer = DiscordEmbedFooter("IReader Community")
-        )
-        
-        val payload = DiscordWebhookPayload(
-            embeds = listOf(embed)
-        )
-        
-        // Send to Discord with image attachment
-        val response = httpClient.submitFormWithBinaryData(
-            url = webhookUrl,
-            formData = formData {
-                // Add JSON payload
-                append("payload_json", json.encodeToString(payload))
-                
-                // Add image attachment
-                append(
-                    "file",
-                    imageBytes,
-                    Headers.build {
-                        append(HttpHeaders.ContentType, "image/png")
-                        append(HttpHeaders.ContentDisposition, "filename=\"quote_${quote.createdAt}.png\"")
+        if (supabaseUrl.isNotBlank()) {
+            val base64Image = imageBytes.encodeBase64()
+            val bodyJson = buildJsonObject {
+                put("type", "quote")
+                put("title", "📚 New Quote Shared")
+                put("description", "\"${quote.text.take(2000)}\"")
+                put("username", username)
+                put("fileBase64", base64Image)
+                put("fileName", "quote_${quote.createdAt}.png")
+                put("color", 5814783)
+                putJsonArray("fields") {
+                    addJsonObject {
+                        put("name", "Book")
+                        put("value", quote.bookTitle)
+                        put("inline", true)
                     }
-                )
+                    val authorValue = quote.author
+                    if (!authorValue.isNullOrBlank()) {
+                        addJsonObject {
+                            put("name", "Author")
+                            put("value", authorValue)
+                            put("inline", true)
+                        }
+                    }
+                    if (quote.chapterTitle.isNotBlank()) {
+                        addJsonObject {
+                            put("name", "Chapter")
+                            put("value", quote.chapterTitle)
+                            put("inline", false)
+                        }
+                    }
+                    addJsonObject {
+                        put("name", "Shared by")
+                        put("value", "@$username")
+                        put("inline", false)
+                    }
+                }
+            }.toString()
+
+            val response = httpClient.post("${supabaseUrl.trimEnd('/')}/functions/v1/discord-webhook") {
+                header("apikey", supabaseKey)
+                header("Authorization", "Bearer $supabaseKey")
+                header(HttpHeaders.ContentType, "application/json")
+                setBody(bodyJson)
             }
-        )
-        
-        if (response.status != HttpStatusCode.OK && response.status != HttpStatusCode.NoContent) {
-            val errorBody = response.bodyAsText()
-            throw Exception("Discord webhook failed: ${response.status} - $errorBody")
+
+            if (!response.status.isSuccess()) {
+                val errorBody = response.bodyAsText()
+                throw Exception("Discord webhook via Supabase proxy failed: ${response.status} - $errorBody")
+            }
+        } else {
+            // Fallback to direct Discord webhook
+            val embed = DiscordEmbed(
+                title = "📚 New Quote Shared",
+                description = "\"${quote.text.take(2000)}\"",
+                fields = buildList {
+                    add(DiscordEmbedField("Book", quote.bookTitle, inline = true))
+                    val authorValue = quote.author
+                    if (!authorValue.isNullOrBlank()) {
+                        add(DiscordEmbedField("Author", authorValue, inline = true))
+                    }
+                    if (quote.chapterTitle.isNotBlank()) {
+                        add(DiscordEmbedField("Chapter", quote.chapterTitle, inline = false))
+                    }
+                    add(DiscordEmbedField("Shared by", "@$username", inline = false))
+                },
+                color = 5814783,
+                timestamp = kotlin.time.Clock.System.now().toString(),
+                footer = DiscordEmbedFooter("IReader Community")
+            )
+            
+            val payload = DiscordWebhookPayload(
+                embeds = listOf(embed)
+            )
+            
+            val response = httpClient.submitFormWithBinaryData(
+                url = webhookUrl,
+                formData = formData {
+                    append("payload_json", json.encodeToString(payload))
+                    append(
+                        "file",
+                        imageBytes,
+                        Headers.build {
+                            append(HttpHeaders.ContentType, "image/png")
+                            append(HttpHeaders.ContentDisposition, "filename=\"quote_${quote.createdAt}.png\"")
+                        }
+                    )
+                }
+            )
+            
+            if (response.status != HttpStatusCode.OK && response.status != HttpStatusCode.NoContent) {
+                val errorBody = response.bodyAsText()
+                throw Exception("Discord webhook failed: ${response.status} - $errorBody")
+            }
         }
     }
 }

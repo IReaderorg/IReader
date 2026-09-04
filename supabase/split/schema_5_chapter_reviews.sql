@@ -89,7 +89,8 @@ CREATE POLICY "Users can delete their own chapter reviews"
 -- ============================================================================
 
 -- Average rating per chapter
-CREATE OR REPLACE VIEW public.chapter_ratings_summary AS
+CREATE OR REPLACE VIEW public.chapter_ratings_summary 
+WITH (security_invoker = true) AS
 SELECT 
     book_title,
     chapter_name,

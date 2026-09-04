@@ -21,20 +21,25 @@ object PluginLogger {
     /**
      * Log listeners for custom log handling
      */
+    private val listenersLock = Any()
     private val listeners = mutableListOf<(Level, String, String, Throwable?) -> Unit>()
     
     /**
      * Add a log listener
      */
     fun addListener(listener: (Level, String, String, Throwable?) -> Unit) {
-        listeners.add(listener)
+        synchronized(listenersLock) {
+            listeners.add(listener)
+        }
     }
     
     /**
      * Remove a log listener
      */
     fun removeListener(listener: (Level, String, String, Throwable?) -> Unit) {
-        listeners.remove(listener)
+        synchronized(listenersLock) {
+            listeners.remove(listener)
+        }
     }
     
     /**
@@ -68,8 +73,9 @@ object PluginLogger {
     private fun log(level: Level, tag: String, message: String, throwable: Throwable?) {
         if (level.ordinal < minLevel.ordinal) return
         
-        // Notify listeners
-        listeners.forEach { it(level, tag, message, throwable) }
+        // Notify listeners with snapshot to prevent ConcurrentModificationException
+        val snapshot = synchronized(listenersLock) { listeners.toList() }
+        snapshot.forEach { it(level, tag, message, throwable) }
         
         // Default console output
         val prefix = when (level) {

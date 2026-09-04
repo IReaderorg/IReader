@@ -85,7 +85,8 @@ CREATE POLICY "Users can delete their own book reviews"
 -- ============================================================================
 
 -- Average rating per book
-CREATE OR REPLACE VIEW public.book_ratings_summary AS
+CREATE OR REPLACE VIEW public.book_ratings_summary 
+WITH (security_invoker = true) AS
 SELECT 
     book_title,
     COUNT(*) as review_count,

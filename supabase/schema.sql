@@ -595,6 +595,12 @@ CREATE TABLE IF NOT EXISTS public.schema_version (
     description TEXT
 );
 
+ALTER TABLE public.schema_version ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow read access to schema_version"
+    ON public.schema_version FOR SELECT
+    USING (true);
+
 INSERT INTO public.schema_version (version, description)
 VALUES (2, 'Complete consolidated schema with all features')
 ON CONFLICT (version) DO NOTHING;
@@ -1416,7 +1422,8 @@ CREATE TRIGGER character_art_updated_at BEFORE UPDATE ON public.character_art FO
 -- VIEWS
 -- ============================================================================
 
-CREATE OR REPLACE VIEW user_reading_summary AS
+CREATE OR REPLACE VIEW user_reading_summary 
+WITH (security_invoker = true) AS
 SELECT u.id AS user_id, u.email, u.username, u.is_supporter,
        COUNT(DISTINCT sb.book_id) AS total_books, 0 AS favorite_books, 0 AS total_chapters,
        0 AS read_chapters, COUNT(DISTINCT rp.id) AS books_in_progress,
@@ -1426,7 +1433,8 @@ LEFT JOIN public.synced_books sb ON u.id = sb.user_id
 LEFT JOIN public.reading_progress rp ON u.id = rp.user_id
 GROUP BY u.id, u.email, u.username, u.is_supporter, u.created_at;
 
-CREATE OR REPLACE VIEW recent_activity AS
+CREATE OR REPLACE VIEW recent_activity 
+WITH (security_invoker = true) AS
 SELECT 'reading_progress' AS activity_type, rp.user_id, u.email, rp.book_id, NULL AS title, rp.updated_at
 FROM public.reading_progress rp JOIN public.users u ON rp.user_id = u.id
 UNION ALL
@@ -1434,13 +1442,15 @@ SELECT 'synced_book', sb.user_id, u.email, sb.book_id, sb.title, to_timestamp(sb
 FROM public.synced_books sb JOIN public.users u ON sb.user_id = u.id
 ORDER BY updated_at DESC LIMIT 100;
 
-CREATE OR REPLACE VIEW public.leaderboard_with_rank AS
+CREATE OR REPLACE VIEW public.leaderboard_with_rank 
+WITH (security_invoker = true) AS
 SELECT id, user_id, username, total_reading_time_minutes, total_chapters_read, books_completed,
        reading_streak, has_badge, badge_type, updated_at, created_at,
        ROW_NUMBER() OVER (ORDER BY total_reading_time_minutes DESC) as rank
 FROM public.leaderboard ORDER BY total_reading_time_minutes DESC;
 
-CREATE OR REPLACE VIEW book_reviews_with_badges AS
+CREATE OR REPLACE VIEW book_reviews_with_badges 
+WITH (security_invoker = true) AS
 SELECT br.id, br.user_id, br.book_title, br.rating, br.review_text, br.created_at,
        u.username, ub.badge_id, b.name as badge_name, b.icon as badge_icon, b.image_url as badge_image_url
 FROM public.book_reviews br
@@ -1449,7 +1459,8 @@ LEFT JOIN public.user_badges ub ON br.user_id = ub.user_id AND ub.is_primary = t
 LEFT JOIN public.badges b ON ub.badge_id = b.id
 ORDER BY br.created_at DESC;
 
-CREATE OR REPLACE VIEW chapter_reviews_with_badges AS
+CREATE OR REPLACE VIEW chapter_reviews_with_badges 
+WITH (security_invoker = true) AS
 SELECT cr.id, cr.user_id, cr.book_title, cr.chapter_name, cr.rating, cr.review_text, cr.created_at,
        u.username, ub.badge_id, b.name as badge_name, b.icon as badge_icon, b.image_url as badge_image_url
 FROM public.chapter_reviews cr

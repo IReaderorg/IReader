@@ -284,8 +284,12 @@ val repositoryInjectModule = module {
     // Discord Quote repository - for community quote sharing
     single<ireader.domain.data.repository.DiscordQuoteRepository> {
         val discordWebhookUrl = ireader.domain.config.PlatformConfig.getDiscordQuoteWebhookUrl()
+        val supabaseUrl = ireader.domain.config.PlatformConfig.getSupabaseAuthUrl()
+        val supabaseKey = ireader.domain.config.PlatformConfig.getSupabaseAuthKey()
         ireader.data.quote.DiscordQuoteRepositoryImpl(
             webhookUrl = discordWebhookUrl,
+            supabaseUrl = supabaseUrl,
+            supabaseKey = supabaseKey,
             httpClient = get<ireader.core.http.HttpClients>().default,
             quoteCardGenerator = ireader.data.quote.createQuoteCardGenerator()
         )
@@ -294,12 +298,16 @@ val repositoryInjectModule = module {
     // Character Art Gallery repository - Discord only
     single<ireader.domain.data.repository.CharacterArtRepository> {
         val discordWebhookUrl = ireader.domain.config.PlatformConfig.getDiscordCharacterArtWebhookUrl()
+        val supabaseUrl = ireader.domain.config.PlatformConfig.getSupabaseAuthUrl()
+        val supabaseKey = ireader.domain.config.PlatformConfig.getSupabaseAuthKey()
 
-        if (discordWebhookUrl.isNotBlank()) {
-            // Use Discord webhook integration
+        if (discordWebhookUrl.isNotBlank() || supabaseUrl.isNotBlank()) {
+            // Use Discord webhook integration via Supabase proxy or direct
             val discordService = ireader.domain.services.discord.DiscordWebhookService(
                 httpClient = get<ireader.core.http.HttpClients>().default,
-                webhookUrl = discordWebhookUrl
+                webhookUrl = discordWebhookUrl,
+                supabaseUrl = supabaseUrl,
+                supabaseKey = supabaseKey
             )
             ireader.data.repository.DiscordCharacterArtRepository(discordService)
         } else {
@@ -366,11 +374,15 @@ val repositoryInjectModule = module {
     // Share-to-Discord (achievements / level-ups / streaks / reviews) — reuses the quote webhook.
     single<ireader.domain.data.repository.DiscordShareRepository> {
         val webhookUrl = ireader.domain.config.PlatformConfig.getDiscordQuoteWebhookUrl()
+        val supabaseUrl = ireader.domain.config.PlatformConfig.getSupabaseAuthUrl()
+        val supabaseKey = ireader.domain.config.PlatformConfig.getSupabaseAuthKey()
         ireader.data.gamification.DiscordShareRepositoryImpl(
             webhookUrl = webhookUrl,
             service = ireader.domain.services.discord.DiscordWebhookService(
                 httpClient = get<ireader.core.http.HttpClients>().default,
                 webhookUrl = webhookUrl,
+                supabaseUrl = supabaseUrl,
+                supabaseKey = supabaseKey,
             ),
         )
     }

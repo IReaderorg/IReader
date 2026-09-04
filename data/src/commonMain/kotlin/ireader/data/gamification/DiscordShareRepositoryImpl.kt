@@ -4,11 +4,11 @@ import ireader.domain.data.repository.DiscordShareRepository
 import ireader.domain.services.discord.DiscordWebhookService
 
 class DiscordShareRepositoryImpl(
-    private val webhookUrl: String,
+    private val webhookUrl: String = "",
     private val service: DiscordWebhookService,
 ) : DiscordShareRepository {
 
-    override val isConfigured: Boolean get() = webhookUrl.isNotBlank()
+    override val isConfigured: Boolean get() = webhookUrl.isNotBlank() || service.isConfigured
 
     override suspend fun shareAchievement(username: String, achievementName: String, tier: String): Result<Unit> =
         service.postMessage("🏅 **@$username** unlocked the **$achievementName** ($tier) achievement on IReader!")

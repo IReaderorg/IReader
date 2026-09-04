@@ -8,6 +8,8 @@ SQL Editor (or via `supabase db push`). Each is idempotent where possible.
 | base | `../schema.sql` | Core schema (users, leaderboard, reviews, badges, …) — run first if fresh |
 | 001 | `001_profile_gamification.sql` | Profile/economy columns, gamification tables, RLS, reward-engine functions (`sync_reading_stats`, `evaluate_achievements`, `checkin_daily`, `vote_book`, `spend_stones`), triggers, snapshot cron |
 | 002 | `002_achievement_seed.sql` | Seeds `achievement_definitions` (the achievement catalog) + the `verified_reader` badge |
+| 003 | `003_synced_books_cover_url.sql` | Adds `cover_url` and `source_name` columns to `synced_books` and updates `get_popular_books` RPC |
+| 004 | `004_security_advisor_fixes.sql` | Fixes Supabase Security Advisor warnings: enables RLS on public tables, sets `security_invoker = true` on views, hardens function search paths |
 
 ## Design notes
 

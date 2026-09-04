@@ -314,7 +314,9 @@ class ReaderContentViewModel(
     ): Chapter? {
         onBeforeChapterLoad()
 
-        val preloadedChapter = preloadedChapters.remove(chapterId)
+        val preloadedChapter = synchronized(preloadLock) {
+            preloadedChapters.remove(chapterId)
+        }
         val chapter = preloadedChapter?.takeIf { !it.isEmpty() }
             ?: getChapterUseCase.findChapterById(chapterId)
 
@@ -916,7 +918,9 @@ class ReaderContentViewModel(
         chapterNavigationJob?.cancel()
         chapterControllerEventJob?.cancel()
         chapterNotifierJob?.cancel()
-        preloadedChapters.clear()
+        synchronized(preloadLock) {
+            preloadedChapters.clear()
+        }
         chapterController.dispatch(ChapterCommand.Cleanup)
     }
 }

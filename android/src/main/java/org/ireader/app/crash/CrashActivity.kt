@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -41,12 +42,12 @@ class CrashActivity : ComponentActivity() {
             LoadingScreen()
         }
         
-        val crashReport = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val crashReport = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(CrashHandler.EXTRA_CRASH_REPORT, CrashReport::class.java)
         } else {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra(CrashHandler.EXTRA_CRASH_REPORT)
-        }
+        }) ?: CrashLogStorage.loadLatest(this)
         
         if (crashReport == null) {
             finish()
@@ -144,6 +145,8 @@ fun CrashScreen(crashReport: CrashReport) {
     val context = LocalContext.current
     var showFullStackTrace by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var isSendingReport by remember { mutableStateOf(false) }
+    var reportSent by remember { mutableStateOf(false) }
     
     // Database migration state
     var showMigrationDialog by remember { mutableStateOf(false) }
@@ -305,6 +308,72 @@ fun CrashScreen(crashReport: CrashReport) {
                 }
                 
                 // Action Buttons
+                Button(
+                    onClick = {
+                        if (!isSendingReport && !reportSent) {
+                            isSendingReport = true
+                            scope.launch {
+                                try {
+                                    val supabaseUrl = ireader.domain.config.PlatformConfig.getSupabaseAuthUrl()
+                                    val supabaseKey = ireader.domain.config.PlatformConfig.getSupabaseAuthKey()
+                                    val webhookUrl = ireader.domain.config.PlatformConfig.getDiscordQuoteWebhookUrl()
+                                    
+                                    val service = ireader.domain.services.discord.DiscordWebhookService(
+                                        httpClient = io.ktor.client.HttpClient(),
+                                        webhookUrl = webhookUrl,
+                                        supabaseUrl = supabaseUrl,
+                                        supabaseKey = supabaseKey
+                                    )
+                                    val result = service.postCrashReport(
+                                        exceptionType = crashReport.exceptionType,
+                                        exceptionMessage = crashReport.exceptionMessage,
+                                        stackTrace = crashReport.stackTrace,
+                                        deviceModel = crashReport.deviceModel,
+                                        appVersion = crashReport.appVersion,
+                                        androidVersion = crashReport.androidVersion
+                                    )
+                                    if (result.isSuccess) {
+                                        reportSent = true
+                                        Toast.makeText(context, "Crash report sent to developers. Thank you!", Toast.LENGTH_LONG).show()
+                                    } else {
+                                        val err = result.exceptionOrNull()?.message ?: "Unknown error"
+                                        Toast.makeText(context, "Failed to send report: $err", Toast.LENGTH_LONG).show()
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error sending report: ${e.message}", Toast.LENGTH_LONG).show()
+                                } finally {
+                                    isSendingReport = false
+                                }
+                            }
+                        }
+                    },
+                    enabled = !isSendingReport && !reportSent,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (reportSent) Color(0xFF4CAF50) else Color(0xFF5865F2)
+                    )
+                ) {
+                    if (isSendingReport) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Sending Crash Report...", color = Color.White)
+                    } else if (reportSent) {
+                        Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Crash Report Sent!", color = Color.White)
+                    } else {
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Send Crash Report to Developers", color = Color.White)
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
                 Button(
                     onClick = {
                         createGitHubIssue(context, crashReport)

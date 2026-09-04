@@ -226,7 +226,8 @@ EXECUTE FUNCTION update_leaderboard_updated_at();
 -- ============================================================================
 
 -- Create a view for leaderboard with rankings
-CREATE OR REPLACE VIEW public.leaderboard_with_rank AS
+CREATE OR REPLACE VIEW public.leaderboard_with_rank 
+WITH (security_invoker = true) AS
 SELECT 
     id,
     user_id,

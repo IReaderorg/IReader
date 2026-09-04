@@ -1452,8 +1452,10 @@ class LibraryViewModel(
             }
             
             // Cancel all existing load jobs
-            paginationLoadJobs.values.forEach { it?.cancel() }
-            paginationLoadJobs.clear()
+            synchronized(paginationLock) {
+                paginationLoadJobs.values.forEach { it?.cancel() }
+                paginationLoadJobs.clear()
+            }
             
             // Clear all cached data
             _paginatedBooks.value = emptyMap()
@@ -1489,8 +1491,10 @@ class LibraryViewModel(
         Log.info { "$TAG: refreshCurrentCategory() called for categoryId=$currentCategoryId" }
         
         // Cancel any existing load job for this category to prevent race conditions
-        paginationLoadJobs[currentCategoryId]?.cancel()
-        paginationLoadJobs[currentCategoryId] = null
+        synchronized(paginationLock) {
+            paginationLoadJobs[currentCategoryId]?.cancel()
+            paginationLoadJobs[currentCategoryId] = null
+        }
         
         // Launch a coroutine to handle the refresh properly
         scope.launch {

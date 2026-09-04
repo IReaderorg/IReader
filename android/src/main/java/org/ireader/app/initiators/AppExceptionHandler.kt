@@ -62,41 +62,15 @@ class AppExceptionHandler(
 
     override fun uncaughtException(t: Thread, e: Throwable) {
         Log.error(e, "an error was caught by exception handler")
-        crashlyticsHandler.uncaughtException(t, e)
-        lastStartedActivity?.let { activity ->
-            val isRestarted = activity.intent
-                .getBooleanExtra(RESTARTED, false)
-
-            val lastException = activity.intent
-                .getSerializableExtra(LAST_EXCEPTION) as Throwable?
-
-            if (!isRestarted || !isSameException(e, lastException)) {
-                killThisProcess {
-                    // signal exception to be logged by crashlytics
-                    crashlyticsHandler.uncaughtException(t, e)
-
-                    val intent = activity.intent
-                        .putExtra(RESTARTED, true)
-                        .putExtra(LAST_EXCEPTION, e)
-                        .addFlags(
-                            Intent.FLAG_ACTIVITY_NEW_TASK or
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        )
-
-                    with(activity) {
-                        finish()
-                        startActivity(intent)
-                    }
-                }
-            } else {
-                Log.debug { "The system exception handler will handle the caught exception." }
-
-                killThisProcess { systemHandler.uncaughtException(t, e) }
-            }
-        } ?: killThisProcess {
+        try {
             crashlyticsHandler.uncaughtException(t, e)
-            systemHandler.uncaughtException(t, e)
+        } catch (ex: Exception) {
+            Log.error(ex, "Failed to forward crash to crashlytics")
         }
+        
+        // Delegate to systemHandler (org.ireader.app.crash.CrashHandler) 
+        // to persist the crash log to disk and launch CrashActivity
+        systemHandler.uncaughtException(t, e)
     }
 
     /**
@@ -109,7 +83,7 @@ class AppExceptionHandler(
         if (lastException == null) return false
 
         return originalException.javaClass == lastException.javaClass &&
-            originalException.stackTrace[0] == originalException.stackTrace[0] &&
+            originalException.stackTrace.firstOrNull() == lastException.stackTrace.firstOrNull() &&
             originalException.message == lastException.message
     }
 

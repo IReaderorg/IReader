@@ -23,12 +23,20 @@ class CrashHandler private constructor(private val context: Context) : Thread.Un
             // Create crash report
             val crashReport = createCrashReport(throwable, thread)
             
+            // Persist crash report to disk immediately
+            CrashLogStorage.save(context, crashReport)
+            
             // Launch crash activity
             val intent = Intent(context, CrashActivity::class.java).apply {
                 putExtra(EXTRA_CRASH_REPORT, crashReport)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }
             context.startActivity(intent)
+            
+            // Allow AMS to spawn the :crash process before killing current process
+            try {
+                Thread.sleep(300)
+            } catch (_: InterruptedException) {}
             
             // Kill the process
             android.os.Process.killProcess(android.os.Process.myPid())
