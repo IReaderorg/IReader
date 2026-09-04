@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +25,10 @@ class SettingsReaderViewModel(
     // Display preferences
     val doubleTapZoom: StateFlow<Boolean> = preferenceStore.getBoolean("double_tap_zoom", true).stateIn(scope)
     val showPageNumber: StateFlow<Boolean> = preferenceStore.getBoolean("show_page_number", true).stateIn(scope)
-    val fullscreen: StateFlow<Boolean> = preferenceStore.getBoolean("reader_fullscreen", true).stateIn(scope)
+    val fullscreen: StateFlow<Boolean> = preferenceStore.getBoolean(
+        ReaderPreferences.SAVED_IMMERSIVE_MODE_PREFERENCES,
+        false
+    ).stateIn(scope)
     val keepScreenOn: StateFlow<Boolean> = preferenceStore.getBoolean("keep_screen_on", true).stateIn(scope)
     val showStatusBar: StateFlow<Boolean> = preferenceStore.getBoolean("show_status_bar", false).stateIn(scope)
     val showNavigationBar: StateFlow<Boolean> = preferenceStore.getBoolean("show_navigation_bar", false).stateIn(scope)
@@ -105,7 +109,8 @@ class SettingsReaderViewModel(
     }
     
     fun setFullscreen(enabled: Boolean) {
-        preferenceStore.getBoolean("reader_fullscreen", true).set(enabled)
+        preferenceStore.getBoolean(ReaderPreferences.SAVED_IMMERSIVE_MODE_PREFERENCES, false).set(enabled)
+        preferenceStore.getBoolean("reader_fullscreen", false).set(enabled)
     }
     
     fun setKeepScreenOn(enabled: Boolean) {

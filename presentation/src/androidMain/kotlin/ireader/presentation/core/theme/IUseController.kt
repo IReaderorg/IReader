@@ -111,6 +111,10 @@ class WindowInsetsController(private val window: Window) {
     var isSystemBarsVisible: Boolean
         get() = true // Always return true as we can't directly query this
         set(value) {
+            if (!value) {
+                insetsController.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
             isStatusBarVisible = value
             isNavigationBarVisible = value
         }

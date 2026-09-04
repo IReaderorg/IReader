@@ -5,8 +5,10 @@ import android.app.Activity
 import android.os.Build
 import android.view.View
 import android.view.View.GONE
+import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.annotation.UiThread
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
@@ -39,9 +41,21 @@ fun Activity.enableFullScreen() {
     )
 }
 
-@Suppress("DEPRECATION")
-val Activity.isImmersiveModeEnabled
-    get() = window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY == window.decorView.systemUiVisibility
+val Activity.isImmersiveModeEnabled: Boolean
+    get() {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val insets = window.decorView.rootWindowInsets
+            if (insets != null) {
+                !insets.isVisible(WindowInsets.Type.statusBars()) &&
+                    !insets.isVisible(WindowInsets.Type.navigationBars())
+            } else {
+                false
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            (window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
+        }
+    }
 
 /**
  * Sets the screen brightness. Call this before setContentView.
@@ -83,19 +97,56 @@ fun Activity.showBottomBar() {
 }
 
 /**
- * Created by hristijan on 3/29/19 to long live and prosper !
+ * Enables immersive mode, setting cutout mode on Android P+ and hiding system bars.
  */
-@Suppress("DEPRECATION")
 fun Activity.enableImmersiveMode() {
-    val window = window
-    window.setFlags(
-        WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        WindowManager.LayoutParams.FLAG_FULLSCREEN
-    )
-    window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
-        if (visibility != 0)
-            return@setOnSystemUiVisibilityChangeListener
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val params = window.attributes
+        if (params.layoutInDisplayCutoutMode != WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.attributes = params
+        }
+    }
+    hideSystemUI()
+}
 
+/**
+ * Shows the system bars using modern WindowCompat APIs.
+ */
+fun Activity.showSystemUI() {
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+    windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
+
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        @Suppress("DEPRECATION")
+        window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            )
+    }
+}
+
+/**
+ * Hides the system bars using modern WindowCompat APIs and configures transient swipe behavior.
+ */
+fun Activity.hideSystemUI() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val params = window.attributes
+        if (params.layoutInDisplayCutoutMode != WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
+            params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.attributes = params
+        }
+    }
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+    windowInsetsController.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -106,41 +157,3 @@ fun Activity.enableImmersiveMode() {
             )
     }
 }
-
-/**
- * This snippet shows the system bars. It does this by removing all the flags
- * except for the ones that make the content appear under the system bars.
- */
-@Suppress("DEPRECATION")
-fun Activity.showSystemUI() {
-    window.decorView.systemUiVisibility = (
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        )
-    window.decorView.fitsSystemWindows = false
-    val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
-    windowInsetsController.systemBarsBehavior =
-        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
-}
-
-/**
- * This snippet hides the system bars.
- */
-@Suppress("DEPRECATION")
-fun Activity.hideSystemUI() {
-    window.decorView.systemUiVisibility = (
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            or View.SYSTEM_UI_FLAG_FULLSCREEN
-            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-        )
-    window.decorView.fitsSystemWindows = false
-    val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
-    windowInsetsController.systemBarsBehavior =
-        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-    }

@@ -3,6 +3,7 @@ package ireader.presentation.ui.reader.viewmodel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
@@ -21,6 +22,7 @@ import kotlin.time.Instant
 actual class PlatformReaderSettingReader(
        private val webViewManager: WebViewManger
 ) {
+    private var focusChangeListener: ViewTreeObserver.OnWindowFocusChangeListener? = null
 
 
     actual fun ReaderScreenViewModel.saveBrightness(context: Any, brightness: Float) {
@@ -89,11 +91,17 @@ actual class PlatformReaderSettingReader(
 
 
     fun ReaderScreenViewModel.showSystemBars(context: Context) {
-        context.findComponentActivity()?.showSystemUI()
+        val activity = context.findComponentActivity() ?: return
+        activity.window.decorView.post {
+            activity.showSystemUI()
+        }
     }
 
     fun ReaderScreenViewModel.hideSystemBars(context: Context) {
-        context.findComponentActivity()?.hideSystemUI()
+        val activity = context.findComponentActivity() ?: return
+        activity.window.decorView.post {
+            activity.hideSystemUI()
+        }
     }
 
     actual fun ReaderScreenViewModel.restoreSetting(
@@ -101,11 +109,15 @@ actual class PlatformReaderSettingReader(
         scrollState: ScrollState,
         lazyScrollState: LazyListState
     ) {
-        val activity = (context as Context).findComponentActivity()
+        val activity = (context as? Context)?.findComponentActivity()
         if (activity != null) {
+            focusChangeListener?.let { listener ->
+                activity.window.decorView.viewTreeObserver.removeOnWindowFocusChangeListener(listener)
+                focusChangeListener = null
+            }
             val window = activity.window
             val layoutParams: WindowManager.LayoutParams = window.attributes
-            showSystemBars(context)
+            showSystemBars(activity)
             layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window.attributes = layoutParams
@@ -138,6 +150,20 @@ actual class PlatformReaderSettingReader(
         onHideNav: (Boolean) -> Unit,
         onHideStatus: (Boolean) -> Unit
     ) {
+        val activity = (context as? Context)?.findComponentActivity()
+        if (activity != null) {
+            focusChangeListener?.let { oldListener ->
+                activity.window.decorView.viewTreeObserver.removeOnWindowFocusChangeListener(oldListener)
+            }
+            val newListener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+                if (hasFocus && immersiveMode.value && isReaderModeEnable) {
+                    hideSystemBars(activity)
+                }
+            }
+            focusChangeListener = newListener
+            activity.window.decorView.viewTreeObserver.addOnWindowFocusChangeListener(newListener)
+        }
+
         scope.launch {
             readImmersiveMode(onHideNav = onHideNav, onHideStatus = onHideStatus, context = context)
         }
