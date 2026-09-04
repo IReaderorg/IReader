@@ -326,6 +326,28 @@ class TTSController(
                     Log.warn { "$TAG: Ignoring stale EngineEvent.Error(utteranceId=${event.utteranceId}, current=$currentUtteranceId)" }
                     return
                 }
+
+                // Resilience: If playback is currently active and there is a next paragraph available,
+                // try auto-advancing to avoid completely stopping playback on an individual paragraph synthesis glitch.
+                val currentState = _state.value
+                if (currentState.isPlaying && currentState.canGoNext) {
+                    Log.warn { "$TAG: Speech failed for $currentUtteranceId (${event.message}), attempting to auto-advance to next paragraph" }
+                    commandMutex.withLock {
+                        val stateInLock = _state.value
+                        if (stateInLock.isPlaying && stateInLock.canGoNext) {
+                            _state.update {
+                                it.copy(
+                                    previousParagraphIndex = it.currentParagraphIndex,
+                                    currentParagraphIndex = it.currentParagraphIndex + 1,
+                                    loadingParagraphs = it.loadingParagraphs - it.currentParagraphIndex
+                                )
+                            }
+                            play()
+                            return
+                        }
+                    }
+                }
+
                 handleError(TTSError.SpeechFailed(event.message))
             }
         }

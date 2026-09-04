@@ -6,6 +6,7 @@ import android.speech.tts.UtteranceProgressListener
 import ireader.core.log.Log
 import ireader.domain.models.entities.Chapter
 import ireader.domain.services.tts.CoquiTTSService
+import ireader.domain.services.tts_service.v2.TTSSentenceSplitter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -53,11 +54,25 @@ class NativeTTSPlayer(
     
     // Pending speak request to execute when TTS is ready
     private var pendingSpeak: Pair<String, String>? = null
+
+    // Track active chunked utterance for sentence/clause pipelining
+    private data class ActiveUtterance(
+        val utteranceId: String,
+        val chunks: List<String>,
+        var nextChunkToQueue: Int = 0,
+        var completedCount: Int = 0,
+        var hasStarted: Boolean = false,
+        var hasSuccessfulChunk: Boolean = false
+    )
+    private val utteranceLock = Any()
+    private var activeUtterance: ActiveUtterance? = null
+    private var isListenerConfigured = false
     
     init {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 isInitialized = true
+                ensureUtteranceListener()
                 Log.info { "Native TTS initialized successfully" }
                 
                 // Apply pending voice if set before initialization
@@ -122,6 +137,130 @@ class NativeTTSPlayer(
         }
     }
     
+    private fun ensureUtteranceListener() {
+        if (isListenerConfigured) return
+        isListenerConfigured = true
+        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {
+                handleUtteranceStart(utteranceId)
+            }
+
+            override fun onDone(utteranceId: String?) {
+                handleUtteranceDone(utteranceId)
+            }
+
+            @Deprecated("Deprecated in Java")
+            override fun onError(utteranceId: String?) {
+                handleUtteranceError(utteranceId, TextToSpeech.ERROR)
+            }
+
+            override fun onError(utteranceId: String?, errorCode: Int) {
+                handleUtteranceError(utteranceId, errorCode)
+            }
+        })
+    }
+
+    private fun handleUtteranceStart(subId: String?) {
+        val (parentUtteranceId, _) = parseSubUtteranceId(subId) ?: return
+        var shouldNotifyStart = false
+        synchronized(utteranceLock) {
+            val current = activeUtterance
+            if (current != null && current.utteranceId == parentUtteranceId) {
+                if (!current.hasStarted) {
+                    current.hasStarted = true
+                    shouldNotifyStart = true
+                }
+            }
+        }
+        if (shouldNotifyStart) {
+            scope.launch {
+                callback?.onStart(parentUtteranceId)
+            }
+        }
+    }
+
+    private fun handleUtteranceDone(subId: String?) {
+        val (parentUtteranceId, _) = parseSubUtteranceId(subId) ?: return
+        var shouldNotifyDone = false
+        var nextChunkToSpeak: Pair<String, String>? = null
+
+        synchronized(utteranceLock) {
+            val current = activeUtterance
+            if (current != null && current.utteranceId == parentUtteranceId) {
+                current.hasSuccessfulChunk = true
+                current.completedCount++
+
+                if (current.nextChunkToQueue < current.chunks.size) {
+                    val nextIdx = current.nextChunkToQueue
+                    val nextSubId = makeSubUtteranceId(parentUtteranceId, nextIdx)
+                    val nextText = current.chunks[nextIdx]
+                    current.nextChunkToQueue++
+                    nextChunkToSpeak = nextText to nextSubId
+                }
+
+                if (current.completedCount >= current.chunks.size) {
+                    shouldNotifyDone = true
+                    activeUtterance = null
+                }
+            }
+        }
+
+        nextChunkToSpeak?.let { (text, nextId) ->
+            tts?.speak(text, TextToSpeech.QUEUE_ADD, null, nextId)
+        }
+
+        if (shouldNotifyDone) {
+            scope.launch {
+                callback?.onDone(parentUtteranceId)
+            }
+        }
+    }
+
+    private fun handleUtteranceError(subId: String?, errorCode: Int) {
+        Log.error { "Native TTS error on chunk $subId, code=$errorCode" }
+        val (parentUtteranceId, _) = parseSubUtteranceId(subId) ?: return
+        var shouldNotifyDone = false
+        var shouldNotifyError = false
+        var nextChunkToSpeak: Pair<String, String>? = null
+
+        synchronized(utteranceLock) {
+            val current = activeUtterance
+            if (current != null && current.utteranceId == parentUtteranceId) {
+                current.completedCount++
+
+                if (current.nextChunkToQueue < current.chunks.size) {
+                    // Resiliency: skip the failed chunk and continue with next chunk
+                    val nextIdx = current.nextChunkToQueue
+                    val nextSubId = makeSubUtteranceId(parentUtteranceId, nextIdx)
+                    val nextText = current.chunks[nextIdx]
+                    current.nextChunkToQueue++
+                    nextChunkToSpeak = nextText to nextSubId
+                } else if (current.completedCount >= current.chunks.size) {
+                    if (current.hasSuccessfulChunk) {
+                        shouldNotifyDone = true
+                    } else {
+                        shouldNotifyError = true
+                    }
+                    activeUtterance = null
+                }
+            }
+        }
+
+        nextChunkToSpeak?.let { (text, nextId) ->
+            tts?.speak(text, TextToSpeech.QUEUE_ADD, null, nextId)
+        }
+
+        if (shouldNotifyError) {
+            scope.launch {
+                callback?.onError(parentUtteranceId, "TTS error code: $errorCode")
+            }
+        } else if (shouldNotifyDone) {
+            scope.launch {
+                callback?.onDone(parentUtteranceId)
+            }
+        }
+    }
+
     override fun speak(text: String, utteranceId: String) {
         if (text.isBlank()) {
             scope.launch {
@@ -147,52 +286,75 @@ class NativeTTSPlayer(
             return
         }
         
-        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(utteranceId: String?) {
-                utteranceId?.let { id ->
-                    scope.launch {
-                        callback?.onStart(id)
-                    }
-                }
+        val chunks = TTSSentenceSplitter.split(text)
+        if (chunks.isEmpty()) {
+            scope.launch {
+                callback?.onDone(utteranceId)
             }
-            
-            override fun onDone(utteranceId: String?) {
-                utteranceId?.let { id ->
-                    scope.launch {
-                        callback?.onDone(id)
-                    }
-                }
-            }
-            
-            @Deprecated("Deprecated in Java")
-            override fun onError(utteranceId: String?) {
-                utteranceId?.let { id ->
-                    scope.launch {
-                        callback?.onError(id, "TTS error")
-                    }
-                }
-            }
-            
-            override fun onError(utteranceId: String?, errorCode: Int) {
-                Log.error { "Native TTS error: $utteranceId, code=$errorCode" }
-                utteranceId?.let { id ->
-                    scope.launch {
-                        callback?.onError(id, "TTS error code: $errorCode")
-                    }
-                }
-            }
-        })
-        
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+            return
+        }
+
+        ensureUtteranceListener()
+
+        val utterance = ActiveUtterance(
+            utteranceId = utteranceId,
+            chunks = chunks,
+            nextChunkToQueue = 1,
+            completedCount = 0,
+            hasStarted = false,
+            hasSuccessfulChunk = false
+        )
+
+        val firstSubId = makeSubUtteranceId(utteranceId, 0)
+        val firstChunk = chunks[0]
+
+        val secondChunkInfo: Pair<String, String>? = if (chunks.size > 1) {
+            utterance.nextChunkToQueue = 2
+            chunks[1] to makeSubUtteranceId(utteranceId, 1)
+        } else {
+            null
+        }
+
+        synchronized(utteranceLock) {
+            activeUtterance = utterance
+        }
+
+        // Chunk 0 flushes previous speech
+        tts?.speak(firstChunk, TextToSpeech.QUEUE_FLUSH, null, firstSubId)
+
+        // Chunk 1 is queued immediately with QUEUE_ADD so there is zero gap
+        secondChunkInfo?.let { (chunkText, chunkId) ->
+            tts?.speak(chunkText, TextToSpeech.QUEUE_ADD, null, chunkId)
+        }
+    }
+
+    private fun makeSubUtteranceId(parentUtteranceId: String, chunkIndex: Int): String {
+        return "${parentUtteranceId}__sub__${chunkIndex}"
+    }
+
+    private fun parseSubUtteranceId(subId: String?): Pair<String, Int>? {
+        if (subId == null) return null
+        val delimiter = "__sub__"
+        val idx = subId.lastIndexOf(delimiter)
+        if (idx == -1) return subId to 0
+        val parentId = subId.substring(0, idx)
+        val chunkIdx = subId.substring(idx + delimiter.length).toIntOrNull() ?: 0
+        return parentId to chunkIdx
     }
     
     override fun stop() {
         pendingSpeak = null
+        synchronized(utteranceLock) {
+            activeUtterance = null
+        }
         tts?.stop()
     }
     
     override fun pause() {
         pendingSpeak = null
+        synchronized(utteranceLock) {
+            activeUtterance = null
+        }
         tts?.stop()
     }
     
@@ -220,6 +382,10 @@ class NativeTTSPlayer(
     
     override fun cleanup() {
         pendingSpeak = null
+        synchronized(utteranceLock) {
+            activeUtterance = null
+        }
+        isListenerConfigured = false
         tts?.stop()
         tts?.shutdown()
         tts = null
