@@ -7,6 +7,7 @@ import ireader.domain.preferences.prefs.UiPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class MigrationRepositoryImpl(
     private val uiPreferences: UiPreferences,
@@ -46,9 +47,7 @@ class MigrationRepositoryImpl(
     }
     
     override suspend fun saveMigrationJob(job: MigrationJob) {
-        val currentJobs = _migrationJobs.value.toMutableList()
-        currentJobs.add(job)
-        _migrationJobs.value = currentJobs
+        _migrationJobs.update { current -> current + job }
     }
     
     override fun getAllMigrationJobs(): Flow<List<MigrationJob>> {
@@ -56,11 +55,8 @@ class MigrationRepositoryImpl(
     }
     
     override suspend fun updateMigrationJobStatus(jobId: String, status: MigrationJobStatus) {
-        val currentJobs = _migrationJobs.value.toMutableList()
-        val index = currentJobs.indexOfFirst { it.id == jobId }
-        if (index != -1) {
-            currentJobs[index] = currentJobs[index].copy(status = status)
-            _migrationJobs.value = currentJobs
+        _migrationJobs.update { current ->
+            current.map { if (it.id == jobId) it.copy(status = status) else it }
         }
     }
     
@@ -70,18 +66,16 @@ class MigrationRepositoryImpl(
         completedBooks: Int,
         failedBooks: Int
     ) {
-        val currentJobs = _migrationJobs.value.toMutableList()
-        val index = currentJobs.indexOfFirst { it.id == jobId }
-        if (index != -1) {
-            // Update job progress - this would update the job's progress field if it exists
-            // For now, just update the status based on progress
-            val updatedJob = currentJobs[index]
-            currentJobs[index] = updatedJob
-            _migrationJobs.value = currentJobs
+        _migrationJobs.update { current ->
+            current.map { job ->
+                if (job.id == jobId) {
+                    job
+                } else job
+            }
         }
     }
     
     override suspend fun deleteMigrationJob(jobId: String) {
-        _migrationJobs.value = _migrationJobs.value.filter { it.id != jobId }
+        _migrationJobs.update { current -> current.filter { it.id != jobId } }
     }
 }

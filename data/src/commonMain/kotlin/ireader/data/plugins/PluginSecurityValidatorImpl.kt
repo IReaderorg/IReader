@@ -31,6 +31,7 @@ class PluginSecurityValidatorImpl(
     }
 
     // Cache for license validations
+    private val lock = Any()
     private val licenseCache = mutableMapOf<String, Pair<LicenseValidation, Long>>()
 
     override suspend fun canInstallPlugin(
@@ -98,7 +99,7 @@ class PluginSecurityValidatorImpl(
     override suspend fun validateLicense(userId: String, pluginId: String): LicenseValidation {
         // Check cache first
         val cacheKey = "$userId:$pluginId"
-        val cached = licenseCache[cacheKey]
+        val cached = synchronized(lock) { licenseCache[cacheKey] }
         if (cached != null && (currentTimeToLong() - cached.second) < LICENSE_CACHE_DURATION_MS) {
             return cached.first
         }
@@ -111,7 +112,9 @@ class PluginSecurityValidatorImpl(
         )
 
         // Cache the result
-        licenseCache[cacheKey] = validation to currentTimeToLong()
+        synchronized(lock) {
+            licenseCache[cacheKey] = validation to currentTimeToLong()
+        }
 
         return validation
     }
@@ -144,15 +147,20 @@ class PluginSecurityValidatorImpl(
      * Clear license cache (call when user logs out or purchases)
      */
     fun clearCache() {
-        licenseCache.clear()
+        synchronized(lock) {
+            licenseCache.clear()
+        }
     }
 
     /**
      * Clear cache for specific plugin
      */
     fun clearCacheForPlugin(pluginId: String) {
-        licenseCache.keys.filter { it.endsWith(":$pluginId") }.forEach {
-            licenseCache.remove(it)
+        synchronized(lock) {
+            val toRemove = licenseCache.keys.filter { it.endsWith(":$pluginId") }
+            toRemove.forEach {
+                licenseCache.remove(it)
+            }
         }
     }
 }

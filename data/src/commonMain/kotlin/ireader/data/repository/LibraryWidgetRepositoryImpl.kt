@@ -19,6 +19,7 @@ class LibraryWidgetRepositoryImpl(
     private val handler: DatabaseHandler
 ) : LibraryWidgetRepository {
     
+    private val lock = Any()
     private val widgetConfigs = mutableMapOf<Int, LibraryWidgetConfig>()
     private val _widgetDataFlows = mutableMapOf<Int, MutableStateFlow<LibraryWidgetData?>>()
     private val _statisticsFlow = MutableStateFlow(WidgetStatistics(
@@ -31,12 +32,14 @@ class LibraryWidgetRepositoryImpl(
     ))
     
     override suspend fun getWidgetConfig(widgetId: Int): LibraryWidgetConfig? {
-        return widgetConfigs[widgetId] ?: loadWidgetConfigFromDatabase(widgetId)
+        return synchronized(lock) { widgetConfigs[widgetId] } ?: loadWidgetConfigFromDatabase(widgetId)
     }
     
     override suspend fun saveWidgetConfig(config: LibraryWidgetConfig): Boolean {
         return try {
-            widgetConfigs[config.widgetId] = config
+            synchronized(lock) {
+                widgetConfigs[config.widgetId] = config
+            }
             saveWidgetConfigToDatabase(config)
             true
         } catch (e: Exception) {
@@ -46,8 +49,10 @@ class LibraryWidgetRepositoryImpl(
     
     override suspend fun deleteWidgetConfig(widgetId: Int): Boolean {
         return try {
-            widgetConfigs.remove(widgetId)
-            _widgetDataFlows.remove(widgetId)
+            synchronized(lock) {
+                widgetConfigs.remove(widgetId)
+                _widgetDataFlows.remove(widgetId)
+            }
             deleteWidgetConfigFromDatabase(widgetId)
             true
         } catch (e: Exception) {
@@ -56,7 +61,7 @@ class LibraryWidgetRepositoryImpl(
     }
     
     override suspend fun getAllWidgetConfigs(): List<LibraryWidgetConfig> {
-        return widgetConfigs.values.toList()
+        return synchronized(lock) { widgetConfigs.values.toList() }
     }
     
     override suspend fun getWidgetData(widgetId: Int): LibraryWidgetData? {
@@ -69,15 +74,18 @@ class LibraryWidgetRepositoryImpl(
     }
     
     override fun getWidgetDataAsFlow(widgetId: Int): Flow<LibraryWidgetData?> {
-        return _widgetDataFlows.getOrPut(widgetId) {
-            MutableStateFlow(null)
+        return synchronized(lock) {
+            _widgetDataFlows.getOrPut(widgetId) {
+                MutableStateFlow(null)
+            }
         }.asStateFlow()
     }
     
     override suspend fun updateWidgetData(widgetId: Int): Boolean {
         return try {
             val data = getWidgetData(widgetId)
-            _widgetDataFlows[widgetId]?.value = data
+            val flow = synchronized(lock) { _widgetDataFlows[widgetId] }
+            flow?.value = data
             true
         } catch (e: Exception) {
             false
@@ -86,7 +94,8 @@ class LibraryWidgetRepositoryImpl(
     
     override suspend fun updateAllWidgets(): Boolean {
         return try {
-            widgetConfigs.keys.forEach { widgetId ->
+            val widgetIds = synchronized(lock) { widgetConfigs.keys.toList() }
+            widgetIds.forEach { widgetId ->
                 updateWidgetData(widgetId)
             }
             true

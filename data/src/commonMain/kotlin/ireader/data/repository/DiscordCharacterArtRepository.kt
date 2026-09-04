@@ -20,6 +20,7 @@ class DiscordCharacterArtRepository(
 ) : CharacterArtRepository {
     
     // Local cache for recently posted art (optional, for UI feedback)
+    private val lock = Any()
     private val recentlyPosted = mutableListOf<CharacterArt>()
     
     override suspend fun getApprovedArt(
@@ -31,7 +32,7 @@ class DiscordCharacterArtRepository(
     ): Result<List<CharacterArt>> {
         // Discord doesn't have a gallery - art is in Discord channel
         // Return empty list or recently posted for UI feedback
-        return Result.success(recentlyPosted.take(limit))
+        return Result.success(synchronized(lock) { recentlyPosted.take(limit) })
     }
     
     override suspend fun getArtByBook(bookTitle: String): Result<List<CharacterArt>> {
@@ -51,7 +52,7 @@ class DiscordCharacterArtRepository(
     
     override suspend fun getUserSubmissions(): Result<List<CharacterArt>> {
         // Return recently posted by this user
-        return Result.success(recentlyPosted)
+        return Result.success(synchronized(lock) { recentlyPosted.toList() })
     }
     
     override suspend fun getPendingArt(): Result<List<CharacterArt>> {
@@ -61,7 +62,7 @@ class DiscordCharacterArtRepository(
     
     override suspend fun getArtById(id: String): Result<CharacterArt> {
         // Find in recent cache
-        val art = recentlyPosted.firstOrNull { it.id == id }
+        val art = synchronized(lock) { recentlyPosted.firstOrNull { it.id == id } }
         return if (art != null) {
             Result.success(art)
         } else {
@@ -104,9 +105,11 @@ class DiscordCharacterArtRepository(
             )
             
             // Add to recent cache
-            recentlyPosted.add(0, art)
-            if (recentlyPosted.size > 50) {
-                recentlyPosted.removeLast()
+            synchronized(lock) {
+                recentlyPosted.add(0, art)
+                if (recentlyPosted.size > 50) {
+                    recentlyPosted.removeLast()
+                }
             }
             
             art
@@ -130,7 +133,9 @@ class DiscordCharacterArtRepository(
     
     override suspend fun deleteArt(artId: String): Result<Unit> {
         // Remove from local cache only
-        recentlyPosted.removeAll { it.id == artId }
+        synchronized(lock) {
+            recentlyPosted.removeAll { it.id == artId }
+        }
         return Result.success(Unit)
     }
     
@@ -156,6 +161,8 @@ class DiscordCharacterArtRepository(
     
     override fun observeArt(filter: ArtStyleFilter): kotlinx.coroutines.flow.Flow<List<CharacterArt>> {
         // Return flow of recently posted art
-        return kotlinx.coroutines.flow.flowOf(recentlyPosted)
+        return kotlinx.coroutines.flow.flow {
+            emit(synchronized(lock) { recentlyPosted.toList() })
+        }
     }
 }

@@ -33,6 +33,7 @@ class ExtensionManagerImpl(
     private val privateExtensionsDir: String? = null // Directory for private installations
 ) : ExtensionManager {
     
+    private val statsLock = Any()
     private val extensionStatistics = mutableMapOf<Long, ExtensionStatistics>()
     
     // Shizuku service state
@@ -88,16 +89,18 @@ class ExtensionManagerImpl(
             }
             
             // Initialize statistics
-            extensionStatistics[catalog.sourceId] = ExtensionStatistics(
-                extensionId = catalog.sourceId,
-                installDate = currentTimeToLong(),
-                lastUsed = 0,
-                usageCount = 0,
-                errorCount = 0,
-                averageResponseTime = 0,
-                totalDataTransferred = 0,
-                crashCount = 0
-            )
+            synchronized(statsLock) {
+                extensionStatistics[catalog.sourceId] = ExtensionStatistics(
+                    extensionId = catalog.sourceId,
+                    installDate = currentTimeToLong(),
+                    lastUsed = 0,
+                    usageCount = 0,
+                    errorCount = 0,
+                    averageResponseTime = 0,
+                    totalDataTransferred = 0,
+                    crashCount = 0
+                )
+            }
             
             log.info("Successfully installed extension: ${catalog.name}")
             Result.success(Unit)
@@ -203,7 +206,9 @@ class ExtensionManagerImpl(
             uninstallCatalog.await(catalog)
             
             // Remove statistics
-            extensionStatistics.remove(catalog.sourceId)
+            synchronized(statsLock) {
+                extensionStatistics.remove(catalog.sourceId)
+            }
             
             // If it was a private installation, also remove the file
             privateExtensionsDir?.let { dir ->
@@ -296,25 +301,29 @@ class ExtensionManagerImpl(
     }
     
     override suspend fun getExtensionStatistics(extensionId: Long): ExtensionStatistics? {
-        return extensionStatistics[extensionId]
+        return synchronized(statsLock) { extensionStatistics[extensionId] }
     }
     
     override suspend fun trackExtensionUsage(extensionId: Long) {
-        val stats = extensionStatistics[extensionId] ?: return
-        
-        extensionStatistics[extensionId] = stats.copy(
-            lastUsed = currentTimeToLong(),
-            usageCount = stats.usageCount + 1
-        )
+        synchronized(statsLock) {
+            val stats = extensionStatistics[extensionId] ?: return
+            
+            extensionStatistics[extensionId] = stats.copy(
+                lastUsed = currentTimeToLong(),
+                usageCount = stats.usageCount + 1
+            )
+        }
     }
     
     override suspend fun reportExtensionError(extensionId: Long, error: Throwable) {
         log.error("Extension error reported for $extensionId", error)
         
-        val stats = extensionStatistics[extensionId] ?: return
-        
-        extensionStatistics[extensionId] = stats.copy(
-            errorCount = stats.errorCount + 1
-        )
+        synchronized(statsLock) {
+            val stats = extensionStatistics[extensionId] ?: return
+            
+            extensionStatistics[extensionId] = stats.copy(
+                errorCount = stats.errorCount + 1
+            )
+        }
     }
 }

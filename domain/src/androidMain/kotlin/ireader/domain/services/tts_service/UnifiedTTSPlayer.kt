@@ -502,6 +502,10 @@ class CoquiTTSPlayer(
     }
     
     override fun cleanup() {
+        synchronized(cacheLock) {
+            audioCache.clear()
+            cacheStatus.clear()
+        }
         coquiService?.cleanup()
         coquiService = null
         isInitialized = false

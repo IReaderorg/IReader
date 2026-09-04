@@ -83,8 +83,15 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
     }
 
     override suspend fun deleteSavedDownloadByBookId(bookId: Long) {
+        val chapterIds = findAllDownloads().filter { it.bookId == bookId }.map { it.chapterId }
         handler.await {
             downloadQueries.deleteByBookId(bookId)
+        }
+        synchronized(lock) {
+            chapterIds.forEach {
+                downloadStatusMap.remove(it)
+                downloadProgressMap.remove(it)
+            }
         }
     }
 
@@ -134,7 +141,9 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
             bookId = item.bookId,
             priority = item.priority
         ))
-        downloadStatusMap[item.chapterId] = item.status
+        synchronized(lock) {
+            downloadStatusMap[item.chapterId] = item.status
+        }
     }
 
     override suspend fun addToQueue(items: List<DownloadItem>) {
@@ -145,8 +154,10 @@ class DownloadRepositoryImpl(private val handler: DatabaseHandler) :
                 priority = item.priority
             )
         })
-        items.forEach { item ->
-            downloadStatusMap[item.chapterId] = item.status
+        synchronized(lock) {
+            items.forEach { item ->
+                downloadStatusMap[item.chapterId] = item.status
+            }
         }
     }
 

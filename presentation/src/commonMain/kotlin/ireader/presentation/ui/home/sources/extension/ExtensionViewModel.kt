@@ -79,6 +79,7 @@ class ExtensionViewModel(
     }
 
     @Volatile private var autoFetchJob: Job? = null
+    private val installerJobsLock = Any()
     private val installerJobs: MutableMap<Long, Job> = mutableMapOf()
 
     // ── Preferences ─────────────────────────────────────────────────────
@@ -293,9 +294,12 @@ class ExtensionViewModel(
      * Install or update a catalog. Direct implementation — no controller indirection.
      */
     fun installCatalog(catalog: Catalog) {
-        if (installerJobs.containsKey(catalog.sourceId)) return
+        val alreadyRunning = synchronized(installerJobsLock) {
+            installerJobs.containsKey(catalog.sourceId)
+        }
+        if (alreadyRunning) return
 
-        installerJobs[catalog.sourceId] = scope.launch {
+        val job = scope.launch {
             val isUpdate = catalog is CatalogInstalled
             val (pkgName, flow) = if (isUpdate) {
                 catalog as CatalogInstalled
@@ -305,20 +309,28 @@ class ExtensionViewModel(
                 catalog.pkgName to _installCatalog.await(catalog)
             }
 
-            flow.collect { step ->
-                if (step is InstallStep.Error) showSnackBar(UiText.DynamicString(step.error))
-                updateState { s ->
-                    s.copy(
-                        installSteps = if (step is InstallStep.Success) {
-                            refreshCatalogsQuietly()
-                            s.installSteps - pkgName
-                        } else {
-                            s.installSteps + (pkgName to step)
-                        }
-                    )
+            try {
+                flow.collect { step ->
+                    if (step is InstallStep.Error) showSnackBar(UiText.DynamicString(step.error))
+                    updateState { s ->
+                        s.copy(
+                            installSteps = if (step is InstallStep.Success) {
+                                refreshCatalogsQuietly()
+                                s.installSteps - pkgName
+                            } else {
+                                s.installSteps + (pkgName to step)
+                            }
+                        )
+                    }
+                }
+            } finally {
+                synchronized(installerJobsLock) {
+                    installerJobs.remove(catalog.sourceId)
                 }
             }
-            installerJobs.remove(catalog.sourceId)
+        }
+        synchronized(installerJobsLock) {
+            installerJobs[catalog.sourceId] = job
         }
     }
 
@@ -337,8 +349,10 @@ class ExtensionViewModel(
     }
 
     fun cancelCatalogJob(catalog: Catalog) {
-        installerJobs[catalog.sourceId]?.cancel()
-        installerJobs.remove(catalog.sourceId)
+        val jobToCancel = synchronized(installerJobsLock) {
+            installerJobs.remove(catalog.sourceId)
+        }
+        jobToCancel?.cancel()
         val pkgName = when (catalog) {
             is CatalogRemote -> catalog.pkgName
             is CatalogInstalled -> catalog.pkgName

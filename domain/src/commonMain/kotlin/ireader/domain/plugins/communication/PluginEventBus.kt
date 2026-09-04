@@ -84,15 +84,16 @@ class PluginEventBus {
         )
         
         scope.launch {
-            mutex.withLock {
+            val stickyEventsToDeliver = mutex.withLock {
                 subscriptions[subscriberId] = subscription
+                stickyEvents.values
+                    .filter { eventTypes.contains(it.eventType) }
+                    .filter { sourceFilter == null || sourceFilter.contains(it.sourcePluginId) }
+                    .toList()
             }
             
             // Deliver sticky events
-            stickyEvents.values
-                .filter { eventTypes.contains(it.eventType) }
-                .filter { sourceFilter == null || sourceFilter.contains(it.sourcePluginId) }
-                .forEach { handler(it) }
+            stickyEventsToDeliver.forEach { handler(it) }
         }
         
         return subscription

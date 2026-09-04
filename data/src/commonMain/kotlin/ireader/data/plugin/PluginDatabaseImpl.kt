@@ -18,6 +18,7 @@ class PluginDatabaseImpl(
 ) : PluginDatabase {
 
     // In-memory permission storage
+    private val lock = Any()
     private val grantedPermissions = mutableMapOf<String, MutableSet<PluginPermission>>()
 
     override suspend fun getPluginInfo(pluginId: String): PluginInfo? {
@@ -75,23 +76,33 @@ class PluginDatabaseImpl(
     // Permission management methods using in-memory storage
     
     override suspend fun saveGrantedPermission(pluginId: String, permission: PluginPermission) {
-        val permissions = grantedPermissions.getOrPut(pluginId) { mutableSetOf() }
-        permissions.add(permission)
+        synchronized(lock) {
+            val permissions = grantedPermissions.getOrPut(pluginId) { mutableSetOf() }
+            permissions.add(permission)
+        }
     }
 
     override suspend fun revokeGrantedPermission(pluginId: String, permission: PluginPermission) {
-        grantedPermissions[pluginId]?.remove(permission)
+        synchronized(lock) {
+            grantedPermissions[pluginId]?.remove(permission)
+        }
     }
 
     override suspend fun revokeAllGrantedPermissions(pluginId: String) {
-        grantedPermissions.remove(pluginId)
+        synchronized(lock) {
+            grantedPermissions.remove(pluginId)
+        }
     }
 
     override suspend fun getAllGrantedPermissions(): Map<String, List<PluginPermission>> {
-        return grantedPermissions.mapValues { it.value.toList() }
+        return synchronized(lock) {
+            grantedPermissions.mapValues { it.value.toList() }
+        }
     }
 
     override suspend fun getGrantedPermissions(pluginId: String): List<PluginPermission> {
-        return grantedPermissions[pluginId]?.toList() ?: emptyList()
+        return synchronized(lock) {
+            grantedPermissions[pluginId]?.toList() ?: emptyList()
+        }
     }
 }

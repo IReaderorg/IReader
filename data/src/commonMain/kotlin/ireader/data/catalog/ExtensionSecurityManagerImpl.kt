@@ -15,6 +15,7 @@ class ExtensionSecurityManagerImpl(
     private val log: Log
 ) : ExtensionSecurityManager {
     
+    private val lock = Any()
     private val trustedExtensions = mutableSetOf<Long>()
     private val blockedExtensions = mutableSetOf<Long>()
     
@@ -79,9 +80,13 @@ class ExtensionSecurityManagerImpl(
     override suspend fun getTrustLevel(catalog: Catalog): ExtensionTrustLevel {
         val extensionId = catalog.sourceId
         
+        val (isBlocked, isTrusted) = synchronized(lock) {
+            Pair(blockedExtensions.contains(extensionId), trustedExtensions.contains(extensionId))
+        }
+        
         return when {
-            blockedExtensions.contains(extensionId) -> ExtensionTrustLevel.BLOCKED
-            trustedExtensions.contains(extensionId) -> ExtensionTrustLevel.TRUSTED
+            isBlocked -> ExtensionTrustLevel.BLOCKED
+            isTrusted -> ExtensionTrustLevel.TRUSTED
             verifySignature(catalog) -> ExtensionTrustLevel.VERIFIED
             else -> ExtensionTrustLevel.UNTRUSTED
         }
@@ -89,18 +94,20 @@ class ExtensionSecurityManagerImpl(
     
     override suspend fun setTrustLevel(extensionId: Long, trustLevel: ExtensionTrustLevel): Result<Unit> {
         return try {
-            when (trustLevel) {
-                ExtensionTrustLevel.TRUSTED -> {
-                    trustedExtensions.add(extensionId)
-                    blockedExtensions.remove(extensionId)
-                }
-                ExtensionTrustLevel.BLOCKED -> {
-                    blockedExtensions.add(extensionId)
-                    trustedExtensions.remove(extensionId)
-                }
-                else -> {
-                    trustedExtensions.remove(extensionId)
-                    blockedExtensions.remove(extensionId)
+            synchronized(lock) {
+                when (trustLevel) {
+                    ExtensionTrustLevel.TRUSTED -> {
+                        trustedExtensions.add(extensionId)
+                        blockedExtensions.remove(extensionId)
+                    }
+                    ExtensionTrustLevel.BLOCKED -> {
+                        blockedExtensions.add(extensionId)
+                        trustedExtensions.remove(extensionId)
+                    }
+                    else -> {
+                        trustedExtensions.remove(extensionId)
+                        blockedExtensions.remove(extensionId)
+                    }
                 }
             }
             log.info("Set trust level for extension $extensionId to $trustLevel")
@@ -112,7 +119,7 @@ class ExtensionSecurityManagerImpl(
     }
     
     override suspend fun isTrusted(extensionId: Long): Boolean {
-        return trustedExtensions.contains(extensionId)
+        return synchronized(lock) { trustedExtensions.contains(extensionId) }
     }
     
     override suspend fun getSecurityWarnings(catalog: Catalog): List<String> {

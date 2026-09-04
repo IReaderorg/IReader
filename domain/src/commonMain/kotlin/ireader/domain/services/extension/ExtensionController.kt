@@ -88,9 +88,11 @@ class ExtensionController(
     private var catalogSubscriptionJob: Job? = null
     
     // Installation jobs
+    private val jobsLock = Any()
     private val installerJobs: MutableMap<Long, Job> = mutableMapOf()
     
     // Error tracking for diagnostics
+    private val errorLock = Any()
     private val errorHistory = mutableListOf<TimestampedError>()
     
     /**
@@ -240,8 +242,12 @@ class ExtensionController(
         catalogSubscriptionJob?.cancel()
         catalogSubscriptionJob = null
         
-        installerJobs.values.forEach { it.cancel() }
-        installerJobs.clear()
+        val jobsToCancel = synchronized(jobsLock) {
+            val jobs = installerJobs.values.toList()
+            installerJobs.clear()
+            jobs
+        }
+        jobsToCancel.forEach { it.cancel() }
         
         _state.update { ExtensionState() }
     }
@@ -255,12 +261,15 @@ class ExtensionController(
     private suspend fun installExtension(catalog: CatalogRemote) {
         Log.debug { "$TAG: installExtension(${catalog.pkgName})" }
         
-        if (installerJobs.containsKey(catalog.sourceId)) {
+        val alreadyRunning = synchronized(jobsLock) {
+            installerJobs.containsKey(catalog.sourceId)
+        }
+        if (alreadyRunning) {
             Log.warn { "$TAG: Installation already in progress for ${catalog.pkgName}" }
             return
         }
         
-        installerJobs[catalog.sourceId] = scope.launch {
+        val job = scope.launch {
             try {
                 installCatalog.await(catalog).collect { step ->
                     handleInstallStep(catalog.pkgName, step)
@@ -281,8 +290,13 @@ class ExtensionController(
                 recordError(error, e)
                 handleError(error)
             } finally {
-                installerJobs.remove(catalog.sourceId)
+                synchronized(jobsLock) {
+                    installerJobs.remove(catalog.sourceId)
+                }
             }
+        }
+        synchronized(jobsLock) {
+            installerJobs[catalog.sourceId] = job
         }
     }
 
@@ -320,12 +334,15 @@ class ExtensionController(
     private suspend fun updateExtension(catalog: CatalogInstalled) {
         Log.debug { "$TAG: updateExtension(${catalog.pkgName})" }
         
-        if (installerJobs.containsKey(catalog.sourceId)) {
+        val alreadyRunning = synchronized(jobsLock) {
+            installerJobs.containsKey(catalog.sourceId)
+        }
+        if (alreadyRunning) {
             Log.warn { "$TAG: Update already in progress for ${catalog.pkgName}" }
             return
         }
         
-        installerJobs[catalog.sourceId] = scope.launch {
+        val job = scope.launch {
             try {
                 updateCatalog.await(catalog).collect { step ->
                     handleInstallStep(catalog.pkgName, step)
@@ -341,8 +358,13 @@ class ExtensionController(
                 recordError(error, e)
                 handleError(error)
             } finally {
-                installerJobs.remove(catalog.sourceId)
+                synchronized(jobsLock) {
+                    installerJobs.remove(catalog.sourceId)
+                }
             }
+        }
+        synchronized(jobsLock) {
+            installerJobs[catalog.sourceId] = job
         }
     }
     
@@ -352,8 +374,10 @@ class ExtensionController(
     private fun cancelInstallation(catalog: Catalog) {
         Log.debug { "$TAG: cancelInstallation(${catalog.sourceId})" }
         
-        installerJobs[catalog.sourceId]?.cancel()
-        installerJobs.remove(catalog.sourceId)
+        val jobToCancel = synchronized(jobsLock) {
+            installerJobs.remove(catalog.sourceId)
+        }
+        jobToCancel?.cancel()
         
         val pkgName = when (catalog) {
             is CatalogRemote -> catalog.pkgName
@@ -631,10 +655,12 @@ class ExtensionController(
      * Record an error for diagnostics.
      */
     private fun recordError(error: ExtensionError, cause: Throwable) {
-        errorHistory.add(TimestampedError(error, cause))
-        // Keep only last 50 errors
-        if (errorHistory.size > 50) {
-            errorHistory.removeAt(0)
+        synchronized(errorLock) {
+            errorHistory.add(TimestampedError(error, cause))
+            // Keep only last 50 errors
+            if (errorHistory.size > 50) {
+                errorHistory.removeAt(0)
+            }
         }
     }
     
@@ -649,7 +675,7 @@ class ExtensionController(
     /**
      * Get error history for diagnostics.
      */
-    fun getErrorHistory(): List<TimestampedError> = errorHistory.toList()
+    fun getErrorHistory(): List<TimestampedError> = synchronized(errorLock) { errorHistory.toList() }
     
     /**
      * Release all resources. Call when the controller is no longer needed.

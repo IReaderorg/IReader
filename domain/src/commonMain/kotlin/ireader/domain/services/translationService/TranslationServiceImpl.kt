@@ -82,6 +82,7 @@ class TranslationServiceImpl(
     override val currentBookId: StateFlow<Long?> = stateHolder.currentBookId
     
     // Queue of chapters to translate
+    private val queueLock = Any()
     private val translationQueue = mutableListOf<TranslationTask>()
     private var currentSourceLang: String = "en"
     private var currentTargetLang: String = "en"
@@ -130,7 +131,9 @@ class TranslationServiceImpl(
     override suspend fun cleanup() {
         translationJob?.cancel()
         stateHolder.reset()
-        translationQueue.clear()
+        synchronized(queueLock) {
+            translationQueue.clear()
+        }
         _state.value = ServiceState.IDLE
         Log.info { "TranslationService cleaned up" }
     }
@@ -222,7 +225,9 @@ class TranslationServiceImpl(
                 )
             }
             // Insert at front of queue
-            translationQueue.addAll(0, newTasks)
+            synchronized(queueLock) {
+                translationQueue.addAll(0, newTasks)
+            }
             
             // Update progress for new chapters (this overwrites any old failed/completed status)
             chapters.forEach { chapter ->
@@ -254,19 +259,23 @@ class TranslationServiceImpl(
         stateHolder.setTranslationProgress(emptyMap())
         
         // Create translation tasks
-        translationQueue.clear()
+        synchronized(queueLock) {
+            translationQueue.clear()
+            chapters.forEach { chapter ->
+                val task = TranslationTask(
+                    chapterId = chapter.id,
+                    bookId = bookId,
+                    chapterName = chapter.name,
+                    bookName = book.title,
+                    needsDownload = chapter.isEmpty(),
+                    sourceLang = currentSourceLang,
+                    targetLang = currentTargetLang,
+                    engineId = currentEngineId
+                )
+                translationQueue.add(task)
+            }
+        }
         chapters.forEach { chapter ->
-            val task = TranslationTask(
-                chapterId = chapter.id,
-                bookId = bookId,
-                chapterName = chapter.name,
-                bookName = book.title,
-                needsDownload = chapter.isEmpty(),
-                sourceLang = currentSourceLang,
-                targetLang = currentTargetLang,
-                engineId = currentEngineId
-            )
-            translationQueue.add(task)
             stateHolder.updateChapterProgress(
                 chapter.id,
                 TranslationProgress(
@@ -321,8 +330,12 @@ class TranslationServiceImpl(
         val delayMs = translationPreferences.translationRateLimitDelayMs().get()
         val burstSize = TranslationServiceConstants.RATE_LIMIT_BURST_SIZE
         
-        while (translationQueue.isNotEmpty() && !stateHolder.isPaused.value) {
-            val task = translationQueue.removeFirstOrNull() ?: break
+        while (!stateHolder.isPaused.value) {
+            val task = synchronized(queueLock) {
+                if (translationQueue.isNotEmpty()) {
+                    translationQueue.removeFirstOrNull()
+                } else null
+            } ?: break
             
             try {
                 // Apply rate limiting for web-based engines
@@ -353,13 +366,15 @@ class TranslationServiceImpl(
         }
         
         // Reset state when done
-        if (translationQueue.isEmpty()) {
+        val isQueueEmpty = synchronized(queueLock) { translationQueue.isEmpty() }
+        if (isQueueEmpty) {
             stateHolder.setCurrentBookId(null)
             
             // Clear progress map after a short delay to allow notification to show completion
             scope.launch {
                 delay(3000)
-                if (!stateHolder.isRunning.value && translationQueue.isEmpty()) {
+                val stillEmpty = synchronized(queueLock) { translationQueue.isEmpty() }
+                if (!stateHolder.isRunning.value && stillEmpty) {
                     stateHolder.setTranslationProgress(emptyMap())
                 }
             }
@@ -859,13 +874,16 @@ class TranslationServiceImpl(
 
     override suspend fun resume() {
         stateHolder.setPaused(false)
-        if (translationQueue.isNotEmpty()) {
+        val hasPending = synchronized(queueLock) { translationQueue.isNotEmpty() }
+        if (hasPending) {
             startTranslation()
         }
     }
 
     override suspend fun cancelTranslation(chapterId: Long): ServiceResult<Unit> {
-        translationQueue.removeAll { it.chapterId == chapterId }
+        synchronized(queueLock) {
+            translationQueue.removeAll { it.chapterId == chapterId }
+        }
         stateHolder.updateChapterProgress(
             chapterId,
             stateHolder.translationProgress.value[chapterId]?.copy(
@@ -877,7 +895,12 @@ class TranslationServiceImpl(
 
     override suspend fun cancelAll(): ServiceResult<Unit> {
         translationJob?.cancel()
-        translationQueue.forEach { task ->
+        val tasks = synchronized(queueLock) {
+            val copy = translationQueue.toList()
+            translationQueue.clear()
+            copy
+        }
+        tasks.forEach { task ->
             stateHolder.updateChapterProgress(
                 task.chapterId,
                 TranslationProgress(
@@ -888,7 +911,6 @@ class TranslationServiceImpl(
                 )
             )
         }
-        translationQueue.clear()
         stateHolder.reset()
         _state.value = ServiceState.IDLE
         return ServiceResult.Success(Unit)
@@ -912,7 +934,9 @@ class TranslationServiceImpl(
             targetLang = currentTargetLang
         )
         
-        translationQueue.add(task)
+        synchronized(queueLock) {
+            translationQueue.add(task)
+        }
         stateHolder.updateChapterProgress(
             chapterId,
             progress.copy(

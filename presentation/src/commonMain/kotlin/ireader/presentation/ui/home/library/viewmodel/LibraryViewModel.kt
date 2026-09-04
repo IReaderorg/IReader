@@ -1282,7 +1282,9 @@ class LibraryViewModel(
                 )
                 
                 // Track when this category was loaded
-                lastCategoryLoadTime[categoryId] = ireader.domain.utils.extensions.currentTimeToLong()
+                synchronized(loadTimeLock) {
+                    lastCategoryLoadTime[categoryId] = ireader.domain.utils.extensions.currentTimeToLong()
+                }
                 
                 // Update paginated books state
                 _paginatedBooks.update { current ->
@@ -1529,7 +1531,9 @@ class LibraryViewModel(
                 Log.info { "$TAG: refreshCurrentCategory() loaded ${books.size} books (total=$totalCount)" }
                 
                 // Track when this category was loaded
-                lastCategoryLoadTime[currentCategoryId] = ireader.domain.utils.extensions.currentTimeToLong()
+                synchronized(loadTimeLock) {
+                    lastCategoryLoadTime[currentCategoryId] = ireader.domain.utils.extensions.currentTimeToLong()
+                }
                 
                 // Update paginated books state - this atomically replaces the old books
                 _paginatedBooks.update { current ->
@@ -1563,7 +1567,8 @@ class LibraryViewModel(
     }
     
     // Track when the current category was last loaded
-    private var lastCategoryLoadTime = mutableMapOf<Long, Long>()
+    private val loadTimeLock = Any()
+    private val lastCategoryLoadTime = mutableMapOf<Long, Long>()
     private val STALE_THRESHOLD_MS = 5000L // Consider data stale after 5 seconds
     
     /**
@@ -1573,7 +1578,7 @@ class LibraryViewModel(
      */
     fun refreshCurrentCategoryIfStale() {
         val currentCategoryId = categories.getOrNull(selectedCategoryIndex)?.id ?: 0L
-        val lastLoad = lastCategoryLoadTime[currentCategoryId] ?: 0L
+        val lastLoad = synchronized(loadTimeLock) { lastCategoryLoadTime[currentCategoryId] ?: 0L }
         val now = ireader.domain.utils.extensions.currentTimeToLong()
         val timeSinceLastLoad = now - lastLoad
         

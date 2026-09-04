@@ -19,12 +19,14 @@ class ExtensionRepositoryManagerImpl(
 ) : ExtensionRepositoryManager {
     
     // Cache for repository fingerprints
+    private val cacheLock = Any()
     private val fingerprintCache = mutableMapOf<Long, String>()
     
     override fun getRepositories(): Flow<List<ExtensionRepository>> {
         return catalogSourceRepository.subscribe().map { sources ->
+            val cacheSnapshot = synchronized(cacheLock) { fingerprintCache.toMap() }
             sources.map { source ->
-                val cachedFingerprint = fingerprintCache[source.id]
+                val cachedFingerprint = cacheSnapshot[source.id]
                 ExtensionRepository(
                     id = source.id,
                     name = source.name,
@@ -80,7 +82,9 @@ class ExtensionRepositoryManagerImpl(
             
             // Cache the fingerprint if provided
             if (fingerprint != null) {
-                fingerprintCache[extensionSource.id] = fingerprint
+                synchronized(cacheLock) {
+                    fingerprintCache[extensionSource.id] = fingerprint
+                }
             }
             
             log.info("Added repository: $name ($url) with trust level: $trustLevel")
@@ -109,7 +113,9 @@ class ExtensionRepositoryManagerImpl(
             val extensionSource = catalogSourceRepository.find(repositoryId)
             if (extensionSource != null) {
                 catalogSourceRepository.delete(extensionSource)
-                fingerprintCache.remove(repositoryId)
+                synchronized(cacheLock) {
+                    fingerprintCache.remove(repositoryId)
+                }
                 log.info("Removed repository: $repositoryId")
                 Result.success(Unit)
             } else {
@@ -126,7 +132,9 @@ class ExtensionRepositoryManagerImpl(
             // Update fingerprint cache
             val fp = repository.fingerprint
             if (fp != null) {
-                fingerprintCache[repository.id] = fp
+                synchronized(cacheLock) {
+                    fingerprintCache[repository.id] = fp
+                }
             }
             log.info("Updated repository: ${repository.name}")
             Result.success(Unit)
@@ -163,7 +171,7 @@ class ExtensionRepositoryManagerImpl(
             val extensionSource = catalogSourceRepository.find(repositoryId)
                 ?: return false
             
-            val cachedFingerprint = fingerprintCache[repositoryId]
+            val cachedFingerprint = synchronized(cacheLock) { fingerprintCache[repositoryId] }
                 ?: return false
             
             verifyFingerprint(extensionSource.key, cachedFingerprint)

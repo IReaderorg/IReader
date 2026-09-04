@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import ireader.core.util.createICoroutineScope
@@ -37,6 +38,7 @@ class HotReloadManager(
     private val _isWatching = MutableStateFlow(false)
     val isWatching: StateFlow<Boolean> = _isWatching.asStateFlow()
     
+    private val lock = Any()
     private val snapshots = mutableMapOf<String, PluginSnapshot>()
     private val fileHashes = mutableMapOf<String, String>()
 
@@ -72,11 +74,11 @@ class HotReloadManager(
         
         for (change in changes) {
             val pluginId = change.pluginId ?: continue
-            val currentHash = fileHashes[change.path]
+            val currentHash = synchronized(lock) { fileHashes[change.path] }
             val newHash = fileWatcher.computeFileHash(change.path)
             
             if (currentHash != newHash) {
-                fileHashes[change.path] = newHash
+                synchronized(lock) { fileHashes[change.path] = newHash }
                 _events.emit(HotReloadEvent.FileChanged(pluginId, change.path, change.timestamp))
                 
                 if (config.autoReload) {
@@ -150,7 +152,7 @@ class HotReloadManager(
             
             Result.success(Unit)
         } catch (e: Exception) {
-            val canRollback = snapshots.containsKey(pluginId)
+            val canRollback = synchronized(lock) { snapshots.containsKey(pluginId) }
             updatePluginState(pluginId) { 
                 it.copy(
                     status = HotReloadStatus.RELOAD_FAILED,
@@ -166,7 +168,7 @@ class HotReloadManager(
      * Rollback a plugin to its previous version.
      */
     suspend fun rollbackPlugin(pluginId: String): Result<Unit> {
-        val snapshot = snapshots[pluginId]
+        val snapshot = synchronized(lock) { snapshots[pluginId] }
             ?: return Result.failure(IllegalStateException("No snapshot available for rollback"))
         
         return try {
@@ -203,13 +205,16 @@ class HotReloadManager(
             emptyMap()
         }
         
-        snapshots[pluginId] = PluginSnapshot(
+        val snapshot = PluginSnapshot(
             pluginId = pluginId,
             timestamp = currentTimeToLong(),
             pluginData = ByteArray(0), // Would be populated with actual plugin data
             preservedState = preservedState,
             manifest = plugin?.manifest?.toString() ?: ""
         )
+        synchronized(lock) {
+            snapshots[pluginId] = snapshot
+        }
     }
     
     private suspend fun restoreFromSnapshot(snapshot: PluginSnapshot) {
@@ -218,21 +223,25 @@ class HotReloadManager(
     }
     
     private fun updatePluginState(pluginId: String, update: (HotReloadPluginState) -> HotReloadPluginState) {
-        val current = _pluginStates.value[pluginId] ?: HotReloadPluginState(
-            pluginId = pluginId,
-            lastModified = currentTimeToLong(),
-            lastReloadTime = null,
-            reloadCount = 0,
-            status = HotReloadStatus.IDLE
-        )
-        _pluginStates.value = _pluginStates.value + (pluginId to update(current))
+        _pluginStates.update { currentMap ->
+            val current = currentMap[pluginId] ?: HotReloadPluginState(
+                pluginId = pluginId,
+                lastModified = currentTimeToLong(),
+                lastReloadTime = null,
+                reloadCount = 0,
+                status = HotReloadStatus.IDLE
+            )
+            currentMap + (pluginId to update(current))
+        }
     }
     
     /**
      * Clear all snapshots to free memory.
      */
     fun clearSnapshots() {
-        snapshots.clear()
+        synchronized(lock) {
+            snapshots.clear()
+        }
     }
     
     /**

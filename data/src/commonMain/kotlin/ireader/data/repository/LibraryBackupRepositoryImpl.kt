@@ -7,6 +7,7 @@ import ireader.domain.models.common.Uri
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ireader.domain.utils.extensions.currentTimeToLong
@@ -28,6 +29,7 @@ class LibraryBackupRepositoryImpl(
         )
     )
     
+    private val historyLock = Any()
     private val backupHistory = mutableListOf<BackupRecord>()
     
     override suspend fun createBackup(
@@ -58,17 +60,19 @@ class LibraryBackupRepositoryImpl(
             writeBackupToUri(uri, backupData, metadata)
             
             // Record in history
-            backupHistory.add(
-                BackupRecord(
-                    id = "backup_${currentTimeToLong()}",
-                    timestamp = currentTimeToLong(),
-                    backupType = backupType,
-                    size = 0L, // Calculate actual size
-                    location = uri.toString(),
-                    isSuccessful = true,
-                    metadata = metadata
+            synchronized(historyLock) {
+                backupHistory.add(
+                    BackupRecord(
+                        id = "backup_${currentTimeToLong()}",
+                        timestamp = currentTimeToLong(),
+                        backupType = backupType,
+                        size = 0L, // Calculate actual size
+                        location = uri.toString(),
+                        isSuccessful = true,
+                        metadata = metadata
+                    )
                 )
-            )
+            }
             
             true
         } catch (e: Exception) {
@@ -134,17 +138,21 @@ class LibraryBackupRepositoryImpl(
             val backupData = readBackupFromUri(uri)
             restoreBackupData(backupData, options)
             
-            _restoreProgress.value = _restoreProgress.value.copy(
-                isCompleted = true,
-                currentItem = "Restore completed"
-            )
+            _restoreProgress.update {
+                it.copy(
+                    isCompleted = true,
+                    currentItem = "Restore completed"
+                )
+            }
             
             true
         } catch (e: Exception) {
-            _restoreProgress.value = _restoreProgress.value.copy(
-                isCompleted = true,
-                currentItem = "Restore failed: ${e.message}"
-            )
+            _restoreProgress.update {
+                it.copy(
+                    isCompleted = true,
+                    currentItem = "Restore failed: ${e.message}"
+                )
+            }
             false
         }
     }
@@ -155,10 +163,12 @@ class LibraryBackupRepositoryImpl(
     
     override suspend fun cancelRestore(): Boolean {
         return try {
-            _restoreProgress.value = _restoreProgress.value.copy(
-                isCompleted = true,
-                currentItem = "Restore cancelled"
-            )
+            _restoreProgress.update {
+                it.copy(
+                    isCompleted = true,
+                    currentItem = "Restore cancelled"
+                )
+            }
             true
         } catch (e: Exception) {
             false
@@ -209,13 +219,15 @@ class LibraryBackupRepositoryImpl(
     }
     
     override suspend fun getBackupHistory(): List<BackupRecord> {
-        return backupHistory.takeLast(50)
+        return synchronized(historyLock) { backupHistory.takeLast(50) }
     }
     
     override suspend fun deleteBackup(backupId: String): Boolean {
         return try {
-            val toRemove = backupHistory.filter { it.id == backupId }
-            backupHistory.removeAll(toRemove)
+            synchronized(historyLock) {
+                val toRemove = backupHistory.filter { it.id == backupId }
+                backupHistory.removeAll(toRemove)
+            }
             true
         } catch (e: Exception) {
             false
