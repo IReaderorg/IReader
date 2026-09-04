@@ -14,12 +14,9 @@ import ireader.domain.usecases.reader.TextReplacementUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.tts.TTSTextSanitizer
 import ireader.domain.utils.extensions.ioDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
+import kotlinx.coroutines.withContext
 
 /**
  * Implementation of TTSContentLoader that uses existing repositories
@@ -66,13 +63,13 @@ class TTSContentLoaderImpl(
         
         // Check if content is available, fetch if needed
         var content = chapter.content
-        if (content.isEmpty()) {
-            Log.warn { "$TAG: Chapter content empty, attempting to fetch from remote" }
+        if (chapter.isEmpty()) {
+            Log.warn { "$TAG: Chapter content empty or placeholder, attempting to fetch from remote" }
             val fetchedContent = fetchChapterContent(book, chapter)
             if (fetchedContent != null && fetchedContent.isNotEmpty()) {
                 // Re-read from DB to get filtered content
                 val refreshedChapter = chapterUseCase.findChapterById(chapterId)
-                if (refreshedChapter != null) {
+                if (refreshedChapter != null && !refreshedChapter.isEmpty()) {
                     chapter = refreshedChapter
                     content = refreshedChapter.content
                 } else {
@@ -110,30 +107,20 @@ class TTSContentLoaderImpl(
         }
         
         return try {
-            // Use suspendCancellableCoroutine to convert callback-based API to suspend
-            suspendCancellableCoroutine { continuation ->
-                var resumed = false
-                
-                CoroutineScope(ioDispatcher).launch {
-                    remoteUseCases.fetchAndSaveChapterContent(
-                        chapter = chapter,
-                        catalog = catalog,
-                        onError = { error ->
-                            Log.error { "$TAG: Failed to fetch from remote: $error" }
-                            if (!resumed) {
-                                resumed = true
-                                continuation.resume(null)
-                            }
-                        },
-                        onSuccess = { filteredChapter ->
-                            Log.warn { "$TAG: Successfully fetched and filtered ${filteredChapter.content.size} pages" }
-                            if (!resumed) {
-                                resumed = true
-                                continuation.resume(filteredChapter.content)
-                            }
-                        }
-                    )
-                }
+            withContext(ioDispatcher) {
+                var result: List<Page>? = null
+                remoteUseCases.fetchAndSaveChapterContent(
+                    chapter = chapter,
+                    catalog = catalog,
+                    onError = { error ->
+                        Log.error { "$TAG: Failed to fetch from remote: $error" }
+                    },
+                    onSuccess = { filteredChapter ->
+                        Log.warn { "$TAG: Successfully fetched and filtered ${filteredChapter.content.size} pages" }
+                        result = filteredChapter.content
+                    }
+                )
+                result
             }
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to fetch chapter content: ${e.message}" }
@@ -157,7 +144,7 @@ class TTSContentLoaderImpl(
         val textContent = content
             .filterIsInstance<Text>()
             .map { it.text }
-            .filter { it.isNotBlank() }
+            .filter { it.isNotBlank() && !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER") }
         
         // If we have text pages, process them
         if (textContent.isNotEmpty()) {
@@ -172,7 +159,8 @@ class TTSContentLoaderImpl(
             val filtered = contentFilterUseCase?.filterStrings(replaced) ?: replaced
             
             // Step 3: Sanitize for TTS - remove brackets and special characters that shouldn't be read aloud
-            return ttsSanitizer.sanitizeList(filtered)
+            val sanitized = ttsSanitizer.sanitizeList(filtered)
+            return sanitized.filter { !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER") }
         }
         
         return emptyList()

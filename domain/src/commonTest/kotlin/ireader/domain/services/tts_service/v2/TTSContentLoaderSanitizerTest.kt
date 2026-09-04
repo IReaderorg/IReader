@@ -188,6 +188,28 @@ class TTSContentLoaderSanitizerTest {
         }
     }
     
+    @Test
+    fun `parseContent should filter out downloaded chapter placeholder`() {
+        val pages = listOf(
+            Text("Chapter title"),
+            Text("[DOWNLOADED_CONTENT_PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER]"),
+            Text("Actual story content paragraph.")
+        )
+        val result = parseContentWithSanitizer(pages)
+        assertEquals(2, result.size)
+        assertEquals("Chapter title", result[0])
+        assertEquals("Actual story content paragraph.", result[1])
+    }
+
+    @Test
+    fun `parseContent should return empty list when content only contains placeholder`() {
+        val pages = listOf(
+            Text("[DOWNLOADED_CONTENT_PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER]")
+        )
+        val result = parseContentWithSanitizer(pages)
+        assertTrue(result.isEmpty())
+    }
+
     /**
      * Helper method that simulates the parseContent logic with sanitizer
      */
@@ -195,7 +217,7 @@ class TTSContentLoaderSanitizerTest {
         val textContent = pages
             .filterIsInstance<Text>()
             .map { it.text }
-            .filter { it.isNotBlank() }
+            .filter { it.isNotBlank() && !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER") }
         
         if (textContent.isEmpty()) {
             return emptyList()

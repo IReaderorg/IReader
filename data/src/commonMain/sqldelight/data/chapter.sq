@@ -189,7 +189,12 @@ ON CONFLICT(book_id, url) DO UPDATE SET
     date_fetch = excluded.date_fetch,
     date_upload = excluded.date_upload,
     content = CASE 
-        WHEN excluded.content IS NULL OR excluded.content = '' OR excluded.content = '[]' THEN chapter.content
+        WHEN excluded.content IS NULL 
+          OR excluded.content = '' 
+          OR excluded.content = '[]' 
+          OR excluded.content LIKE '%PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER%' 
+          OR excluded.content LIKE '%DOWNLOADED_CONTENT_PLACEHOLDER%' 
+        THEN chapter.content
         ELSE excluded.content
     END,
     type = excluded.type;

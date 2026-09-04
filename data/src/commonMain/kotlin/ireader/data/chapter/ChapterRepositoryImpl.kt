@@ -99,6 +99,7 @@ class ChapterRepositoryImpl(
 
     override suspend fun insertChapter(chapter: Chapter): Long {
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
+        val contentToSave = if (chapter.isEmpty()) emptyList() else chapter.content
         val result = handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
@@ -113,7 +114,7 @@ class ChapterRepositoryImpl(
                     chapter.sourceOrder,
                     chapter.dateFetch,
                     chapter.dateUpload,
-                    chapter.content,
+                    contentToSave,
                     chapter.type,
                 )
              chapterQueries.selectLastInsertedRowId()
@@ -132,7 +133,7 @@ class ChapterRepositoryImpl(
         // Notify observers that chapter content was updated
         // This allows the reader screen to reload content when chapters are downloaded
         // by the downloader or other background processes
-        if (chapterNotifier != null && chapter.content.isNotEmpty()) {
+        if (chapterNotifier != null && !chapter.isEmpty()) {
             chapterNotifier.tryNotifyChange(
                 ChapterNotifier.ChangeType.ContentFetched(chapter.id, chapter.bookId)
             )
@@ -149,14 +150,14 @@ class ChapterRepositoryImpl(
         // Log batch insert
         Log.debug { 
             "$tag: insertChapters called with ${chapters.size} chapters. " +
-            "Empty content chapters: ${chapters.count { it.content.isEmpty() }}"
+            "Empty content chapters: ${chapters.count { it.isEmpty() }}"
         }
         
         // Check for chapters with empty content that might overwrite existing content
-        val chaptersWithEmptyContent = chapters.filter { it.content.isEmpty() }
+        val chaptersWithEmptyContent = chapters.filter { it.isEmpty() }
         if (chaptersWithEmptyContent.isNotEmpty()) {
             Log.warn { 
-                "$tag: WARNING - ${chaptersWithEmptyContent.size} chapters have empty content and may overwrite existing data. " +
+                "$tag: WARNING - ${chaptersWithEmptyContent.size} chapters have empty or placeholder content; content will be preserved. " +
                 "Chapter IDs: ${chaptersWithEmptyContent.take(5).map { it.id }}"
             }
         }
@@ -174,6 +175,7 @@ class ChapterRepositoryImpl(
         chapters.chunked(batchSize).forEach { chunk ->
             val chunkResult = handler.awaitListAsync(true) {
                 chunk.forEach { chapter ->
+                    val contentToSave = if (chapter.isEmpty()) emptyList() else chapter.content
                     chapterQueries.upsert(
                         chapter.id.toDB(),
                         chapter.bookId,
@@ -187,7 +189,7 @@ class ChapterRepositoryImpl(
                         chapter.sourceOrder,
                         chapter.dateFetch,
                         chapter.dateUpload,
-                        chapter.content,
+                        contentToSave,
                         chapter.type
                     )
                 }

@@ -301,6 +301,31 @@ class ChapterMapperBehaviorTest {
         assertEquals(2L, invalidChapters.first().id, "Invalid chapter should be the light-mapped one")
     }
 
+    @Test
+    fun `light mapper with DOWNLOADED_CHAPTER_PLACEHOLDER is recognized as empty`() {
+        val chapter = Chapter(
+            id = 1L,
+            bookId = 1L,
+            key = "url",
+            name = "Ch 1",
+            content = listOf(Text("[DOWNLOADED_CONTENT_PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER]"))
+        )
+        assertTrue(chapter.isEmpty(), "Light mapped chapter with placeholder must be recognized as empty")
+    }
+
+    @Test
+    fun `content sanitization for repository insert should return emptyList when chapter isEmpty`() {
+        val emptyChapter = Chapter(
+            id = 1L,
+            bookId = 1L,
+            key = "url",
+            name = "Ch 1",
+            content = listOf(Text("[DOWNLOADED_CONTENT_PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER]"))
+        )
+        val contentToSave = if (emptyChapter.isEmpty()) emptyList() else emptyChapter.content
+        assertTrue(contentToSave.isEmpty(), "Content to save must be emptyList so database upsert preserves existing content")
+    }
+
     // ==================== Helper Functions ====================
 
     /**

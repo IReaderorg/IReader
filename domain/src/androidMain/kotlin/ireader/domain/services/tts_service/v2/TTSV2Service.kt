@@ -24,10 +24,13 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.media.session.MediaButtonReceiver
 import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import coil3.asDrawable
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import ireader.core.log.Log
+import ireader.domain.models.BookCover
+import ireader.domain.models.entities.Book
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.utils.DrawableResources
 import ireader.domain.utils.extensions.launchMainActivityIntent
@@ -478,7 +481,7 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             ""
         }
         
-        val metadata = android.support.v4.media.MediaMetadataCompat.Builder()
+        val metadataBuilder = android.support.v4.media.MediaMetadataCompat.Builder()
             .putString(
                 android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE,
                 state.chapter?.name ?: "TTS Playback"
@@ -491,15 +494,20 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM,
                 state.book?.title ?: ""
             )
-            .build()
         
-        mediaSession.setMetadata(metadata)
+        cachedCoverBitmap?.let { bitmap ->
+            metadataBuilder.putBitmap(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap)
+            metadataBuilder.putBitmap(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ART, bitmap)
+        }
+        
+        mediaSession.setMetadata(metadataBuilder.build())
     }
     
     // ========== Notification ==========
     
     // Cached book cover bitmap
     private var cachedCoverBitmap: Bitmap? = null
+    private var cachedCoverBookId: Long? = null
     private var cachedCoverUrl: String? = null
     
     private fun createNotificationChannel() {
@@ -664,33 +672,42 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
     }
     
     /**
-     * Load book cover image for notification
+     * Load book cover image for notification and MediaSession
      */
-    private fun loadBookCover(coverUrl: String?) {
-        if (coverUrl == null || coverUrl == cachedCoverUrl) return
+    private fun loadBookCover(book: Book?) {
+        if (book == null) return
+        val coverUrl = book.cover
+        if (book.id == cachedCoverBookId && coverUrl == cachedCoverUrl && cachedCoverBitmap != null) return
         
+        if (book.id != cachedCoverBookId) {
+            cachedCoverBitmap = null
+            cachedCoverBookId = book.id
+            cachedCoverUrl = null
+        }
         cachedCoverUrl = coverUrl
         
         serviceScope.launch(Dispatchers.IO) {
             try {
+                val bookCover = BookCover.from(book)
                 val request = ImageRequest.Builder(this@TTSV2Service)
-                    .data(coverUrl)
+                    .data(bookCover)
                     .size(coil3.size.Size(512, 512))
-                    .allowHardware(false) // Required for notification
+                    .allowHardware(false) // Required for notification and MediaSession
                     .build()
                 
-                val result = ImageLoader(this@TTSV2Service).execute(request)
+                val result = SingletonImageLoader.get(this@TTSV2Service).execute(request)
                 val bitmap = result.image?.asDrawable(resources)?.toBitmap()
                 
                 if (bitmap != null) {
                     cachedCoverBitmap = bitmap
-                    // Update notification with new cover
+                    // Update notification and media session with new cover
                     launch(Dispatchers.Main) {
+                        updateMediaSessionState(controller.state.value)
                         updateNotification()
                     }
-
                 }
             } catch (e: Exception) {
+                Log.error { "TTSV2Service: Failed to load book cover: ${e.message}" }
             }
         }
     }
@@ -704,8 +721,8 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
 
                 
                 // Load book cover if changed
-                state.book?.cover?.let { coverUrl ->
-                    loadBookCover(coverUrl)
+                state.book?.let { book ->
+                    loadBookCover(book)
                 }
                 
                 updateMediaSessionState(state)
