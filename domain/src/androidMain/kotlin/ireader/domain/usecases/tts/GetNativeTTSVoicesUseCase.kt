@@ -26,7 +26,12 @@ class GetNativeTTSVoicesUseCase(
     suspend fun getAvailableVoices(): Result<List<IReaderVoice>> = suspendCancellableCoroutine { continuation ->
         var ttsInstance: TextToSpeech? = null
         try {
-            ttsInstance = TextToSpeech(context) { status ->
+            val appContext = context.applicationContext ?: context
+            ttsInstance = TextToSpeech(appContext) { status ->
+                if (!continuation.isActive) {
+                    ttsInstance?.shutdown()
+                    return@TextToSpeech
+                }
                 if (status == TextToSpeech.SUCCESS) {
                     try {
                         val voices = ttsInstance?.voices?.mapNotNull { voice: Voice ->
@@ -40,24 +45,33 @@ class GetNativeTTSVoicesUseCase(
                         
                         Log.info { "Found ${voices.size} native TTS voices" }
                         ttsInstance?.shutdown()
-                        continuation.resume(Result.success(voices))
+                        if (continuation.isActive) {
+                            continuation.resume(Result.success(voices))
+                        }
                     } catch (e: Exception) {
                         Log.error { "Error getting voices: ${e.message}" }
                         ttsInstance?.shutdown()
-                        continuation.resume(Result.failure(e))
+                        if (continuation.isActive) {
+                            continuation.resume(Result.failure(e))
+                        }
                     }
                 } else {
                     Log.error { "TTS initialization failed with status: $status" }
-                    continuation.resume(Result.failure(Exception("TTS initialization failed")))
+                    ttsInstance?.shutdown()
+                    if (continuation.isActive) {
+                        continuation.resume(Result.failure(Exception("TTS initialization failed with status: $status")))
+                    }
                 }
             }
             
             continuation.invokeOnCancellation {
                 ttsInstance?.shutdown()
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.error { "Failed to create TTS: ${e.message}" }
-            continuation.resume(Result.failure(e))
+            if (continuation.isActive) {
+                continuation.resume(Result.failure(e))
+            }
         }
     }
     
@@ -68,30 +82,44 @@ class GetNativeTTSVoicesUseCase(
     suspend fun getAvailableLanguages(): Result<List<Locale>> = suspendCancellableCoroutine { continuation ->
         var ttsInstance: TextToSpeech? = null
         try {
-            ttsInstance = TextToSpeech(context) { status ->
+            val appContext = context.applicationContext ?: context
+            ttsInstance = TextToSpeech(appContext) { status ->
+                if (!continuation.isActive) {
+                    ttsInstance?.shutdown()
+                    return@TextToSpeech
+                }
                 if (status == TextToSpeech.SUCCESS) {
                     try {
                         val languages = ttsInstance?.availableLanguages?.toList() ?: emptyList<Locale>()
                         Log.info { "Found ${languages.size} native TTS languages" }
                         ttsInstance?.shutdown()
-                        continuation.resume(Result.success(languages))
+                        if (continuation.isActive) {
+                            continuation.resume(Result.success(languages))
+                        }
                     } catch (e: Exception) {
                         Log.error { "Error getting languages: ${e.message}" }
                         ttsInstance?.shutdown()
-                        continuation.resume(Result.failure(e))
+                        if (continuation.isActive) {
+                            continuation.resume(Result.failure(e))
+                        }
                     }
                 } else {
                     Log.error { "TTS initialization failed with status: $status" }
-                    continuation.resume(Result.failure(Exception("TTS initialization failed")))
+                    ttsInstance?.shutdown()
+                    if (continuation.isActive) {
+                        continuation.resume(Result.failure(Exception("TTS initialization failed with status: $status")))
+                    }
                 }
             }
             
             continuation.invokeOnCancellation {
                 ttsInstance?.shutdown()
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.error { "Failed to create TTS: ${e.message}" }
-            continuation.resume(Result.failure(e))
+            if (continuation.isActive) {
+                continuation.resume(Result.failure(e))
+            }
         }
     }
     

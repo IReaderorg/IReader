@@ -26,7 +26,11 @@ class NativeTTSPlayer(
     
     override suspend fun initialize(): Result<Unit> = suspendCancellableCoroutine { continuation ->
         try {
-            tts = TextToSpeech(context) { status ->
+            val appContext = context.applicationContext ?: context
+            tts = TextToSpeech(appContext) { status ->
+                if (!continuation.isActive) {
+                    return@TextToSpeech
+                }
                 if (status == TextToSpeech.SUCCESS) {
                     isInitialized = true
                     
@@ -64,15 +68,25 @@ class NativeTTSPlayer(
                     })
                     
                     Log.info { "Native TTS initialized successfully" }
-                    continuation.resume(Result.success(Unit))
+                    if (continuation.isActive) {
+                        continuation.resume(Result.success(Unit))
+                    }
                 } else {
                     Log.error { "Native TTS initialization failed: $status" }
-                    continuation.resume(Result.failure(Exception("TTS initialization failed")))
+                    if (continuation.isActive) {
+                        continuation.resume(Result.failure(Exception("TTS initialization failed with status: $status")))
+                    }
                 }
             }
-        } catch (e: Exception) {
+            
+            continuation.invokeOnCancellation {
+                tts?.shutdown()
+            }
+        } catch (e: Throwable) {
             Log.error { "Failed to create TTS: ${e.message}" }
-            continuation.resume(Result.failure(e))
+            if (continuation.isActive) {
+                continuation.resume(Result.failure(e))
+            }
         }
     }
     

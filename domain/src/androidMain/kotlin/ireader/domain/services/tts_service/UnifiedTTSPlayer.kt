@@ -69,36 +69,47 @@ class NativeTTSPlayer(
     private var isListenerConfigured = false
     
     init {
-        tts = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                isInitialized = true
-                ensureUtteranceListener()
-                Log.info { "Native TTS initialized successfully" }
-                
-                // Apply pending voice if set before initialization
-                pendingVoice?.let { voice ->
-                    applyVoice(voice)
-                    pendingVoice = null
-                }
-                
-                // Notify that TTS is ready
-                scope.launch {
-                    callback?.onReady()
-                }
-                
-                // Execute pending speak request if any
-                pendingSpeak?.let { (text, utteranceId) ->
-                    pendingSpeak = null
-                    speakInternal(text, utteranceId)
-                }
-            } else {
-                Log.error { "Native TTS initialization failed with status: $status" }
-                // Notify error for pending request
-                pendingSpeak?.let { (_, utteranceId) ->
-                    pendingSpeak = null
-                    scope.launch {
-                        callback?.onError(utteranceId, "TTS initialization failed")
+        try {
+            val appContext = context.applicationContext ?: context
+            tts = TextToSpeech(appContext) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    isInitialized = true
+                    ensureUtteranceListener()
+                    Log.info { "Native TTS initialized successfully" }
+                    
+                    // Apply pending voice if set before initialization
+                    pendingVoice?.let { voice ->
+                        applyVoice(voice)
+                        pendingVoice = null
                     }
+                    
+                    // Notify that TTS is ready
+                    scope.launch {
+                        callback?.onReady()
+                    }
+                    
+                    // Execute pending speak request if any
+                    pendingSpeak?.let { (text, utteranceId) ->
+                        pendingSpeak = null
+                        speakInternal(text, utteranceId)
+                    }
+                } else {
+                    Log.error { "Native TTS initialization failed with status: $status" }
+                    // Notify error for pending request
+                    pendingSpeak?.let { (_, utteranceId) ->
+                        pendingSpeak = null
+                        scope.launch {
+                            callback?.onError(utteranceId, "TTS initialization failed with status: $status")
+                        }
+                    }
+                }
+            }
+        } catch (e: Throwable) {
+            Log.error { "Failed to initialize Native TTS: ${e.message}" }
+            pendingSpeak?.let { (_, utteranceId) ->
+                pendingSpeak = null
+                scope.launch {
+                    callback?.onError(utteranceId, "TTS initialization error: ${e.message}")
                 }
             }
         }

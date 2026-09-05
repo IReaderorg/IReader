@@ -36,9 +36,20 @@
     <uses-permission android:name="android.permission.READ_INSTALL_SESSIONS" />
     
     <queries>
+        <!-- Correct Android TTS service action (lowercase service) for third-party engines like VoxSherpa -->
+        <intent>
+            <action android:name="android.intent.action.TTS_service" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
+
+        <!-- Explicit package queries for popular third-party & offline TTS engines -->
+        <package android:name="com.CodeBySona.VoxSherpa" />
+        <package android:name="com.google.android.tts" />
+        <package android:name="com.samsung.SMT" />
+        <package android:name="com.github.olga_yakovleva.rhvoice.android" />
+        <package android:name="com.reecedunn.espeak" />
 
         <!-- Add other extension package names as needed -->
         <!-- Also add a generic intent filter for package visibility -->
@@ -46,8 +57,6 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="ireader.*" />
         </intent>
-        
-
     </queries>
 
     <application
