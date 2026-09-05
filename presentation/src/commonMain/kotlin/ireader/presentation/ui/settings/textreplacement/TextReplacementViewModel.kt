@@ -230,18 +230,21 @@ class TextReplacementViewModel(
      * This is a user-friendly validation that provides clear error messages.
      */
     fun validateRegexPattern(pattern: String): String? {
-        // Check if pattern contains regex metacharacters
-        val regexMetaChars = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
-        val hasRegexChars = pattern.any { it in regexMetaChars }
-        
-        if (!hasRegexChars) {
-            // No regex metacharacters, so it's a literal string - always valid
+        if (!isRegexPattern(pattern)) {
+            // Not a regex pattern, so it's a literal string - always valid
             return null
         }
         
         // Try to compile the pattern to check if it's valid regex
         return try {
-            Regex(pattern)
+            val trimmed = pattern.trim()
+            if (trimmed.length >= 2 && trimmed.startsWith("/") && trimmed.lastIndexOf('/') > 0) {
+                val lastSlash = trimmed.lastIndexOf('/')
+                val regexBody = trimmed.substring(1, lastSlash)
+                Regex(regexBody)
+            } else {
+                Regex(pattern)
+            }
             null // Valid regex
         } catch (e: Exception) {
             // Provide user-friendly error message
@@ -275,11 +278,10 @@ class TextReplacementViewModel(
     
     /**
      * Check if a pattern is likely intended to be a regex pattern.
-     * Returns true if the pattern contains regex metacharacters.
+     * Uses smart detection from TextReplacementUseCase.
      */
     fun isRegexPattern(pattern: String): Boolean {
-        val regexMetaChars = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
-        return pattern.any { it in regexMetaChars }
+        return TextReplacementUseCase.isRegexPattern(pattern)
     }
     
     /**

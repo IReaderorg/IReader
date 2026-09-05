@@ -222,4 +222,159 @@ class TextReplacementUseCaseTest {
         assertEquals("replaced", regexResult)
         assertEquals("replaced text", literalResult)
     }
+
+    @Test
+    fun `literal strings with metacharacters should not be treated as regex`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Mr dot",
+                findText = "Mr.",
+                replaceText = "Mister",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            ),
+            TextReplacement(
+                id = 2,
+                name = "Brackets",
+                findText = "[Audio]",
+                replaceText = "",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            ),
+            TextReplacement(
+                id = 3,
+                name = "Dollar",
+                findText = "$100",
+                replaceText = "100 dollars",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            ),
+            TextReplacement(
+                id = 4,
+                name = "Question mark",
+                findText = "Why?",
+                replaceText = "Because",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        // 1. "Mr." should match literally "Mr." and NOT "Mr " or "MrX"
+        val mrResult = useCase.applyReplacementsToText("Mr. Smith and Mr Jones", bookId = null)
+        assertEquals("Mister Smith and Mr Jones", mrResult)
+
+        // 2. "[Audio]" should match literally "[Audio]" and NOT each letter A, u, d, i, o
+        val audioResult = useCase.applyReplacementsToText("[Audio] Introduction to audio", bookId = null)
+        assertEquals(" Introduction to audio", audioResult)
+
+        // 3. "$100" should match literally "$100" (in regex, $ matches end of line and would fail)
+        val dollarResult = useCase.applyReplacementsToText("Price is $100 today", bookId = null)
+        assertEquals("Price is 100 dollars today", dollarResult)
+
+        // 4. "Why?" should match literally "Why?" and NOT match "Wh"
+        val whyResult = useCase.applyReplacementsToText("Why? Not Wh", bookId = null)
+        assertEquals("Because Not Wh", whyResult)
+    }
+
+    @Test
+    fun `explicit regex pattern with slash delimiters should be evaluated as regex`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Slash Regex",
+                findText = "/chapter\\s+\\d+/i",
+                replaceText = "[CH]",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val result = useCase.applyReplacementsToText("Welcome to Chapter 42 now", bookId = null)
+        assertEquals("Welcome to [CH] now", result)
+    }
+
+    @Test
+    fun `invalidateCache should clear prepared replacement cache`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Rule 1",
+                findText = "alpha",
+                replaceText = "beta",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val initial = useCase.applyReplacementsToText("alpha text", bookId = null)
+        assertEquals("beta text", initial)
+
+        // Update repository rules and invalidate cache
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Rule 1",
+                findText = "alpha",
+                replaceText = "gamma",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        useCase.invalidateCache()
+
+        val updated = useCase.applyReplacementsToText("alpha text", bookId = null)
+        assertEquals("gamma text", updated)
+    }
+
+    @Test
+    fun `applyReplacementsToPages should apply precompiled rules across all pages`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Dr title",
+                findText = "Dr.",
+                replaceText = "Doctor",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            ),
+            TextReplacement(
+                id = 2,
+                name = "Remove watermarks",
+                findText = ".*Read more at.*",
+                replaceText = "",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val pages = listOf(
+            ireader.core.source.model.Text("Dr. John went to the clinic."),
+            ireader.core.source.model.Text("Read more at website.com"),
+            ireader.core.source.model.Text("Dr. Smith said hello.")
+        )
+
+        val processedPages = useCase.applyReplacementsToPages(pages, bookId = null)
+        assertEquals(3, processedPages.size)
+        assertEquals("Doctor John went to the clinic.", (processedPages[0] as ireader.core.source.model.Text).text)
+        assertEquals("", (processedPages[1] as ireader.core.source.model.Text).text)
+        assertEquals("Doctor Smith said hello.", (processedPages[2] as ireader.core.source.model.Text).text)
+    }
 }

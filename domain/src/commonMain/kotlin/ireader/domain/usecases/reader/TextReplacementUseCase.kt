@@ -28,36 +28,157 @@ class TextReplacementUseCase(
     
     companion object {
         private const val TAG = "TextReplacement"
-        
-        // Regex metacharacters used to detect if a pattern is regex or literal
-        private val REGEX_META_CHARS = setOf('.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\')
-        
+
         /**
-         * Helper function to detect if a pattern contains regex metacharacters.
-         * Extracted to avoid duplication (Issue #17).
+         * Helper function to detect if a pattern contains regex constructs or is meant to be a regex.
+         * Distinguishes intentional regex patterns from common literal strings with punctuation.
          */
-        private fun isRegexPattern(pattern: String): Boolean {
-            return pattern.any { it in REGEX_META_CHARS }
+        fun isRegexPattern(pattern: String): Boolean {
+            val trimmed = pattern.trim()
+            if (trimmed.isEmpty()) return false
+
+            // Explicit slash-delimited regex: /pattern/ or /pattern/i
+            if (trimmed.length >= 2 && trimmed.startsWith("/") && trimmed.lastIndexOf('/') > 0) {
+                return true
+            }
+            // Standard regex character classes: \d, \D, \w, \W, \s, \S, \b, \B
+            if (Regex("""\\[dDwWsSbB]""").containsMatchIn(pattern)) {
+                return true
+            }
+            // Regex wildcards and repetition quantifiers: .*, .+, .?, .{, *?, +?
+            if (pattern.contains(".*") || pattern.contains(".+") || pattern.contains(".?") ||
+                pattern.contains("*?") || pattern.contains("+?")) {
+                return true
+            }
+            // Regex groups and assertions: (?:, (?=, (?!, (?<=, (?<!, (?i
+            if (pattern.contains("(?:") || pattern.contains("(?=") || pattern.contains("(?!") ||
+                pattern.contains("(?<=") || pattern.contains("(?<!") || pattern.contains("(?i")) {
+                return true
+            }
+            // Start/End line anchors: ^ at start, $ at end (not literal $100 price)
+            if (pattern.startsWith("^") || (pattern.endsWith("$") && !pattern.startsWith("$"))) {
+                return true
+            }
+            // Character range inside brackets: e.g. [a-z], [0-9], [A-Z], [^
+            if (Regex("""\[\^|\[[a-zA-Z0-9]-[a-zA-Z0-9]\]""").containsMatchIn(pattern)) {
+                return true
+            }
+            // Regex alternation: e.g. foo|bar
+            if (pattern.contains("|")) {
+                return true
+            }
+            return false
         }
     }
-    
+
     /**
-     * Apply replacements to a list of Page objects (for Reader screen)
+     * Pre-compiled replacement rule ready for batch evaluation.
+     * Caches compiled Regex so it is not re-created for each paragraph or page.
+     */
+    data class PreparedReplacement(
+        val findText: String,
+        val replaceText: String,
+        val caseSensitive: Boolean,
+        val regex: Regex? = null
+    )
+
+    private val cacheLock = Any()
+    private val preparedCache = mutableMapOf<Long?, List<PreparedReplacement>>()
+
+    /**
+     * Prepare a single replacement rule into a compiled matcher.
+     */
+    fun prepareReplacement(replacement: TextReplacement): PreparedReplacement {
+        val pattern = replacement.findText
+        val trimmed = pattern.trim()
+
+        // 1. Check for slash-delimited regex: /pattern/flags
+        if (trimmed.length >= 2 && trimmed.startsWith("/") && trimmed.lastIndexOf('/') > 0) {
+            val lastSlash = trimmed.lastIndexOf('/')
+            val regexBody = trimmed.substring(1, lastSlash)
+            val flagsStr = trimmed.substring(lastSlash + 1)
+            val options = mutableSetOf<RegexOption>()
+            if (flagsStr.contains('i', ignoreCase = true) || !replacement.caseSensitive) {
+                options.add(RegexOption.IGNORE_CASE)
+            }
+            if (flagsStr.contains('m', ignoreCase = true)) {
+                options.add(RegexOption.MULTILINE)
+            }
+            try {
+                val regex = Regex(regexBody, options)
+                return PreparedReplacement(
+                    findText = pattern,
+                    replaceText = replacement.replaceText,
+                    caseSensitive = replacement.caseSensitive,
+                    regex = regex
+                )
+            } catch (e: Exception) {
+                Log.warn { "$TAG: Failed to compile slash-delimited regex '$pattern': ${e.message}" }
+            }
+        }
+
+        // 2. Check if it's likely a regex pattern
+        if (isRegexPattern(pattern)) {
+            val options = if (replacement.caseSensitive) {
+                emptySet()
+            } else {
+                setOf(RegexOption.IGNORE_CASE)
+            }
+            try {
+                val regex = Regex(pattern, options)
+                return PreparedReplacement(
+                    findText = pattern,
+                    replaceText = replacement.replaceText,
+                    caseSensitive = replacement.caseSensitive,
+                    regex = regex
+                )
+            } catch (e: Exception) {
+                Log.warn { "$TAG: Regex compilation failed for '$pattern', falling back to literal: ${e.message}" }
+            }
+        }
+
+        // 3. Literal replacement
+        return PreparedReplacement(
+            findText = pattern,
+            replaceText = replacement.replaceText,
+            caseSensitive = replacement.caseSensitive,
+            regex = null
+        )
+    }
+
+    /**
+     * Get pre-compiled replacements for a book, using in-memory cache when available.
+     */
+    private suspend fun getPreparedReplacements(bookId: Long?): List<PreparedReplacement> {
+        synchronized(cacheLock) {
+            preparedCache[bookId]?.let { return it }
+        }
+        val rawReplacements = getEnabledReplacements(bookId)
+        val prepared = rawReplacements.map { prepareReplacement(it) }
+        synchronized(cacheLock) {
+            preparedCache[bookId] = prepared
+        }
+        return prepared
+    }
+
+    /**
+     * Apply replacements to a list of Page objects (for Reader screen).
+     * Pre-compiles matchers once for all pages instead of recompiling per paragraph.
      */
     suspend fun applyReplacementsToPages(pages: List<Page>, bookId: Long? = null): List<Page> {
-        val replacements = getEnabledReplacements(bookId)
-        
-        if (replacements.isEmpty()) {
+        val prepared = getPreparedReplacements(bookId)
+
+        if (prepared.isEmpty()) {
             return pages
         }
-        
-        Log.debug { "$TAG: Applying ${replacements.size} replacements to ${pages.size} pages" }
-        
+
+        Log.debug { "$TAG: Applying ${prepared.size} precompiled replacements to ${pages.size} pages" }
+
         return pages.map { page ->
             when (page) {
                 is Text -> {
                     val originalText = page.text
-                    val replacedText = applyReplacements(originalText, replacements)
+                    val replacedText = applyPreparedReplacements(originalText, prepared)
                     if (originalText != replacedText) {
                         Log.debug { "$TAG: Text changed from ${originalText.length} to ${replacedText.length} chars" }
                     }
@@ -67,40 +188,39 @@ class TextReplacementUseCase(
             }
         }
     }
-    
+
     /**
-     * Apply replacements to a list of strings (for TTS screen)
+     * Apply replacements to a list of strings (for TTS screen).
      */
     suspend fun applyReplacementsToStrings(content: List<String>, bookId: Long? = null): List<String> {
-        val replacements = getEnabledReplacements(bookId)
-        
-        if (replacements.isEmpty()) {
+        val prepared = getPreparedReplacements(bookId)
+
+        if (prepared.isEmpty()) {
             return content
         }
-        
-        Log.debug { "$TAG: Applying ${replacements.size} replacements to ${content.size} strings" }
-        
+
+        Log.debug { "$TAG: Applying ${prepared.size} precompiled replacements to ${content.size} strings" }
+
         return content.map { text ->
-            applyReplacements(text, replacements)
+            applyPreparedReplacements(text, prepared)
         }
     }
-    
+
     /**
      * Apply replacements to a single string
      */
     suspend fun applyReplacementsToText(text: String, bookId: Long? = null): String {
-        val replacements = getEnabledReplacements(bookId)
-        
-        if (replacements.isEmpty()) {
+        val prepared = getPreparedReplacements(bookId)
+
+        if (prepared.isEmpty()) {
             return text
         }
-        
-        return applyReplacements(text, replacements)
+
+        return applyPreparedReplacements(text, prepared)
     }
-    
+
     /**
      * Get enabled replacements from repository.
-     * Fixed Issue #10: Now properly suspend instead of using runBlocking.
      */
     private suspend fun getEnabledReplacements(bookId: Long? = null): List<TextReplacement> {
         val replacements = if (repository != null) {
@@ -117,112 +237,59 @@ class TextReplacementUseCase(
         } else {
             emptyList()
         }
-        
+
         return replacements
     }
-    
+
     /**
-     * Apply all replacements to text efficiently.
-     * Supports both literal string replacement and regex patterns.
-     * Fixed Issue #17: Uses extracted isRegexPattern() helper to avoid duplication.
+     * Apply precompiled replacements to text efficiently.
+     * Uses Regex for regex patterns and fast native string replacement for literal rules.
      */
-    private fun applyReplacements(text: String, replacements: List<TextReplacement>): String {
-        if (replacements.isEmpty() || text.isEmpty()) {
+    private fun applyPreparedReplacements(text: String, prepared: List<PreparedReplacement>): String {
+        if (prepared.isEmpty() || text.isEmpty()) {
             return text
         }
-        
+
         var result = text
-        
-        // Apply each replacement in order
-        for (replacement in replacements) {
-            try {
-                // Use extracted helper function (Issue #17 fix)
-                val isRegex = isRegexPattern(replacement.findText)
-                
-                result = if (isRegex) {
-                    // Use regex replacement
-                    val regexOptions = if (replacement.caseSensitive) {
-                        setOf()
-                    } else {
-                        setOf(RegexOption.IGNORE_CASE)
-                    }
-                    val regex = Regex(replacement.findText, regexOptions)
-                    regex.replace(result, replacement.replaceText)
+        for (rep in prepared) {
+            result = if (rep.regex != null) {
+                rep.regex.replace(result, rep.replaceText)
+            } else {
+                if (rep.caseSensitive) {
+                    result.replace(rep.findText, rep.replaceText)
                 } else {
-                    // Use literal string replacement
-                    if (replacement.caseSensitive) {
-                        result.replace(replacement.findText, replacement.replaceText)
-                    } else {
-                        result.replace(replacement.findText, replacement.replaceText, ignoreCase = true)
-                    }
-                }
-            } catch (e: Exception) {
-                // If regex fails, try literal replacement as fallback
-                Log.warn { "$TAG: Regex failed for '${replacement.findText}', using literal replacement: ${e.message}" }
-                result = if (replacement.caseSensitive) {
-                    result.replace(replacement.findText, replacement.replaceText)
-                } else {
-                    result.replace(replacement.findText, replacement.replaceText, ignoreCase = true)
+                    result.replace(rep.findText, rep.replaceText, ignoreCase = true)
                 }
             }
         }
-        
         return result
     }
-    
+
     /**
      * Invalidate the replacement cache (call when replacements are modified)
-     * 
-     * **Note:** This method is currently a no-op. Caching was removed to ensure real-time updates
-     * from the database. The method is kept for API compatibility with existing code that may
-     * call it, but it no longer performs any action.
-     * 
-     * **Background:** Previously, this use case cached replacements in memory for performance.
-     * However, this caused issues with stale data when replacements were modified. The caching
-     * logic was removed, and now the repository/database layer handles any necessary caching.
-     * 
-     * **Future:** This method may be removed in a future version once all callers are verified
-     * to not depend on it.
      */
     fun invalidateCache() {
-        // No-op: caching removed to ensure real-time updates
+        synchronized(cacheLock) {
+            preparedCache.clear()
+        }
     }
-    
+
     /**
      * Test replacements against sample text
      * @return the replaced result
-     * Fixed Issue #17: Uses extracted isRegexPattern() helper.
      */
     fun testReplacement(text: String, findText: String, replaceText: String, caseSensitive: Boolean = false): String {
-        return try {
-            // Use extracted helper function (Issue #17 fix)
-            val isRegex = isRegexPattern(findText)
-            
-            if (isRegex) {
-                // Use regex replacement
-                val regexOptions = if (caseSensitive) {
-                    setOf()
-                } else {
-                    setOf(RegexOption.IGNORE_CASE)
-                }
-                val regex = Regex(findText, regexOptions)
-                regex.replace(text, replaceText)
-            } else {
-                // Use literal string replacement
-                if (caseSensitive) {
-                    text.replace(findText, replaceText)
-                } else {
-                    text.replace(findText, replaceText, ignoreCase = true)
-                }
-            }
-        } catch (e: Exception) {
-            // If regex fails, try literal replacement as fallback
-            if (caseSensitive) {
-                text.replace(findText, replaceText)
-            } else {
-                text.replace(findText, replaceText, ignoreCase = true)
-            }
-        }
+        val prepared = prepareReplacement(
+            TextReplacement(
+                name = "Test",
+                findText = findText,
+                replaceText = replaceText,
+                caseSensitive = caseSensitive,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        return applyPreparedReplacements(text, listOf(prepared))
     }
     
     // ==================== Repository Operations ====================

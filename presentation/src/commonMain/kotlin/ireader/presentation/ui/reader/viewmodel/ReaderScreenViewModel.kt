@@ -52,6 +52,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -161,6 +162,7 @@ class ReaderScreenViewModel(
     val exportGlossaryUseCase get() = readerUseCasesAggregate.exportGlossary
     val importGlossaryUseCase get() = readerUseCasesAggregate.importGlossary
     val contentFilterUseCase get() = readerUseCasesAggregate.contentFilter
+    val textReplacementUseCase get() = readerUseCasesAggregate.textReplacement
 
     data class Param(val chapterId: Long?, val bookId: Long?)
 
@@ -279,8 +281,26 @@ class ReaderScreenViewModel(
         
         // Subscribe to content filter changes to re-filter content
         subscribeToContentFilterChanges()
+
+        // Subscribe to text replacement changes to re-apply replacements
+        subscribeToTextReplacementChanges()
     }
-    
+
+    /**
+     * Subscribe to text replacement changes and re-apply replacements when rules change.
+     */
+    private fun subscribeToTextReplacementChanges() {
+        textReplacementUseCase.getGlobalReplacements()
+            ?.drop(1)
+            ?.onEach { replacements ->
+                Log.debug { "Text replacements changed: ${replacements.size} rules" }
+                textReplacementUseCase.invalidateCache()
+                contentVM.clearPreloadCache()
+                refilterCurrentContent()
+            }
+            ?.launchIn(scope)
+    }
+
     /**
      * Subscribe to content filter preference changes and re-filter content when they change.
      */

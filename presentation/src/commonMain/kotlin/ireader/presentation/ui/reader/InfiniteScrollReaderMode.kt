@@ -56,7 +56,7 @@ fun InfiniteScrollReaderContent(
     var lastTrackedChapterIndex by remember { mutableIntStateOf(0) }
 
     // Initialize with current chapter, then preload next 2
-    LaunchedEffect(successState.currentChapter.id) {
+    LaunchedEffect(successState.currentChapter.id, successState.content) {
         val currentPages = successState.currentContent
         loadedChapters.clear()
         loadedChapters.add(successState.currentChapter to currentPages)

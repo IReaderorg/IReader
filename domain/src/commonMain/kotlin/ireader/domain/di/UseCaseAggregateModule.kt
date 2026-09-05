@@ -124,6 +124,7 @@ val useCaseAggregateModule = module {
             exportGlossary = get(),
             importGlossary = get(),
             contentFilter = get(),
+            textReplacement = get(),
             chapterRepository = get()
         )
     }

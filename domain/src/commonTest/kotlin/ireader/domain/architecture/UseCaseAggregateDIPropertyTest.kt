@@ -100,7 +100,9 @@ class UseCaseAggregateDIPropertyTest {
                 "saveGlossaryEntry",
                 "deleteGlossaryEntry",
                 "exportGlossary",
-                "importGlossary"
+                "importGlossary",
+                "contentFilter",
+                "textReplacement"
             )
             
             assertTrue(
