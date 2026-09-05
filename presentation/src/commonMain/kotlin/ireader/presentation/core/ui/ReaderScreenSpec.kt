@@ -40,6 +40,9 @@ import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.this_is_first_chapter
+import ireader.i18n.LAST_CHAPTER
+import ireader.i18n.NO_VALUE
+import ireader.i18n.NULL_VALUE
 import ireader.i18n.resources.this_is_last_chapter
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
@@ -73,6 +76,32 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+/**
+ * Resolves the initial chapter ID to load in the reader.
+ *
+ * If the user explicitly tapped a specific chapter (e.g., chapter 74 in the chapter list),
+ * that explicit chapter ID MUST take precedence over any previously restored reading state.
+ * Restored process state is only used for resume operations (LAST_CHAPTER / NO_VALUE / NULL_VALUE).
+ */
+fun resolveInitialReaderChapterId(
+    requestedChapterId: Long,
+    bookId: Long,
+    restoredState: ReaderProcessState?
+): Long {
+    val isExplicitChapter = requestedChapterId > 0 &&
+        requestedChapterId != LAST_CHAPTER &&
+        requestedChapterId != NO_VALUE &&
+        requestedChapterId != NULL_VALUE
+
+    return if (isExplicitChapter) {
+        requestedChapterId
+    } else if (restoredState != null && restoredState.bookId == bookId && restoredState.chapterId > 0) {
+        restoredState.chapterId
+    } else {
+        requestedChapterId
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 data class ReaderScreenSpec(
     val bookId: Long,
@@ -95,13 +124,14 @@ data class ReaderScreenSpec(
         val restoredState = remember { processStateManager.getReaderState() }
 
         // Track active chapter ID with rememberSaveable so orientation change retains the current chapter
-        var activeChapterId by rememberSaveable(bookId) {
-            val restoredChapterId = if (restoredState != null && restoredState.bookId == bookId && restoredState.chapterId > 0) {
-                restoredState.chapterId
-            } else {
-                chapterId
-            }
-            mutableStateOf(restoredChapterId)
+        var activeChapterId by rememberSaveable(bookId, chapterId) {
+            mutableStateOf(
+                resolveInitialReaderChapterId(
+                    requestedChapterId = chapterId,
+                    bookId = bookId,
+                    restoredState = restoredState
+                )
+            )
         }
 
         // One VM per back-stack entry: survives forward navigation, handles chapter
