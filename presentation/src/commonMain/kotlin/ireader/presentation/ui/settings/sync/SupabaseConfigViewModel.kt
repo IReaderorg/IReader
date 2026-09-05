@@ -203,6 +203,162 @@ CREATE INDEX IF NOT EXISTS idx_reading_progress_user_id ON public.reading_progre
 ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public reading_progress access" ON public.reading_progress;
 CREATE POLICY "Allow public reading_progress access" ON public.reading_progress FOR ALL USING (true) WITH CHECK (true);
+
+-- 4. Create users & gamification economy (Spirit Stones & Check-ins)
+CREATE TABLE IF NOT EXISTS public.users (
+    id UUID PRIMARY KEY DEFAULT auth.uid(),
+    email TEXT,
+    username TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can read own profile" ON public.users;
+CREATE POLICY "Users can read own profile" ON public.users FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
+CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (auth.uid() = id);
+
+ALTER TABLE public.users
+    ADD COLUMN IF NOT EXISTS display_name TEXT,
+    ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS avatar_url TEXT,
+    ADD COLUMN IF NOT EXISTS cover_image_url TEXT,
+    ADD COLUMN IF NOT EXISTS level INT DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS xp BIGINT DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS level_title TEXT DEFAULT 'Novice Reader',
+    ADD COLUMN IF NOT EXISTS spirit_stones BIGINT DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS active_title_id TEXT,
+    ADD COLUMN IF NOT EXISTS checkin_streak INT DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS last_checkin_date DATE;
+
+CREATE TABLE IF NOT EXISTS public.daily_checkins (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    checkin_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    streak_day INT NOT NULL DEFAULT 1,
+    reward_amount INT NOT NULL DEFAULT 10,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (user_id, checkin_date)
+);
+ALTER TABLE public.daily_checkins ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS daily_checkins_read ON public.daily_checkins;
+CREATE POLICY daily_checkins_read ON public.daily_checkins FOR SELECT USING (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS public.spirit_stone_transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    amount BIGINT NOT NULL,
+    type TEXT NOT NULL,
+    description TEXT,
+    reference_id TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.spirit_stone_transactions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS sst_read ON public.spirit_stone_transactions;
+CREATE POLICY sst_read ON public.spirit_stone_transactions FOR SELECT USING (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS public.user_titles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    title_id TEXT NOT NULL,
+    title_name TEXT NOT NULL,
+    rarity TEXT NOT NULL DEFAULT 'COMMON',
+    is_active BOOLEAN DEFAULT FALSE,
+    acquired_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (user_id, title_id)
+);
+ALTER TABLE public.user_titles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS user_titles_all ON public.user_titles;
+CREATE POLICY user_titles_all ON public.user_titles FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- 5. Daily Check-in RPC Function
+DROP FUNCTION IF EXISTS public.checkin_daily();
+CREATE OR REPLACE FUNCTION public.checkin_daily()
+RETURNS JSON
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+    v_user UUID := auth.uid();
+    v_today DATE := CURRENT_DATE;
+    v_last DATE;
+    v_streak INT;
+    v_reward INT;
+BEGIN
+    IF v_user IS NULL THEN RAISE EXCEPTION 'Not authenticated'; END IF;
+
+    SELECT last_checkin_date, COALESCE(checkin_streak, 0) INTO v_last, v_streak
+      FROM public.users WHERE id = v_user;
+
+    IF v_last = v_today THEN
+        RETURN json_build_object('already', true, 'streak_day', v_streak, 'reward', 0);
+    END IF;
+
+    IF v_last = v_today - 1 THEN
+        v_streak := v_streak + 1;
+    ELSE
+        v_streak := 1;
+    END IF;
+
+    v_reward := CASE
+        WHEN v_streak % 30 = 0 THEN 200
+        WHEN v_streak % 7 = 0 THEN 50
+        ELSE 10
+    END;
+
+    INSERT INTO public.daily_checkins (user_id, checkin_date, streak_day, reward_amount)
+    VALUES (v_user, v_today, v_streak, v_reward)
+    ON CONFLICT (user_id, checkin_date) DO NOTHING;
+
+    UPDATE public.users
+       SET spirit_stones = COALESCE(spirit_stones, 0) + v_reward,
+           checkin_streak = v_streak,
+           last_checkin_date = v_today
+     WHERE id = v_user;
+
+    INSERT INTO public.spirit_stone_transactions (user_id, amount, type, description)
+    VALUES (v_user, v_reward, 'CHECKIN', 'Daily check-in (day ' || v_streak || ')');
+
+    RETURN json_build_object('already', false, 'streak_day', v_streak, 'reward', v_reward);
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.checkin_daily() TO authenticated;
+
+-- 6. Spend Stones RPC Function
+DROP FUNCTION IF EXISTS public.spend_stones(TEXT, TEXT, INT);
+DROP FUNCTION IF EXISTS public.spend_stones(INT, TEXT);
+DROP FUNCTION IF EXISTS public.spend_stones;
+CREATE OR REPLACE FUNCTION public.spend_stones(
+    p_item_type TEXT,
+    p_item_id TEXT,
+    p_cost INT
+)
+RETURNS JSON
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+    v_user UUID := auth.uid();
+    v_balance BIGINT;
+BEGIN
+    IF v_user IS NULL THEN RAISE EXCEPTION 'Not authenticated'; END IF;
+    IF p_cost < 0 THEN RAISE EXCEPTION 'Invalid cost'; END IF;
+
+    SELECT COALESCE(spirit_stones, 0) INTO v_balance FROM public.users WHERE id = v_user FOR UPDATE;
+    IF v_balance < p_cost THEN
+        RETURN json_build_object('ok', false, 'reason', 'INSUFFICIENT_STONES', 'balance', v_balance);
+    END IF;
+
+    UPDATE public.users SET spirit_stones = spirit_stones - p_cost WHERE id = v_user;
+    INSERT INTO public.spirit_stone_transactions (user_id, amount, type, description, reference_id)
+    VALUES (v_user, -p_cost, 'SPEND', 'Purchased ' || p_item_type || ': ' || p_item_id, p_item_id);
+
+    IF p_item_type = 'TITLE' THEN
+        INSERT INTO public.user_titles (user_id, title_id, title_name)
+        VALUES (v_user, p_item_id, p_item_id)
+        ON CONFLICT (user_id, title_id) DO NOTHING;
+    END IF;
+
+    RETURN json_build_object('ok', true, 'balance', v_balance - p_cost);
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.spend_stones(TEXT, TEXT, INT) TO authenticated;
 """.trimIndent()
     }
 

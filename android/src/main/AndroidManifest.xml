@@ -45,6 +45,7 @@
         </intent>
 
         <!-- Explicit package queries for popular third-party & offline TTS engines -->
+        <package android:name="com.CodeBySonu.VoxSherpa" />
         <package android:name="com.CodeBySona.VoxSherpa" />
         <package android:name="com.google.android.tts" />
         <package android:name="com.samsung.SMT" />

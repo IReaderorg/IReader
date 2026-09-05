@@ -358,6 +358,9 @@ class ProfileViewModel(
             val stats = runCatching { readingStatisticsRepository?.getStatistics() }.getOrNull()
             val minutes = stats?.totalReadingTimeMinutes ?: 0L
             val rl = ReaderLevel.fromMinutes(minutes)
+            val todayStr = currentTimeToLong().formatIsoDate()
+            val localCheckedInToday = uiPreferences?.lastCheckinDate()?.get() == todayStr
+            val localStones = uiPreferences?.localSpiritStones()?.get() ?: 0L
             updateState {
                 it.copy(
                     level = rl.level,
@@ -368,6 +371,8 @@ class ProfileViewModel(
                     genresExplored = stats?.favoriteGenres?.size ?: 0,
                     longestStreak = stats?.longestStreak ?: 0,
                     readingTimeMinutes = stats?.totalReadingTimeMinutes ?: 0L,
+                    spiritStones = localStones,
+                    hasCheckedInToday = localCheckedInToday,
                 )
             }
 
@@ -390,13 +395,13 @@ class ProfileViewModel(
             }
 
             repo.getProfile(userId).onSuccess { p ->
-                val todayStr = currentTimeToLong().formatIsoDate()
                 val checkedInToday = (p.lastCheckinDate?.startsWith(todayStr) == true) ||
                         (uiPreferences?.lastCheckinDate()?.get() == todayStr)
                 val effectiveLevel = maxOf(rl.level, p.level)
                 val effectiveTitle = ReaderLevel.getLevelTitle(effectiveLevel)
                 val effectiveProgress = if (rl.level >= p.level) rl.progress else p.levelProgress
                 val effectiveXp = if (rl.level >= p.level) rl.currentXp else p.xp
+                uiPreferences?.localSpiritStones()?.set(p.spiritStones)
                 updateState {
                     it.copy(
                         level = effectiveLevel, xp = effectiveXp, levelTitle = effectiveTitle,
@@ -437,6 +442,7 @@ class ProfileViewModel(
         scope.launch {
             updateState { it.copy(showEditProfileDialog = false) }
             gamificationRepository?.updateProfile(
+                displayName = null,
                 bio = bio,
                 avatarUrl = avatarUrl.ifBlank { null },
                 coverUrl = coverUrl.ifBlank { null },
@@ -459,32 +465,76 @@ class ProfileViewModel(
     fun checkIn() {
         if (currentState.hasCheckedInToday) return
         scope.launch {
-            val repo = gamificationRepository ?: return@launch
             val todayStr = currentTimeToLong().formatIsoDate()
-            uiPreferences?.lastCheckinDate()?.set(todayStr)
-            updateState { it.copy(hasCheckedInToday = true) }
+            val repo = gamificationRepository
+
+            if (repo == null) {
+                performLocalCheckin(todayStr)
+                return@launch
+            }
+
             repo.checkinDaily().onSuccess { result ->
+                uiPreferences?.lastCheckinDate()?.set(todayStr)
                 if (!result.already) {
+                    val reward = if (result.reward > 0) result.reward else 10
                     updateState { 
                         it.copy(
                             checkinStreak = result.streakDay, 
-                            lastCheckinReward = result.reward,
-                            hasCheckedInToday = true
+                            lastCheckinReward = reward,
+                            hasCheckedInToday = true,
+                            checkinError = null,
                         ) 
                     }
-                    currentState.currentUser?.id?.let { id -> 
-                        repo.getProfile(id).onSuccess { p ->
+                    val uid = currentState.currentUser?.id
+                    if (uid != null) {
+                        repo.getProfile(uid).onSuccess { p ->
+                            uiPreferences?.localSpiritStones()?.set(p.spiritStones)
                             updateState { it.copy(spiritStones = p.spiritStones) } 
                         } 
+                    } else {
+                        val cur = uiPreferences?.localSpiritStones()?.get() ?: currentState.spiritStones
+                        val newBal = cur + reward
+                        uiPreferences?.localSpiritStones()?.set(newBal)
+                        updateState { it.copy(spiritStones = newBal) }
                     }
                 } else {
-                    updateState { it.copy(hasCheckedInToday = true) }
+                    updateState { it.copy(hasCheckedInToday = true, checkinError = null) }
                 }
-            }.onFailure {
-                updateState { it.copy(hasCheckedInToday = true) }
+            }.onFailure { error ->
+                updateState { 
+                    it.copy(
+                        hasCheckedInToday = false, 
+                        checkinError = error.message ?: "Daily check-in failed. Please check Supabase migrations or network connection."
+                    ) 
+                }
             }
         }
     }
+
+    private fun performLocalCheckin(todayStr: String) {
+        val currentStones = uiPreferences?.localSpiritStones()?.get() ?: currentState.spiritStones
+        val prevStreak = currentState.checkinStreak
+        val newStreak = prevStreak + 1
+        val reward = when {
+            newStreak % 30 == 0 -> 200
+            newStreak % 7 == 0 -> 50
+            else -> 10
+        }
+        val newBalance = currentStones + reward
+        uiPreferences?.localSpiritStones()?.set(newBalance)
+        uiPreferences?.lastCheckinDate()?.set(todayStr)
+        updateState {
+            it.copy(
+                spiritStones = newBalance,
+                checkinStreak = newStreak,
+                lastCheckinReward = reward,
+                hasCheckedInToday = true,
+                checkinError = null,
+            )
+        }
+    }
+
+    fun clearCheckinError() = updateState { it.copy(checkinError = null) }
 
     fun setActiveTitle(titleId: String?) {
         scope.launch {
@@ -537,6 +587,7 @@ data class ProfileState(
     val spiritStones: Long = 0,
     val checkinStreak: Int = 0,
     val hasCheckedInToday: Boolean = false,
+    val checkinError: String? = null,
     val lastCheckinReward: Int = 0,
     val activeTitleId: String? = null,
     val genresExplored: Int = 0,

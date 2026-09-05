@@ -5,6 +5,7 @@ import ireader.domain.data.repository.ReadingChallengeRepository
 import ireader.domain.models.gamification.ReadingChallenge
 import ireader.domain.models.gamification.ReadingChallengeState
 import ireader.domain.models.gamification.ChallengeType
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 class ReadingChallengeRepositoryImpl(
-    private val prefs: PreferenceStore
+    private val prefs: PreferenceStore,
+    private val uiPreferences: UiPreferences? = null,
 ) : ReadingChallengeRepository {
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -99,11 +101,17 @@ class ReadingChallengeRepositoryImpl(
         } }
 
         current.weeklyChallenge?.let { ch -> updateSingleChallenge(ch, "weekly", now, minutesRead) { updated ->
-            _state.update { s -> s.copy(weeklyChallenge = updated) }
+            _state.update { s ->
+                val stonesEarned = if (updated.isCompleted && !ch.isCompleted) s.totalStonesEarnedFromChallenges + updated.rewardStones else s.totalStonesEarnedFromChallenges
+                s.copy(weeklyChallenge = updated, totalStonesEarnedFromChallenges = stonesEarned)
+            }
         } }
 
         current.monthlyChallenge?.let { ch -> updateSingleChallenge(ch, "monthly", now, minutesRead) { updated ->
-            _state.update { s -> s.copy(monthlyChallenge = updated) }
+            _state.update { s ->
+                val stonesEarned = if (updated.isCompleted && !ch.isCompleted) s.totalStonesEarnedFromChallenges + updated.rewardStones else s.totalStonesEarnedFromChallenges
+                s.copy(monthlyChallenge = updated, totalStonesEarnedFromChallenges = stonesEarned)
+            }
         } }
     }
 
@@ -115,11 +123,18 @@ class ReadingChallengeRepositoryImpl(
         onUpdate: suspend (ReadingChallenge) -> Unit
     ) {
         if (challenge.isCompleted || now !in challenge.startDate..challenge.endDate) return
+        val wasCompleted = challenge.isCompleted
+        val isNowCompleted = challenge.currentMinutes + minutesRead >= challenge.goalMinutes
         val updated = challenge.copy(
             currentMinutes = challenge.currentMinutes + minutesRead,
-            isCompleted = challenge.currentMinutes + minutesRead >= challenge.goalMinutes,
-            completedAt = if (challenge.currentMinutes + minutesRead >= challenge.goalMinutes) now else null
+            isCompleted = isNowCompleted,
+            completedAt = if (isNowCompleted) now else null
         )
+        if (isNowCompleted && !wasCompleted && updated.rewardStones > 0) {
+            uiPreferences?.localSpiritStones()?.let { pref ->
+                pref.set(pref.get() + updated.rewardStones)
+            }
+        }
         saveChallenge(type, updated)
         onUpdate(updated)
     }

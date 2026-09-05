@@ -3,6 +3,7 @@ package ireader.presentation.ui.spiritstone
 import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.BadgeRepository
 import ireader.domain.data.repository.GamificationRepository
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +45,8 @@ data class SpiritStoneShopState(
 class SpiritStoneShopViewModel(
     private val gamificationRepository: GamificationRepository,
     private val badgeRepository: BadgeRepository,
-    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
+    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?,
+    private val uiPreferences: UiPreferences? = null,
 ) : BaseViewModel() {
 
     private val _state = MutableStateFlow(SpiritStoneShopState())
@@ -79,8 +81,17 @@ class SpiritStoneShopViewModel(
 
                 if (userId.isNotEmpty()) {
                     try {
-                        spiritStones = gamificationRepository.getProfile(userId).getOrNull()?.spiritStones ?: 0
-                    } catch (_: Exception) {}
+                        val profile = gamificationRepository.getProfile(userId).getOrNull()
+                        val remoteStones = profile?.spiritStones ?: 0L
+                        if (remoteStones > 0L) {
+                            spiritStones = remoteStones
+                            uiPreferences?.localSpiritStones()?.set(remoteStones)
+                        } else {
+                            spiritStones = uiPreferences?.localSpiritStones()?.get() ?: 0L
+                        }
+                    } catch (_: Exception) {
+                        spiritStones = uiPreferences?.localSpiritStones()?.get() ?: 0L
+                    }
 
                     try {
                         val allBadges = badgeRepository.getAvailableBadges().getOrDefault(emptyList())
@@ -112,6 +123,8 @@ class SpiritStoneShopViewModel(
                                 .thenByDescending { it.rarity == "EPIC" }
                                 .thenByDescending { it.rarity == "RARE" })
                     } catch (_: Exception) {}
+                } else {
+                    spiritStones = uiPreferences?.localSpiritStones()?.get() ?: 0L
                 }
 
                 _state.update {
@@ -159,9 +172,11 @@ class SpiritStoneShopViewModel(
                 )
 
                 if (result.isSuccess) {
+                    val newBalance = maxOf(0L, currentState.spiritStones - cost)
+                    uiPreferences?.localSpiritStones()?.set(newBalance)
                     _state.update {
                         it.copy(
-                            spiritStones = it.spiritStones - cost,
+                            spiritStones = newBalance,
                             availableTitles = it.availableTitles.map { t ->
                                 if (t.id == itemId) t.copy(isOwned = true) else t
                             },

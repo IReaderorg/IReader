@@ -504,6 +504,7 @@ END;
 $$;
 
 -- Daily check-in: awards streak-scaled stones, then evaluates achievements.
+DROP FUNCTION IF EXISTS public.checkin_daily();
 CREATE OR REPLACE FUNCTION public.checkin_daily()
 RETURNS JSON
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
@@ -583,6 +584,9 @@ END;
 $$;
 
 -- Spend earned Spirit Stones on a cosmetic (badge / title). Cosmetic-only.
+DROP FUNCTION IF EXISTS public.spend_stones(TEXT, TEXT, INT);
+DROP FUNCTION IF EXISTS public.spend_stones(INT, TEXT);
+DROP FUNCTION IF EXISTS public.spend_stones;
 CREATE OR REPLACE FUNCTION public.spend_stones(
     p_item_type TEXT,   -- 'BADGE' | 'TITLE'
     p_item_id   TEXT,

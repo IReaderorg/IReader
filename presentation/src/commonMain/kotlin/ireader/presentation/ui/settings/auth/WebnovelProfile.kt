@@ -137,7 +137,7 @@ fun WebnovelProfileScreen(
                 )
             }
             item { XpPanel(level = state.level, progress = state.levelProgress, xp = state.xp, rank = state.leaderboardRank) }
-            if (signedIn) item { CheckinPanel(streak = state.checkinStreak, hasCheckedInToday = state.hasCheckedInToday, onCheckIn = onCheckIn) }
+            item { CheckinPanel(streak = state.checkinStreak, hasCheckedInToday = state.hasCheckedInToday, error = state.checkinError, onCheckIn = onCheckIn) }
             if (activeTitle != null) item { ActiveTitlePanel(activeTitle) }
             if (ownedBadges.isNotEmpty()) item { BadgesShowcase(ownedBadges) }
             if (state.achievements.isNotEmpty()) item { AchievementsShowcase(state.achievements) }
@@ -378,36 +378,46 @@ private fun XpPanel(level: Int, progress: Float, xp: Long, rank: Int) {
 }
 
 @Composable
-private fun CheckinPanel(streak: Int, hasCheckedInToday: Boolean, onCheckIn: () -> Unit) {
+private fun CheckinPanel(streak: Int, hasCheckedInToday: Boolean, error: String? = null, onCheckIn: () -> Unit) {
     val cs = MaterialTheme.colorScheme
     val isCheckedIn = hasCheckedInToday
+    val hasError = error != null && !isCheckedIn
     Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(18.dp))
-        .background(if (isCheckedIn) cs.surfaceVariant else cs.tertiaryContainer)
+        .background(
+            if (isCheckedIn) cs.surfaceVariant 
+            else if (hasError) cs.errorContainer.copy(alpha = 0.5f)
+            else cs.tertiaryContainer
+        )
         .clickable(enabled = !isCheckedIn, onClick = onCheckIn).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(if (isCheckedIn) "✅" else "🔥", fontSize = 26.sp)
+            Text(if (isCheckedIn) "✅" else if (hasError) "⚠️" else "🔥", fontSize = 26.sp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    if (isCheckedIn) "Checked in today!" else "Daily Check-in",
-                    color = cs.onTertiaryContainer,
+                    if (isCheckedIn) "Checked in today!" else if (hasError) "Check-in failed" else "Daily Check-in",
+                    color = if (hasError) cs.onErrorContainer else cs.onTertiaryContainer,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
                 Text(
                     if (isCheckedIn) "Come back tomorrow"
+                    else if (hasError) error
                     else if (streak > 0) "$streak-day streak · tap to claim"
                     else "Start your streak & earn stones",
-                    color = cs.onTertiaryContainer.copy(alpha = 0.85f),
+                    color = (if (hasError) cs.onErrorContainer else cs.onTertiaryContainer).copy(alpha = 0.85f),
                     fontSize = 12.sp
                 )
             }
             Box(Modifier.clip(RoundedCornerShape(20.dp))
-                .background(if (isCheckedIn) cs.surfaceVariant.copy(alpha = 0.5f) else cs.tertiary)
+                .background(
+                    if (isCheckedIn) cs.surfaceVariant.copy(alpha = 0.5f) 
+                    else if (hasError) cs.error 
+                    else cs.tertiary
+                )
                 .padding(horizontal = 16.dp, vertical = 8.dp)) {
                 Text(
-                    if (isCheckedIn) "Done" else "Claim",
-                    color = if (isCheckedIn) cs.onSurfaceVariant else cs.onTertiary,
+                    if (isCheckedIn) "Done" else if (hasError) "Retry" else "Claim",
+                    color = if (isCheckedIn) cs.onSurfaceVariant else if (hasError) cs.onError else cs.onTertiary,
                     fontWeight = FontWeight.Bold
                 )
             }
