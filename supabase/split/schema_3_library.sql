@@ -26,7 +26,13 @@ CREATE TABLE IF NOT EXISTS public.synced_books (
     last_read BIGINT NOT NULL DEFAULT 0,
     cover_url TEXT DEFAULT '',
     source_name TEXT DEFAULT '',
+    author TEXT DEFAULT '',
+    description TEXT DEFAULT '',
+    genres TEXT DEFAULT '',
+    status BIGINT DEFAULT 0,
+    favorite BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     -- Constraints
     PRIMARY KEY (user_id, book_id),
@@ -81,6 +87,22 @@ CREATE POLICY "Users can update their own synced books"
 CREATE POLICY "Users can delete their own synced books"
     ON public.synced_books FOR DELETE
     USING (user_id = auth.uid()::TEXT);
+
+-- ----------------------------------------------------------------------------
+-- Sync Manifest Table (Document Store)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.sync_manifest (
+    user_id TEXT NOT NULL PRIMARY KEY,
+    manifest JSONB NOT NULL,
+    updated_at BIGINT NOT NULL DEFAULT 0
+);
+
+ALTER TABLE public.sync_manifest ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own sync manifest"
+    ON public.sync_manifest FOR ALL
+    USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL)
+    WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
 
 -- ============================================================================
 -- SUCCESS MESSAGE

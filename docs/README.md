@@ -37,8 +37,8 @@ Bypass protections and read from any site.
 
 ### 🔄 [Sync & Backup](guides/sync_backup.md)
 Keep your library safe and synchronized.
+*   **[Supabase Cloud Setup Guide](guides/supabase_setup_guide.md)** ⭐ NEW: Free personal cloud database setup.
 *   **[Supabase Sync](guides/sync_backup.md#supabase-sync)**: Sync across devices.
-*   **[Custom Config](guides/sync_backup.md#custom-supabase-configuration)**: Host your own backend.
 *   **[Backup/Restore](guides/sync_backup.md#backup--restore)**: Create local backups.
 
 ### ✨ [Features](guides/features.md)

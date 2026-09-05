@@ -4,23 +4,17 @@ Keep your library safe and synchronized across devices using Supabase Sync and l
 
 ## Supabase Sync
 
-IReader uses Supabase to sync your reading progress, library, and history across devices.
+IReader uses your personal, private Supabase database to sync your reading progress, library, and Spirit Stones across all devices.
 
-### Setting Up Sync
-1.  Go to **Settings** → **Sync**.
-2.  **Default Configuration**: By default, IReader uses a shared Supabase instance. You can use this immediately without setup.
-3.  **Login**: Ensure you are logged in (if required by the instance).
+> [!TIP]
+> For complete step-by-step instructions on creating your free Supabase project, getting API keys, and setting up database tables, see the **[Supabase Cloud Sync & Setup Guide](supabase_setup_guide.md)**.
 
-### Custom Supabase Configuration
-For advanced users who want full control over their data, you can host your own Supabase instance.
-
-1.  Go to **Settings** → **Sync**.
-2.  Toggle **Use Custom Supabase** to ON.
-3.  Enter your Supabase project details:
-    *   **Project URL**: Your Supabase project URL (e.g., `https://xyz.supabase.co`).
-    *   **API Key**: Your `anon` public key.
-4.  **Multi-Endpoint**: If you use separate projects for different data (e.g., one for books, one for progress), enable "Multi-Endpoint Configuration" and enter details for each.
-5.  **Database Schema**: Tap "Database Schema" to see the required tables (`users`, `reading_progress`, `synced_books`, `synced_chapters`) if you are setting up a new project.
+### Setting Up Personal Sync (Recommended)
+1. Go to **Settings** → **Sync** → **Supabase Configuration**.
+2. Enter your **Project URL** and **API Key** (`anon` key).
+3. Tap **Save Configuration**, then tap **Test Connection**.
+4. Use **Copy Setup SQL** in the app to get the database schema, then paste it into your Supabase SQL Editor.
+5. Use **Share Config** to quickly export and import your setup across multiple devices.
 
 ### Sync Settings
 *   **Auto Sync**: Automatically syncs progress in the background.

@@ -185,6 +185,17 @@ CREATE TABLE IF NOT EXISTS public.synced_books (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (user_id, book_id)
 );
+ALTER TABLE public.synced_books DROP CONSTRAINT IF EXISTS synced_books_user_id_fkey;
+ALTER TABLE public.synced_books
+    ADD COLUMN IF NOT EXISTS author TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS genres TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS status BIGINT DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS favorite BOOLEAN DEFAULT true,
+    ADD COLUMN IF NOT EXISTS cover_url TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS source_name TEXT DEFAULT '',
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+
 CREATE INDEX IF NOT EXISTS idx_synced_books_user_id ON public.synced_books(user_id);
 ALTER TABLE public.synced_books ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public synced_books access" ON public.synced_books;
@@ -199,6 +210,9 @@ CREATE TABLE IF NOT EXISTS public.reading_progress (
     updated_at BIGINT DEFAULT 0,
     PRIMARY KEY (user_id, book_id)
 );
+ALTER TABLE public.reading_progress DROP CONSTRAINT IF EXISTS reading_progress_user_id_fkey;
+ALTER TABLE public.reading_progress DROP CONSTRAINT IF EXISTS scroll_position_range;
+
 CREATE INDEX IF NOT EXISTS idx_reading_progress_user_id ON public.reading_progress(user_id);
 ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public reading_progress access" ON public.reading_progress;
