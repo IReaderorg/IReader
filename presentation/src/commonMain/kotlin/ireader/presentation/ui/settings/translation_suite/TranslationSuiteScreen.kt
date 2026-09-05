@@ -42,6 +42,8 @@ fun TranslationSuiteScreen(
     onSelectEngineId: (Long) -> Unit,
     onSelectLanguage: (String) -> Unit,
     onOpenAIApiKeyChange: (String) -> Unit = {},
+    onOpenAIBaseUrlChange: (String) -> Unit = {},
+    onOpenAIModelChange: (String) -> Unit = {},
     onDeepSeekApiKeyChange: (String) -> Unit = {},
     onGeminiApiKeyChange: (String) -> Unit = {},
     onGeminiModelChange: (String) -> Unit = {},
@@ -82,7 +84,7 @@ fun TranslationSuiteScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabTitles = listOf("Engines & Models", "Context & Style", "Glossary", "Text Cleanup")
+    val tabTitles = listOf("AI Models", "Context & Style", "Glossary", "Text Cleanup")
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.testConnectionState) {
@@ -145,6 +147,8 @@ fun TranslationSuiteScreen(
                     ActiveEngineDetailCard(
                         state = state,
                         onOpenAIApiKeyChange = onOpenAIApiKeyChange,
+                        onOpenAIBaseUrlChange = onOpenAIBaseUrlChange,
+                        onOpenAIModelChange = onOpenAIModelChange,
                         onDeepSeekApiKeyChange = onDeepSeekApiKeyChange,
                         onGeminiApiKeyChange = onGeminiApiKeyChange,
                         onGeminiModelChange = onGeminiModelChange,
@@ -331,7 +335,7 @@ private fun EngineSelectionHeader(
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(
-                text = "Translation Engine",
+                text = "AI Model",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -387,6 +391,8 @@ private fun EngineSelectionHeader(
 private fun ActiveEngineDetailCard(
     state: TranslationSuiteState,
     onOpenAIApiKeyChange: (String) -> Unit,
+    onOpenAIBaseUrlChange: (String) -> Unit,
+    onOpenAIModelChange: (String) -> Unit,
     onDeepSeekApiKeyChange: (String) -> Unit,
     onGeminiApiKeyChange: (String) -> Unit,
     onGeminiModelChange: (String) -> Unit,
@@ -466,11 +472,32 @@ private fun ActiveEngineDetailCard(
                 }
                 2L -> {
                     // OpenAI
-                    Text("OpenAI Configuration", style = MaterialTheme.typography.titleSmall)
+                    Text("OpenAI & Compatible Configuration", style = MaterialTheme.typography.titleSmall)
+                    OutlinedTextField(
+                        value = state.openAIBaseUrl,
+                        onValueChange = onOpenAIBaseUrlChange,
+                        label = { Text("API Base URL") },
+                        placeholder = { Text("https://api.openai.com/v1") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = state.openAIModel,
+                        onValueChange = onOpenAIModelChange,
+                        label = { Text("Model Name") },
+                        placeholder = { Text("gpt-3.5-turbo") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
                     ApiKeyField(
                         value = state.openAIApiKey,
                         onValueChange = onOpenAIApiKeyChange,
-                        label = "OpenAI API Key"
+                        label = "OpenAI API Key (Optional for local)"
+                    )
+                    Text(
+                        text = "Supports OpenAI, Groq, vLLM, Ollama, LM Studio, LocalAI, etc.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     onNavigateToLogin?.let { onLogin ->
                         OutlinedButton(onClick = { onLogin("chatgpt") }, modifier = Modifier.fillMaxWidth()) {

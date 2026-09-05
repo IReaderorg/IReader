@@ -27,6 +27,8 @@ class TranslationScreenSpec {
             onSelectEngineId = { viewModel.setEngineId(it) },
             onSelectLanguage = { viewModel.setTargetLanguage(it) },
             onOpenAIApiKeyChange = { viewModel.setOpenAIApiKey(it) },
+            onOpenAIBaseUrlChange = { viewModel.setOpenAIBaseUrl(it) },
+            onOpenAIModelChange = { viewModel.setOpenAIModel(it) },
             onDeepSeekApiKeyChange = { viewModel.setDeepSeekApiKey(it) },
             onGeminiApiKeyChange = { viewModel.setGeminiApiKey(it) },
             onGeminiModelChange = { viewModel.setGeminiModel(it) },

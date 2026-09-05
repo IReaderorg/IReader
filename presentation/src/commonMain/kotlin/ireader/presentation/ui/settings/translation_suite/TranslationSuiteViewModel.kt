@@ -52,6 +52,8 @@ data class TranslationSuiteState(
 
     // Engine Credentials & Parameters
     val openAIApiKey: String = "",
+    val openAIBaseUrl: String = "https://api.openai.com/v1",
+    val openAIModel: String = "gpt-3.5-turbo",
     val deepSeekApiKey: String = "",
     val geminiApiKey: String = "",
     val geminiModel: String = "",
@@ -128,6 +130,8 @@ class TranslationSuiteViewModel(
     private fun loadSettings() {
         val engineId = readerPreferences.translatorEngine().get().let { if (it == -1L) 11L else it }
         val openAIKey = readerPreferences.openAIApiKey().get()
+        val openAIBase = readerPreferences.openAIBaseUrl().get()
+        val openAIM = readerPreferences.openAIModel().get()
         val deepSeekKey = readerPreferences.deepSeekApiKey().get()
         val geminiKey = readerPreferences.geminiApiKey().get()
         val geminiM = readerPreferences.geminiModel().get()
@@ -156,6 +160,8 @@ class TranslationSuiteViewModel(
             it.copy(
                 selectedEngineId = engineId,
                 openAIApiKey = openAIKey,
+                openAIBaseUrl = if (openAIBase.isNotBlank()) openAIBase else "https://api.openai.com/v1",
+                openAIModel = if (openAIM.isNotBlank()) openAIM else "gpt-3.5-turbo",
                 deepSeekApiKey = deepSeekKey,
                 geminiApiKey = geminiKey,
                 geminiModel = geminiM,
@@ -236,6 +242,16 @@ class TranslationSuiteViewModel(
     fun setOpenAIApiKey(key: String) {
         readerPreferences.openAIApiKey().set(key)
         updateState { it.copy(openAIApiKey = key) }
+    }
+
+    fun setOpenAIBaseUrl(url: String) {
+        readerPreferences.openAIBaseUrl().set(url)
+        updateState { it.copy(openAIBaseUrl = url) }
+    }
+
+    fun setOpenAIModel(model: String) {
+        readerPreferences.openAIModel().set(model)
+        updateState { it.copy(openAIModel = model) }
     }
 
     fun setDeepSeekApiKey(key: String) {

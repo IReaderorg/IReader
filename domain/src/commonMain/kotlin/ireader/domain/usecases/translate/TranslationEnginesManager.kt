@@ -35,7 +35,7 @@ class TranslationEnginesManager(
     private val pluginManager: PluginManager? = null
 ) {
 
-    // Built-in translation engines:
+    // Built-in translation engines / AI models:
     val builtInEngines = listOf(
         GoogleTranslateML(),  // id=0, offline
         GoogleTranslateFree(),  // id=11, online free, no setup required
@@ -50,10 +50,20 @@ class TranslationEnginesManager(
         LibreTranslateEngine(httpClients),  // id=4, LibreTranslate
         FreeAITranslateEngine(httpClients)  // id=7, AI Webscraping
     )
+
+    /**
+     * Alias for builtInEngines as these models are used for multiple tasks (AI models)
+     */
+    val aiModels: List<TranslateEngine> get() = builtInEngines
     
     // Cache for translation results to improve performance
     // Requirements: 4.4
     private val translationCache = mutableMapOf<String, String>()
+
+    /**
+     * Get the active AI Model / Translation Engine
+     */
+    fun getAiModel(): TranslateEngine = get()
 
     fun get(): TranslateEngine {
         val pluginId = readerPreferences.translatorPluginId().get()
@@ -665,8 +675,10 @@ class TranslationEnginesManager(
         }
         return when (engine.id) {
             2L -> { // OpenAI
-                val apiKey = readerPreferences.openAIApiKey().get()
-                if (apiKey.isBlank()) TranslationError.ApiKeyNotSet("OpenAI") else null
+                val baseUrl = readerPreferences.openAIBaseUrl().get().trim()
+                val isOfficial = baseUrl.isBlank() || baseUrl.contains("api.openai.com", ignoreCase = true)
+                val apiKey = readerPreferences.openAIApiKey().get().trim()
+                if (apiKey.isBlank() && isOfficial) TranslationError.ApiKeyNotSet("OpenAI") else null
             }
             3L -> { // DeepSeek
                 val apiKey = readerPreferences.deepSeekApiKey().get()

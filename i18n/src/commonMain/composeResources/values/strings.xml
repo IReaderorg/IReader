@@ -617,12 +617,16 @@
     <string name="translating">Translating... This may take a moment.</string>
     <string name="translation_complete">Translation complete.</string>
     <string name="translation_settings">Translation Settings</string>
-    <string name="translation_engine">Translation Engine</string>
+    <string name="translation_engine">AI Model</string>
     <string name="content_type">Content Type</string>
     <string name="tone_type">Tone</string>
     <string name="preserve_style">Preserve Style</string>
     <string name="api_settings">API Settings</string>
     <string name="openai_api_key">OpenAI API Key</string>
+    <string name="openai_api_url">OpenAI Compatible API Base URL</string>
+    <string name="openai_model">OpenAI Model</string>
+    <string name="openai_api_url_hint">Default: https://api.openai.com/v1 (or custom/local endpoint)</string>
+    <string name="openai_model_hint">Default: gpt-3.5-turbo (or custom model name)</string>
     <string name="deepseek_api_key">DeepSeek API Key</string>
     <string name="libretranslate_api_key">LibreTranslate API Key</string>
     <string name="openrouter_api_key">OpenRouter API Key</string>
@@ -650,7 +654,7 @@
     <string name="api_response_error">Api Response was not successful</string>
     <string name="deepseek_payment_required">DeepSeek payment required or API quota exceeded</string>
     <string name="translations">translation</string>
-    <string name="translation_engines_refreshed">Translation engines refreshed</string>
+    <string name="translation_engines_refreshed">AI models refreshed</string>
     <string name="ollama_server_url_not_set">OOllama server url not set</string>
     <string name="literary">Literary</string>
     <string name="technical">Technical</string>
@@ -1991,7 +1995,7 @@
     <string name="select_what_data_to_transfer">Select what data to transfer</string>
     <string name="select_when_automatic_updates_are_allowed">Select when automatic updates are allowed:</string>
     <string name="select_which_gemini_model_to_use_for_translation">Select which Gemini model to use for translation</string>
-    <string name="select_your_preferred_translation_engine">Select your preferred translation engine and configure its settings. AI-powered engines (OpenAI, DeepSeek) require API keys and offer more advanced features.</string>
+    <string name="select_your_preferred_translation_engine">Select your preferred AI model and configure its settings. AI-powered models (OpenAI, DeepSeek, Claude, Gemini) require API keys and offer more advanced features.</string>
     <string name="selected_languages">Selected Languages</string>
     <string name="selectionanimation">selectionAnimation</string>
     <string name="sets_the_tone_of_translated_text">Sets the tone of translated text</string>
@@ -2878,7 +2882,7 @@
     <string name="translation_timeout_with_seconds">%1$s did not respond within %2$d seconds. Please try again.</string>
     <string name="translation_text_too_long">The text is too long for %1$s to process. Try translating smaller sections.</string>
     <string name="translation_text_too_long_with_limit">The text exceeds %1$s limit of %2$d characters. Try translating smaller sections.</string>
-    <string name="translation_engine_not_available">%1$s is not available in this version of the app. Please use a different translation engine.</string>
+    <string name="translation_engine_not_available">%1$s is not available in this version of the app. Please use a different AI model.</string>
     <string name="translation_model_not_found">The AI model for %1$s could not be found. Please check your settings.</string>
     <string name="translation_model_not_found_with_name">Model '%2$s' not found in %1$s. Please select a different model in settings.</string>
     <string name="translation_plugin_error">Translation plugin '%1$s' encountered an error. Please check the plugin settings or try a different engine.</string>
@@ -2888,13 +2892,13 @@
     <string name="gemini_api_key_invalid">Gemini API key is invalid or has expired. Please get a new key from Google AI Studio.</string>
     
     <!-- Translation Engine Initialization -->
-    <string name="translation_engine_initialization">Translation Engine Initialization</string>
+    <string name="translation_engine_initialization">AI Model Initialization</string>
     <string name="engine_requires_initialization">Engine Requires Initialization</string>
     <string name="engine_initialization_description">%1$s requires downloading language models before it can translate. This is a one-time setup.</string>
     <string name="downloading_language_model">Downloading Language Model</string>
     <string name="initialization_complete">Initialization Complete!</string>
     <string name="initialization_failed">Initialization Failed</string>
-    <string name="translation_engine_ready">Translation engine is ready to use</string>
+    <string name="translation_engine_ready">AI model is ready to use</string>
     <string name="language_pair">Language Pair</string>
     <string name="initialize">Initialize</string>
     

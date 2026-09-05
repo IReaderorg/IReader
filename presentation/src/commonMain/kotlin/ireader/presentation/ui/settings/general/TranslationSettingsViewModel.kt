@@ -38,6 +38,8 @@ class TranslationSettingsViewModel(
 
     val translatorEngine = readerPreferences.translatorEngine().asState()
     val openAIApiKey = readerPreferences.openAIApiKey().asState()
+    val openAIBaseUrl = readerPreferences.openAIBaseUrl().asState()
+    val openAIModel = readerPreferences.openAIModel().asState()
     val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()
     val geminiApiKey = readerPreferences.geminiApiKey().asState()
     val geminiModel = readerPreferences.geminiModel().asState()
@@ -106,6 +108,14 @@ class TranslationSettingsViewModel(
     fun updateOpenAIApiKey(value: String) {
         openAIApiKey.value = value
     }
+
+    fun updateOpenAIBaseUrl(value: String) {
+        openAIBaseUrl.value = value
+    }
+
+    fun updateOpenAIModel(value: String) {
+        openAIModel.value = value
+    }
     
     fun updateDeepSeekApiKey(value: String) {
         deepSeekApiKey.value = value
@@ -172,7 +182,11 @@ class TranslationSettingsViewModel(
                 // Validate API key is set if required
                 if (engine.requiresApiKey) {
                     val apiKey = when (engine.id) {
-                        2L -> openAIApiKey.value // OpenAI
+                        2L -> {
+                            val baseUrl = openAIBaseUrl.value.trim()
+                            val isOfficial = baseUrl.isBlank() || baseUrl.contains("api.openai.com", ignoreCase = true)
+                            if (openAIApiKey.value.isBlank() && !isOfficial) "dummy-key" else openAIApiKey.value.trim()
+                        }
                         3L -> deepSeekApiKey.value // DeepSeek
                         8L -> geminiApiKey.value // Gemini
                         9L -> openRouterApiKey.value // OpenRouter

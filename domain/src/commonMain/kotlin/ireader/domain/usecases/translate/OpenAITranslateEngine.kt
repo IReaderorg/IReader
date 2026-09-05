@@ -39,9 +39,24 @@ class OpenAITranslateEngine(
     override val rateLimitDelayMs: Long = 3000L
     
     override val isOffline: Boolean = false
+
+    fun getBaseUrl(): String {
+        val url = readerPreferences.openAIBaseUrl().get().trim()
+        return if (url.isBlank()) "https://api.openai.com/v1" else url.trimEnd('/')
+    }
+
+    fun getChatEndpoint(): String {
+        val base = getBaseUrl()
+        return if (base.endsWith("/chat/completions")) base else "$base/chat/completions"
+    }
+
+    fun getModel(): String {
+        val model = readerPreferences.openAIModel().get().trim()
+        return if (model.isBlank()) "gpt-3.5-turbo" else model
+    }
     
     /**
-     * Generate content using OpenAI API
+     * Generate content using OpenAI API or compatible endpoint
      */
     override suspend fun generateContent(
         systemPrompt: String,
@@ -49,19 +64,23 @@ class OpenAITranslateEngine(
         temperature: Float,
         maxTokens: Int
     ): Result<String> {
-        val apiKey = readerPreferences.openAIApiKey().get()
-        if (apiKey.isBlank()) {
+        val baseUrl = getBaseUrl()
+        val isOfficial = baseUrl.contains("api.openai.com", ignoreCase = true)
+        val apiKey = readerPreferences.openAIApiKey().get().trim().ifEmpty {
+            if (!isOfficial) "dummy-key" else ""
+        }
+        if (apiKey.isBlank() && isOfficial) {
             return Result.failure(Exception("OpenAI API key not configured"))
         }
         
         return try {
-            val response = client.default.post("https://api.openai.com/v1/chat/completions") {
+            val response = client.default.post(getChatEndpoint()) {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer $apiKey")
                 }
                 contentType(ContentType.Application.Json)
                 setBody(OpenAIRequest(
-                    model = "gpt-3.5-turbo",
+                    model = getModel(),
                     messages = listOf(
                         Message(role = "system", content = systemPrompt),
                         Message(role = "user", content = userPrompt)
@@ -229,9 +248,13 @@ class OpenAITranslateEngine(
             return
         }
         
-        val apiKey = readerPreferences.openAIApiKey().get()
+        val baseUrl = getBaseUrl()
+        val isOfficial = baseUrl.contains("api.openai.com", ignoreCase = true)
+        val apiKey = readerPreferences.openAIApiKey().get().trim().ifEmpty {
+            if (!isOfficial) "dummy-key" else ""
+        }
         
-        if (apiKey.isBlank()) {
+        if (apiKey.isBlank() && isOfficial) {
             onError(UiText.MStringResource(Res.string.openai_api_key_not_set))
             return
         }
@@ -248,13 +271,13 @@ class OpenAITranslateEngine(
             
             onProgress(40)
             try {
-                val response = client.default.post("https://api.openai.com/v1/chat/completions") {
+                val response = client.default.post(getChatEndpoint()) {
                     headers {
                         append(HttpHeaders.Authorization, "Bearer $apiKey")
                     }
                     contentType(ContentType.Application.Json)
                     setBody(OpenAIRequest(
-                        model = "gpt-3.5-turbo", // or "gpt-4" for better quality
+                        model = getModel(),
                         messages = listOf(
                             Message(role = "system", content = "You are a professional translator with expertise in multiple languages."),
                             Message(role = "user", content = prompt)

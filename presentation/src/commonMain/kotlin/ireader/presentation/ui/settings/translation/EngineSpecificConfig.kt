@@ -100,7 +100,10 @@ import ireader.i18n.resources.nvidia_model
 import ireader.i18n.resources.nvidia_nim
 import ireader.i18n.resources.ok
 import ireader.i18n.resources.ollama_configuration
+import ireader.i18n.resources.openai_api_key
+import ireader.i18n.resources.openai_api_url
 import ireader.i18n.resources.openai_configuration
+import ireader.i18n.resources.openai_model
 import ireader.i18n.resources.openrouter_api_key
 import ireader.i18n.resources.openrouter_fetch_models
 import ireader.i18n.resources.openrouter_info
@@ -108,6 +111,7 @@ import ireader.i18n.resources.openrouter_model
 import ireader.i18n.resources.ready
 import ireader.i18n.resources.refresh_models
 import ireader.i18n.resources.sign_in_required
+import ireader.i18n.resources.test
 import ireader.i18n.resources.to
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.general.MlKitInitState
@@ -145,6 +149,17 @@ fun EngineSpecificConfig(
             initProgress = viewModel.mlKitInitProgress,
             onInitialize = { source, target -> viewModel.initializeGoogleMlKit(source, target) },
             onResetState = { viewModel.resetMlKitInitState() },
+            modifier = modifier
+        )
+        2L -> OpenAIConfig(
+            baseUrl = viewModel.openAIBaseUrl.value,
+            model = viewModel.openAIModel.value,
+            apiKey = viewModel.openAIApiKey.value,
+            onBaseUrlChange = { viewModel.updateOpenAIBaseUrl(it) },
+            onModelChange = { viewModel.updateOpenAIModel(it) },
+            onApiKeyChange = { viewModel.updateOpenAIApiKey(it) },
+            onTestConnection = { viewModel.testConnection() },
+            testState = viewModel.testConnectionState,
             modifier = modifier
         )
         5L -> OllamaConfig(
@@ -1046,6 +1061,138 @@ private fun OllamaConfig(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 maxLines = 1
             )
+        }
+    }
+}
+
+@Composable
+private fun OpenAIConfig(
+    baseUrl: String,
+    model: String,
+    apiKey: String,
+    onBaseUrlChange: (String) -> Unit,
+    onModelChange: (String) -> Unit,
+    onApiKeyChange: (String) -> Unit,
+    onTestConnection: () -> Unit,
+    testState: TestConnectionState,
+    modifier: Modifier = Modifier
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var showApiKey by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "OpenAI & Compatible Endpoints",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            // Base URL Input
+            OutlinedTextField(
+                value = baseUrl,
+                onValueChange = onBaseUrlChange,
+                label = { Text(localizeHelper.localize(Res.string.openai_api_url), maxLines = 1) },
+                placeholder = { Text("https://api.openai.com/v1", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Model Input
+            OutlinedTextField(
+                value = model,
+                onValueChange = onModelChange,
+                label = { Text(localizeHelper.localize(Res.string.openai_model), maxLines = 1) },
+                placeholder = { Text("gpt-3.5-turbo", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // API Key Input
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = onApiKeyChange,
+                label = { Text(localizeHelper.localize(Res.string.openai_api_key) + " (Optional for local)", maxLines = 1) },
+                placeholder = { Text("sk-...", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Test Connection Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Supports OpenAI, Groq, vLLM, Ollama, LM Studio, etc.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(
+                    onClick = onTestConnection,
+                    enabled = testState !is TestConnectionState.Testing
+                ) {
+                    if (testState is TestConnectionState.Testing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(localizeHelper.localize(Res.string.test))
+                    }
+                }
+            }
+
+            if (testState is TestConnectionState.Success) {
+                Text(
+                    text = testState.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else if (testState is TestConnectionState.Error) {
+                Text(
+                    text = testState.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }

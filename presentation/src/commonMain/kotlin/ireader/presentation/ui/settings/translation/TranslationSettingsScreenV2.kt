@@ -119,11 +119,11 @@ fun TranslationSettingsScreenV2(
     val isPluginEngine = currentEngine is PluginTranslateEngineWrapper
     
     // Show API key section for engines that need it
-    // Note: Gemini (8L) has its own API key field in GeminiConfig, so exclude it here
-    val showApiKeySection = isOpenAISelected || isDeepSeekSelected || 
+    // Note: Gemini (8L) and OpenAI (2L) have their own custom config fields in EngineSpecificConfig, so exclude them here
+    val showApiKeySection = isDeepSeekSelected || 
                            viewModel.translatorEngine.value == 9L || // OpenRouter
                            viewModel.translatorEngine.value == 10L || // NVIDIA
-                           (currentEngine?.requiresApiKey == true && !isGeminiSelected)
+                           (currentEngine?.requiresApiKey == true && !isGeminiSelected && !isOpenAISelected)
 
     // Load cached models on first composition
     LaunchedEffect(Unit) {

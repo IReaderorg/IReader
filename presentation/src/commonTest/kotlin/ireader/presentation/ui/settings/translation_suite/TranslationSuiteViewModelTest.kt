@@ -112,6 +112,14 @@ class TranslationSuiteViewModelTest {
         assertEquals("test-openai-key", viewModel.state.value.openAIApiKey)
         assertEquals("test-openai-key", readerPrefs.openAIApiKey().get())
 
+        viewModel.setOpenAIBaseUrl("https://api.groq.com/openai/v1")
+        assertEquals("https://api.groq.com/openai/v1", viewModel.state.value.openAIBaseUrl)
+        assertEquals("https://api.groq.com/openai/v1", readerPrefs.openAIBaseUrl().get())
+
+        viewModel.setOpenAIModel("llama-3.1-70b-versatile")
+        assertEquals("llama-3.1-70b-versatile", viewModel.state.value.openAIModel)
+        assertEquals("llama-3.1-70b-versatile", readerPrefs.openAIModel().get())
+
         viewModel.setGeminiApiKey("test-gemini-key")
         assertEquals("test-gemini-key", viewModel.state.value.geminiApiKey)
         assertEquals("test-gemini-key", readerPrefs.geminiApiKey().get())

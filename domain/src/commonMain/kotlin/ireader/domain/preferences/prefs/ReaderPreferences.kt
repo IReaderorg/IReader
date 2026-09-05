@@ -268,6 +268,12 @@ Visit.*for more chapters"""
     fun openAIApiKey(): Preference<String> {
         return preferenceStore.getString("openai_api_key", "")
     }
+    fun openAIBaseUrl(): Preference<String> {
+        return preferenceStore.getString("openai_base_url", "https://api.openai.com/v1")
+    }
+    fun openAIModel(): Preference<String> {
+        return preferenceStore.getString("openai_model", "gpt-3.5-turbo")
+    }
     fun deepSeekApiKey(): Preference<String> {
         return preferenceStore.getString("deepseek_api_key", "")
     }

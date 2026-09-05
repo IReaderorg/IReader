@@ -167,4 +167,42 @@ class TranslationEnginesManagerTest {
         readerPrefs.nvidiaApiKey().set("nvapi-test-key")
         assertEquals("nvapi-test-key", manager.getApiKeyForCurrentEngine())
     }
+
+    @Test
+    fun testAiModelsAliasAndGetAiModel() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val httpClients = HttpClients(prefStore)
+        val manager = TranslationEnginesManager(readerPrefs, httpClients)
+
+        assertEquals(manager.builtInEngines, manager.aiModels)
+        assertEquals(manager.get(), manager.getAiModel())
+    }
+
+    @Test
+    fun testOpenAICustomBaseUrlAndModel() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val httpClients = HttpClients(prefStore)
+        val manager = TranslationEnginesManager(readerPrefs, httpClients)
+
+        val openAIEngine = manager.builtInEngines.first { it.id == 2L } as OpenAITranslateEngine
+
+        // Test defaults
+        assertEquals("https://api.openai.com/v1", openAIEngine.getBaseUrl())
+        assertEquals("https://api.openai.com/v1/chat/completions", openAIEngine.getChatEndpoint())
+        assertEquals("gpt-3.5-turbo", openAIEngine.getModel())
+
+        // Test custom base url and model
+        readerPrefs.openAIBaseUrl().set("https://api.groq.com/openai/v1")
+        readerPrefs.openAIModel().set("llama-3.1-70b-versatile")
+
+        assertEquals("https://api.groq.com/openai/v1", openAIEngine.getBaseUrl())
+        assertEquals("https://api.groq.com/openai/v1/chat/completions", openAIEngine.getChatEndpoint())
+        assertEquals("llama-3.1-70b-versatile", openAIEngine.getModel())
+
+        // Test custom endpoint that already ends with /chat/completions
+        readerPrefs.openAIBaseUrl().set("http://localhost:11434/v1/chat/completions")
+        assertEquals("http://localhost:11434/v1/chat/completions", openAIEngine.getChatEndpoint())
+    }
 }
