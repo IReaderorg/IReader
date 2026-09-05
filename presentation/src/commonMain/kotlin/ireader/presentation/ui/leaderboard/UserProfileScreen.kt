@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -55,10 +53,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ireader.domain.models.entities.SyncedBookSummary
 import ireader.domain.models.gamification.ReaderTier
 import ireader.presentation.ui.core.ui.AsyncImage
 
@@ -86,15 +82,10 @@ fun UserProfileScreen(
     vm: LeaderboardViewModel,
     userId: String,
     onBack: () -> Unit,
-    onBookClick: (String, Long) -> Unit,
 ) {
     val state by vm.state.collectAsState()
 
     val userEntry = state.leaderboard.find { it.userId == userId }
-
-    LaunchedEffect(userId) {
-        vm.loadUserBooks(userId)
-    }
 
     if (userEntry == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -191,17 +182,6 @@ fun UserProfileScreen(
                 }
             }
 
-            // Books title
-            item(span = { GridItemSpan(2) }) { Text("Currently Reading", fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 4.dp)) }
-
-            if (state.isLoadingBooks) {
-                item(span = { GridItemSpan(2) }) { Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(modifier = Modifier.size(32.dp)) } }
-            } else if (state.selectedUserBooks.isEmpty()) {
-                item(span = { GridItemSpan(2) }) { Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { Text("No synced books yet", color = cs.onSurfaceVariant, fontSize = 13.sp) } }
-            } else {
-                items(state.selectedUserBooks) { book -> BookCard(book = book, onClick = { onBookClick(book.bookUrl, book.sourceId) }) }
-            }
-
             item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(16.dp)) }
         }
     }
@@ -216,29 +196,6 @@ private fun StatTile(icon: ImageVector, value: String, label: String, accent: Co
             Spacer(Modifier.height(6.dp))
             Text(value, color = accent, fontWeight = FontWeight.Bold, fontSize = 18.sp, textAlign = TextAlign.Center)
             Text(label, color = cs.onSurfaceVariant, fontSize = 11.sp)
-        }
-    }
-}
-
-@Composable
-private fun BookCard(book: SyncedBookSummary, onClick: () -> Unit) {
-    val cs = MaterialTheme.colorScheme
-    Surface(modifier = Modifier.clickable(onClick = onClick), shape = RoundedCornerShape(12.dp), color = cs.surface) {
-        Column {
-            Box(Modifier.fillMaxWidth().aspectRatio(0.7f).clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)).background(cs.surfaceVariant)) {
-                if (book.coverUrl.isNotBlank()) {
-                    AsyncImage(model = book.coverUrl, contentDescription = book.title, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                } else {
-                    Icon(Icons.Filled.MenuBook, contentDescription = null, tint = cs.onSurfaceVariant.copy(alpha = 0.4f), modifier = Modifier.size(40.dp).align(Alignment.Center))
-                }
-            }
-            Column(Modifier.padding(10.dp)) {
-                Text(book.title, maxLines = 2, overflow = TextOverflow.Ellipsis, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, lineHeight = 14.sp)
-                if (book.sourceName.isNotBlank()) {
-                    Spacer(Modifier.height(2.dp))
-                    Text(book.sourceName, maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 10.sp, color = cs.onSurfaceVariant)
-                }
-            }
         }
     }
 }

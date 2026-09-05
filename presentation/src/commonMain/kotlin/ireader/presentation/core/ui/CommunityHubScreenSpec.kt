@@ -33,9 +33,6 @@ class CommunityHubScreenSpec {
             onLeaderboard = {
                 navController.navigate(NavigationRoutes.leaderboard)
             },
-            onPopularBooks = {
-                navController.navigate(NavigationRoutes.popularBooks)
-            },
             onProfile = {
                 navController.navigate(NavigationRoutes.profile)
             },

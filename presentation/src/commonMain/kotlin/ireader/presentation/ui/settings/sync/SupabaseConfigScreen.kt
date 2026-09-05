@@ -18,9 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Book
-
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
@@ -28,11 +30,13 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,6 +50,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -67,6 +73,10 @@ import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.core.safePopBackStack
 class SupabaseConfigScreen  {
@@ -78,8 +88,13 @@ class SupabaseConfigScreen  {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: SupabaseConfigViewModel = koinInject()
         val state by viewModel.state.collectAsState()
+        val snackbarHostState = remember { SnackbarHostState() }
+        val coroutineScope = rememberCoroutineScope()
+        val clipboardManager = LocalClipboardManager.current
+        var advancedExpanded by remember { mutableStateOf(false) }
         
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 Toolbar(
                     title = { Text(localizeHelper.localize(Res.string.supabase_configuration)) },
@@ -98,64 +113,47 @@ class SupabaseConfigScreen  {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Info Card
+                // 1. Single Project Card (Personal Supabase - Recommended)
                 item {
-                    DefaultConfigInfoCard(
-                        hasDefaultConfig = state.hasDefaultConfig,
-                        useCustom = state.useCustomSupabase
+                    SingleProjectCard(
+                        url = state.singleProjectUrl,
+                        apiKey = state.singleProjectKey,
+                        isConfigured = state.isPersonalConfigured,
+                        isTesting = state.isTesting,
+                        testResult = state.testResult,
+                        onUrlChanged = { viewModel.setSingleProjectUrl(it) },
+                        onApiKeyChanged = { viewModel.setSingleProjectKey(it) },
+                        onSave = {
+                            viewModel.saveSingleProjectConfig()
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Personal Supabase configuration saved!")
+                            }
+                        },
+                        onTest = { viewModel.testConnection() },
+                        onClear = {
+                            viewModel.clearPersonalConfig()
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Personal Supabase configuration cleared.")
+                            }
+                        },
+                        onCopySetupSql = {
+                            clipboardManager.setText(AnnotatedString(viewModel.getSetupSqlScript()))
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Setup SQL script copied to clipboard!")
+                            }
+                        },
+                        onShareConfig = {
+                            val exported = viewModel.exportConfig()
+                            clipboardManager.setText(AnnotatedString(exported))
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Configuration copied to clipboard!")
+                            }
+                        },
+                        onOpenImportDialog = { viewModel.setShowImportDialog(true) }
                     )
                 }
-                
-                // Custom Configuration Toggle
-                item {
-                    CustomConfigToggleCard(
-                        hasDefaultConfig = state.hasDefaultConfig,
-                        useCustom = state.useCustomSupabase,
-                        onToggle = { viewModel.setUseCustomSupabase(it) }
-                    )
-                }
-                
-                // 7-Project Configuration (shown when custom is enabled or no default exists)
-                if (state.useCustomSupabase || !state.hasDefaultConfig) {
-                    item {
-                        MultiProjectCard(
-                            authUrl = state.authUrl,
-                            authApiKey = state.authApiKey,
-                            readingUrl = state.readingUrl,
-                            readingApiKey = state.readingApiKey,
-                            libraryUrl = state.libraryUrl,
-                            libraryApiKey = state.libraryApiKey,
-                            bookReviewsUrl = state.bookReviewsUrl,
-                            bookReviewsApiKey = state.bookReviewsApiKey,
-                            chapterReviewsUrl = state.chapterReviewsUrl,
-                            chapterReviewsApiKey = state.chapterReviewsApiKey,
-                            badgesUrl = state.badgesUrl,
-                            badgesApiKey = state.badgesApiKey,
-                            analyticsUrl = state.analyticsUrl,
-                            analyticsApiKey = state.analyticsApiKey,
-                            onAuthUrlChanged = { viewModel.setAuthUrl(it) },
-                            onAuthApiKeyChanged = { viewModel.setAuthApiKey(it) },
-                            onReadingUrlChanged = { viewModel.setReadingUrl(it) },
-                            onReadingApiKeyChanged = { viewModel.setReadingApiKey(it) },
-                            onLibraryUrlChanged = { viewModel.setLibraryUrl(it) },
-                            onLibraryApiKeyChanged = { viewModel.setLibraryApiKey(it) },
-                            onBookReviewsUrlChanged = { viewModel.setBookReviewsUrl(it) },
-                            onBookReviewsApiKeyChanged = { viewModel.setBookReviewsApiKey(it) },
-                            onChapterReviewsUrlChanged = { viewModel.setChapterReviewsUrl(it) },
-                            onChapterReviewsApiKeyChanged = { viewModel.setChapterReviewsApiKey(it) },
-                            onBadgesUrlChanged = { viewModel.setBadgesUrl(it) },
-                            onBadgesApiKeyChanged = { viewModel.setBadgesApiKey(it) },
-                            onAnalyticsUrlChanged = { viewModel.setAnalyticsUrl(it) },
-                            onAnalyticsApiKeyChanged = { viewModel.setAnalyticsApiKey(it) },
-                            onFillAllWithSame = { url, key -> viewModel.fillAllWithSame(url, key) },
-                            onSave = { viewModel.saveConfiguration() },
-                            onTest = { viewModel.testConnection() },
-                            isTesting = state.isTesting,
-                            testResult = state.testResult
-                        )
-                    }
-                }
-                
+
+                // 2. Sync Settings Card
                 item {
                     SyncSettingsCard(
                         autoSyncEnabled = state.autoSyncEnabled,
@@ -165,6 +163,7 @@ class SupabaseConfigScreen  {
                     )
                 }
                 
+                // 3. Last Sync Card
                 item {
                     LastSyncCard(
                         lastSyncTime = state.lastSyncTime,
@@ -172,16 +171,120 @@ class SupabaseConfigScreen  {
                         isSyncing = state.isSyncing
                     )
                 }
+
+                // 4. Advanced 7-Project Architecture
+                item {
+                    AdvancedArchitectureCard(
+                        expanded = advancedExpanded,
+                        onExpandChanged = { advancedExpanded = it }
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            DefaultConfigInfoCard(
+                                hasDefaultConfig = state.hasDefaultConfig,
+                                useCustom = state.useCustomSupabase
+                            )
+
+                            CustomConfigToggleCard(
+                                hasDefaultConfig = state.hasDefaultConfig,
+                                useCustom = state.useCustomSupabase,
+                                onToggle = { viewModel.setUseCustomSupabase(it) }
+                            )
+
+                            MultiProjectCard(
+                                authUrl = state.authUrl,
+                                authApiKey = state.authApiKey,
+                                readingUrl = state.readingUrl,
+                                readingApiKey = state.readingApiKey,
+                                libraryUrl = state.libraryUrl,
+                                libraryApiKey = state.libraryApiKey,
+                                bookReviewsUrl = state.bookReviewsUrl,
+                                bookReviewsApiKey = state.bookReviewsApiKey,
+                                chapterReviewsUrl = state.chapterReviewsUrl,
+                                chapterReviewsApiKey = state.chapterReviewsApiKey,
+                                badgesUrl = state.badgesUrl,
+                                badgesApiKey = state.badgesApiKey,
+                                analyticsUrl = state.analyticsUrl,
+                                analyticsApiKey = state.analyticsApiKey,
+                                onAuthUrlChanged = { viewModel.setAuthUrl(it) },
+                                onAuthApiKeyChanged = { viewModel.setAuthApiKey(it) },
+                                onReadingUrlChanged = { viewModel.setReadingUrl(it) },
+                                onReadingApiKeyChanged = { viewModel.setReadingApiKey(it) },
+                                onLibraryUrlChanged = { viewModel.setLibraryUrl(it) },
+                                onLibraryApiKeyChanged = { viewModel.setLibraryApiKey(it) },
+                                onBookReviewsUrlChanged = { viewModel.setBookReviewsUrl(it) },
+                                onBookReviewsApiKeyChanged = { viewModel.setBookReviewsApiKey(it) },
+                                onChapterReviewsUrlChanged = { viewModel.setChapterReviewsUrl(it) },
+                                onChapterReviewsApiKeyChanged = { viewModel.setChapterReviewsApiKey(it) },
+                                onBadgesUrlChanged = { viewModel.setBadgesUrl(it) },
+                                onBadgesApiKeyChanged = { viewModel.setBadgesApiKey(it) },
+                                onAnalyticsUrlChanged = { viewModel.setAnalyticsUrl(it) },
+                                onAnalyticsApiKeyChanged = { viewModel.setAnalyticsApiKey(it) },
+                                onFillAllWithSame = { url, key -> viewModel.fillAllWithSame(url, key) },
+                                onSave = { viewModel.saveConfiguration() },
+                                onTest = { viewModel.testConnection() },
+                                isTesting = state.isTesting,
+                                testResult = state.testResult
+                            )
+                        }
+                    }
+                }
                 
+                // 5. Database Schema
                 item {
                     DatabaseSchemaCard()
                 }
             }
         }
+
+        if (state.showImportDialog) {
+            AlertDialog(
+                onDismissRequest = { viewModel.setShowImportDialog(false) },
+                title = { Text("Import Supabase Configuration") },
+                text = {
+                    Column {
+                        Text(
+                            "Paste the exported configuration JSON below:",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = state.importInputText,
+                            onValueChange = { viewModel.setImportInputText(it) },
+                            modifier = Modifier.fillMaxWidth().height(140.dp),
+                            placeholder = { Text("{\"url\": \"https://...\", \"anonKey\": \"...\"}") },
+                            maxLines = 6
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val success = viewModel.importConfig(state.importInputText)
+                            viewModel.setShowImportDialog(false)
+                            coroutineScope.launch {
+                                if (success) {
+                                    snackbarHostState.showSnackbar("Configuration imported successfully!")
+                                } else {
+                                    snackbarHostState.showSnackbar("Invalid configuration format.")
+                                }
+                            }
+                        },
+                        enabled = state.importInputText.isNotBlank()
+                    ) {
+                        Text("Import")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { viewModel.setShowImportDialog(false) }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
         
         state.error?.let { error ->
             LaunchedEffect(error) {
-                // Show error snackbar
+                snackbarHostState.showSnackbar(error)
                 viewModel.clearError()
             }
         }
@@ -189,6 +292,296 @@ class SupabaseConfigScreen  {
 }
 
 
+
+@Composable
+private fun SingleProjectCard(
+    url: String,
+    apiKey: String,
+    isConfigured: Boolean,
+    isTesting: Boolean,
+    testResult: String?,
+    onUrlChanged: (String) -> Unit,
+    onApiKeyChanged: (String) -> Unit,
+    onSave: () -> Unit,
+    onTest: () -> Unit,
+    onClear: () -> Unit,
+    onCopySetupSql: () -> Unit,
+    onShareConfig: () -> Unit,
+    onOpenImportDialog: () -> Unit
+) {
+    var showApiKey by remember { mutableStateOf(false) }
+    var showInstructions by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isConfigured) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Personal Supabase Database",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isConfigured) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Sync library, progress, & categories to your own Supabase",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isConfigured) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (isConfigured) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                ) {
+                    Text(
+                        text = if (isConfigured) "Configured" else "Not Setup",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isConfigured) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Action row: Setup SQL, Share, Import
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onCopySetupSql,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Copy SQL", style = MaterialTheme.typography.labelSmall)
+                }
+
+                OutlinedButton(
+                    onClick = onShareConfig,
+                    modifier = Modifier.weight(1f),
+                    enabled = isConfigured
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Share", style = MaterialTheme.typography.labelSmall)
+                }
+
+                OutlinedButton(
+                    onClick = onOpenImportDialog,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Import", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Step-by-step instructions collapsible
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "How to setup your free Supabase",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        IconButton(onClick = { showInstructions = !showInstructions }, modifier = Modifier.size(24.dp)) {
+                            Icon(
+                                imageVector = if (showInstructions) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                contentDescription = if (showInstructions) "Hide" else "Show"
+                            )
+                        }
+                    }
+
+                    if (showInstructions) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "1. Create a free project at supabase.com\n" +
+                                   "2. In your Supabase dashboard, click 'SQL Editor'\n" +
+                                   "3. Tap 'Copy SQL' above, paste it into the editor, and click 'RUN'\n" +
+                                   "4. Go to Project Settings > API, copy 'Project URL' and 'anon' public key, and paste them below!",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = url,
+                onValueChange = onUrlChanged,
+                label = { Text("Project URL") },
+                placeholder = { Text("https://xyzcompany.supabase.co") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = onApiKeyChanged,
+                label = { Text("API Anon Key") },
+                placeholder = { Text("eyJhbGciOiJIUzI1NiIsIn...") },
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                singleLine = true
+            )
+
+            testResult?.let { result ->
+                Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (result.contains("✓")) 
+                            MaterialTheme.colorScheme.primaryContainer 
+                        else 
+                            MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = result,
+                        modifier = Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = onTest,
+                    modifier = Modifier.weight(1f),
+                    enabled = !isTesting && url.isNotBlank() && apiKey.isNotBlank()
+                ) {
+                    if (isTesting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.CloudSync, contentDescription = null, modifier = Modifier.size(18.dp))
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Test")
+                }
+
+                Button(
+                    onClick = onSave,
+                    modifier = Modifier.weight(1.5f),
+                    enabled = url.isNotBlank() && apiKey.isNotBlank()
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Save Config")
+                }
+
+                if (isConfigured) {
+                    IconButton(onClick = onClear) {
+                        Icon(Icons.Default.Delete, contentDescription = "Clear", tint = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdvancedArchitectureCard(
+    expanded: Boolean,
+    onExpandChanged: (Boolean) -> Unit,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Advanced: 7-Project Architecture",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Configure separate Supabase microservices per feature",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                IconButton(onClick = { onExpandChanged(!expanded) }) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (expanded) "Collapse" else "Expand"
+                    )
+                }
+            }
+
+            if (expanded) {
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(12.dp))
+                content()
+            }
+        }
+    }
+}
 
 @Composable
 private fun DefaultConfigInfoCard(
@@ -485,63 +878,47 @@ private fun DatabaseSchemaCard() {
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 SchemaTable(
-                    tableName = "users",
+                    tableName = "sync_manifest (Document Store)",
                     columns = listOf(
-                        "id (uuid, primary key)",
-                        "email (text)",
-                        "username (text, nullable)",
-                        "eth_wallet_address (text, nullable)",
-                        "is_supporter (boolean, default false)",
-                        "created_at (timestamp)"
+                        "user_id (text, primary key)",
+                        "manifest (jsonb, lossless sync data)",
+                        "updated_at (bigint, timestamp)"
                     )
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 SchemaTable(
-                    tableName = "reading_progress",
+                    tableName = "synced_books (Relational View)",
                     columns = listOf(
-                        "id (uuid, primary key)",
-                        "user_id (uuid, foreign key)",
-                        "book_id (text)",
-                        "last_chapter_slug (text)",
-                        "last_scroll_position (float)",
-                        "updated_at (timestamp)"
-                    )
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                SchemaTable(
-                    tableName = "synced_books",
-                    columns = listOf(
-                        "id (uuid, primary key)",
-                        "user_id (uuid, foreign key)",
+                        "user_id (text)",
                         "book_id (text)",
                         "source_id (bigint)",
                         "title (text)",
+                        "book_url (text)",
                         "author (text)",
-                        "cover (text)",
+                        "description (text)",
+                        "genres (text)",
+                        "status (bigint)",
+                        "cover_url (text)",
                         "favorite (boolean)",
                         "last_read (bigint)",
-                        "updated_at (timestamp)"
+                        "updated_at (timestamp)",
+                        "PRIMARY KEY (user_id, book_id)"
                     )
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 SchemaTable(
-                    tableName = "synced_chapters",
+                    tableName = "reading_progress (Relational View)",
                     columns = listOf(
-                        "id (uuid, primary key)",
-                        "user_id (uuid, foreign key)",
+                        "user_id (text)",
                         "book_id (text)",
-                        "chapter_key (text)",
-                        "chapter_name (text)",
-                        "read (boolean)",
-                        "bookmark (boolean)",
-                        "last_page_read (bigint)",
-                        "updated_at (timestamp)"
+                        "last_chapter_slug (text)",
+                        "last_scroll_position (float)",
+                        "updated_at (bigint)",
+                        "PRIMARY KEY (user_id, book_id)"
                     )
                 )
             }

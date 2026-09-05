@@ -8,37 +8,62 @@ import ireader.domain.models.sync.SyncBookItem
 import ireader.domain.models.sync.SyncProgressItem
 import ireader.domain.models.sync.SyncProviderType
 import ireader.domain.models.sync.UnifiedSyncManifest
+import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.domain.services.sync.SyncProvider
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 /**
  * Supabase implementation of SyncProvider.
- * Synchronizes books and reading progress with Supabase PostgreSQL tables.
+ * Synchronizes books, reading progress, and manifests with user-owned Supabase instances.
  */
 class SupabaseSyncProvider(
-    private val remoteRepository: RemoteRepository
+    private val remoteRepository: RemoteRepository,
+    private val supabasePreferences: SupabasePreferences
 ) : SyncProvider {
 
     companion object {
         private const val TAG = "SupabaseSyncProvider"
     }
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
+    }
+
     override val type: SyncProviderType = SyncProviderType.SUPABASE
     override val name: String = "Supabase Cloud"
 
     override suspend fun isAuthenticated(): Boolean {
-        return try {
-            remoteRepository.getCurrentUser().getOrNull() != null
-        } catch (_: Exception) {
-            false
-        }
+        return supabasePreferences.isPersonalSupabaseConfigured()
+    }
+
+    private suspend fun getEffectiveUserId(): String {
+        return remoteRepository.getCurrentUser().getOrNull()?.id
+            ?: ("user_" + supabasePreferences.getEffectiveSyncUrl().hashCode().toUInt().toString(16))
     }
 
     override suspend fun fetchRemoteManifest(): Result<UnifiedSyncManifest?> {
         return try {
-            val user = remoteRepository.getCurrentUser().getOrNull()
-                ?: return Result.failure(IllegalStateException("Supabase not authenticated"))
+            if (!isAuthenticated()) {
+                return Result.failure(IllegalStateException("Personal Supabase not configured"))
+            }
 
-            val syncedBooks = remoteRepository.getSyncedBooks(user.id).getOrDefault(emptyList())
+            val userId = getEffectiveUserId()
+
+            // 1. Primary: Fetch full manifest from sync_manifest table (full fidelity)
+            val rawManifest = remoteRepository.getSyncManifest(userId).getOrNull()
+            if (!rawManifest.isNullOrBlank()) {
+                val parsed = json.decodeFromString<UnifiedSyncManifest>(rawManifest)
+                return Result.success(parsed)
+            }
+
+            // 2. Fallback: Query relational synced_books table
+            val syncedBooks = remoteRepository.getSyncedBooks(userId).getOrDefault(emptyList())
+            if (syncedBooks.isEmpty()) {
+                return Result.success(null)
+            }
 
             val bookItems = syncedBooks.map {
                 SyncBookItem(
@@ -46,8 +71,12 @@ class SupabaseSyncProvider(
                     sourceId = it.sourceId,
                     key = it.bookUrl,
                     title = it.title,
+                    author = it.author,
+                    description = it.description,
+                    genres = if (it.genres.isNotBlank()) it.genres.split(",") else emptyList(),
+                    status = it.status,
                     coverUrl = it.coverUrl,
-                    favorite = true,
+                    favorite = it.favorite,
                     lastModified = it.lastRead
                 )
             }
@@ -70,34 +99,48 @@ class SupabaseSyncProvider(
 
     override suspend fun uploadManifest(manifest: UnifiedSyncManifest): Result<Unit> {
         return try {
-            val user = remoteRepository.getCurrentUser().getOrNull()
-                ?: return Result.failure(IllegalStateException("Supabase not authenticated"))
+            if (!isAuthenticated()) {
+                return Result.failure(IllegalStateException("Personal Supabase not configured"))
+            }
 
-            // Sync all books to Supabase
+            val userId = getEffectiveUserId()
+
+            // 1. Upload full manifest to sync_manifest table
+            val manifestJson = json.encodeToString(manifest)
+            runCatching {
+                remoteRepository.saveSyncManifest(userId, manifestJson).getOrThrow()
+            }
+
+            // 2. Also populate synced_books relational table with rich data
             manifest.books.forEach { bookItem ->
                 val syncedBook = SyncedBook(
-                    userId = user.id,
+                    userId = userId,
                     bookId = bookItem.globalId,
                     sourceId = bookItem.sourceId,
                     title = bookItem.title,
                     bookUrl = bookItem.key,
                     lastRead = bookItem.lastModified,
                     coverUrl = bookItem.coverUrl,
-                    sourceName = ""
+                    sourceName = "",
+                    author = bookItem.author,
+                    description = bookItem.description,
+                    genres = bookItem.genres.joinToString(","),
+                    status = bookItem.status,
+                    favorite = bookItem.favorite
                 )
-                remoteRepository.syncBook(syncedBook).getOrThrow()
+                runCatching { remoteRepository.syncBook(syncedBook) }
             }
 
-            // Sync reading progress items
+            // 3. Sync reading progress items to reading_progress table
             manifest.progress.forEach { progressItem ->
                 val readingProgress = ReadingProgress(
-                    userId = user.id,
+                    userId = userId,
                     bookId = progressItem.bookGlobalId,
                     lastChapterSlug = progressItem.chapterKey,
                     lastScrollPosition = progressItem.progress,
                     updatedAt = progressItem.lastModified
                 )
-                remoteRepository.syncReadingProgress(readingProgress)
+                runCatching { remoteRepository.syncReadingProgress(readingProgress) }
             }
 
             Result.success(Unit)
@@ -109,16 +152,16 @@ class SupabaseSyncProvider(
 
     override suspend fun pushProgress(progress: SyncProgressItem): Result<Unit> {
         return try {
-            val user = remoteRepository.getCurrentUser().getOrNull() ?: return Result.success(Unit)
+            if (!isAuthenticated()) return Result.success(Unit)
+            val userId = getEffectiveUserId()
             val readingProgress = ReadingProgress(
-                userId = user.id,
+                userId = userId,
                 bookId = progress.bookGlobalId,
                 lastChapterSlug = progress.chapterKey,
                 lastScrollPosition = progress.progress,
                 updatedAt = progress.lastModified
             )
             remoteRepository.syncReadingProgress(readingProgress)
-
         } catch (e: Exception) {
             Log.warn { "$TAG: Failed to push realtime progress: ${e.message}" }
             Result.failure(e)

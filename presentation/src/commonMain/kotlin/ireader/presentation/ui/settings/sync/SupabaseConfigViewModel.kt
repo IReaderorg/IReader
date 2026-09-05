@@ -16,7 +16,16 @@ data class SupabaseConfigState(
     val isSyncing: Boolean = false,
     val testResult: String? = null,
     val error: String? = null,
-    // Custom configuration toggle
+    val copyStatusMessage: String? = null,
+    // Single Project Mode (Recommended for personal Supabase)
+    val isSingleProjectMode: Boolean = true,
+    val singleProjectUrl: String = "",
+    val singleProjectKey: String = "",
+    val isPersonalConfigured: Boolean = false,
+    val showImportDialog: Boolean = false,
+    val importInputText: String = "",
+    val showShareDialog: Boolean = false,
+    // Custom configuration toggle (Advanced 7-project)
     val useCustomSupabase: Boolean = false,
     // Default configuration (from local.properties/config.properties)
     val hasDefaultConfig: Boolean = false,
@@ -58,7 +67,7 @@ class SupabaseConfigViewModel(
         loadConfiguration()
     }
     
-    private fun loadConfiguration() {
+    fun loadConfiguration() {
         scope.launch {
             // Check if default config exists (from local.properties/config.properties)
             val hasDefault = try {
@@ -67,6 +76,13 @@ class SupabaseConfigViewModel(
             } catch (e: Exception) {
                 false
             }
+
+            val singleUrl = supabasePreferences.userSupabaseUrl().get().ifEmpty {
+                supabasePreferences.supabaseLibraryUrl().get()
+            }
+            val singleKey = supabasePreferences.userSupabaseAnonKey().get().ifEmpty {
+                supabasePreferences.supabaseLibraryKey().get()
+            }
             
             updateState { it.copy(
                 autoSyncEnabled = supabasePreferences.autoSyncEnabled().get(),
@@ -74,6 +90,9 @@ class SupabaseConfigViewModel(
                 lastSyncTime = supabasePreferences.lastSyncTime().get(),
                 useCustomSupabase = supabasePreferences.useCustomSupabase().get(),
                 hasDefaultConfig = hasDefault,
+                singleProjectUrl = singleUrl,
+                singleProjectKey = singleKey,
+                isPersonalConfigured = supabasePreferences.isPersonalSupabaseConfigured(),
                 // 7-Project configuration (user overrides)
                 authUrl = supabasePreferences.supabaseAuthUrl().get(),
                 authApiKey = supabasePreferences.supabaseAuthKey().get(),
@@ -95,6 +114,126 @@ class SupabaseConfigViewModel(
         }
     }
     
+    fun setSingleProjectUrl(url: String) {
+        updateState { it.copy(singleProjectUrl = url) }
+    }
+
+    fun setSingleProjectKey(key: String) {
+        updateState { it.copy(singleProjectKey = key) }
+    }
+
+    fun setIsSingleProjectMode(isSingle: Boolean) {
+        updateState { it.copy(isSingleProjectMode = isSingle) }
+    }
+
+    fun saveSingleProjectConfig() {
+        scope.launch {
+            val url = currentState.singleProjectUrl.trim()
+            val key = currentState.singleProjectKey.trim()
+            supabasePreferences.userSupabaseUrl().set(url)
+            supabasePreferences.userSupabaseAnonKey().set(key)
+            // Mirror to library and reading endpoints for multi-client compatibility
+            supabasePreferences.supabaseLibraryUrl().set(url)
+            supabasePreferences.supabaseLibraryKey().set(key)
+            supabasePreferences.supabaseReadingUrl().set(url)
+            supabasePreferences.supabaseReadingKey().set(key)
+            supabasePreferences.useCustomSupabase().set(true)
+
+            updateState {
+                it.copy(
+                    isPersonalConfigured = supabasePreferences.isPersonalSupabaseConfigured(),
+                    testResult = "✓ Personal Supabase configuration saved successfully!",
+                    error = null
+                )
+            }
+        }
+    }
+
+    fun getSetupSqlScript(): String {
+        return """
+-- ==========================================================
+-- IReader Cloud Sync Setup Script
+-- Paste this script into your Supabase SQL Editor and click RUN.
+-- Dashboard URL: https://supabase.com/dashboard/project/_/sql
+-- ==========================================================
+
+-- 1. Create full sync manifest table (High-Fidelity Document Store)
+CREATE TABLE IF NOT EXISTS public.sync_manifest (
+    user_id TEXT NOT NULL PRIMARY KEY,
+    manifest JSONB NOT NULL,
+    updated_at BIGINT NOT NULL DEFAULT 0
+);
+ALTER TABLE public.sync_manifest ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public sync_manifest access" ON public.sync_manifest;
+CREATE POLICY "Allow public sync_manifest access" ON public.sync_manifest FOR ALL USING (true) WITH CHECK (true);
+
+-- 2. Create synced_books table (Relational View)
+CREATE TABLE IF NOT EXISTS public.synced_books (
+    user_id TEXT NOT NULL,
+    book_id TEXT NOT NULL,
+    source_id BIGINT NOT NULL,
+    title TEXT NOT NULL,
+    book_url TEXT NOT NULL,
+    last_read BIGINT NOT NULL DEFAULT 0,
+    cover_url TEXT DEFAULT '',
+    source_name TEXT DEFAULT '',
+    author TEXT DEFAULT '',
+    description TEXT DEFAULT '',
+    genres TEXT DEFAULT '',
+    status BIGINT DEFAULT 0,
+    favorite BOOLEAN DEFAULT true,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (user_id, book_id)
+);
+CREATE INDEX IF NOT EXISTS idx_synced_books_user_id ON public.synced_books(user_id);
+ALTER TABLE public.synced_books ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public synced_books access" ON public.synced_books;
+CREATE POLICY "Allow public synced_books access" ON public.synced_books FOR ALL USING (true) WITH CHECK (true);
+
+-- 3. Create reading_progress table (Relational View)
+CREATE TABLE IF NOT EXISTS public.reading_progress (
+    user_id TEXT NOT NULL,
+    book_id TEXT NOT NULL,
+    last_chapter_slug TEXT NOT NULL,
+    last_scroll_position FLOAT DEFAULT 0,
+    updated_at BIGINT DEFAULT 0,
+    PRIMARY KEY (user_id, book_id)
+);
+CREATE INDEX IF NOT EXISTS idx_reading_progress_user_id ON public.reading_progress(user_id);
+ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public reading_progress access" ON public.reading_progress;
+CREATE POLICY "Allow public reading_progress access" ON public.reading_progress FOR ALL USING (true) WITH CHECK (true);
+""".trimIndent()
+    }
+
+    fun exportConfig(): String {
+        return supabasePreferences.exportConfigJson()
+    }
+
+    fun importConfig(text: String): Boolean {
+        val success = supabasePreferences.importConfigJson(text)
+        if (success) {
+            loadConfiguration()
+        }
+        return success
+    }
+
+    fun setShowImportDialog(show: Boolean) {
+        updateState { it.copy(showImportDialog = show, importInputText = "") }
+    }
+
+    fun setImportInputText(text: String) {
+        updateState { it.copy(importInputText = text) }
+    }
+
+    fun setShowShareDialog(show: Boolean) {
+        updateState { it.copy(showShareDialog = show) }
+    }
+
+    fun setCopyStatus(message: String?) {
+        updateState { it.copy(copyStatusMessage = message) }
+    }
+
     fun setUseCustomSupabase(useCustom: Boolean) {
         updateState { it.copy(useCustomSupabase = useCustom) }
         scope.launch {
@@ -170,29 +309,83 @@ class SupabaseConfigViewModel(
         }
     }
     
+    fun clearPersonalConfig() {
+        scope.launch {
+            supabasePreferences.userSupabaseUrl().set("")
+            supabasePreferences.userSupabaseAnonKey().set("")
+            supabasePreferences.supabaseLibraryUrl().set("")
+            supabasePreferences.supabaseLibraryKey().set("")
+            supabasePreferences.supabaseReadingUrl().set("")
+            supabasePreferences.supabaseReadingKey().set("")
+            updateState {
+                it.copy(
+                    singleProjectUrl = "",
+                    singleProjectKey = "",
+                    isPersonalConfigured = false,
+                    testResult = "Personal Supabase configuration cleared."
+                )
+            }
+        }
+    }
+
     fun testConnection() {
         scope.launch {
             updateState { it.copy(isTesting = true, testResult = null) }
             
             try {
-                // Test connection by trying to get current user
+                if (currentState.isSingleProjectMode) {
+                    val url = currentState.singleProjectUrl.trim()
+                    val key = currentState.singleProjectKey.trim()
+                    if (url.isBlank() || key.isBlank()) {
+                        updateState {
+                            it.copy(
+                                isTesting = false,
+                                testResult = "✗ Please enter both Supabase Project URL and API Key before testing."
+                            )
+                        }
+                        return@launch
+                    }
+                    // Temporarily or permanently ensure prefs are updated to test
+                    saveSingleProjectConfig()
+                    val result = remoteRepository.getSyncManifest("test_probe")
+                    if (result.isSuccess) {
+                        updateState {
+                            it.copy(
+                                isTesting = false,
+                                testResult = "✓ Connection successful! Personal Supabase is ready for sync."
+                            )
+                        }
+                        return@launch
+                    } else {
+                        val errMsg = result.exceptionOrNull()?.message ?: "Unknown error"
+                        updateState {
+                            it.copy(
+                                isTesting = false,
+                                testResult = "✗ Connection failed: $errMsg. (Have you run the Setup SQL script?)"
+                            )
+                        }
+                        return@launch
+                    }
+                }
+
+                // Multi-project test connection
                 val result = remoteRepository.getCurrentUser()
                 
                 if (result.isSuccess) {
                     updateState { it.copy(
                         isTesting = false,
-                        testResult = "? Connection successful! Supabase is configured correctly."
+                        testResult = "✓ Connection successful! Supabase is configured correctly."
                     )}
                 } else {
                     updateState { it.copy(
                         isTesting = false,
-                        testResult = "? Connection failed: ${result.exceptionOrNull()?.message}"
+                        testResult = "✗ Connection failed: ${result.exceptionOrNull()?.message}"
                     )}
                 }
             } catch (e: Exception) {
                 updateState { it.copy(
                     isTesting = false,
-                    testResult = "? Connection failed: ${e.message}"
+                    testResult = "✗ Connection failed: ${e.message}"
                 )}
             }
         }

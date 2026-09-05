@@ -20,6 +20,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import ireader.domain.utils.extensions.currentTimeToLong
 
@@ -75,7 +78,12 @@ class SupabaseRemoteRepository(
         @SerialName("book_url") val book_url: String,
         @SerialName("last_read") val last_read: Long,
         @SerialName("cover_url") val cover_url: String = "",
-        @SerialName("source_name") val source_name: String = ""
+        @SerialName("source_name") val source_name: String = "",
+        @SerialName("author") val author: String = "",
+        @SerialName("description") val description: String = "",
+        @SerialName("genres") val genres: String = "",
+        @SerialName("status") val status: Long = 0L,
+        @SerialName("favorite") val favorite: Boolean = true
     )
     
     init {
@@ -347,17 +355,17 @@ class SupabaseRemoteRepository(
                         when (action) {
                             is PostgresAction.Insert -> {
                                 val record = action.record
-                                val recordUserId = record["user_id"] as? String
-                                val recordBookId = record["book_id"] as? String
+                                val recordUserId = record["user_id"]?.jsonPrimitive?.contentOrNull
+                                val recordBookId = record["book_id"]?.jsonPrimitive?.contentOrNull
                                 
                                 if (recordUserId == userId && recordBookId == bookId) {
                                     val dto = ReadingProgressDto(
-                                        id = record["id"] as? String,
+                                        id = record["id"]?.jsonPrimitive?.contentOrNull,
                                         user_id = recordUserId ?: "",
                                         book_id = recordBookId ?: "",
-                                        last_chapter_slug = record["last_chapter_slug"] as? String ?: "",
-                                        last_scroll_position = (record["last_scroll_position"] as? Number)?.toFloat() ?: 0f,
-                                        updated_at = record["updated_at"] as? String
+                                        last_chapter_slug = record["last_chapter_slug"]?.jsonPrimitive?.contentOrNull ?: "",
+                                        last_scroll_position = record["last_scroll_position"]?.jsonPrimitive?.floatOrNull ?: 0f,
+                                        updated_at = record["updated_at"]?.jsonPrimitive?.contentOrNull
                                     )
                                     
                                     val progress = dto.toDomain()
@@ -367,17 +375,17 @@ class SupabaseRemoteRepository(
                             }
                             is PostgresAction.Update -> {
                                 val record = action.record
-                                val recordUserId = record["user_id"] as? String
-                                val recordBookId = record["book_id"] as? String
+                                val recordUserId = record["user_id"]?.jsonPrimitive?.contentOrNull
+                                val recordBookId = record["book_id"]?.jsonPrimitive?.contentOrNull
                                 
                                 if (recordUserId == userId && recordBookId == bookId) {
                                     val dto = ReadingProgressDto(
-                                        id = record["id"] as? String,
+                                        id = record["id"]?.jsonPrimitive?.contentOrNull,
                                         user_id = recordUserId ?: "",
                                         book_id = recordBookId ?: "",
-                                        last_chapter_slug = record["last_chapter_slug"] as? String ?: "",
-                                        last_scroll_position = (record["last_scroll_position"] as? Number)?.toFloat() ?: 0f,
-                                        updated_at = record["updated_at"] as? String
+                                        last_chapter_slug = record["last_chapter_slug"]?.jsonPrimitive?.contentOrNull ?: "",
+                                        last_scroll_position = record["last_scroll_position"]?.jsonPrimitive?.floatOrNull ?: 0f,
+                                        updated_at = record["updated_at"]?.jsonPrimitive?.contentOrNull
                                     )
                                     
                                     val progress = dto.toDomain()
@@ -387,8 +395,8 @@ class SupabaseRemoteRepository(
                             }
                             is PostgresAction.Delete -> {
                                 val oldRecord = action.oldRecord
-                                val deletedUserId = oldRecord["user_id"] as? String
-                                val deletedBookId = oldRecord["book_id"] as? String
+                                val deletedUserId = oldRecord["user_id"]?.jsonPrimitive?.contentOrNull
+                                val deletedBookId = oldRecord["book_id"]?.jsonPrimitive?.contentOrNull
                                 
                                 if (deletedUserId == userId && deletedBookId == bookId) {
                                     emit(null)
@@ -478,6 +486,11 @@ class SupabaseRemoteRepository(
                     put("last_read", book.lastRead)
                     put("cover_url", book.coverUrl)
                     put("source_name", book.sourceName)
+                    put("author", book.author)
+                    put("description", book.description)
+                    put("genres", book.genres)
+                    put("status", book.status)
+                    put("favorite", book.favorite)
                 }
                 
                 backendService.upsert(
@@ -516,6 +529,38 @@ class SupabaseRemoteRepository(
             ).getOrThrow()
             Unit
         }
+
+    override suspend fun getSyncManifest(userId: String): Result<String?> =
+        RemoteErrorMapper.withErrorMapping {
+            try {
+                val queryResult = backendService.query(
+                    table = "sync_manifest",
+                    filters = mapOf("user_id" to userId)
+                ).getOrNull()
+                val manifestElement = queryResult?.firstOrNull()?.let {
+                    (it as? kotlinx.serialization.json.JsonObject)?.get("manifest")
+                }
+                manifestElement?.toString()
+            } catch (_: Exception) {
+                null
+            }
+        }
+
+    override suspend fun saveSyncManifest(userId: String, manifestJson: String): Result<Unit> =
+        RemoteErrorMapper.withErrorMapping {
+            val manifestElement = json.parseToJsonElement(manifestJson)
+            val data = buildJsonObject {
+                put("user_id", userId)
+                put("manifest", manifestElement)
+                put("updated_at", ireader.core.util.currentTimeMillis())
+            }
+            backendService.upsert(
+                table = "sync_manifest",
+                data = data,
+                onConflict = "user_id",
+                returning = false
+            ).getOrThrow()
+        }
     
     // DTO Converters for Books
     
@@ -528,7 +573,12 @@ class SupabaseRemoteRepository(
             book_url = bookUrl,
             last_read = lastRead,
             cover_url = coverUrl,
-            source_name = sourceName
+            source_name = sourceName,
+            author = author,
+            description = description,
+            genres = genres,
+            status = status,
+            favorite = favorite
         )
     }
     
@@ -541,7 +591,12 @@ class SupabaseRemoteRepository(
             bookUrl = book_url,
             lastRead = last_read,
             coverUrl = cover_url,
-            sourceName = source_name
+            sourceName = source_name,
+            author = author,
+            description = description,
+            genres = genres,
+            status = status,
+            favorite = favorite
         )
     }
 }

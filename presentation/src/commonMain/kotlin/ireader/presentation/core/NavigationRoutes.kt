@@ -21,7 +21,6 @@ object NavigationRoutes {
     const val adminBadgeVerification = "adminBadgeVerification"
     const val leaderboard = "leaderboard"
     const val userProfile = "userProfile/{userId}"
-    const val popularBooks = "popularBooks"
     const val rewards = "rewards"
     const val spiritStones = "spiritStones"
     const val userTitles = "userTitles"

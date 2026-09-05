@@ -86,9 +86,14 @@ class UnifiedSyncViewModel(
                 googleDriveAuthenticator.getUserEmail() ?: "Google Account"
             } else null
 
+            val isPersonalConfigured = supabasePreferences.isPersonalSupabaseConfigured()
             val user = remoteRepository?.getCurrentUser()?.getOrNull()
-            val isSupaAuth = user != null
-            val supaEmail = user?.email
+            val isSupaAuth = isPersonalConfigured || user != null
+            val supaEmail = when {
+                isPersonalConfigured -> "Personal Database"
+                user != null -> user.email
+                else -> null
+            }
 
             updateState {
                 it.copy(
@@ -168,6 +173,8 @@ class UnifiedSyncViewModel(
                 remoteRepository?.signOut()
             } catch (_: Exception) {
             }
+            supabasePreferences.userSupabaseUrl().set("")
+            supabasePreferences.userSupabaseAnonKey().set("")
             updateState {
                 it.copy(
                     isSupabaseConnected = false,

@@ -16,10 +16,7 @@ class UserProfileScreenSpec {
         UserProfileScreen(
             vm = leaderboardViewModel,
             userId = userId,
-            onBack = { navController.safePopBackStack() },
-            onBookClick = { bookUrl, sourceId ->
-                navController.navigate("explore/$sourceId")
-            }
+            onBack = { navController.safePopBackStack() }
         )
     }
 }

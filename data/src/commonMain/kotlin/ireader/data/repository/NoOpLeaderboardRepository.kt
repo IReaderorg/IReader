@@ -3,7 +3,6 @@ package ireader.data.repository
 import ireader.data.repository.base.NoOpRepositoryBase
 import ireader.domain.data.repository.LeaderboardRepository
 import ireader.domain.models.entities.LeaderboardEntry
-import ireader.domain.models.entities.SyncedBookSummary
 import ireader.domain.models.entities.UserLeaderboardStats
 import kotlinx.coroutines.flow.Flow
 
@@ -36,7 +35,4 @@ object NoOpLeaderboardRepository : NoOpRepositoryBase(), LeaderboardRepository {
 
     override suspend fun getUserLeaderboardEntry(userId: String): Result<UserLeaderboardStats?> =
         emptyResult()
-
-    override suspend fun getUserSyncedBooks(userId: String): Result<List<SyncedBookSummary>> =
-        emptyListResult()
 }

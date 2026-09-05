@@ -39,7 +39,6 @@ fun CommunityHubScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     onLeaderboard: () -> Unit,
-    onPopularBooks: () -> Unit,
     onProfile: () -> Unit = {},
     onCharacterArtGallery: () -> Unit,
     onReadingBuddy: () -> Unit = {},
@@ -124,16 +123,6 @@ fun CommunityHubScreen(
                     description = "Compete with other readers based on reading time",
                     icon = Icons.Filled.EmojiEvents,
                     onClick = onLeaderboard
-                )
-            }
-            
-            item {
-                SettingsItem(
-                    title = localize(Res.string.popular_books),
-                    description = "Discover what the community is reading",
-                    icon = Icons.AutoMirrored.Filled.TrendingUp,
-                    onClick = onPopularBooks
-
                 )
             }
             

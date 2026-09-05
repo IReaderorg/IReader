@@ -49,9 +49,13 @@ data class SyncBookItem(
     val key: String,
     val title: String,
     val author: String = "",
+    val description: String = "",
+    val genres: List<String> = emptyList(),
+    val status: Long = 0L,
     val coverUrl: String = "",
     val favorite: Boolean = true,
     val lastModified: Long = 0L,
+    val categories: List<String> = emptyList(),
     val downloadedChapterCount: Int = 0
 )
 

@@ -39,7 +39,8 @@ class MultiProjectBackendService(
             // Project 2 - Reading
             "reading_progress" -> readingService
             
-            // Project 3 - Library (includes character art gallery)
+            // Project 3 - Library (includes sync_manifest and character art gallery)
+            "sync_manifest",
             "synced_books",
             "character_art", "character_art_likes", "character_art_reports" -> libraryService
             

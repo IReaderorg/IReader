@@ -16,5 +16,10 @@ data class SyncedBook(
     val bookUrl: String,
     val lastRead: Long,
     val coverUrl: String = "",
-    val sourceName: String = ""
+    val sourceName: String = "",
+    val author: String = "",
+    val description: String = "",
+    val genres: String = "",
+    val status: Long = 0L,
+    val favorite: Boolean = true
 )

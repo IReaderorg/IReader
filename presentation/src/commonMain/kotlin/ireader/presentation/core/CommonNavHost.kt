@@ -133,10 +133,6 @@ fun CommonNavHost(
             } ?: return@composable
             ireader.presentation.core.ui.UserProfileScreenSpec().Content(userId = userId)
         }
-
-        composable(NavigationRoutes.popularBooks) {
-            ireader.presentation.core.ui.PopularBooksScreenSpec().Content()
-        }
         
         // Reading Hub - unified statistics, buddy, and quotes screen
         composable(NavigationRoutes.readingHub) {

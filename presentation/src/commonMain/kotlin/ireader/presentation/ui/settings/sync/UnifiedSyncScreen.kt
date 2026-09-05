@@ -141,17 +141,17 @@ fun UnifiedSyncScreen(
 
             item {
                 ProviderOptionCard(
-                    title = "Supabase Cloud",
-                    subtitle = "Account library & real-time progress sync",
+                    title = "Personal Supabase Cloud",
+                    subtitle = "Personal Supabase database sync (books, metadata, categories, progress)",
                     icon = Icons.Outlined.Storage,
                     isSelected = state.selectedProvider == SyncProviderType.SUPABASE,
-                    accountStatus = if (state.isSupabaseConnected) "Signed in as ${state.supabaseEmail ?: "User"}" else "Not signed in",
+                    accountStatus = if (state.isSupabaseConnected) "Connected (${state.supabaseEmail ?: "Personal DB"})" else "Setup required (Personal Supabase)",
                     isConnected = state.isSupabaseConnected,
                     onSelect = { onSelectProvider(SyncProviderType.SUPABASE) },
-                    primaryActionText = if (state.isSupabaseConnected) "Sign Out" else "Sign In / Setup",
+                    primaryActionText = if (state.isSupabaseConnected) "Sign Out / Disconnect" else "Setup Personal Supabase",
                     onPrimaryAction = if (state.isSupabaseConnected) onSignOutSupabase else onOpenSupabaseAuth,
-                    secondaryActionIcon = if (state.isSupabaseConnected) Icons.Outlined.Settings else null,
-                    onSecondaryAction = if (state.isSupabaseConnected) onOpenSupabaseAuth else null
+                    secondaryActionIcon = Icons.Outlined.Settings,
+                    onSecondaryAction = onOpenSupabaseAuth
                 )
             }
 

@@ -136,4 +136,14 @@ interface RemoteRepository {
      * @return Result indicating success or failure
      */
     suspend fun deleteSyncedBook(userId: String, bookId: String): Result<Unit>
+
+    /**
+     * Fetch full JSON manifest from remote cloud table if supported
+     */
+    suspend fun getSyncManifest(userId: String): Result<String?> = Result.success(null)
+
+    /**
+     * Upload full JSON manifest to remote cloud table if supported
+     */
+    suspend fun saveSyncManifest(userId: String, manifestJson: String): Result<Unit> = Result.success(Unit)
 }

@@ -65,25 +65,21 @@ val remoteModule = module {
             { ireader.domain.config.PlatformConfig.getSupabaseAuthKey() }
         )
         
-        // Project 2 - Reading
-        val readingUrl = getUrl(
-            prefs.supabaseReadingUrl().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseReadingUrl() }
-        )
-        val readingKey = getKey(
-            prefs.supabaseReadingKey().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseReadingKey() }
-        )
+        // Project 2 - Reading (STRICTLY user-owned Supabase: never sends sync to developer server)
+        val readingUrl = prefs.userSupabaseUrl().get().trim().ifEmpty {
+            if (useCustom) prefs.supabaseReadingUrl().get().trim() else ""
+        }
+        val readingKey = prefs.userSupabaseAnonKey().get().trim().ifEmpty {
+            if (useCustom) prefs.supabaseReadingKey().get().trim() else ""
+        }
         
-        // Project 3 - Library
-        val libraryUrl = getUrl(
-            prefs.supabaseLibraryUrl().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseLibraryUrl() }
-        )
-        val libraryKey = getKey(
-            prefs.supabaseLibraryKey().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseLibraryKey() }
-        )
+        // Project 3 - Library (STRICTLY user-owned Supabase: never sends sync to developer server)
+        val libraryUrl = prefs.userSupabaseUrl().get().trim().ifEmpty {
+            if (useCustom) prefs.supabaseLibraryUrl().get().trim() else ""
+        }
+        val libraryKey = prefs.userSupabaseAnonKey().get().trim().ifEmpty {
+            if (useCustom) prefs.supabaseLibraryKey().get().trim() else ""
+        }
         
         // Project 4 - Book Reviews
         val bookReviewsUrl = getUrl(

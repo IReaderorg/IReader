@@ -64,7 +64,7 @@ val syncDataModule = module {
     // ========== Unified Sync Engine & Providers ==========
     
     single { ireader.data.sync.providers.GoogleDriveSyncProvider(get()) }
-    single { ireader.data.sync.providers.SupabaseSyncProvider(get()) }
+    single { ireader.data.sync.providers.SupabaseSyncProvider(get(), get()) }
     single { ireader.data.sync.providers.LocalWiFiSyncProvider(get()) }
 
     single {

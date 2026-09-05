@@ -162,26 +162,6 @@ val repositoryInjectModule = module {
         }
     }
     
-    // Popular books repository
-    single<ireader.domain.data.repository.PopularBooksRepository> {
-        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
-        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            // No Supabase configured, use NoOp singleton
-            ireader.data.repository.NoOpPopularBooksRepository
-        } else {
-            try {
-                val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).libraryClient
-                ireader.data.popular.PopularBooksRepositoryImpl(
-                    supabaseClient = supabaseClient,
-                    backendService = get()
-                )
-            } catch (e: Exception) {
-                // Fallback to NoOp singleton if something goes wrong
-                ireader.data.repository.NoOpPopularBooksRepository
-            }
-        }
-    }
-    
     // All reviews repository
     single<ireader.domain.data.repository.AllReviewsRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()

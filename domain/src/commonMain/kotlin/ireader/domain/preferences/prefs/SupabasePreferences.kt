@@ -49,6 +49,10 @@ class SupabasePreferences(
         // Project 8 - Community Source
         const val COMMUNITY_URL = "supabase_community_url"
         const val COMMUNITY_API_KEY = "supabase_community_api_key"
+
+        // Unified User-Owned Personal Supabase (Single Project)
+        const val USER_SUPABASE_URL = "user_supabase_url"
+        const val USER_SUPABASE_ANON_KEY = "user_supabase_anon_key"
         
         // Sync settings
         const val AUTO_SYNC_ENABLED = "auto_sync_enabled"
@@ -181,5 +185,121 @@ class SupabasePreferences(
     
     fun supabaseCommunityKey(): Preference<String> {
         return preferenceStore.getString(COMMUNITY_API_KEY, "")
+    }
+
+    // Unified User-Owned Personal Supabase (Single Project)
+    fun userSupabaseUrl(): Preference<String> {
+        return preferenceStore.getString(USER_SUPABASE_URL, "")
+    }
+
+    fun userSupabaseAnonKey(): Preference<String> {
+        return preferenceStore.getString(USER_SUPABASE_ANON_KEY, "")
+    }
+
+    /**
+     * Checks if the user has configured their own personal Supabase project for sync.
+     */
+    fun isPersonalSupabaseConfigured(): Boolean {
+        val singleUrl = userSupabaseUrl().get().trim()
+        val singleKey = userSupabaseAnonKey().get().trim()
+        if (singleUrl.isNotBlank() && singleKey.isNotBlank()) return true
+
+        if (useCustomSupabase().get()) {
+            val libUrl = supabaseLibraryUrl().get().trim()
+            val libKey = supabaseLibraryKey().get().trim()
+            if (libUrl.isNotBlank() && libKey.isNotBlank()) return true
+        }
+
+        return false
+    }
+
+    /**
+     * Resolves the effective personal Supabase URL for book/reading sync.
+     * Never returns developer's default Supabase instance.
+     */
+    fun getEffectiveSyncUrl(): String {
+        val single = userSupabaseUrl().get().trim()
+        if (single.isNotBlank()) return single
+        if (useCustomSupabase().get()) {
+            val lib = supabaseLibraryUrl().get().trim()
+            if (lib.isNotBlank()) return lib
+        }
+        return ""
+    }
+
+    /**
+     * Resolves the effective personal Supabase Key for book/reading sync.
+     * Never returns developer's default Supabase instance.
+     */
+    fun getEffectiveSyncKey(): String {
+        val single = userSupabaseAnonKey().get().trim()
+        if (single.isNotBlank()) return single
+        if (useCustomSupabase().get()) {
+            val lib = supabaseLibraryKey().get().trim()
+            if (lib.isNotBlank()) return lib
+        }
+        return ""
+    }
+
+    /**
+     * Export the personal Supabase configuration as a portable JSON string.
+     */
+    fun exportConfigJson(): String {
+        val url = getEffectiveSyncUrl()
+        val key = getEffectiveSyncKey()
+        return "{\"url\":\"$url\",\"key\":\"$key\",\"version\":1}"
+    }
+
+    /**
+     * Import a personal Supabase configuration JSON or key-value string.
+     * Supports format: {"url": "...", "key": "..."} or plain url/key text.
+     */
+    fun importConfigJson(configString: String): Boolean {
+        val trimmed = configString.trim()
+        if (trimmed.isBlank()) return false
+        try {
+            var parsedUrl = ""
+            var parsedKey = ""
+
+            val urlMatch = """"url"\s*:\s*"([^"]+)"""".toRegex().find(trimmed)
+            val keyMatch = """"key"\s*:\s*"([^"]+)"""".toRegex().find(trimmed)
+                ?: """"anonKey"\s*:\s*"([^"]+)"""".toRegex().find(trimmed)
+
+            if (urlMatch != null && keyMatch != null) {
+                parsedUrl = urlMatch.groupValues[1].trim()
+                parsedKey = keyMatch.groupValues[1].trim()
+            } else {
+                // Fallback: line-by-line parsing
+                val lines = trimmed.lines().map { it.trim() }.filter { it.isNotBlank() }
+                for (line in lines) {
+                    if (line.startsWith("http://") || line.startsWith("https://")) {
+                        parsedUrl = line
+                    } else if (line.startsWith("ey") && line.length > 30) {
+                        parsedKey = line
+                    } else if (line.contains("=")) {
+                        val parts = line.split("=", limit = 2)
+                        val k = parts[0].trim().lowercase()
+                        val v = parts[1].trim()
+                        if (k.contains("url")) parsedUrl = v
+                        if (k.contains("key")) parsedKey = v
+                    }
+                }
+            }
+
+            if (parsedUrl.isNotBlank() && parsedKey.isNotBlank()) {
+                userSupabaseUrl().set(parsedUrl)
+                userSupabaseAnonKey().set(parsedKey)
+                // Also mirror to library and reading endpoints for 7-project compatibility
+                supabaseLibraryUrl().set(parsedUrl)
+                supabaseLibraryKey().set(parsedKey)
+                supabaseReadingUrl().set(parsedUrl)
+                supabaseReadingKey().set(parsedKey)
+                useCustomSupabase().set(true)
+                return true
+            }
+        } catch (_: Exception) {
+            return false
+        }
+        return false
     }
 }
