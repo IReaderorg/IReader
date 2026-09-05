@@ -124,6 +124,11 @@ abstract class TranslateEngine {
     open val requiresApiKey: Boolean = false
     
     /**
+     * Default maximum characters per request for this engine.
+     */
+    open val defaultMaxCharsPerRequest: Int = 4000
+
+    /**
      * Maximum characters per request for this engine.
      * Used to chunk large texts before sending to the API.
      * Default: 4000 characters (safe for most APIs)
@@ -279,6 +284,30 @@ abstract class TranslateEngine {
                     listOf(paragraph)
                 }
             }
+        }
+        
+        /**
+         * Chunks a list of paragraphs so that each chunk's combined character count
+         * does not exceed [maxChars]. Always includes at least one paragraph per chunk.
+         */
+        fun chunkTextsByMaxChars(texts: List<String>, maxChars: Int): List<List<String>> {
+            if (texts.isEmpty()) return emptyList()
+            val chunks = mutableListOf<List<String>>()
+            var currentChunk = mutableListOf<String>()
+            var currentLen = 0
+            for (text in texts) {
+                if (currentChunk.isNotEmpty() && currentLen + text.length > maxChars) {
+                    chunks.add(currentChunk)
+                    currentChunk = mutableListOf()
+                    currentLen = 0
+                }
+                currentChunk.add(text)
+                currentLen += text.length
+            }
+            if (currentChunk.isNotEmpty()) {
+                chunks.add(currentChunk)
+            }
+            return chunks
         }
         
         // Add new engines to the values() method

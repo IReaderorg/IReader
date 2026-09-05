@@ -33,6 +33,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
+import ireader.presentation.ui.settings.translation.ContextSizeSelector
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +68,7 @@ fun TranslationSuiteScreen(
     onToneTypeChange: (ToneType) -> Unit = {},
     onPreserveStyleChange: (Boolean) -> Unit = {},
     onCustomPromptChange: (String) -> Unit = {},
+    onContextSizeChange: (Int) -> Unit = {},
     onToggleAutoTranslateChapters: (Boolean) -> Unit = {},
     onToggleAutoTranslateNovelNames: (Boolean) -> Unit = {},
     onToggleAutoShareTranslations: (Boolean) -> Unit = {},
@@ -163,6 +165,7 @@ fun TranslationSuiteScreen(
                         onLoadNvidiaModels = onLoadNvidiaModels,
                         onOllamaUrlChange = onOllamaUrlChange,
                         onOllamaModelChange = onOllamaModelChange,
+                        onContextSizeChange = onContextSizeChange,
                         onTestConnection = onTestConnection,
                         onInitializeGoogleMlKit = onInitializeGoogleMlKit,
                         onNavigateToLogin = onNavigateToLogin
@@ -179,6 +182,7 @@ fun TranslationSuiteScreen(
                         onToneTypeChange = onToneTypeChange,
                         onPreserveStyleChange = onPreserveStyleChange,
                         onCustomPromptChange = onCustomPromptChange,
+                        onContextSizeChange = onContextSizeChange,
                         onToggleAutoTranslateChapters = onToggleAutoTranslateChapters,
                         onToggleAutoTranslateNovelNames = onToggleAutoTranslateNovelNames,
                         onToggleAutoShareTranslations = onToggleAutoShareTranslations,
@@ -407,6 +411,7 @@ private fun ActiveEngineDetailCard(
     onLoadNvidiaModels: () -> Unit,
     onOllamaUrlChange: (String) -> Unit,
     onOllamaModelChange: (String) -> Unit,
+    onContextSizeChange: (Int) -> Unit = {},
     onTestConnection: () -> Unit,
     onInitializeGoogleMlKit: (String, String) -> Unit,
     onNavigateToLogin: ((String) -> Unit)?
@@ -624,6 +629,13 @@ private fun ActiveEngineDetailCard(
                 }
             }
 
+            if (state.selectedEngineId in listOf(2L, 3L, 5L, 8L, 9L, 10L, 13L)) {
+                ContextSizeSelector(
+                    contextSize = state.translationContextSize,
+                    onContextSizeChange = onContextSizeChange
+                )
+            }
+
             HorizontalDivider()
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -674,6 +686,7 @@ private fun ContextAndStyleSection(
     onToneTypeChange: (ToneType) -> Unit,
     onPreserveStyleChange: (Boolean) -> Unit,
     onCustomPromptChange: (String) -> Unit,
+    onContextSizeChange: (Int) -> Unit = {},
     onToggleAutoTranslateChapters: (Boolean) -> Unit,
     onToggleAutoTranslateNovelNames: (Boolean) -> Unit,
     onToggleAutoShareTranslations: (Boolean) -> Unit,
@@ -736,6 +749,12 @@ private fun ContextAndStyleSection(
                 label = { Text("Custom System Prompt (Optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2
+            )
+
+            // Context Size
+            ContextSizeSelector(
+                contextSize = state.translationContextSize,
+                onContextSizeChange = onContextSizeChange
             )
 
             HorizontalDivider()

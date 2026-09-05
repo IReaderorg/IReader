@@ -33,7 +33,9 @@ class OpenAITranslateEngine(
     
     // GPT-4 has 8k token context, GPT-3.5 has 4k
     // ~4 chars per token, so ~6000 chars is safe
-    override val maxCharsPerRequest: Int = 6000
+    override val defaultMaxCharsPerRequest: Int = 6000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
     
     // OpenAI rate limits vary by tier, 3 seconds is safe for most
     override val rateLimitDelayMs: Long = 3000L
@@ -261,81 +263,80 @@ class OpenAITranslateEngine(
         
         try {
             onProgress(0)
-            // Combine all paragraphs into a single text
-            val combinedText = texts.joinToString("\n---PARAGRAPH_BREAK---\n")
             val sourceLanguage = if (source == "auto") "the source language" else getLanguageName(source)
             val targetLanguage = getLanguageName(target)
+            val maxOutputTokens = maxOf(4000, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
             
-            onProgress(20)
-            val prompt = buildPrompt(combinedText, sourceLanguage, targetLanguage, context)
+            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            val allResults = mutableListOf<String>()
+            val totalChunks = chunks.size
             
-            onProgress(40)
             try {
-                val response = client.default.post(getChatEndpoint()) {
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer $apiKey")
-                    }
-                    contentType(ContentType.Application.Json)
-                    setBody(OpenAIRequest(
-                        model = getModel(),
-                        messages = listOf(
-                            Message(role = "system", content = "You are a professional translator with expertise in multiple languages."),
-                            Message(role = "user", content = prompt)
-                        ),
-                        temperature = 0.3, // Lower for more predictable translations
-                        max_tokens = 4000
-                    ))
-                }
-                
-                // Check the response status code
-                if (response.status.value == 402 || response.status.value == 429) {
-                    println("OpenAI API error: HTTP ${response.status.value} - Quota exceeded or rate limited")
-                    onError(UiText.MStringResource(Res.string.openai_quota_exceeded))
-                    return
-                } else if (response.status.value == 401) {
-                    println("OpenAI API error: HTTP 401 - Invalid API key")
-                    onError(UiText.MStringResource(Res.string.openai_api_key_invalid))
-                    return
-                }
-                
-                onProgress(80)
-                val result = response.body<OpenAIResponse>()
-                
-                // Detailed debugging of response
-                println("OpenAI API response received: ${result.id}")
-                println("OpenAI choices is null: ${result.choices == null}")
-                println("OpenAI choices is empty: ${result.choices?.isEmpty() ?: true}")
-                
-                // Add null checks for the choices collection
-                if (result.choices != null && result.choices.isNotEmpty()) {
-                    // Further null check on message content
-                    val choice = result.choices[0]
-                    val message = choice.message
-                    val messageContent = message?.content
+                for ((chunkIndex, chunk) in chunks.withIndex()) {
+                    val startProgress = (chunkIndex * 100) / totalChunks
+                    onProgress(startProgress + 20 / totalChunks)
                     
-                    if (messageContent != null && messageContent.isNotEmpty()) {
-                        val translatedText = messageContent.trim()
-                        // Split the response back into individual paragraphs
-                        val splitTexts = translatedText.split("\n---PARAGRAPH_BREAK---\n")
-                        
-                        // Ensure we have the right number of paragraphs to match input
-                        val finalTexts = if (splitTexts.size == texts.size) {
-                            splitTexts
-                        } else {
-                            // Adjust the paragraph count to match input
-                            adjustParagraphCount(splitTexts, texts)
+                    val combinedText = chunk.joinToString("\n---PARAGRAPH_BREAK---\n")
+                    val prompt = buildPrompt(combinedText, sourceLanguage, targetLanguage, context)
+                    
+                    onProgress(startProgress + 40 / totalChunks)
+                    val response = client.default.post(getChatEndpoint()) {
+                        headers {
+                            append(HttpHeaders.Authorization, "Bearer $apiKey")
                         }
-                        
-                        onProgress(100)
-                        onSuccess(finalTexts)
-                    } else {
+                        contentType(ContentType.Application.Json)
+                        setBody(OpenAIRequest(
+                            model = getModel(),
+                            messages = listOf(
+                                Message(role = "system", content = "You are a professional translator with expertise in multiple languages."),
+                                Message(role = "user", content = prompt)
+                            ),
+                            temperature = 0.3, // Lower for more predictable translations
+                            max_tokens = maxOutputTokens
+                        ))
+                    }
+                    
+                    // Check the response status code
+                    if (response.status.value == 402 || response.status.value == 429) {
+                        println("OpenAI API error: HTTP ${response.status.value} - Quota exceeded or rate limited")
+                        onError(UiText.MStringResource(Res.string.openai_quota_exceeded))
+                        return
+                    } else if (response.status.value == 401) {
+                        println("OpenAI API error: HTTP 401 - Invalid API key")
+                        onError(UiText.MStringResource(Res.string.openai_api_key_invalid))
+                        return
+                    }
+                    
+                    onProgress(startProgress + 80 / totalChunks)
+                    val result = response.body<OpenAIResponse>()
+                    
+                    val choice = result.choices?.firstOrNull()
+                    val messageContent = choice?.message?.content
+                    
+                    if (messageContent.isNullOrBlank()) {
                         println("OpenAI API returned empty message content")
                         onError(UiText.MStringResource(Res.string.empty_response))
+                        return
                     }
-                } else {
-                    println("OpenAI API returned empty choices array")
-                    onError(UiText.MStringResource(Res.string.empty_response))
+                    
+                    val translatedText = messageContent.trim()
+                    val splitTexts = translatedText.split("\n---PARAGRAPH_BREAK---\n")
+                    val adjustedTexts = if (splitTexts.size == chunk.size) {
+                        splitTexts
+                    } else {
+                        adjustParagraphCount(splitTexts, chunk)
+                    }
+                    allResults.addAll(adjustedTexts)
                 }
+                
+                val finalTexts = if (allResults.size == texts.size) {
+                    allResults
+                } else {
+                    adjustParagraphCount(allResults, texts)
+                }
+                
+                onProgress(100)
+                onSuccess(finalTexts)
             } catch (e: Exception) {
                 // Log the network error for debugging
                 println("OpenAI API error: $e")

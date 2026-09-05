@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.FilterChip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Login
@@ -155,9 +157,11 @@ fun EngineSpecificConfig(
             baseUrl = viewModel.openAIBaseUrl.value,
             model = viewModel.openAIModel.value,
             apiKey = viewModel.openAIApiKey.value,
+            contextSize = viewModel.getEngineContextSize(2L).value,
             onBaseUrlChange = { viewModel.updateOpenAIBaseUrl(it) },
             onModelChange = { viewModel.updateOpenAIModel(it) },
             onApiKeyChange = { viewModel.updateOpenAIApiKey(it) },
+            onContextSizeChange = { viewModel.updateEngineContextSize(2L, it) },
             onTestConnection = { viewModel.testConnection() },
             testState = viewModel.testConnectionState,
             modifier = modifier
@@ -165,8 +169,10 @@ fun EngineSpecificConfig(
         5L -> OllamaConfig(
             ollamaUrl = viewModel.ollamaUrl.value,
             ollamaModel = viewModel.ollamaModel.value,
+            contextSize = viewModel.getEngineContextSize(5L).value,
             onUrlChange = { viewModel.updateOllamaUrl(it) },
             onModelChange = { viewModel.updateOllamaModel(it) },
+            onContextSizeChange = { viewModel.updateEngineContextSize(5L, it) },
             onTestConnection = { viewModel.testConnection() },
             testState = viewModel.testConnectionState,
             modifier = modifier
@@ -185,8 +191,10 @@ fun EngineSpecificConfig(
         8L -> GeminiConfig(
             apiKey = viewModel.geminiApiKey.value,
             selectedModel = viewModel.geminiModel.value,
+            contextSize = viewModel.getEngineContextSize(8L).value,
             onApiKeyChange = { viewModel.updateGeminiApiKey(it) },
             onModelChange = { viewModel.updateGeminiModel(it) },
+            onContextSizeChange = { viewModel.updateEngineContextSize(8L, it) },
             onLoadModels = { viewModel.loadGeminiModels() },
             availableModels = viewModel.geminiModels,
             isLoadingModels = viewModel.isLoadingGeminiModels,
@@ -195,8 +203,10 @@ fun EngineSpecificConfig(
         9L -> OpenRouterConfig(
             apiKey = viewModel.openRouterApiKey.value,
             selectedModel = viewModel.openRouterModel.value,
+            contextSize = viewModel.getEngineContextSize(9L).value,
             onApiKeyChange = { viewModel.updateOpenRouterApiKey(it) },
             onModelChange = { viewModel.updateOpenRouterModel(it) },
+            onContextSizeChange = { viewModel.updateEngineContextSize(9L, it) },
             onLoadModels = { viewModel.loadOpenRouterModels() },
             availableModels = viewModel.openRouterModels,
             isLoadingModels = viewModel.isLoadingOpenRouterModels,
@@ -205,8 +215,10 @@ fun EngineSpecificConfig(
         10L -> NvidiaConfig(
             apiKey = viewModel.nvidiaApiKey.value,
             selectedModel = viewModel.nvidiaModel.value,
+            contextSize = viewModel.getEngineContextSize(10L).value,
             onApiKeyChange = { viewModel.updateNvidiaApiKey(it) },
             onModelChange = { viewModel.updateNvidiaModel(it) },
+            onContextSizeChange = { viewModel.updateEngineContextSize(10L, it) },
             onLoadModels = { viewModel.loadNvidiaModels() },
             availableModels = viewModel.nvidiaModels,
             isLoadingModels = viewModel.isLoadingNvidiaModels,
@@ -930,8 +942,10 @@ private fun GenericPluginConfig(
 private fun OllamaConfig(
     ollamaUrl: String,
     ollamaModel: String,
+    contextSize: Int = 0,
     onUrlChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
+    onContextSizeChange: (Int) -> Unit = {},
     onTestConnection: () -> Unit,
     testState: TestConnectionState,
     modifier: Modifier = Modifier
@@ -970,6 +984,12 @@ private fun OllamaConfig(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Context & Chunk Size
+            ContextSizeSelector(
+                contextSize = contextSize,
+                onContextSizeChange = onContextSizeChange
             )
 
             // Test Connection Row
@@ -1070,9 +1090,11 @@ private fun OpenAIConfig(
     baseUrl: String,
     model: String,
     apiKey: String,
+    contextSize: Int = 0,
     onBaseUrlChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
     onApiKeyChange: (String) -> Unit,
+    onContextSizeChange: (Int) -> Unit = {},
     onTestConnection: () -> Unit,
     testState: TestConnectionState,
     modifier: Modifier = Modifier
@@ -1150,6 +1172,12 @@ private fun OpenAIConfig(
                     }
                 },
                 textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Context & Chunk Size
+            ContextSizeSelector(
+                contextSize = contextSize,
+                onContextSizeChange = onContextSizeChange
             )
 
             // Test Connection Button
@@ -1597,8 +1625,10 @@ private fun LanguageDropdown(
 private fun GeminiConfig(
     apiKey: String,
     selectedModel: String,
+    contextSize: Int = 0,
     onApiKeyChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
+    onContextSizeChange: (Int) -> Unit = {},
     onLoadModels: () -> Unit,
     availableModels: List<Pair<String, String>>,
     isLoadingModels: Boolean,
@@ -1717,6 +1747,12 @@ private fun GeminiConfig(
                 }
             }
             
+            // Context & Chunk Size
+            ContextSizeSelector(
+                contextSize = contextSize,
+                onContextSizeChange = onContextSizeChange
+            )
+
             // Info
             Text(
                 text = localizeHelper.localize(Res.string.enter_gemini_api_key),
@@ -1735,8 +1771,10 @@ private fun GeminiConfig(
 private fun OpenRouterConfig(
     apiKey: String,
     selectedModel: String,
+    contextSize: Int = 0,
     onApiKeyChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
+    onContextSizeChange: (Int) -> Unit = {},
     onLoadModels: () -> Unit,
     availableModels: List<Pair<String, String>>,
     isLoadingModels: Boolean,
@@ -1835,6 +1873,12 @@ private fun OpenRouterConfig(
                 }
             }
             
+            // Context & Chunk Size
+            ContextSizeSelector(
+                contextSize = contextSize,
+                onContextSizeChange = onContextSizeChange
+            )
+
             // Info
             Text(
                 text = localizeHelper.localize(Res.string.openrouter_info),
@@ -1853,8 +1897,10 @@ private fun OpenRouterConfig(
 private fun NvidiaConfig(
     apiKey: String,
     selectedModel: String,
+    contextSize: Int = 0,
     onApiKeyChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
+    onContextSizeChange: (Int) -> Unit = {},
     onLoadModels: () -> Unit,
     availableModels: List<Pair<String, String>>,
     isLoadingModels: Boolean,
@@ -1953,6 +1999,12 @@ private fun NvidiaConfig(
                 }
             }
             
+            // Context & Chunk Size
+            ContextSizeSelector(
+                contextSize = contextSize,
+                onContextSizeChange = onContextSizeChange
+            )
+
             // Info
             Text(
                 text = localizeHelper.localize(Res.string.nvidia_info),
@@ -2515,3 +2567,89 @@ private fun pow(base: Double, exponent: Int): Double {
     }
     return result
 }
+
+/**
+ * Reusable Context & Chunk Size Selector for AI Models
+ * Allows users to set chunk character limits (Auto, 8K, 16K, 32K, 64K, Custom).
+ */
+@Composable
+fun ContextSizeSelector(
+    contextSize: Int,
+    onContextSizeChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Context & Chunk Size"
+) {
+    val presets = listOf(
+        0 to "Auto",
+        8000 to "8K",
+        16000 to "16K",
+        32000 to "32K",
+        64000 to "64K"
+    )
+    val isStandardPreset = contextSize in listOf(0, 8000, 16000, 32000, 64000)
+    var showCustomInput by remember { mutableStateOf(!isStandardPreset && contextSize > 0) }
+    var customText by remember(contextSize) {
+        mutableStateOf(if (!isStandardPreset && contextSize > 0) contextSize.toString() else "")
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = "Character limit per AI request. Larger chunks reduce round-trips and translate much faster.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            presets.forEach { (size, chipLabel) ->
+                val selected = !showCustomInput && contextSize == size
+                FilterChip(
+                    selected = selected,
+                    onClick = {
+                        showCustomInput = false
+                        onContextSizeChange(size)
+                    },
+                    label = { Text(chipLabel, style = MaterialTheme.typography.labelSmall) }
+                )
+            }
+            FilterChip(
+                selected = showCustomInput,
+                onClick = {
+                    showCustomInput = true
+                },
+                label = { Text("Custom", style = MaterialTheme.typography.labelSmall) }
+            )
+        }
+
+        if (showCustomInput) {
+            OutlinedTextField(
+                value = customText,
+                onValueChange = { input ->
+                    val filtered = input.filter { it.isDigit() }
+                    customText = filtered
+                    val parsed = filtered.toIntOrNull()
+                    if (parsed != null && parsed in 1000..500000) {
+                        onContextSizeChange(parsed)
+                    }
+                },
+                label = { Text("Characters per request (e.g. 25000)") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                supportingText = {
+                    Text("Recommended: 8,000 - 64,000 characters depending on model context window")
+                }
+            )
+        }
+    }
+}
+

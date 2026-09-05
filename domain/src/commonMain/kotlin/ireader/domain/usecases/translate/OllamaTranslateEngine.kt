@@ -41,7 +41,9 @@ class OllamaTranslateEngine(
     override val requiresApiKey: Boolean = false
     
     // Ollama is local, can handle larger chunks
-    override val maxCharsPerRequest: Int = 10000
+    override val defaultMaxCharsPerRequest: Int = 10000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
     
     // Local engine, minimal rate limiting
     override val rateLimitDelayMs: Long = 100L
@@ -429,8 +431,8 @@ class OllamaTranslateEngine(
             val sourceLang = supportedLanguages.find { it.first == source }?.second ?: source
             val targetLang = supportedLanguages.find { it.first == target }?.second ?: target
             
-            // Chunk texts like Gemini does
-            val chunks = texts.chunked(MAX_CHUNK_SIZE)
+            // Chunk texts based on configured context size
+            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
             val allResults = mutableListOf<String>()
             val totalChunks = chunks.size
             
@@ -534,13 +536,14 @@ Text to translate:
 
 $combinedText"""
         
+        val numPredict = maxOf(8192, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(32768))
         val request = OllamaChatRequest(
             model = model,
             messages = listOf(
                 OllamaMessage(role = "system", content = systemPrompt),
                 OllamaMessage(role = "user", content = userPrompt)
             ),
-            options = OllamaOptions(temperature = 0.1f, num_predict = 8192)
+            options = OllamaOptions(temperature = 0.1f, num_predict = numPredict)
         )
         
         val response = client.default.post(chatUrl) {

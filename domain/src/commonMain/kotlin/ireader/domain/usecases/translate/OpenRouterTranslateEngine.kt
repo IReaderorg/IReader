@@ -58,7 +58,9 @@ class OpenRouterTranslateEngine(
     override val requiresApiKey: Boolean = true
     
     // OpenRouter supports larger context windows
-    override val maxCharsPerRequest: Int = 6000
+    override val defaultMaxCharsPerRequest: Int = 6000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
     
     // Rate limit varies by model, 2 seconds is safe
     override val rateLimitDelayMs: Long = 2000L
@@ -307,91 +309,94 @@ class OpenRouterTranslateEngine(
         
         try {
             onProgress(0)
-            
-            // Combine all paragraphs into a single text with markers
-            val combinedText = texts.joinToString("\n---PARAGRAPH_BREAK---\n")
             val sourceLanguage = if (source == "auto") "the source language" else getLanguageName(source)
             val targetLanguage = getLanguageName(target)
+            val maxOutputTokens = maxOf(4096, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
             
-            onProgress(20)
-            val prompt = buildPrompt(combinedText, sourceLanguage, targetLanguage, context)
+            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            val allResults = mutableListOf<String>()
+            val totalChunks = chunks.size
             
-            onProgress(40)
-            
-            Log.debug { "OpenRouter: Starting translation with model $selectedModel" }
-            
-            val response = client.default.post("$baseUrl/chat/completions") {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $apiKey")
-                    append("HTTP-Referer", "https://ireader.app")
-                    append("X-Title", "IReader")
-                }
-                contentType(ContentType.Application.Json)
-                timeout {
-                    requestTimeoutMillis = 120000 // 2 minutes
-                    connectTimeoutMillis = 30000
-                }
-                setBody(OpenRouterRequest(
-                    model = selectedModel,
-                    messages = listOf(
-                        Message(role = "system", content = getSystemPrompt()),
-                        Message(role = "user", content = prompt)
-                    ),
-                    temperature = 0.3,
-                    max_tokens = 4096
-                ))
-            }
-            
-            // Handle HTTP errors
-            when (response.status.value) {
-                401 -> {
-                    Log.error { "OpenRouter API error: HTTP 401 - Invalid API key" }
-                    onError(UiText.MStringResource(Res.string.openrouter_api_key_invalid))
-                    return
-                }
-                402 -> {
-                    Log.error { "OpenRouter API error: HTTP 402 - Insufficient credits" }
-                    onError(UiText.MStringResource(Res.string.openrouter_insufficient_credits))
-                    return
-                }
-                429 -> {
-                    Log.error { "OpenRouter API error: HTTP 429 - Rate limited" }
-                    onError(UiText.MStringResource(Res.string.api_rate_limit_exceeded))
-                    return
-                }
-            }
-            
-            onProgress(80)
-            val result = response.body<OpenRouterResponse>()
-            
-            Log.debug { "OpenRouter API response received: ${result.id}" }
-            
-            if (result.choices != null && result.choices.isNotEmpty()) {
-                val choice = result.choices[0]
-                val messageContent = choice.message?.content
+            Log.debug { "OpenRouter: Starting translation with model $selectedModel, $totalChunks chunks" }
+
+            for ((chunkIndex, chunk) in chunks.withIndex()) {
+                val startProgress = (chunkIndex * 100) / totalChunks
+                onProgress(startProgress + 20 / totalChunks)
                 
-                if (!messageContent.isNullOrBlank()) {
-                    val translatedText = messageContent.trim()
-                    // Split the response back into individual paragraphs
-                    val splitTexts = translatedText.split("\n---PARAGRAPH_BREAK---\n")
-                    
-                    // Ensure we have the right number of paragraphs to match input
-                    val finalTexts = if (splitTexts.size == texts.size) {
-                        splitTexts
-                    } else {
-                        adjustParagraphCount(splitTexts, texts)
+                val combinedText = chunk.joinToString("\n---PARAGRAPH_BREAK---\n")
+                val prompt = buildPrompt(combinedText, sourceLanguage, targetLanguage, context)
+                
+                onProgress(startProgress + 40 / totalChunks)
+                
+                val response = client.default.post("$baseUrl/chat/completions") {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $apiKey")
+                        append("HTTP-Referer", "https://ireader.app")
+                        append("X-Title", "IReader")
                     }
-                    
-                    onProgress(100)
-                    onSuccess(finalTexts)
-                } else {
+                    contentType(ContentType.Application.Json)
+                    timeout {
+                        requestTimeoutMillis = 120000 // 2 minutes
+                        connectTimeoutMillis = 30000
+                    }
+                    setBody(OpenRouterRequest(
+                        model = selectedModel,
+                        messages = listOf(
+                            Message(role = "system", content = getSystemPrompt()),
+                            Message(role = "user", content = prompt)
+                        ),
+                        temperature = 0.3,
+                        max_tokens = maxOutputTokens
+                    ))
+                }
+                
+                // Handle HTTP errors
+                when (response.status.value) {
+                    401 -> {
+                        Log.error { "OpenRouter API error: HTTP 401 - Invalid API key" }
+                        onError(UiText.MStringResource(Res.string.openrouter_api_key_invalid))
+                        return
+                    }
+                    402 -> {
+                        Log.error { "OpenRouter API error: HTTP 402 - Insufficient credits" }
+                        onError(UiText.MStringResource(Res.string.openrouter_insufficient_credits))
+                        return
+                    }
+                    429 -> {
+                        Log.error { "OpenRouter API error: HTTP 429 - Rate limited" }
+                        onError(UiText.MStringResource(Res.string.api_rate_limit_exceeded))
+                        return
+                    }
+                }
+                
+                onProgress(startProgress + 80 / totalChunks)
+                val result = response.body<OpenRouterResponse>()
+                
+                val choice = result.choices?.firstOrNull()
+                val messageContent = choice?.message?.content
+                
+                if (messageContent.isNullOrBlank()) {
                     Log.error { "OpenRouter API returned empty message content" }
                     onError(UiText.MStringResource(Res.string.empty_response))
+                    return
                 }
-            } else {
-                Log.error { "OpenRouter API returned empty choices array" }
-                onError(UiText.MStringResource(Res.string.empty_response))
+                
+                val splitTexts = messageContent.trim().split("\n---PARAGRAPH_BREAK---\n")
+                val adjustedTexts = if (splitTexts.size == chunk.size) {
+                    splitTexts
+                } else {
+                    adjustParagraphCount(splitTexts, chunk)
+                }
+                allResults.addAll(adjustedTexts)
             }
+            
+            val finalTexts = if (allResults.size == texts.size) {
+                allResults
+            } else {
+                adjustParagraphCount(allResults, texts)
+            }
+            onProgress(100)
+            onSuccess(finalTexts)
         } catch (e: Exception) {
             Log.error { "OpenRouter translation error: ${e.message}" }
             

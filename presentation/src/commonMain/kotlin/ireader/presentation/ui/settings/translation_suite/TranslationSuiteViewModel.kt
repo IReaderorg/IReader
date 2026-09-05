@@ -90,6 +90,7 @@ data class TranslationSuiteState(
     val toneType: ToneType = ToneType.NEUTRAL,
     val preserveStyle: Boolean = false,
     val customPrompt: String = "",
+    val translationContextSize: Int = 0,
 
     // Automation & Community
     val autoTranslateChapters: Boolean = false,
@@ -148,6 +149,7 @@ class TranslationSuiteViewModel(
         val toneTypeInt = readerPreferences.translatorToneType().get()
         val preserve = readerPreferences.translatorPreserveStyle().get()
         val prompt = readerPreferences.translationCustomPrompt().get()
+        val contextSize = readerPreferences.translationContextSize().get()
 
         val autoNovel = translationPreferences.autoTranslateNovelNames().get()
         val autoShare = communityPreferences?.autoShareTranslations()?.get() ?: false
@@ -177,6 +179,7 @@ class TranslationSuiteViewModel(
                 toneType = resolvedToneType,
                 preserveStyle = preserve,
                 customPrompt = prompt,
+                translationContextSize = contextSize,
                 autoTranslateNovelNames = autoNovel,
                 autoShareTranslations = autoShare,
                 contributorName = contributor
@@ -237,6 +240,19 @@ class TranslationSuiteViewModel(
 
     fun setTargetLanguage(language: String) {
         updateState { it.copy(targetLanguage = language) }
+    }
+
+    fun setTranslationContextSize(size: Int) {
+        readerPreferences.translationContextSize().set(size)
+        updateState { it.copy(translationContextSize = size) }
+    }
+
+    fun getEngineContextSize(engineId: Long): Int {
+        return readerPreferences.engineContextSize(engineId).get()
+    }
+
+    fun setEngineContextSize(engineId: Long, size: Int) {
+        readerPreferences.engineContextSize(engineId).set(size)
     }
 
     fun setOpenAIApiKey(key: String) {

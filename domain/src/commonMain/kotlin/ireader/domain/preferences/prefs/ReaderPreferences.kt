@@ -265,6 +265,19 @@ Visit.*for more chapters"""
     fun translatorPreserveStyle(): Preference<Boolean> {
         return preferenceStore.getBoolean("translator_preserve_style", true)
     }
+    fun translationContextSize(): Preference<Int> {
+        return preferenceStore.getInt("translation_context_size", 0)
+    }
+    fun engineContextSize(engineId: Long): Preference<Int> {
+        return preferenceStore.getInt("translator_context_size_$engineId", 0)
+    }
+    fun getEffectiveContextSize(engineId: Long, defaultSize: Int): Int {
+        val engineSpecific = engineContextSize(engineId).get()
+        if (engineSpecific > 0) return engineSpecific
+        val global = translationContextSize().get()
+        if (global > 0) return global
+        return defaultSize
+    }
     fun openAIApiKey(): Preference<String> {
         return preferenceStore.getString("openai_api_key", "")
     }

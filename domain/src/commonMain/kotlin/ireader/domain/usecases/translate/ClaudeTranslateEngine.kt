@@ -35,7 +35,9 @@ class ClaudeTranslateEngine(
     override val supportsStylePreservation: Boolean = true
     override val requiresApiKey: Boolean = true
 
-    override val maxCharsPerRequest: Int = 10000
+    override val defaultMaxCharsPerRequest: Int = 10000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
     override val rateLimitDelayMs: Long = 2000L
     override val isOffline: Boolean = false
 
@@ -207,28 +209,40 @@ class ClaudeTranslateEngine(
             onProgress(10)
             val sourceLangName = if (source == "auto") "Auto-detect" else getLanguageName(source)
             val targetLangName = getLanguageName(target)
-
-            val joinedText = texts.joinToString("\n$PARAGRAPH_BREAK_MARKER\n")
+            val maxOutputTokens = maxOf(4096, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
+            
+            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            val allResults = mutableListOf<String>()
+            val totalChunks = chunks.size
             val systemPrompt = "You are a professional literary translator. Translate accurately while preserving formatting, style, and tone. Maintain the $PARAGRAPH_BREAK_MARKER separator exactly between paragraphs. Output ONLY the translated text without notes or commentary."
-            val userPrompt = buildPrompt(joinedText, sourceLangName, targetLangName, context)
 
-            onProgress(40)
-            val result = generateContent(systemPrompt, userPrompt, temperature = 0.3f, maxTokens = 4096)
-            if (result.isSuccess) {
-                val translatedText = result.getOrNull() ?: ""
-                val paragraphs = translatedText.split(PARAGRAPH_BREAK_MARKER)
-                    .map { sanitizeParagraphBreakMarkers(it).trim() }
-                    .filter { it.isNotEmpty() }
+            for ((chunkIndex, chunk) in chunks.withIndex()) {
+                val startProgress = 10 + (chunkIndex * 80) / totalChunks
+                onProgress(startProgress)
 
-                onProgress(100)
-                if (paragraphs.size == texts.size) {
-                    onSuccess(paragraphs)
+                val joinedText = chunk.joinToString("\n$PARAGRAPH_BREAK_MARKER\n")
+                val userPrompt = buildPrompt(joinedText, sourceLangName, targetLangName, context)
+
+                val result = generateContent(systemPrompt, userPrompt, temperature = 0.3f, maxTokens = maxOutputTokens)
+                if (result.isSuccess) {
+                    val translatedText = result.getOrNull() ?: ""
+                    val paragraphs = translatedText.split(PARAGRAPH_BREAK_MARKER)
+                        .map { sanitizeParagraphBreakMarkers(it).trim() }
+                        .filter { it.isNotEmpty() }
+
+                    if (paragraphs.size == chunk.size) {
+                        allResults.addAll(paragraphs)
+                    } else {
+                        allResults.addAll(sanitizeTranslatedParagraphs(listOf(translatedText)))
+                    }
                 } else {
-                    onSuccess(sanitizeTranslatedParagraphs(listOf(translatedText)))
+                    onError(UiText.DynamicString(result.exceptionOrNull()?.message ?: "Unknown Claude translation error"))
+                    return
                 }
-            } else {
-                onError(UiText.DynamicString(result.exceptionOrNull()?.message ?: "Unknown Claude translation error"))
             }
+
+            onProgress(100)
+            onSuccess(allResults)
         } catch (e: Exception) {
             onError(UiText.DynamicString(e.message ?: "Failed to translate with Claude"))
         }

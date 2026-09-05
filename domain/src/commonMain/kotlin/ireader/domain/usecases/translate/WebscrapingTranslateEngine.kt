@@ -50,6 +50,10 @@ open class WebscrapingTranslateEngine(
     override val supportsStylePreservation: Boolean = true
     override val requiresApiKey: Boolean = false
 
+    override val defaultMaxCharsPerRequest: Int = 6000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
+
     // Various states for webview login
     private val _loginState = MutableStateFlow(LoginState.UNKNOWN)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
@@ -289,15 +293,7 @@ open class WebscrapingTranslateEngine(
             
             // For Gemini API, chunk texts to avoid token limits
             if (currentService == AI_SERVICE.GEMINI) {
-                // OPTIMIZED: Dynamic chunk size based on text length
-                // Shorter texts can be batched more aggressively to reduce API calls
-                val avgTextLength = texts.map { it.length }.average()
-                val maxChunkSize = when {
-                    avgTextLength < 100 -> 40  // Short paragraphs: batch more
-                    avgTextLength < 300 -> 25  // Medium paragraphs
-                    else -> 15                  // Long paragraphs: smaller batches
-                }
-                val chunks = texts.chunked(maxChunkSize)
+                val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
                 val allResults = mutableListOf<String>()
                 
                 chunks.forEachIndexed { chunkIndex, chunk ->
@@ -929,7 +925,9 @@ class DeepSeekWebViewTranslateEngine(httpClients: HttpClients, readerPreferences
     override val engineName: String = "DeepSeek WebView (No API Key)"
     
     // WebView engines have similar limits
-    override val maxCharsPerRequest: Int = 6000
+    override val defaultMaxCharsPerRequest: Int = 6000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
     
     // WebView needs longer delays to avoid detection
     override val rateLimitDelayMs: Long = 5000L
@@ -948,7 +946,9 @@ class GeminiTranslateEngine(httpClients: HttpClients, readerPreferences: ReaderP
     
     // Gemini has a 30k token limit, but we use characters as approximation
     // ~4 chars per token, so ~8000 chars is safe for input + output
-    override val maxCharsPerRequest: Int = 6000
+    override val defaultMaxCharsPerRequest: Int = 6000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
     
     // Gemini free tier: 15 RPM (requests per minute) = 4 seconds between requests
     // We use 5 seconds to be safe

@@ -3046,4 +3046,10 @@
     <string name="similar_titles_no_similar_books">No similar books found for this title</string>
     <string name="only_show_similar_titles_in_explore">Only in Explore Screen</string>
     <string name="only_show_similar_titles_in_explore_subtitle">Only show similar titles when navigating from Explore or Search screens</string>
+
+    <!-- AI Model Context & Chunk Size -->
+    <string name="context_size">Context &amp; Chunk Size</string>
+    <string name="context_size_description">Character limit per AI request. Larger chunks reduce API calls and translate faster.</string>
+    <string name="context_size_auto">Auto</string>
+    <string name="context_size_custom">Custom</string>
 </resources>

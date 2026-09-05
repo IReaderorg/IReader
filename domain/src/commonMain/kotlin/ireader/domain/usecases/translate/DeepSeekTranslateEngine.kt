@@ -33,7 +33,9 @@ class DeepSeekTranslateEngine(
     override val requiresApiKey: Boolean = true
     
     // DeepSeek has 64k context window, but we keep it conservative
-    override val maxCharsPerRequest: Int = 8000
+    override val defaultMaxCharsPerRequest: Int = 8000
+    override val maxCharsPerRequest: Int
+        get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
     
     // DeepSeek has generous rate limits, 3 seconds is safe
     override val rateLimitDelayMs: Long = 3000L
@@ -247,10 +249,10 @@ class DeepSeekTranslateEngine(
             
             val sourceLanguage = if (source == "auto") "the source language" else getLanguageName(source)
             val targetLanguage = getLanguageName(target)
+            val maxOutputTokens = maxOf(2000, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
             
-            // Chunk translation for better handling of large texts
-            val maxChunkSize = MAX_CHUNK_SIZE
-            val chunks = texts.chunked(maxChunkSize)
+            // Chunk translation based on configured context size
+            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
             val allResults = mutableListOf<String>()
             
             chunks.forEachIndexed { chunkIndex, chunk ->
@@ -261,7 +263,7 @@ class DeepSeekTranslateEngine(
                 val prompt = buildPrompt(combinedText, sourceLanguage, targetLanguage, context)
                 
                 try {
-                    val translationResult = callDeepSeekApi(apiKey, prompt)
+                    val translationResult = callDeepSeekApi(apiKey, prompt, maxOutputTokens)
                     val splitResults = splitResponse(translationResult, chunk.size)
                     allResults.addAll(splitResults)
                 } catch (e: Exception) {
@@ -290,7 +292,7 @@ class DeepSeekTranslateEngine(
     /**
      * Call DeepSeek API with retry logic
      */
-    private suspend fun callDeepSeekApi(apiKey: String, prompt: String): String {
+    private suspend fun callDeepSeekApi(apiKey: String, prompt: String, maxTokens: Int = 2000): String {
         
         val response = client.default.post("https://api.deepseek.com/v1/chat/completions") {
             headers {
@@ -305,7 +307,7 @@ class DeepSeekTranslateEngine(
                     Message(role = "user", content = prompt)
                 ),
                 temperature = 0.1, // Lower temperature = more deterministic, fewer retries needed
-                max_tokens = 2000  // Reduced from 4000 to save costs
+                max_tokens = maxTokens
             ))
             timeout {
                 requestTimeoutMillis = 60000

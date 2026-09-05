@@ -53,6 +53,17 @@ class TranslationSettingsViewModel(
     val ollamaUrl = readerPreferences.ollamaServerUrl().asState()
     val ollamaModel = readerPreferences.ollamaModel().asState()
     val translationCustomPrompt = readerPreferences.translationCustomPrompt().asState()
+    val translationContextSize = readerPreferences.translationContextSize().asState()
+    
+    fun updateTranslationContextSize(size: Int) {
+        readerPreferences.translationContextSize().set(size)
+    }
+
+    fun getEngineContextSize(engineId: Long) = readerPreferences.engineContextSize(engineId).asState()
+
+    fun updateEngineContextSize(engineId: Long, size: Int) {
+        readerPreferences.engineContextSize(engineId).set(size)
+    }
     
     // Community sharing preferences
     val autoShareTranslations = communityPreferences?.autoShareTranslations()?.asState() 

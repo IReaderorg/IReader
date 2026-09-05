@@ -30,6 +30,8 @@ fun AdvancedSettingsSection(
     onPreserveStyleChange: (Boolean) -> Unit,
     onCustomPromptChange: (String) -> Unit,
     isAiEngine: Boolean,
+    contextSize: Int = 0,
+    onContextSizeChange: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -163,6 +165,14 @@ fun AdvancedSettingsSection(
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
             }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+            // Translation Context Size Selector
+            ContextSizeSelector(
+                contextSize = contextSize,
+                onContextSizeChange = onContextSizeChange
+            )
         }
     }
 }
