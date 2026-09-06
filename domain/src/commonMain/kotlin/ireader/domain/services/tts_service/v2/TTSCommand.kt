@@ -46,6 +46,7 @@ sealed class TTSCommand {
     data class SetAutoNextChapter(val enabled: Boolean) : TTSCommand()
     data class SetEngine(val type: EngineType) : TTSCommand()
     data class SetGradioConfig(val config: GradioConfig) : TTSCommand()
+    data class SetLocalConfig(val config: ireader.domain.services.tts_service.local.LocalTTSConfig) : TTSCommand()
     
     // Chunk mode commands (for remote TTS with text merging)
     data class EnableChunkMode(val targetWordCount: Int = 50) : TTSCommand()

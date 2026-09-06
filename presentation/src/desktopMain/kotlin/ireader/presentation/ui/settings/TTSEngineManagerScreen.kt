@@ -604,6 +604,12 @@ fun TTSEngineManagerScreen(
                 appPrefs = appPrefs,
                 scope = scope
             )
+
+            // Local Server TTS Section (Chatterbox Persian, etc.)
+            LocalTTSSectionDesktop(
+                appPrefs = appPrefs,
+                scope = scope
+            )
             
             // Piper TTS Voices Section - Opens new voice selection dialog
             var showPiperVoiceDialog by remember { mutableStateOf(false) }

@@ -146,6 +146,7 @@ class TTSNotificationUseCase(
             ttsProvider = when (state.engineType) {
                 EngineType.NATIVE -> "Native TTS"
                 EngineType.GRADIO -> "Gradio TTS"
+                EngineType.LOCAL -> "Local Server TTS"
             }
         )
         

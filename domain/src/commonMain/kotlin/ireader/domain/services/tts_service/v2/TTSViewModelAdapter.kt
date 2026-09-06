@@ -77,6 +77,9 @@ class TTSViewModelAdapter(
     val isUsingGradio: StateFlow<Boolean> = state.map { it.engineType == EngineType.GRADIO }
         .stateIn(scope, SharingStarted.WhileSubscribed(5000), false)
     
+    val isUsingLocal: StateFlow<Boolean> = state.map { it.engineType == EngineType.LOCAL }
+        .stateIn(scope, SharingStarted.WhileSubscribed(5000), false)
+    
     // Chunk mode state
     val chunkModeEnabled: StateFlow<Boolean> = state.map { it.chunkModeEnabled }
         .stateIn(scope, SharingStarted.WhileSubscribed(5000), false)
@@ -228,6 +231,16 @@ class TTSViewModelAdapter(
     fun useGradioTTS(config: GradioConfig) {
         setGradioConfig(config)
         setEngine(EngineType.GRADIO)
+    }
+
+    fun setLocalConfig(config: ireader.domain.services.tts_service.local.LocalTTSConfig) {
+        Log.warn { "$TAG: setLocalConfig(${config.name})" }
+        controller.dispatch(TTSCommand.SetLocalConfig(config))
+    }
+
+    fun useLocalTTS(config: ireader.domain.services.tts_service.local.LocalTTSConfig) {
+        setLocalConfig(config)
+        setEngine(EngineType.LOCAL)
     }
     
     // ========== Translation Actions ==========

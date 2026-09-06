@@ -49,11 +49,18 @@ val ttsV2Module = module {
     // Using single instead of factory to maintain state across the app
     // No ChapterController - TTS has its own independent state, sync happens via onPop
     single {
+        val localTTSManager = getOrNull<ireader.domain.services.tts_service.local.LocalTTSManager>()
         TTSController(
             contentLoader = get(),
             nativeEngineFactory = { TTSEngineFactory.createNativeEngine() },
             gradioEngineFactory = { config -> TTSEngineFactory.createGradioEngine(config) },
             initialGradioConfig = null, // Can be set via SetGradioConfig command
+            localEngineFactory = { config ->
+                localTTSManager?.createEngine(config)?.let {
+                    ireader.domain.services.tts_service.local.LocalTTSEngineV2(it)
+                }
+            },
+            initialLocalConfig = localTTSManager?.config?.value,
             cacheUseCase = getOrNull() // Optional - for offline playback of cached audio
         )
     }

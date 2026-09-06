@@ -105,8 +105,9 @@ fun rememberTTSV2StateAdapter(
                 currentEngine = when (engineType) {
                     EngineType.NATIVE -> "Native TTS"
                     EngineType.GRADIO -> "Gradio TTS"
+                    EngineType.LOCAL -> "Local Server TTS"
                 },
-                availableEngines = listOf("Native TTS", "Gradio TTS"),
+                availableEngines = listOf("Native TTS", "Gradio TTS", "Local Server TTS"),
                 isTTSReady = isEngineReady,
                 // Sentence highlighting
                 paragraphStartTime = paragraphStartTime,

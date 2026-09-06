@@ -361,4 +361,15 @@ actual val DomainModule = module {
             pluginManager = get()  // Load TTS configs from installed GRADIO_TTS plugins
         )
     }
+
+    // Local TTS Manager for local or remote TTS servers (e.g. Chatterbox Persian TTS)
+    single<ireader.domain.services.tts_service.local.LocalTTSManager> {
+        val appPrefs: ireader.domain.preferences.prefs.AppPreferences = get()
+        ireader.domain.services.tts_service.local.LocalTTSManager(
+            httpClient = get<ireader.core.http.HttpClients>().default,
+            audioPlayerFactory = { ireader.domain.services.tts_service.AndroidGradioAudioPlayer(androidContext()) },
+            saveConfig = { json -> appPrefs.localTTSConfig().set(json) },
+            loadConfig = { appPrefs.localTTSConfig().get().ifEmpty { null } }
+        )
+    }
 }

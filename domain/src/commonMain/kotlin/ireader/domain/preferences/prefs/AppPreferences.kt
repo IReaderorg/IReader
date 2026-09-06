@@ -256,7 +256,23 @@ class AppPreferences(
     fun activeGradioApiKey(): Preference<String> {
         return preferenceStore.getString("active_gradio_api_key", "")
     }
-    
+
+    // ==================== Local Server TTS Settings ====================
+
+    /**
+     * Whether to use Local TTS server (e.g. Chatterbox Persian TTS)
+     */
+    fun useLocalTTS(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_local_tts", false)
+    }
+
+    /**
+     * Local TTS Server configurations JSON
+     */
+    fun localTTSConfig(): Preference<String> {
+        return preferenceStore.getString("local_tts_config", "")
+    }
+
     // ==================== App Update Settings ====================
     
     /**

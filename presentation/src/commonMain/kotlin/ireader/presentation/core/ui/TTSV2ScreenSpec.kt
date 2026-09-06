@@ -76,6 +76,7 @@ import ireader.domain.services.common.TranslationStatus
 import ireader.domain.services.processstate.ProcessStateManager
 import ireader.domain.services.processstate.TTSProcessState
 import ireader.domain.services.tts_service.GradioTTSManager
+import ireader.domain.services.tts_service.local.LocalTTSManager
 import ireader.domain.services.tts_service.TTSChapterCache
 import ireader.domain.services.tts_service.TTSChapterDownloadManager
 import ireader.domain.services.tts_service.TTSTextMerger
@@ -173,6 +174,7 @@ class TTSV2ScreenSpec(
         val chapterCache: TTSChapterCache = koinInject()
         val serviceStarter: TTSV2ServiceStarter = koinInject()
         val gradioTTSManager: GradioTTSManager = koinInject()
+        val localTTSManager: LocalTTSManager = koinInject()
         val processStateManager: ProcessStateManager = koinInject()
         val chapterNotifier: ChapterNotifier = koinInject()
         val trackReadingProgressUseCase: ireader.domain.usecases.statistics.TrackReadingProgressUseCase = koinInject()
@@ -279,6 +281,11 @@ class TTSV2ScreenSpec(
         val activeGradioConfigId by remember {
             derivedStateOf { savedGradioConfigId.ifEmpty { "coqui_ireader" } }
         }
+
+        // Local Server TTS state
+        val useLocalTTS by appPreferences.useLocalTTS().changes().collectAsState(
+            initial = appPreferences.useLocalTTS().get()
+        )
         
         // Selected Piper voice model - observe changes to display in UI
         val selectedPiperModel by appPreferences.selectedPiperModel().changes().collectAsState(
@@ -489,8 +496,13 @@ class TTSV2ScreenSpec(
                 viewModel.loadChapter(bookId, chapterId, readingParagraph)
             }
             
-            // Configure Gradio TTS if enabled (only if not already configured)
-            if (useGradioTTS && activeGradioConfigId.isNotEmpty() && !alreadyLoaded) {
+            // Configure Local Server TTS or Gradio TTS if enabled
+            if (useLocalTTS && !alreadyLoaded) {
+                Log.warn { "TTSV2ScreenSpec: Configuring Local Server TTS" }
+                val localConfig = localTTSManager.config.value
+                viewModel.adapter.useLocalTTS(localConfig)
+                Log.warn { "TTSV2ScreenSpec: Local TTS configured: ${localConfig.serverUrl}" }
+            } else if (useGradioTTS && activeGradioConfigId.isNotEmpty() && !alreadyLoaded) {
                 Log.warn { "TTSV2ScreenSpec: Configuring Gradio TTS with config: $activeGradioConfigId" }
                 val gradioTTSConfig = gradioTTSManager.getConfigByIdOrPreset(activeGradioConfigId)
                 if (gradioTTSConfig != null) {
@@ -516,7 +528,7 @@ class TTSV2ScreenSpec(
                 } else {
                     Log.warn { "TTSV2ScreenSpec: Gradio config not found: $activeGradioConfigId" }
                 }
-            } else if (!useGradioTTS && !alreadyLoaded) {
+            } else if (!useGradioTTS && !useLocalTTS && !alreadyLoaded) {
                 // Native TTS - enable chunk mode if configured
                 if (mergeWordsNative > 0) {
                     viewModel.adapter.enableChunkMode(mergeWordsNative)
@@ -616,22 +628,28 @@ class TTSV2ScreenSpec(
             wpmHistory = emptyList()
         }
         
-        // Watch for Gradio config changes (when user changes config in settings)
+        // Watch for TTS engine and config changes (when user changes config in settings)
         var previousGradioConfigId by remember { mutableStateOf(activeGradioConfigId) }
         var previousUseGradioTTS by remember { mutableStateOf(useGradioTTS) }
-        LaunchedEffect(activeGradioConfigId, useGradioTTS) {
-            // Skip initial composition (both values unchanged)
+        var previousUseLocalTTS by remember { mutableStateOf(useLocalTTS) }
+        LaunchedEffect(activeGradioConfigId, useGradioTTS, useLocalTTS) {
+            // Skip initial composition (values unchanged)
             val configChanged = previousGradioConfigId != activeGradioConfigId
             val useGradioChanged = previousUseGradioTTS != useGradioTTS
+            val useLocalChanged = previousUseLocalTTS != useLocalTTS
             
-            if (!configChanged && !useGradioChanged) return@LaunchedEffect
+            if (!configChanged && !useGradioChanged && !useLocalChanged) return@LaunchedEffect
             
             previousGradioConfigId = activeGradioConfigId
             previousUseGradioTTS = useGradioTTS
+            previousUseLocalTTS = useLocalTTS
             
-            Log.warn { "TTSV2ScreenSpec: Gradio settings changed - config=$activeGradioConfigId, useGradio=$useGradioTTS" }
+            Log.warn { "TTSV2ScreenSpec: TTS settings changed - config=$activeGradioConfigId, useGradio=$useGradioTTS, useLocal=$useLocalTTS" }
             
-            if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
+            if (useLocalTTS) {
+                Log.warn { "TTSV2ScreenSpec: Switched to Local Server TTS" }
+                viewModel.adapter.useLocalTTS(localTTSManager.config.value)
+            } else if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
                 val gradioTTSConfig = gradioTTSManager.getConfigByIdOrPreset(activeGradioConfigId)
                 if (gradioTTSConfig != null) {
                     val v2Config = GradioConfig(
@@ -652,7 +670,7 @@ class TTSV2ScreenSpec(
                     
                     Log.warn { "TTSV2ScreenSpec: Gradio engine updated to: ${gradioTTSConfig.name}" }
                 }
-            } else if (!useGradioTTS) {
+            } else if (!useGradioTTS && !useLocalTTS) {
                 // Switch back to native TTS
                 viewModel.adapter.useNativeTTS()
                 // Enable chunk mode for native TTS if configured
@@ -996,8 +1014,9 @@ class TTSV2ScreenSpec(
                     currentEngine = when (state.engineType) {
                         EngineType.NATIVE -> "Native TTS"
                         EngineType.GRADIO -> "Gradio TTS"
+                        EngineType.LOCAL -> "Local Server TTS"
                     },
-                    availableEngines = listOf("Native TTS", "Gradio TTS"),
+                    availableEngines = listOf("Native TTS", "Gradio TTS", "Local Server TTS"),
                     isTTSReady = state.isEngineReady,
                     paragraphStartTime = paragraphStartTime,
                     sentenceHighlightEnabled = sentenceHighlightEnabled,
@@ -1127,6 +1146,7 @@ class TTSV2ScreenSpec(
             currentEngineName = when (state.engineType) {
                 EngineType.NATIVE -> "Native TTS"
                 EngineType.GRADIO -> "Gradio TTS"
+                EngineType.LOCAL -> "Local Server TTS"
             },
             readTranslatedText = readTranslatedText,
             hasTranslation = state.hasTranslation,

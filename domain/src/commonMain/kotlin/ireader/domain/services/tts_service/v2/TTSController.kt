@@ -39,10 +39,13 @@ class TTSController(
     private val nativeEngineFactory: () -> TTSEngine,
     private val gradioEngineFactory: ((GradioConfig) -> TTSEngine?)? = null,
     initialGradioConfig: GradioConfig? = null,
+    private val localEngineFactory: ((ireader.domain.services.tts_service.local.LocalTTSConfig) -> TTSEngine?)? = null,
+    initialLocalConfig: ireader.domain.services.tts_service.local.LocalTTSConfig? = null,
     private val cacheUseCase: TTSCacheUseCase? = null
 ) {
-    // Mutable Gradio config that can be updated at runtime
+    // Mutable configs that can be updated at runtime
     private var gradioConfig: GradioConfig? = initialGradioConfig
+    private var localConfig: ireader.domain.services.tts_service.local.LocalTTSConfig? = initialLocalConfig
     companion object {
         private const val TAG = "TTSController"
 
@@ -184,6 +187,7 @@ class TTSController(
             is TTSCommand.SetAutoNextChapter -> setAutoNextChapter(command.enabled)
             is TTSCommand.SetEngine -> setEngine(command.type)
             is TTSCommand.SetGradioConfig -> setGradioConfig(command.config)
+            is TTSCommand.SetLocalConfig -> setLocalConfig(command.config)
             
             is TTSCommand.EnableChunkMode -> enableChunkMode(command.targetWordCount)
             is TTSCommand.DisableChunkMode -> disableChunkMode()
@@ -216,6 +220,21 @@ class TTSController(
                         }
                     } else {
                         Log.warn { "$TAG: No Gradio config, falling back to native" }
+                        _state.update { it.copy(engineType = EngineType.NATIVE) }
+                        nativeEngineFactory()
+                    }
+                }
+                EngineType.LOCAL -> {
+                    Log.debug { "$TAG: Creating Local engine" }
+                    val config = localConfig
+                    if (config != null && localEngineFactory != null) {
+                        localEngineFactory.invoke(config) ?: run {
+                            Log.warn { "$TAG: Local engine creation failed, falling back to native" }
+                            _state.update { it.copy(engineType = EngineType.NATIVE) }
+                            nativeEngineFactory()
+                        }
+                    } else {
+                        Log.warn { "$TAG: No Local config, falling back to native" }
                         _state.update { it.copy(engineType = EngineType.NATIVE) }
                         nativeEngineFactory()
                     }
@@ -1213,6 +1232,25 @@ class TTSController(
         // If currently using Gradio engine, reinitialize with new config
         if (_state.value.engineType == EngineType.GRADIO) {
             // Cancel chapter watch — engine is being replaced
+            nextChapterWatchJob?.cancel()
+            nextChapterWatchJob = null
+            nextChapterFetched = false
+
+            engine?.stop()
+            engine?.release()
+            engine = null
+            _state.update { it.copy(isEngineReady = false) }
+            initialize()
+        }
+    }
+
+    private fun setLocalConfig(config: ireader.domain.services.tts_service.local.LocalTTSConfig) {
+        Log.debug { "$TAG: setLocalConfig(${config.name})" }
+
+        localConfig = config
+
+        // If currently using Local engine, reinitialize with new config
+        if (_state.value.engineType == EngineType.LOCAL) {
             nextChapterWatchJob?.cancel()
             nextChapterWatchJob = null
             nextChapterFetched = false
