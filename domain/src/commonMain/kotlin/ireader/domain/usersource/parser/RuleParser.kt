@@ -30,6 +30,9 @@ object RuleParser {
      */
     fun getString(doc: Document, rule: String?): String {
         if (rule.isNullOrBlank()) return ""
+        if (isJsRule(rule)) {
+            return evalJsRule(doc, rule).trim()
+        }
         return parseRule(doc, rule).trim()
     }
     
@@ -38,6 +41,9 @@ object RuleParser {
      */
     fun getString(element: Element, rule: String?): String {
         if (rule.isNullOrBlank()) return ""
+        if (isJsRule(rule)) {
+            return evalJsRule(element, rule).trim()
+        }
         return parseRuleFromElement(element, rule).trim()
     }
     
@@ -205,6 +211,11 @@ object RuleParser {
         
         if (targetElements.isEmpty()) return ""
         
+        if (extractor.startsWith("js:", ignoreCase = true) || extractor.startsWith("@js:", ignoreCase = true)) {
+            val jsCode = if (extractor.startsWith("@js:", ignoreCase = true)) extractor.substring(4) else extractor.substring(3)
+            return evalJsRule(targetElements.first(), jsCode)
+        }
+        
         return when (extractor.lowercase()) {
             "text" -> targetElements.firstOrNull()?.text() ?: ""
             "textnodes" -> {
@@ -215,6 +226,14 @@ object RuleParser {
             "owntext" -> targetElements.firstOrNull()?.ownText() ?: ""
             "html", "innerhtml" -> targetElements.firstOrNull()?.html() ?: ""
             "outerhtml", "all" -> targetElements.joinToString("\n") { it.outerHtml() }
+            "href" -> targetElements.firstOrNull()?.let {
+                val abs = it.absUrl("href")
+                if (abs.isNotBlank()) abs else it.attr("href")
+            } ?: ""
+            "src" -> targetElements.firstOrNull()?.let {
+                val abs = it.absUrl("src")
+                if (abs.isNotBlank()) abs else it.attr("src")
+            } ?: ""
             else -> targetElements.firstOrNull()?.attr(extractor) ?: ""
         }
     }
@@ -225,6 +244,9 @@ object RuleParser {
             return true
         }
         if (lower in setOf("href", "src", "data-src", "content", "title", "alt")) {
+            return true
+        }
+        if (lower.startsWith("js:") || lower.startsWith("@js:")) {
             return true
         }
         // If it starts with a known selector prefix, it's not an extractor
@@ -238,30 +260,114 @@ object RuleParser {
         return false
     }
     
+    private sealed class ElementFilter {
+        object None : ElementFilter()
+        data class Single(val index: Int) : ElementFilter()
+        data class Exclude(val index: Int) : ElementFilter()
+        data class Slice(val start: Int?, val end: Int?) : ElementFilter()
+        data class Multiple(val indices: List<Int>) : ElementFilter()
+    }
+
+    private data class ParsedSelectorToken(
+        val baseSelector: String,
+        val filter: ElementFilter
+    )
+
+    private fun parseFilterSelector(token: String): ParsedSelectorToken {
+        val trimmed = token.trim()
+        
+        // 1. Bracket notation: tag.tr[1:], tag.tr[0], tag.tr[-1], tag.tr[:2], tag.tr[!0], tag.tr[0, 2]
+        if (trimmed.endsWith("]") && trimmed.contains("[")) {
+            val openBracket = trimmed.lastIndexOf('[')
+            val base = trimmed.substring(0, openBracket).trim()
+            val expr = trimmed.substring(openBracket + 1, trimmed.length - 1).trim()
+            
+            val filter = when {
+                expr.contains(":") -> {
+                    val parts = expr.split(":")
+                    val start = parts.getOrNull(0)?.trim()?.takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    val end = parts.getOrNull(1)?.trim()?.takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    ElementFilter.Slice(start, end)
+                }
+                expr.startsWith("!") -> {
+                    val idx = expr.substring(1).trim().toIntOrNull()
+                    if (idx != null) ElementFilter.Exclude(idx) else ElementFilter.None
+                }
+                expr.contains(",") -> {
+                    val indices = expr.split(",").mapNotNull { it.trim().toIntOrNull() }
+                    if (indices.isNotEmpty()) ElementFilter.Multiple(indices) else ElementFilter.None
+                }
+                else -> {
+                    val idx = expr.toIntOrNull()
+                    if (idx != null) ElementFilter.Single(idx) else ElementFilter.None
+                }
+            }
+            return ParsedSelectorToken(base, filter)
+        }
+        
+        // 2. Dot index notation: selector.0, selector.-1
+        val dotRegex = Regex("""^(.+)\.(-?\d+)$""")
+        val match = dotRegex.find(trimmed)
+        if (match != null) {
+            val base = match.groupValues[1].trim()
+            val idx = match.groupValues[2].toIntOrNull()
+            if (idx != null) {
+                return ParsedSelectorToken(base, ElementFilter.Single(idx))
+            }
+        }
+        
+        return ParsedSelectorToken(trimmed, ElementFilter.None)
+    }
+
+    private fun applyFilter(elements: List<Element>, filter: ElementFilter): List<Element> {
+        if (elements.isEmpty()) return emptyList()
+        return when (filter) {
+            is ElementFilter.None -> elements
+            is ElementFilter.Single -> {
+                val idx = if (filter.index < 0) elements.size + filter.index else filter.index
+                if (idx in elements.indices) listOf(elements[idx]) else emptyList()
+            }
+            is ElementFilter.Exclude -> {
+                val idx = if (filter.index < 0) elements.size + filter.index else filter.index
+                elements.filterIndexed { i, _ -> i != idx }
+            }
+            is ElementFilter.Slice -> {
+                val s = when {
+                    filter.start == null -> 0
+                    filter.start < 0 -> maxOf(0, elements.size + filter.start)
+                    else -> minOf(filter.start, elements.size)
+                }
+                val e = when {
+                    filter.end == null -> elements.size
+                    filter.end < 0 -> maxOf(0, elements.size + filter.end)
+                    else -> minOf(filter.end, elements.size)
+                }
+                if (s < e) elements.subList(s, e) else emptyList()
+            }
+            is ElementFilter.Multiple -> {
+                filter.indices.mapNotNull { idx ->
+                    val resolved = if (idx < 0) elements.size + idx else idx
+                    elements.getOrNull(resolved)
+                }
+            }
+        }
+    }
+
     private fun navigateElements(initialElements: List<Element>, tokens: List<String>): List<Element> {
         var current = initialElements
         
         for (token in tokens) {
             val isReverse = token.startsWith("-")
             val cleanToken = if (isReverse) token.substring(1).trim() else token.trim()
-            val (baseSelector, index) = parseIndexSelector(cleanToken)
-            val css = translateToCss(baseSelector)
+            val parsed = parseFilterSelector(cleanToken)
+            val css = translateToCss(parsed.baseSelector)
             
             val nextList = mutableListOf<Element>()
             for (parent in current) {
                 val matched = if (css.isBlank()) parent.children() else parent.select(css)
                 val resolvedMatched = if (isReverse) matched.reversed() else matched
-                
-                if (index != null) {
-                    val target = when {
-                        index >= 0 && index < resolvedMatched.size -> resolvedMatched[index]
-                        index < 0 && resolvedMatched.size + index >= 0 -> resolvedMatched[resolvedMatched.size + index]
-                        else -> null
-                    }
-                    if (target != null) nextList.add(target)
-                } else {
-                    nextList.addAll(resolvedMatched)
-                }
+                val filtered = applyFilter(resolvedMatched, parsed.filter)
+                nextList.addAll(filtered)
             }
             current = nextList
             if (current.isEmpty()) break
@@ -305,16 +411,6 @@ object RuleParser {
         return Triple(parts[0], parts.getOrNull(1), parts.getOrNull(2) ?: "")
     }
     
-    private fun parseIndexSelector(selector: String): Pair<String, Int?> {
-        val regex = Regex("""^(.+)\.(-?\d+)$""")
-        val match = regex.find(selector)
-        return if (match != null) {
-            Pair(match.groupValues[1], match.groupValues[2].toIntOrNull())
-        } else {
-            Pair(selector, null)
-        }
-    }
-    
     private fun applyRegex(value: String, pattern: String?, replacement: String?): String {
         if (pattern.isNullOrBlank()) return value
         return try {
@@ -322,6 +418,321 @@ object RuleParser {
             if (replacement != null) value.replace(regex, replacement) else regex.find(value)?.value ?: value
         } catch (e: Exception) {
             value
+        }
+    }
+
+    // ==================== @js: Rule Evaluation ====================
+
+    fun isJsRule(rule: String?): Boolean {
+        if (rule.isNullOrBlank()) return false
+        val trimmed = rule.trim()
+        return trimmed.startsWith("@js:", ignoreCase = true) ||
+               (trimmed.startsWith("<js>", ignoreCase = true) && trimmed.endsWith("</js>", ignoreCase = true))
+    }
+
+    private fun extractJsCode(rule: String): String {
+        val trimmed = rule.trim()
+        return when {
+            trimmed.startsWith("@js:", ignoreCase = true) -> trimmed.substring(4).trim()
+            trimmed.startsWith("<js>", ignoreCase = true) && trimmed.endsWith("</js>", ignoreCase = true) ->
+                trimmed.substring(4, trimmed.length - 5).trim()
+            else -> trimmed
+        }
+    }
+
+    fun evalJsRule(element: Element, rule: String): String {
+        val jsCode = extractJsCode(rule)
+        
+        // 1. Content paragraph extraction with ad filtering
+        if (jsCode.contains(".select(") && (jsCode.contains("indexOf(") || jsCode.contains("includes(") || jsCode.contains("out.push"))) {
+            val contentResult = evalContentRule(element, jsCode)
+            if (contentResult.isNotBlank()) return contentResult
+        }
+        
+        // 2. Parent / sibling traversal (e.g. coverUrl from sibling)
+        if (jsCode.contains("parent()") && (jsCode.contains("img") || jsCode.contains("children()"))) {
+            val siblingResult = evalSiblingTraversal(element, jsCode)
+            if (siblingResult.isNotBlank()) return siblingResult
+        }
+        
+        // 3. Regex matching: String(result).match(/pattern/)
+        if (jsCode.contains(".match(/")) {
+            val regexResult = evalRegexMatch(element, jsCode)
+            if (regexResult.isNotBlank()) return regexResult
+        }
+        
+        // 4. Jsoup method call chain on result / doc
+        val chainResult = evalJsoupChain(element, jsCode)
+        if (chainResult.isNotBlank()) return chainResult
+        
+        return ""
+    }
+
+    private fun evalJsoupChain(element: Element, jsCode: String): String {
+        val chainPattern = Regex("""(?:result|doc)((?:\.(?:select|get|first|last|children|parent|text|ownText|html|outerHtml|attr)\s*\([^)]*\))+)""")
+        val match = chainPattern.find(jsCode) ?: return ""
+        val chainStr = match.groupValues[1]
+        
+        val stepRegex = Regex("""\.(select|get|first|last|children|parent|text|ownText|html|outerHtml|attr)\s*\(([^)]*)\)""")
+        val steps = stepRegex.findAll(chainStr).toList()
+        if (steps.isEmpty()) return ""
+        
+        var current = listOf(element)
+        for (step in steps) {
+            val method = step.groupValues[1]
+            val arg = step.groupValues[2].trim().trim('\'', '"')
+            
+            when (method) {
+                "select" -> {
+                    current = current.flatMap { it.select(arg) }
+                }
+                "get" -> {
+                    val idx = arg.toIntOrNull() ?: 0
+                    val item = if (idx < 0) current.getOrNull(current.size + idx) else current.getOrNull(idx)
+                    current = listOfNotNull(item)
+                }
+                "first" -> {
+                    current = listOfNotNull(current.firstOrNull())
+                }
+                "last" -> {
+                    current = listOfNotNull(current.lastOrNull())
+                }
+                "parent" -> {
+                    current = current.mapNotNull { it.parent() }
+                }
+                "children" -> {
+                    current = current.flatMap { it.children() }
+                }
+                "text" -> {
+                    return current.firstOrNull()?.text().orEmpty().trim()
+                }
+                "ownText" -> {
+                    return current.firstOrNull()?.ownText().orEmpty().trim()
+                }
+                "html" -> {
+                    return current.firstOrNull()?.html().orEmpty().trim()
+                }
+                "outerHtml" -> {
+                    return current.firstOrNull()?.outerHtml().orEmpty().trim()
+                }
+                "attr" -> {
+                    val target = current.firstOrNull() ?: return ""
+                    val value = if (arg.equals("href", ignoreCase = true) || arg.equals("src", ignoreCase = true)) {
+                        val abs = target.absUrl(arg)
+                        if (abs.isNotBlank()) abs else target.attr(arg)
+                    } else {
+                        target.attr(arg)
+                    }
+                    return value.trim()
+                }
+            }
+            if (current.isEmpty()) return ""
+        }
+        return current.firstOrNull()?.text().orEmpty().trim()
+    }
+
+    private fun evalSiblingTraversal(element: Element, jsCode: String): String {
+        val parent = element.parent() ?: return ""
+        val siblings = parent.children()
+        val currentIndex = siblings.indexOf(element)
+        if (currentIndex < 0) return ""
+        
+        val offsetRegex = Regex("""i\s*([+-])\s*(\d+)""")
+        val offsetMatch = offsetRegex.find(jsCode)
+        val offset = if (offsetMatch != null) {
+            val sign = if (offsetMatch.groupValues[1] == "-") -1 else 1
+            val delta = offsetMatch.groupValues[2].toIntOrNull() ?: 1
+            sign * delta
+        } else {
+            -1
+        }
+        
+        val targetSibling = siblings.getOrNull(currentIndex + offset) ?: return ""
+        val imgEl = targetSibling.select("img").firstOrNull() ?: return ""
+        val src = imgEl.absUrl("src").ifBlank { imgEl.attr("src") }
+        return src.trim()
+    }
+
+    private fun evalRegexMatch(element: Element, jsCode: String): String {
+        val matchRegex = Regex("""\.match\(/([^/]+)/([a-z]*)\)""")
+        val match = matchRegex.find(jsCode) ?: return ""
+        val pattern = match.groupValues[1]
+        val flags = match.groupValues[2]
+        val options = mutableSetOf<RegexOption>()
+        if ('i' in flags) options.add(RegexOption.IGNORE_CASE)
+        if ('m' in flags) options.add(RegexOption.MULTILINE)
+        
+        val regex = try {
+            Regex(pattern, options)
+        } catch (e: Exception) {
+            return ""
+        }
+        
+        val targetText = if (element is Document) element.html() else element.outerHtml()
+        val textMatch = regex.find(targetText) ?: regex.find(element.text()) ?: return ""
+        
+        val groupRegex = Regex("""m\[(\d+)\]""")
+        val groupMatch = groupRegex.find(jsCode)
+        val groupIndex = groupMatch?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 1
+        
+        return textMatch.groupValues.getOrNull(groupIndex) ?: textMatch.groupValues.getOrNull(0) ?: textMatch.value
+    }
+
+    private fun evalContentRule(element: Element, jsCode: String): String {
+        val rootDoc = if (element is Document) element else (element.ownerDocument() ?: element)
+        
+        val selectorMatches = Regex("""\.select\(['"]([^'"]+)['"]\)""").findAll(jsCode)
+            .map { it.groupValues[1] }
+            .toList()
+        
+        var paragraphs: List<Element> = emptyList()
+        for (sel in selectorMatches) {
+            val matched = rootDoc.select(sel)
+            if (matched.isNotEmpty()) {
+                paragraphs = matched
+                break
+            }
+        }
+        if (paragraphs.isEmpty()) {
+            paragraphs = rootDoc.select("#htmlContent p, .panel-readcontent p, p")
+        }
+        if (paragraphs.isEmpty()) return ""
+        
+        val continueConditions = extractContinueConditions(jsCode)
+        
+        val out = mutableListOf<String>()
+        for (p in paragraphs) {
+            val t = p.text().trim()
+            if (t.isBlank()) continue
+            if (shouldSkipParagraph(t, continueConditions)) continue
+            out.add(t)
+        }
+        return out.joinToString("\n")
+    }
+
+    private fun extractContinueConditions(jsCode: String): List<String> {
+        val conditions = mutableListOf<String>()
+        var idx = 0
+        while (idx < jsCode.length) {
+            val ifIdx = jsCode.indexOf("if", idx)
+            if (ifIdx < 0) break
+            
+            var openParen = ifIdx + 2
+            while (openParen < jsCode.length && jsCode[openParen].isWhitespace()) openParen++
+            if (openParen < jsCode.length && jsCode[openParen] == '(') {
+                var depth = 1
+                var curr = openParen + 1
+                while (curr < jsCode.length && depth > 0) {
+                    when (jsCode[curr]) {
+                        '(' -> depth++
+                        ')' -> depth--
+                    }
+                    curr++
+                }
+                if (depth == 0) {
+                    val cond = jsCode.substring(openParen + 1, curr - 1).trim()
+                    val rest = jsCode.substring(curr).trimStart()
+                    if (rest.startsWith("continue")) {
+                        conditions.add(cond)
+                    }
+                    idx = curr
+                    continue
+                }
+            }
+            idx = ifIdx + 2
+        }
+        return conditions
+    }
+
+    private fun shouldSkipParagraph(t: String, continueConditions: List<String>): Boolean {
+        for (cond in continueConditions) {
+            val replaced = replaceIndexOfCalls(cond, t)
+            if (evalBooleanExpr(replaced)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun replaceIndexOfCalls(condition: String, text: String): String {
+        var s = condition
+        
+        val positiveIndexRegex = Regex("""(?:t|text|str)\.indexOf\(['"]([^'"]+)['"]\)\s*(?:>\s*-?1|>=\s*0|!=\s*-1)""")
+        s = positiveIndexRegex.replace(s) { m ->
+            val kw = m.groupValues[1]
+            if (text.contains(kw)) " true " else " false "
+        }
+        
+        val negativeIndexRegex = Regex("""(?:t|text|str)\.indexOf\(['"]([^'"]+)['"]\)\s*(?:==\s*-1|<=\s*-?1|<\s*0)""")
+        s = negativeIndexRegex.replace(s) { m ->
+            val kw = m.groupValues[1]
+            if (text.contains(kw)) " false " else " true "
+        }
+        
+        val includesRegex = Regex("""(?:t|text|str)\.includes\(['"]([^'"]+)['"]\)""")
+        s = includesRegex.replace(s) { m ->
+            val kw = m.groupValues[1]
+            if (text.contains(kw)) " true " else " false "
+        }
+        
+        s = s.replace(Regex("""!(?:t|text|str)\b"""), " false ")
+        
+        return s
+    }
+
+    private class BooleanExprParser(private val s: String) {
+        var pos = 0
+
+        fun parseOr(): Boolean {
+            var left = parseAnd()
+            while (pos + 1 < s.length && s[pos] == '|' && s[pos + 1] == '|') {
+                pos += 2
+                val right = parseAnd()
+                left = left || right
+            }
+            return left
+        }
+
+        private fun parseAnd(): Boolean {
+            var left = parsePrimary()
+            while (pos + 1 < s.length && s[pos] == '&' && s[pos + 1] == '&') {
+                pos += 2
+                val right = parsePrimary()
+                left = left && right
+            }
+            return left
+        }
+
+        private fun parsePrimary(): Boolean {
+            if (pos >= s.length) return false
+            if (s.startsWith("true", pos)) {
+                pos += 4
+                return true
+            }
+            if (s.startsWith("false", pos)) {
+                pos += 5
+                return false
+            }
+            if (s[pos] == '!') {
+                pos++
+                return !parsePrimary()
+            }
+            if (s[pos] == '(') {
+                pos++
+                val res = parseOr()
+                if (pos < s.length && s[pos] == ')') pos++
+                return res
+            }
+            return false
+        }
+    }
+
+    private fun evalBooleanExpr(expr: String): Boolean {
+        val s = expr.replace(" ", "")
+        return try {
+            BooleanExprParser(s).parseOr()
+        } catch (e: Exception) {
+            false
         }
     }
 }
@@ -483,6 +894,44 @@ object UrlParser {
                     }
                 }
             }
+        }
+    }
+
+    fun decodeUrl(value: String): String {
+        return try {
+            val bytes = mutableListOf<Byte>()
+            var i = 0
+            while (i < value.length) {
+                when (val c = value[i]) {
+                    '%' -> {
+                        if (i + 2 < value.length) {
+                            val hex = value.substring(i + 1, i + 3)
+                            val byteVal = hex.toIntOrNull(16)
+                            if (byteVal != null) {
+                                bytes.add(byteVal.toByte())
+                                i += 3
+                            } else {
+                                bytes.addAll(c.toString().encodeToByteArray().toList())
+                                i++
+                            }
+                        } else {
+                            bytes.addAll(c.toString().encodeToByteArray().toList())
+                            i++
+                        }
+                    }
+                    '+' -> {
+                        bytes.add(' '.code.toByte())
+                        i++
+                    }
+                    else -> {
+                        bytes.addAll(c.toString().encodeToByteArray().toList())
+                        i++
+                    }
+                }
+            }
+            bytes.toByteArray().decodeToString()
+        } catch (e: Exception) {
+            value
         }
     }
 }

@@ -53,9 +53,18 @@ class UserSourceEngine(
     }
     
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        return when (sort?.name) {
-            "Latest" -> getLatest(page)
-            else -> getPopular(page)
+        return when {
+            sort is CategoryListing -> getCategoryBooks(sort.categoryUrl, page)
+            sort?.name == "Latest" -> getLatest(page)
+            sort?.name == "Popular" -> getPopular(page)
+            else -> {
+                val categories = parseExploreCategories(userSource.exploreUrl)
+                if (categories.isNotEmpty()) {
+                    getCategoryBooks(categories.first().url, page)
+                } else {
+                    getPopular(page)
+                }
+            }
         }
     }
     
@@ -66,13 +75,18 @@ class UserSourceEngine(
         val response = fetchResponse(parsed)
         return parseBookList(response, isSearch = true)
     }
-    
-    private suspend fun getLatest(page: Int): MangasPageInfo {
-        if (userSource.exploreUrl.isBlank()) return MangasPageInfo(emptyList(), false)
-        
-        val parsed = UrlParser.parseRequest(userSource.exploreUrl, baseUrl, page = page)
+
+    private suspend fun getCategoryBooks(urlTemplate: String, page: Int): MangasPageInfo {
+        if (urlTemplate.isBlank()) return MangasPageInfo(emptyList(), false)
+        val parsed = UrlParser.parseRequest(urlTemplate, baseUrl, page = page)
         val response = fetchResponse(parsed)
         return parseBookList(response, isSearch = false)
+    }
+    
+    private suspend fun getLatest(page: Int): MangasPageInfo {
+        val categories = parseExploreCategories(userSource.exploreUrl)
+        val urlTemplate = categories.firstOrNull()?.url ?: userSource.exploreUrl
+        return getCategoryBooks(urlTemplate, page)
     }
     
     private suspend fun getPopular(page: Int): MangasPageInfo = getLatest(page)
@@ -410,11 +424,65 @@ class UserSourceEngine(
     }
     
     // ==================== Listings & Filters ====================
+
+    data class ExploreCategory(val title: String, val url: String)
+
+    private fun parseExploreCategories(exploreUrl: String): List<ExploreCategory> {
+        if (exploreUrl.isBlank()) return emptyList()
+        val trimmed = exploreUrl.trim()
+        
+        // 1. JSON array format: [{"title":"...","url":"..."}]
+        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+            try {
+                val element = json.parseToJsonElement(trimmed)
+                if (element is kotlinx.serialization.json.JsonArray) {
+                    val list = element.mapNotNull { item ->
+                        if (item is kotlinx.serialization.json.JsonObject) {
+                            val title = (item["title"] ?: item["name"])?.let {
+                                if (it is kotlinx.serialization.json.JsonPrimitive) it.content else null
+                            } ?: "Explore"
+                            val url = item["url"]?.let {
+                                if (it is kotlinx.serialization.json.JsonPrimitive) it.content else null
+                            } ?: return@mapNotNull null
+                            ExploreCategory(title, url)
+                        } else null
+                    }
+                    if (list.isNotEmpty()) return list
+                }
+            } catch (e: Exception) { }
+        }
+        
+        // 2. Line-by-line format: Title::Url or Title&&Url
+        val lines = trimmed.split(Regex("[\r\n]+|(?<!:)&&")).map { it.trim() }.filter { it.isNotBlank() }
+        val categories = mutableListOf<ExploreCategory>()
+        for (line in lines) {
+            when {
+                line.contains("::") -> {
+                    val title = line.substringBefore("::").trim()
+                    val url = line.substringAfter("::").trim()
+                    if (url.isNotBlank()) categories.add(ExploreCategory(title, url))
+                }
+                line.contains("&&") -> {
+                    val title = line.substringBefore("&&").trim()
+                    val url = line.substringAfter("&&").trim()
+                    if (url.isNotBlank()) categories.add(ExploreCategory(title, url))
+                }
+                line.startsWith("http://") || line.startsWith("https://") || line.startsWith("/") -> {
+                    categories.add(ExploreCategory("Popular", line))
+                }
+            }
+        }
+        return categories
+    }
     
-    override fun getListings(): List<Listing> = listOf(
-        PopularListing(),
-        LatestListing()
-    )
+    override fun getListings(): List<Listing> {
+        val categories = parseExploreCategories(userSource.exploreUrl)
+        val listings = mutableListOf<Listing>(PopularListing(), LatestListing())
+        for (cat in categories) {
+            listings.add(CategoryListing(cat.title, cat.url))
+        }
+        return listings
+    }
     
     override fun getFilters(): FilterList = listOf(Filter.Title())
     
@@ -423,4 +491,5 @@ class UserSourceEngine(
     // Concrete Listing implementations
     private class PopularListing : Listing("Popular")
     private class LatestListing : Listing("Latest")
+    class CategoryListing(name: String, val categoryUrl: String) : Listing(name)
 }

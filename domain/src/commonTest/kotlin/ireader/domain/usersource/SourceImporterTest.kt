@@ -153,4 +153,22 @@ class SourceImporterTest {
         assertNotNull(parsed)
         assertTrue(parsed.contains("raw.githubusercontent.com") || parsed.contains("jsdelivr.net"))
     }
+
+    @Test
+    fun testParseImportUrlYioveAndYueduProtocol() {
+        // Direct Yiove website URL
+        val yioveUrl = "https://shuyuan.yiove.com/book-source/81b68e2f-b84b-4cba-b667-19899fae1a2d"
+        val resolved = importer.parseImportUrl(yioveUrl)
+        assertEquals("https://shuyuan-api.yiove.com/import/book-source/81b68e2f-b84b-4cba-b667-19899fae1a2d", resolved)
+
+        // yuedu:// scheme with encoded src
+        val yueduUrl = "yuedu://booksource/importonline?src=https%3A%2F%2Fshuyuan-api.yiove.com%2Fimport%2Fbook-source%2F81b68e2f-b84b-4cba-b667-19899fae1a2d"
+        val resolvedYuedu = importer.parseImportUrl(yueduUrl)
+        assertEquals("https://shuyuan-api.yiove.com/import/book-source/81b68e2f-b84b-4cba-b667-19899fae1a2d", resolvedYuedu)
+
+        // yuedu:// scheme wrapping frontend web URL
+        val yueduWebUrl = "yuedu://booksource/importonline?src=https%3A%2F%2Fshuyuan.yiove.com%2Fbook-source%2F81b68e2f-b84b-4cba-b667-19899fae1a2d"
+        val resolvedYueduWeb = importer.parseImportUrl(yueduWebUrl)
+        assertEquals("https://shuyuan-api.yiove.com/import/book-source/81b68e2f-b84b-4cba-b667-19899fae1a2d", resolvedYueduWeb)
+    }
 }

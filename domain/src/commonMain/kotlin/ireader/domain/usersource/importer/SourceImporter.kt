@@ -1,6 +1,7 @@
 package ireader.domain.usersource.importer
 
 import ireader.domain.usersource.model.*
+import ireader.domain.usersource.parser.UrlParser
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -75,6 +76,54 @@ class SourceImporter {
      */
     fun parseImportUrl(url: String): String? {
         val trimmed = url.trim()
+
+        // 1. Handle yuedu:// protocol (e.g. yuedu://booksource/importonline?src=...)
+        if (trimmed.startsWith("yuedu://", ignoreCase = true)) {
+            val query = trimmed.substringAfter("?", "")
+            if (query.isNotBlank()) {
+                val params = query.split("&").associate { param ->
+                    val key = param.substringBefore("=").trim()
+                    val rawVal = param.substringAfter("=", "").trim()
+                    val decoded = try {
+                        UrlParser.decodeUrl(rawVal)
+                    } catch (e: Exception) {
+                        rawVal
+                    }
+                    key to decoded
+                }
+                val src = params["src"] ?: params["url"]
+                if (!src.isNullOrBlank()) {
+                    return parseImportUrl(src)
+                }
+            }
+        }
+
+        // 2. Handle shuyuan.yiove.com frontend URLs -> redirect to backend API
+        val yioveSingleRegex = Regex("""https?://shuyuan\.yiove\.com/book-source/([a-zA-Z0-9_-]+)""")
+        val singleMatch = yioveSingleRegex.find(trimmed)
+        if (singleMatch != null) {
+            return "https://shuyuan-api.yiove.com/import/book-source/${singleMatch.groupValues[1]}"
+        }
+
+        val yioveRangeRegex = Regex("""https?://shuyuan\.yiove\.com/book-sources/([a-zA-Z0-9_#-]+)""")
+        val rangeMatch = yioveRangeRegex.find(trimmed)
+        if (rangeMatch != null) {
+            return "https://shuyuan-api.yiove.com/import/book-sources/${rangeMatch.groupValues[1]}"
+        }
+
+        val yioveCollectionRegex = Regex("""https?://shuyuan\.yiove\.com/book-source-collection/([a-zA-Z0-9_-]+)""")
+        val colMatch = yioveCollectionRegex.find(trimmed)
+        if (colMatch != null) {
+            return "https://shuyuan-api.yiove.com/import/book-source-collection/${colMatch.groupValues[1]}"
+        }
+
+        val yioveSearchRegex = Regex("""https?://shuyuan\.yiove\.com/book-source-search/([^/]+)/([^/]+)""")
+        val searchMatch = yioveSearchRegex.find(trimmed)
+        if (searchMatch != null) {
+            return "https://shuyuan-api.yiove.com/import/book-source-search/${searchMatch.groupValues[1]}/${searchMatch.groupValues[2]}"
+        }
+
+        // 3. Handle GitHub and standard HTTP/HTTPS URLs
         return when {
             trimmed.contains("raw.githubusercontent.com") -> trimmed
             trimmed.contains("github.com") && trimmed.contains("/blob/") -> {
