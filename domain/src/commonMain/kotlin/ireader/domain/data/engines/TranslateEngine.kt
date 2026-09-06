@@ -136,6 +136,15 @@ abstract class TranslateEngine {
     open val maxCharsPerRequest: Int = 4000
     
     /**
+     * Maximum paragraphs per request for this engine.
+     * Used in conjunction with maxCharsPerRequest to prevent sending too many
+     * paragraphs at once to LLMs, which causes token limit exhaustion, timeouts,
+     * or dropped paragraph break markers.
+     * Default: 12 paragraphs per chunk.
+     */
+    open val maxParagraphsPerRequest: Int = DEFAULT_MAX_PARAGRAPHS_PER_CHUNK
+    
+    /**
      * Minimum delay between requests in milliseconds.
      * Used to prevent rate limiting from online APIs.
      * Default: 3000ms (3 seconds) for online engines
@@ -216,6 +225,14 @@ abstract class TranslateEngine {
         return Result.failure(Exception("Content generation not supported by this engine"))
     }
     
+    /**
+     * Adjusts the number of translated paragraphs to match the original count.
+     * Default implementation delegates to companion adjustParagraphCount.
+     */
+    open fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
+        return Companion.adjustParagraphCount(translatedParagraphs, originalTexts)
+    }
+
     companion object {
         // Define engine IDs as constants for easier reference
         const val BUILT_IN = 0L
@@ -240,25 +257,35 @@ abstract class TranslateEngine {
         const val PARAGRAPH_BREAK_MARKER = "---PARAGRAPH_BREAK---"
         
         /**
+         * Comprehensive regex matching any variation of paragraph break markers:
+         * e.g. "---PARAGRAPH_BREAK---", "--PARAGRAPH_BREAK__", "__PARAGRAPH_BREAK__",
+         * "[PARAGRAPH_BREAK]", "--- PARAGRAPH BREAK ---", "---paragraph_break---", etc.
+         */
+        val PARAGRAPH_BREAK_REGEX = Regex(
+            """\r?\n?[-_*#=\s\[\]]*PARAGRAPH[\s_-]*BREAK[-_*#=\s\[\]]*\r?\n?""",
+            RegexOption.IGNORE_CASE
+        )
+        
+        /**
          * Sanitize translated text by removing any leftover PARAGRAPH_BREAK markers.
          * 
-         * When AI models aren't smart enough, they may output the literal marker text
-         * instead of using it as a proper separator. This method cleans up any
-         * remaining markers from individual translated paragraphs.
+         * When AI models output the literal marker text instead of using it as a
+         * proper separator, this cleans up any remaining markers from individual paragraphs.
          * 
          * This handles variations like:
          * - "---PARAGRAPH_BREAK---" (exact marker)
-         * - "--- PARAGRAPH_BREAK ---" (with spaces)
-         * - "---paragraph_break---" (case variations)
+         * - "--PARAGRAPH_BREAK__" (mixed dashes and underscores)
+         * - "__PARAGRAPH_BREAK__" (underscores)
+         * - "--- PARAGRAPH BREAK ---" (with spaces)
+         * - "[PARAGRAPH_BREAK]" (with brackets)
          * - Lines that are just the marker with surrounding whitespace/newlines
          */
         fun sanitizeParagraphBreakMarkers(text: String): String {
-            if (!text.contains("PARAGRAPH_BREAK", ignoreCase = true)) return text
+            if (!text.contains("PARAGRAPH", ignoreCase = true) || !text.contains("BREAK", ignoreCase = true)) return text
             
-            // Remove the marker pattern (case-insensitive, with optional surrounding dashes/spaces)
             val sanitized = text
-                .replace(Regex("""\n?-{2,}\s*PARAGRAPH_BREAK\s*-{2,}\n?""", RegexOption.IGNORE_CASE), "\n")
-                .replace(Regex("""\r?\n?-{2,}\s*PARAGRAPH_BREAK\s*-{2,}\r?\n?""", RegexOption.IGNORE_CASE), "\n")
+                .replace(PARAGRAPH_BREAK_REGEX, "\n")
+                .replace(Regex("""[-_*#=\s\[\]]*PARAGRAPH[\s_-]*BREAK[-_*#=\s\[\]]*""", RegexOption.IGNORE_CASE), "")
                 .trim()
             
             return sanitized
@@ -274,29 +301,136 @@ abstract class TranslateEngine {
          */
         fun sanitizeTranslatedParagraphs(paragraphs: List<String>): List<String> {
             return paragraphs.flatMap { paragraph ->
-                if (paragraph.contains("PARAGRAPH_BREAK", ignoreCase = true)) {
+                if (paragraph.contains("PARAGRAPH", ignoreCase = true) && paragraph.contains("BREAK", ignoreCase = true)) {
                     // The paragraph still contains markers - split by them first, then clean
                     paragraph
-                        .split(Regex("""-{2,}\s*PARAGRAPH_BREAK\s*-{2,}""", RegexOption.IGNORE_CASE))
-                        .map { it.trim() }
+                        .split(PARAGRAPH_BREAK_REGEX)
+                        .map { sanitizeParagraphBreakMarkers(it).trim() }
                         .filter { it.isNotEmpty() }
                 } else {
-                    listOf(paragraph)
+                    listOf(sanitizeParagraphBreakMarkers(paragraph).trim()).filter { it.isNotEmpty() }
                 }
             }
         }
         
         /**
-         * Chunks a list of paragraphs so that each chunk's combined character count
-         * does not exceed [maxChars]. Always includes at least one paragraph per chunk.
+         * Splits a raw AI translation response by paragraph break markers,
+         * handling all symbol and whitespace variations.
+         * Falls back to newline splitting if markers were stripped by the model.
          */
-        fun chunkTextsByMaxChars(texts: List<String>, maxChars: Int): List<List<String>> {
+        fun splitByParagraphMarkers(response: String, expectedCount: Int = 0): List<String> {
+            val text = response.trim()
+            if (text.contains("PARAGRAPH", ignoreCase = true) && text.contains("BREAK", ignoreCase = true)) {
+                val split = text
+                    .split(PARAGRAPH_BREAK_REGEX)
+                    .map { sanitizeParagraphBreakMarkers(it).trim() }
+                    .filter { it.isNotEmpty() }
+                if (split.size == expectedCount || expectedCount <= 0 || split.size > 1) {
+                    return split
+                }
+            }
+            
+            // If markers weren't used or splitting yielded 1 item when multiple were expected,
+            // check if double newlines or single newlines can split the text into expectedCount
+            if (expectedCount > 1) {
+                val byDoubleNewline = text.split(Regex("""\r?\n\s*\r?\n"""))
+                    .map { sanitizeParagraphBreakMarkers(it).trim() }
+                    .filter { it.isNotEmpty() }
+                if (byDoubleNewline.size == expectedCount) {
+                    return byDoubleNewline
+                }
+                val bySingleNewline = text.lines()
+                    .map { sanitizeParagraphBreakMarkers(it).trim() }
+                    .filter { it.isNotEmpty() }
+                if (bySingleNewline.size == expectedCount) {
+                    return bySingleNewline
+                }
+                if (bySingleNewline.size >= expectedCount) {
+                    val result = mutableListOf<String>()
+                    val linesPerParagraph = bySingleNewline.size / expectedCount
+                    for (i in 0 until expectedCount) {
+                        val start = i * linesPerParagraph
+                        val end = if (i == expectedCount - 1) bySingleNewline.size else (i + 1) * linesPerParagraph
+                        if (start < bySingleNewline.size) {
+                            result.add(bySingleNewline.subList(start, end.coerceAtMost(bySingleNewline.size)).joinToString("\n"))
+                        }
+                    }
+                    if (result.size == expectedCount) {
+                        return result
+                    }
+                }
+            }
+            
+            return listOf(sanitizeParagraphBreakMarkers(text).trim()).filter { it.isNotEmpty() }
+        }
+        
+        /**
+         * Adjusts the number of translated paragraphs to match the original count.
+         * If too few paragraphs were produced, attempts to split multi-line paragraphs
+         * first before falling back to original text.
+         */
+        fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
+            if (translatedParagraphs.size == originalTexts.size) return translatedParagraphs
+            if (translatedParagraphs.isEmpty()) return originalTexts
+            
+            val result = translatedParagraphs.toMutableList()
+            
+            // If we have only 1 paragraph but expected multiple, try to split lines
+            if (result.size == 1 && originalTexts.size > 1) {
+                val lines = result[0].lines().map { it.trim() }.filter { it.isNotEmpty() }
+                if (lines.size >= originalTexts.size) {
+                    val splitResult = mutableListOf<String>()
+                    val linesPerParagraph = lines.size / originalTexts.size
+                    for (i in 0 until originalTexts.size) {
+                        val start = i * linesPerParagraph
+                        val end = if (i == originalTexts.size - 1) lines.size else (i + 1) * linesPerParagraph
+                        if (start < lines.size) {
+                            splitResult.add(lines.subList(start, end.coerceAtMost(lines.size)).joinToString("\n"))
+                        }
+                    }
+                    if (splitResult.size == originalTexts.size) {
+                        return splitResult
+                    }
+                }
+            }
+            
+            // If we have too few paragraphs, add original ones
+            while (result.size < originalTexts.size) {
+                result.add(originalTexts[result.size])
+            }
+            
+            // If we have too many paragraphs, remove extras
+            if (result.size > originalTexts.size) {
+                result.subList(originalTexts.size, result.size).clear()
+            }
+            
+            return result
+        }
+        
+        /** Default maximum paragraphs per chunk for AI/LLM translation */
+        const val DEFAULT_MAX_PARAGRAPHS_PER_CHUNK = 12
+        
+        /**
+         * Chunks a list of paragraphs so that each chunk's combined character count
+         * does not exceed [maxChars], AND the number of paragraphs does not exceed [maxParagraphs].
+         * Always includes at least one paragraph per chunk.
+         */
+        fun chunkTexts(
+            texts: List<String>,
+            maxChars: Int,
+            maxParagraphs: Int = DEFAULT_MAX_PARAGRAPHS_PER_CHUNK
+        ): List<List<String>> {
             if (texts.isEmpty()) return emptyList()
             val chunks = mutableListOf<List<String>>()
             var currentChunk = mutableListOf<String>()
             var currentLen = 0
+            val effectiveMaxParagraphs = if (maxParagraphs > 0) maxParagraphs else DEFAULT_MAX_PARAGRAPHS_PER_CHUNK
+
             for (text in texts) {
-                if (currentChunk.isNotEmpty() && currentLen + text.length > maxChars) {
+                val exceedsChars = currentChunk.isNotEmpty() && currentLen + text.length > maxChars
+                val exceedsParagraphs = currentChunk.size >= effectiveMaxParagraphs
+
+                if (exceedsChars || exceedsParagraphs) {
                     chunks.add(currentChunk)
                     currentChunk = mutableListOf()
                     currentLen = 0
@@ -308,6 +442,19 @@ abstract class TranslateEngine {
                 chunks.add(currentChunk)
             }
             return chunks
+        }
+        
+        /**
+         * Chunks a list of paragraphs so that each chunk's combined character count
+         * does not exceed [maxChars], and paragraph count does not exceed [maxParagraphs].
+         * Always includes at least one paragraph per chunk.
+         */
+        fun chunkTextsByMaxChars(
+            texts: List<String>,
+            maxChars: Int,
+            maxParagraphs: Int = DEFAULT_MAX_PARAGRAPHS_PER_CHUNK
+        ): List<List<String>> {
+            return chunkTexts(texts, maxChars, maxParagraphs)
         }
         
         // Add new engines to the values() method

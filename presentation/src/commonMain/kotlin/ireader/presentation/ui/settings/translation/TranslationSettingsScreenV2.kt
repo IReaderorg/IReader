@@ -261,11 +261,13 @@ fun TranslationSettingsScreenV2(
                         preserveStyle = viewModel.translatorPreserveStyle.value,
                         customPrompt = viewModel.translationCustomPrompt.value,
                         contextSize = viewModel.translationContextSize.value,
+                        paragraphChunkSize = viewModel.translationParagraphChunkSize.value,
                         onContentTypeChange = { viewModel.updateTranslatorContentType(it) },
                         onToneTypeChange = { viewModel.updateTranslatorToneType(it) },
                         onPreserveStyleChange = { viewModel.updateTranslatorPreserveStyle(it) },
                         onCustomPromptChange = { viewModel.updateTranslationCustomPrompt(it) },
                         onContextSizeChange = { viewModel.updateTranslationContextSize(it) },
+                        onParagraphChunkSizeChange = { viewModel.updateTranslationParagraphChunkSize(it) },
                         isAiEngine = isAiEngine
                     )
                 }

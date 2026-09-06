@@ -61,6 +61,8 @@ class OpenRouterTranslateEngine(
     override val defaultMaxCharsPerRequest: Int = 6000
     override val maxCharsPerRequest: Int
         get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
+    override val maxParagraphsPerRequest: Int
+        get() = readerPreferences.getEffectiveParagraphChunkSize(id, DEFAULT_MAX_PARAGRAPHS_PER_CHUNK)
     
     // Rate limit varies by model, 2 seconds is safe
     override val rateLimitDelayMs: Long = 2000L
@@ -313,7 +315,7 @@ class OpenRouterTranslateEngine(
             val targetLanguage = getLanguageName(target)
             val maxOutputTokens = maxOf(4096, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
             
-            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            val chunks = chunkTexts(texts, maxCharsPerRequest, maxParagraphsPerRequest)
             val allResults = mutableListOf<String>()
             val totalChunks = chunks.size
             
@@ -381,19 +383,21 @@ class OpenRouterTranslateEngine(
                     return
                 }
                 
-                val splitTexts = messageContent.trim().split("\n---PARAGRAPH_BREAK---\n")
-                val adjustedTexts = if (splitTexts.size == chunk.size) {
-                    splitTexts
+                val splitTexts = splitByParagraphMarkers(messageContent, chunk.size)
+                val sanitizedChunk = sanitizeTranslatedParagraphs(splitTexts)
+                val adjustedTexts = if (sanitizedChunk.size == chunk.size) {
+                    sanitizedChunk
                 } else {
-                    adjustParagraphCount(splitTexts, chunk)
+                    adjustParagraphCount(sanitizedChunk, chunk)
                 }
                 allResults.addAll(adjustedTexts)
             }
             
-            val finalTexts = if (allResults.size == texts.size) {
-                allResults
+            val sanitizedAll = sanitizeTranslatedParagraphs(allResults)
+            val finalTexts = if (sanitizedAll.size == texts.size) {
+                sanitizedAll
             } else {
-                adjustParagraphCount(allResults, texts)
+                adjustParagraphCount(sanitizedAll, texts)
             }
             onProgress(100)
             onSuccess(finalTexts)
@@ -602,23 +606,6 @@ Do not add any explanations, notes, or commentary - only provide the translation
         val prompt: String? = null,
         val completion: String? = null
     )
-
-    // Helper function to adjust paragraph count to match input
-    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
-        val result = translatedParagraphs.toMutableList()
-        
-        // If we have too few paragraphs, add original ones
-        while (result.size < originalTexts.size) {
-            result.add(originalTexts[result.size])
-        }
-        
-        // If we have too many paragraphs, remove extras
-        if (result.size > originalTexts.size) {
-            result.subList(originalTexts.size, result.size).clear()
-        }
-        
-        return result
-    }
     
     companion object {
         const val OPENROUTER = 9L

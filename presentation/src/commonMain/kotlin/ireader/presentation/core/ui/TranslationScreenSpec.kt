@@ -57,6 +57,7 @@ class TranslationScreenSpec {
             onPreserveStyleChange = { viewModel.setPreserveStyle(it) },
             onCustomPromptChange = { viewModel.setCustomPrompt(it) },
             onContextSizeChange = { viewModel.setTranslationContextSize(it) },
+            onParagraphChunkSizeChange = { viewModel.setTranslationParagraphChunkSize(it) },
             onToggleAutoTranslateChapters = { viewModel.toggleAutoTranslateChapters(it) },
             onToggleAutoTranslateNovelNames = { viewModel.toggleAutoTranslateNovelNames(it) },
             onToggleAutoShareTranslations = { viewModel.toggleAutoShareTranslations(it) },

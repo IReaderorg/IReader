@@ -270,21 +270,4 @@ class LibreTranslateEngine(
             onError(errorMessage)
         }
     }
-    
-    // Helper function to adjust paragraph count to match input
-    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
-        val result = translatedParagraphs.toMutableList()
-        
-        // If we have too few paragraphs, add original ones
-        while (result.size < originalTexts.size) {
-            result.add(originalTexts[result.size])
-        }
-        
-        // If we have too many paragraphs, remove extras
-        if (result.size > originalTexts.size) {
-            result.subList(originalTexts.size, result.size).clear()
-        }
-        
-        return result
-    }
 } 

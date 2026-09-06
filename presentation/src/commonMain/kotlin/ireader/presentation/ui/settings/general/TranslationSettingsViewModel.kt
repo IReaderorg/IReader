@@ -64,6 +64,18 @@ class TranslationSettingsViewModel(
     fun updateEngineContextSize(engineId: Long, size: Int) {
         readerPreferences.engineContextSize(engineId).set(size)
     }
+
+    val translationParagraphChunkSize = readerPreferences.translationParagraphChunkSize().asState()
+
+    fun updateTranslationParagraphChunkSize(size: Int) {
+        readerPreferences.translationParagraphChunkSize().set(size)
+    }
+
+    fun getEngineParagraphChunkSize(engineId: Long) = readerPreferences.engineParagraphChunkSize(engineId).asState()
+
+    fun updateEngineParagraphChunkSize(engineId: Long, size: Int) {
+        readerPreferences.engineParagraphChunkSize(engineId).set(size)
+    }
     
     // Community sharing preferences
     val autoShareTranslations = communityPreferences?.autoShareTranslations()?.asState() 

@@ -278,6 +278,19 @@ Visit.*for more chapters"""
         if (global > 0) return global
         return defaultSize
     }
+    fun translationParagraphChunkSize(): Preference<Int> {
+        return preferenceStore.getInt("translation_paragraph_chunk_size", 0)
+    }
+    fun engineParagraphChunkSize(engineId: Long): Preference<Int> {
+        return preferenceStore.getInt("translator_paragraph_chunk_size_$engineId", 0)
+    }
+    fun getEffectiveParagraphChunkSize(engineId: Long, defaultSize: Int = 12): Int {
+        val engineSpecific = engineParagraphChunkSize(engineId).get()
+        if (engineSpecific > 0) return engineSpecific
+        val global = translationParagraphChunkSize().get()
+        if (global > 0) return global
+        return defaultSize
+    }
     fun openAIApiKey(): Preference<String> {
         return preferenceStore.getString("openai_api_key", "")
     }

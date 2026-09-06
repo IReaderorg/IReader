@@ -91,6 +91,7 @@ data class TranslationSuiteState(
     val preserveStyle: Boolean = false,
     val customPrompt: String = "",
     val translationContextSize: Int = 0,
+    val translationParagraphChunkSize: Int = 0,
 
     // Automation & Community
     val autoTranslateChapters: Boolean = false,
@@ -150,6 +151,7 @@ class TranslationSuiteViewModel(
         val preserve = readerPreferences.translatorPreserveStyle().get()
         val prompt = readerPreferences.translationCustomPrompt().get()
         val contextSize = readerPreferences.translationContextSize().get()
+        val paragraphChunkSize = readerPreferences.translationParagraphChunkSize().get()
 
         val autoNovel = translationPreferences.autoTranslateNovelNames().get()
         val autoShare = communityPreferences?.autoShareTranslations()?.get() ?: false
@@ -180,6 +182,7 @@ class TranslationSuiteViewModel(
                 preserveStyle = preserve,
                 customPrompt = prompt,
                 translationContextSize = contextSize,
+                translationParagraphChunkSize = paragraphChunkSize,
                 autoTranslateNovelNames = autoNovel,
                 autoShareTranslations = autoShare,
                 contributorName = contributor
@@ -253,6 +256,20 @@ class TranslationSuiteViewModel(
 
     fun setEngineContextSize(engineId: Long, size: Int) {
         readerPreferences.engineContextSize(engineId).set(size)
+    }
+
+    fun setTranslationParagraphChunkSize(size: Int) {
+        readerPreferences.translationParagraphChunkSize().set(size)
+        updateState { it.copy(translationParagraphChunkSize = size) }
+    }
+
+    fun getEngineParagraphChunkSize(engineId: Long): Int {
+        return readerPreferences.engineParagraphChunkSize(engineId).get()
+    }
+
+    fun setEngineParagraphChunkSize(engineId: Long, size: Int) {
+        readerPreferences.engineParagraphChunkSize(engineId).set(size)
+        updateState { it.copy(translationParagraphChunkSize = size) }
     }
 
     fun setOpenAIApiKey(key: String) {

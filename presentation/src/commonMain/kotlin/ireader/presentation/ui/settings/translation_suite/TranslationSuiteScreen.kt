@@ -34,6 +34,7 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.translation.ContextSizeSelector
+import ireader.presentation.ui.settings.translation.ParagraphChunkSizeSelector
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +70,7 @@ fun TranslationSuiteScreen(
     onPreserveStyleChange: (Boolean) -> Unit = {},
     onCustomPromptChange: (String) -> Unit = {},
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphChunkSizeChange: (Int) -> Unit = {},
     onToggleAutoTranslateChapters: (Boolean) -> Unit = {},
     onToggleAutoTranslateNovelNames: (Boolean) -> Unit = {},
     onToggleAutoShareTranslations: (Boolean) -> Unit = {},
@@ -114,142 +116,147 @@ fun TranslationSuiteScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item {
-                PrimaryTabRow(
-                    selectedTabIndex = selectedTab,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    tabTitles.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTab == index,
-                            onClick = { selectedTab = index },
-                            text = { Text(title) }
+            PrimaryTabRow(
+                selectedTabIndex = selectedTab,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = { Text(title) }
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 10.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Tab 0: Engines & Models
+                if (selectedTab == 0) {
+                    item {
+                        EngineSelectionHeader(
+                            state = state,
+                            onSelectEngineId = onSelectEngineId
+                        )
+                    }
+
+                    item {
+                        ActiveEngineDetailCard(
+                            state = state,
+                            onOpenAIApiKeyChange = onOpenAIApiKeyChange,
+                            onOpenAIBaseUrlChange = onOpenAIBaseUrlChange,
+                            onOpenAIModelChange = onOpenAIModelChange,
+                            onDeepSeekApiKeyChange = onDeepSeekApiKeyChange,
+                            onGeminiApiKeyChange = onGeminiApiKeyChange,
+                            onGeminiModelChange = onGeminiModelChange,
+                            onRefreshGeminiModels = onRefreshGeminiModels,
+                            onClaudeApiKeyChange = onClaudeApiKeyChange,
+                            onClaudeModelChange = onClaudeModelChange,
+                            onOpenRouterApiKeyChange = onOpenRouterApiKeyChange,
+                            onOpenRouterModelChange = onOpenRouterModelChange,
+                            onLoadOpenRouterModels = onLoadOpenRouterModels,
+                            onNvidiaApiKeyChange = onNvidiaApiKeyChange,
+                            onNvidiaModelChange = onNvidiaModelChange,
+                            onLoadNvidiaModels = onLoadNvidiaModels,
+                            onOllamaUrlChange = onOllamaUrlChange,
+                            onOllamaModelChange = onOllamaModelChange,
+                            onContextSizeChange = onContextSizeChange,
+                            onParagraphChunkSizeChange = onParagraphChunkSizeChange,
+                            onTestConnection = onTestConnection,
+                            onInitializeGoogleMlKit = onInitializeGoogleMlKit,
+                            onNavigateToLogin = onNavigateToLogin
                         )
                     }
                 }
-            }
 
-            // Tab 0: Engines & Models
-            if (selectedTab == 0) {
-                item {
-                    EngineSelectionHeader(
-                        state = state,
-                        onSelectEngineId = onSelectEngineId
-                    )
-                }
-
-                item {
-                    ActiveEngineDetailCard(
-                        state = state,
-                        onOpenAIApiKeyChange = onOpenAIApiKeyChange,
-                        onOpenAIBaseUrlChange = onOpenAIBaseUrlChange,
-                        onOpenAIModelChange = onOpenAIModelChange,
-                        onDeepSeekApiKeyChange = onDeepSeekApiKeyChange,
-                        onGeminiApiKeyChange = onGeminiApiKeyChange,
-                        onGeminiModelChange = onGeminiModelChange,
-                        onRefreshGeminiModels = onRefreshGeminiModels,
-                        onClaudeApiKeyChange = onClaudeApiKeyChange,
-                        onClaudeModelChange = onClaudeModelChange,
-                        onOpenRouterApiKeyChange = onOpenRouterApiKeyChange,
-                        onOpenRouterModelChange = onOpenRouterModelChange,
-                        onLoadOpenRouterModels = onLoadOpenRouterModels,
-                        onNvidiaApiKeyChange = onNvidiaApiKeyChange,
-                        onNvidiaModelChange = onNvidiaModelChange,
-                        onLoadNvidiaModels = onLoadNvidiaModels,
-                        onOllamaUrlChange = onOllamaUrlChange,
-                        onOllamaModelChange = onOllamaModelChange,
-                        onContextSizeChange = onContextSizeChange,
-                        onTestConnection = onTestConnection,
-                        onInitializeGoogleMlKit = onInitializeGoogleMlKit,
-                        onNavigateToLogin = onNavigateToLogin
-                    )
-                }
-            }
-
-            // Tab 1: Context & Style
-            if (selectedTab == 1) {
-                item {
-                    ContextAndStyleSection(
-                        state = state,
-                        onContentTypeChange = onContentTypeChange,
-                        onToneTypeChange = onToneTypeChange,
-                        onPreserveStyleChange = onPreserveStyleChange,
-                        onCustomPromptChange = onCustomPromptChange,
-                        onContextSizeChange = onContextSizeChange,
-                        onToggleAutoTranslateChapters = onToggleAutoTranslateChapters,
-                        onToggleAutoTranslateNovelNames = onToggleAutoTranslateNovelNames,
-                        onToggleAutoShareTranslations = onToggleAutoShareTranslations,
-                        onContributorNameChange = onContributorNameChange
-                    )
-                }
-            }
-
-            // Tab 2: Glossary Dictionary
-            if (selectedTab == 2) {
-                item {
-                    GlossaryHeaderSection(
-                        searchQuery = state.glossarySearchQuery,
-                        onSearchChange = onGlossarySearch,
-                        onAddClick = { onSetShowAddGlossaryDialog(true) }
-                    )
-                }
-
-                val filteredTerms = if (state.glossarySearchQuery.isBlank()) {
-                    state.glossaryTerms
-                } else {
-                    state.glossaryTerms.filter {
-                        it.sourceTerm.contains(state.glossarySearchQuery, ignoreCase = true) ||
-                        it.targetTerm.contains(state.glossarySearchQuery, ignoreCase = true)
+                // Tab 1: Context & Style
+                if (selectedTab == 1) {
+                    item {
+                        ContextAndStyleSection(
+                            state = state,
+                            onContentTypeChange = onContentTypeChange,
+                            onToneTypeChange = onToneTypeChange,
+                            onPreserveStyleChange = onPreserveStyleChange,
+                            onCustomPromptChange = onCustomPromptChange,
+                            onContextSizeChange = onContextSizeChange,
+                            onParagraphChunkSizeChange = onParagraphChunkSizeChange,
+                            onToggleAutoTranslateChapters = onToggleAutoTranslateChapters,
+                            onToggleAutoTranslateNovelNames = onToggleAutoTranslateNovelNames,
+                            onToggleAutoShareTranslations = onToggleAutoShareTranslations,
+                            onContributorNameChange = onContributorNameChange
+                        )
                     }
                 }
 
-                if (filteredTerms.isEmpty()) {
+                // Tab 2: Glossary Dictionary
+                if (selectedTab == 2) {
                     item {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Translate,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(40.dp),
-                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    "No glossary terms yet",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    "Add names, locations, and special terms to ensure consistent translation across chapters.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                        GlossaryHeaderSection(
+                            searchQuery = state.glossarySearchQuery,
+                            onSearchChange = onGlossarySearch,
+                            onAddClick = { onSetShowAddGlossaryDialog(true) }
+                        )
+                    }
+
+                    val filteredTerms = if (state.glossarySearchQuery.isBlank()) {
+                        state.glossaryTerms
+                    } else {
+                        state.glossaryTerms.filter {
+                            it.sourceTerm.contains(state.glossarySearchQuery, ignoreCase = true) ||
+                            it.targetTerm.contains(state.glossarySearchQuery, ignoreCase = true)
                         }
                     }
-                } else {
-                    items(filteredTerms, key = { it.id }) { term ->
-                        GlossaryTermCard(
-                            term = term,
-                            onDelete = { onDeleteGlossaryTerm(term.id) }
-                        )
+
+                    if (filteredTerms.isEmpty()) {
+                        item {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Translate,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(36.dp),
+                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        "No glossary terms yet",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        "Add names, locations, and special terms to ensure consistent translation across chapters.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        items(filteredTerms, key = { it.id }) { term ->
+                            GlossaryTermCard(
+                                term = term,
+                                onDelete = { onDeleteGlossaryTerm(term.id) }
+                            )
+                        }
                     }
                 }
-            }
 
             // Tab 3: Text Cleanup & Rules
             if (selectedTab == 3) {
@@ -308,6 +315,7 @@ fun TranslationSuiteScreen(
             }
 
             item { Spacer(modifier = Modifier.height(32.dp)) }
+        }
         }
 
         // Add Glossary Dialog
@@ -412,6 +420,7 @@ private fun ActiveEngineDetailCard(
     onOllamaUrlChange: (String) -> Unit,
     onOllamaModelChange: (String) -> Unit,
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphChunkSizeChange: (Int) -> Unit = {},
     onTestConnection: () -> Unit,
     onInitializeGoogleMlKit: (String, String) -> Unit,
     onNavigateToLogin: ((String) -> Unit)?
@@ -634,6 +643,10 @@ private fun ActiveEngineDetailCard(
                     contextSize = state.translationContextSize,
                     onContextSizeChange = onContextSizeChange
                 )
+                ParagraphChunkSizeSelector(
+                    paragraphSize = state.translationParagraphChunkSize,
+                    onParagraphSizeChange = onParagraphChunkSizeChange
+                )
             }
 
             HorizontalDivider()
@@ -687,6 +700,7 @@ private fun ContextAndStyleSection(
     onPreserveStyleChange: (Boolean) -> Unit,
     onCustomPromptChange: (String) -> Unit,
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphChunkSizeChange: (Int) -> Unit = {},
     onToggleAutoTranslateChapters: (Boolean) -> Unit,
     onToggleAutoTranslateNovelNames: (Boolean) -> Unit,
     onToggleAutoShareTranslations: (Boolean) -> Unit,
@@ -757,6 +771,12 @@ private fun ContextAndStyleSection(
                 onContextSizeChange = onContextSizeChange
             )
 
+            // Paragraph Chunk Size
+            ParagraphChunkSizeSelector(
+                paragraphSize = state.translationParagraphChunkSize,
+                onParagraphSizeChange = onParagraphChunkSizeChange
+            )
+
             HorizontalDivider()
 
             // Automation
@@ -784,19 +804,26 @@ private fun ContextAndStyleSection(
 private fun GlossaryHeaderSection(
     searchQuery: String,
     onSearchChange: (String) -> Unit,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                 Text("Glossary Dictionary", style = MaterialTheme.typography.titleMedium)
                 Text("Force exact translations for names and world-building terms", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Button(onClick = onAddClick) {
+            FilledTonalButton(
+                onClick = onAddClick,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+            ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Add Term")
@@ -826,7 +853,7 @@ private fun GlossaryTermCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

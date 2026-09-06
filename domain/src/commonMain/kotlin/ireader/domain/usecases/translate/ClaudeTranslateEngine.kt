@@ -38,6 +38,8 @@ class ClaudeTranslateEngine(
     override val defaultMaxCharsPerRequest: Int = 10000
     override val maxCharsPerRequest: Int
         get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
+    override val maxParagraphsPerRequest: Int
+        get() = readerPreferences.getEffectiveParagraphChunkSize(id, DEFAULT_MAX_PARAGRAPHS_PER_CHUNK)
     override val rateLimitDelayMs: Long = 2000L
     override val isOffline: Boolean = false
 
@@ -211,7 +213,7 @@ class ClaudeTranslateEngine(
             val targetLangName = getLanguageName(target)
             val maxOutputTokens = maxOf(4096, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
             
-            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            val chunks = chunkTexts(texts, maxCharsPerRequest, maxParagraphsPerRequest)
             val allResults = mutableListOf<String>()
             val totalChunks = chunks.size
             val systemPrompt = "You are a professional literary translator. Translate accurately while preserving formatting, style, and tone. Maintain the $PARAGRAPH_BREAK_MARKER separator exactly between paragraphs. Output ONLY the translated text without notes or commentary."
@@ -226,23 +228,28 @@ class ClaudeTranslateEngine(
                 val result = generateContent(systemPrompt, userPrompt, temperature = 0.3f, maxTokens = maxOutputTokens)
                 if (result.isSuccess) {
                     val translatedText = result.getOrNull() ?: ""
-                    val paragraphs = translatedText.split(PARAGRAPH_BREAK_MARKER)
-                        .map { sanitizeParagraphBreakMarkers(it).trim() }
-                        .filter { it.isNotEmpty() }
-
-                    if (paragraphs.size == chunk.size) {
-                        allResults.addAll(paragraphs)
+                    val splitParagraphs = splitByParagraphMarkers(translatedText, chunk.size)
+                    val sanitized = sanitizeTranslatedParagraphs(splitParagraphs)
+                    val adjusted = if (sanitized.size == chunk.size) {
+                        sanitized
                     } else {
-                        allResults.addAll(sanitizeTranslatedParagraphs(listOf(translatedText)))
+                        adjustParagraphCount(sanitized, chunk)
                     }
+                    allResults.addAll(adjusted)
                 } else {
                     onError(UiText.DynamicString(result.exceptionOrNull()?.message ?: "Unknown Claude translation error"))
                     return
                 }
             }
 
+            val sanitizedAll = sanitizeTranslatedParagraphs(allResults)
+            val finalResults = if (sanitizedAll.size == texts.size) {
+                sanitizedAll
+            } else {
+                adjustParagraphCount(sanitizedAll, texts)
+            }
             onProgress(100)
-            onSuccess(allResults)
+            onSuccess(finalResults)
         } catch (e: Exception) {
             onError(UiText.DynamicString(e.message ?: "Failed to translate with Claude"))
         }

@@ -32,6 +32,8 @@ fun AdvancedSettingsSection(
     isAiEngine: Boolean,
     contextSize: Int = 0,
     onContextSizeChange: (Int) -> Unit = {},
+    paragraphChunkSize: Int = 0,
+    onParagraphChunkSizeChange: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -172,6 +174,14 @@ fun AdvancedSettingsSection(
             ContextSizeSelector(
                 contextSize = contextSize,
                 onContextSizeChange = onContextSizeChange
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+            // Paragraph Chunk Size Selector
+            ParagraphChunkSizeSelector(
+                paragraphSize = paragraphChunkSize,
+                onParagraphSizeChange = onParagraphChunkSizeChange
             )
         }
     }

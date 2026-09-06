@@ -1,6 +1,7 @@
 package ireader.domain.usecases.translate
 
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -31,11 +32,11 @@ class OpenAITranslateEngine(
     override val supportsStylePreservation: Boolean = true
     override val requiresApiKey: Boolean = true
     
-    // GPT-4 has 8k token context, GPT-3.5 has 4k
-    // ~4 chars per token, so ~6000 chars is safe
-    override val defaultMaxCharsPerRequest: Int = 6000
+    // ~4 chars per token, 3500 chars is safe for OpenAI-compatible and free models
+    override val defaultMaxCharsPerRequest: Int = 3500
     override val maxCharsPerRequest: Int
         get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
+    override val maxParagraphsPerRequest: Int = 12
     
     // OpenAI rate limits vary by tier, 3 seconds is safe for most
     override val rateLimitDelayMs: Long = 3000L
@@ -81,6 +82,11 @@ class OpenAITranslateEngine(
                     append(HttpHeaders.Authorization, "Bearer $apiKey")
                 }
                 contentType(ContentType.Application.Json)
+                timeout {
+                    requestTimeoutMillis = 60000
+                    connectTimeoutMillis = 15000
+                    socketTimeoutMillis = 60000
+                }
                 setBody(OpenAIRequest(
                     model = getModel(),
                     messages = listOf(
@@ -265,9 +271,9 @@ class OpenAITranslateEngine(
             onProgress(0)
             val sourceLanguage = if (source == "auto") "the source language" else getLanguageName(source)
             val targetLanguage = getLanguageName(target)
-            val maxOutputTokens = maxOf(4000, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
+            val maxOutputTokens = maxOf(2048, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(4096))
             
-            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            val chunks = chunkTexts(texts, maxCharsPerRequest, maxParagraphsPerRequest)
             val allResults = mutableListOf<String>()
             val totalChunks = chunks.size
             
@@ -285,6 +291,11 @@ class OpenAITranslateEngine(
                             append(HttpHeaders.Authorization, "Bearer $apiKey")
                         }
                         contentType(ContentType.Application.Json)
+                        timeout {
+                            requestTimeoutMillis = 90000
+                            connectTimeoutMillis = 15000
+                            socketTimeoutMillis = 90000
+                        }
                         setBody(OpenAIRequest(
                             model = getModel(),
                             messages = listOf(
@@ -320,19 +331,21 @@ class OpenAITranslateEngine(
                     }
                     
                     val translatedText = messageContent.trim()
-                    val splitTexts = translatedText.split("\n---PARAGRAPH_BREAK---\n")
-                    val adjustedTexts = if (splitTexts.size == chunk.size) {
-                        splitTexts
+                    val splitTexts = splitByParagraphMarkers(translatedText, chunk.size)
+                    val sanitizedChunk = sanitizeTranslatedParagraphs(splitTexts)
+                    val adjustedTexts = if (sanitizedChunk.size == chunk.size) {
+                        sanitizedChunk
                     } else {
-                        adjustParagraphCount(splitTexts, chunk)
+                        adjustParagraphCount(sanitizedChunk, chunk)
                     }
                     allResults.addAll(adjustedTexts)
                 }
                 
-                val finalTexts = if (allResults.size == texts.size) {
-                    allResults
+                val sanitizedAll = sanitizeTranslatedParagraphs(allResults)
+                val finalTexts = if (sanitizedAll.size == texts.size) {
+                    sanitizedAll
                 } else {
-                    adjustParagraphCount(allResults, texts)
+                    adjustParagraphCount(sanitizedAll, texts)
                 }
                 
                 onProgress(100)
@@ -357,6 +370,10 @@ class OpenAITranslateEngine(
                     e is NullPointerException && e.message?.contains("Collection.isEmpty()") == true ->
                         UiText.MStringResource(Res.string.api_response_error)
                         
+                    e.message?.contains("timeout", ignoreCase = true) == true ||
+                    e.message?.contains("timed out", ignoreCase = true) == true ->
+                        UiText.DynamicString("Translation request timed out. The server or model took too long to respond.")
+
                     else -> UiText.ExceptionString(e)
                 }
                 
@@ -460,21 +477,4 @@ class OpenAITranslateEngine(
         @SerialName("finish_reason")
         val finishReason: String = ""
     )
-
-    // Helper function to adjust paragraph count to match input
-    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
-        val result = translatedParagraphs.toMutableList()
-        
-        // If we have too few paragraphs, add original ones
-        while (result.size < originalTexts.size) {
-            result.add(originalTexts[result.size])
-        }
-        
-        // If we have too many paragraphs, remove extras
-        if (result.size > originalTexts.size) {
-            result.subList(originalTexts.size, result.size).clear()
-        }
-        
-        return result
-    }
 } 

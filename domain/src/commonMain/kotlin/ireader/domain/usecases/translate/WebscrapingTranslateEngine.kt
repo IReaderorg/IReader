@@ -425,23 +425,6 @@ open class WebscrapingTranslateEngine(
         return response ?: throw Exception("No response from service after $attempts seconds")
     }
     
-    // Helper function to adjust paragraph count
-    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalParagraphs: List<String>): List<String> {
-        val result = translatedParagraphs.toMutableList()
-        
-        // If we have too few paragraphs, add original ones
-        while (result.size < originalParagraphs.size) {
-            result.add(originalParagraphs[result.size])
-        }
-        
-        // If we have too many paragraphs, remove extras
-        if (result.size > originalParagraphs.size) {
-            result.subList(originalParagraphs.size, result.size).clear()
-        }
-        
-        return result
-    }
-    
     /**
      * Builds a prompt for the AI model based on the translation context
      */

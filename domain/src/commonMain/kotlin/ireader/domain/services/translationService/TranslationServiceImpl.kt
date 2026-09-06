@@ -562,15 +562,16 @@ class TranslationServiceImpl(
             }
         } else null) ?: translationEnginesManager.get()
         val maxChars = engine.maxCharsPerRequest
+        val maxParagraphs = engine.maxParagraphsPerRequest
         val delayMs = if (engine.isOffline) 0L else maxOf(engine.rateLimitDelayMs, 3000L)
         
-        // Chunk content based on engine's max character limit
-        val chunks = chunkContent(content, maxChars)
+        // Chunk content based on engine's max character limit AND max paragraph limit
+        val chunks = chunkContent(content, maxChars, maxParagraphs)
         val result = mutableListOf<String>()
         val totalChunks = chunks.size
         var translatedParagraphCount = 0
         
-        Log.info { "Translating $totalParagraphs paragraphs in $totalChunks chunks (max $maxChars chars per chunk)" }
+        Log.info { "Translating $totalParagraphs paragraphs in $totalChunks chunks (max $maxChars chars, max $maxParagraphs paragraphs per chunk)" }
         
         for ((index, chunk) in chunks.withIndex()) {
             // Check circuit breaker before each chunk
@@ -578,8 +579,8 @@ class TranslationServiceImpl(
                 throw Exception("Translation service temporarily unavailable due to repeated failures. Please try again later.")
             }
             
-            // Update progress with chunk info
-            val progress = (index.toFloat() / totalChunks.toFloat()).coerceIn(0.3f, 0.9f)
+            // Update progress with chunk info (scaling smoothly across the 0.3 to 0.9 range)
+            val progress = 0.3f + (index.toFloat() / totalChunks.toFloat()) * 0.6f
             stateHolder.updateChapterProgress(
                 task.chapterId,
                 TranslationProgress(
@@ -769,13 +770,18 @@ class TranslationServiceImpl(
     }
     
     /**
-     * Chunk content into smaller pieces based on max character limit.
+     * Chunk content into smaller pieces based on max character limit and max paragraphs limit.
      * Tries to keep paragraphs together when possible.
      */
-    private fun chunkContent(content: List<String>, maxChars: Int): List<List<String>> {
+    private fun chunkContent(
+        content: List<String>,
+        maxChars: Int,
+        maxParagraphs: Int = TranslateEngine.DEFAULT_MAX_PARAGRAPHS_PER_CHUNK
+    ): List<List<String>> {
         val chunks = mutableListOf<List<String>>()
         var currentChunk = mutableListOf<String>()
         var currentChunkSize = 0
+        val effectiveMaxParagraphs = if (maxParagraphs > 0) maxParagraphs else TranslateEngine.DEFAULT_MAX_PARAGRAPHS_PER_CHUNK
         
         for (text in content) {
             val textSize = text.length
@@ -794,11 +800,9 @@ class TranslationServiceImpl(
                 for (splitText in splitTexts) {
                     chunks.add(listOf(splitText))
                 }
-            } else if (currentChunkSize + textSize > maxChars) {
-                // Current chunk is full, start new one
-                if (currentChunk.isNotEmpty()) {
-                    chunks.add(currentChunk.toList())
-                }
+            } else if (currentChunk.isNotEmpty() && (currentChunkSize + textSize > maxChars || currentChunk.size >= effectiveMaxParagraphs)) {
+                // Current chunk is full or max paragraphs reached, start new one
+                chunks.add(currentChunk.toList())
                 currentChunk = mutableListOf(text)
                 currentChunkSize = textSize
             } else {

@@ -57,6 +57,8 @@ class NvidiaTranslateEngine(
     override val defaultMaxCharsPerRequest: Int = 4000
     override val maxCharsPerRequest: Int
         get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
+    override val maxParagraphsPerRequest: Int
+        get() = readerPreferences.getEffectiveParagraphChunkSize(id, DEFAULT_MAX_PARAGRAPHS_PER_CHUNK)
     
     // Rate limit varies by model, 2 seconds is safe
     override val rateLimitDelayMs: Long = 2000L
@@ -314,7 +316,7 @@ class NvidiaTranslateEngine(
             val targetLanguage = getLanguageName(target)
             val maxOutputTokens = maxOf(4096, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
             
-            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            val chunks = chunkTexts(texts, maxCharsPerRequest, maxParagraphsPerRequest)
             val allResults = mutableListOf<String>()
             val totalChunks = chunks.size
             
@@ -383,19 +385,21 @@ class NvidiaTranslateEngine(
                     return
                 }
                 
-                val splitTexts = messageContent.trim().split("\n---PARAGRAPH_BREAK---\n")
-                val adjustedTexts = if (splitTexts.size == chunk.size) {
-                    splitTexts
+                val splitTexts = splitByParagraphMarkers(messageContent, chunk.size)
+                val sanitizedChunk = sanitizeTranslatedParagraphs(splitTexts)
+                val adjustedTexts = if (sanitizedChunk.size == chunk.size) {
+                    sanitizedChunk
                 } else {
-                    adjustParagraphCount(splitTexts, chunk)
+                    adjustParagraphCount(sanitizedChunk, chunk)
                 }
                 allResults.addAll(adjustedTexts)
             }
             
-            val finalTexts = if (allResults.size == texts.size) {
-                allResults
+            val sanitizedAll = sanitizeTranslatedParagraphs(allResults)
+            val finalTexts = if (sanitizedAll.size == texts.size) {
+                sanitizedAll
             } else {
-                adjustParagraphCount(allResults, texts)
+                adjustParagraphCount(sanitizedAll, texts)
             }
             onProgress(100)
             onSuccess(finalTexts)
@@ -600,58 +604,6 @@ Do not add any explanations, notes, or commentary - only provide the translation
         val created: Long? = null,
         val owned_by: String? = null
     )
-    
-    /**
-     * Adjust paragraph count to match expected size
-     * Handles cases where the AI merges or splits paragraphs
-     */
-    private fun adjustParagraphCount(
-        splitTexts: List<String>,
-        originalTexts: List<String>
-    ): List<String> {
-        // If we have fewer paragraphs, try to distribute content
-        if (splitTexts.size < originalTexts.size) {
-            val result = mutableListOf<String>()
-            var currentIndex = 0
-            
-            for (original in originalTexts) {
-                if (currentIndex < splitTexts.size) {
-                    // Estimate if this paragraph should take more content
-                    val ratio = original.length.toDouble() / originalTexts.sumOf { it.length }
-                    val expectedParagraphs = maxOf(1, (ratio * splitTexts.size).toInt())
-                    
-                    if (expectedParagraphs > 1 && currentIndex + expectedParagraphs <= splitTexts.size) {
-                        result.add(splitTexts.subList(currentIndex, currentIndex + expectedParagraphs).joinToString("\n"))
-                        currentIndex += expectedParagraphs
-                    } else {
-                        result.add(splitTexts.getOrNull(currentIndex++) ?: "")
-                    }
-                } else {
-                    result.add("")
-                }
-            }
-            
-            return result
-        }
-        
-        // If we have more paragraphs, merge extras
-        if (splitTexts.size > originalTexts.size) {
-            val extraCount = splitTexts.size - originalTexts.size
-            val mergeCount = extraCount / originalTexts.size + 1
-            
-            return originalTexts.indices.map { index ->
-                val start = index * mergeCount
-                val end = minOf(start + mergeCount, splitTexts.size)
-                if (start < splitTexts.size) {
-                    splitTexts.subList(start, end).joinToString("\n")
-                } else {
-                    ""
-                }
-            }
-        }
-        
-        return splitTexts
-    }
     
     companion object {
         /**

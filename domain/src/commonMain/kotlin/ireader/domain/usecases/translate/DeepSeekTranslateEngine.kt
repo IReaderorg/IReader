@@ -36,6 +36,8 @@ class DeepSeekTranslateEngine(
     override val defaultMaxCharsPerRequest: Int = 8000
     override val maxCharsPerRequest: Int
         get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
+    override val maxParagraphsPerRequest: Int
+        get() = readerPreferences.getEffectiveParagraphChunkSize(id, DEFAULT_MAX_PARAGRAPHS_PER_CHUNK)
     
     // DeepSeek has generous rate limits, 3 seconds is safe
     override val rateLimitDelayMs: Long = 3000L
@@ -251,8 +253,8 @@ class DeepSeekTranslateEngine(
             val targetLanguage = getLanguageName(target)
             val maxOutputTokens = maxOf(2000, (maxCharsPerRequest * 0.75).toInt().coerceAtMost(16384))
             
-            // Chunk translation based on configured context size
-            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            // Chunk translation based on configured context and paragraph size
+            val chunks = chunkTexts(texts, maxCharsPerRequest, maxParagraphsPerRequest)
             val allResults = mutableListOf<String>()
             
             chunks.forEachIndexed { chunkIndex, chunk ->
@@ -264,8 +266,14 @@ class DeepSeekTranslateEngine(
                 
                 try {
                     val translationResult = callDeepSeekApi(apiKey, prompt, maxOutputTokens)
-                    val splitResults = splitResponse(translationResult, chunk.size)
-                    allResults.addAll(splitResults)
+                    val splitResults = splitByParagraphMarkers(translationResult, chunk.size)
+                    val sanitizedChunk = sanitizeTranslatedParagraphs(splitResults)
+                    val adjustedChunk = if (sanitizedChunk.size == chunk.size) {
+                        sanitizedChunk
+                    } else {
+                        adjustParagraphCount(sanitizedChunk, chunk)
+                    }
+                    allResults.addAll(adjustedChunk)
                 } catch (e: Exception) {
                     // Rethrow to handle at outer level
                     throw e
@@ -273,10 +281,11 @@ class DeepSeekTranslateEngine(
             }
             
             // Ensure we have the right number of results
-            val finalResults = if (allResults.size == texts.size) {
-                allResults
+            val sanitizedAll = sanitizeTranslatedParagraphs(allResults)
+            val finalResults = if (sanitizedAll.size == texts.size) {
+                sanitizedAll
             } else {
-                adjustParagraphCount(allResults, texts)
+                adjustParagraphCount(sanitizedAll, texts)
             }
             
             onProgress(100)
@@ -339,58 +348,6 @@ class DeepSeekTranslateEngine(
         }
         
         throw Exception("Empty response from DeepSeek API - no translation returned")
-    }
-    
-    /**
-     * Split response back into paragraphs
-     */
-    private fun splitResponse(response: String, expectedCount: Int): List<String> {
-        if (response.contains("---PARAGRAPH_BREAK---")) {
-            return response
-                .split("---PARAGRAPH_BREAK---")
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-        }
-        
-        // If marker not found and we expect multiple paragraphs, try newlines
-        if (expectedCount > 1) {
-            val lines = response.lines()
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-            
-            if (lines.size >= expectedCount) {
-                val result = mutableListOf<String>()
-                val linesPerParagraph = lines.size / expectedCount
-                
-                for (i in 0 until expectedCount) {
-                    val start = i * linesPerParagraph
-                    val end = if (i == expectedCount - 1) lines.size else (i + 1) * linesPerParagraph
-                    if (start < lines.size) {
-                        result.add(lines.subList(start, end.coerceAtMost(lines.size)).joinToString("\n"))
-                    }
-                }
-                return result
-            }
-        }
-        
-        return listOf(response.trim())
-    }
-    
-    // Helper function to adjust paragraph count to match input
-    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
-        val result = translatedParagraphs.toMutableList()
-        
-        // If we have too few paragraphs, add original ones
-        while (result.size < originalTexts.size) {
-            result.add(originalTexts[result.size])
-        }
-        
-        // If we have too many paragraphs, remove extras
-        if (result.size > originalTexts.size) {
-            result.subList(originalTexts.size, result.size).clear()
-        }
-        
-        return result
     }
     
     private fun buildPrompt(

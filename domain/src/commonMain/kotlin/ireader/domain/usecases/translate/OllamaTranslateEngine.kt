@@ -44,6 +44,8 @@ class OllamaTranslateEngine(
     override val defaultMaxCharsPerRequest: Int = 10000
     override val maxCharsPerRequest: Int
         get() = readerPreferences.getEffectiveContextSize(id, defaultMaxCharsPerRequest)
+    override val maxParagraphsPerRequest: Int
+        get() = readerPreferences.getEffectiveParagraphChunkSize(id, DEFAULT_MAX_PARAGRAPHS_PER_CHUNK)
     
     // Local engine, minimal rate limiting
     override val rateLimitDelayMs: Long = 100L
@@ -431,8 +433,8 @@ class OllamaTranslateEngine(
             val sourceLang = supportedLanguages.find { it.first == source }?.second ?: source
             val targetLang = supportedLanguages.find { it.first == target }?.second ?: target
             
-            // Chunk texts based on configured context size
-            val chunks = chunkTextsByMaxChars(texts, maxCharsPerRequest)
+            // Chunk texts based on configured context size and paragraph limits
+            val chunks = chunkTexts(texts, maxCharsPerRequest, maxParagraphsPerRequest)
             val allResults = mutableListOf<String>()
             val totalChunks = chunks.size
             
@@ -448,10 +450,11 @@ class OllamaTranslateEngine(
             }
             
             // Ensure correct paragraph count
-            val finalResults = if (allResults.size == texts.size) {
-                allResults
+            val sanitizedAll = sanitizeTranslatedParagraphs(allResults)
+            val finalResults = if (sanitizedAll.size == texts.size) {
+                sanitizedAll
             } else {
-                adjustParagraphCount(allResults, texts)
+                adjustParagraphCount(sanitizedAll, texts)
             }
             
             onProgress(100)
@@ -579,61 +582,12 @@ $combinedText"""
             throw Exception("Empty response from Ollama")
         }
         
-        return splitResponse(content, chunk.size)
-    }
-    
-
-    
-    /**
-     * Split response back into paragraphs using PARAGRAPH_BREAK marker
-     */
-    private fun splitResponse(response: String, expectedCount: Int): List<String> {
-        // Split by marker and clean up
-        if (response.contains(MARKER)) {
-            val parts = response
-                .split(MARKER)
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-            
-            if (parts.size == expectedCount) {
-                return parts
-            }
-            
-            // If count doesn't match but we have parts, adjust
-            if (parts.isNotEmpty()) {
-                return adjustParagraphCount(parts, List(expectedCount) { "" })
-            }
+        val split = splitByParagraphMarkers(content, chunk.size)
+        val sanitized = sanitizeTranslatedParagraphs(split)
+        return if (sanitized.size == chunk.size) {
+            sanitized
+        } else {
+            adjustParagraphCount(sanitized, chunk)
         }
-        
-        // Fallback: try double newlines
-        if (expectedCount > 1) {
-            val parts = response.split("\n\n")
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-            
-            if (parts.size >= expectedCount) {
-                return parts.take(expectedCount)
-            }
-        }
-        
-        // Single paragraph fallback
-        return listOf(response.trim())
-    }
-    
-    /**
-     * Adjust paragraph count to match input
-     */
-    private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
-        val result = translatedParagraphs.toMutableList()
-        
-        while (result.size < originalTexts.size) {
-            result.add(originalTexts[result.size])
-        }
-        
-        if (result.size > originalTexts.size) {
-            result.subList(originalTexts.size, result.size).clear()
-        }
-        
-        return result
     }
 } 

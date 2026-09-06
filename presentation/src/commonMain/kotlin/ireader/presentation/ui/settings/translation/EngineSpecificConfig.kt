@@ -158,10 +158,12 @@ fun EngineSpecificConfig(
             model = viewModel.openAIModel.value,
             apiKey = viewModel.openAIApiKey.value,
             contextSize = viewModel.getEngineContextSize(2L).value,
+            paragraphSize = viewModel.getEngineParagraphChunkSize(2L).value,
             onBaseUrlChange = { viewModel.updateOpenAIBaseUrl(it) },
             onModelChange = { viewModel.updateOpenAIModel(it) },
             onApiKeyChange = { viewModel.updateOpenAIApiKey(it) },
             onContextSizeChange = { viewModel.updateEngineContextSize(2L, it) },
+            onParagraphSizeChange = { viewModel.updateEngineParagraphChunkSize(2L, it) },
             onTestConnection = { viewModel.testConnection() },
             testState = viewModel.testConnectionState,
             modifier = modifier
@@ -170,9 +172,11 @@ fun EngineSpecificConfig(
             ollamaUrl = viewModel.ollamaUrl.value,
             ollamaModel = viewModel.ollamaModel.value,
             contextSize = viewModel.getEngineContextSize(5L).value,
+            paragraphSize = viewModel.getEngineParagraphChunkSize(5L).value,
             onUrlChange = { viewModel.updateOllamaUrl(it) },
             onModelChange = { viewModel.updateOllamaModel(it) },
             onContextSizeChange = { viewModel.updateEngineContextSize(5L, it) },
+            onParagraphSizeChange = { viewModel.updateEngineParagraphChunkSize(5L, it) },
             onTestConnection = { viewModel.testConnection() },
             testState = viewModel.testConnectionState,
             modifier = modifier
@@ -192,9 +196,11 @@ fun EngineSpecificConfig(
             apiKey = viewModel.geminiApiKey.value,
             selectedModel = viewModel.geminiModel.value,
             contextSize = viewModel.getEngineContextSize(8L).value,
+            paragraphSize = viewModel.getEngineParagraphChunkSize(8L).value,
             onApiKeyChange = { viewModel.updateGeminiApiKey(it) },
             onModelChange = { viewModel.updateGeminiModel(it) },
             onContextSizeChange = { viewModel.updateEngineContextSize(8L, it) },
+            onParagraphSizeChange = { viewModel.updateEngineParagraphChunkSize(8L, it) },
             onLoadModels = { viewModel.loadGeminiModels() },
             availableModels = viewModel.geminiModels,
             isLoadingModels = viewModel.isLoadingGeminiModels,
@@ -204,9 +210,11 @@ fun EngineSpecificConfig(
             apiKey = viewModel.openRouterApiKey.value,
             selectedModel = viewModel.openRouterModel.value,
             contextSize = viewModel.getEngineContextSize(9L).value,
+            paragraphSize = viewModel.getEngineParagraphChunkSize(9L).value,
             onApiKeyChange = { viewModel.updateOpenRouterApiKey(it) },
             onModelChange = { viewModel.updateOpenRouterModel(it) },
             onContextSizeChange = { viewModel.updateEngineContextSize(9L, it) },
+            onParagraphSizeChange = { viewModel.updateEngineParagraphChunkSize(9L, it) },
             onLoadModels = { viewModel.loadOpenRouterModels() },
             availableModels = viewModel.openRouterModels,
             isLoadingModels = viewModel.isLoadingOpenRouterModels,
@@ -216,9 +224,11 @@ fun EngineSpecificConfig(
             apiKey = viewModel.nvidiaApiKey.value,
             selectedModel = viewModel.nvidiaModel.value,
             contextSize = viewModel.getEngineContextSize(10L).value,
+            paragraphSize = viewModel.getEngineParagraphChunkSize(10L).value,
             onApiKeyChange = { viewModel.updateNvidiaApiKey(it) },
             onModelChange = { viewModel.updateNvidiaModel(it) },
             onContextSizeChange = { viewModel.updateEngineContextSize(10L, it) },
+            onParagraphSizeChange = { viewModel.updateEngineParagraphChunkSize(10L, it) },
             onLoadModels = { viewModel.loadNvidiaModels() },
             availableModels = viewModel.nvidiaModels,
             isLoadingModels = viewModel.isLoadingNvidiaModels,
@@ -943,9 +953,11 @@ private fun OllamaConfig(
     ollamaUrl: String,
     ollamaModel: String,
     contextSize: Int = 0,
+    paragraphSize: Int = 0,
     onUrlChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphSizeChange: (Int) -> Unit = {},
     onTestConnection: () -> Unit,
     testState: TestConnectionState,
     modifier: Modifier = Modifier
@@ -990,6 +1002,12 @@ private fun OllamaConfig(
             ContextSizeSelector(
                 contextSize = contextSize,
                 onContextSizeChange = onContextSizeChange
+            )
+
+            // Paragraph Chunk Size
+            ParagraphChunkSizeSelector(
+                paragraphSize = paragraphSize,
+                onParagraphSizeChange = onParagraphSizeChange
             )
 
             // Test Connection Row
@@ -1091,10 +1109,12 @@ private fun OpenAIConfig(
     model: String,
     apiKey: String,
     contextSize: Int = 0,
+    paragraphSize: Int = 0,
     onBaseUrlChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
     onApiKeyChange: (String) -> Unit,
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphSizeChange: (Int) -> Unit = {},
     onTestConnection: () -> Unit,
     testState: TestConnectionState,
     modifier: Modifier = Modifier
@@ -1178,6 +1198,12 @@ private fun OpenAIConfig(
             ContextSizeSelector(
                 contextSize = contextSize,
                 onContextSizeChange = onContextSizeChange
+            )
+
+            // Paragraph Chunk Size
+            ParagraphChunkSizeSelector(
+                paragraphSize = paragraphSize,
+                onParagraphSizeChange = onParagraphSizeChange
             )
 
             // Test Connection Button
@@ -1626,9 +1652,11 @@ private fun GeminiConfig(
     apiKey: String,
     selectedModel: String,
     contextSize: Int = 0,
+    paragraphSize: Int = 0,
     onApiKeyChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphSizeChange: (Int) -> Unit = {},
     onLoadModels: () -> Unit,
     availableModels: List<Pair<String, String>>,
     isLoadingModels: Boolean,
@@ -1753,6 +1781,12 @@ private fun GeminiConfig(
                 onContextSizeChange = onContextSizeChange
             )
 
+            // Paragraph Chunk Size
+            ParagraphChunkSizeSelector(
+                paragraphSize = paragraphSize,
+                onParagraphSizeChange = onParagraphSizeChange
+            )
+
             // Info
             Text(
                 text = localizeHelper.localize(Res.string.enter_gemini_api_key),
@@ -1772,9 +1806,11 @@ private fun OpenRouterConfig(
     apiKey: String,
     selectedModel: String,
     contextSize: Int = 0,
+    paragraphSize: Int = 0,
     onApiKeyChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphSizeChange: (Int) -> Unit = {},
     onLoadModels: () -> Unit,
     availableModels: List<Pair<String, String>>,
     isLoadingModels: Boolean,
@@ -1879,6 +1915,12 @@ private fun OpenRouterConfig(
                 onContextSizeChange = onContextSizeChange
             )
 
+            // Paragraph Chunk Size
+            ParagraphChunkSizeSelector(
+                paragraphSize = paragraphSize,
+                onParagraphSizeChange = onParagraphSizeChange
+            )
+
             // Info
             Text(
                 text = localizeHelper.localize(Res.string.openrouter_info),
@@ -1898,9 +1940,11 @@ private fun NvidiaConfig(
     apiKey: String,
     selectedModel: String,
     contextSize: Int = 0,
+    paragraphSize: Int = 0,
     onApiKeyChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
     onContextSizeChange: (Int) -> Unit = {},
+    onParagraphSizeChange: (Int) -> Unit = {},
     onLoadModels: () -> Unit,
     availableModels: List<Pair<String, String>>,
     isLoadingModels: Boolean,
@@ -2003,6 +2047,12 @@ private fun NvidiaConfig(
             ContextSizeSelector(
                 contextSize = contextSize,
                 onContextSizeChange = onContextSizeChange
+            )
+
+            // Paragraph Chunk Size
+            ParagraphChunkSizeSelector(
+                paragraphSize = paragraphSize,
+                onParagraphSizeChange = onParagraphSizeChange
             )
 
             // Info
@@ -2653,3 +2703,87 @@ fun ContextSizeSelector(
     }
 }
 
+/**
+ * Reusable Paragraph Chunk Size Selector for AI Models
+ * Allows users to configure how many paragraphs are sent per request (Auto (12), 5, 10, 15, 20, Custom).
+ */
+@Composable
+fun ParagraphChunkSizeSelector(
+    paragraphSize: Int,
+    onParagraphSizeChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "Paragraphs Per Request"
+) {
+    val presets = listOf(
+        0 to "Auto (12)",
+        5 to "5",
+        10 to "10",
+        15 to "15",
+        20 to "20"
+    )
+    val isStandardPreset = paragraphSize in listOf(0, 5, 10, 15, 20)
+    var showCustomInput by remember { mutableStateOf(!isStandardPreset && paragraphSize > 0) }
+    var customText by remember(paragraphSize) {
+        mutableStateOf(if (!isStandardPreset && paragraphSize > 0) paragraphSize.toString() else "")
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = "Maximum paragraphs per AI request. Smaller chunks (5-12) prevent timeouts, avoid rate limits, and keep paragraph breaks intact on free models.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            presets.forEach { (size, chipLabel) ->
+                val selected = !showCustomInput && paragraphSize == size
+                FilterChip(
+                    selected = selected,
+                    onClick = {
+                        showCustomInput = false
+                        onParagraphSizeChange(size)
+                    },
+                    label = { Text(chipLabel, style = MaterialTheme.typography.labelSmall) }
+                )
+            }
+            FilterChip(
+                selected = showCustomInput,
+                onClick = {
+                    showCustomInput = true
+                },
+                label = { Text("Custom", style = MaterialTheme.typography.labelSmall) }
+            )
+        }
+
+        if (showCustomInput) {
+            OutlinedTextField(
+                value = customText,
+                onValueChange = { input ->
+                    val filtered = input.filter { it.isDigit() }
+                    customText = filtered
+                    val parsed = filtered.toIntOrNull()
+                    if (parsed != null && parsed in 1..100) {
+                        onParagraphSizeChange(parsed)
+                    }
+                },
+                label = { Text("Paragraphs per request (1-100)") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                supportingText = {
+                    Text("Recommended: 5 - 15 paragraphs per chunk for fast, reliable responses")
+                }
+            )
+        }
+    }
+}
