@@ -353,7 +353,7 @@ val PresentationModules = module {
     }
     factory {
         ireader.presentation.ui.sourcecreator.legado.LegadoSourceImportViewModel(
-            httpClient = get(),
+            httpClient = get<ireader.core.http.HttpClients>().default,
             saveUserSource = get(),
             catalogStore = get()
         )

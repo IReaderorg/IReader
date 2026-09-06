@@ -43,6 +43,9 @@ class UserSourceRepositoryImpl(
     }
     
     override suspend fun getById(sourceId: Long): UserSource? {
+        val all = getAll()
+        val match = all.firstOrNull { it.generateId() == sourceId }
+        if (match != null) return match
         return handler.awaitOneOrNull { userSourceQueries.findById(sourceId) }
             ?.toUserSource()
     }
@@ -102,7 +105,12 @@ class UserSourceRepositoryImpl(
     }
     
     override suspend fun deleteById(sourceId: Long) {
-        handler.await { userSourceQueries.deleteById(sourceId) }
+        val target = getById(sourceId)
+        if (target != null) {
+            delete(target.sourceUrl)
+        } else {
+            handler.await { userSourceQueries.deleteById(sourceId) }
+        }
     }
     
     override suspend fun deleteAll() {

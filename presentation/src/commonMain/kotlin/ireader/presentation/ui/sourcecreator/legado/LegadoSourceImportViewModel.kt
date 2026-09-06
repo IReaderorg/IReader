@@ -45,15 +45,21 @@ data class LegadoRepository(
 
 private val defaultRepositories = listOf(
     LegadoRepository(
-        name = "源仓库",
-        description = "Popular Chinese novel sources",
-        url = "https://raw.githubusercontent.com/shidahuilang/shuyuan/shuyuan/good.json",
+        name = "XIU2 阅读书源",
+        description = "High quality community maintained sources (CDN)",
+        url = "https://cdn.jsdelivr.net/gh/XIU2/Yuedu@master/shuyuan",
         language = "zh"
     ),
     LegadoRepository(
-        name = "阅读书源",
-        description = "Community maintained sources",
-        url = "https://raw.githubusercontent.com/XIU2/Yuedu/master/shuyuan",
+        name = "源仓库 优质书源",
+        description = "Curated high-performance Chinese novel sources (CDN)",
+        url = "https://cdn.jsdelivr.net/gh/shidahuilang/shuyuan-bak@main/good.json",
+        language = "zh"
+    ),
+    LegadoRepository(
+        name = "源仓库 综合书源",
+        description = "Large collection of verified Legado sources (CDN)",
+        url = "https://cdn.jsdelivr.net/gh/shidahuilang/shuyuan-bak@main/shuyuan_data.json",
         language = "zh"
     )
 )
@@ -115,7 +121,8 @@ class LegadoSourceImportViewModel(
             _state.update { it.copy(isLoading = true, errorMessage = null, sourceUrl = repository.url) }
             
             try {
-                val response = httpClient.get(repository.url)
+                val resolvedUrl = sourceImporter.parseImportUrl(repository.url) ?: repository.url
+                val response = httpClient.get(resolvedUrl)
                 val json = response.bodyAsText()
                 parseJson(json)
             } catch (e: Exception) {

@@ -5,13 +5,20 @@ import com.fleeksoft.ksoup.nodes.Document
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.request
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.contentType
 import ireader.core.source.CatalogSource
 import ireader.core.source.model.*
 import ireader.domain.usersource.model.UserSource
+import ireader.domain.usersource.parser.ParsedRequest
 import ireader.domain.usersource.parser.RuleParser
 import ireader.domain.usersource.parser.UrlParser
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 
 /**
  * Engine that executes user-defined source rules.
@@ -33,6 +40,11 @@ class UserSourceEngine(
         isLenient = true
     }
     
+    private sealed class EngineResponse {
+        data class Html(val doc: Document) : EngineResponse()
+        data class Json(val element: JsonElement) : EngineResponse()
+    }
+    
     // ==================== Search ====================
     
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
@@ -50,66 +62,110 @@ class UserSourceEngine(
     private suspend fun search(query: String, page: Int): MangasPageInfo {
         if (userSource.searchUrl.isBlank()) return MangasPageInfo(emptyList(), false)
         
-        val url = UrlParser.parse(userSource.searchUrl, baseUrl, key = query, page = page)
-        val doc = fetchDocument(url)
-        return parseBookList(doc, isSearch = true)
+        val parsed = UrlParser.parseRequest(userSource.searchUrl, baseUrl, key = query, page = page)
+        val response = fetchResponse(parsed)
+        return parseBookList(response, isSearch = true)
     }
     
     private suspend fun getLatest(page: Int): MangasPageInfo {
         if (userSource.exploreUrl.isBlank()) return MangasPageInfo(emptyList(), false)
         
-        val url = UrlParser.parse(userSource.exploreUrl, baseUrl, page = page)
-        val doc = fetchDocument(url)
-        return parseBookList(doc, isSearch = false)
+        val parsed = UrlParser.parseRequest(userSource.exploreUrl, baseUrl, page = page)
+        val response = fetchResponse(parsed)
+        return parseBookList(response, isSearch = false)
     }
     
     private suspend fun getPopular(page: Int): MangasPageInfo = getLatest(page)
     
-    private fun parseBookList(doc: Document, isSearch: Boolean): MangasPageInfo {
+    private fun parseBookList(response: EngineResponse, isSearch: Boolean): MangasPageInfo {
         val searchRule = userSource.ruleSearch
         val exploreRule = userSource.ruleExplore
         val bookListSelector = if (isSearch) searchRule.bookList else exploreRule.bookList
         
         if (bookListSelector.isBlank()) return MangasPageInfo(emptyList(), false)
         
-        val elements = RuleParser.getElements(doc, bookListSelector)
-        
-        val books = elements.mapNotNull { element ->
-            try {
-                val bookName = RuleParser.getString(element, if (isSearch) searchRule.name else exploreRule.name)
-                if (bookName.isBlank()) return@mapNotNull null
-                
-                val bookUrl = RuleParser.getString(element, if (isSearch) searchRule.bookUrl else exploreRule.bookUrl)
-                val author = RuleParser.getString(element, if (isSearch) searchRule.author else exploreRule.author)
-                val coverUrl = RuleParser.getString(element, if (isSearch) searchRule.coverUrl else exploreRule.coverUrl)
-                val intro = RuleParser.getString(element, if (isSearch) searchRule.intro else exploreRule.intro)
-                
-                MangaInfo(
-                    key = UrlParser.toAbsoluteUrl(bookUrl, baseUrl),
-                    title = bookName,
-                    author = author,
-                    cover = if (coverUrl.isNotBlank()) UrlParser.toAbsoluteUrl(coverUrl, baseUrl) else "",
-                    description = intro
-                )
-            } catch (e: Exception) {
-                null
+        return when (response) {
+            is EngineResponse.Html -> {
+                val elements = RuleParser.getElements(response.doc, bookListSelector)
+                val books = elements.mapNotNull { element ->
+                    try {
+                        val bookName = RuleParser.getString(element, if (isSearch) searchRule.name else exploreRule.name)
+                        if (bookName.isBlank()) return@mapNotNull null
+                        
+                        val bookUrl = RuleParser.getString(element, if (isSearch) searchRule.bookUrl else exploreRule.bookUrl)
+                        val author = RuleParser.getString(element, if (isSearch) searchRule.author else exploreRule.author)
+                        val coverUrl = RuleParser.getString(element, if (isSearch) searchRule.coverUrl else exploreRule.coverUrl)
+                        val intro = RuleParser.getString(element, if (isSearch) searchRule.intro else exploreRule.intro)
+                        
+                        MangaInfo(
+                            key = UrlParser.toAbsoluteUrl(bookUrl, baseUrl),
+                            title = bookName,
+                            author = author,
+                            cover = if (coverUrl.isNotBlank()) UrlParser.toAbsoluteUrl(coverUrl, baseUrl) else "",
+                            description = intro
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                MangasPageInfo(books, books.isNotEmpty())
+            }
+            is EngineResponse.Json -> {
+                val jsonElements = RuleParser.getJsonElements(response.element, bookListSelector)
+                val books = jsonElements.mapNotNull { item ->
+                    try {
+                        val bookName = RuleParser.getString(item, if (isSearch) searchRule.name else exploreRule.name)
+                        if (bookName.isBlank()) return@mapNotNull null
+                        
+                        val bookUrl = RuleParser.getString(item, if (isSearch) searchRule.bookUrl else exploreRule.bookUrl)
+                        val author = RuleParser.getString(item, if (isSearch) searchRule.author else exploreRule.author)
+                        val coverUrl = RuleParser.getString(item, if (isSearch) searchRule.coverUrl else exploreRule.coverUrl)
+                        val intro = RuleParser.getString(item, if (isSearch) searchRule.intro else exploreRule.intro)
+                        
+                        MangaInfo(
+                            key = UrlParser.toAbsoluteUrl(bookUrl, baseUrl),
+                            title = bookName,
+                            author = author,
+                            cover = if (coverUrl.isNotBlank()) UrlParser.toAbsoluteUrl(coverUrl, baseUrl) else "",
+                            description = intro
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                MangasPageInfo(books, books.isNotEmpty())
             }
         }
-        
-        return MangasPageInfo(books, books.isNotEmpty())
     }
     
     // ==================== Book Details ====================
     
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
         val rule = userSource.ruleBookInfo
-        val doc = fetchDocument(manga.key)
+        val response = fetchResponse(manga.key)
         
-        val name = RuleParser.getString(doc, rule.name).ifBlank { manga.title }
-        val author = RuleParser.getString(doc, rule.author).ifBlank { manga.author }
-        val intro = RuleParser.getString(doc, rule.intro).ifBlank { manga.description }
-        val coverUrl = RuleParser.getString(doc, rule.coverUrl).ifBlank { manga.cover }
-        val kind = RuleParser.getString(doc, rule.kind)
+        val name: String
+        val author: String
+        val intro: String
+        val coverUrl: String
+        val kind: String
+        
+        when (response) {
+            is EngineResponse.Html -> {
+                name = RuleParser.getString(response.doc, rule.name).ifBlank { manga.title }
+                author = RuleParser.getString(response.doc, rule.author).ifBlank { manga.author }
+                intro = RuleParser.getString(response.doc, rule.intro).ifBlank { manga.description }
+                coverUrl = RuleParser.getString(response.doc, rule.coverUrl).ifBlank { manga.cover }
+                kind = RuleParser.getString(response.doc, rule.kind)
+            }
+            is EngineResponse.Json -> {
+                name = RuleParser.getString(response.element, rule.name).ifBlank { manga.title }
+                author = RuleParser.getString(response.element, rule.author).ifBlank { manga.author }
+                intro = RuleParser.getString(response.element, rule.intro).ifBlank { manga.description }
+                coverUrl = RuleParser.getString(response.element, rule.coverUrl).ifBlank { manga.cover }
+                kind = RuleParser.getString(response.element, rule.kind)
+            }
+        }
         
         val genres = if (kind.isNotBlank()) {
             kind.split(",", "，", "/", "|").map { it.trim() }.filter { it.isNotBlank() }
@@ -133,8 +189,11 @@ class UserSourceEngine(
         
         // Get TOC URL (might be different from book URL)
         val tocUrl = if (userSource.ruleBookInfo.tocUrl.isNotBlank()) {
-            val bookDoc = fetchDocument(manga.key)
-            val url = RuleParser.getString(bookDoc, userSource.ruleBookInfo.tocUrl)
+            val bookResponse = fetchResponse(manga.key)
+            val url = when (bookResponse) {
+                is EngineResponse.Html -> RuleParser.getString(bookResponse.doc, userSource.ruleBookInfo.tocUrl)
+                is EngineResponse.Json -> RuleParser.getString(bookResponse.element, userSource.ruleBookInfo.tocUrl)
+            }
             if (url.isNotBlank()) UrlParser.toAbsoluteUrl(url, baseUrl) else manga.key
         } else {
             manga.key
@@ -146,12 +205,15 @@ class UserSourceEngine(
         val maxPages = 50
         
         while (currentUrl != null && pageCount < maxPages) {
-            val doc = fetchDocument(currentUrl)
-            val pageChapters = parseChapterList(doc, rule)
+            val response = fetchResponse(currentUrl)
+            val pageChapters = parseChapterList(response, rule)
             chapters.addAll(pageChapters)
             
             currentUrl = if (rule.nextTocUrl.isNotBlank()) {
-                val nextUrl = RuleParser.getString(doc, rule.nextTocUrl)
+                val nextUrl = when (response) {
+                    is EngineResponse.Html -> RuleParser.getString(response.doc, rule.nextTocUrl)
+                    is EngineResponse.Json -> RuleParser.getString(response.element, rule.nextTocUrl)
+                }
                 if (nextUrl.isNotBlank() && nextUrl != currentUrl) {
                     UrlParser.toAbsoluteUrl(nextUrl, baseUrl)
                 } else null
@@ -166,25 +228,47 @@ class UserSourceEngine(
         }
     }
     
-    private fun parseChapterList(doc: Document, rule: ireader.domain.usersource.model.TocRule): List<ChapterInfo> {
+    private fun parseChapterList(response: EngineResponse, rule: ireader.domain.usersource.model.TocRule): List<ChapterInfo> {
         if (rule.chapterList.isBlank()) return emptyList()
         
-        val elements = RuleParser.getElements(doc, rule.chapterList)
-        
-        return elements.mapNotNull { element ->
-            try {
-                val chapterName = RuleParser.getString(element, rule.chapterName)
-                if (chapterName.isBlank()) return@mapNotNull null
-                
-                val chapterUrl = RuleParser.getString(element, rule.chapterUrl)
-                if (chapterUrl.isBlank()) return@mapNotNull null
-                
-                ChapterInfo(
-                    key = UrlParser.toAbsoluteUrl(chapterUrl, baseUrl),
-                    name = chapterName
-                )
-            } catch (e: Exception) {
-                null
+        return when (response) {
+            is EngineResponse.Html -> {
+                val elements = RuleParser.getElements(response.doc, rule.chapterList)
+                elements.mapNotNull { element ->
+                    try {
+                        val chapterName = RuleParser.getString(element, rule.chapterName)
+                        if (chapterName.isBlank()) return@mapNotNull null
+                        
+                        val chapterUrl = RuleParser.getString(element, rule.chapterUrl)
+                        if (chapterUrl.isBlank()) return@mapNotNull null
+                        
+                        ChapterInfo(
+                            key = UrlParser.toAbsoluteUrl(chapterUrl, baseUrl),
+                            name = chapterName
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+            }
+            is EngineResponse.Json -> {
+                val jsonElements = RuleParser.getJsonElements(response.element, rule.chapterList)
+                jsonElements.mapNotNull { item ->
+                    try {
+                        val chapterName = RuleParser.getString(item, rule.chapterName)
+                        if (chapterName.isBlank()) return@mapNotNull null
+                        
+                        val chapterUrl = RuleParser.getString(item, rule.chapterUrl)
+                        if (chapterUrl.isBlank()) return@mapNotNull null
+                        
+                        ChapterInfo(
+                            key = UrlParser.toAbsoluteUrl(chapterUrl, baseUrl),
+                            name = chapterName
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
             }
         }
     }
@@ -201,14 +285,33 @@ class UserSourceEngine(
         val maxPages = 100
         
         while (currentUrl != null && pageCount < maxPages) {
-            val doc = fetchDocument(currentUrl)
-            val content = parseContent(doc, rule)
+            val response = fetchResponse(currentUrl)
+            val content = when (response) {
+                is EngineResponse.Html -> parseContent(response.doc, rule)
+                is EngineResponse.Json -> {
+                    var c = RuleParser.getString(response.element, rule.content)
+                    if (rule.replaceRegex.isNotBlank()) {
+                        try {
+                            val parts = rule.replaceRegex.split("##")
+                            if (parts.size >= 2) {
+                                val pattern = Regex(parts[0])
+                                val replacement = parts.getOrElse(1) { "" }
+                                c = c.replace(pattern, replacement)
+                            }
+                        } catch (e: Exception) { }
+                    }
+                    c
+                }
+            }
             if (content.isNotBlank()) {
                 contentParts.add(content)
             }
             
             currentUrl = if (rule.nextContentUrl.isNotBlank()) {
-                val nextUrl = RuleParser.getString(doc, rule.nextContentUrl)
+                val nextUrl = when (response) {
+                    is EngineResponse.Html -> RuleParser.getString(response.doc, rule.nextContentUrl)
+                    is EngineResponse.Json -> RuleParser.getString(response.element, rule.nextContentUrl)
+                }
                 if (nextUrl.isNotBlank() && nextUrl != currentUrl) {
                     UrlParser.toAbsoluteUrl(nextUrl, baseUrl)
                 } else null
@@ -259,8 +362,14 @@ class UserSourceEngine(
     
     // ==================== HTTP ====================
     
-    private suspend fun fetchDocument(url: String): Document {
-        val response = httpClient.get(url) {
+    private suspend fun fetchResponse(url: String): EngineResponse {
+        val parsed = UrlParser.parseRequest(url, baseUrl)
+        return fetchResponse(parsed)
+    }
+    
+    private suspend fun fetchResponse(parsed: ParsedRequest): EngineResponse {
+        val response = httpClient.request(parsed.url) {
+            method = io.ktor.http.HttpMethod.parse(parsed.method)
             if (userSource.header.isNotBlank()) {
                 try {
                     val headerMap = json.decodeFromString<Map<String, String>>(userSource.header)
@@ -269,9 +378,35 @@ class UserSourceEngine(
                     }
                 } catch (e: Exception) { }
             }
+            if (parsed.headers.isNotEmpty()) {
+                headers {
+                    parsed.headers.forEach { (key, value) -> append(key, value) }
+                }
+            }
+            if (parsed.body != null) {
+                setBody(parsed.body)
+                val hasContentType = parsed.headers.keys.any { it.equals("Content-Type", ignoreCase = true) }
+                if (!hasContentType) {
+                    val trimmedBody = parsed.body.trim()
+                    if (trimmedBody.startsWith("{") || trimmedBody.startsWith("[")) {
+                        contentType(io.ktor.http.ContentType.Application.Json)
+                    } else {
+                        contentType(io.ktor.http.ContentType.Application.FormUrlEncoded)
+                    }
+                }
+            }
         }
-        val html = response.bodyAsText()
-        return Ksoup.parse(html, url)
+        val text = response.bodyAsText().trim()
+        val isJson = (text.startsWith("{") && text.endsWith("}")) || (text.startsWith("[") && text.endsWith("]"))
+        return if (isJson) {
+            try {
+                EngineResponse.Json(json.parseToJsonElement(text))
+            } catch (e: Exception) {
+                EngineResponse.Html(Ksoup.parse(text, parsed.url))
+            }
+        } else {
+            EngineResponse.Html(Ksoup.parse(text, parsed.url))
+        }
     }
     
     // ==================== Listings & Filters ====================

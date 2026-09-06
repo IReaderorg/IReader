@@ -26,36 +26,44 @@ class SourceImporter {
     
     /**
      * Import sources from JSON string.
-     * Supports both single source and array of sources.
+     * Supports arrays, single sources, wrapped structures (sources/data/list), and flexible rule formats.
      */
     fun importFromJson(jsonString: String): ImportResult {
         return try {
             val trimmed = jsonString.trim()
+            val rootElement = json.parseToJsonElement(trimmed)
             
-            when {
-                trimmed.startsWith("[") -> {
-                    // Array of sources
-                    val legadoSources = json.decodeFromString<List<LegadoBookSource>>(trimmed)
-                    val sources = legadoSources.mapNotNull { convertLegadoSource(it) }
-                    if (sources.isEmpty()) {
-                        ImportResult.Error("No valid sources found in the JSON array")
-                    } else {
-                        ImportResult.Success(sources)
+            val sourceObjects: List<kotlinx.serialization.json.JsonObject> = when (rootElement) {
+                is kotlinx.serialization.json.JsonArray -> rootElement.filterIsInstance<kotlinx.serialization.json.JsonObject>()
+                is kotlinx.serialization.json.JsonObject -> {
+                    when {
+                        rootElement.containsKey("sources") && rootElement["sources"] is kotlinx.serialization.json.JsonArray -> {
+                            (rootElement["sources"] as kotlinx.serialization.json.JsonArray).filterIsInstance<kotlinx.serialization.json.JsonObject>()
+                        }
+                        rootElement.containsKey("data") && rootElement["data"] is kotlinx.serialization.json.JsonArray -> {
+                            (rootElement["data"] as kotlinx.serialization.json.JsonArray).filterIsInstance<kotlinx.serialization.json.JsonObject>()
+                        }
+                        rootElement.containsKey("list") && rootElement["list"] is kotlinx.serialization.json.JsonArray -> {
+                            (rootElement["list"] as kotlinx.serialization.json.JsonArray).filterIsInstance<kotlinx.serialization.json.JsonObject>()
+                        }
+                        rootElement.containsKey("bookSourceUrl") || rootElement.containsKey("bookSourceName") || rootElement.containsKey("url") -> {
+                            listOf(rootElement)
+                        }
+                        else -> emptyList()
                     }
                 }
-                trimmed.startsWith("{") -> {
-                    // Single source
-                    val legadoSource = json.decodeFromString<LegadoBookSource>(trimmed)
-                    val source = convertLegadoSource(legadoSource)
-                    if (source != null) {
-                        ImportResult.Success(listOf(source))
-                    } else {
-                        ImportResult.Error("Failed to parse source")
-                    }
-                }
-                else -> {
-                    ImportResult.Error("Invalid JSON format", "JSON must start with [ or {")
-                }
+                else -> emptyList()
+            }
+
+            if (sourceObjects.isEmpty()) {
+                return ImportResult.Error("No valid sources found in the JSON")
+            }
+
+            val sources = sourceObjects.mapNotNull { parseSource(it) }
+            if (sources.isEmpty()) {
+                ImportResult.Error("No valid sources found in the JSON")
+            } else {
+                ImportResult.Success(sources)
             }
         } catch (e: Exception) {
             ImportResult.Error("Failed to parse JSON", e.message)
@@ -63,138 +71,214 @@ class SourceImporter {
     }
     
     /**
-     * Import from URL (returns JSON string to be parsed).
+     * Import from URL (returns URL string to be parsed or fetched).
      */
     fun parseImportUrl(url: String): String? {
-        // Handle common source sharing URLs
+        val trimmed = url.trim()
         return when {
-            url.contains("raw.githubusercontent.com") -> url
-            url.contains("github.com") && url.contains("/blob/") -> {
-                url.replace("github.com", "raw.githubusercontent.com")
-                   .replace("/blob/", "/")
+            trimmed.contains("raw.githubusercontent.com") -> trimmed
+            trimmed.contains("github.com") && trimmed.contains("/blob/") -> {
+                trimmed.replace("github.com", "raw.githubusercontent.com")
+                    .replace("/blob/", "/")
             }
-            url.contains("gist.github.com") -> {
-                "$url/raw"
-            }
-            url.endsWith(".json") -> url
+            trimmed.contains("gist.github.com") -> "$trimmed/raw"
+            trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
             else -> null
         }
     }
     
-    /**
-     * Convert Legado BookSource to our UserSource format.
-     */
-    private fun convertLegadoSource(legado: LegadoBookSource): UserSource? {
-        if (legado.bookSourceUrl.isBlank() || legado.bookSourceName.isBlank()) {
+    private fun parseSource(obj: kotlinx.serialization.json.JsonObject): UserSource? {
+        val sourceUrl = obj.getString("bookSourceUrl").ifBlank { obj.getString("url") }
+        val sourceName = obj.getString("bookSourceName").ifBlank { obj.getString("name") }
+        if (sourceUrl.isBlank() || sourceName.isBlank()) {
             return null
         }
         
+        val sourceGroup = obj.getString("bookSourceGroup").ifBlank { obj.getString("group") }
+        val sourceType = obj.getInt("bookSourceType", obj.getInt("type", UserSource.TYPE_NOVEL))
+        val enabled = obj.getBoolean("enabled", true)
+        val comment = obj.getString("bookSourceComment").ifBlank { obj.getString("comment") }.ifBlank { obj.getString("note") }
+        val lastUpdateTime = obj.getLong("lastUpdateTime", 0L)
+        val header = obj.getStringOrObject("header")
+        val searchUrl = obj.getString("searchUrl")
+        val exploreUrl = obj.getString("exploreUrl")
+        
         return UserSource(
-            sourceUrl = legado.bookSourceUrl,
-            sourceName = legado.bookSourceName,
-            sourceGroup = legado.bookSourceGroup,
-            sourceType = legado.bookSourceType,
-            enabled = legado.enabled,
-            lang = detectLanguage(legado),
-            comment = legado.bookSourceComment,
-            lastUpdateTime = legado.lastUpdateTime,
-            header = legado.header,
-            searchUrl = legado.searchUrl,
-            exploreUrl = legado.exploreUrl,
-            ruleSearch = convertSearchRule(legado.ruleSearch),
-            ruleBookInfo = convertBookInfoRule(legado.ruleBookInfo),
-            ruleToc = convertTocRule(legado.ruleToc),
-            ruleContent = convertContentRule(legado.ruleContent),
-            ruleExplore = convertExploreRule(legado.ruleExplore)
+            sourceUrl = sourceUrl,
+            sourceName = sourceName,
+            sourceGroup = sourceGroup,
+            sourceType = sourceType,
+            enabled = enabled,
+            lang = detectLanguage(sourceGroup, sourceName, sourceUrl),
+            comment = comment,
+            lastUpdateTime = lastUpdateTime,
+            header = header,
+            searchUrl = searchUrl,
+            exploreUrl = exploreUrl,
+            ruleSearch = parseSearchRule(obj["ruleSearch"]),
+            ruleBookInfo = parseBookInfoRule(obj["ruleBookInfo"]),
+            ruleToc = parseTocRule(obj["ruleToc"]),
+            ruleContent = parseContentRule(obj["ruleContent"]),
+            ruleExplore = parseExploreRule(obj["ruleExplore"])
         )
     }
-    
-    private fun detectLanguage(legado: LegadoBookSource): String {
-        val group = legado.bookSourceGroup.lowercase()
-        val name = legado.bookSourceName.lowercase()
-        val url = legado.bookSourceUrl.lowercase()
+
+    private fun detectLanguage(group: String, name: String, url: String): String {
+        val g = group.lowercase()
+        val n = name.lowercase()
+        val u = url.lowercase()
         
         return when {
-            group.contains("中文") || group.contains("chinese") -> "zh"
-            group.contains("한국") || group.contains("korean") -> "ko"
-            group.contains("日本") || group.contains("japanese") -> "ja"
-            group.contains("русский") || group.contains("russian") -> "ru"
-            url.contains(".cn") || url.contains(".tw") -> "zh"
-            url.contains(".kr") -> "ko"
-            url.contains(".jp") -> "ja"
-            url.contains(".ru") -> "ru"
+            g.contains("中文") || g.contains("chinese") || n.contains("中文") -> "zh"
+            g.contains("한국") || g.contains("korean") -> "ko"
+            g.contains("日本") || g.contains("japanese") -> "ja"
+            g.contains("русский") || g.contains("russian") -> "ru"
+            u.contains(".cn") || u.contains(".tw") -> "zh"
+            u.contains(".kr") -> "ko"
+            u.contains(".jp") -> "ja"
+            u.contains(".ru") -> "ru"
             else -> "en"
         }
     }
-    
-    private fun convertSearchRule(rule: LegadoSearchRule?): SearchRule {
-        if (rule == null) return SearchRule()
+
+    private fun resolveRuleObject(element: kotlinx.serialization.json.JsonElement?): kotlinx.serialization.json.JsonObject? {
+        if (element == null) return null
+        return when (element) {
+            is kotlinx.serialization.json.JsonObject -> element
+            is kotlinx.serialization.json.JsonPrimitive -> {
+                val content = element.content.trim()
+                if (content.startsWith("{")) {
+                    try {
+                        json.parseToJsonElement(content) as? kotlinx.serialization.json.JsonObject
+                    } catch (e: Exception) {
+                        null
+                    }
+                } else null
+            }
+            else -> null
+        }
+    }
+
+    private fun parseSearchRule(element: kotlinx.serialization.json.JsonElement?): SearchRule {
+        val obj = resolveRuleObject(element) ?: return SearchRule()
         return SearchRule(
-            bookList = rule.bookList,
-            name = rule.name,
-            author = rule.author,
-            intro = rule.intro,
-            kind = rule.kind,
-            lastChapter = rule.lastChapter,
-            updateTime = rule.updateTime,
-            bookUrl = rule.bookUrl,
-            coverUrl = rule.coverUrl,
-            wordCount = rule.wordCount
+            bookList = obj.getString("bookList"),
+            name = obj.getString("name"),
+            author = obj.getString("author"),
+            intro = obj.getString("intro"),
+            kind = obj.getString("kind"),
+            lastChapter = obj.getString("lastChapter"),
+            updateTime = obj.getString("updateTime"),
+            bookUrl = obj.getString("bookUrl"),
+            coverUrl = obj.getString("coverUrl"),
+            wordCount = obj.getString("wordCount")
         )
     }
-    
-    private fun convertBookInfoRule(rule: LegadoBookInfoRule?): BookInfoRule {
-        if (rule == null) return BookInfoRule()
+
+    private fun parseBookInfoRule(element: kotlinx.serialization.json.JsonElement?): BookInfoRule {
+        val obj = resolveRuleObject(element) ?: return BookInfoRule()
         return BookInfoRule(
-            init = rule.init,
-            name = rule.name,
-            author = rule.author,
-            intro = rule.intro,
-            kind = rule.kind,
-            lastChapter = rule.lastChapter,
-            updateTime = rule.updateTime,
-            coverUrl = rule.coverUrl,
-            tocUrl = rule.tocUrl,
-            wordCount = rule.wordCount
+            init = obj.getString("init"),
+            name = obj.getString("name"),
+            author = obj.getString("author"),
+            intro = obj.getString("intro"),
+            kind = obj.getString("kind"),
+            lastChapter = obj.getString("lastChapter"),
+            updateTime = obj.getString("updateTime"),
+            coverUrl = obj.getString("coverUrl"),
+            tocUrl = obj.getString("tocUrl"),
+            wordCount = obj.getString("wordCount")
         )
     }
-    
-    private fun convertTocRule(rule: LegadoTocRule?): TocRule {
-        if (rule == null) return TocRule()
+
+    private fun parseTocRule(element: kotlinx.serialization.json.JsonElement?): TocRule {
+        val obj = resolveRuleObject(element) ?: return TocRule()
+        val chapterList = obj.getString("chapterList")
+        val isReverse = obj.getBoolean("isReverse", false) || chapterList.startsWith("-")
         return TocRule(
-            chapterList = rule.chapterList,
-            chapterName = rule.chapterName,
-            chapterUrl = rule.chapterUrl,
-            updateTime = rule.updateTime,
-            nextTocUrl = rule.nextTocUrl,
-            isReverse = rule.isReverse ?: false
+            chapterList = chapterList,
+            chapterName = obj.getString("chapterName"),
+            chapterUrl = obj.getString("chapterUrl"),
+            updateTime = obj.getString("updateTime"),
+            nextTocUrl = obj.getString("nextTocUrl"),
+            isReverse = isReverse
         )
     }
-    
-    private fun convertContentRule(rule: LegadoContentRule?): ContentRule {
-        if (rule == null) return ContentRule()
+
+    private fun parseContentRule(element: kotlinx.serialization.json.JsonElement?): ContentRule {
+        val obj = resolveRuleObject(element) ?: return ContentRule()
         return ContentRule(
-            content = rule.content,
-            title = rule.title,
-            nextContentUrl = rule.nextContentUrl,
-            replaceRegex = rule.replaceRegex,
-            imageStyle = rule.imageStyle,
-            purify = rule.purify
+            content = obj.getString("content"),
+            title = obj.getString("title"),
+            nextContentUrl = obj.getString("nextContentUrl"),
+            replaceRegex = obj.getString("replaceRegex"),
+            imageStyle = obj.getString("imageStyle"),
+            purify = obj.getString("purify")
         )
     }
-    
-    private fun convertExploreRule(rule: LegadoExploreRule?): ExploreRule {
-        if (rule == null) return ExploreRule()
+
+    private fun parseExploreRule(element: kotlinx.serialization.json.JsonElement?): ExploreRule {
+        val obj = resolveRuleObject(element) ?: return ExploreRule()
         return ExploreRule(
-            bookList = rule.bookList,
-            name = rule.name,
-            author = rule.author,
-            intro = rule.intro,
-            kind = rule.kind,
-            lastChapter = rule.lastChapter,
-            bookUrl = rule.bookUrl,
-            coverUrl = rule.coverUrl
+            bookList = obj.getString("bookList"),
+            name = obj.getString("name"),
+            author = obj.getString("author"),
+            intro = obj.getString("intro"),
+            kind = obj.getString("kind"),
+            lastChapter = obj.getString("lastChapter"),
+            bookUrl = obj.getString("bookUrl"),
+            coverUrl = obj.getString("coverUrl")
         )
+    }
+
+    private fun kotlinx.serialization.json.JsonObject.getString(key: String, default: String = ""): String {
+        val el = this[key] ?: return default
+        return when (el) {
+            is kotlinx.serialization.json.JsonPrimitive -> el.content
+            else -> el.toString()
+        }
+    }
+
+    private fun kotlinx.serialization.json.JsonObject.getInt(key: String, default: Int = 0): Int {
+        val el = this[key] ?: return default
+        return when (el) {
+            is kotlinx.serialization.json.JsonPrimitive -> {
+                el.content.toIntOrNull() ?: default
+            }
+            else -> default
+        }
+    }
+
+    private fun kotlinx.serialization.json.JsonObject.getLong(key: String, default: Long = 0L): Long {
+        val el = this[key] ?: return default
+        return when (el) {
+            is kotlinx.serialization.json.JsonPrimitive -> {
+                el.content.toLongOrNull() ?: default
+            }
+            else -> default
+        }
+    }
+
+    private fun kotlinx.serialization.json.JsonObject.getBoolean(key: String, default: Boolean = true): Boolean {
+        val el = this[key] ?: return default
+        return when (el) {
+            is kotlinx.serialization.json.JsonPrimitive -> {
+                when (el.content.lowercase()) {
+                    "1", "true" -> true
+                    "0", "false" -> false
+                    else -> default
+                }
+            }
+            else -> default
+        }
+    }
+
+    private fun kotlinx.serialization.json.JsonObject.getStringOrObject(key: String): String {
+        val el = this[key] ?: return ""
+        return when (el) {
+            is kotlinx.serialization.json.JsonPrimitive -> el.content
+            else -> el.toString()
+        }
     }
 }
 
