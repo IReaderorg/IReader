@@ -1,18 +1,16 @@
 -- ==========================================================
--- IReader Complete Database Schema
+-- IReader Database Schema: OPTION B (WITH CHAPTER TEXT CONTENT)
 -- ==========================================================
--- This file contains all tables, policies, triggers, and functions.
+-- Recommended for: Self-hosted Supabase, local PostgreSQL, TrueNAS, VPS, Docker
 --
--- CHAPTER CONTENT STORAGE OPTIONS:
--- IReader supports two schema configurations depending on your self-hosting setup:
--- 1. OPTION A: schema_lightweight.sql (DEFAULT)
---    Zero chapter body contents stored. Recommended for Supabase Free Tier (500MB limit).
--- 2. OPTION B: schema_with_chapter_content.sql
---    Includes 'content TEXT' column in public.synced_chapters for complete offline novel backups.
---    Recommended for self-hosted instances (TrueNAS, VPS, Docker, PostgreSQL).
+-- Features:
+-- ✓ Full personal library synchronization (books, categories, bookmarks, reading progress)
+-- ✓ Complete chapter metadata sync (names, chapter numbers, read/unread, last page read)
+-- ✓ Complete chapter text/body content storage in public.synced_chapters(content)
+-- ✓ Full offline backup of complete novel libraries to your private cloud
 --
--- To upgrade an existing database to Option B at any time, run:
---   supabase/migrations/007_optional_chapter_content.sql
+-- Note: Remember to enable "Sync Chapter Content (Full Text)" in the IReader app settings:
+--   Settings -> Sync & Cloud Backup -> Sync Content -> Sync Chapter Content
 -- ==========================================================
 
 -- ============================================================================
@@ -122,7 +120,7 @@ CREATE INDEX IF NOT EXISTS idx_sync_manifest_gin
 COMMENT ON TABLE public.sync_manifest IS 'Canonical full-fidelity JSONB sync manifest (books, chapters without content, progress, categories, tombstones)';
 
 -- ----------------------------------------------------------------------------
--- Synced Chapters Table (Relational Store - Metadata Only, Zero Content)
+-- Synced Chapters Table (Relational Store - With Full Chapter Content)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.synced_chapters (
     user_id TEXT NOT NULL,
@@ -138,6 +136,7 @@ CREATE TABLE IF NOT EXISTS public.synced_chapters (
     date_upload BIGINT DEFAULT 0,
     date_fetch BIGINT DEFAULT 0,
     translator TEXT DEFAULT '',
+    content TEXT DEFAULT '',
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (user_id, chapter_id)
 );
@@ -148,7 +147,7 @@ CREATE INDEX IF NOT EXISTS idx_synced_chapters_read ON public.synced_chapters(us
 CREATE INDEX IF NOT EXISTS idx_synced_chapters_bookmark ON public.synced_chapters(user_id, bookmark);
 CREATE INDEX IF NOT EXISTS idx_synced_chapters_order ON public.synced_chapters(user_id, book_id, source_order ASC);
 
-COMMENT ON TABLE public.synced_chapters IS 'Synced chapter metadata (no chapter contents stored)';
+COMMENT ON TABLE public.synced_chapters IS 'Synced chapter metadata and offline text content for self-hosted backup';
 
 -- ----------------------------------------------------------------------------
 -- Synced Chapters Dynamic View (Unpacked directly from sync_manifest)
@@ -169,6 +168,7 @@ SELECT
     COALESCE((ch->>'dateUpload')::bigint, 0) AS date_upload,
     COALESCE((ch->>'dateFetch')::bigint, 0) AS date_fetch,
     COALESCE(ch->>'translator', '') AS translator,
+    COALESCE(ch->>'content', '') AS content,
     sm.updated_at
 FROM public.sync_manifest sm,
 LATERAL jsonb_array_elements(sm.manifest->'chapters') AS ch;

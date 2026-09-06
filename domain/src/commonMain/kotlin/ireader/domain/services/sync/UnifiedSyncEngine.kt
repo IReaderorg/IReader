@@ -155,8 +155,9 @@ class UnifiedSyncEngine(
                 _syncState.update { it.copy(progress = 0.4f, currentStep = "Reading local library...") }
 
                 // 2. Read local data
+                val syncChapterContent = syncPreferences.syncChapterContentEnabled().get()
                 val localBooks = localRepository.getBooks()
-                val localChapters = localRepository.getChapters(includeDownloadedContent = false)
+                val localChapters = localRepository.getChapters(includeDownloadedContent = syncChapterContent)
                 val localHistory = localRepository.getHistory()
                 val now = currentTimeMillis()
 
@@ -221,7 +222,7 @@ class UnifiedSyncEngine(
                     }
                 }
 
-                // 4b. Merge Chapters (without content, Last-Write-Wins + Progress preservation)
+                // 4b. Merge Chapters (Last-Write-Wins + Progress preservation + Optional Content)
                 val syncChapters = syncPreferences.syncChaptersEnabled().get()
                 val chaptersToApplyLocally = mutableListOf<ChapterSyncData>()
                 if (syncChapters) {
@@ -233,15 +234,24 @@ class UnifiedSyncEngine(
                         if (!tombstonedBookIds.contains(remoteChapter.bookGlobalId)) {
                             val localChapter = localChaptersMap[remoteChapter.globalId]
                             if (localChapter == null) {
-                                // New chapter from remote, strictly stripped of content
-                                chaptersToApplyLocally.add(remoteChapter.copy(content = ""))
+                                // New chapter from remote
+                                chaptersToApplyLocally.add(
+                                    if (syncChapterContent) remoteChapter else remoteChapter.copy(content = "")
+                                )
                             } else {
                                 val isRemoteNewer = remoteChapter.dateFetch > localChapter.dateFetch
                                 val hasProgressChange = (!localChapter.read && remoteChapter.read) ||
                                     (remoteChapter.lastPageRead > localChapter.lastPageRead) ||
                                     (remoteChapter.bookmark != localChapter.bookmark)
+                                val hasContentUpdate = syncChapterContent && remoteChapter.content.isNotBlank() && localChapter.content.isBlank()
 
-                                if (isRemoteNewer || hasProgressChange) {
+                                if (isRemoteNewer || hasProgressChange || hasContentUpdate) {
+                                    val mergedContent = if (syncChapterContent) {
+                                        if (isRemoteNewer && remoteChapter.content.isNotBlank()) remoteChapter.content
+                                        else localChapter.content.ifBlank { remoteChapter.content }
+                                    } else {
+                                        ""
+                                    }
                                     val merged = localChapter.copy(
                                         name = if (isRemoteNewer && remoteChapter.name.isNotBlank()) remoteChapter.name else localChapter.name,
                                         translator = if (isRemoteNewer && remoteChapter.translator.isNotBlank()) remoteChapter.translator else localChapter.translator,
@@ -252,7 +262,7 @@ class UnifiedSyncEngine(
                                         sourceOrder = if (isRemoteNewer) remoteChapter.sourceOrder else localChapter.sourceOrder,
                                         dateFetch = maxOf(localChapter.dateFetch, remoteChapter.dateFetch),
                                         dateUpload = maxOf(localChapter.dateUpload, remoteChapter.dateUpload),
-                                        content = ""
+                                        content = mergedContent
                                     )
                                     if (merged != localChapter) {
                                         chaptersToApplyLocally.add(merged)
@@ -323,9 +333,13 @@ class UnifiedSyncEngine(
                 }
 
                 val unifiedChapters = if (syncChapters) {
-                    val updatedLocalChapters = localRepository.getChapters(includeDownloadedContent = false)
-                    // Strictly ensure no chapter body/page content is ever sent in the manifest payload
-                    updatedLocalChapters.map { it.copy(content = "") }
+                    val updatedLocalChapters = localRepository.getChapters(includeDownloadedContent = syncChapterContent)
+                    if (syncChapterContent) {
+                        updatedLocalChapters
+                    } else {
+                        // Strip chapter body/page content if chapter content sync is disabled (default)
+                        updatedLocalChapters.map { it.copy(content = "") }
+                    }
                 } else {
                     remoteManifest?.chapters ?: emptyList()
                 }

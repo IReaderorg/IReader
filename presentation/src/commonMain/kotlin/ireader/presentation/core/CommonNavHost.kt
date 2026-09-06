@@ -463,6 +463,7 @@ fun CommonNavHost(
                 onDismissCustomCloudDialog = { viewModel.toggleCustomCloudDialog(false) },
                 onToggleSyncBooks = { viewModel.toggleSyncBooks(it) },
                 onToggleSyncChapters = { viewModel.toggleSyncChapters(it) },
+                onToggleSyncChapterContent = { viewModel.toggleSyncChapterContent(it) },
                 onToggleSyncProgress = { viewModel.toggleSyncProgress(it) }
             )
         }

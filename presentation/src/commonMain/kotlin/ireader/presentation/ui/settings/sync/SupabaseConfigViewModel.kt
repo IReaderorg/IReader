@@ -61,6 +61,7 @@ data class SupabaseConfigState(
     // Granular sync selection
     val syncBooksEnabled: Boolean = true,
     val syncChaptersEnabled: Boolean = true,
+    val syncChapterContentEnabled: Boolean = false,
     val syncProgressEnabled: Boolean = true,
     // Community Backend Server
     val useCustomCommunityServer: Boolean = false,
@@ -117,6 +118,7 @@ class SupabaseConfigViewModel(
                 // Granular sync selection
                 syncBooksEnabled = syncPreferences?.syncBooksEnabled()?.get() ?: true,
                 syncChaptersEnabled = syncPreferences?.syncChaptersEnabled()?.get() ?: true,
+                syncChapterContentEnabled = syncPreferences?.syncChapterContentEnabled()?.get() ?: false,
                 syncProgressEnabled = syncPreferences?.syncProgressEnabled()?.get() ?: true,
                 // Community server
                 useCustomCommunityServer = supabasePreferences.useCustomCommunityServer().get(),
@@ -249,7 +251,59 @@ ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public reading_progress access" ON public.reading_progress;
 CREATE POLICY "Allow public reading_progress access" ON public.reading_progress FOR ALL USING (true) WITH CHECK (true);
 
--- 4. Create users & gamification economy (Spirit Stones & Check-ins)
+-- 4. Create synced_chapters table (Relational Store with optional content support)
+CREATE TABLE IF NOT EXISTS public.synced_chapters (
+    user_id        TEXT NOT NULL,
+    chapter_id     TEXT NOT NULL,
+    book_id        TEXT NOT NULL,
+    chapter_key    TEXT NOT NULL,
+    name           TEXT NOT NULL,
+    chapter_number REAL DEFAULT 0,
+    source_order   BIGINT DEFAULT 0,
+    read           BOOLEAN DEFAULT false,
+    bookmark       BOOLEAN DEFAULT false,
+    last_page_read BIGINT DEFAULT 0,
+    date_upload    BIGINT DEFAULT 0,
+    date_fetch     BIGINT DEFAULT 0,
+    translator     TEXT DEFAULT '',
+    content        TEXT DEFAULT '',
+    updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (user_id, chapter_id)
+);
+ALTER TABLE public.synced_chapters ADD COLUMN IF NOT EXISTS content TEXT DEFAULT '';
+
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_user_id ON public.synced_chapters(user_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_book_id ON public.synced_chapters(user_id, book_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_read ON public.synced_chapters(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_bookmark ON public.synced_chapters(user_id, bookmark);
+
+ALTER TABLE public.synced_chapters ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public synced_chapters access" ON public.synced_chapters;
+CREATE POLICY "Allow public synced_chapters access" ON public.synced_chapters FOR ALL USING (true) WITH CHECK (true);
+
+-- 5. Create synced_chapters_view (Dynamic view unpacked from sync_manifest)
+CREATE OR REPLACE VIEW public.synced_chapters_view 
+WITH (security_invoker = true) AS
+SELECT 
+    sm.user_id,
+    ch->>'globalId' AS chapter_id,
+    ch->>'bookGlobalId' AS book_id,
+    ch->>'key' AS chapter_key,
+    ch->>'name' AS name,
+    COALESCE((ch->>'number')::numeric, 0) AS chapter_number,
+    COALESCE((ch->>'sourceOrder')::bigint, 0) AS source_order,
+    COALESCE((ch->>'read')::boolean, false) AS read,
+    COALESCE((ch->>'bookmark')::boolean, false) AS bookmark,
+    COALESCE((ch->>'lastPageRead')::bigint, 0) AS last_page_read,
+    COALESCE((ch->>'dateUpload')::bigint, 0) AS date_upload,
+    COALESCE((ch->>'dateFetch')::bigint, 0) AS date_fetch,
+    COALESCE(ch->>'translator', '') AS translator,
+    COALESCE(ch->>'content', '') AS content,
+    sm.updated_at
+FROM public.sync_manifest sm,
+LATERAL jsonb_array_elements(sm.manifest->'chapters') AS ch;
+
+-- 6. Create users & gamification economy (Spirit Stones & Check-ins)
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY DEFAULT auth.uid(),
     email TEXT,
@@ -316,7 +370,7 @@ ALTER TABLE public.user_titles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS user_titles_all ON public.user_titles;
 CREATE POLICY user_titles_all ON public.user_titles FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
--- 5. Daily Check-in RPC Function
+-- 7. Daily Check-in RPC Function
 DROP FUNCTION IF EXISTS public.checkin_daily();
 CREATE OR REPLACE FUNCTION public.checkin_daily()
 RETURNS JSON
@@ -367,7 +421,7 @@ END;
 $$;
 GRANT EXECUTE ON FUNCTION public.checkin_daily() TO authenticated;
 
--- 6. Spend Stones RPC Function
+-- 8. Spend Stones RPC Function
 DROP FUNCTION IF EXISTS public.spend_stones(TEXT, TEXT, INT);
 DROP FUNCTION IF EXISTS public.spend_stones(INT, TEXT);
 DROP FUNCTION IF EXISTS public.spend_stones;
@@ -551,6 +605,13 @@ GRANT EXECUTE ON FUNCTION public.spend_stones(TEXT, TEXT, INT) TO authenticated;
         updateState { it.copy(syncProgressEnabled = enabled) }
         scope.launch {
             syncPreferences?.syncProgressEnabled()?.set(enabled)
+        }
+    }
+
+    fun toggleSyncChapterContent(enabled: Boolean) {
+        updateState { it.copy(syncChapterContentEnabled = enabled) }
+        scope.launch {
+            syncPreferences?.syncChapterContentEnabled()?.set(enabled)
         }
     }
 

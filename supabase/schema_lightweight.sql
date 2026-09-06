@@ -1,17 +1,14 @@
 -- ==========================================================
--- IReader Complete Database Schema
+-- IReader Database Schema: OPTION A (LIGHTWEIGHT / NO CHAPTER CONTENT)
 -- ==========================================================
--- This file contains all tables, policies, triggers, and functions.
+-- Recommended for: Supabase Free Tier (500MB storage quota), low-bandwidth hosting
 --
--- CHAPTER CONTENT STORAGE OPTIONS:
--- IReader supports two schema configurations depending on your self-hosting setup:
--- 1. OPTION A: schema_lightweight.sql (DEFAULT)
---    Zero chapter body contents stored. Recommended for Supabase Free Tier (500MB limit).
--- 2. OPTION B: schema_with_chapter_content.sql
---    Includes 'content TEXT' column in public.synced_chapters for complete offline novel backups.
---    Recommended for self-hosted instances (TrueNAS, VPS, Docker, PostgreSQL).
+-- Features:
+-- ✓ Full personal library synchronization (books, categories, bookmarks, reading progress)
+-- ✓ Complete chapter metadata sync (names, chapter numbers, read/unread, last page read)
+-- ✗ Zero chapter body/text content stored (preserves database disk space and bandwidth)
 --
--- To upgrade an existing database to Option B at any time, run:
+-- Note: If you later decide to store full chapter texts, simply run migration:
 --   supabase/migrations/007_optional_chapter_content.sql
 -- ==========================================================
 

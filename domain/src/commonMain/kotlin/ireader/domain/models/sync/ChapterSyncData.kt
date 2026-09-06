@@ -27,14 +27,14 @@ data class ChapterSyncData(
     val bookGlobalId: String,
     val key: String,
     val name: String,
-    val read: Boolean,
-    val bookmark: Boolean,
-    val lastPageRead: Long,
-    val sourceOrder: Long,
-    val number: Float,
-    val dateUpload: Long,
-    val dateFetch: Long,
-    val translator: String,
+    val read: Boolean = false,
+    val bookmark: Boolean = false,
+    val lastPageRead: Long = 0L,
+    val sourceOrder: Long = 0L,
+    val number: Float = 0f,
+    val dateUpload: Long = 0L,
+    val dateFetch: Long = 0L,
+    val translator: String = "",
     val content: String = "" // Serialized List<Page> as JSON string, empty for lightweight manifest
 ) {
     init {

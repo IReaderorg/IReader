@@ -27,6 +27,7 @@ class SyncPreferences(private val preferenceStore: PreferenceStore) {
         // Granular Sync Content Options (Optional for self-hosted instances)
         const val SYNC_BOOKS_ENABLED = "sync_books_enabled"
         const val SYNC_CHAPTERS_ENABLED = "sync_chapters_enabled"
+        const val SYNC_CHAPTER_CONTENT_ENABLED = "sync_chapter_content_enabled"
         const val SYNC_PROGRESS_ENABLED = "sync_progress_enabled"
         const val SYNC_HISTORY_ENABLED = "sync_history_enabled"
 
@@ -195,6 +196,14 @@ class SyncPreferences(private val preferenceStore: PreferenceStore) {
      */
     fun syncChaptersEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean(SYNC_CHAPTERS_ENABLED, true)
+    }
+
+    /**
+     * Whether to sync full chapter text / body content for self-hosted backup.
+     * Default: false (saves database storage quota and bandwidth; user must opt in).
+     */
+    fun syncChapterContentEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_CHAPTER_CONTENT_ENABLED, false)
     }
 
     /**

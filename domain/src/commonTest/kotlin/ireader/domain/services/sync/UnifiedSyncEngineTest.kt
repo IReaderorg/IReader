@@ -93,7 +93,9 @@ class UnifiedSyncEngineTest {
             this.history.addAll(history)
         }
 
-        override suspend fun getChapters(includeDownloadedContent: Boolean): List<ChapterSyncData> = chapters
+        override suspend fun getChapters(includeDownloadedContent: Boolean): List<ChapterSyncData> {
+            return if (includeDownloadedContent) chapters else chapters.map { it.copy(content = "") }
+        }
         override suspend fun applyChapters(chapters: List<ChapterSyncData>) {
             this.chapters.removeAll { existing -> chapters.any { it.globalId == existing.globalId } }
             this.chapters.addAll(chapters)
@@ -645,5 +647,79 @@ class UnifiedSyncEngineTest {
         assertEquals("1|remote-book", localRepo.books.first().globalId)
         // Remote chapter should NOT be applied locally because syncChaptersEnabled is false
         assertEquals(0, localRepo.chapters.size)
+    }
+
+    @Test
+    fun `sync strips chapter content by default when syncChapterContentEnabled is false`() = runTest {
+        val prefStore = TestPreferenceStore()
+        val prefs = SyncPreferences(prefStore)
+        prefs.setSelectedProviderType(SyncProviderType.GOOGLE_DRIVE)
+        // syncChapterContentEnabled is false by default
+        assertFalse(prefs.syncChapterContentEnabled().get())
+
+        val localRepo = MockSyncLocalRepository()
+        localRepo.chapters.add(
+            ChapterSyncData(
+                globalId = "1|ch-1",
+                bookGlobalId = "1|book-1",
+                key = "ch-1",
+                name = "Chapter 1",
+                content = "Downloaded chapter content that should NOT be uploaded"
+            )
+        )
+
+        val provider = MockSyncProvider(SyncProviderType.GOOGLE_DRIVE)
+        val engine = UnifiedSyncEngine(
+            syncPreferences = prefs,
+            providers = listOf(provider),
+            localRepository = localRepo,
+            deviceId = "test-device"
+        )
+
+        val result = engine.syncNow()
+        assertTrue(result.isSuccess)
+
+        // Uploaded manifest should have stripped chapter content
+        val uploadedManifest = provider.lastUploadedManifest
+        assertNotNull(uploadedManifest)
+        assertEquals(1, uploadedManifest.chapters.size)
+        assertEquals("", uploadedManifest.chapters.first().content)
+        assertEquals("Chapter 1", uploadedManifest.chapters.first().name)
+    }
+
+    @Test
+    fun `sync preserves and uploads chapter content when syncChapterContentEnabled is true`() = runTest {
+        val prefStore = TestPreferenceStore()
+        val prefs = SyncPreferences(prefStore)
+        prefs.setSelectedProviderType(SyncProviderType.GOOGLE_DRIVE)
+        prefs.syncChapterContentEnabled().set(true)
+
+        val localRepo = MockSyncLocalRepository()
+        localRepo.chapters.add(
+            ChapterSyncData(
+                globalId = "1|ch-1",
+                bookGlobalId = "1|book-1",
+                key = "ch-1",
+                name = "Chapter 1",
+                content = "Preserved full chapter text for self-hosted backup"
+            )
+        )
+
+        val provider = MockSyncProvider(SyncProviderType.GOOGLE_DRIVE)
+        val engine = UnifiedSyncEngine(
+            syncPreferences = prefs,
+            providers = listOf(provider),
+            localRepository = localRepo,
+            deviceId = "test-device"
+        )
+
+        val result = engine.syncNow()
+        assertTrue(result.isSuccess)
+
+        // Uploaded manifest should include the chapter text
+        val uploadedManifest = provider.lastUploadedManifest
+        assertNotNull(uploadedManifest)
+        assertEquals(1, uploadedManifest.chapters.size)
+        assertEquals("Preserved full chapter text for self-hosted backup", uploadedManifest.chapters.first().content)
     }
 }

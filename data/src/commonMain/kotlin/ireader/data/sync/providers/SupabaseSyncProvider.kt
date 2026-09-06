@@ -151,6 +151,30 @@ class SupabaseSyncProvider(
                 }
             }
 
+            // 4. Sync chapters to synced_chapters table (if chapters sync enabled)
+            if (syncPreferences == null || syncPreferences.syncChaptersEnabled().get()) {
+                val syncContent = syncPreferences?.syncChapterContentEnabled()?.get() == true
+                manifest.chapters.forEach { chapterItem ->
+                    val syncedChapter = ireader.domain.models.remote.SyncedChapter(
+                        userId = userId,
+                        chapterId = chapterItem.globalId,
+                        bookId = chapterItem.bookGlobalId,
+                        chapterKey = chapterItem.key,
+                        name = chapterItem.name,
+                        chapterNumber = chapterItem.number,
+                        sourceOrder = chapterItem.sourceOrder,
+                        read = chapterItem.read,
+                        bookmark = chapterItem.bookmark,
+                        lastPageRead = chapterItem.lastPageRead,
+                        dateUpload = chapterItem.dateUpload,
+                        dateFetch = chapterItem.dateFetch,
+                        translator = chapterItem.translator,
+                        content = if (syncContent) chapterItem.content else ""
+                    )
+                    runCatching { remoteRepository.syncChapter(syncedChapter) }
+                }
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to upload manifest: ${e.message}" }

@@ -160,9 +160,11 @@ class SupabaseConfigScreen  {
                     ContentSyncSelectionCard(
                         syncBooks = state.syncBooksEnabled,
                         syncChapters = state.syncChaptersEnabled,
+                        syncChapterContent = state.syncChapterContentEnabled,
                         syncProgress = state.syncProgressEnabled,
                         onToggleBooks = { viewModel.toggleSyncBooks(it) },
                         onToggleChapters = { viewModel.toggleSyncChapters(it) },
+                        onToggleChapterContent = { viewModel.toggleSyncChapterContent(it) },
                         onToggleProgress = { viewModel.toggleSyncProgress(it) }
                     )
                 }
@@ -1522,9 +1524,11 @@ private fun formatTime(timestamp: Long): String {
 private fun ContentSyncSelectionCard(
     syncBooks: Boolean,
     syncChapters: Boolean,
+    syncChapterContent: Boolean,
     syncProgress: Boolean,
     onToggleBooks: (Boolean) -> Unit,
     onToggleChapters: (Boolean) -> Unit,
+    onToggleChapterContent: (Boolean) -> Unit,
     onToggleProgress: (Boolean) -> Unit
 ) {
     Card(
@@ -1578,6 +1582,22 @@ private fun ContentSyncSelectionCard(
                     Text("Sync chapter list, bookmarks, and read states", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(checked = syncChapters, onCheckedChange = onToggleChapters)
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleChapterContent(!syncChapterContent) },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Sync Chapter Content (Full Text)", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                    Text("Upload full downloaded chapter bodies. Default: Off (saves bandwidth and storage)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = syncChapterContent, onCheckedChange = onToggleChapterContent)
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

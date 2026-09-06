@@ -36,21 +36,29 @@ If you already have an older database:
 
 ## Files & Directory Structure
 
-- `schema.sql` - **Complete monolithic database schema** (includes all migrations and fixes)
-  - Full synchronization tables (`sync_manifest`, `synced_books`, `synced_chapters`, `synced_chapters_view`)
-  - Reading progress, book reviews, chapter reviews, and quotes
-  - Gamification, check-in streak, and badge systems
-  - Optimized GIN indexing and RLS security policies
+- `schema.sql` - **Default database schema** (lightweight, alias to `schema_lightweight.sql`)
+- `schema_lightweight.sql` - **Option A (Lightweight - Recommended for Supabase Free Tier)**:
+  - Synchronizes all book metadata, chapter reading state, bookmarks, scroll positions, and last read page.
+  - Does **NOT** store full novel text/body content in the cloud, staying comfortably within the 500MB free quota.
+- `schema_with_chapter_content.sql` - **Option B (Full Content - For Self-Hosted Supabase / PostgreSQL)**:
+  - Includes a `content TEXT DEFAULT ''` column in `public.synced_chapters` and exposes it in `public.synced_chapters_view`.
+  - Intended for self-hosters (TrueNAS, VPS, Docker, unlimited cloud) who enable "Sync Chapter Content (Full Text)" in the app.
 - `migrations/` - **Versioned incremental migrations**
   - `001_profile_gamification.sql` to `004_security_advisor_fixes.sql`
   - `005_unified_sync_and_library_enhancements.sql` - Sync manifest document store & rich library metadata
   - `006_chapter_sync_and_manifest_updates.sql` - Synced chapters metadata table, GIN index, and dynamic view
+  - `007_optional_chapter_content.sql` - Adds optional `content TEXT` column and updates `synced_chapters_view` for chapter body text backup
 - `split/` - **Modular schemas for distributed multi-project setups**
   - Allows distributing tables across multiple free-tier Supabase projects (up to 5.5GB storage)
 
 ## Key Features
 
-- **Lightweight Chapter Sync**: Complete chapter metadata (titles, numbers, reading state, bookmarks, last read page) synced seamlessly without chapter body/page contents. Fast, private, and sub-100KB payloads.
+- **Two Storage Profiles (Option A vs Option B)**:
+  - **Option A (Default / Lightweight)**: Chapter metadata (titles, numbers, reading state, bookmarks, last read page) synced seamlessly without chapter body text. Fast, private, and minimal storage consumption.
+  - **Option B (Full Chapter Content)**: Offline novel text saved to `synced_chapters` for complete self-hosted backup.
+- **In-App User Control**:
+  - Setting: **"Sync Chapter Content (Full Text)"** under **Settings → Unified Sync** and **Settings → Supabase Configuration**.
+  - Default: **Disabled (false)** so free-tier users never unintentionally exceed database storage quotas.
 - **Unified Sync Manifest**: Stored as high-fidelity JSONB with GIN indexing (`idx_sync_manifest_gin`), queryable dynamically via `synced_chapters_view`.
 - **Single-Project & Multi-Project Support**: Works with a single free Supabase project or distributed across multiple projects.
 

@@ -52,9 +52,14 @@ Once the project is ready:
    * **Project API Keys**: Copy the **`anon` / `public`** key (starts with `ey...`).
 4. Keep these handy—you will enter them into IReader.
 
----
-
 ## Step 3: Run the Database Setup SQL Script
+
+Choose the setup that best fits your hosting environment:
+* **Option A: Lightweight (Recommended for Supabase Free Tier)**: Saves bandwidth and storage by synchronizing all book & chapter metadata without chapter body text. Fits millions of records in 500MB. Uses [`supabase/schema_lightweight.sql`](../../supabase/schema_lightweight.sql).
+* **Option B: Full Content (For Self-Hosted PostgreSQL / Supabase)**: Backs up full novel chapter text to the cloud for offline access across self-hosted instances (VPS, Docker, TrueNAS). Uses [`supabase/schema_with_chapter_content.sql`](../../supabase/schema_with_chapter_content.sql).
+
+> [!NOTE]
+> The setup script below supports both modes. It creates `synced_chapters` with an optional `content` column that consumes 0 bytes when empty. The app setting **"Sync Chapter Content (Full Text)"** defaults to **OFF**, so your cloud database stays lightweight unless you explicitly enable content sync.
 
 To prepare your database tables and RPC functions for book syncing and Spirit Stones check-in:
 
@@ -132,7 +137,7 @@ ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public reading_progress access" ON public.reading_progress;
 CREATE POLICY "Allow public reading_progress access" ON public.reading_progress FOR ALL USING (true) WITH CHECK (true);
 
--- 4. Synced Chapters (Relational Table - Metadata Only, Zero Content)
+-- 4. Synced Chapters (Relational Table with optional content support)
 CREATE TABLE IF NOT EXISTS public.synced_chapters (
     user_id        TEXT NOT NULL,
     chapter_id     TEXT NOT NULL,
@@ -147,9 +152,11 @@ CREATE TABLE IF NOT EXISTS public.synced_chapters (
     date_upload    BIGINT DEFAULT 0,
     date_fetch     BIGINT DEFAULT 0,
     translator     TEXT DEFAULT '',
+    content        TEXT DEFAULT '',
     updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (user_id, chapter_id)
 );
+ALTER TABLE public.synced_chapters ADD COLUMN IF NOT EXISTS content TEXT DEFAULT '';
 
 CREATE INDEX IF NOT EXISTS idx_synced_chapters_user_id ON public.synced_chapters(user_id);
 CREATE INDEX IF NOT EXISTS idx_synced_chapters_book_id ON public.synced_chapters(user_id, book_id);
@@ -177,6 +184,7 @@ SELECT
     COALESCE((ch->>'dateUpload')::bigint, 0) AS date_upload,
     COALESCE((ch->>'dateFetch')::bigint, 0) AS date_fetch,
     COALESCE(ch->>'translator', '') AS translator,
+    COALESCE(ch->>'content', '') AS content,
     sm.updated_at
 FROM public.sync_manifest sm,
 LATERAL jsonb_array_elements(sm.manifest->'chapters') AS ch;
@@ -363,8 +371,12 @@ GRANT EXECUTE ON FUNCTION public.spend_stones(TEXT, TEXT, INT) TO authenticated;
 3. Under **Personal Supabase (Single Project - Recommended)**:
    - Paste your **Project URL** into the URL field.
    - Paste your **anon / public Key** into the API Key field.
-4. Tap **Save Configuration**.
-5. Tap **Test Connection**.
+4. Under **Content Sync Options**:
+   - **Sync Chapter Content (Full Text)**: Default is **OFF**.
+     - Keep **OFF** if you use Supabase's free cloud tier (recommended).
+     - Turn **ON** only if you self-host Supabase/PostgreSQL (VPS, TrueNAS, local Docker) with sufficient storage and want full novel text backed up offline.
+5. Tap **Save Configuration**.
+6. Tap **Test Connection**.
    - You should see: `✓ Connection successful! Personal Supabase is ready for sync.`
 
 ---
@@ -395,15 +407,26 @@ Once configured:
 
 ## Step 7: How Chapter Synchronization Works
 
-IReader includes complete chapter synchronization across all your devices, designed with speed, bandwidth efficiency, and privacy in mind:
+IReader includes complete chapter synchronization across all your devices, giving users total control over storage and bandwidth:
 
-### 1. Metadata-Only Payloads (No Content Uploaded)
-* **What is synced**: Chapter names, numbers, source order, read/unread status, bookmarks, last read page, and fetch dates.
-* **What is NEVER synced**: Chapter body text, novel paragraphs, and downloaded offline files are **never uploaded** to Supabase.
+### 1. Two Operational Modes
+
+#### Mode 1: Metadata-Only Sync (Default & Recommended)
+* **Setting**: `Sync Chapter Content (Full Text)` = **OFF** (default)
+* **What is synced**: Chapter titles, numbers, source order, read/unread status, bookmarks, last read page, and fetch dates.
+* **What is NOT synced**: Chapter body text and novel paragraphs are omitted from upload.
 * **Benefits**:
-  * **Lightning fast**: Even a library with hundreds of books and 50,000+ chapters syncs in seconds with a compressed payload under a few megabytes.
-  * **Free-tier friendly**: Consumes minimal Supabase database storage (less than 5MB for thousands of chapters).
-  * **Storage safe**: Preserves your phone/desktop local storage without downloading gigabytes of text files redundantly.
+  * **Lightning fast**: Libraries with hundreds of novels and 50,000+ chapters sync in under 2 seconds with payloads <1MB.
+  * **Free-tier friendly**: Uses less than 5MB of database storage, staying well below Supabase's 500MB free quota.
+  * **Bandwidth safe**: Perfect for mobile networks and roaming.
+
+#### Mode 2: Full Chapter Content Backup (For Self-Hosters)
+* **Setting**: `Sync Chapter Content (Full Text)` = **ON**
+* **What is synced**: Everything in Mode 1, plus full downloaded chapter text/body contents stored directly into `public.synced_chapters(content)`.
+* **Benefits**:
+  * Complete, self-contained offline novel backup in your own database.
+  * Easy recovery of downloaded chapters when migrating to a new phone or desktop.
+  * Ideal for self-hosted instances running PostgreSQL on Docker, TrueNAS, unRAID, or a dedicated VPS.
 
 ### 2. Single-Request Atomic Sync (`sync_manifest`)
 All book and chapter states are uploaded together into the `sync_manifest` table as an atomic JSONB document. This prevents partial sync failures or network timeouts caused by firing thousands of individual row inserts. A specialized PostgreSQL GIN index (`idx_sync_manifest_gin`) ensures fast updates and querying.
@@ -412,7 +435,7 @@ All book and chapter states are uploaded together into the `sync_manifest` table
 You can view your synced chapters in relational format directly in the Supabase Dashboard:
 1. In the Supabase sidebar, open **Table Editor**.
 2. Click on **`synced_chapters_view`**.
-3. You will see a live, unpacked relational table of every chapter across your books, including its read status, bookmark flag, and last read page!
+3. You will see a live, unpacked relational table of every chapter across your books, including its read status, bookmark flag, last read page, and optional content!
 4. You can also run SQL queries in the SQL Editor:
    ```sql
    -- Find all bookmarked chapters across your library

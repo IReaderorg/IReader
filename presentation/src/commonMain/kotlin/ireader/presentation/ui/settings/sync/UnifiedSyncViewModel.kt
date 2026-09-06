@@ -41,6 +41,7 @@ data class UnifiedSyncScreenState(
     // Granular content selection
     val syncBooksEnabled: Boolean = true,
     val syncChaptersEnabled: Boolean = true,
+    val syncChapterContentEnabled: Boolean = false,
     val syncProgressEnabled: Boolean = true
 )
 
@@ -70,6 +71,7 @@ class UnifiedSyncViewModel(
         val customPath = syncPreferences.customCloudPath().get()
         val booksEnabled = syncPreferences.syncBooksEnabled().get()
         val chaptersEnabled = syncPreferences.syncChaptersEnabled().get()
+        val chapterContentEnabled = syncPreferences.syncChapterContentEnabled().get()
         val progressEnabled = syncPreferences.syncProgressEnabled().get()
 
         updateState {
@@ -86,6 +88,7 @@ class UnifiedSyncViewModel(
                 customCloudPath = customPath,
                 syncBooksEnabled = booksEnabled,
                 syncChaptersEnabled = chaptersEnabled,
+                syncChapterContentEnabled = chapterContentEnabled,
                 syncProgressEnabled = progressEnabled
             )
         }
@@ -319,6 +322,11 @@ class UnifiedSyncViewModel(
     fun toggleSyncChapters(enabled: Boolean) {
         syncPreferences.syncChaptersEnabled().set(enabled)
         updateState { it.copy(syncChaptersEnabled = enabled) }
+    }
+
+    fun toggleSyncChapterContent(enabled: Boolean) {
+        syncPreferences.syncChapterContentEnabled().set(enabled)
+        updateState { it.copy(syncChapterContentEnabled = enabled) }
     }
 
     fun toggleSyncProgress(enabled: Boolean) {

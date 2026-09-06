@@ -108,7 +108,9 @@ CREATE INDEX IF NOT EXISTS idx_sync_manifest_gin
     ON public.sync_manifest USING GIN (manifest jsonb_path_ops);
 
 -- ----------------------------------------------------------------------------
--- Synced Chapters Table (Relational Store - Metadata Only)
+-- Synced Chapters Table (Relational Store)
+-- Option A (Default): Metadata Only (zero chapter content stored, free-tier friendly)
+-- Option B: With Chapter Content (for self-hosted PostgreSQL/Supabase instances)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.synced_chapters (
     user_id        TEXT NOT NULL,
@@ -124,6 +126,9 @@ CREATE TABLE IF NOT EXISTS public.synced_chapters (
     date_upload    BIGINT DEFAULT 0,
     date_fetch     BIGINT DEFAULT 0,
     translator     TEXT DEFAULT '',
+    -- Option B: Stores full novel chapter body/text for offline self-hosted backup.
+    -- If using Option A (lightweight), this column consumes 0 bytes when empty.
+    content        TEXT DEFAULT '',
     updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (user_id, chapter_id)
 );
@@ -159,6 +164,7 @@ SELECT
     COALESCE((ch->>'dateUpload')::bigint, 0) AS date_upload,
     COALESCE((ch->>'dateFetch')::bigint, 0) AS date_fetch,
     COALESCE(ch->>'translator', '') AS translator,
+    COALESCE(ch->>'content', '') AS content,
     sm.updated_at
 FROM public.sync_manifest sm,
 LATERAL jsonb_array_elements(sm.manifest->'chapters') AS ch;

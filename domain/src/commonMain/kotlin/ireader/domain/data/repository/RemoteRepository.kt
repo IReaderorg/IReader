@@ -146,4 +146,9 @@ interface RemoteRepository {
      * Upload full JSON manifest to remote cloud table if supported
      */
     suspend fun saveSyncManifest(userId: String, manifestJson: String): Result<Unit> = Result.success(Unit)
+
+    /**
+     * Sync a chapter to remote backend synced_chapters table
+     */
+    suspend fun syncChapter(chapter: ireader.domain.models.remote.SyncedChapter): Result<Unit> = Result.success(Unit)
 }

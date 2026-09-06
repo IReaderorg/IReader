@@ -54,6 +54,7 @@ fun UnifiedSyncScreen(
     onDismissCustomCloudDialog: () -> Unit = {},
     onToggleSyncBooks: (Boolean) -> Unit = {},
     onToggleSyncChapters: (Boolean) -> Unit = {},
+    onToggleSyncChapterContent: (Boolean) -> Unit = {},
     onToggleSyncProgress: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -248,10 +249,25 @@ fun UnifiedSyncScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Sync Downloaded Chapters", style = MaterialTheme.typography.bodyLarge)
-                                Text("Upload and backup chapter content for self-hosting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("Sync Chapters Status", style = MaterialTheme.typography.bodyLarge)
+                                Text("Sync chapter numbers, read status, bookmarks, and last page read", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Switch(checked = state.syncChaptersEnabled, onCheckedChange = onToggleSyncChapters)
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onToggleSyncChapterContent(!state.syncChapterContentEnabled) },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Sync Chapter Content (Full Text)", style = MaterialTheme.typography.bodyLarge)
+                                Text("Upload downloaded chapter bodies to self-hosted database. Default: Off (saves storage)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(checked = state.syncChapterContentEnabled, onCheckedChange = onToggleSyncChapterContent)
                         }
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))

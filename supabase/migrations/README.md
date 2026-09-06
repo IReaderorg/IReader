@@ -12,6 +12,7 @@ SQL Editor (or via `supabase db push`). Each is idempotent where possible.
 | 004 | `004_security_advisor_fixes.sql` | Fixes Supabase Security Advisor warnings: enables RLS on public tables, sets `security_invoker = true` on views, hardens function search paths |
 | 005 | `005_unified_sync_and_library_enhancements.sql` | Adds `sync_manifest` document store, rich book metadata (`author`, `description`, `genres`, `status`, `favorite`), and personal Supabase sync support |
 | 006 | `006_chapter_sync_and_manifest_updates.sql` | Adds `synced_chapters` table, dynamic `synced_chapters_view` from manifest, and JSONB GIN index on `sync_manifest` |
+| 007 | `007_optional_chapter_content.sql` | Adds optional `content TEXT DEFAULT ''` to `synced_chapters` and updates `synced_chapters_view` to include `content` for self-hosters who enable chapter content sync |
 
 ## Design notes
 

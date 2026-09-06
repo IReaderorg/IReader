@@ -571,6 +571,36 @@ class SupabaseRemoteRepository(
                 returning = false
             ).getOrThrow()
         }
+
+    override suspend fun syncChapter(chapter: ireader.domain.models.remote.SyncedChapter): Result<Unit> =
+        RemoteErrorMapper.withErrorMapping {
+            retryPolicy.executeWithRetry {
+                val chapterData = buildJsonObject {
+                    put("user_id", chapter.userId)
+                    put("chapter_id", chapter.chapterId)
+                    put("book_id", chapter.bookId)
+                    put("chapter_key", chapter.chapterKey)
+                    put("name", chapter.name)
+                    put("chapter_number", chapter.chapterNumber)
+                    put("source_order", chapter.sourceOrder)
+                    put("read", chapter.read)
+                    put("bookmark", chapter.bookmark)
+                    put("last_page_read", chapter.lastPageRead)
+                    put("date_upload", chapter.dateUpload)
+                    put("date_fetch", chapter.dateFetch)
+                    put("translator", chapter.translator)
+                    if (chapter.content.isNotBlank()) {
+                        put("content", chapter.content)
+                    }
+                }
+                backendService.upsert(
+                    table = "synced_chapters",
+                    data = chapterData,
+                    onConflict = "user_id,chapter_id",
+                    returning = false
+                ).getOrThrow()
+            }
+        }
     
     // DTO Converters for Books
     
