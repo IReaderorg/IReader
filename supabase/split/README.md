@@ -26,7 +26,7 @@ The schema is split into 11 separate projects for maximum storage:
 |------|---------|--------|
 | `schema_1_auth.sql` | Auth | users |
 | `schema_2_reading.sql` | Reading | reading_progress |
-| `schema_3_library.sql` | Library | synced_books |
+| `schema_3_library.sql` | Library | sync_manifest, synced_books, synced_chapters, synced_chapters_view |
 | `schema_4_book_reviews.sql` | Book Reviews | book_reviews |
 | `schema_5_chapter_reviews.sql` | Chapter Reviews | chapter_reviews |
 | `schema_6_badges.sql` | Badges | badges, user_badges, payment_proofs, nft_wallets |
@@ -141,7 +141,7 @@ You can combine multiple schemas into a single Supabase project if you don't nee
 ### Option A: 3 Projects (1.5GB)
 | Project | Schemas | Tables |
 |---------|---------|--------|
-| Main | 1, 2, 3, 7 | users, reading_progress, synced_books, leaderboard |
+| Main | 1, 2, 3, 7 | users, reading_progress, sync_manifest, synced_books, synced_chapters, leaderboard |
 | Social | 4, 5, 8 | book_reviews, chapter_reviews, quotes |
 | Community | 6, 9, 10, 11 | badges, community_source, glossary, character_art |
 
@@ -149,7 +149,7 @@ You can combine multiple schemas into a single Supabase project if you don't nee
 | Project | Schemas | Tables |
 |---------|---------|--------|
 | Auth | 1 | users |
-| Core | 2, 3, 7 | reading_progress, synced_books, leaderboard |
+| Core | 2, 3, 7 | reading_progress, sync_manifest, synced_books, synced_chapters, leaderboard |
 | Reviews | 4, 5 | book_reviews, chapter_reviews |
 | Badges | 6 | badges, user_badges, payment_proofs, nft_wallets |
 | Community | 8, 9, 10, 11 | quotes, community_source, glossary, character_art |

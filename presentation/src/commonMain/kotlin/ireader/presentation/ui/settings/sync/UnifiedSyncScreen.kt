@@ -142,7 +142,7 @@ fun UnifiedSyncScreen(
             item {
                 ProviderOptionCard(
                     title = "Personal Supabase Cloud",
-                    subtitle = "Personal Supabase database sync (books, metadata, categories, progress)",
+                    subtitle = "Personal Supabase database sync (books, chapters, categories, progress)",
                     icon = Icons.Outlined.Storage,
                     isSelected = state.selectedProvider == SyncProviderType.SUPABASE,
                     accountStatus = if (state.isSupabaseConnected) "Connected (${state.supabaseEmail ?: "Personal DB"})" else "Setup required (Personal Supabase)",

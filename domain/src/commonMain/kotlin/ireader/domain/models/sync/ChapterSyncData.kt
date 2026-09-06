@@ -35,7 +35,7 @@ data class ChapterSyncData(
     val dateUpload: Long,
     val dateFetch: Long,
     val translator: String,
-    val content: String // Serialized List<Page> as JSON string
+    val content: String = "" // Serialized List<Page> as JSON string, empty for lightweight manifest
 ) {
     init {
         require(globalId.isNotBlank()) { "Global ID cannot be empty or blank" }

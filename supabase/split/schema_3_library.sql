@@ -104,6 +104,65 @@ CREATE POLICY "Users can manage their own sync manifest"
     USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL)
     WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
 
+CREATE INDEX IF NOT EXISTS idx_sync_manifest_gin 
+    ON public.sync_manifest USING GIN (manifest jsonb_path_ops);
+
+-- ----------------------------------------------------------------------------
+-- Synced Chapters Table (Relational Store - Metadata Only)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.synced_chapters (
+    user_id        TEXT NOT NULL,
+    chapter_id     TEXT NOT NULL,
+    book_id        TEXT NOT NULL,
+    chapter_key    TEXT NOT NULL,
+    name           TEXT NOT NULL,
+    chapter_number REAL DEFAULT 0,
+    source_order   BIGINT DEFAULT 0,
+    read           BOOLEAN DEFAULT false,
+    bookmark       BOOLEAN DEFAULT false,
+    last_page_read BIGINT DEFAULT 0,
+    date_upload    BIGINT DEFAULT 0,
+    date_fetch     BIGINT DEFAULT 0,
+    translator     TEXT DEFAULT '',
+    updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (user_id, chapter_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_user_id ON public.synced_chapters(user_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_book_id ON public.synced_chapters(user_id, book_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_read ON public.synced_chapters(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_bookmark ON public.synced_chapters(user_id, bookmark);
+
+ALTER TABLE public.synced_chapters ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own synced chapters"
+    ON public.synced_chapters FOR ALL
+    USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL)
+    WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+
+-- ----------------------------------------------------------------------------
+-- Synced Chapters Dynamic View (Unpacked from JSONB Manifest)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW public.synced_chapters_view 
+WITH (security_invoker = true) AS
+SELECT 
+    sm.user_id,
+    ch->>'globalId' AS chapter_id,
+    ch->>'bookGlobalId' AS book_id,
+    ch->>'key' AS chapter_key,
+    ch->>'name' AS name,
+    COALESCE((ch->>'number')::numeric, 0) AS chapter_number,
+    COALESCE((ch->>'sourceOrder')::bigint, 0) AS source_order,
+    COALESCE((ch->>'read')::boolean, false) AS read,
+    COALESCE((ch->>'bookmark')::boolean, false) AS bookmark,
+    COALESCE((ch->>'lastPageRead')::bigint, 0) AS last_page_read,
+    COALESCE((ch->>'dateUpload')::bigint, 0) AS date_upload,
+    COALESCE((ch->>'dateFetch')::bigint, 0) AS date_fetch,
+    COALESCE(ch->>'translator', '') AS translator,
+    sm.updated_at
+FROM public.sync_manifest sm,
+LATERAL jsonb_array_elements(sm.manifest->'chapters') AS ch;
+
 -- ============================================================================
 -- SUCCESS MESSAGE
 -- ============================================================================

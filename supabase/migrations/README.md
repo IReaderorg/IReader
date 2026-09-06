@@ -11,6 +11,7 @@ SQL Editor (or via `supabase db push`). Each is idempotent where possible.
 | 003 | `003_synced_books_cover_url.sql` | Adds `cover_url` and `source_name` columns to `synced_books` and updates `get_popular_books` RPC |
 | 004 | `004_security_advisor_fixes.sql` | Fixes Supabase Security Advisor warnings: enables RLS on public tables, sets `security_invoker = true` on views, hardens function search paths |
 | 005 | `005_unified_sync_and_library_enhancements.sql` | Adds `sync_manifest` document store, rich book metadata (`author`, `description`, `genres`, `status`, `favorite`), and personal Supabase sync support |
+| 006 | `006_chapter_sync_and_manifest_updates.sql` | Adds `synced_chapters` table, dynamic `synced_chapters_view` from manifest, and JSONB GIN index on `sync_manifest` |
 
 ## Design notes
 

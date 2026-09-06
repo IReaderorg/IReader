@@ -77,6 +77,7 @@ class UnifiedSyncEngineTest {
 
     private class MockSyncLocalRepository : SyncLocalRepository {
         val books = mutableListOf<BookSyncData>()
+        val chapters = mutableListOf<ChapterSyncData>()
         val history = mutableListOf<HistorySyncData>()
         val deletedIds = mutableListOf<String>()
 
@@ -92,8 +93,11 @@ class UnifiedSyncEngineTest {
             this.history.addAll(history)
         }
 
-        override suspend fun getChapters(includeDownloadedContent: Boolean): List<ChapterSyncData> = emptyList()
-        override suspend fun applyChapters(chapters: List<ChapterSyncData>) {}
+        override suspend fun getChapters(includeDownloadedContent: Boolean): List<ChapterSyncData> = chapters
+        override suspend fun applyChapters(chapters: List<ChapterSyncData>) {
+            this.chapters.removeAll { existing -> chapters.any { it.globalId == existing.globalId } }
+            this.chapters.addAll(chapters)
+        }
         override suspend fun deleteBooksByGlobalIds(globalIds: List<String>) {
             deletedIds.addAll(globalIds)
             books.removeAll { globalIds.contains(it.globalId) }
@@ -262,5 +266,272 @@ class UnifiedSyncEngineTest {
         // Book should have been deleted locally
         assertFalse(localRepo.books.any { it.globalId == "1-deleted-book" })
         assertTrue(localRepo.deletedIds.contains("1-deleted-book"))
+    }
+
+    @Test
+    fun `delta merge applies remote chapters locally without content`() = runTest(testDispatcher) {
+        val prefStore = TestPreferenceStore()
+        val prefs = SyncPreferences(prefStore)
+        prefs.setSelectedProviderType(SyncProviderType.GOOGLE_DRIVE)
+
+        val provider = MockSyncProvider(
+            type = SyncProviderType.GOOGLE_DRIVE,
+            isAuth = true
+        )
+        provider.remoteManifest = UnifiedSyncManifest(
+            version = 1,
+            deviceId = "other-device",
+            timestamp = 1000L,
+            books = listOf(
+                SyncBookItem(
+                    globalId = "1|book-1",
+                    sourceId = 1L,
+                    key = "book-1",
+                    title = "Remote Novel",
+                    favorite = true,
+                    lastModified = 2000L
+                )
+            ),
+            chapters = listOf(
+                ChapterSyncData(
+                    globalId = "1|ch-1",
+                    bookGlobalId = "1|book-1",
+                    key = "ch-1",
+                    name = "Chapter 1",
+                    read = false,
+                    bookmark = false,
+                    lastPageRead = 0L,
+                    sourceOrder = 1L,
+                    number = 1.0f,
+                    dateUpload = 1000L,
+                    dateFetch = 2000L,
+                    translator = "Translator",
+                    content = ""
+                )
+            )
+        )
+
+        val localRepo = MockSyncLocalRepository()
+
+        val engine = UnifiedSyncEngine(
+            syncPreferences = prefs,
+            providers = listOf(provider),
+            localRepository = localRepo,
+            deviceId = "my-device-id"
+        )
+
+        val result = engine.syncNow()
+        assertTrue(result.isSuccess)
+
+        // Remote chapter should now exist in local repository without content
+        val localCh = localRepo.chapters.firstOrNull { it.globalId == "1|ch-1" }
+        assertNotNull(localCh)
+        assertEquals("Chapter 1", localCh.name)
+        assertEquals("", localCh.content)
+        assertEquals(1, localRepo.chapters.size)
+    }
+
+    @Test
+    fun `sync merges chapter reading progress and history`() = runTest(testDispatcher) {
+        val prefStore = TestPreferenceStore()
+        val prefs = SyncPreferences(prefStore)
+        prefs.setSelectedProviderType(SyncProviderType.GOOGLE_DRIVE)
+
+        val provider = MockSyncProvider(
+            type = SyncProviderType.GOOGLE_DRIVE,
+            isAuth = true
+        )
+        provider.remoteManifest = UnifiedSyncManifest(
+            version = 1,
+            deviceId = "other-device",
+            timestamp = 2000L,
+            books = listOf(
+                SyncBookItem(
+                    globalId = "1|book-1",
+                    sourceId = 1L,
+                    key = "book-1",
+                    title = "Book 1",
+                    lastModified = 2000L
+                )
+            ),
+            chapters = listOf(
+                ChapterSyncData(
+                    globalId = "1|ch-1",
+                    bookGlobalId = "1|book-1",
+                    key = "ch-1",
+                    name = "Chapter 1",
+                    read = true, // Read remotely
+                    bookmark = false,
+                    lastPageRead = 20L, // Read further remotely
+                    sourceOrder = 1L,
+                    number = 1.0f,
+                    dateUpload = 1000L,
+                    dateFetch = 1000L,
+                    translator = "",
+                    content = ""
+                )
+            ),
+            progress = listOf(
+                SyncProgressItem(
+                    bookGlobalId = "1|book-1",
+                    chapterKey = "ch-1",
+                    chapterGlobalId = "1|ch-1",
+                    progress = 0.85f,
+                    lastRead = 2000L,
+                    lastModified = 2000L
+                )
+            )
+        )
+
+        val localRepo = MockSyncLocalRepository()
+        localRepo.books.add(
+            BookSyncData(
+                globalId = "1|book-1",
+                sourceId = "1",
+                key = "book-1",
+                title = "Book 1",
+                author = "",
+                description = "",
+                genres = emptyList(),
+                status = 0L,
+                coverUrl = "",
+                favorite = true,
+                updatedAt = 1000L,
+                addedAt = 1000L
+            )
+        )
+        localRepo.chapters.add(
+            ChapterSyncData(
+                globalId = "1|ch-1",
+                bookGlobalId = "1|book-1",
+                key = "ch-1",
+                name = "Chapter 1",
+                read = false, // Not read locally yet
+                bookmark = true, // Bookmarked locally
+                lastPageRead = 5L,
+                sourceOrder = 1L,
+                number = 1.0f,
+                dateUpload = 1000L,
+                dateFetch = 1000L,
+                translator = "",
+                content = ""
+            )
+        )
+        localRepo.history.add(
+            HistorySyncData(
+                chapterGlobalId = "1|ch-1",
+                lastRead = 500L,
+                timeRead = 100L,
+                readingProgress = 0.2
+            )
+        )
+
+        val engine = UnifiedSyncEngine(
+            syncPreferences = prefs,
+            providers = listOf(provider),
+            localRepository = localRepo,
+            deviceId = "my-device-id"
+        )
+
+        val result = engine.syncNow()
+        assertTrue(result.isSuccess)
+
+        // Verify chapter progress merged: read is true, lastPageRead advanced to 20, bookmark preserved
+        val chapter = localRepo.chapters.first { it.globalId == "1|ch-1" }
+        assertTrue(chapter.read)
+        assertEquals(20L, chapter.lastPageRead)
+        assertTrue(chapter.bookmark)
+        assertEquals("", chapter.content)
+
+        // Verify history merged: remote history has higher timestamp and was applied
+        val history = localRepo.history.first { it.chapterGlobalId == "1|ch-1" }
+        assertEquals(2000L, history.lastRead)
+        assertEquals(0.85, history.readingProgress, 0.01)
+    }
+
+    @Test
+    fun `uploaded manifest contains complete chapters stripped of content and enriched progress`() = runTest(testDispatcher) {
+        val prefStore = TestPreferenceStore()
+        val prefs = SyncPreferences(prefStore)
+        prefs.setSelectedProviderType(SyncProviderType.GOOGLE_DRIVE)
+
+        val provider = MockSyncProvider(
+            type = SyncProviderType.GOOGLE_DRIVE,
+            isAuth = true
+        )
+
+        val localRepo = MockSyncLocalRepository()
+        localRepo.books.add(
+            BookSyncData(
+                globalId = "1|book-1",
+                sourceId = "1",
+                key = "book-1",
+                title = "Local Book",
+                author = "Author",
+                description = "Desc",
+                genres = listOf("Fantasy"),
+                status = 1L,
+                coverUrl = "https://example.com/cover.jpg",
+                favorite = true,
+                updatedAt = 1000L,
+                addedAt = 1000L
+            )
+        )
+        localRepo.chapters.add(
+            ChapterSyncData(
+                globalId = "1|ch-1",
+                bookGlobalId = "1|book-1",
+                key = "ch-1",
+                name = "Chapter 1",
+                read = true,
+                bookmark = true,
+                lastPageRead = 15L,
+                sourceOrder = 1L,
+                number = 1.0f,
+                dateUpload = 1000L,
+                dateFetch = 1500L,
+                translator = "Scanlator",
+                content = "some heavy local page content that must never be synced"
+            )
+        )
+        localRepo.history.add(
+            HistorySyncData(
+                chapterGlobalId = "1|ch-1",
+                lastRead = 2500L,
+                timeRead = 300L,
+                readingProgress = 0.75
+            )
+        )
+
+        val engine = UnifiedSyncEngine(
+            syncPreferences = prefs,
+            providers = listOf(provider),
+            localRepository = localRepo,
+            deviceId = "my-device-id"
+        )
+
+        val result = engine.syncNow()
+        assertTrue(result.isSuccess)
+
+        val uploadedManifest = assertNotNull(provider.lastUploadedManifest)
+        assertEquals(1, uploadedManifest.chapters.size)
+
+        val uploadedChapter = uploadedManifest.chapters.first()
+        assertEquals("1|ch-1", uploadedChapter.globalId)
+        assertEquals("1|book-1", uploadedChapter.bookGlobalId)
+        assertEquals("Chapter 1", uploadedChapter.name)
+        assertTrue(uploadedChapter.read)
+        assertTrue(uploadedChapter.bookmark)
+        assertEquals(15L, uploadedChapter.lastPageRead)
+        // Content MUST be stripped to empty string
+        assertEquals("", uploadedChapter.content)
+
+        // Progress must have bookGlobalId and chapterKey mapped from chapter
+        assertEquals(1, uploadedManifest.progress.size)
+        val uploadedProgress = uploadedManifest.progress.first()
+        assertEquals("1|book-1", uploadedProgress.bookGlobalId)
+        assertEquals("ch-1", uploadedProgress.chapterKey)
+        assertEquals("1|ch-1", uploadedProgress.chapterGlobalId)
+        assertEquals(0.75f, uploadedProgress.progress)
     }
 }

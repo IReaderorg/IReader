@@ -156,6 +156,7 @@ class UnifiedSyncEngine(
 
                 // 2. Read local data
                 val localBooks = localRepository.getBooks()
+                val localChapters = localRepository.getChapters(includeDownloadedContent = false)
                 val localHistory = localRepository.getHistory()
                 val now = currentTimeMillis()
 
@@ -217,6 +218,50 @@ class UnifiedSyncEngine(
                     Log.info { "$TAG: Applied ${booksToApplyLocally.size} remote books locally" }
                 }
 
+                // 4b. Merge Chapters (without content, Last-Write-Wins + Progress preservation)
+                _syncState.update { it.copy(progress = 0.72f, currentStep = "Merging chapters...") }
+                val remoteChapters = remoteManifest?.chapters ?: emptyList()
+                val localChaptersMap = localChapters.associateBy { it.globalId }
+                val chaptersToApplyLocally = mutableListOf<ChapterSyncData>()
+
+                remoteChapters.forEach { remoteChapter ->
+                    if (!tombstonedBookIds.contains(remoteChapter.bookGlobalId)) {
+                        val localChapter = localChaptersMap[remoteChapter.globalId]
+                        if (localChapter == null) {
+                            // New chapter from remote, strictly stripped of content
+                            chaptersToApplyLocally.add(remoteChapter.copy(content = ""))
+                        } else {
+                            val isRemoteNewer = remoteChapter.dateFetch > localChapter.dateFetch
+                            val hasProgressChange = (!localChapter.read && remoteChapter.read) ||
+                                (remoteChapter.lastPageRead > localChapter.lastPageRead) ||
+                                (remoteChapter.bookmark != localChapter.bookmark)
+
+                            if (isRemoteNewer || hasProgressChange) {
+                                val merged = localChapter.copy(
+                                    name = if (isRemoteNewer && remoteChapter.name.isNotBlank()) remoteChapter.name else localChapter.name,
+                                    translator = if (isRemoteNewer && remoteChapter.translator.isNotBlank()) remoteChapter.translator else localChapter.translator,
+                                    read = localChapter.read || remoteChapter.read,
+                                    bookmark = if (isRemoteNewer) remoteChapter.bookmark else (localChapter.bookmark || remoteChapter.bookmark),
+                                    lastPageRead = maxOf(localChapter.lastPageRead, remoteChapter.lastPageRead),
+                                    number = if (isRemoteNewer) remoteChapter.number else localChapter.number,
+                                    sourceOrder = if (isRemoteNewer) remoteChapter.sourceOrder else localChapter.sourceOrder,
+                                    dateFetch = maxOf(localChapter.dateFetch, remoteChapter.dateFetch),
+                                    dateUpload = maxOf(localChapter.dateUpload, remoteChapter.dateUpload),
+                                    content = ""
+                                )
+                                if (merged != localChapter) {
+                                    chaptersToApplyLocally.add(merged)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (chaptersToApplyLocally.isNotEmpty()) {
+                    localRepository.applyChapters(chaptersToApplyLocally)
+                    Log.info { "$TAG: Applied ${chaptersToApplyLocally.size} remote chapters locally" }
+                }
+
                 // 5. Merge History / Reading Progress (Last-Write-Wins)
                 _syncState.update { it.copy(progress = 0.8f, currentStep = "Merging reading progress...") }
                 val remoteProgressMap = (remoteManifest?.progress ?: emptyList()).associateBy { it.chapterGlobalId }
@@ -248,8 +293,8 @@ class UnifiedSyncEngine(
                 _syncState.update { it.copy(progress = 0.9f, currentStep = "Uploading unified manifest...") }
 
                 val updatedLocalBooks = localRepository.getBooks()
+                val updatedLocalChapters = localRepository.getChapters(includeDownloadedContent = false)
                 val updatedLocalHistory = localRepository.getHistory()
-
 
                 val unifiedBooks = updatedLocalBooks.map {
                     SyncBookItem(
@@ -267,17 +312,27 @@ class UnifiedSyncEngine(
                     )
                 }
 
+                // Strictly ensure no chapter body/page content is ever sent in the manifest payload
+                val unifiedChapters = updatedLocalChapters.map {
+                    it.copy(content = "")
+                }
+
+                // Map chapterGlobalId -> (bookGlobalId, key) to enrich reading progress
+                val chapterToBookMap = updatedLocalChapters.associate { it.globalId to (it.bookGlobalId to it.key) }
+
                 val unifiedProgress = updatedLocalHistory.map {
+                    val info = chapterToBookMap[it.chapterGlobalId]
+                    val bookGlobalId = info?.first ?: ""
+                    val chapterKey = info?.second ?: it.chapterGlobalId.substringAfter("|", "")
                     SyncProgressItem(
-                        bookGlobalId = "",
-                        chapterKey = "",
+                        bookGlobalId = bookGlobalId,
+                        chapterKey = chapterKey,
                         chapterGlobalId = it.chapterGlobalId,
                         progress = it.readingProgress.toFloat(),
                         lastRead = it.lastRead,
                         lastModified = it.lastRead
                     )
                 }
-
 
                 // Merge active tombstones
                 val combinedTombstones = (activeRemoteTombstones + synchronized(localTombstones) { localTombstones.toList() })
@@ -289,6 +344,7 @@ class UnifiedSyncEngine(
                     deviceId = deviceId,
                     timestamp = now,
                     books = unifiedBooks,
+                    chapters = unifiedChapters,
                     progress = unifiedProgress,
                     tombstones = combinedTombstones
                 )
@@ -308,13 +364,14 @@ class UnifiedSyncEngine(
                     currentStep = "Sync Complete",
                     lastSyncTimestamp = now,
                     booksSyncedCount = booksToApplyLocally.size,
+                    chaptersSyncedCount = chaptersToApplyLocally.size,
                     progressSyncedCount = historyToApplyLocally.size,
                     errorMessage = null
                 )
 
                 syncPreferences.lastSyncTimestamp().set(now)
                 _syncState.value = finishState
-                Log.info { "$TAG: Sync finished successfully. Synced ${booksToApplyLocally.size} books, ${historyToApplyLocally.size} progress entries" }
+                Log.info { "$TAG: Sync finished successfully. Synced ${booksToApplyLocally.size} books, ${chaptersToApplyLocally.size} chapters, ${historyToApplyLocally.size} progress entries" }
                 Result.success(finishState)
             } catch (e: Exception) {
                 if (e is CancellationException) {

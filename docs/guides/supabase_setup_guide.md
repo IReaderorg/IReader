@@ -8,7 +8,7 @@ This guide walks you through setting up your own **free, private Supabase databa
 
 * **100% Free Forever**: Supabase's free tier provides 500MB of database storage (enough for millions of synced books and chapters).
 * **Private & Secure**: Your library data and reading history are stored on your personal cloud database, never on developer or community servers.
-* **Full-Fidelity Synchronization (`sync_manifest`)**: Syncs books, categories, cover art, chapter progress, scroll percentages, and reading stats.
+* **Full-Fidelity Synchronization (`sync_manifest`)**: Syncs books, complete chapters (titles, numbers, read status, bookmarks, without chapter body content), cover art, reading progress, scroll percentages, and reading history.
 * **Cross-Device Gamification**: Seamlessly earn Spirit Stones, keep your check-in streak, and sync balances across all your devices.
 * **Quick Configuration Sharing**: Export a lightweight JSON config on one device and import it on your phone or desktop in 2 clicks.
 
@@ -21,7 +21,8 @@ This guide walks you through setting up your own **free, private Supabase databa
 4. [Step 4: Configure IReader App](#step-4-configure-ireader-app)
 5. [Step 5: Sync to Multiple Devices (Export & Import)](#step-5-sync-to-multiple-devices-export--import)
 6. [Step 6: Daily Check-in & Spirit Stones](#step-6-daily-check-in--spirit-stones)
-7. [Troubleshooting & Common Errors](#troubleshooting--common-errors)
+7. [Step 7: How Chapter Synchronization Works](#step-7-how-chapter-synchronization-works)
+8. [Troubleshooting & Common Errors](#troubleshooting--common-errors)
 
 ---
 
@@ -75,6 +76,7 @@ CREATE TABLE IF NOT EXISTS public.sync_manifest (
 ALTER TABLE public.sync_manifest ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public sync_manifest access" ON public.sync_manifest;
 CREATE POLICY "Allow public sync_manifest access" ON public.sync_manifest FOR ALL USING (true) WITH CHECK (true);
+CREATE INDEX IF NOT EXISTS idx_sync_manifest_gin ON public.sync_manifest USING GIN (manifest jsonb_path_ops);
 
 -- 2. Synced Books (Relational View with rich metadata)
 CREATE TABLE IF NOT EXISTS public.synced_books (
@@ -130,7 +132,56 @@ ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow public reading_progress access" ON public.reading_progress;
 CREATE POLICY "Allow public reading_progress access" ON public.reading_progress FOR ALL USING (true) WITH CHECK (true);
 
--- 4. Users & Gamification Economy
+-- 4. Synced Chapters (Relational Table - Metadata Only, Zero Content)
+CREATE TABLE IF NOT EXISTS public.synced_chapters (
+    user_id        TEXT NOT NULL,
+    chapter_id     TEXT NOT NULL,
+    book_id        TEXT NOT NULL,
+    chapter_key    TEXT NOT NULL,
+    name           TEXT NOT NULL,
+    chapter_number REAL DEFAULT 0,
+    source_order   BIGINT DEFAULT 0,
+    read           BOOLEAN DEFAULT false,
+    bookmark       BOOLEAN DEFAULT false,
+    last_page_read BIGINT DEFAULT 0,
+    date_upload    BIGINT DEFAULT 0,
+    date_fetch     BIGINT DEFAULT 0,
+    translator     TEXT DEFAULT '',
+    updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (user_id, chapter_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_user_id ON public.synced_chapters(user_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_book_id ON public.synced_chapters(user_id, book_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_read ON public.synced_chapters(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_bookmark ON public.synced_chapters(user_id, bookmark);
+
+ALTER TABLE public.synced_chapters ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public synced_chapters access" ON public.synced_chapters;
+CREATE POLICY "Allow public synced_chapters access" ON public.synced_chapters FOR ALL USING (true) WITH CHECK (true);
+
+-- 5. Synced Chapters Dynamic View (Unpacked from JSONB Manifest)
+CREATE OR REPLACE VIEW public.synced_chapters_view 
+WITH (security_invoker = true) AS
+SELECT 
+    sm.user_id,
+    ch->>'globalId' AS chapter_id,
+    ch->>'bookGlobalId' AS book_id,
+    ch->>'key' AS chapter_key,
+    ch->>'name' AS name,
+    COALESCE((ch->>'number')::numeric, 0) AS chapter_number,
+    COALESCE((ch->>'sourceOrder')::bigint, 0) AS source_order,
+    COALESCE((ch->>'read')::boolean, false) AS read,
+    COALESCE((ch->>'bookmark')::boolean, false) AS bookmark,
+    COALESCE((ch->>'lastPageRead')::bigint, 0) AS last_page_read,
+    COALESCE((ch->>'dateUpload')::bigint, 0) AS date_upload,
+    COALESCE((ch->>'dateFetch')::bigint, 0) AS date_fetch,
+    COALESCE(ch->>'translator', '') AS translator,
+    sm.updated_at
+FROM public.sync_manifest sm,
+LATERAL jsonb_array_elements(sm.manifest->'chapters') AS ch;
+
+-- 6. Users & Gamification Economy
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY DEFAULT auth.uid(),
     email TEXT,
@@ -339,6 +390,42 @@ Once configured:
   * Your streak will increment (+1 day).
   * Spirit Stones will be awarded (10 base, 50 at 7-day streak, 200 at 30-day streak).
   * Your balance will sync across all connected devices.
+
+---
+
+## Step 7: How Chapter Synchronization Works
+
+IReader includes complete chapter synchronization across all your devices, designed with speed, bandwidth efficiency, and privacy in mind:
+
+### 1. Metadata-Only Payloads (No Content Uploaded)
+* **What is synced**: Chapter names, numbers, source order, read/unread status, bookmarks, last read page, and fetch dates.
+* **What is NEVER synced**: Chapter body text, novel paragraphs, and downloaded offline files are **never uploaded** to Supabase.
+* **Benefits**:
+  * **Lightning fast**: Even a library with hundreds of books and 50,000+ chapters syncs in seconds with a compressed payload under a few megabytes.
+  * **Free-tier friendly**: Consumes minimal Supabase database storage (less than 5MB for thousands of chapters).
+  * **Storage safe**: Preserves your phone/desktop local storage without downloading gigabytes of text files redundantly.
+
+### 2. Single-Request Atomic Sync (`sync_manifest`)
+All book and chapter states are uploaded together into the `sync_manifest` table as an atomic JSONB document. This prevents partial sync failures or network timeouts caused by firing thousands of individual row inserts. A specialized PostgreSQL GIN index (`idx_sync_manifest_gin`) ensures fast updates and querying.
+
+### 3. Inspecting Synced Chapters in Supabase
+You can view your synced chapters in relational format directly in the Supabase Dashboard:
+1. In the Supabase sidebar, open **Table Editor**.
+2. Click on **`synced_chapters_view`**.
+3. You will see a live, unpacked relational table of every chapter across your books, including its read status, bookmark flag, and last read page!
+4. You can also run SQL queries in the SQL Editor:
+   ```sql
+   -- Find all bookmarked chapters across your library
+   SELECT book_id, name, chapter_number, last_page_read 
+   FROM public.synced_chapters_view 
+   WHERE bookmark = true;
+
+   -- Count total read chapters per book
+   SELECT book_id, COUNT(*) AS read_chapters 
+   FROM public.synced_chapters_view 
+   WHERE read = true 
+   GROUP BY book_id;
+   ```
 
 ---
 

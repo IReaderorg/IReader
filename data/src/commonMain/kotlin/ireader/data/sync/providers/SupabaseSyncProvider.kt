@@ -133,14 +133,16 @@ class SupabaseSyncProvider(
 
             // 3. Sync reading progress items to reading_progress table
             manifest.progress.forEach { progressItem ->
-                val readingProgress = ReadingProgress(
-                    userId = userId,
-                    bookId = progressItem.bookGlobalId,
-                    lastChapterSlug = progressItem.chapterKey,
-                    lastScrollPosition = progressItem.progress,
-                    updatedAt = progressItem.lastModified
-                )
-                runCatching { remoteRepository.syncReadingProgress(readingProgress) }
+                if (progressItem.bookGlobalId.isNotBlank() && progressItem.chapterKey.isNotBlank()) {
+                    val readingProgress = ReadingProgress(
+                        userId = userId,
+                        bookId = progressItem.bookGlobalId,
+                        lastChapterSlug = progressItem.chapterKey,
+                        lastScrollPosition = progressItem.progress,
+                        updatedAt = progressItem.lastModified
+                    )
+                    runCatching { remoteRepository.syncReadingProgress(readingProgress) }
+                }
             }
 
             Result.success(Unit)

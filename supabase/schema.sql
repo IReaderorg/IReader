@@ -58,32 +58,30 @@ COMMENT ON COLUMN public.users.is_admin IS 'Whether user has admin privileges fo
 -- ----------------------------------------------------------------------------
 -- Reading Progress Table
 -- ----------------------------------------------------------------------------
+-- Reading Progress Table
+-- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.reading_progress (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
     book_id TEXT NOT NULL,
     last_chapter_slug TEXT NOT NULL,
     last_scroll_position FLOAT DEFAULT 0,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at BIGINT DEFAULT 0,
     
-    CONSTRAINT unique_user_book UNIQUE(user_id, book_id),
-    CONSTRAINT scroll_position_range CHECK (last_scroll_position >= 0 AND last_scroll_position <= 1),
+    PRIMARY KEY (user_id, book_id),
     CONSTRAINT book_id_not_empty CHECK (LENGTH(book_id) > 0),
     CONSTRAINT chapter_slug_not_empty CHECK (LENGTH(last_chapter_slug) > 0)
 );
 
 CREATE INDEX IF NOT EXISTS idx_reading_progress_user_id ON public.reading_progress(user_id);
-CREATE INDEX IF NOT EXISTS idx_reading_progress_user_book ON public.reading_progress(user_id, book_id);
-CREATE INDEX IF NOT EXISTS idx_reading_progress_updated_at ON public.reading_progress(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reading_progress_book_id ON public.reading_progress(book_id);
 
 COMMENT ON TABLE public.reading_progress IS 'Current reading position for each book';
 
 -- ----------------------------------------------------------------------------
--- Synced Books Table
+-- Synced Books Table (Relational Store)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.synced_books (
-    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
     book_id TEXT NOT NULL,
     source_id BIGINT NOT NULL,
     title TEXT NOT NULL,
@@ -91,6 +89,12 @@ CREATE TABLE IF NOT EXISTS public.synced_books (
     last_read BIGINT NOT NULL DEFAULT 0,
     cover_url TEXT DEFAULT '',
     source_name TEXT DEFAULT '',
+    author TEXT DEFAULT '',
+    description TEXT DEFAULT '',
+    genres TEXT DEFAULT '',
+    status BIGINT DEFAULT 0,
+    favorite BOOLEAN DEFAULT true,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     PRIMARY KEY (user_id, book_id),
     CONSTRAINT book_id_synced_not_empty CHECK (LENGTH(book_id) > 0),
@@ -100,10 +104,77 @@ CREATE TABLE IF NOT EXISTS public.synced_books (
 );
 
 CREATE INDEX IF NOT EXISTS idx_synced_books_user_id ON public.synced_books(user_id);
+CREATE INDEX IF NOT EXISTS idx_synced_books_book_id ON public.synced_books(book_id);
 CREATE INDEX IF NOT EXISTS idx_synced_books_last_read ON public.synced_books(user_id, last_read DESC);
 CREATE INDEX IF NOT EXISTS idx_synced_books_title ON public.synced_books(title);
 
-COMMENT ON TABLE public.synced_books IS 'Favorite books with essential metadata';
+COMMENT ON TABLE public.synced_books IS 'Favorite books with rich metadata';
+
+-- ----------------------------------------------------------------------------
+-- Sync Manifest Table (Document Store for Full-Fidelity Sync)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.sync_manifest (
+    user_id TEXT NOT NULL PRIMARY KEY,
+    manifest JSONB NOT NULL,
+    updated_at BIGINT NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_sync_manifest_gin 
+    ON public.sync_manifest USING GIN (manifest jsonb_path_ops);
+
+COMMENT ON TABLE public.sync_manifest IS 'Canonical full-fidelity JSONB sync manifest (books, chapters without content, progress, categories, tombstones)';
+
+-- ----------------------------------------------------------------------------
+-- Synced Chapters Table (Relational Store - Metadata Only, Zero Content)
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.synced_chapters (
+    user_id TEXT NOT NULL,
+    chapter_id TEXT NOT NULL,
+    book_id TEXT NOT NULL,
+    chapter_key TEXT NOT NULL,
+    name TEXT NOT NULL,
+    chapter_number REAL DEFAULT 0,
+    source_order BIGINT DEFAULT 0,
+    read BOOLEAN DEFAULT false,
+    bookmark BOOLEAN DEFAULT false,
+    last_page_read BIGINT DEFAULT 0,
+    date_upload BIGINT DEFAULT 0,
+    date_fetch BIGINT DEFAULT 0,
+    translator TEXT DEFAULT '',
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (user_id, chapter_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_user_id ON public.synced_chapters(user_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_book_id ON public.synced_chapters(user_id, book_id);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_read ON public.synced_chapters(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_bookmark ON public.synced_chapters(user_id, bookmark);
+CREATE INDEX IF NOT EXISTS idx_synced_chapters_order ON public.synced_chapters(user_id, book_id, source_order ASC);
+
+COMMENT ON TABLE public.synced_chapters IS 'Synced chapter metadata (no chapter contents stored)';
+
+-- ----------------------------------------------------------------------------
+-- Synced Chapters Dynamic View (Unpacked directly from sync_manifest)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW public.synced_chapters_view 
+WITH (security_invoker = true) AS
+SELECT 
+    sm.user_id,
+    ch->>'globalId' AS chapter_id,
+    ch->>'bookGlobalId' AS book_id,
+    ch->>'key' AS chapter_key,
+    ch->>'name' AS name,
+    COALESCE((ch->>'number')::numeric, 0) AS chapter_number,
+    COALESCE((ch->>'sourceOrder')::bigint, 0) AS source_order,
+    COALESCE((ch->>'read')::boolean, false) AS read,
+    COALESCE((ch->>'bookmark')::boolean, false) AS bookmark,
+    COALESCE((ch->>'lastPageRead')::bigint, 0) AS last_page_read,
+    COALESCE((ch->>'dateUpload')::bigint, 0) AS date_upload,
+    COALESCE((ch->>'dateFetch')::bigint, 0) AS date_fetch,
+    COALESCE(ch->>'translator', '') AS translator,
+    sm.updated_at
+FROM public.sync_manifest sm,
+LATERAL jsonb_array_elements(sm.manifest->'chapters') AS ch;
 
 -- ----------------------------------------------------------------------------
 -- Book Reviews Table
@@ -613,6 +684,8 @@ ON CONFLICT (version) DO NOTHING;
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reading_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.synced_books ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.sync_manifest ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.synced_chapters ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.book_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chapter_reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
@@ -643,18 +716,34 @@ CREATE POLICY "Users can insert their own data" ON public.users FOR INSERT WITH 
 -- ----------------------------------------------------------------------------
 -- Reading Progress Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own reading progress" ON public.reading_progress FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert their own reading progress" ON public.reading_progress FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update their own reading progress" ON public.reading_progress FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete their own reading progress" ON public.reading_progress FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Users can view their own reading progress" ON public.reading_progress FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can insert their own reading progress" ON public.reading_progress FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can update their own reading progress" ON public.reading_progress FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can delete their own reading progress" ON public.reading_progress FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
 
 -- ----------------------------------------------------------------------------
 -- Synced Books Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own synced books" ON public.synced_books FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert their own synced books" ON public.synced_books FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update their own synced books" ON public.synced_books FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete their own synced books" ON public.synced_books FOR DELETE USING (auth.uid() = user_id);
+CREATE POLICY "Users can view their own synced books" ON public.synced_books FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can insert their own synced books" ON public.synced_books FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can update their own synced books" ON public.synced_books FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can delete their own synced books" ON public.synced_books FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+
+-- ----------------------------------------------------------------------------
+-- Sync Manifest Table Policies
+-- ----------------------------------------------------------------------------
+CREATE POLICY "Users can view their own sync manifest" ON public.sync_manifest FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can insert their own sync manifest" ON public.sync_manifest FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can update their own sync manifest" ON public.sync_manifest FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can delete their own sync manifest" ON public.sync_manifest FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+
+-- ----------------------------------------------------------------------------
+-- Synced Chapters Table Policies
+-- ----------------------------------------------------------------------------
+CREATE POLICY "Users can view their own synced chapters" ON public.synced_chapters FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can insert their own synced chapters" ON public.synced_chapters FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can update their own synced chapters" ON public.synced_chapters FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can delete their own synced chapters" ON public.synced_chapters FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
 
 -- ----------------------------------------------------------------------------
 -- Book Reviews Table Policies

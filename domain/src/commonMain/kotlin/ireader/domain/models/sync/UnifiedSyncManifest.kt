@@ -21,7 +21,8 @@ enum class UniversalSyncItemType {
     BOOK,
     CATEGORY,
     HISTORY,
-    BOOKMARK
+    BOOKMARK,
+    CHAPTER
 }
 
 /**
@@ -36,6 +37,7 @@ data class UnifiedSyncManifest(
     val books: List<SyncBookItem> = emptyList(),
     val progress: List<SyncProgressItem> = emptyList(),
     val categories: List<SyncCategoryItem> = emptyList(),
+    val chapters: List<ChapterSyncData> = emptyList(),
     val tombstones: List<SyncTombstone> = emptyList()
 )
 
@@ -105,6 +107,7 @@ data class UnifiedSyncState(
     val currentStep: String = "",
     val lastSyncTimestamp: Long = 0L,
     val booksSyncedCount: Int = 0,
+    val chaptersSyncedCount: Int = 0,
     val progressSyncedCount: Int = 0,
     val errorMessage: String? = null
 )

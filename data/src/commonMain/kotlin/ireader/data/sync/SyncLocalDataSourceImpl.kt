@@ -143,11 +143,12 @@ class SyncLocalDataSourceImpl(
     override suspend fun getChapters(includeDownloadedContent: Boolean): List<ChapterSyncData> {
         return handler.await {
             // Get all chapters for all books
-            chapterQueries.getAllChapters().executeAsList().map { chapter ->
+            chapterQueries.getAllChapters().executeAsList().mapNotNull { chapter ->
                 // Get book to construct book global ID
-                val book = bookQueries.findBookById(chapter.book_id).executeAsOneOrNull()
-                val bookGlobalId = if (book != null) "${book.source}|${book.url}" else ""
-                val chapterGlobalId = if (book != null) "${book.source}|${chapter.url}" else ""
+                val book = bookQueries.findBookById(chapter.book_id).executeAsOneOrNull() ?: return@mapNotNull null
+                val bookGlobalId = "${book.source}|${book.url}"
+                val chapterGlobalId = "${book.source}|${chapter.url}"
+                if (bookGlobalId.isBlank() || chapterGlobalId.isBlank() || chapter.url.isBlank()) return@mapNotNull null
                 
                 // Encode content to JSON string using extension function only when requested
                 val contentJson = if (includeDownloadedContent && chapter.content.isNotEmpty()) {
@@ -155,17 +156,17 @@ class SyncLocalDataSourceImpl(
                         chapter.content.encode()
                     } catch (e: Exception) {
                         Log.error("Failed to encode chapter content for chapter ${chapter.name} (${chapter.url})", e)
-                        "[]"
+                        ""
                     }
                 } else {
-                    "[]"
+                    ""
                 }
                 
                 ChapterSyncData(
                     globalId = chapterGlobalId,
                     bookGlobalId = bookGlobalId,
                     key = chapter.url,
-                    name = chapter.name,
+                    name = chapter.name.ifBlank { "Chapter ${chapter.chapter_number}" },
                     read = chapter.read,
                     bookmark = chapter.bookmark,
                     lastPageRead = chapter.last_page_read,
@@ -337,7 +338,11 @@ class SyncLocalDataSourceImpl(
                 ).executeAsOneOrNull()
                 
                 // Use upsertForSync to handle both insert and update cases
-                val shouldUpdate = existingChapter == null || chapter.dateFetch > existingChapter.date_fetch
+                val shouldUpdate = existingChapter == null ||
+                    chapter.dateFetch > existingChapter.date_fetch ||
+                    chapter.read != existingChapter.read ||
+                    chapter.bookmark != existingChapter.bookmark ||
+                    chapter.lastPageRead != existingChapter.last_page_read
                 
                 if (shouldUpdate) {
                     try {
@@ -347,18 +352,24 @@ class SyncLocalDataSourceImpl(
                         } catch (e: Exception) {
                             emptyList() // Empty content if decoding fails
                         }
+
+                        val mergedRead = if (existingChapter != null) (existingChapter.read || chapter.read) else chapter.read
+                        val mergedLastPageRead = if (existingChapter != null) maxOf(existingChapter.last_page_read, chapter.lastPageRead) else chapter.lastPageRead
+                        val mergedBookmark = if (existingChapter != null) {
+                            if (chapter.dateFetch > existingChapter.date_fetch) chapter.bookmark else (existingChapter.bookmark || chapter.bookmark)
+                        } else chapter.bookmark
                         
                         chapterQueries.upsertForSync(
                             bookId = book._id,
                             key = chapter.key,
                             name = chapter.name,
                             translator = chapter.translator.ifEmpty { null },
-                            read = chapter.read,
-                            bookmark = chapter.bookmark,
-                            last_page_read = chapter.lastPageRead,
+                            read = mergedRead,
+                            bookmark = mergedBookmark,
+                            last_page_read = mergedLastPageRead,
                             chapter_number = chapter.number,
                             source_order = chapter.sourceOrder,
-                            date_fetch = chapter.dateFetch,
+                            date_fetch = if (existingChapter != null) maxOf(existingChapter.date_fetch, chapter.dateFetch) else chapter.dateFetch,
                             date_upload = chapter.dateUpload,
                             content = contentPages,
                             type = 0L
