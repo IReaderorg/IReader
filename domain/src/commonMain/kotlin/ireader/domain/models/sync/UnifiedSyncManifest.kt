@@ -10,7 +10,8 @@ enum class SyncProviderType {
     NONE,
     GOOGLE_DRIVE,
     SUPABASE,
-    LOCAL_WIFI
+    LOCAL_WIFI,
+    CUSTOM_CLOUD
 }
 
 /**

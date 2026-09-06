@@ -39,20 +39,33 @@ class CommunityRepositoryImpl(
     
     private fun getBaseUrl(): String {
         val customUrl = communityPreferences.communitySourceUrl().get()
-        return if (customUrl.isNotBlank()) {
-            customUrl.trimEnd('/')
-        } else {
-            // Fall back to library URL if community URL not set
-            supabasePreferences.supabaseLibraryUrl().get().trimEnd('/')
+        if (customUrl.isNotBlank()) {
+            return customUrl.trimEnd('/')
+        }
+        val effectiveCommunity = supabasePreferences.getEffectiveCommunityUrl()
+        if (effectiveCommunity.isNotBlank()) {
+            return effectiveCommunity.trimEnd('/')
+        }
+        return try {
+            ireader.domain.config.PlatformConfig.getSupabaseAnalyticsUrl().trimEnd('/')
+        } catch (_: Exception) {
+            ""
         }
     }
     
     private fun getApiKey(): String {
         val customKey = communityPreferences.communitySourceApiKey().get()
-        return if (customKey.isNotBlank()) {
-            customKey
-        } else {
-            supabasePreferences.supabaseLibraryKey().get()
+        if (customKey.isNotBlank()) {
+            return customKey
+        }
+        val effectiveKey = supabasePreferences.getEffectiveCommunityKey()
+        if (effectiveKey.isNotBlank()) {
+            return effectiveKey
+        }
+        return try {
+            ireader.domain.config.PlatformConfig.getSupabaseAnalyticsKey()
+        } catch (_: Exception) {
+            ""
         }
     }
     

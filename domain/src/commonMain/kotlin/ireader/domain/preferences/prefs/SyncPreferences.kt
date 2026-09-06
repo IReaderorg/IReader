@@ -23,6 +23,19 @@ class SyncPreferences(private val preferenceStore: PreferenceStore) {
         const val SYNC_TRANSFER_PROGRESS = "sync_transfer_progress"
         const val SYNC_TRANSFER_DOWNLOADED_CHAPTERS = "sync_transfer_downloaded_chapters"
         const val SYNC_TRANSFER_SETTINGS = "sync_transfer_settings"
+
+        // Granular Sync Content Options (Optional for self-hosted instances)
+        const val SYNC_BOOKS_ENABLED = "sync_books_enabled"
+        const val SYNC_CHAPTERS_ENABLED = "sync_chapters_enabled"
+        const val SYNC_PROGRESS_ENABLED = "sync_progress_enabled"
+        const val SYNC_HISTORY_ENABLED = "sync_history_enabled"
+
+        // Custom Cloud / WebDAV / Nextcloud / TrueNAS
+        const val CUSTOM_CLOUD_URL = "custom_cloud_url"
+        const val CUSTOM_CLOUD_USERNAME = "custom_cloud_username"
+        const val CUSTOM_CLOUD_PASSWORD = "custom_cloud_password"
+        const val CUSTOM_CLOUD_SERVER_TYPE = "custom_cloud_server_type"
+        const val CUSTOM_CLOUD_PATH = "custom_cloud_path"
     }
 
     /**
@@ -165,6 +178,84 @@ class SyncPreferences(private val preferenceStore: PreferenceStore) {
         val current = getSavedDevices().filterNot { it.deviceId == deviceId }
         val newJson = json.encodeToString(current)
         savedDevicesJson().set(newJson)
+    }
+
+    // ========== Granular Content Sync Preferences ==========
+
+    /**
+     * Whether to sync books (titles, covers, categories, status, favorite state).
+     */
+    fun syncBooksEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_BOOKS_ENABLED, true)
+    }
+
+    /**
+     * Whether to sync chapters (metadata, numbers, read state, bookmarks, last read page).
+     * Does NOT sync or transmit chapter text contents.
+     */
+    fun syncChaptersEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_CHAPTERS_ENABLED, true)
+    }
+
+    /**
+     * Whether to sync reading progress (scroll positions, current chapter).
+     */
+    fun syncProgressEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_PROGRESS_ENABLED, true)
+    }
+
+    /**
+     * Whether to sync reading history timestamps.
+     */
+    fun syncHistoryEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SYNC_HISTORY_ENABLED, true)
+    }
+
+    // ========== Custom Cloud (Nextcloud / TrueNAS / WebDAV) Preferences ==========
+
+    /**
+     * WebDAV or Nextcloud server URL.
+     * Example: https://cloud.example.com/remote.php/dav/files/myuser/ or https://truenas.local/webdav/
+     */
+    fun customCloudUrl(): Preference<String> {
+        return preferenceStore.getString(CUSTOM_CLOUD_URL, "")
+    }
+
+    /**
+     * Username for Custom Cloud / Nextcloud / TrueNAS authentication.
+     */
+    fun customCloudUsername(): Preference<String> {
+        return preferenceStore.getString(CUSTOM_CLOUD_USERNAME, "")
+    }
+
+    /**
+     * Password or App Password / Token for Custom Cloud authentication.
+     */
+    fun customCloudPassword(): Preference<String> {
+        return preferenceStore.getString(CUSTOM_CLOUD_PASSWORD, "")
+    }
+
+    /**
+     * Server type: "NEXTCLOUD", "TRUENAS", or "WEBDAV".
+     */
+    fun customCloudServerType(): Preference<String> {
+        return preferenceStore.getString(CUSTOM_CLOUD_SERVER_TYPE, "NEXTCLOUD")
+    }
+
+    /**
+     * Subdirectory path on the remote cloud for IReader manifests (default: "IReader").
+     */
+    fun customCloudPath(): Preference<String> {
+        return preferenceStore.getString(CUSTOM_CLOUD_PATH, "IReader")
+    }
+
+    /**
+     * Check if Custom Cloud has required credentials configured.
+     */
+    fun isCustomCloudConfigured(): Boolean {
+        return customCloudUrl().get().trim().isNotBlank() &&
+               customCloudUsername().get().trim().isNotBlank() &&
+               customCloudPassword().get().trim().isNotBlank()
     }
 }
 

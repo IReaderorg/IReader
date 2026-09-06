@@ -35,4 +35,9 @@ interface SupabaseClientProvider {
      * Used to verify app is using official backend
      */
     fun getSupabaseUrl(): String
+
+    /**
+     * Invalidate and close cached Supabase clients when configuration changes.
+     */
+    fun invalidateClients() {}
 }

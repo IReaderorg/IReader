@@ -183,108 +183,117 @@ class UnifiedSyncEngine(
                 if (isCancelled) throw CancellationException("Sync cancelled")
 
                 // 4. Merge Books (Last-Write-Wins)
-                _syncState.update { it.copy(progress = 0.65f, currentStep = "Merging books...") }
-                val remoteBooksMap = (remoteManifest?.books ?: emptyList()).associateBy { it.globalId }
-                val localBooksMap = localBooks.associateBy { it.globalId }
-
+                val syncBooks = syncPreferences.syncBooksEnabled().get()
                 val booksToApplyLocally = mutableListOf<BookSyncData>()
-                remoteBooksMap.forEach { (globalId, remoteBook) ->
-                    if (!tombstonedBookIds.contains(globalId)) {
-                        val localBook = localBooksMap[globalId]
-                        if (localBook == null || remoteBook.lastModified > localBook.updatedAt) {
-                            booksToApplyLocally.add(
-                                BookSyncData(
-                                    globalId = remoteBook.globalId,
-                                    sourceId = remoteBook.sourceId.toString(),
-                                    key = remoteBook.key,
-                                    title = remoteBook.title,
-                                    author = remoteBook.author,
-                                    description = remoteBook.description,
-                                    genres = remoteBook.genres,
-                                    status = remoteBook.status,
-                                    coverUrl = remoteBook.coverUrl,
-                                    favorite = remoteBook.favorite,
-                                    updatedAt = remoteBook.lastModified,
-                                    addedAt = remoteBook.lastModified
+                if (syncBooks) {
+                    _syncState.update { it.copy(progress = 0.65f, currentStep = "Merging books...") }
+                    val remoteBooksMap = (remoteManifest?.books ?: emptyList()).associateBy { it.globalId }
+                    val localBooksMap = localBooks.associateBy { it.globalId }
+
+                    remoteBooksMap.forEach { (globalId, remoteBook) ->
+                        if (!tombstonedBookIds.contains(globalId)) {
+                            val localBook = localBooksMap[globalId]
+                            if (localBook == null || remoteBook.lastModified > localBook.updatedAt) {
+                                booksToApplyLocally.add(
+                                    BookSyncData(
+                                        globalId = remoteBook.globalId,
+                                        sourceId = remoteBook.sourceId.toString(),
+                                        key = remoteBook.key,
+                                        title = remoteBook.title,
+                                        author = remoteBook.author,
+                                        description = remoteBook.description,
+                                        genres = remoteBook.genres,
+                                        status = remoteBook.status,
+                                        coverUrl = remoteBook.coverUrl,
+                                        favorite = remoteBook.favorite,
+                                        updatedAt = remoteBook.lastModified,
+                                        addedAt = remoteBook.lastModified
+                                    )
                                 )
-                            )
+                            }
                         }
+                    }
+
+                    if (booksToApplyLocally.isNotEmpty()) {
+                        localRepository.applyBooks(booksToApplyLocally)
+                        libraryController?.dispatch(LibraryCommand.RefreshLibrary)
+                        Log.info { "$TAG: Applied ${booksToApplyLocally.size} remote books locally" }
                     }
                 }
 
-                if (booksToApplyLocally.isNotEmpty()) {
-                    localRepository.applyBooks(booksToApplyLocally)
-                    libraryController?.dispatch(LibraryCommand.RefreshLibrary)
-                    Log.info { "$TAG: Applied ${booksToApplyLocally.size} remote books locally" }
-                }
-
                 // 4b. Merge Chapters (without content, Last-Write-Wins + Progress preservation)
-                _syncState.update { it.copy(progress = 0.72f, currentStep = "Merging chapters...") }
-                val remoteChapters = remoteManifest?.chapters ?: emptyList()
-                val localChaptersMap = localChapters.associateBy { it.globalId }
+                val syncChapters = syncPreferences.syncChaptersEnabled().get()
                 val chaptersToApplyLocally = mutableListOf<ChapterSyncData>()
+                if (syncChapters) {
+                    _syncState.update { it.copy(progress = 0.72f, currentStep = "Merging chapters...") }
+                    val remoteChapters = remoteManifest?.chapters ?: emptyList()
+                    val localChaptersMap = localChapters.associateBy { it.globalId }
 
-                remoteChapters.forEach { remoteChapter ->
-                    if (!tombstonedBookIds.contains(remoteChapter.bookGlobalId)) {
-                        val localChapter = localChaptersMap[remoteChapter.globalId]
-                        if (localChapter == null) {
-                            // New chapter from remote, strictly stripped of content
-                            chaptersToApplyLocally.add(remoteChapter.copy(content = ""))
-                        } else {
-                            val isRemoteNewer = remoteChapter.dateFetch > localChapter.dateFetch
-                            val hasProgressChange = (!localChapter.read && remoteChapter.read) ||
-                                (remoteChapter.lastPageRead > localChapter.lastPageRead) ||
-                                (remoteChapter.bookmark != localChapter.bookmark)
+                    remoteChapters.forEach { remoteChapter ->
+                        if (!tombstonedBookIds.contains(remoteChapter.bookGlobalId)) {
+                            val localChapter = localChaptersMap[remoteChapter.globalId]
+                            if (localChapter == null) {
+                                // New chapter from remote, strictly stripped of content
+                                chaptersToApplyLocally.add(remoteChapter.copy(content = ""))
+                            } else {
+                                val isRemoteNewer = remoteChapter.dateFetch > localChapter.dateFetch
+                                val hasProgressChange = (!localChapter.read && remoteChapter.read) ||
+                                    (remoteChapter.lastPageRead > localChapter.lastPageRead) ||
+                                    (remoteChapter.bookmark != localChapter.bookmark)
 
-                            if (isRemoteNewer || hasProgressChange) {
-                                val merged = localChapter.copy(
-                                    name = if (isRemoteNewer && remoteChapter.name.isNotBlank()) remoteChapter.name else localChapter.name,
-                                    translator = if (isRemoteNewer && remoteChapter.translator.isNotBlank()) remoteChapter.translator else localChapter.translator,
-                                    read = localChapter.read || remoteChapter.read,
-                                    bookmark = if (isRemoteNewer) remoteChapter.bookmark else (localChapter.bookmark || remoteChapter.bookmark),
-                                    lastPageRead = maxOf(localChapter.lastPageRead, remoteChapter.lastPageRead),
-                                    number = if (isRemoteNewer) remoteChapter.number else localChapter.number,
-                                    sourceOrder = if (isRemoteNewer) remoteChapter.sourceOrder else localChapter.sourceOrder,
-                                    dateFetch = maxOf(localChapter.dateFetch, remoteChapter.dateFetch),
-                                    dateUpload = maxOf(localChapter.dateUpload, remoteChapter.dateUpload),
-                                    content = ""
-                                )
-                                if (merged != localChapter) {
-                                    chaptersToApplyLocally.add(merged)
+                                if (isRemoteNewer || hasProgressChange) {
+                                    val merged = localChapter.copy(
+                                        name = if (isRemoteNewer && remoteChapter.name.isNotBlank()) remoteChapter.name else localChapter.name,
+                                        translator = if (isRemoteNewer && remoteChapter.translator.isNotBlank()) remoteChapter.translator else localChapter.translator,
+                                        read = localChapter.read || remoteChapter.read,
+                                        bookmark = if (isRemoteNewer) remoteChapter.bookmark else (localChapter.bookmark || remoteChapter.bookmark),
+                                        lastPageRead = maxOf(localChapter.lastPageRead, remoteChapter.lastPageRead),
+                                        number = if (isRemoteNewer) remoteChapter.number else localChapter.number,
+                                        sourceOrder = if (isRemoteNewer) remoteChapter.sourceOrder else localChapter.sourceOrder,
+                                        dateFetch = maxOf(localChapter.dateFetch, remoteChapter.dateFetch),
+                                        dateUpload = maxOf(localChapter.dateUpload, remoteChapter.dateUpload),
+                                        content = ""
+                                    )
+                                    if (merged != localChapter) {
+                                        chaptersToApplyLocally.add(merged)
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                if (chaptersToApplyLocally.isNotEmpty()) {
-                    localRepository.applyChapters(chaptersToApplyLocally)
-                    Log.info { "$TAG: Applied ${chaptersToApplyLocally.size} remote chapters locally" }
-                }
-
-                // 5. Merge History / Reading Progress (Last-Write-Wins)
-                _syncState.update { it.copy(progress = 0.8f, currentStep = "Merging reading progress...") }
-                val remoteProgressMap = (remoteManifest?.progress ?: emptyList()).associateBy { it.chapterGlobalId }
-                val localHistoryMap = localHistory.associateBy { it.chapterGlobalId }
-
-                val historyToApplyLocally = mutableListOf<HistorySyncData>()
-                remoteProgressMap.forEach { (chapterGlobalId, remoteProg) ->
-                    val localHist = localHistoryMap[chapterGlobalId]
-                    if (localHist == null || remoteProg.lastModified > localHist.lastRead) {
-                        historyToApplyLocally.add(
-                            HistorySyncData(
-                                chapterGlobalId = remoteProg.chapterGlobalId,
-                                lastRead = remoteProg.lastRead,
-                                readingProgress = remoteProg.progress.toDouble(),
-                                timeRead = 0L
-                            )
-                        )
+                    if (chaptersToApplyLocally.isNotEmpty()) {
+                        localRepository.applyChapters(chaptersToApplyLocally)
+                        Log.info { "$TAG: Applied ${chaptersToApplyLocally.size} remote chapters locally" }
                     }
                 }
 
-                if (historyToApplyLocally.isNotEmpty()) {
-                    localRepository.applyHistory(historyToApplyLocally)
-                    Log.info { "$TAG: Applied ${historyToApplyLocally.size} progress entries locally" }
+                // 5. Merge History / Reading Progress (Last-Write-Wins)
+                val syncProgress = syncPreferences.syncProgressEnabled().get()
+                val historyToApplyLocally = mutableListOf<HistorySyncData>()
+                if (syncProgress) {
+                    _syncState.update { it.copy(progress = 0.8f, currentStep = "Merging reading progress...") }
+                    val remoteProgressMap = (remoteManifest?.progress ?: emptyList()).associateBy { it.chapterGlobalId }
+                    val localHistoryMap = localHistory.associateBy { it.chapterGlobalId }
+
+                    remoteProgressMap.forEach { (chapterGlobalId, remoteProg) ->
+                        val localHist = localHistoryMap[chapterGlobalId]
+                        if (localHist == null || remoteProg.lastModified > localHist.lastRead) {
+                            historyToApplyLocally.add(
+                                HistorySyncData(
+                                    chapterGlobalId = remoteProg.chapterGlobalId,
+                                    lastRead = remoteProg.lastRead,
+                                    readingProgress = remoteProg.progress.toDouble(),
+                                    timeRead = 0L
+                                )
+                            )
+                        }
+                    }
+
+                    if (historyToApplyLocally.isNotEmpty()) {
+                        localRepository.applyHistory(historyToApplyLocally)
+                        Log.info { "$TAG: Applied ${historyToApplyLocally.size} progress entries locally" }
+                    }
                 }
 
                 if (isCancelled) throw CancellationException("Sync cancelled")
@@ -292,46 +301,55 @@ class UnifiedSyncEngine(
                 // 6. Build and Upload Merged UnifiedSyncManifest
                 _syncState.update { it.copy(progress = 0.9f, currentStep = "Uploading unified manifest...") }
 
-                val updatedLocalBooks = localRepository.getBooks()
-                val updatedLocalChapters = localRepository.getChapters(includeDownloadedContent = false)
-                val updatedLocalHistory = localRepository.getHistory()
-
-                val unifiedBooks = updatedLocalBooks.map {
-                    SyncBookItem(
-                        globalId = it.globalId,
-                        sourceId = it.sourceId.toLongOrNull() ?: 0L,
-                        key = it.key,
-                        title = it.title,
-                        author = it.author,
-                        description = it.description,
-                        genres = it.genres,
-                        status = it.status,
-                        coverUrl = it.coverUrl ?: "",
-                        favorite = it.favorite,
-                        lastModified = it.updatedAt
-                    )
+                val unifiedBooks = if (syncBooks) {
+                    val updatedLocalBooks = localRepository.getBooks()
+                    updatedLocalBooks.map {
+                        SyncBookItem(
+                            globalId = it.globalId,
+                            sourceId = it.sourceId.toLongOrNull() ?: 0L,
+                            key = it.key,
+                            title = it.title,
+                            author = it.author,
+                            description = it.description,
+                            genres = it.genres,
+                            status = it.status,
+                            coverUrl = it.coverUrl ?: "",
+                            favorite = it.favorite,
+                            lastModified = it.updatedAt
+                        )
+                    }
+                } else {
+                    remoteManifest?.books ?: emptyList()
                 }
 
-                // Strictly ensure no chapter body/page content is ever sent in the manifest payload
-                val unifiedChapters = updatedLocalChapters.map {
-                    it.copy(content = "")
+                val unifiedChapters = if (syncChapters) {
+                    val updatedLocalChapters = localRepository.getChapters(includeDownloadedContent = false)
+                    // Strictly ensure no chapter body/page content is ever sent in the manifest payload
+                    updatedLocalChapters.map { it.copy(content = "") }
+                } else {
+                    remoteManifest?.chapters ?: emptyList()
                 }
 
-                // Map chapterGlobalId -> (bookGlobalId, key) to enrich reading progress
-                val chapterToBookMap = updatedLocalChapters.associate { it.globalId to (it.bookGlobalId to it.key) }
+                val unifiedProgress = if (syncProgress) {
+                    val updatedLocalHistory = localRepository.getHistory()
+                    val chaptersForProgress = localRepository.getChapters(includeDownloadedContent = false)
+                    val chapterToBookMap = chaptersForProgress.associate { it.globalId to (it.bookGlobalId to it.key) }
 
-                val unifiedProgress = updatedLocalHistory.map {
-                    val info = chapterToBookMap[it.chapterGlobalId]
-                    val bookGlobalId = info?.first ?: ""
-                    val chapterKey = info?.second ?: it.chapterGlobalId.substringAfter("|", "")
-                    SyncProgressItem(
-                        bookGlobalId = bookGlobalId,
-                        chapterKey = chapterKey,
-                        chapterGlobalId = it.chapterGlobalId,
-                        progress = it.readingProgress.toFloat(),
-                        lastRead = it.lastRead,
-                        lastModified = it.lastRead
-                    )
+                    updatedLocalHistory.map {
+                        val info = chapterToBookMap[it.chapterGlobalId]
+                        val bookGlobalId = info?.first ?: ""
+                        val chapterKey = info?.second ?: it.chapterGlobalId.substringAfter("|", "")
+                        SyncProgressItem(
+                            bookGlobalId = bookGlobalId,
+                            chapterKey = chapterKey,
+                            chapterGlobalId = it.chapterGlobalId,
+                            progress = it.readingProgress.toFloat(),
+                            lastRead = it.lastRead,
+                            lastModified = it.lastRead
+                        )
+                    }
+                } else {
+                    remoteManifest?.progress ?: emptyList()
                 }
 
                 // Merge active tombstones

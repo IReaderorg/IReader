@@ -534,4 +534,116 @@ class UnifiedSyncEngineTest {
         assertEquals("1|ch-1", uploadedProgress.chapterGlobalId)
         assertEquals(0.75f, uploadedProgress.progress)
     }
+
+    @Test
+    fun `sync respects syncBooksEnabled false and skips book merging`() = runTest {
+        val prefStore = TestPreferenceStore()
+        val prefs = SyncPreferences(prefStore)
+        prefs.setSelectedProviderType(SyncProviderType.GOOGLE_DRIVE)
+        prefs.syncBooksEnabled().set(false)
+        prefs.syncChaptersEnabled().set(true)
+
+        val remoteBook = SyncBookItem(
+            globalId = "1|remote-book",
+            sourceId = 1L,
+            key = "/book/remote",
+            title = "Remote Book",
+            lastModified = 2000L
+        )
+        val remoteChapter = ChapterSyncData(
+            globalId = "1|ch-1",
+            bookGlobalId = "1|remote-book",
+            key = "ch-1",
+            name = "Chapter 1",
+            read = false,
+            bookmark = false,
+            lastPageRead = 0L,
+            sourceOrder = 1L,
+            number = 1.0f,
+            dateUpload = 1000L,
+            dateFetch = 2000L,
+            translator = "Scanlator"
+        )
+
+        val remoteManifest = UnifiedSyncManifest(
+            version = 1,
+            books = listOf(remoteBook),
+            chapters = listOf(remoteChapter)
+        )
+        val provider = MockSyncProvider(SyncProviderType.GOOGLE_DRIVE)
+        provider.remoteManifest = remoteManifest
+        val localRepo = MockSyncLocalRepository()
+
+        val engine = UnifiedSyncEngine(
+            syncPreferences = prefs,
+            providers = listOf(provider),
+            localRepository = localRepo,
+            deviceId = "test-device"
+        )
+
+        val result = engine.syncNow()
+        assertTrue(result.isSuccess)
+
+        // Remote book should NOT be applied locally because syncBooksEnabled is false
+        assertEquals(0, localRepo.books.size)
+        // Remote chapter should be applied because syncChaptersEnabled is true
+        assertEquals(1, localRepo.chapters.size)
+        assertEquals("1|ch-1", localRepo.chapters.first().globalId)
+    }
+
+    @Test
+    fun `sync respects syncChaptersEnabled false and skips chapter merging`() = runTest {
+        val prefStore = TestPreferenceStore()
+        val prefs = SyncPreferences(prefStore)
+        prefs.setSelectedProviderType(SyncProviderType.GOOGLE_DRIVE)
+        prefs.syncBooksEnabled().set(true)
+        prefs.syncChaptersEnabled().set(false)
+
+        val remoteBook = SyncBookItem(
+            globalId = "1|remote-book",
+            sourceId = 1L,
+            key = "/book/remote",
+            title = "Remote Book",
+            lastModified = 2000L
+        )
+        val remoteChapter = ChapterSyncData(
+            globalId = "1|ch-1",
+            bookGlobalId = "1|remote-book",
+            key = "ch-1",
+            name = "Chapter 1",
+            read = false,
+            bookmark = false,
+            lastPageRead = 0L,
+            sourceOrder = 1L,
+            number = 1.0f,
+            dateUpload = 1000L,
+            dateFetch = 2000L,
+            translator = "Scanlator"
+        )
+
+        val remoteManifest = UnifiedSyncManifest(
+            version = 1,
+            books = listOf(remoteBook),
+            chapters = listOf(remoteChapter)
+        )
+        val provider = MockSyncProvider(SyncProviderType.GOOGLE_DRIVE)
+        provider.remoteManifest = remoteManifest
+        val localRepo = MockSyncLocalRepository()
+
+        val engine = UnifiedSyncEngine(
+            syncPreferences = prefs,
+            providers = listOf(provider),
+            localRepository = localRepo,
+            deviceId = "test-device"
+        )
+
+        val result = engine.syncNow()
+        assertTrue(result.isSuccess)
+
+        // Remote book should be applied because syncBooksEnabled is true
+        assertEquals(1, localRepo.books.size)
+        assertEquals("1|remote-book", localRepo.books.first().globalId)
+        // Remote chapter should NOT be applied locally because syncChaptersEnabled is false
+        assertEquals(0, localRepo.chapters.size)
+    }
 }

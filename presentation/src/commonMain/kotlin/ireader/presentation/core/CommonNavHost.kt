@@ -453,7 +453,17 @@ fun CommonNavHost(
                 onClearGoogleDriveError = { viewModel.clearGoogleDriveError() },
                 onOpenSupabaseAuth = { navController.navigate(NavigationRoutes.supabaseConfig) },
                 onSignOutSupabase = { viewModel.signOutSupabase() },
-                onOpenWifiSync = { navController.navigate(NavigationRoutes.wifiSync) }
+                onOpenWifiSync = { navController.navigate(NavigationRoutes.wifiSync) },
+                onConnectCustomCloud = { viewModel.toggleCustomCloudDialog(true) },
+                onDisconnectCustomCloud = { viewModel.disconnectCustomCloud() },
+                onConfigureCustomCloud = { viewModel.toggleCustomCloudDialog(true) },
+                onSaveCustomCloudCredentials = { url, user, pass, type, path ->
+                    viewModel.saveCustomCloudCredentials(url, user, pass, type, path)
+                },
+                onDismissCustomCloudDialog = { viewModel.toggleCustomCloudDialog(false) },
+                onToggleSyncBooks = { viewModel.toggleSyncBooks(it) },
+                onToggleSyncChapters = { viewModel.toggleSyncChapters(it) },
+                onToggleSyncProgress = { viewModel.toggleSyncProgress(it) }
             )
         }
         

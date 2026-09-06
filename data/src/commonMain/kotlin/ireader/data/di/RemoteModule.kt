@@ -22,127 +22,9 @@ import org.koin.dsl.module
  */
 val remoteModule = module {
     
-    // Multi-Project Supabase Client Provider (always enabled)
+    // Multi-Project Supabase Client Provider (always enabled, reactive to runtime preference updates)
     single<SupabaseClientProvider> {
-        val prefs = get<SupabasePreferences>()
-        
-        // Check if user wants to use custom configuration
-        val useCustom = prefs.useCustomSupabase().get()
-        
-        // Helper function to get config with fallback: user preference -> platform config
-        fun getUrl(userPref: String, platformConfig: () -> String): String {
-            return if (useCustom && userPref.isNotEmpty()) {
-                userPref
-            } else {
-                try {
-                    platformConfig()
-                } catch (e: Exception) {
-                    ""
-                }
-            }
-        }
-        
-        fun getKey(userPref: String, platformConfig: () -> String): String {
-            return if (useCustom && userPref.isNotEmpty()) {
-                userPref
-            } else {
-                try {
-                    platformConfig()
-                } catch (e: Exception) {
-                    ""
-                }
-            }
-        }
-        
-        // Load credentials with fallback chain: user preferences -> platform config (local.properties/config.properties)
-        // Project 1 - Auth
-        val authUrl = getUrl(
-            prefs.supabaseAuthUrl().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseAuthUrl() }
-        )
-        val authKey = getKey(
-            prefs.supabaseAuthKey().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseAuthKey() }
-        )
-        
-        // Project 2 - Reading (STRICTLY user-owned Supabase: never sends sync to developer server)
-        val readingUrl = prefs.userSupabaseUrl().get().trim().ifEmpty {
-            if (useCustom) prefs.supabaseReadingUrl().get().trim() else ""
-        }
-        val readingKey = prefs.userSupabaseAnonKey().get().trim().ifEmpty {
-            if (useCustom) prefs.supabaseReadingKey().get().trim() else ""
-        }
-        
-        // Project 3 - Library (STRICTLY user-owned Supabase: never sends sync to developer server)
-        val libraryUrl = prefs.userSupabaseUrl().get().trim().ifEmpty {
-            if (useCustom) prefs.supabaseLibraryUrl().get().trim() else ""
-        }
-        val libraryKey = prefs.userSupabaseAnonKey().get().trim().ifEmpty {
-            if (useCustom) prefs.supabaseLibraryKey().get().trim() else ""
-        }
-        
-        // Project 4 - Book Reviews
-        val bookReviewsUrl = getUrl(
-            prefs.supabaseBookReviewsUrl().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseBookReviewsUrl() }
-        )
-        val bookReviewsKey = getKey(
-            prefs.supabaseBookReviewsKey().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseBookReviewsKey() }
-        )
-        
-        // Project 5 - Chapter Reviews
-        val chapterReviewsUrl = getUrl(
-            prefs.supabaseChapterReviewsUrl().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseChapterReviewsUrl() }
-        )
-        val chapterReviewsKey = getKey(
-            prefs.supabaseChapterReviewsKey().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseChapterReviewsKey() }
-        )
-        
-        // Project 6 - Badges
-        val badgesUrl = getUrl(
-            prefs.supabaseBadgesUrl().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseBadgesUrl() }
-        )
-        val badgesKey = getKey(
-            prefs.supabaseBadgesKey().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseBadgesKey() }
-        )
-        
-        // Project 7 - Analytics
-        val analyticsUrl = getUrl(
-            prefs.supabaseAnalyticsUrl().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseAnalyticsUrl() }
-        )
-        val analyticsKey = getKey(
-            prefs.supabaseAnalyticsKey().get(),
-            { ireader.domain.config.PlatformConfig.getSupabaseAnalyticsKey() }
-        )
-        
-        // If no configuration available (neither user nor platform), use NoOp provider
-        if (authUrl.isEmpty() || authKey.isEmpty()) {
-            return@single ireader.data.remote.NoOpSupabaseClientProvider()
-        }
-        
-        // Create Multi-Project provider
-        MultiSupabaseClientProvider(
-            authUrl = authUrl,
-            authKey = authKey,
-            readingUrl = readingUrl,
-            readingKey = readingKey,
-            libraryUrl = libraryUrl,
-            libraryKey = libraryKey,
-            bookReviewsUrl = bookReviewsUrl,
-            bookReviewsKey = bookReviewsKey,
-            chapterReviewsUrl = chapterReviewsUrl,
-            chapterReviewsKey = chapterReviewsKey,
-            badgesUrl = badgesUrl,
-            badgesKey = badgesKey,
-            analyticsUrl = analyticsUrl,
-            analyticsKey = analyticsKey
-        )
+        MultiSupabaseClientProvider(preferences = get())
     }
     
     // Sync queue
@@ -154,56 +36,52 @@ val remoteModule = module {
     // Remote cache
     single { RemoteCache() }
     
-    // Backend Service (abstraction layer)
+    // Backend Service (routes tables across projects dynamically)
     single<ireader.data.backend.BackendService> {
         val provider = get<SupabaseClientProvider>()
-        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            ireader.data.backend.NoOpBackendService()
+        if (provider is MultiSupabaseClientProvider) {
+            ireader.data.backend.MultiProjectBackendService(provider)
         } else {
-            val supabaseClient = (provider as MultiSupabaseClientProvider).authClient
-            ireader.data.backend.SupabaseBackendService(supabaseClient)
+            ireader.data.backend.NoOpBackendService()
         }
     }
     
     // Auth Service (authentication abstraction)
     single<ireader.data.backend.AuthService> {
         val provider = get<SupabaseClientProvider>()
-        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            ireader.data.backend.NoOpAuthService()
+        if (provider is MultiSupabaseClientProvider) {
+            ireader.data.backend.SupabaseAuthService { provider.authClient }
         } else {
-            val supabaseClient = (provider as MultiSupabaseClientProvider).authClient
-            ireader.data.backend.SupabaseAuthService(supabaseClient)
+            ireader.data.backend.NoOpAuthService()
         }
     }
     
     // Remote repository
     single<RemoteRepository> {
         val provider = get<SupabaseClientProvider>()
-        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            ireader.data.remote.NoOpRemoteRepository()
-        } else {
-            val supabaseClient = (provider as MultiSupabaseClientProvider).authClient
+        if (provider is MultiSupabaseClientProvider) {
             SupabaseRemoteRepository(
-                supabaseClient = supabaseClient,
+                clientProvider = { provider.authClient },
                 backendService = get(),
                 syncQueue = get(),
                 retryPolicy = get(),
                 cache = get()
             )
+        } else {
+            ireader.data.remote.NoOpRemoteRepository()
         }
     }
     
     // Admin User repository for admin user management
     single<ireader.domain.data.repository.AdminUserRepository> {
         val provider = get<SupabaseClientProvider>()
-        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            ireader.data.admin.NoOpAdminUserRepository()
-        } else {
-            val supabaseClient = (provider as MultiSupabaseClientProvider).authClient
+        if (provider is MultiSupabaseClientProvider) {
             ireader.data.admin.AdminUserRepositoryImpl(
-                supabaseClient = supabaseClient,
+                clientProvider = { provider.authClient },
                 backendService = get()
             )
+        } else {
+            ireader.data.admin.NoOpAdminUserRepository()
         }
     }
 }

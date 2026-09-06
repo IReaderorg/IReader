@@ -19,14 +19,14 @@ class MultiProjectBackendService(
     private val multiProvider: MultiSupabaseClientProvider
 ) : BackendService {
     
-    // Delegate services for each project
-    private val authService by lazy { SupabaseBackendService(multiProvider.authClient) }
-    private val readingService by lazy { SupabaseBackendService(multiProvider.readingClient) }
-    private val libraryService by lazy { SupabaseBackendService(multiProvider.libraryClient) }
-    private val bookReviewsService by lazy { SupabaseBackendService(multiProvider.bookReviewsClient) }
-    private val chapterReviewsService by lazy { SupabaseBackendService(multiProvider.chapterReviewsClient) }
-    private val badgesService by lazy { SupabaseBackendService(multiProvider.badgesClient) }
-    private val analyticsService by lazy { SupabaseBackendService(multiProvider.analyticsClient) }
+    // Delegate services for each project (dynamically resolved to handle runtime config changes)
+    private val authService = SupabaseBackendService { multiProvider.authClient }
+    private val readingService = SupabaseBackendService { multiProvider.readingClient }
+    private val libraryService = SupabaseBackendService { multiProvider.libraryClient }
+    private val bookReviewsService = SupabaseBackendService { multiProvider.bookReviewsClient }
+    private val chapterReviewsService = SupabaseBackendService { multiProvider.chapterReviewsClient }
+    private val badgesService = SupabaseBackendService { multiProvider.badgesClient }
+    private val analyticsService = SupabaseBackendService { multiProvider.analyticsClient }
     
     /**
      * Route to the appropriate service based on table name

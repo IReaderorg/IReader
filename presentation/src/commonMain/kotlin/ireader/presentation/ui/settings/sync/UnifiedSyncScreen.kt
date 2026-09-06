@@ -10,10 +10,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.sync.SyncProviderType
 import ireader.domain.utils.extensions.currentTimeToLong
@@ -42,6 +47,14 @@ fun UnifiedSyncScreen(
     onOpenSupabaseAuth: () -> Unit = {},
     onSignOutSupabase: () -> Unit = {},
     onOpenWifiSync: () -> Unit = {},
+    onConnectCustomCloud: () -> Unit = {},
+    onDisconnectCustomCloud: () -> Unit = {},
+    onConfigureCustomCloud: () -> Unit = {},
+    onSaveCustomCloudCredentials: (url: String, user: String, pass: String, type: String, path: String) -> Unit = { _, _, _, _, _ -> },
+    onDismissCustomCloudDialog: () -> Unit = {},
+    onToggleSyncBooks: (Boolean) -> Unit = {},
+    onToggleSyncChapters: (Boolean) -> Unit = {},
+    onToggleSyncProgress: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     IScaffold(
@@ -157,6 +170,22 @@ fun UnifiedSyncScreen(
 
             item {
                 ProviderOptionCard(
+                    title = "Custom Cloud (WebDAV / Nextcloud / TrueNAS)",
+                    subtitle = "Self-hosted storage via standard WebDAV (Nextcloud, TrueNAS, Apache, ownCloud)",
+                    icon = Icons.Outlined.Cloud,
+                    isSelected = state.selectedProvider == SyncProviderType.CUSTOM_CLOUD,
+                    accountStatus = if (state.isCustomCloudConnected) "Connected to ${state.customCloudUrl}" else "Not configured",
+                    isConnected = state.isCustomCloudConnected,
+                    onSelect = { onSelectProvider(SyncProviderType.CUSTOM_CLOUD) },
+                    primaryActionText = if (state.isCustomCloudConnected) "Disconnect" else "Configure Server",
+                    onPrimaryAction = if (state.isCustomCloudConnected) onDisconnectCustomCloud else onConfigureCustomCloud,
+                    secondaryActionIcon = Icons.Outlined.Settings,
+                    onSecondaryAction = onConfigureCustomCloud
+                )
+            }
+
+            item {
+                ProviderOptionCard(
                     title = "Local Wi-Fi P2P",
                     subtitle = "Direct device-to-device sync over local network (Discovery, Pairing PIN, Server Mode)",
                     icon = Icons.Outlined.Wifi,
@@ -181,7 +210,69 @@ fun UnifiedSyncScreen(
                 )
             }
 
-            // 3. Sync Triggers & Settings
+            // 3. Sync Content Settings
+            item {
+                Text(
+                    text = "Sync Content",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            item {
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onToggleSyncBooks(!state.syncBooksEnabled) },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Sync Books Library", style = MaterialTheme.typography.bodyLarge)
+                                Text("Save and sync book details & metadata", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(checked = state.syncBooksEnabled, onCheckedChange = onToggleSyncBooks)
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onToggleSyncChapters(!state.syncChaptersEnabled) },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Sync Downloaded Chapters", style = MaterialTheme.typography.bodyLarge)
+                                Text("Upload and backup chapter content for self-hosting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(checked = state.syncChaptersEnabled, onCheckedChange = onToggleSyncChapters)
+                        }
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onToggleSyncProgress(!state.syncProgressEnabled) },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Sync Reading Progress", style = MaterialTheme.typography.bodyLarge)
+                                Text("Keep last read chapters and scroll positions synchronized", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Switch(checked = state.syncProgressEnabled, onCheckedChange = onToggleSyncProgress)
+                        }
+                    }
+                }
+            }
+
+            // 4. Sync Triggers & Settings
             item {
                 Text(
                     text = "Sync Settings",
@@ -257,6 +348,17 @@ fun UnifiedSyncScreen(
                 onDismissGoogleDriveCredentials()
                 onConnectGoogleDrive()
             }
+        )
+    }
+
+    if (state.showCustomCloudDialog) {
+        CustomCloudCredentialsDialog(
+            initialUrl = state.customCloudUrl,
+            initialUsername = state.customCloudUsername,
+            initialServerType = state.customCloudServerType,
+            initialPath = state.customCloudPath,
+            onDismiss = onDismissCustomCloudDialog,
+            onSave = onSaveCustomCloudCredentials
         )
     }
 }
@@ -473,3 +575,124 @@ private fun formatTimestamp(timestamp: Long): String {
         else -> "$days days ago"
     }
 }
+
+@Composable
+fun CustomCloudCredentialsDialog(
+    initialUrl: String,
+    initialUsername: String,
+    initialServerType: String,
+    initialPath: String,
+    onDismiss: () -> Unit,
+    onSave: (url: String, user: String, pass: String, type: String, path: String) -> Unit
+) {
+    var url by remember(initialUrl) { mutableStateOf(initialUrl) }
+    var username by remember(initialUsername) { mutableStateOf(initialUsername) }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var serverType by remember(initialServerType) { mutableStateOf(if (initialServerType.isBlank()) "Nextcloud" else initialServerType) }
+    var path by remember(initialPath) { mutableStateOf(if (initialPath.isBlank()) "/IReader" else initialPath) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Custom Cloud (WebDAV) Setup")
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "Connect your private cloud or NAS storage (Nextcloud, TrueNAS, Apache, ownCloud) using WebDAV.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Server Type Presets
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf("Nextcloud", "TrueNAS", "Generic WebDAV").forEach { type ->
+                        FilterChip(
+                            selected = serverType.equals(type, ignoreCase = true),
+                            onClick = {
+                                serverType = type
+                                if (type == "Nextcloud" && url.isBlank()) {
+                                    url = "https://your-nextcloud.com/remote.php/dav/files/USERNAME/"
+                                } else if (type == "TrueNAS" && url.isBlank()) {
+                                    url = "http://your-nas-ip:8080"
+                                }
+                            },
+                            label = { Text(type, style = MaterialTheme.typography.labelSmall) }
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    label = { Text("Server WebDAV URL") },
+                    placeholder = { Text("https://example.com/remote.php/webdav") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username") },
+                    placeholder = { Text("admin / username") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("App Password / Token") },
+                    placeholder = { Text("Password or generated app token") },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = path,
+                    onValueChange = { path = it },
+                    label = { Text("Sync Directory Path") },
+                    placeholder = { Text("/IReader") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onSave(url, username, password, serverType, path)
+                    onDismiss()
+                },
+                enabled = url.isNotBlank()
+            ) {
+                Text("Save & Connect")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+

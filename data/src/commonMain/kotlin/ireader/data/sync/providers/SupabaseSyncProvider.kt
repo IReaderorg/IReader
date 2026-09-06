@@ -9,6 +9,7 @@ import ireader.domain.models.sync.SyncProgressItem
 import ireader.domain.models.sync.SyncProviderType
 import ireader.domain.models.sync.UnifiedSyncManifest
 import ireader.domain.preferences.prefs.SupabasePreferences
+import ireader.domain.preferences.prefs.SyncPreferences
 import ireader.domain.services.sync.SyncProvider
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,7 +20,8 @@ import kotlinx.serialization.json.Json
  */
 class SupabaseSyncProvider(
     private val remoteRepository: RemoteRepository,
-    private val supabasePreferences: SupabasePreferences
+    private val supabasePreferences: SupabasePreferences,
+    private val syncPreferences: SyncPreferences? = null
 ) : SyncProvider {
 
     companion object {
@@ -111,37 +113,41 @@ class SupabaseSyncProvider(
                 remoteRepository.saveSyncManifest(userId, manifestJson).getOrThrow()
             }
 
-            // 2. Also populate synced_books relational table with rich data
-            manifest.books.forEach { bookItem ->
-                val syncedBook = SyncedBook(
-                    userId = userId,
-                    bookId = bookItem.globalId,
-                    sourceId = bookItem.sourceId,
-                    title = bookItem.title,
-                    bookUrl = bookItem.key,
-                    lastRead = bookItem.lastModified,
-                    coverUrl = bookItem.coverUrl,
-                    sourceName = "",
-                    author = bookItem.author,
-                    description = bookItem.description,
-                    genres = bookItem.genres.joinToString(","),
-                    status = bookItem.status,
-                    favorite = bookItem.favorite
-                )
-                runCatching { remoteRepository.syncBook(syncedBook) }
+            // 2. Also populate synced_books relational table with rich data (if books sync enabled)
+            if (syncPreferences == null || syncPreferences.syncBooksEnabled().get()) {
+                manifest.books.forEach { bookItem ->
+                    val syncedBook = SyncedBook(
+                        userId = userId,
+                        bookId = bookItem.globalId,
+                        sourceId = bookItem.sourceId,
+                        title = bookItem.title,
+                        bookUrl = bookItem.key,
+                        lastRead = bookItem.lastModified,
+                        coverUrl = bookItem.coverUrl,
+                        sourceName = "",
+                        author = bookItem.author,
+                        description = bookItem.description,
+                        genres = bookItem.genres.joinToString(","),
+                        status = bookItem.status,
+                        favorite = bookItem.favorite
+                    )
+                    runCatching { remoteRepository.syncBook(syncedBook) }
+                }
             }
 
-            // 3. Sync reading progress items to reading_progress table
-            manifest.progress.forEach { progressItem ->
-                if (progressItem.bookGlobalId.isNotBlank() && progressItem.chapterKey.isNotBlank()) {
-                    val readingProgress = ReadingProgress(
-                        userId = userId,
-                        bookId = progressItem.bookGlobalId,
-                        lastChapterSlug = progressItem.chapterKey,
-                        lastScrollPosition = progressItem.progress,
-                        updatedAt = progressItem.lastModified
-                    )
-                    runCatching { remoteRepository.syncReadingProgress(readingProgress) }
+            // 3. Sync reading progress items to reading_progress table (if progress sync enabled)
+            if (syncPreferences == null || syncPreferences.syncProgressEnabled().get()) {
+                manifest.progress.forEach { progressItem ->
+                    if (progressItem.bookGlobalId.isNotBlank() && progressItem.chapterKey.isNotBlank()) {
+                        val readingProgress = ReadingProgress(
+                            userId = userId,
+                            bookId = progressItem.bookGlobalId,
+                            lastChapterSlug = progressItem.chapterKey,
+                            lastScrollPosition = progressItem.progress,
+                            updatedAt = progressItem.lastModified
+                        )
+                        runCatching { remoteRepository.syncReadingProgress(readingProgress) }
+                    }
                 }
             }
 
@@ -155,6 +161,7 @@ class SupabaseSyncProvider(
     override suspend fun pushProgress(progress: SyncProgressItem): Result<Unit> {
         return try {
             if (!isAuthenticated()) return Result.success(Unit)
+            if (syncPreferences != null && !syncPreferences.syncProgressEnabled().get()) return Result.success(Unit)
             val userId = getEffectiveUserId()
             val readingProgress = ReadingProgress(
                 userId = userId,

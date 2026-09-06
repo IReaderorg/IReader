@@ -54,6 +54,11 @@ class SupabasePreferences(
         const val USER_SUPABASE_URL = "user_supabase_url"
         const val USER_SUPABASE_ANON_KEY = "user_supabase_anon_key"
         
+        // Community Backend Server (Community Sources, Translations, Leaderboard, Badges)
+        const val USE_CUSTOM_COMMUNITY_SERVER = "use_custom_community_server"
+        const val CUSTOM_COMMUNITY_URL = "custom_community_url"
+        const val CUSTOM_COMMUNITY_API_KEY = "custom_community_api_key"
+
         // Sync settings
         const val AUTO_SYNC_ENABLED = "auto_sync_enabled"
         const val SYNC_ON_WIFI_ONLY = "sync_on_wifi_only"
@@ -301,5 +306,60 @@ class SupabasePreferences(
             return false
         }
         return false
+    }
+
+    // ========== Community Backend Server Preferences ==========
+
+    /**
+     * Whether to override the default community backend (from app environment) with a custom server.
+     */
+    fun useCustomCommunityServer(): Preference<Boolean> {
+        return preferenceStore.getBoolean(USE_CUSTOM_COMMUNITY_SERVER, false)
+    }
+
+    /**
+     * Custom Community Server URL for community sources, leaderboard, and badges.
+     */
+    fun customCommunityUrl(): Preference<String> {
+        return preferenceStore.getString(CUSTOM_COMMUNITY_URL, "")
+    }
+
+    /**
+     * Custom Community Server API key.
+     */
+    fun customCommunityApiKey(): Preference<String> {
+        return preferenceStore.getString(CUSTOM_COMMUNITY_API_KEY, "")
+    }
+
+    /**
+     * Resolves the effective community server URL.
+     * If custom community is enabled and configured, returns it; otherwise falls back to app environment.
+     */
+    fun getEffectiveCommunityUrl(): String {
+        if (useCustomCommunityServer().get()) {
+            val custom = customCommunityUrl().get().trim()
+            if (custom.isNotBlank()) return custom
+        }
+        return try {
+            ireader.domain.config.PlatformConfig.getSupabaseAnalyticsUrl()
+        } catch (_: Exception) {
+            ""
+        }
+    }
+
+    /**
+     * Resolves the effective community server API key.
+     * If custom community is enabled and configured, returns it; otherwise falls back to app environment.
+     */
+    fun getEffectiveCommunityKey(): String {
+        if (useCustomCommunityServer().get()) {
+            val custom = customCommunityApiKey().get().trim()
+            if (custom.isNotBlank()) return custom
+        }
+        return try {
+            ireader.domain.config.PlatformConfig.getSupabaseAnalyticsKey()
+        } catch (_: Exception) {
+            ""
+        }
     }
 }

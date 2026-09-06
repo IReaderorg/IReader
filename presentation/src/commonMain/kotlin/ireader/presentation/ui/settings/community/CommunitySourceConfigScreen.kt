@@ -111,6 +111,7 @@ class CommunitySourceConfigScreen {
                             onUrlChanged = { viewModel.setCommunitySourceUrl(it) },
                             onApiKeyChanged = { viewModel.setCommunitySourceApiKey(it) },
                             onSave = { viewModel.saveConfiguration() },
+                            onReset = { viewModel.resetToDefaultServer() },
                             onTest = { viewModel.testConnection() },
                             isTesting = state.isTesting,
                             testResult = state.testResult
@@ -268,16 +269,21 @@ private fun UrlConfigCard(
     onUrlChanged: (String) -> Unit,
     onApiKeyChanged: (String) -> Unit,
     onSave: () -> Unit,
+    onReset: () -> Unit,
     onTest: () -> Unit,
     isTesting: Boolean,
     testResult: String?
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showApiKey by remember { mutableStateOf(false) }
+    val isCustomServer = url.isNotBlank()
     
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -291,17 +297,24 @@ private fun UrlConfigCard(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = localizeHelper.localize(Res.string.supabase_configuration),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Community Backend Server",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = if (isCustomServer) "Custom Server Active" else "Connected to App Default Server",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isCustomServer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(4.dp))
             
             Text(
-                text = localizeHelper.localize(Res.string.configure_your_own_supabase_instance),
+                text = "Used exclusively for community novel catalogs, shared translations, and leaderboards. If you self-host your own community instance, enter your credentials below. Otherwise, the app uses its pre-configured default server.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -311,8 +324,8 @@ private fun UrlConfigCard(
             OutlinedTextField(
                 value = url,
                 onValueChange = onUrlChanged,
-                label = { Text(localizeHelper.localize(Res.string.supabase_url)) },
-                placeholder = { Text("https://your-project.supabase.co") },
+                label = { Text("Community Server URL (Optional)") },
+                placeholder = { Text("https://your-community.supabase.co") },
                 leadingIcon = { Icon(Icons.Default.Link, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -323,8 +336,8 @@ private fun UrlConfigCard(
             OutlinedTextField(
                 value = apiKey,
                 onValueChange = onApiKeyChanged,
-                label = { Text(localizeHelper.localize(Res.string.api_key_anon_key)) },
-                placeholder = { Text(localizeHelper.localize(Res.string.eyjhbgcioijiuzi1niis)) },
+                label = { Text("Community Server API Key (Optional)") },
+                placeholder = { Text("anon-public-key") },
                 leadingIcon = { Icon(Icons.Default.Key, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { showApiKey = !showApiKey }) {
@@ -368,6 +381,16 @@ private fun UrlConfigCard(
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(localizeHelper.localize(Res.string.save))
+                }
+            }
+
+            if (isCustomServer) {
+                Spacer(modifier = Modifier.height(8.dp))
+                androidx.compose.material3.OutlinedButton(
+                    onClick = onReset,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Reset to Default App Server")
                 }
             }
             

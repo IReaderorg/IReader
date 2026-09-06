@@ -18,9 +18,16 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
 class AdminUserRepositoryImpl(
-    private val supabaseClient: SupabaseClient,
+    private val clientProvider: () -> SupabaseClient,
     private val backendService: BackendService
 ) : AdminUserRepository {
+    
+    constructor(
+        supabaseClient: SupabaseClient,
+        backendService: BackendService
+    ) : this({ supabaseClient }, backendService)
+    
+    private val supabaseClient: SupabaseClient get() = clientProvider()
     
     private val json = Json {
         ignoreUnknownKeys = true

@@ -1,6 +1,10 @@
 package ireader.presentation.ui.settings.sync
 
 import androidx.compose.runtime.Stable
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.statement.HttpResponse
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.presentation.ui.core.viewmodel.StateViewModel
@@ -53,14 +57,25 @@ data class SupabaseConfigState(
     val analyticsApiKey: String = "",
     // Project 8 - Community Source
     val communityUrl: String = "",
-    val communityApiKey: String = ""
+    val communityApiKey: String = "",
+    // Granular sync selection
+    val syncBooksEnabled: Boolean = true,
+    val syncChaptersEnabled: Boolean = true,
+    val syncProgressEnabled: Boolean = true,
+    // Community Backend Server
+    val useCustomCommunityServer: Boolean = false,
+    val customCommunityUrl: String = "",
+    val customCommunityApiKey: String = "",
+    val defaultCommunityUrl: String = ""
 )
 
 class SupabaseConfigViewModel(
     private val supabasePreferences: SupabasePreferences,
     private val remoteRepository: RemoteRepository,
     private val syncManager: ireader.domain.services.SyncManager? = null,
-    private val bookRepository: ireader.domain.data.repository.BookRepository? = null
+    private val bookRepository: ireader.domain.data.repository.BookRepository? = null,
+    private val supabaseClientProvider: ireader.domain.data.repository.SupabaseClientProvider? = null,
+    private val syncPreferences: ireader.domain.preferences.prefs.SyncPreferences? = null
 ) : StateViewModel<SupabaseConfigState>(SupabaseConfigState()) {
     
     init {
@@ -75,6 +90,12 @@ class SupabaseConfigViewModel(
                 defaultAuthUrl.isNotEmpty()
             } catch (e: Exception) {
                 false
+            }
+
+            val defaultCommunity = try {
+                ireader.domain.config.PlatformConfig.getSupabaseAnalyticsUrl()
+            } catch (e: Exception) {
+                ""
             }
 
             val singleUrl = supabasePreferences.userSupabaseUrl().get().ifEmpty {
@@ -93,6 +114,15 @@ class SupabaseConfigViewModel(
                 singleProjectUrl = singleUrl,
                 singleProjectKey = singleKey,
                 isPersonalConfigured = supabasePreferences.isPersonalSupabaseConfigured(),
+                // Granular sync selection
+                syncBooksEnabled = syncPreferences?.syncBooksEnabled()?.get() ?: true,
+                syncChaptersEnabled = syncPreferences?.syncChaptersEnabled()?.get() ?: true,
+                syncProgressEnabled = syncPreferences?.syncProgressEnabled()?.get() ?: true,
+                // Community server
+                useCustomCommunityServer = supabasePreferences.useCustomCommunityServer().get(),
+                customCommunityUrl = supabasePreferences.customCommunityUrl().get(),
+                customCommunityApiKey = supabasePreferences.customCommunityApiKey().get(),
+                defaultCommunityUrl = defaultCommunity,
                 // 7-Project configuration (user overrides)
                 authUrl = supabasePreferences.supabaseAuthUrl().get(),
                 authApiKey = supabasePreferences.supabaseAuthKey().get(),
@@ -138,6 +168,7 @@ class SupabaseConfigViewModel(
             supabasePreferences.supabaseReadingUrl().set(url)
             supabasePreferences.supabaseReadingKey().set(key)
             supabasePreferences.useCustomSupabase().set(true)
+            supabaseClientProvider?.invalidateClients()
 
             updateState {
                 it.copy(
@@ -383,6 +414,7 @@ GRANT EXECUTE ON FUNCTION public.spend_stones(TEXT, TEXT, INT) TO authenticated;
     fun importConfig(text: String): Boolean {
         val success = supabasePreferences.importConfigJson(text)
         if (success) {
+            supabaseClientProvider?.invalidateClients()
             loadConfiguration()
         }
         return success
@@ -466,9 +498,10 @@ GRANT EXECUTE ON FUNCTION public.spend_stones(TEXT, TEXT, INT) TO authenticated;
                 supabasePreferences.supabaseAnalyticsKey().set(currentState.analyticsApiKey)
                 supabasePreferences.supabaseCommunityUrl().set(currentState.communityUrl)
                 supabasePreferences.supabaseCommunityKey().set(currentState.communityApiKey)
+                supabaseClientProvider?.invalidateClients()
                 
                 updateState { it.copy(
-                    testResult = "? Configuration saved successfully! Total storage: 3.5GB",
+                    testResult = "✓ Configuration saved successfully! Total storage: 3.5GB",
                     error = null
                 )}
             } catch (e: Exception) {
@@ -487,6 +520,7 @@ GRANT EXECUTE ON FUNCTION public.spend_stones(TEXT, TEXT, INT) TO authenticated;
             supabasePreferences.supabaseLibraryKey().set("")
             supabasePreferences.supabaseReadingUrl().set("")
             supabasePreferences.supabaseReadingKey().set("")
+            supabaseClientProvider?.invalidateClients()
             updateState {
                 it.copy(
                     singleProjectUrl = "",
@@ -494,6 +528,124 @@ GRANT EXECUTE ON FUNCTION public.spend_stones(TEXT, TEXT, INT) TO authenticated;
                     isPersonalConfigured = false,
                     testResult = "Personal Supabase configuration cleared."
                 )
+            }
+        }
+    }
+
+    // Granular content sync toggles
+    fun toggleSyncBooks(enabled: Boolean) {
+        updateState { it.copy(syncBooksEnabled = enabled) }
+        scope.launch {
+            syncPreferences?.syncBooksEnabled()?.set(enabled)
+        }
+    }
+
+    fun toggleSyncChapters(enabled: Boolean) {
+        updateState { it.copy(syncChaptersEnabled = enabled) }
+        scope.launch {
+            syncPreferences?.syncChaptersEnabled()?.set(enabled)
+        }
+    }
+
+    fun toggleSyncProgress(enabled: Boolean) {
+        updateState { it.copy(syncProgressEnabled = enabled) }
+        scope.launch {
+            syncPreferences?.syncProgressEnabled()?.set(enabled)
+        }
+    }
+
+    // Community Server Configuration
+    fun toggleUseCustomCommunityServer(enabled: Boolean) {
+        updateState { it.copy(useCustomCommunityServer = enabled) }
+        scope.launch {
+            supabasePreferences.useCustomCommunityServer().set(enabled)
+            supabaseClientProvider?.invalidateClients()
+        }
+    }
+
+    fun setCustomCommunityUrl(url: String) {
+        updateState { it.copy(customCommunityUrl = url) }
+    }
+
+    fun setCustomCommunityApiKey(key: String) {
+        updateState { it.copy(customCommunityApiKey = key) }
+    }
+
+    fun saveCommunityServerConfig() {
+        scope.launch {
+            supabasePreferences.customCommunityUrl().set(currentState.customCommunityUrl.trim())
+            supabasePreferences.customCommunityApiKey().set(currentState.customCommunityApiKey.trim())
+            supabasePreferences.useCustomCommunityServer().set(true)
+            supabaseClientProvider?.invalidateClients()
+            updateState {
+                it.copy(
+                    useCustomCommunityServer = true,
+                    testResult = "✓ Custom Community Server configuration saved!",
+                    error = null
+                )
+            }
+        }
+    }
+
+    fun resetCommunityServerToDefault() {
+        scope.launch {
+            supabasePreferences.useCustomCommunityServer().set(false)
+            supabasePreferences.customCommunityUrl().set("")
+            supabasePreferences.customCommunityApiKey().set("")
+            supabaseClientProvider?.invalidateClients()
+            updateState {
+                it.copy(
+                    useCustomCommunityServer = false,
+                    customCommunityUrl = "",
+                    customCommunityApiKey = "",
+                    testResult = "✓ Reset to default built-in community server."
+                )
+            }
+        }
+    }
+
+    fun testCommunityConnection() {
+        scope.launch {
+            updateState { it.copy(isTesting = true, testResult = null) }
+            val effUrl = supabasePreferences.getEffectiveCommunityUrl()
+            val effKey = supabasePreferences.getEffectiveCommunityKey()
+            if (effUrl.isBlank() || effKey.isBlank()) {
+                updateState {
+                    it.copy(
+                        isTesting = false,
+                        testResult = "✗ Community server is not configured or app environment key is missing."
+                    )
+                }
+                return@launch
+            }
+            try {
+                val client = HttpClient()
+                val response: HttpResponse = client.get("${effUrl.trimEnd('/')}/rest/v1/") {
+                    header("apikey", effKey)
+                }
+                val statusCode = response.status.value
+                if (statusCode in 200..299 || statusCode == 404 || statusCode == 401) {
+                    updateState {
+                        it.copy(
+                            isTesting = false,
+                            testResult = "✓ Community Server reached successfully (HTTP $statusCode)!"
+                        )
+                    }
+                } else {
+                    updateState {
+                        it.copy(
+                            isTesting = false,
+                            testResult = "✗ Community Server responded with HTTP $statusCode."
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                updateState {
+                    it.copy(
+                        isTesting = false,
+                        testResult = "✗ Failed to connect to Community Server: ${e.message}"
+                    )
+                }
             }
         }
     }

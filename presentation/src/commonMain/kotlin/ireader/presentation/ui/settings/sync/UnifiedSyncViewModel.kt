@@ -30,7 +30,18 @@ data class UnifiedSyncScreenState(
     val autoSyncOnChapterFinish: Boolean = true,
     val syncOnWifiOnly: Boolean = false,
     val lastSyncTimestamp: Long = 0L,
-    val showCustomSupabaseDialog: Boolean = false
+    val showCustomSupabaseDialog: Boolean = false,
+    // Custom Cloud (WebDAV / Nextcloud / TrueNAS)
+    val isCustomCloudConnected: Boolean = false,
+    val customCloudUrl: String = "",
+    val customCloudUsername: String = "",
+    val customCloudServerType: String = "generic",
+    val customCloudPath: String = "",
+    val showCustomCloudDialog: Boolean = false,
+    // Granular content selection
+    val syncBooksEnabled: Boolean = true,
+    val syncChaptersEnabled: Boolean = true,
+    val syncProgressEnabled: Boolean = true
 )
 
 class UnifiedSyncViewModel(
@@ -52,6 +63,14 @@ class UnifiedSyncViewModel(
         val autoOnChapter = syncPreferences.autoSyncOnChapterFinish().get()
         val onWifiOnly = syncPreferences.syncOnWifiOnly().get()
         val lastTimestamp = syncPreferences.lastSyncTimestamp().get()
+        val isCustomCloudAuth = syncPreferences.isCustomCloudConfigured()
+        val customUrl = syncPreferences.customCloudUrl().get()
+        val customUser = syncPreferences.customCloudUsername().get()
+        val customType = syncPreferences.customCloudServerType().get()
+        val customPath = syncPreferences.customCloudPath().get()
+        val booksEnabled = syncPreferences.syncBooksEnabled().get()
+        val chaptersEnabled = syncPreferences.syncChaptersEnabled().get()
+        val progressEnabled = syncPreferences.syncProgressEnabled().get()
 
         updateState {
             it.copy(
@@ -59,7 +78,15 @@ class UnifiedSyncViewModel(
                 autoSyncOnLaunch = autoOnLaunch,
                 autoSyncOnChapterFinish = autoOnChapter,
                 syncOnWifiOnly = onWifiOnly,
-                lastSyncTimestamp = lastTimestamp
+                lastSyncTimestamp = lastTimestamp,
+                isCustomCloudConnected = isCustomCloudAuth,
+                customCloudUrl = customUrl,
+                customCloudUsername = customUser,
+                customCloudServerType = customType,
+                customCloudPath = customPath,
+                syncBooksEnabled = booksEnabled,
+                syncChaptersEnabled = chaptersEnabled,
+                syncProgressEnabled = progressEnabled
             )
         }
 
@@ -95,12 +122,23 @@ class UnifiedSyncViewModel(
                 else -> null
             }
 
+            val isCustomCloudAuth = syncPreferences.isCustomCloudConfigured()
+            val customUrl = syncPreferences.customCloudUrl().get()
+            val customUser = syncPreferences.customCloudUsername().get()
+            val customType = syncPreferences.customCloudServerType().get()
+            val customPath = syncPreferences.customCloudPath().get()
+
             updateState {
                 it.copy(
                     isGoogleDriveConnected = isDriveAuth,
                     googleDriveEmail = driveEmail,
                     isSupabaseConnected = isSupaAuth,
-                    supabaseEmail = supaEmail
+                    supabaseEmail = supaEmail,
+                    isCustomCloudConnected = isCustomCloudAuth,
+                    customCloudUrl = customUrl,
+                    customCloudUsername = customUser,
+                    customCloudServerType = customType,
+                    customCloudPath = customPath
                 )
             }
         }
@@ -221,6 +259,71 @@ class UnifiedSyncViewModel(
 
     fun setShowCustomSupabaseDialog(show: Boolean) {
         updateState { it.copy(showCustomSupabaseDialog = show) }
+    }
+
+    fun toggleCustomCloudDialog(show: Boolean) {
+        updateState { it.copy(showCustomCloudDialog = show) }
+    }
+
+    fun saveCustomCloudCredentials(
+        url: String,
+        username: String,
+        password: String,
+        serverType: String,
+        path: String
+    ) {
+        syncPreferences.customCloudUrl().set(url.trim())
+        syncPreferences.customCloudUsername().set(username.trim())
+        if (password.isNotEmpty()) {
+            syncPreferences.customCloudPassword().set(password.trim())
+        }
+        syncPreferences.customCloudServerType().set(serverType.trim())
+        syncPreferences.customCloudPath().set(path.trim())
+
+        updateState {
+            it.copy(
+                isCustomCloudConnected = syncPreferences.isCustomCloudConfigured(),
+                customCloudUrl = url.trim(),
+                customCloudUsername = username.trim(),
+                customCloudServerType = serverType.trim(),
+                customCloudPath = path.trim(),
+                showCustomCloudDialog = false,
+                selectedProvider = SyncProviderType.CUSTOM_CLOUD
+            )
+        }
+        unifiedSyncEngine.setProvider(SyncProviderType.CUSTOM_CLOUD)
+    }
+
+    fun disconnectCustomCloud() {
+        syncPreferences.customCloudUrl().set("")
+        syncPreferences.customCloudUsername().set("")
+        syncPreferences.customCloudPassword().set("")
+        updateState {
+            it.copy(
+                isCustomCloudConnected = false,
+                customCloudUrl = "",
+                customCloudUsername = "",
+                selectedProvider = if (it.selectedProvider == SyncProviderType.CUSTOM_CLOUD) SyncProviderType.NONE else it.selectedProvider
+            )
+        }
+        if (syncPreferences.getSelectedProviderType() == SyncProviderType.CUSTOM_CLOUD) {
+            unifiedSyncEngine.setProvider(SyncProviderType.NONE)
+        }
+    }
+
+    fun toggleSyncBooks(enabled: Boolean) {
+        syncPreferences.syncBooksEnabled().set(enabled)
+        updateState { it.copy(syncBooksEnabled = enabled) }
+    }
+
+    fun toggleSyncChapters(enabled: Boolean) {
+        syncPreferences.syncChaptersEnabled().set(enabled)
+        updateState { it.copy(syncChaptersEnabled = enabled) }
+    }
+
+    fun toggleSyncProgress(enabled: Boolean) {
+        syncPreferences.syncProgressEnabled().set(enabled)
+        updateState { it.copy(syncProgressEnabled = enabled) }
     }
 }
 

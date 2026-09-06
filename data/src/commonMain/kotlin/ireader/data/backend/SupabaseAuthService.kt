@@ -10,8 +10,12 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class SupabaseAuthService(
-    private val client: SupabaseClient
+    private val clientProvider: () -> SupabaseClient
 ) : AuthService {
+    
+    constructor(client: SupabaseClient) : this({ client })
+    
+    private val client: SupabaseClient get() = clientProvider()
     
     override suspend fun signIn(email: String, password: String): Result<AuthUser> {
         return try {

@@ -18,8 +18,12 @@ import io.ktor.http.encodeURLParameter
  * to avoid Kotlin reflection issues on Android.
  */
 class SupabaseBackendService(
-    private val client: SupabaseClient
+    private val clientProvider: () -> SupabaseClient
 ) : BackendService {
+    
+    constructor(client: SupabaseClient) : this({ client })
+    
+    private val client: SupabaseClient get() = clientProvider()
     
     private val json = Json {
         ignoreUnknownKeys = true

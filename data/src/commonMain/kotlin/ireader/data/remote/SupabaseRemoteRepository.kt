@@ -30,12 +30,22 @@ import ireader.domain.utils.extensions.currentTimeToLong
  * Supabase implementation of RemoteRepository with email/password authentication
  */
 class SupabaseRemoteRepository(
-    private val supabaseClient: SupabaseClient,
+    private val clientProvider: () -> SupabaseClient,
     private val backendService: BackendService,
     private val syncQueue: SyncQueue,
     private val retryPolicy: RetryPolicy = RetryPolicy(),
     private val cache: RemoteCache = RemoteCache()
 ) : RemoteRepository {
+    
+    constructor(
+        supabaseClient: SupabaseClient,
+        backendService: BackendService,
+        syncQueue: SyncQueue,
+        retryPolicy: RetryPolicy = RetryPolicy(),
+        cache: RemoteCache = RemoteCache()
+    ) : this({ supabaseClient }, backendService, syncQueue, retryPolicy, cache)
+    
+    private val supabaseClient: SupabaseClient get() = clientProvider()
     
     private val json = Json {
         ignoreUnknownKeys = true

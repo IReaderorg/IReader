@@ -154,6 +154,23 @@ class CommunitySourceConfigViewModel(
         }
     }
     
+    fun resetToDefaultServer() {
+        scope.launch {
+            try {
+                communityPreferences.communitySourceUrl().set("")
+                communityPreferences.communitySourceApiKey().set("")
+                updateState { it.copy(
+                    communitySourceUrl = "",
+                    communitySourceApiKey = "",
+                    testResult = "✓ Reverted to default app community server",
+                    error = null
+                )}
+            } catch (e: Exception) {
+                updateState { it.copy(error = "Failed to reset server: ${e.message}") }
+            }
+        }
+    }
+    
     fun testConnection() {
         scope.launch {
             updateState { it.copy(isTesting = true, testResult = null) }

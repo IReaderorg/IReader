@@ -2,6 +2,7 @@ package ireader.presentation.ui.settings.sync
 
 import ireader.presentation.core.LocalNavigator
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -153,7 +155,46 @@ class SupabaseConfigScreen  {
                     )
                 }
 
-                // 2. Sync Settings Card
+                // 2. Granular Content Selection (Books, Chapters, Progress)
+                item {
+                    ContentSyncSelectionCard(
+                        syncBooks = state.syncBooksEnabled,
+                        syncChapters = state.syncChaptersEnabled,
+                        syncProgress = state.syncProgressEnabled,
+                        onToggleBooks = { viewModel.toggleSyncBooks(it) },
+                        onToggleChapters = { viewModel.toggleSyncChapters(it) },
+                        onToggleProgress = { viewModel.toggleSyncProgress(it) }
+                    )
+                }
+
+                // 3. Community Backend Server Card
+                item {
+                    CommunityServerCard(
+                        useCustom = state.useCustomCommunityServer,
+                        customUrl = state.customCommunityUrl,
+                        customApiKey = state.customCommunityApiKey,
+                        defaultUrl = state.defaultCommunityUrl,
+                        isTesting = state.isTesting,
+                        onToggleCustom = { viewModel.toggleUseCustomCommunityServer(it) },
+                        onUrlChanged = { viewModel.setCustomCommunityUrl(it) },
+                        onApiKeyChanged = { viewModel.setCustomCommunityApiKey(it) },
+                        onSave = {
+                            viewModel.saveCommunityServerConfig()
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Custom Community Server configuration saved!")
+                            }
+                        },
+                        onReset = {
+                            viewModel.resetCommunityServerToDefault()
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Reset to built-in community backend.")
+                            }
+                        },
+                        onTest = { viewModel.testCommunityConnection() }
+                    )
+                }
+
+                // 4. Sync Settings Card
                 item {
                     SyncSettingsCard(
                         autoSyncEnabled = state.autoSyncEnabled,
@@ -1474,5 +1515,260 @@ private fun formatTime(timestamp: Long): String {
         diff < 3600_000 -> "${diff / 60_000} minutes ago"
         diff < 86400_000 -> "${diff / 3600_000} hours ago"
         else -> "${diff / 86400_000} days ago"
+    }
+}
+
+@Composable
+private fun ContentSyncSelectionCard(
+    syncBooks: Boolean,
+    syncChapters: Boolean,
+    syncProgress: Boolean,
+    onToggleBooks: (Boolean) -> Unit,
+    onToggleChapters: (Boolean) -> Unit,
+    onToggleProgress: (Boolean) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Sync Content Selection",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Customize what data gets uploaded to your self-hosted server.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleBooks(!syncBooks) },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Sync Books", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                    Text("Sync library novels and book metadata (optional)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = syncBooks, onCheckedChange = onToggleBooks)
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleChapters(!syncChapters) },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Sync Chapters", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                    Text("Sync chapter list, bookmarks, and read states", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = syncChapters, onCheckedChange = onToggleChapters)
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleProgress(!syncProgress) },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Sync Reading Progress", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                    Text("Sync active reading positions and last read timestamps", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = syncProgress, onCheckedChange = onToggleProgress)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CommunityServerCard(
+    useCustom: Boolean,
+    customUrl: String,
+    customApiKey: String,
+    defaultUrl: String,
+    isTesting: Boolean,
+    onToggleCustom: (Boolean) -> Unit,
+    onUrlChanged: (String) -> Unit,
+    onApiKeyChanged: (String) -> Unit,
+    onSave: () -> Unit,
+    onReset: () -> Unit,
+    onTest: () -> Unit
+) {
+    var showApiKey by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Community & Leaderboard Backend",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Used for community sources, translations, leaderboard, and badges",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (!useCustom) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = if (!useCustom) "Default Env" else "Custom Server",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (!useCustom) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleCustom(!useCustom) },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Use Custom Community Server", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        if (!useCustom) "Currently using default community server (built into app)" else "Custom community backend active",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(checked = useCustom, onCheckedChange = onToggleCustom)
+            }
+
+            if (useCustom) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = customUrl,
+                    onValueChange = onUrlChanged,
+                    label = { Text("Community Server URL") },
+                    placeholder = { Text("https://your-community-supabase.co") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = customApiKey,
+                    onValueChange = onApiKeyChanged,
+                    label = { Text("Community API Key (Anon)") },
+                    placeholder = { Text("eyJhbGciOi...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { showApiKey = !showApiKey }) {
+                            Icon(
+                                imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (showApiKey) "Hide" else "Show"
+                            )
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onSave,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Save Server")
+                    }
+
+                    OutlinedButton(
+                        onClick = onTest,
+                        enabled = !isTesting,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        if (isTesting) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                        } else {
+                            Text("Test")
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = onReset,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Reset")
+                    }
+                }
+            } else if (defaultUrl.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Cloud,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Connected to app environment: ${defaultUrl.take(35)}...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
     }
 }
