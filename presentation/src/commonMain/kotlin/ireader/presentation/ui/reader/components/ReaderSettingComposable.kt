@@ -835,6 +835,14 @@ fun GeneralScreenTab(
                 title = localizeHelper.localize(Res.string.volume_key_navigation),
             )
         }
+        if (vm.volumeKeyNavigation.value) {
+            item {
+                SwitchPreference(
+                    preference = vm.volumeKeyInverted,
+                    title = localizeHelper.localize(Res.string.invert_volume_keys),
+                )
+            }
+        }
         item {
             SwitchPreference(
                 preference = vm.paragraphTranslationEnabled,

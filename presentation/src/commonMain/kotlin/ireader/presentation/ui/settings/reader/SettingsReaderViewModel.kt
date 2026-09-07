@@ -39,7 +39,8 @@ class SettingsReaderViewModel(
     
     // Navigation preferences
     val navigationMode: StateFlow<String> = preferenceStore.getString("navigation_mode", "tap").stateIn(scope)
-    val volumeKeysEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("volume_keys_enabled", false).stateIn(scope)
+    val volumeKeysEnabled: StateFlow<Boolean> = preferenceStore.getBoolean("volume_key_navigation", false).stateIn(scope)
+    val volumeKeysInverted: StateFlow<Boolean> = preferenceStore.getBoolean("reader_volume_keys_inverted", false).stateIn(scope)
     val invertTapping: StateFlow<Boolean> = preferenceStore.getBoolean("invert_tapping", false).stateIn(scope)
     
     // Visual effects preferences
@@ -148,7 +149,11 @@ class SettingsReaderViewModel(
     }
     
     fun setVolumeKeysEnabled(enabled: Boolean) {
-        preferenceStore.getBoolean("volume_keys_enabled", false).set(enabled)
+        preferenceStore.getBoolean("volume_key_navigation", false).set(enabled)
+    }
+    
+    fun setVolumeKeysInverted(enabled: Boolean) {
+        preferenceStore.getBoolean("reader_volume_keys_inverted", false).set(enabled)
     }
     
     fun setInvertTapping(enabled: Boolean) {

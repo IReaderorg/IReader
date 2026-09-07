@@ -486,6 +486,7 @@
     <string name="show_webView_during_fetching">WebView Integration</string>
     <string name="screen_always_on">Screen Always On</string>
     <string name="volume_key_navigation">Volume Key Navigation</string>
+    <string name="invert_volume_keys">Invert Volume Keys</string>
     <string name="general">General</string>
     <string name="use_default_image_loader">Use the Default Image Loader</string>
     <string name="system_default">Default</string>

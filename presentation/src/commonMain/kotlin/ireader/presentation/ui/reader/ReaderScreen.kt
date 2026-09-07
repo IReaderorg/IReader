@@ -10,6 +10,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -230,13 +231,56 @@ private fun ReadingScreenContent(
     // No complex syncing needed - Material3 ModalBottomSheet is controlled by boolean condition
     // The sheet visibility is controlled by !vm.isReaderModeEnable
 
+    fun handleVolumeAction(isVolumeUp: Boolean) {
+        val action = determineVolumeKeyAction(
+            isVolumeUp = isVolumeUp,
+            volumeKeyInverted = vm.volumeKeyInverted.value,
+            readingMode = vm.readingMode.value,
+            canScrollForward = lazyListState.canScrollForward,
+            canScrollBackward = lazyListState.canScrollBackward,
+        )
+        when (action) {
+            VolumeKeyAction.PAGE_NEXT -> vm.navigatePageNext()
+            VolumeKeyAction.PAGE_PREV -> vm.navigatePagePrev()
+            VolumeKeyAction.NEXT_CHAPTER -> onNextWithReset()
+            VolumeKeyAction.PREV_CHAPTER -> onPrevWithReset()
+            VolumeKeyAction.SCROLL_FORWARD -> {
+                scope.launch {
+                    if (!vm.verticalScrolling.value && scrollState.maxValue > 0) {
+                        val viewportWidth = scrollState.maxValue.toFloat()
+                        val scrollDistance = (viewportWidth * 0.85f).coerceAtLeast(300f)
+                        scrollState.animateScrollBy(scrollDistance)
+                    } else {
+                        val viewportHeight = lazyListState.layoutInfo.viewportSize.height
+                        val scrollDistance = if (viewportHeight > 0) (viewportHeight * 0.85f) else 600f
+                        lazyListState.animateScrollBy(scrollDistance)
+                    }
+                }
+            }
+            VolumeKeyAction.SCROLL_BACKWARD -> {
+                scope.launch {
+                    if (!vm.verticalScrolling.value && scrollState.maxValue > 0) {
+                        val viewportWidth = scrollState.maxValue.toFloat()
+                        val scrollDistance = (viewportWidth * 0.85f).coerceAtLeast(300f)
+                        scrollState.animateScrollBy(-scrollDistance)
+                    } else {
+                        val viewportHeight = lazyListState.layoutInfo.viewportSize.height
+                        val scrollDistance = if (viewportHeight > 0) (viewportHeight * 0.85f) else 600f
+                        lazyListState.animateScrollBy(-scrollDistance)
+                    }
+                }
+            }
+            VolumeKeyAction.NONE -> Unit
+        }
+    }
+
     Box(
         modifier = ReaderScreenModifiers.fillMaxSize
             .background(backgroundColor)
             .volumeKeyHandler(
                 enabled = vm.volumeKeyNavigation.value,
-                onVolumeUp = onPrevWithReset,
-                onVolumeDown = onNextWithReset
+                onVolumeUp = { handleVolumeAction(isVolumeUp = true) },
+                onVolumeDown = { handleVolumeAction(isVolumeUp = false) }
             ),
         contentAlignment = Alignment.Center,
     ) {

@@ -1,6 +1,7 @@
 package ireader.presentation.ui.settings.audio
 
 import androidx.compose.runtime.Stable
+import io.ktor.client.statement.*
 import ireader.core.log.Log
 import ireader.domain.models.tts.PiperVoice
 import ireader.domain.preferences.prefs.AppPreferences
@@ -15,6 +16,12 @@ import ireader.domain.services.tts_service.PiperVoiceDownloader
 import ireader.domain.services.tts_service.PiperVoiceService
 import ireader.domain.services.tts_service.TTSChapterCache
 import ireader.domain.services.tts_service.TTSEngineCallback
+import ireader.domain.services.tts_service.local.LocalTTSApiFormat
+import ireader.domain.services.tts_service.local.LocalTTSConfig
+import ireader.domain.services.tts_service.local.LocalTTSEngine
+import ireader.domain.services.tts_service.local.LocalTTSHealthResponse
+import ireader.domain.services.tts_service.local.LocalTTSManager
+import ireader.domain.services.tts_service.local.LocalTTSVoice
 import ireader.domain.services.tts_service.v2.EngineType
 import ireader.domain.services.tts_service.v2.GradioConfig
 import ireader.domain.services.tts_service.v2.TTSCommand
@@ -32,13 +39,14 @@ enum class AudioEngineType {
     DEVICE_TTS,
     PIPER_NEURAL,
     KOKORO_NEURAL,
-    GRADIO_AI
+    GRADIO_AI,
+    LOCAL_SERVER
 }
 
 @Stable
 data class AudioStudioState(
     val platformType: PlatformType = PlatformType.DESKTOP,
-    val availableEngines: List<AudioEngineType> = listOf(AudioEngineType.PIPER_NEURAL, AudioEngineType.KOKORO_NEURAL, AudioEngineType.GRADIO_AI),
+    val availableEngines: List<AudioEngineType> = listOf(AudioEngineType.PIPER_NEURAL, AudioEngineType.KOKORO_NEURAL, AudioEngineType.GRADIO_AI, AudioEngineType.LOCAL_SERVER),
     val selectedEngine: AudioEngineType = AudioEngineType.PIPER_NEURAL,
     val speechRate: Float = 1.0f,
     val speechPitch: Float = 1.0f,
@@ -61,6 +69,16 @@ data class AudioStudioState(
     val cloudTestResult: TestResult? = null,
     val editingCloudConfig: GradioTTSConfig? = null,
     val isEditCloudDialogOpen: Boolean = false,
+
+    // Local Server TTS (Chatterbox / Local AI)
+    val localServerUrl: String = "http://127.0.0.1:8000",
+    val localServerVoice: String = "default",
+    val localServerApiFormat: LocalTTSApiFormat = LocalTTSApiFormat.SIMPLE_REST,
+    val localServerApiKey: String = "",
+    val localServerVoices: List<LocalTTSVoice> = LocalTTSManager.DEFAULT_VOICES,
+    val isTestingLocalServer: Boolean = false,
+    val localServerHealth: LocalTTSHealthResponse? = null,
+    val localServerError: String? = null,
 
     // Piper Voice Management (Desktop)
     val piperVoices: List<PiperVoice> = emptyList(),
@@ -88,6 +106,7 @@ class AudioStudioViewModel(
     private val appPreferences: AppPreferences,
     private val platformCapabilities: PlatformCapabilities? = null,
     private val gradioTTSManager: GradioTTSManager? = null,
+    private val localTTSManager: LocalTTSManager? = null,
     private val piperVoiceService: PiperVoiceService? = null,
     private val piperVoiceDownloader: PiperVoiceDownloader? = null,
     private val chapterCache: TTSChapterCache? = null,
@@ -98,14 +117,15 @@ class AudioStudioViewModel(
 
     private var samplePlaybackJob: Job? = null
     private var sampleGradioEngine: GenericGradioTTSEngine? = null
+    private var sampleLocalEngine: LocalTTSEngine? = null
 
     init {
         val platform = platformCapabilities?.platformType ?: PlatformType.DESKTOP
         val availableEngines = when (platform) {
-            PlatformType.ANDROID -> listOf(AudioEngineType.DEVICE_TTS, AudioEngineType.GRADIO_AI)
-            PlatformType.DESKTOP -> listOf(AudioEngineType.PIPER_NEURAL, AudioEngineType.KOKORO_NEURAL, AudioEngineType.GRADIO_AI)
-            PlatformType.IOS -> listOf(AudioEngineType.DEVICE_TTS, AudioEngineType.GRADIO_AI)
-            else -> listOf(AudioEngineType.DEVICE_TTS, AudioEngineType.GRADIO_AI)
+            PlatformType.ANDROID -> listOf(AudioEngineType.DEVICE_TTS, AudioEngineType.GRADIO_AI, AudioEngineType.LOCAL_SERVER)
+            PlatformType.DESKTOP -> listOf(AudioEngineType.PIPER_NEURAL, AudioEngineType.KOKORO_NEURAL, AudioEngineType.GRADIO_AI, AudioEngineType.LOCAL_SERVER)
+            PlatformType.IOS -> listOf(AudioEngineType.DEVICE_TTS, AudioEngineType.GRADIO_AI, AudioEngineType.LOCAL_SERVER)
+            else -> listOf(AudioEngineType.DEVICE_TTS, AudioEngineType.GRADIO_AI, AudioEngineType.LOCAL_SERVER)
         }
 
         updateState {
@@ -117,6 +137,7 @@ class AudioStudioViewModel(
 
         loadSettings()
         observeCloudConfigs()
+        observeLocalTTSConfig()
         observePiperVoices()
         observeTTSPlugins()
         refreshCacheStats()
@@ -155,10 +176,12 @@ class AudioStudioViewModel(
         val sleepTimer = readerPreferences.sleepTime().get().toInt()
         val voice = readerPreferences.speechVoice().get()
 
+        val useLocal = appPreferences.useLocalTTS().get()
         val useAI = appPreferences.useAITTS().get() || appPreferences.useGradioTTS().get()
         val platform = state.value.platformType
 
         val defaultEngine = when {
+            useLocal -> AudioEngineType.LOCAL_SERVER
             useAI -> AudioEngineType.GRADIO_AI
             platform == PlatformType.DESKTOP -> AudioEngineType.PIPER_NEURAL
             else -> AudioEngineType.DEVICE_TTS
@@ -190,6 +213,18 @@ class AudioStudioViewModel(
     private fun syncEngineToController(engine: AudioEngineType) {
         ttsController?.let { controller ->
             when (engine) {
+                AudioEngineType.LOCAL_SERVER -> {
+                    val config = localTTSManager?.config?.value ?: LocalTTSConfig(
+                        serverUrl = state.value.localServerUrl,
+                        voice = state.value.localServerVoice,
+                        speed = state.value.speechRate,
+                        pitch = state.value.speechPitch,
+                        apiKey = state.value.localServerApiKey.ifBlank { null },
+                        apiFormat = state.value.localServerApiFormat
+                    )
+                    controller.dispatch(TTSCommand.SetLocalConfig(config))
+                    controller.dispatch(TTSCommand.SetEngine(EngineType.LOCAL))
+                }
                 AudioEngineType.GRADIO_AI -> {
                     val activeConfig = state.value.activeCloudConfigId?.let { gradioTTSManager?.getConfigById(it) }
                         ?: gradioTTSManager?.getActiveConfig()
@@ -210,6 +245,23 @@ class AudioStudioViewModel(
                 }
                 else -> {
                     controller.dispatch(TTSCommand.SetEngine(EngineType.NATIVE))
+                }
+            }
+        }
+    }
+
+    private fun observeLocalTTSConfig() {
+        localTTSManager?.let { manager ->
+            scope.launch {
+                manager.config.collectLatest { config ->
+                    updateState {
+                        it.copy(
+                            localServerUrl = config.serverUrl,
+                            localServerVoice = config.voice,
+                            localServerApiFormat = config.apiFormat,
+                            localServerApiKey = config.apiKey ?: ""
+                        )
+                    }
                 }
             }
         }
@@ -258,8 +310,10 @@ class AudioStudioViewModel(
 
     fun setEngine(engine: AudioEngineType) {
         val isAI = engine == AudioEngineType.GRADIO_AI
+        val isLocal = engine == AudioEngineType.LOCAL_SERVER
         appPreferences.useAITTS().set(isAI)
         appPreferences.useGradioTTS().set(isAI)
+        appPreferences.useLocalTTS().set(isLocal)
         updateState { it.copy(selectedEngine = engine) }
         syncEngineToController(engine)
     }
@@ -310,6 +364,9 @@ class AudioStudioViewModel(
             sampleGradioEngine?.stop()
             sampleGradioEngine?.cleanup()
             sampleGradioEngine = null
+            sampleLocalEngine?.stop()
+            sampleLocalEngine?.cleanup()
+            sampleLocalEngine = null
             ttsController?.dispatch(TTSCommand.Stop)
             updateState { it.copy(isPlayingSample = false) }
         } else {
@@ -319,8 +376,54 @@ class AudioStudioViewModel(
                 try {
                     val sampleText = state.value.sampleText.ifBlank { "The quick brown fox jumps over the lazy dog." }
                     
-                    if (state.value.selectedEngine == AudioEngineType.GRADIO_AI) {
-                        // 1. Cloud AI Audio Synthesis
+                    if (state.value.selectedEngine == AudioEngineType.LOCAL_SERVER) {
+                        // 1. Local Server TTS (Chatterbox / Local AI)
+                        if (localTTSManager != null) {
+                            val currentCfg = localTTSManager.config.value.copy(
+                                serverUrl = state.value.localServerUrl,
+                                voice = state.value.localServerVoice,
+                                speed = state.value.speechRate,
+                                pitch = state.value.speechPitch,
+                                apiKey = state.value.localServerApiKey.ifBlank { null },
+                                apiFormat = state.value.localServerApiFormat
+                            )
+                            val engine = localTTSManager.createEngine(currentCfg)
+                            sampleLocalEngine = engine
+                            engine.setSpeed(state.value.speechRate)
+                            engine.setPitch(state.value.speechPitch)
+
+                            val completer = CompletableDeferred<Unit>()
+                            engine.setCallback(object : TTSEngineCallback {
+                                override fun onStart(utteranceId: String) {}
+                                override fun onDone(utteranceId: String) {
+                                    completer.complete(Unit)
+                                }
+                                override fun onError(utteranceId: String, error: String) {
+                                    Log.error { "Local TTS sample playback error: $error" }
+                                    completer.complete(Unit)
+                                }
+                            })
+                            engine.speak(sampleText, "sample_preview")
+
+                            withTimeoutOrNull(25_000L) {
+                                completer.await()
+                            }
+                        } else if (ttsController != null) {
+                            syncEngineToController(AudioEngineType.LOCAL_SERVER)
+                            ttsController.dispatch(TTSCommand.SetSpeed(state.value.speechRate))
+                            ttsController.dispatch(TTSCommand.SetPitch(state.value.speechPitch))
+                            ttsController.dispatch(TTSCommand.SetContent(listOf(sampleText)))
+                            ttsController.dispatch(TTSCommand.Play)
+
+                            val wordCount = sampleText.split("\\s+".toRegex()).size.coerceAtLeast(1)
+                            val estimatedDurationMs = ((wordCount * 60_000f / (150f * state.value.speechRate)).toLong()).coerceIn(2000L, 15000L)
+                            delay(estimatedDurationMs)
+                        } else {
+                            val durationMs = ((3000f / state.value.speechRate).toLong()).coerceAtLeast(500L)
+                            delay(durationMs)
+                        }
+                    } else if (state.value.selectedEngine == AudioEngineType.GRADIO_AI) {
+                        // 2. Cloud AI Audio Synthesis
                         val activeConfig = state.value.activeCloudConfigId?.let { gradioTTSManager?.getConfigById(it) }
                             ?: gradioTTSManager?.getActiveConfig()
                             ?: state.value.cloudConfigs.firstOrNull()
@@ -362,7 +465,7 @@ class AudioStudioViewModel(
                             delay(durationMs)
                         }
                     } else {
-                        // 2. Native System TTS or Desktop Neural Piper
+                        // 3. Native System TTS or Desktop Neural Piper
                         if (ttsController != null) {
                             syncEngineToController(state.value.selectedEngine)
                             ttsController.dispatch(TTSCommand.SetSpeed(state.value.speechRate))
@@ -384,6 +487,9 @@ class AudioStudioViewModel(
                     sampleGradioEngine?.stop()
                     sampleGradioEngine?.cleanup()
                     sampleGradioEngine = null
+                    sampleLocalEngine?.stop()
+                    sampleLocalEngine?.cleanup()
+                    sampleLocalEngine = null
                     ttsController?.dispatch(TTSCommand.Stop)
                     updateState { it.copy(isPlayingSample = false) }
                 }
@@ -577,6 +683,86 @@ class AudioStudioViewModel(
         if (stats != null) {
             updateState { it.copy(cacheEntryCount = stats.entryCount, cacheSizeMB = stats.totalSizeMB) }
         }
+    }
+
+    // ==================== Local Server TTS Methods ====================
+
+    fun setLocalServerUrl(url: String) {
+        updateState { it.copy(localServerUrl = url, localServerError = null) }
+        persistLocalConfig()
+    }
+
+    fun setLocalServerVoice(voiceId: String) {
+        val voiceName = state.value.localServerVoices.find { it.id == voiceId }?.name ?: voiceId
+        readerPreferences.speechVoice().set(voiceName)
+        updateState { it.copy(localServerVoice = voiceId, selectedVoiceName = voiceName) }
+        persistLocalConfig()
+    }
+
+    fun setLocalServerApiFormat(format: LocalTTSApiFormat) {
+        updateState { it.copy(localServerApiFormat = format) }
+        persistLocalConfig()
+    }
+
+    fun setLocalServerApiKey(key: String) {
+        updateState { it.copy(localServerApiKey = key) }
+        persistLocalConfig()
+    }
+
+    private fun persistLocalConfig() {
+        val current = localTTSManager?.config?.value ?: LocalTTSConfig()
+        val updated = current.copy(
+            serverUrl = state.value.localServerUrl,
+            voice = state.value.localServerVoice,
+            apiFormat = state.value.localServerApiFormat,
+            apiKey = state.value.localServerApiKey.ifBlank { null },
+            speed = state.value.speechRate,
+            pitch = state.value.speechPitch
+        )
+        localTTSManager?.updateConfig(updated)
+        if (state.value.selectedEngine == AudioEngineType.LOCAL_SERVER) {
+            syncEngineToController(AudioEngineType.LOCAL_SERVER)
+        }
+    }
+
+    fun testLocalServerConnection() {
+        scope.launch {
+            updateState { it.copy(isTestingLocalServer = true, localServerError = null, localServerHealth = null) }
+            try {
+                val result = localTTSManager?.testConnection(
+                    url = state.value.localServerUrl,
+                    apiKey = state.value.localServerApiKey.ifBlank { null }
+                )
+                if (result != null && result.isSuccess) {
+                    val health = result.getOrNull()
+                    updateState { it.copy(isTestingLocalServer = false, localServerHealth = health, localServerError = null) }
+                    fetchLocalServerVoices()
+                } else {
+                    val err = result?.exceptionOrNull()?.message ?: "Failed to connect to Local TTS server"
+                    updateState { it.copy(isTestingLocalServer = false, localServerError = err, localServerHealth = null) }
+                }
+            } catch (e: Exception) {
+                updateState { it.copy(isTestingLocalServer = false, localServerError = e.message ?: "Connection error", localServerHealth = null) }
+            }
+        }
+    }
+
+    fun fetchLocalServerVoices() {
+        scope.launch {
+            try {
+                val voices = localTTSManager?.fetchVoices(
+                    url = state.value.localServerUrl,
+                    apiKey = state.value.localServerApiKey.ifBlank { null }
+                ) ?: LocalTTSManager.DEFAULT_VOICES
+                updateState { it.copy(localServerVoices = voices) }
+            } catch (e: Exception) {
+                Log.warn { "Failed to fetch local server voices: ${e.message}" }
+            }
+        }
+    }
+
+    fun clearLocalServerError() {
+        updateState { it.copy(localServerError = null) }
     }
 }
 

@@ -279,6 +279,29 @@ internal fun PagedReaderContent(
             }
         }
 
+        // Collect volume key / external page navigation events
+        LaunchedEffect(pagerState, totalPagerCount, hasPrevChapter, hasNextChapter) {
+            vm.pageNavigationEvents.collect { event ->
+                val targetPage = pagerState.targetPage
+                when (event) {
+                    is PageNavigationEvent.Next -> {
+                        if (targetPage < totalPagerCount - 1) {
+                            pagerState.animateScrollToPage(targetPage + 1)
+                        } else if (hasNextChapter) {
+                            safeNavigateNext()
+                        }
+                    }
+                    is PageNavigationEvent.Prev -> {
+                        if (targetPage > 0) {
+                            pagerState.animateScrollToPage(targetPage - 1)
+                        } else if (hasPrevChapter) {
+                            safeNavigatePrev()
+                        }
+                    }
+                }
+            }
+        }
+
         // Track current page & reading time
         val currentContentPageIndex by remember {
             derivedStateOf {

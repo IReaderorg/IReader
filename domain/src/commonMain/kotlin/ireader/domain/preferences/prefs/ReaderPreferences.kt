@@ -412,6 +412,10 @@ Visit.*for more chapters"""
         return preferenceStore.getBoolean("volume_key_navigation", false)
     }
 
+    fun volumeKeyInverted(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reader_volume_keys_inverted", false)
+    }
+
     // Paragraph translation menu
     fun paragraphTranslationEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean("paragraph_translation_enabled", false)
@@ -623,13 +627,8 @@ Visit.*for more chapters"""
         return preferenceStore.getBoolean("reader_long_tap", true)
     }
 
-    fun readWithVolumeKeys(): Preference<Boolean> {
-        return preferenceStore.getBoolean("reader_volume_keys", false)
-    }
-
-    fun readWithVolumeKeysInverted(): Preference<Boolean> {
-        return preferenceStore.getBoolean("reader_volume_keys_inverted", false)
-    }
+    fun readWithVolumeKeys(): Preference<Boolean> = volumeKeyNavigation()
+    fun readWithVolumeKeysInverted(): Preference<Boolean> = volumeKeyInverted()
 
     fun navigationModePager(): Preference<Int> {
         return preferenceStore.getInt("reader_navigation_mode_pager", 0)

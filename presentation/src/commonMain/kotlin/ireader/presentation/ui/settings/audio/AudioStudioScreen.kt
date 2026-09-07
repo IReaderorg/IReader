@@ -35,6 +35,9 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.tts.PiperVoice
 import ireader.domain.services.platform.PlatformType
 import ireader.domain.services.tts_service.GradioTTSConfig
+import ireader.domain.services.tts_service.local.LocalTTSApiFormat
+import ireader.domain.services.tts_service.local.LocalTTSHealthResponse
+import ireader.domain.services.tts_service.local.LocalTTSVoice
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 import ireader.presentation.ui.component.IScaffold
@@ -69,6 +72,14 @@ fun AudioStudioScreen(
     onSaveCloudConfig: (GradioTTSConfig) -> Unit = {},
     onDeleteCloudConfig: (String) -> Unit = {},
     onClearCloudTestResult: () -> Unit = {},
+    // Local Server Callbacks
+    onLocalServerUrlChange: (String) -> Unit = {},
+    onLocalServerVoiceChange: (String) -> Unit = {},
+    onLocalServerApiFormatChange: (LocalTTSApiFormat) -> Unit = {},
+    onLocalServerApiKeyChange: (String) -> Unit = {},
+    onTestLocalServer: () -> Unit = {},
+    onFetchLocalVoices: () -> Unit = {},
+    onClearLocalServerError: () -> Unit = {},
     // Piper Callbacks (Desktop)
     onFilterPiperLanguage: (String?) -> Unit = {},
     onSelectPiperVoice: (PiperVoice) -> Unit = {},
@@ -192,6 +203,20 @@ fun AudioStudioScreen(
                         AudioEngineType.KOKORO_NEURAL -> {
                             item {
                                 KokoroNeuralCard()
+                            }
+                        }
+                        AudioEngineType.LOCAL_SERVER -> {
+                            item {
+                                LocalServerTTSCard(
+                                    state = state,
+                                    onUrlChange = onLocalServerUrlChange,
+                                    onVoiceChange = onLocalServerVoiceChange,
+                                    onApiFormatChange = onLocalServerApiFormatChange,
+                                    onApiKeyChange = onLocalServerApiKeyChange,
+                                    onTestConnection = onTestLocalServer,
+                                    onFetchVoices = onFetchLocalVoices,
+                                    onClearError = onClearLocalServerError
+                                )
                             }
                         }
                     }
@@ -375,6 +400,7 @@ private fun VoiceTestBenchCard(
                             AudioEngineType.PIPER_NEURAL -> "Neural (Piper)"
                             AudioEngineType.KOKORO_NEURAL -> "Neural (Kokoro)"
                             AudioEngineType.GRADIO_AI -> "Cloud AI"
+                            AudioEngineType.LOCAL_SERVER -> "Local Server"
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
@@ -443,11 +469,11 @@ private fun EngineSelectionSection(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    Row(
+    LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        state.availableEngines.forEach { engine ->
+        items(state.availableEngines) { engine ->
             val isSelected = state.selectedEngine == engine
             FilterChip(
                 selected = isSelected,
@@ -459,6 +485,7 @@ private fun EngineSelectionSection(
                             AudioEngineType.PIPER_NEURAL -> "Piper Neural"
                             AudioEngineType.KOKORO_NEURAL -> "Kokoro Neural"
                             AudioEngineType.GRADIO_AI -> "Cloud AI"
+                            AudioEngineType.LOCAL_SERVER -> "Local Server"
                         }
                     )
                 },
@@ -469,13 +496,12 @@ private fun EngineSelectionSection(
                             AudioEngineType.PIPER_NEURAL -> Icons.Outlined.Psychology
                             AudioEngineType.KOKORO_NEURAL -> Icons.AutoMirrored.Outlined.VolumeUp
                             AudioEngineType.GRADIO_AI -> Icons.Outlined.Cloud
-
+                            AudioEngineType.LOCAL_SERVER -> Icons.Outlined.Dns
                         },
                         contentDescription = null,
                         modifier = Modifier.size(16.dp)
                     )
-                },
-                modifier = Modifier.weight(1f)
+                }
             )
         }
     }
@@ -929,5 +955,283 @@ private fun FeatureStoreTTSPluginsCard(
         }
     }
 }
+
+@Composable
+private fun LocalServerTTSCard(
+    state: AudioStudioState,
+    onUrlChange: (String) -> Unit,
+    onVoiceChange: (String) -> Unit,
+    onApiFormatChange: (LocalTTSApiFormat) -> Unit,
+    onApiKeyChange: (String) -> Unit,
+    onTestConnection: () -> Unit,
+    onFetchVoices: () -> Unit,
+    onClearError: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        Icons.Outlined.Dns,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Column {
+                        Text(
+                            "Local Server TTS (Chatterbox)",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "Self-hosted AI voice synthesis (Persian & Multilingual)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Health Badge
+                if (state.localServerHealth != null) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFF2E7D32).copy(alpha = 0.15f)
+                    ) {
+                        Text(
+                            "Online",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                } else if (state.localServerError != null) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.errorContainer
+                    ) {
+                        Text(
+                            "Offline",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+
+            // Server URL Input
+            OutlinedTextField(
+                value = state.localServerUrl,
+                onValueChange = onUrlChange,
+                label = { Text("Server URL") },
+                placeholder = { Text("http://127.0.0.1:8000") },
+                leadingIcon = {
+                    Icon(Icons.Outlined.Link, contentDescription = null, modifier = Modifier.size(18.dp))
+                },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Protocol Selection
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    "Protocol:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                FilterChip(
+                    selected = state.localServerApiFormat == LocalTTSApiFormat.SIMPLE_REST,
+                    onClick = { onApiFormatChange(LocalTTSApiFormat.SIMPLE_REST) },
+                    label = { Text("Simple REST (/api/tts)") }
+                )
+                FilterChip(
+                    selected = state.localServerApiFormat == LocalTTSApiFormat.OPENAI_SPEECH,
+                    onClick = { onApiFormatChange(LocalTTSApiFormat.OPENAI_SPEECH) },
+                    label = { Text("OpenAI Audio") }
+                )
+            }
+
+            // Optional API Key
+            OutlinedTextField(
+                value = state.localServerApiKey,
+                onValueChange = onApiKeyChange,
+                label = { Text("API Key (Optional)") },
+                placeholder = { Text("Bearer token if authentication is required") },
+                leadingIcon = {
+                    Icon(Icons.Outlined.Key, contentDescription = null, modifier = Modifier.size(18.dp))
+                },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Test Connection and Fetch Voices Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onTestConnection,
+                    enabled = !state.isTestingLocalServer && state.localServerUrl.isNotBlank(),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    if (state.isTestingLocalServer) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Connecting...")
+                    } else {
+                        Icon(Icons.Outlined.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Test Connection")
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = onFetchVoices,
+                    enabled = !state.isTestingLocalServer && state.localServerUrl.isNotBlank()
+                ) {
+                    Icon(Icons.Outlined.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Fetch Voices")
+                }
+            }
+
+            // Health response info card
+            state.localServerHealth?.let { health ->
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Outlined.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF2E7D32),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                "Connected: ${health.model.ifBlank { "Chatterbox TTS" }}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Device: ${health.device.uppercase()} | Sample Rate: ${health.sample_rate} Hz | Status: ${health.status}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Error info card
+            state.localServerError?.let { error ->
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                Icon(
+                                    Icons.Outlined.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    "Connection Failed",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                            IconButton(onClick = onClearError, modifier = Modifier.size(24.dp)) {
+                                Icon(Icons.Outlined.Close, contentDescription = "Dismiss", modifier = Modifier.size(16.dp))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            error,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Make sure your local server is running: python server.py inside chatterbox-tts-server/",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+
+            // Voice Selector
+            if (state.localServerVoices.isNotEmpty()) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        "Available Server Voices:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.localServerVoices) { voice ->
+                            val isSelected = voice.id == state.localServerVoice
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { onVoiceChange(voice.id) },
+                                label = { Text(voice.name) },
+                                leadingIcon = if (isSelected) {
+                                    { Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
+                                } else null
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 

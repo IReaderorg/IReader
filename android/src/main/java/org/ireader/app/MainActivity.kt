@@ -3,6 +3,7 @@ package org.ireader.app
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -86,6 +87,27 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     val initializers: AppInitializers by inject()
     private val automaticBackup: AutomaticBackup by inject()
     private val localeHelper: LocaleHelper by inject()
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (ireader.presentation.ui.reader.AndroidVolumeKeyDispatcher.handleKeyEvent(event)) {
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (ireader.presentation.ui.reader.AndroidVolumeKeyDispatcher.handleKeyEvent(event)) {
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (ireader.presentation.ui.reader.AndroidVolumeKeyDispatcher.handleKeyEvent(event)) {
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
+    }
     
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {

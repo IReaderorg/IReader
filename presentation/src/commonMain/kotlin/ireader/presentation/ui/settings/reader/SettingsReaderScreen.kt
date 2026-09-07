@@ -49,6 +49,7 @@ fun SettingsReaderScreen(
     val landscapeZoom by viewModel.landscapeZoom.collectAsState()
     val navigationMode by viewModel.navigationMode.collectAsState()
     val volumeKeysEnabled by viewModel.volumeKeysEnabled.collectAsState()
+    val volumeKeysInverted by viewModel.volumeKeysInverted.collectAsState()
     val invertTapping by viewModel.invertTapping.collectAsState()
     val flashOnPageChange by viewModel.flashOnPageChange.collectAsState()
 
@@ -252,6 +253,18 @@ fun SettingsReaderScreen(
                     checked = volumeKeysEnabled,
                     onCheckedChange = viewModel::setVolumeKeysEnabled
                 )
+            }
+
+            if (volumeKeysEnabled) {
+                item {
+                    SettingsSwitchItem(
+                        title = localizeHelper.localize(Res.string.invert_volume_keys),
+                        description = "Reverse volume up/down actions",
+                        icon = Icons.Outlined.SwapVert,
+                        checked = volumeKeysInverted,
+                        onCheckedChange = viewModel::setVolumeKeysInverted
+                    )
+                }
             }
 
             

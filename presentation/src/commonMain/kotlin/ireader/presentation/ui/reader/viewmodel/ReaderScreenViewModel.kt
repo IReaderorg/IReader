@@ -49,9 +49,13 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.reader.ReaderConstants
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ireader.presentation.ui.reader.PageNavigationEvent
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -213,6 +217,18 @@ class ReaderScreenViewModel(
     val bilingualModeEnabled = readerPreferences.bilingualModeEnabled().asState()
     val bilingualModeLayout = readerPreferences.bilingualModeLayout().asState()
     val volumeKeyNavigation = readerPreferences.volumeKeyNavigation().asState()
+    val volumeKeyInverted = readerPreferences.volumeKeyInverted().asState()
+
+    private val _pageNavigationEvents = MutableSharedFlow<PageNavigationEvent>(extraBufferCapacity = 1)
+    val pageNavigationEvents: SharedFlow<PageNavigationEvent> = _pageNavigationEvents.asSharedFlow()
+
+    fun navigatePageNext() {
+        _pageNavigationEvents.tryEmit(PageNavigationEvent.Next)
+    }
+
+    fun navigatePagePrev() {
+        _pageNavigationEvents.tryEmit(PageNavigationEvent.Prev)
+    }
     val autoTranslateNextChapter = readerPreferences.autoTranslateNextChapter().asState()
     val openAIApiKey = readerPreferences.openAIApiKey().asState()
     val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()

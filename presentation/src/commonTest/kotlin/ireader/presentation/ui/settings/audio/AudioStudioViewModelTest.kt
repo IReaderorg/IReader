@@ -104,7 +104,8 @@ class AudioStudioViewModelTest {
         val viewModel = AudioStudioViewModel(readerPrefs, appPrefs)
 
         assertEquals(AudioEngineType.PIPER_NEURAL, viewModel.state.value.selectedEngine)
-        assertEquals(3, viewModel.state.value.availableEngines.size)
+        assertEquals(4, viewModel.state.value.availableEngines.size)
+        assertTrue(viewModel.state.value.availableEngines.contains(AudioEngineType.LOCAL_SERVER))
 
         viewModel.setEngine(AudioEngineType.GRADIO_AI)
         assertEquals(AudioEngineType.GRADIO_AI, viewModel.state.value.selectedEngine)
@@ -213,4 +214,53 @@ class AudioStudioViewModelTest {
         viewModel.togglePlaySample()
         assertFalse(viewModel.state.value.isPlayingSample)
     }
+
+    @Test
+    fun testLocalServerEngineSelection() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val appPrefs = AppPreferences(prefStore)
+
+        val viewModel = AudioStudioViewModel(readerPrefs, appPrefs)
+        viewModel.setEngine(AudioEngineType.LOCAL_SERVER)
+
+        assertEquals(AudioEngineType.LOCAL_SERVER, viewModel.state.value.selectedEngine)
+        assertTrue(appPrefs.useLocalTTS().get())
+        assertFalse(appPrefs.useGradioTTS().get())
+        assertFalse(appPrefs.useAITTS().get())
+    }
+
+    @Test
+    fun testLocalServerConfigurationUpdates() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val appPrefs = AppPreferences(prefStore)
+
+        val viewModel = AudioStudioViewModel(readerPrefs, appPrefs)
+
+        viewModel.setLocalServerUrl("http://192.168.1.50:8000")
+        assertEquals("http://192.168.1.50:8000", viewModel.state.value.localServerUrl)
+
+        viewModel.setLocalServerVoice("persian_female")
+        assertEquals("persian_female", viewModel.state.value.localServerVoice)
+
+        viewModel.setLocalServerApiFormat(ireader.domain.services.tts_service.local.LocalTTSApiFormat.OPENAI_SPEECH)
+        assertEquals(ireader.domain.services.tts_service.local.LocalTTSApiFormat.OPENAI_SPEECH, viewModel.state.value.localServerApiFormat)
+
+        viewModel.setLocalServerApiKey("test-api-key")
+        assertEquals("test-api-key", viewModel.state.value.localServerApiKey)
+    }
+
+    @Test
+    fun testInitialEngineSelectionFromPreferencesWithLocalTTS() {
+        val prefStore = MockPreferenceStore()
+        val readerPrefs = ReaderPreferences(prefStore)
+        val appPrefs = AppPreferences(prefStore)
+
+        appPrefs.useLocalTTS().set(true)
+        val viewModel = AudioStudioViewModel(readerPrefs, appPrefs)
+
+        assertEquals(AudioEngineType.LOCAL_SERVER, viewModel.state.value.selectedEngine)
+    }
 }
+

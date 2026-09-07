@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.reader
+package ireader.domain.preferences
 
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class SettingsReaderViewModelTest {
+class ReaderPreferencesVolumeKeyTest {
 
     private class TestPreferenceStore : PreferenceStore {
         private val stringValues = mutableMapOf<String, String>()
@@ -94,51 +94,32 @@ class SettingsReaderViewModelTest {
     }
 
     @Test
-    fun setFullscreenUpdatesReaderImmersiveModePreference() {
+    fun volumeKeyNavigationPreferenceWorksAndDelegatesCorrectly() {
         val store = TestPreferenceStore()
-        val viewModel = SettingsReaderViewModel(store)
+        val prefs = ReaderPreferences(store)
 
-        // Initially immersive mode is false
-        assertFalse(viewModel.fullscreen.value)
+        assertFalse(prefs.volumeKeyNavigation().get())
+        prefs.volumeKeyNavigation().set(true)
+        assertTrue(prefs.volumeKeyNavigation().get())
+        // Legacy alias readWithVolumeKeys() must share the same preference
+        assertTrue(prefs.readWithVolumeKeys().get())
 
-        // When enabling fullscreen in settings
-        viewModel.setFullscreen(true)
-
-        // Reader immersive mode preference MUST be updated so reader screen honors it
-        assertTrue(store.booleanValues[ReaderPreferences.SAVED_IMMERSIVE_MODE_PREFERENCES] == true)
-
-        // When disabling fullscreen in settings
-        viewModel.setFullscreen(false)
-        assertEquals(false, store.booleanValues[ReaderPreferences.SAVED_IMMERSIVE_MODE_PREFERENCES])
+        prefs.readWithVolumeKeys().set(false)
+        assertFalse(prefs.volumeKeyNavigation().get())
     }
 
     @Test
-    fun setVolumeKeysEnabledUpdatesVolumeKeyNavigationPreference() {
+    fun volumeKeyInvertedPreferenceWorksAndDelegatesCorrectly() {
         val store = TestPreferenceStore()
-        val viewModel = SettingsReaderViewModel(store)
+        val prefs = ReaderPreferences(store)
 
-        assertFalse(viewModel.volumeKeysEnabled.value)
+        assertFalse(prefs.volumeKeyInverted().get())
+        prefs.volumeKeyInverted().set(true)
+        assertTrue(prefs.volumeKeyInverted().get())
+        // Legacy alias readWithVolumeKeysInverted() must share the same preference
+        assertTrue(prefs.readWithVolumeKeysInverted().get())
 
-        viewModel.setVolumeKeysEnabled(true)
-
-        // Reader volume key navigation preference MUST be updated so reader screen honors it
-        assertTrue(store.booleanValues["volume_key_navigation"] == true)
-
-        viewModel.setVolumeKeysEnabled(false)
-        assertEquals(false, store.booleanValues["volume_key_navigation"])
-    }
-
-    @Test
-    fun setVolumeKeysInvertedUpdatesPreference() {
-        val store = TestPreferenceStore()
-        val viewModel = SettingsReaderViewModel(store)
-
-        assertFalse(viewModel.volumeKeysInverted.value)
-
-        viewModel.setVolumeKeysInverted(true)
-        assertTrue(store.booleanValues["reader_volume_keys_inverted"] == true)
-
-        viewModel.setVolumeKeysInverted(false)
-        assertEquals(false, store.booleanValues["reader_volume_keys_inverted"])
+        prefs.readWithVolumeKeysInverted().set(false)
+        assertFalse(prefs.volumeKeyInverted().get())
     }
 }

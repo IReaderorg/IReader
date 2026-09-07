@@ -322,6 +322,7 @@ val screenModelModule = module {
             appPreferences = get(),
             platformCapabilities = getOrNull(),
             gradioTTSManager = getOrNull(),
+            localTTSManager = getOrNull(),
             piperVoiceService = getOrNull(),
             piperVoiceDownloader = getOrNull(),
             chapterCache = getOrNull(),
