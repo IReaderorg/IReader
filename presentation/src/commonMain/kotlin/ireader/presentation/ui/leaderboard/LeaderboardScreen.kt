@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -84,6 +85,14 @@ fun LeaderboardScreen(
                     Box(Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
+                }
+                state.error != null && state.leaderboard.isEmpty() -> item {
+                    ErrorHall(
+                        error = state.error ?: "Failed to load leaderboard",
+                        onRetry = { vm.loadLeaderboard() },
+                        onSync = { vm.syncUserStats() },
+                        isSyncing = state.isSyncing
+                    )
                 }
                 state.leaderboard.isEmpty() -> item {
                     EmptyHall(onSync = { vm.syncUserStats() }, isSyncing = state.isSyncing)
@@ -300,3 +309,61 @@ private fun EmptyHall(onSync: () -> Unit, isSyncing: Boolean) {
         }
     }
 }
+
+@Composable
+private fun ErrorHall(
+    error: String,
+    onRetry: () -> Unit,
+    onSync: () -> Unit,
+    isSyncing: Boolean,
+) {
+    Column(
+        Modifier.fillMaxWidth().padding(40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            Icons.Filled.Warning,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(64.dp)
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "Failed to load rankings",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            error,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(Modifier.height(16.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = onRetry) {
+                Text("Retry")
+            }
+            Button(
+                onClick = onSync,
+                enabled = !isSyncing,
+                colors = ButtonDefaults.outlinedButtonColors()
+            ) {
+                if (isSyncing) {
+                    CircularProgressIndicator(
+                        Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text("Sync my stats")
+            }
+        }
+    }
+}
+

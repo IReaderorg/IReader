@@ -24,6 +24,12 @@ class SupabaseBackendService(
     constructor(client: SupabaseClient) : this({ client })
     
     private val client: SupabaseClient get() = clientProvider()
+
+    private fun getAccessToken(): String? = try {
+        client.auth.currentAccessTokenOrNull()
+    } catch (_: Throwable) {
+        null
+    }
     
     private val json = Json {
         ignoreUnknownKeys = true
@@ -72,7 +78,7 @@ class SupabaseBackendService(
             val queryString = queryParams.joinToString("&")
             
             // Use raw HTTP request
-            val accessToken = client.auth.currentAccessTokenOrNull()
+            val accessToken = getAccessToken()
             val baseUrl = client.supabaseUrl.let { url ->
                 when {
                     url.startsWith("http://") || url.startsWith("https://") -> url
@@ -84,11 +90,12 @@ class SupabaseBackendService(
             
             Log.debug("Supabase query: $url")
             
+            val token = accessToken ?: client.supabaseKey
             val response = client.httpClient.get(url) {
                 header("Content-Type", "application/json")
                 header("apikey", client.supabaseKey)
-                if (accessToken != null) {
-                    header("Authorization", "Bearer $accessToken")
+                if (token.isNotBlank()) {
+                    header("Authorization", "Bearer $token")
                 }
             }
             
@@ -129,9 +136,9 @@ class SupabaseBackendService(
         returning: Boolean
     ): Result<JsonElement?> {
         return try {
-            // Use raw HTTP request to avoid reflection
+            // Use raw HTTP request
             val jsonBody = data.toString()
-            val accessToken = client.auth.currentAccessTokenOrNull()
+            val accessToken = getAccessToken()
             val baseUrl = client.supabaseUrl.let { url ->
                 when {
                     url.startsWith("http://") || url.startsWith("https://") -> url
@@ -139,11 +146,12 @@ class SupabaseBackendService(
                 }
             }.trimEnd('/')
             
+            val token = accessToken ?: client.supabaseKey
             val response = client.httpClient.post("$baseUrl/rest/v1/$table") {
                 header("Content-Type", "application/json")
                 header("apikey", client.supabaseKey)
-                if (accessToken != null) {
-                    header("Authorization", "Bearer $accessToken")
+                if (token.isNotBlank()) {
+                    header("Authorization", "Bearer $token")
                 }
                 if (returning) {
                     header("Prefer", "return=representation")
@@ -199,9 +207,9 @@ class SupabaseBackendService(
                 "$key=eq.$encodedValue"
             }
             
-            // Use raw HTTP request to avoid reflection
+            // Use raw HTTP request
             val jsonBody = data.toString()
-            val accessToken = client.auth.currentAccessTokenOrNull()
+            val accessToken = getAccessToken()
             val baseUrl = client.supabaseUrl.let { url ->
                 when {
                     url.startsWith("http://") || url.startsWith("https://") -> url
@@ -209,11 +217,12 @@ class SupabaseBackendService(
                 }
             }.trimEnd('/')
             
+            val token = accessToken ?: client.supabaseKey
             val response = client.httpClient.patch("$baseUrl/rest/v1/$table?$filterQuery") {
                 header("Content-Type", "application/json")
                 header("apikey", client.supabaseKey)
-                if (accessToken != null) {
-                    header("Authorization", "Bearer $accessToken")
+                if (token.isNotBlank()) {
+                    header("Authorization", "Bearer $token")
                 }
                 if (returning) {
                     header("Prefer", "return=representation")
@@ -295,7 +304,7 @@ class SupabaseBackendService(
                 }
             }.toString()
             
-            val accessToken = client.auth.currentAccessTokenOrNull()
+            val accessToken = getAccessToken()
             val baseUrl = client.supabaseUrl.let { url ->
                 when {
                     url.startsWith("http://") || url.startsWith("https://") -> url
@@ -303,11 +312,12 @@ class SupabaseBackendService(
                 }
             }.trimEnd('/')
             
+            val token = accessToken ?: client.supabaseKey
             val response = client.httpClient.post("$baseUrl/rest/v1/rpc/$function") {
                 header("Content-Type", "application/json")
                 header("apikey", client.supabaseKey)
-                if (accessToken != null) {
-                    header("Authorization", "Bearer $accessToken")
+                if (token.isNotBlank()) {
+                    header("Authorization", "Bearer $token")
                 }
                 setBody(jsonBody)
             }
@@ -344,7 +354,7 @@ class SupabaseBackendService(
     ): Result<JsonElement?> {
         return try {
             val jsonBody = data.toString()
-            val accessToken = client.auth.currentAccessTokenOrNull()
+            val accessToken = getAccessToken()
             val baseUrl = client.supabaseUrl.let { url ->
                 when {
                     url.startsWith("http://") || url.startsWith("https://") -> url
@@ -362,11 +372,12 @@ class SupabaseBackendService(
             
             Log.debug("Supabase upsert to $url: $jsonBody")
             
+            val token = accessToken ?: client.supabaseKey
             val response = client.httpClient.post(url) {
                 header("Content-Type", "application/json")
                 header("apikey", client.supabaseKey)
-                if (accessToken != null) {
-                    header("Authorization", "Bearer $accessToken")
+                if (token.isNotBlank()) {
+                    header("Authorization", "Bearer $token")
                 }
                 // Upsert with resolution preference
                 val preferHeader = buildString {

@@ -17,12 +17,45 @@ val localProperties = Properties().apply {
     }
 }
 
+// Load config.properties as fallback
+val configProperties = Properties().apply {
+    val configPropertiesFile = rootProject.file("config.properties")
+    if (configPropertiesFile.exists()) {
+        configPropertiesFile.inputStream().use { stream -> load(stream) }
+    }
+}
+
 // Helper function to get property with fallback chain
-fun getConfigProperty(envVar: String, propertyKey: String): String {
-    return System.getenv(envVar)
-        ?: localProperties.getProperty(propertyKey)
-        ?: project.findProperty(propertyKey) as? String
-        ?: ""
+fun getConfigProperty(
+    envVar: String,
+    propertyKey: String,
+    fallbackEnvVars: List<String> = emptyList(),
+    fallbackPropertyKeys: List<String> = emptyList()
+): String {
+    // 1. Primary env var
+    System.getenv(envVar)?.takeIf { it.isNotBlank() }?.let { return it }
+    // 2. Fallback env vars
+    for (fEnv in fallbackEnvVars) {
+        System.getenv(fEnv)?.takeIf { it.isNotBlank() }?.let { return it }
+    }
+    // 3. Primary local.properties
+    localProperties.getProperty(propertyKey)?.takeIf { it.isNotBlank() }?.let { return it }
+    // 4. Fallback local.properties
+    for (fProp in fallbackPropertyKeys) {
+        localProperties.getProperty(fProp)?.takeIf { it.isNotBlank() }?.let { return it }
+    }
+    // 5. Primary config.properties
+    configProperties.getProperty(propertyKey)?.takeIf { it.isNotBlank() }?.let { return it }
+    // 6. Fallback config.properties
+    for (fProp in fallbackPropertyKeys) {
+        configProperties.getProperty(fProp)?.takeIf { it.isNotBlank() }?.let { return it }
+    }
+    // 7. Project properties
+    (project.findProperty(propertyKey) as? String)?.takeIf { it.isNotBlank() }?.let { return it }
+    for (fProp in fallbackPropertyKeys) {
+        (project.findProperty(fProp) as? String)?.takeIf { it.isNotBlank() }?.let { return it }
+    }
+    return ""
 }
 
 kotlin {
@@ -233,20 +266,25 @@ buildkonfig {
     defaultConfigs {
         // Supabase Configuration - 7 Projects
         // Note: buildkonfig automatically adds quotes for STRING type, so we don't need escaped quotes
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_AUTH_URL", getConfigProperty("SUPABASE_AUTH_URL", "supabase.auth.url"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_AUTH_KEY", getConfigProperty("SUPABASE_AUTH_KEY", "supabase.auth.key"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_READING_URL", getConfigProperty("SUPABASE_READING_URL", "supabase.reading.url"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_READING_KEY", getConfigProperty("SUPABASE_READING_KEY", "supabase.reading.key"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_LIBRARY_URL", getConfigProperty("SUPABASE_LIBRARY_URL", "supabase.library.url"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_LIBRARY_KEY", getConfigProperty("SUPABASE_LIBRARY_KEY", "supabase.library.key"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BOOK_REVIEWS_URL", getConfigProperty("SUPABASE_BOOK_REVIEWS_URL", "supabase.book_reviews.url"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BOOK_REVIEWS_KEY", getConfigProperty("SUPABASE_BOOK_REVIEWS_KEY", "supabase.book_reviews.key"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_CHAPTER_REVIEWS_URL", getConfigProperty("SUPABASE_CHAPTER_REVIEWS_URL", "supabase.chapter_reviews.url"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_CHAPTER_REVIEWS_KEY", getConfigProperty("SUPABASE_CHAPTER_REVIEWS_KEY", "supabase.chapter_reviews.key"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BADGES_URL", getConfigProperty("SUPABASE_BADGES_URL", "supabase.badges.url"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BADGES_KEY", getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_ANALYTICS_URL", getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url"))
-        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_ANALYTICS_KEY", getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key"))
+        val supabaseUrlFallbacks = listOf("SUPABASE_URL", "SUPABASE_COMMUNITY_URL")
+        val supabasePropUrlFallbacks = listOf("supabase.url", "supabase.community.url")
+        val supabaseKeyFallbacks = listOf("SUPABASE_KEY", "SUPABASE_ANON_KEY", "SUPABASE_COMMUNITY_KEY")
+        val supabasePropKeyFallbacks = listOf("supabase.key", "supabase.anon.key", "supabase.community.key")
+
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_AUTH_URL", getConfigProperty("SUPABASE_AUTH_URL", "supabase.auth.url", supabaseUrlFallbacks, supabasePropUrlFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_AUTH_KEY", getConfigProperty("SUPABASE_AUTH_KEY", "supabase.auth.key", supabaseKeyFallbacks, supabasePropKeyFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_READING_URL", getConfigProperty("SUPABASE_READING_URL", "supabase.reading.url", supabaseUrlFallbacks, supabasePropUrlFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_READING_KEY", getConfigProperty("SUPABASE_READING_KEY", "supabase.reading.key", supabaseKeyFallbacks, supabasePropKeyFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_LIBRARY_URL", getConfigProperty("SUPABASE_LIBRARY_URL", "supabase.library.url", supabaseUrlFallbacks, supabasePropUrlFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_LIBRARY_KEY", getConfigProperty("SUPABASE_LIBRARY_KEY", "supabase.library.key", supabaseKeyFallbacks, supabasePropKeyFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BOOK_REVIEWS_URL", getConfigProperty("SUPABASE_BOOK_REVIEWS_URL", "supabase.book_reviews.url", supabaseUrlFallbacks, supabasePropUrlFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BOOK_REVIEWS_KEY", getConfigProperty("SUPABASE_BOOK_REVIEWS_KEY", "supabase.book_reviews.key", supabaseKeyFallbacks, supabasePropKeyFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_CHAPTER_REVIEWS_URL", getConfigProperty("SUPABASE_CHAPTER_REVIEWS_URL", "supabase.chapter_reviews.url", supabaseUrlFallbacks, supabasePropUrlFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_CHAPTER_REVIEWS_KEY", getConfigProperty("SUPABASE_CHAPTER_REVIEWS_KEY", "supabase.chapter_reviews.key", supabaseKeyFallbacks, supabasePropKeyFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BADGES_URL", getConfigProperty("SUPABASE_BADGES_URL", "supabase.badges.url", supabaseUrlFallbacks, supabasePropUrlFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_BADGES_KEY", getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key", supabaseKeyFallbacks, supabasePropKeyFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_ANALYTICS_URL", getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url", supabaseUrlFallbacks, supabasePropUrlFallbacks))
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "SUPABASE_ANALYTICS_KEY", getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key", supabaseKeyFallbacks, supabasePropKeyFallbacks))
         
         // Cloudflare D1 + R2 Community Translations Configuration
         buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "COMMUNITY_CLOUDFLARE_ACCOUNT_ID", getConfigProperty("COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "community.cloudflare.accountId"))

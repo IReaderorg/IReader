@@ -8,96 +8,82 @@ import ireader.core.config.ConfigLoader
  * These are the defaults that ship with the app - users can override in settings
  */
 actual object PlatformConfig {
+    private val fallbackUrlKeys = listOf("supabase.url", "supabase.community.url")
+    private val fallbackUrlEnvs = listOf("SUPABASE_URL", "SUPABASE_COMMUNITY_URL")
+    private val fallbackKeyKeys = listOf("supabase.key", "supabase.anon.key", "supabase.community.key")
+    private val fallbackKeyEnvs = listOf("SUPABASE_KEY", "SUPABASE_ANON_KEY", "SUPABASE_COMMUNITY_KEY")
+
+    private fun resolveDesktopConfig(
+        propertyKey: String,
+        envVar: String,
+        fallbackKeys: List<String>,
+        fallbackEnvs: List<String>
+    ): String {
+        System.getProperty(propertyKey)?.takeIf { it.isNotBlank() }?.let { return it }
+        System.getenv(envVar)?.takeIf { it.isNotBlank() }?.let { return it }
+        val loaded = ConfigLoader.get(propertyKey, "").trim()
+        if (loaded.isNotBlank()) return loaded
+        for (fProp in fallbackKeys) {
+            System.getProperty(fProp)?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        for (fEnv in fallbackEnvs) {
+            System.getenv(fEnv)?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        for (fKey in fallbackKeys) {
+            val fLoaded = ConfigLoader.get(fKey, "").trim()
+            if (fLoaded.isNotBlank()) return fLoaded
+        }
+        return ""
+    }
+
     // Project 1 - Auth
-    actual fun getSupabaseAuthUrl(): String {
-        return System.getProperty("supabase.auth.url") 
-            ?: System.getenv("SUPABASE_AUTH_URL") 
-            ?: ConfigLoader.get("supabase.auth.url", "")
-    }
+    actual fun getSupabaseAuthUrl(): String =
+        resolveDesktopConfig("supabase.auth.url", "SUPABASE_AUTH_URL", fallbackUrlKeys, fallbackUrlEnvs)
     
-    actual fun getSupabaseAuthKey(): String {
-        return System.getProperty("supabase.auth.key")
-            ?: System.getenv("SUPABASE_AUTH_KEY") 
-            ?: ConfigLoader.get("supabase.auth.key", "")
-    }
+    actual fun getSupabaseAuthKey(): String =
+        resolveDesktopConfig("supabase.auth.key", "SUPABASE_AUTH_KEY", fallbackKeyKeys, fallbackKeyEnvs)
     
     // Project 2 - Reading
-    actual fun getSupabaseReadingUrl(): String {
-        return System.getProperty("supabase.reading.url")
-            ?: System.getenv("SUPABASE_READING_URL")
-            ?: ConfigLoader.get("supabase.reading.url", "")
-    }
+    actual fun getSupabaseReadingUrl(): String =
+        resolveDesktopConfig("supabase.reading.url", "SUPABASE_READING_URL", fallbackUrlKeys, fallbackUrlEnvs)
     
-    actual fun getSupabaseReadingKey(): String {
-        return System.getProperty("supabase.reading.key")
-            ?: System.getenv("SUPABASE_READING_KEY")
-            ?: ConfigLoader.get("supabase.reading.key", "")
-    }
+    actual fun getSupabaseReadingKey(): String =
+        resolveDesktopConfig("supabase.reading.key", "SUPABASE_READING_KEY", fallbackKeyKeys, fallbackKeyEnvs)
     
     // Project 3 - Library
-    actual fun getSupabaseLibraryUrl(): String {
-        return System.getProperty("supabase.library.url")
-            ?: System.getenv("SUPABASE_LIBRARY_URL")
-            ?: ConfigLoader.get("supabase.library.url", "")
-    }
+    actual fun getSupabaseLibraryUrl(): String =
+        resolveDesktopConfig("supabase.library.url", "SUPABASE_LIBRARY_URL", fallbackUrlKeys, fallbackUrlEnvs)
     
-    actual fun getSupabaseLibraryKey(): String {
-        return System.getProperty("supabase.library.key")
-            ?: System.getenv("SUPABASE_LIBRARY_KEY")
-            ?: ConfigLoader.get("supabase.library.key", "")
-    }
+    actual fun getSupabaseLibraryKey(): String =
+        resolveDesktopConfig("supabase.library.key", "SUPABASE_LIBRARY_KEY", fallbackKeyKeys, fallbackKeyEnvs)
     
     // Project 4 - Book Reviews
-    actual fun getSupabaseBookReviewsUrl(): String {
-        return System.getProperty("supabase.book_reviews.url")
-            ?: System.getenv("SUPABASE_BOOK_REVIEWS_URL")
-            ?: ConfigLoader.get("supabase.book_reviews.url", "")
-    }
+    actual fun getSupabaseBookReviewsUrl(): String =
+        resolveDesktopConfig("supabase.book_reviews.url", "SUPABASE_BOOK_REVIEWS_URL", fallbackUrlKeys, fallbackUrlEnvs)
     
-    actual fun getSupabaseBookReviewsKey(): String {
-        return System.getProperty("supabase.book_reviews.key")
-            ?: System.getenv("SUPABASE_BOOK_REVIEWS_KEY")
-            ?: ConfigLoader.get("supabase.book_reviews.key", "")
-    }
+    actual fun getSupabaseBookReviewsKey(): String =
+        resolveDesktopConfig("supabase.book_reviews.key", "SUPABASE_BOOK_REVIEWS_KEY", fallbackKeyKeys, fallbackKeyEnvs)
     
     // Project 5 - Chapter Reviews
-    actual fun getSupabaseChapterReviewsUrl(): String {
-        return System.getProperty("supabase.chapter_reviews.url")
-            ?: System.getenv("SUPABASE_CHAPTER_REVIEWS_URL")
-            ?: ConfigLoader.get("supabase.chapter_reviews.url", "")
-    }
+    actual fun getSupabaseChapterReviewsUrl(): String =
+        resolveDesktopConfig("supabase.chapter_reviews.url", "SUPABASE_CHAPTER_REVIEWS_URL", fallbackUrlKeys, fallbackUrlEnvs)
     
-    actual fun getSupabaseChapterReviewsKey(): String {
-        return System.getProperty("supabase.chapter_reviews.key")
-            ?: System.getenv("SUPABASE_CHAPTER_REVIEWS_KEY")
-            ?: ConfigLoader.get("supabase.chapter_reviews.key", "")
-    }
+    actual fun getSupabaseChapterReviewsKey(): String =
+        resolveDesktopConfig("supabase.chapter_reviews.key", "SUPABASE_CHAPTER_REVIEWS_KEY", fallbackKeyKeys, fallbackKeyEnvs)
     
     // Project 6 - Badges
-    actual fun getSupabaseBadgesUrl(): String {
-        return System.getProperty("supabase.badges.url")
-            ?: System.getenv("SUPABASE_BADGES_URL")
-            ?: ConfigLoader.get("supabase.badges.url", "")
-    }
+    actual fun getSupabaseBadgesUrl(): String =
+        resolveDesktopConfig("supabase.badges.url", "SUPABASE_BADGES_URL", fallbackUrlKeys, fallbackUrlEnvs)
     
-    actual fun getSupabaseBadgesKey(): String {
-        return System.getProperty("supabase.badges.key")
-            ?: System.getenv("SUPABASE_BADGES_KEY")
-            ?: ConfigLoader.get("supabase.badges.key", "")
-    }
+    actual fun getSupabaseBadgesKey(): String =
+        resolveDesktopConfig("supabase.badges.key", "SUPABASE_BADGES_KEY", fallbackKeyKeys, fallbackKeyEnvs)
     
     // Project 7 - Analytics
-    actual fun getSupabaseAnalyticsUrl(): String {
-        return System.getProperty("supabase.analytics.url")
-            ?: System.getenv("SUPABASE_ANALYTICS_URL")
-            ?: ConfigLoader.get("supabase.analytics.url", "")
-    }
+    actual fun getSupabaseAnalyticsUrl(): String =
+        resolveDesktopConfig("supabase.analytics.url", "SUPABASE_ANALYTICS_URL", fallbackUrlKeys, fallbackUrlEnvs)
     
-    actual fun getSupabaseAnalyticsKey(): String {
-        return System.getProperty("supabase.analytics.key")
-            ?: System.getenv("SUPABASE_ANALYTICS_KEY")
-            ?: ConfigLoader.get("supabase.analytics.key", "")
-    }
+    actual fun getSupabaseAnalyticsKey(): String =
+        resolveDesktopConfig("supabase.analytics.key", "SUPABASE_ANALYTICS_KEY", fallbackKeyKeys, fallbackKeyEnvs)
     
     // Cloudflare D1 + R2 (Community Translations)
     actual fun getCommunityCloudflareAccountId(): String {

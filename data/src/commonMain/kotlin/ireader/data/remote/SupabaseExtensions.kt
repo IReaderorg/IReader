@@ -67,7 +67,11 @@ suspend fun <T : Any> insertSafe(
     val jsonBody = json.encodeToString(serializer, value)
     
     // Get user access token if available
-    val accessToken = supabaseClient.auth.currentAccessTokenOrNull()
+    val accessToken = try {
+        supabaseClient.auth.currentAccessTokenOrNull()
+    } catch (_: Throwable) {
+        null
+    }
     
     // Ensure URL has protocol
     val baseUrl = if (supabaseClient.supabaseUrl.startsWith("http")) {
@@ -76,12 +80,13 @@ suspend fun <T : Any> insertSafe(
         "https://${supabaseClient.supabaseUrl}"
     }
     
+    val token = accessToken ?: supabaseClient.supabaseKey
     val response = supabaseClient.httpClient.post("$baseUrl/rest/v1/$table") {
         header("Content-Type", "application/json")
         header("Prefer", "return=representation")
         header("apikey", supabaseClient.supabaseKey)
-        if (accessToken != null) {
-            header("Authorization", "Bearer $accessToken")
+        if (token.isNotBlank()) {
+            header("Authorization", "Bearer $token")
         }
         setBody(jsonBody)
     }
@@ -102,7 +107,11 @@ suspend fun <T : Any> updateSafe(
     val jsonBody = json.encodeToString(serializer, value)
     
     // Get user access token if available
-    val accessToken = supabaseClient.auth.currentAccessTokenOrNull()
+    val accessToken = try {
+        supabaseClient.auth.currentAccessTokenOrNull()
+    } catch (_: Throwable) {
+        null
+    }
     
     // Ensure URL has protocol
     val baseUrl = if (supabaseClient.supabaseUrl.startsWith("http")) {
@@ -111,12 +120,13 @@ suspend fun <T : Any> updateSafe(
         "https://${supabaseClient.supabaseUrl}"
     }
     
+    val token = accessToken ?: supabaseClient.supabaseKey
     val response = supabaseClient.httpClient.patch("$baseUrl/rest/v1/$table?$filterQuery") {
         header("Content-Type", "application/json")
         header("Prefer", "return=representation")
         header("apikey", supabaseClient.supabaseKey)
-        if (accessToken != null) {
-            header("Authorization", "Bearer $accessToken")
+        if (token.isNotBlank()) {
+            header("Authorization", "Bearer $token")
         }
         setBody(jsonBody)
     }

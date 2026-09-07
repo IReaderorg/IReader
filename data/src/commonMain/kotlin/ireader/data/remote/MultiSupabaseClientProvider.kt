@@ -105,17 +105,21 @@ class MultiSupabaseClientProvider(
     ): Pair<String, String> {
         val prefs = preferences ?: return Pair(initialUrl, initialKey)
         val useCustom = prefs.useCustomSupabase().get()
-        val url = if (useCustom && userPrefUrl().isNotBlank()) {
-            userPrefUrl()
+        val url = if (useCustom) {
+            userPrefUrl().trim().ifBlank { prefs.userSupabaseUrl().get().trim() }
         } else {
-            try { platformConfigUrl() } catch (_: Exception) { "" }
-        }.ifBlank { initialUrl }
+            initialUrl.trim().ifBlank {
+                try { platformConfigUrl() } catch (_: Exception) { "" }
+            }
+        }
 
-        val key = if (useCustom && userPrefKey().isNotBlank()) {
-            userPrefKey()
+        val key = if (useCustom) {
+            userPrefKey().trim().ifBlank { prefs.userSupabaseAnonKey().get().trim() }
         } else {
-            try { platformConfigKey() } catch (_: Exception) { "" }
-        }.ifBlank { initialKey }
+            initialKey.trim().ifBlank {
+                try { platformConfigKey() } catch (_: Exception) { "" }
+            }
+        }
 
         return Pair(url.trim(), key.trim())
     }
@@ -192,19 +196,47 @@ class MultiSupabaseClientProvider(
 
     fun getAnalyticsConfig(): Pair<String, String> {
         val prefs = preferences ?: return Pair(initialAnalyticsUrl, initialAnalyticsKey)
-        val effUrl = prefs.getEffectiveCommunityUrl()
-        val effKey = prefs.getEffectiveCommunityKey()
-        if (effUrl.isNotBlank() && effKey.isNotBlank()) {
-            return Pair(effUrl, effKey)
+        
+        // 1. If custom community server is explicitly configured and enabled
+        if (prefs.useCustomCommunityServer().get()) {
+            val customUrl = prefs.customCommunityUrl().get().trim()
+            val customKey = prefs.customCommunityApiKey().get().trim()
+            if (customUrl.isNotBlank() && customKey.isNotBlank()) {
+                return Pair(customUrl, customKey)
+            }
         }
-        return resolveConfig(
-            userPrefUrl = { prefs.supabaseAnalyticsUrl().get() },
-            userPrefKey = { prefs.supabaseAnalyticsKey().get() },
-            platformConfigUrl = { ireader.domain.config.PlatformConfig.getSupabaseAnalyticsUrl() },
-            platformConfigKey = { ireader.domain.config.PlatformConfig.getSupabaseAnalyticsKey() },
-            initialUrl = initialAnalyticsUrl,
-            initialKey = initialAnalyticsKey
-        )
+        
+        // 2. If user enabled custom Supabase in settings
+        if (prefs.useCustomSupabase().get()) {
+            val customAnalyticsUrl = prefs.supabaseAnalyticsUrl().get().trim()
+            val customAnalyticsKey = prefs.supabaseAnalyticsKey().get().trim()
+            if (customAnalyticsUrl.isNotBlank() && customAnalyticsKey.isNotBlank()) {
+                return Pair(customAnalyticsUrl, customAnalyticsKey)
+            }
+            // Fall back to user single-project Supabase config
+            val singleUrl = prefs.userSupabaseUrl().get().trim()
+            val singleKey = prefs.userSupabaseAnonKey().get().trim()
+            if (singleUrl.isNotBlank() && singleKey.isNotBlank()) {
+                return Pair(singleUrl, singleKey)
+            }
+        }
+        
+        // 3. Environment / PlatformConfig default
+        val platformUrl = initialAnalyticsUrl.trim().ifBlank {
+            try { ireader.domain.config.PlatformConfig.getSupabaseAnalyticsUrl() } catch (_: Exception) { "" }.trim()
+        }.ifBlank {
+            initialAuthUrl.trim().ifBlank {
+                try { ireader.domain.config.PlatformConfig.getSupabaseAuthUrl() } catch (_: Exception) { "" }.trim()
+            }
+        }
+        val platformKey = initialAnalyticsKey.trim().ifBlank {
+            try { ireader.domain.config.PlatformConfig.getSupabaseAnalyticsKey() } catch (_: Exception) { "" }.trim()
+        }.ifBlank {
+            initialAuthKey.trim().ifBlank {
+                try { ireader.domain.config.PlatformConfig.getSupabaseAuthKey() } catch (_: Exception) { "" }.trim()
+            }
+        }
+        return Pair(platformUrl, platformKey)
     }
 
     private fun getOrCreateClient(
@@ -246,6 +278,7 @@ class MultiSupabaseClientProvider(
      */
     val readingClient: SupabaseClient
         get() = getOrCreateClient("reading", getReadingConfig()) {
+            install(Auth)
             install(Postgrest)
         }
     
@@ -255,6 +288,7 @@ class MultiSupabaseClientProvider(
      */
     val libraryClient: SupabaseClient
         get() = getOrCreateClient("library", getLibraryConfig()) {
+            install(Auth)
             install(Postgrest)
         }
     
@@ -294,6 +328,7 @@ class MultiSupabaseClientProvider(
      */
     val analyticsClient: SupabaseClient
         get() = getOrCreateClient("analytics", getAnalyticsConfig()) {
+            install(Auth)
             install(Postgrest)
             install(Realtime)
         }

@@ -13,6 +13,7 @@ import ireader.domain.data.repository.VoiceModelRepository
 import ireader.domain.plugins.PluginDatabase
 import ireader.domain.services.library.LibraryChangeNotifier
 import ireader.domain.usecases.database.RepairDatabaseUseCase
+import ireader.core.log.Log
 import org.koin.dsl.module
 
 
@@ -156,6 +157,7 @@ val repositoryInjectModule = module {
                     backendService = get()
                 )
             } catch (e: Exception) {
+                Log.error(e, "Failed to initialize LeaderboardRepositoryImpl")
                 // Fallback to NoOp singleton if something goes wrong
                 ireader.data.repository.NoOpLeaderboardRepository
             }
@@ -176,6 +178,7 @@ val repositoryInjectModule = module {
                     backendService = get()
                 )
             } catch (e: Exception) {
+                Log.error(e, "Failed to initialize AllReviewsRepositoryImpl")
                 // Fallback to NoOp singleton if something goes wrong
                 ireader.data.repository.NoOpAllReviewsRepository
             }
@@ -197,6 +200,7 @@ val repositoryInjectModule = module {
                     backendService = get()
                 )
             } catch (e: Exception) {
+                Log.error(e, "Failed to initialize DonationLeaderboardRepositoryImpl")
                 // Fallback to NoOp singleton if something goes wrong
                 ireader.data.repository.NoOpDonationLeaderboardRepository
             }
