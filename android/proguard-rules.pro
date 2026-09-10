@@ -28,6 +28,40 @@
 -keep,allowoptimization class okio.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }
 
+##---------------Begin: Tsundoku / Tachiyomi Extension Support ----------
+-keep,allowoptimization class eu.kanade.**
+-keep,allowoptimization class tachiyomi.**
+-keep,allowoptimization class mihon.**
+
+# Keep common dependencies used in extensions
+-keep,allowoptimization class kotlin.time.** { public protected *; }
+-keep,allowoptimization class rx.** { public protected *; }
+-keep,allowoptimization class com.dokar.quickjs.** { public protected *; }
+-keep class com.dokar.quickjs.MemoryUsage { *; }
+-keepclassmembers class kotlin.UByteArray { <init>(...); }
+-keep class uy.kohesive.injekt.** { *; }
+-dontwarn uy.kohesive.injekt.**
+
+# Extension models, online sources, and interfaces
+-keep class eu.kanade.tachiyomi.source.model.** { public protected *; }
+-keep class eu.kanade.tachiyomi.source.online.** { public protected *; }
+-keep class eu.kanade.tachiyomi.source.** extends eu.kanade.tachiyomi.source.Source { public protected *; }
+-keep,allowoptimization class eu.kanade.tachiyomi.util.JsoupExtensionsKt { public protected *; }
+
+# Extension network & utilities (from extensions-lib)
+-keep,allowoptimization class eu.kanade.tachiyomi.network.interceptor.RateLimitInterceptorKt { public protected *; }
+-keep,allowoptimization class eu.kanade.tachiyomi.network.interceptor.SpecificHostRateLimitInterceptorKt { public protected *; }
+-keep,allowoptimization class eu.kanade.tachiyomi.network.NetworkHelper { public protected *; }
+-keep,allowoptimization class eu.kanade.tachiyomi.network.OkHttpExtensionsKt { public protected *; }
+-keep,allowoptimization class eu.kanade.tachiyomi.network.RequestsKt { public protected *; }
+-keep,allowoptimization class eu.kanade.tachiyomi.AppInfo { public protected *; }
+
+-keepclassmembers class * implements java.io.Serializable {
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+##---------------End: Tsundoku / Tachiyomi Extension Support ----------
+
 ##---------------Begin: proguard configuration for RE2J (Jsoup dependency)  ----------
 # RE2J - Google's RE2 regular expression library used by Jsoup
 # Keep all RE2J classes to prevent R8 from stripping them
@@ -364,7 +398,81 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+
+# OkHttp Multipart
+-keepclasseswithmembers class okhttp3.MultipartBody$Builder { *; }
+
+# OkHttp Zstandard (zstd) decompression/compression (CRITICAL: native JNI createJniZstd in libzstd-kmp.so reflects ZstdCompressor/ZstdDecompressor)
+-keep class com.squareup.zstd.** { *; }
+-dontwarn com.squareup.zstd.**
+-keep class okhttp3.zstd.** { *; }
+-dontwarn okhttp3.zstd.**
+
+# OkHttp Brotli compression/decompression
+-keep class okhttp3.brotli.** { *; }
+-dontwarn okhttp3.brotli.**
+-keep class org.brotli.** { *; }
+-dontwarn org.brotli.**
 ##---------------End: proguard configuration for Okhttp  ----------
+
+##---------------Begin: proguard configuration for RxJava 1.x (Tsundoku Extensions) ----------
+-dontwarn sun.misc.**
+
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+   long producerIndex;
+   long consumerIndex;
+}
+
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode producerNode;
+}
+
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode consumerNode;
+}
+
+-dontnote rx.internal.util.PlatformDependent
+##---------------End: proguard configuration for RxJava 1.x (Tsundoku Extensions) ----------
+
+##---------------Begin: proguard configuration for kotlinx.serialization (Tsundoku Extensions) ----------
+-dontnote kotlinx.serialization.** # core serialization annotations
+
+# kotlinx-serialization-json specific
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+-keep,includedescriptorclasses class eu.kanade.**$$serializer { *; }
+-keepclassmembers class eu.kanade.** {
+    *** Companion;
+}
+-keepclasseswithmembers class eu.kanade.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+##---------------End: proguard configuration for kotlinx.serialization (Tsundoku Extensions) ----------
+
+# XmlUtil
+-keep public enum nl.adaptivity.xmlutil.EventType { *; }
+
+# Firebase
+-keep class com.google.firebase.installations.** { *; }
+-keep interface com.google.firebase.installations.** { *; }
+
+# WebView JavaScript bridge safety
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keep class eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewViewer$WebViewInterface { *; }
+-keep class eu.kanade.tachiyomi.ui.customsource.ElementSelectorJSInterface { *; }
+
+# KotlinX Datetime
+-keep,allowoptimization class kotlinx.datetime.** { public protected *; }
+
+# Methods called by Shizuku only
+-keepclassmembers class mihon.app.shizuku.ShellInterface {
+    public <init>();
+    public void destroy();
+}
 ##---------------Begin: proguard configuration for okio  ----------
 
 # Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
