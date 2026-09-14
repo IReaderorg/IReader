@@ -19,7 +19,7 @@ class TTSContentLoaderSanitizerTest {
     private val sanitizer = TTSTextSanitizer()
     
     @Test
-    fun `parseContent should remove brackets from text pages`() {
+    fun `parseContent should preserve text inside brackets from text pages`() {
         // Arrange
         val pages = listOf(
             Text("Hello (note) world"),
@@ -32,9 +32,9 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(3, result.size)
-        assertEquals("Hello world", result[0])
-        assertEquals("Test content", result[1])
-        assertEquals("More text", result[2])
+        assertEquals("Hello note world", result[0])
+        assertEquals("Test TL: translation content", result[1])
+        assertEquals("More annotation text", result[2])
     }
     
     @Test
@@ -64,11 +64,11 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(1, result.size)
-        assertEquals("Hello world", result[0])
+        assertEquals("Hello note TL world", result[0])
     }
     
     @Test
-    fun `parseContent should remove empty paragraphs after sanitization`() {
+    fun `parseContent should preserve paragraphs with only brackets`() {
         // Arrange
         val pages = listOf(
             Text("(only brackets)"),
@@ -80,8 +80,10 @@ class TTSContentLoaderSanitizerTest {
         val result = parseContentWithSanitizer(pages)
         
         // Assert
-        assertEquals(1, result.size)
-        assertEquals("Hello world", result[0])
+        assertEquals(3, result.size)
+        assertEquals("only brackets", result[0])
+        assertEquals("Hello world", result[1])
+        assertEquals("only translation note", result[2])
     }
     
     @Test
@@ -97,8 +99,8 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(2, result.size)
-        assertEquals("Hello world", result[0])
-        assertEquals("Test content", result[1])
+        assertEquals("Hello note world", result[0])
+        assertEquals("Test TL content", result[1])
     }
     
     @Test
@@ -128,7 +130,7 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(1, result.size)
-        assertEquals("Hello world", result[0])
+        assertEquals("Hello outer inner note world", result[0])
     }
     
     @Test
@@ -143,7 +145,7 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(1, result.size)
-        assertEquals("Hello world", result[0])
+        assertEquals("Hello note world", result[0])
     }
     
     @Test
@@ -158,34 +160,26 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(3, result.size)
-        assertEquals("First paragraph", result[0])
-        assertEquals("Second paragraph", result[1])
-        assertEquals("Third paragraph", result[2])
+        assertEquals("First note paragraph", result[0])
+        assertEquals("Second TL paragraph", result[1])
+        assertEquals("Third annotation paragraph", result[2])
     }
     
     @Test
-    fun `parseContent should not contain any brackets in output`() {
+    fun `parseContent should preserve RPG system prompts and skills`() {
         // Arrange
         val pages = listOf(
-            Text("Text with (round) [square] {curly} <angle> brackets"),
-            Text("More * asterisks * here")
+            Text("[Skill: Shadow Step] activated!"),
+            Text("[Status Window: HP 100/100]")
         )
         
         // Act
         val result = parseContentWithSanitizer(pages)
         
         // Assert
-        result.forEach { paragraph ->
-            assertFalse(paragraph.contains("("), "Should not contain (")
-            assertFalse(paragraph.contains(")"), "Should not contain )")
-            assertFalse(paragraph.contains("["), "Should not contain [")
-            assertFalse(paragraph.contains("]"), "Should not contain ]")
-            assertFalse(paragraph.contains("{"), "Should not contain {")
-            assertFalse(paragraph.contains("}"), "Should not contain }")
-            assertFalse(paragraph.contains("<"), "Should not contain <")
-            assertFalse(paragraph.contains(">"), "Should not contain >")
-            assertFalse(paragraph.contains("*"), "Should not contain *")
-        }
+        assertEquals(2, result.size)
+        assertEquals("Skill: Shadow Step activated!", result[0])
+        assertEquals("Status Window: HP 100/100", result[1])
     }
     
     @Test

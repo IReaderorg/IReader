@@ -158,9 +158,7 @@ class TTSContentLoaderImpl(
             // Step 2: Apply content filter to remove unwanted patterns
             val filtered = contentFilterUseCase?.filterStrings(replaced) ?: replaced
             
-            // Step 3: Sanitize for TTS - remove brackets and special characters that shouldn't be read aloud
-            val sanitized = ttsSanitizer.sanitizeList(filtered)
-            return sanitized.filter { !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER") }
+            return filtered.filter { !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER") }
         }
         
         return emptyList()

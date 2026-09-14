@@ -166,51 +166,122 @@ class EpubTextExtractionTest {
         assertTrue(result.any { it.text.contains("Text in span") })
     }
     
-    // Helper function that mirrors the actual implementation
-    private fun extractTextContent(doc: com.fleeksoft.ksoup.nodes.Document): List<Text> {
-        val textList = mutableListOf<Text>()
+    @Test
+    fun `extractTextContent should preserve word spacing with inline formatting tags`() {
+        // Arrange
+        val html = """
+            <html>
+            <body>
+                <p>This is <i>italic</i> and <b>bold</b> text with <span>span words</span>.</p>
+            </body>
+            </html>
+        """.trimIndent()
+        val doc = Ksoup.parse(html)
         
-        // Get the body element
-        val body = doc.body()
+        // Act
+        val result = extractTextContent(doc)
         
-        // Traverse all child nodes (including text nodes)
+        // Assert
+        assertEquals(1, result.size, "Should be 1 paragraph, not split across inline tags")
+        assertEquals("This is italic and bold text with span words.", result[0].text)
+    }
 
-        fun traverseNodes(node: com.fleeksoft.ksoup.nodes.Node) {
-            when (node) {
-                is com.fleeksoft.ksoup.nodes.TextNode -> {
-                    // Extract text from text nodes
-                    val text = node.text().trim()
-                    if (text.isNotBlank()) {
-                        textList.add(Text(text))
-                    }
-                }
-                is com.fleeksoft.ksoup.nodes.Element -> {
-                    // For block-level elements, process their children
-                    if (node.tagName() in listOf("h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "blockquote", "pre", "li", "body")) {
-                        node.childNodes().forEach { traverseNodes(it) }
-                    } else {
-                        // For inline elements, get their text content
-                        val text = node.text().trim()
-                        if (text.isNotBlank()) {
-                            textList.add(Text(text))
-                        }
-                    }
-                }
-            }
-        }
+    @Test
+    fun `extractTextContent should split paragraphs on br tags`() {
+        // Arrange
+        val html = """
+            <html>
+            <body>
+                <p>Line 1<br/>Line 2<br/><br/>Line 3</p>
+            </body>
+            </html>
+        """.trimIndent()
+        val doc = Ksoup.parse(html)
         
-        // Start traversal from body
-        body.childNodes().forEach { traverseNodes(it) }
+        // Act
+        val result = extractTextContent(doc)
         
-        return textList.ifEmpty {
-            // Fallback: get all text from body
-            val bodyText = body.text().trim()
-            if (bodyText.isNotBlank()) {
-                listOf(Text(bodyText))
-            } else {
-                emptyList()
-            }
-        }
+        // Assert
+        assertEquals(3, result.size)
+        assertEquals("Line 1", result[0].text)
+        assertEquals("Line 2", result[1].text)
+        assertEquals("Line 3", result[2].text)
+    }
+
+    @Test
+    fun `extractTextContent should handle div with br breaks and no p tags`() {
+        // Arrange
+        val html = """
+            <html>
+            <body>
+                <div class="content">
+                    Paragraph 1 text here.<br><br>
+                    Paragraph 2 text here.
+                </div>
+            </body>
+            </html>
+        """.trimIndent()
+        val doc = Ksoup.parse(html)
+        
+        // Act
+        val result = extractTextContent(doc)
+        
+        // Assert
+        assertEquals(2, result.size)
+        assertEquals("Paragraph 1 text here.", result[0].text)
+        assertEquals("Paragraph 2 text here.", result[1].text)
+    }
+
+    @Test
+    fun `extractTextContent should handle ChatGPT styled epub with quotes and spans`() {
+        // Arrange
+        val html = """
+            <html xmlns="http://www.w3.org/1999/xhtml">
+            <body>
+                <div class="chapter">
+                    <p>He turned to her. <span style="font-style: italic;">“Are you ready?”</span> he asked.</p>
+                    <p>“I am,” she replied firmly.</p>
+                </div>
+            </body>
+            </html>
+        """.trimIndent()
+        val doc = Ksoup.parse(html)
+        
+        // Act
+        val result = extractTextContent(doc)
+        
+        // Assert
+        assertEquals(2, result.size)
+        assertEquals("He turned to her. “Are you ready?” he asked.", result[0].text)
+        assertEquals("“I am,” she replied firmly.", result[1].text)
+    }
+
+    @Test
+    fun `extractTextContent should preserve preformatted text lines`() {
+        // Arrange
+        val html = """
+            <html>
+            <body>
+                <pre>Line 1
+Line 2
+Line 3</pre>
+            </body>
+            </html>
+        """.trimIndent()
+        val doc = Ksoup.parse(html)
+        
+        // Act
+        val result = extractTextContent(doc)
+        
+        // Assert
+        assertEquals(3, result.size)
+        assertEquals("Line 1", result[0].text)
+        assertEquals("Line 2", result[1].text)
+        assertEquals("Line 3", result[2].text)
+    }
+
+    private fun extractTextContent(doc: com.fleeksoft.ksoup.nodes.Document): List<Text> {
+        return EpubTextExtractor.extractTextContent(doc)
     }
 }
 

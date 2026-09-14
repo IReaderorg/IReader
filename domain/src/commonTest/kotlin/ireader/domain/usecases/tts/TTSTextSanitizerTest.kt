@@ -14,19 +14,19 @@ class TTSTextSanitizerTest {
     private val sanitizer = TTSTextSanitizer()
     
     @Test
-    fun `sanitize should remove round brackets and their content`() {
+    fun `sanitize should preserve text inside round brackets`() {
         // Arrange
-        val text = "Hello (this is a note) world"
+        val text = "Hello (this is a thought) world"
         
         // Act
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello this is a thought world", result)
     }
     
     @Test
-    fun `sanitize should remove square brackets and their content`() {
+    fun `sanitize should preserve text inside square brackets`() {
         // Arrange
         val text = "Hello [translator note] world"
         
@@ -34,11 +34,23 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello translator note world", result)
     }
     
     @Test
-    fun `sanitize should remove curly braces and their content`() {
+    fun `sanitize should preserve RPG skill and status window brackets`() {
+        // Arrange
+        val text = "[Skill: Fireball Level 3] [Status Window]"
+        
+        // Act
+        val result = sanitizer.sanitize(text)
+        
+        // Assert
+        assertEquals("Skill: Fireball Level 3 Status Window", result)
+    }
+    
+    @Test
+    fun `sanitize should preserve text inside curly braces`() {
         // Arrange
         val text = "Hello {some annotation} world"
         
@@ -46,7 +58,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello some annotation world", result)
     }
     
     @Test
@@ -62,7 +74,7 @@ class TTSTextSanitizerTest {
     }
     
     @Test
-    fun `sanitize should remove multiple types of brackets in same text`() {
+    fun `sanitize should preserve multiple types of brackets in same text`() {
         // Arrange
         val text = "Hello (note) world [TL: translation] test {annotation} end"
         
@@ -70,11 +82,11 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world test end", result)
+        assertEquals("Hello note world TL: translation test annotation end", result)
     }
     
     @Test
-    fun `sanitize should handle nested brackets`() {
+    fun `sanitize should handle nested brackets while preserving text`() {
         // Arrange
         val text = "Hello (outer (inner) note) world"
         
@@ -82,7 +94,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello outer inner note world", result)
     }
     
     @Test
@@ -110,7 +122,7 @@ class TTSTextSanitizerTest {
     }
     
     @Test
-    fun `sanitize should handle text with only brackets`() {
+    fun `sanitize should preserve text in bracket-only strings`() {
         // Arrange
         val text = "(note) [TL] {annotation}"
         
@@ -118,7 +130,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("", result)
+        assertEquals("note TL annotation", result)
     }
     
     @Test
@@ -130,7 +142,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello note world", result)
     }
     
     @Test
@@ -142,11 +154,11 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("start note Hello world end note", result)
     }
     
     @Test
-    fun `sanitize should remove angle brackets and their content`() {
+    fun `sanitize should preserve text inside angle brackets`() {
         // Arrange
         val text = "Hello <some tag> world"
         
@@ -154,7 +166,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello some tag world", result)
     }
     
     @Test
@@ -178,7 +190,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello note TL world", result)
     }
     
     @Test
@@ -194,7 +206,7 @@ class TTSTextSanitizerTest {
     }
     
     @Test
-    fun `sanitize should handle unmatched opening bracket`() {
+    fun `sanitize should preserve text following unmatched opening bracket`() {
         // Arrange
         val text = "Hello (world"
         
@@ -202,8 +214,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        // Should remove from opening bracket to end
-        assertEquals("Hello", result)
+        assertEquals("Hello world", result)
     }
     
     @Test
@@ -215,7 +226,6 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        // Should just remove the closing bracket
         assertEquals("Hello world", result)
     }
 }
