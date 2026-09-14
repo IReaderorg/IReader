@@ -5,8 +5,10 @@ import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import ireader.domain.services.tts_service.GradioAudioPlayer
 import ireader.domain.services.tts_service.TTSEngineCallback
+import ireader.domain.services.tts_service.v2.EngineEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
@@ -326,4 +328,187 @@ class LocalTTSEngineTest {
         assertEquals(1, maxConcurrent, "Network requests must be serialized: max concurrent was $maxConcurrent")
         ttsEngine.cleanup()
     }
+
+    @Test
+    fun `precacheNext continuously synthesizes all queued items sequentially into cache`() = runTest {
+        val synthesizedTexts = mutableListOf<String>()
+        val cachedUtterances = mutableListOf<String>()
+
+        val engine = MockEngine { request ->
+            val body = request.body.toByteArray().decodeToString()
+            synthesizedTexts.add(body)
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(engine), player, UnconfinedTestDispatcher())
+
+        ttsEngine.setCallback(object : TTSEngineCallback {
+            override fun onStart(utteranceId: String) {}
+            override fun onDone(utteranceId: String) {}
+            override fun onError(utteranceId: String, error: String) {}
+            override fun onCached(utteranceId: String) {
+                cachedUtterances.add(utteranceId)
+            }
+        })
+
+        val items = listOf(
+            "p_1" to "پاراگراف شماره یک برای خوانش",
+            "p_2" to "پاراگراف شماره دو برای خوانش",
+            "p_3" to "پاراگراف شماره سه برای خوانش",
+            "p_4" to "پاراگراف شماره چهار برای خوانش"
+        )
+
+        val job = ttsEngine.precacheNext(items)
+        job?.join()
+
+        assertEquals(4, synthesizedTexts.size, "All 4 items should be synthesized")
+        assertEquals(listOf("p_1", "p_2", "p_3", "p_4"), cachedUtterances, "All 4 items should trigger onCached")
+        assertTrue(ttsEngine.isTextCached("پاراگراف شماره یک برای خوانش"))
+        assertTrue(ttsEngine.isTextCached("پاراگراف شماره چهار برای خوانش"))
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `speak does not cancel in-flight prefetch and plays cached audio immediately`() = runTest {
+        var networkCalls = 0
+
+        val engine = MockEngine {
+            networkCalls++
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(engine), player, UnconfinedTestDispatcher())
+
+        val items = listOf(
+            "p_1" to "جمله اول برای پیش‌بارگذاری",
+            "p_2" to "جمله دوم برای پیش‌بارگذاری"
+        )
+
+        ttsEngine.precacheNext(items)?.join()
+
+        assertEquals(2, networkCalls, "Both items pre-cached")
+
+        // Now speak p_1 (which is already cached)
+        ttsEngine.speak("جمله اول برای پیش‌بارگذاری", "p_1")
+
+        // Network calls should NOT increase because p_1 was cached
+        assertEquals(2, networkCalls, "speak should use cached audio without re-requesting")
+        assertNotNull(player.playedBytes)
+
+        // Check that p_2 is still cached and not cancelled/cleared
+        assertTrue(ttsEngine.isTextCached("جمله دوم برای پیش‌بارگذاری"))
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `clearState cancels pending queue and clears cache`() = runTest {
+        val engine = MockEngine {
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(engine), player, UnconfinedTestDispatcher())
+
+        ttsEngine.precacheNext(listOf("p_1" to "تست برای پاکسازی کش"))?.join()
+
+        assertTrue(ttsEngine.isTextCached("تست برای پاکسازی کش"))
+
+        ttsEngine.clearState()
+
+        assertFalse(ttsEngine.isTextCached("تست برای پاکسازی کش"), "Cache should be cleared after clearState()")
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `cache retains items up to capacity and evicts oldest entries`() = runTest {
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(MockEngine { respondOk() }), player)
+
+        // Directly cache 105 entries (capacity is 100)
+        for (i in 1..105) {
+            ttsEngine.cacheAudio("p_$i", "متن شماره $i", sampleAudioBytes)
+        }
+
+        // The earliest 5 entries (1..5) should have been evicted
+        for (i in 1..5) {
+            assertFalse(ttsEngine.isTextCached("متن شماره $i"), "Entry $i should have been evicted")
+        }
+
+        // The remaining entries (6..105) should still be in cache
+        for (i in 6..105) {
+            assertTrue(ttsEngine.isTextCached("متن شماره $i"), "Entry $i should still be cached")
+        }
+
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `LocalTTSEngineV2 emits EngineEvent Cached when utterance is synthesized`() = runTest {
+        val engine = MockEngine {
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val localEngine = LocalTTSEngine(config, HttpClient(engine), TestAudioPlayer(), UnconfinedTestDispatcher())
+        val v2Engine = localEngine.asV2()
+
+        val events = mutableListOf<EngineEvent>()
+        val collectJob = launch {
+            v2Engine.events.collect {
+                events.add(it)
+            }
+        }
+
+        localEngine.precacheNext(listOf("p_0" to "متن برای بررسی اونت"))?.join()
+
+        assertTrue(events.any { it is EngineEvent.Cached && it.utteranceId == "p_0" }, "Should emit EngineEvent.Cached for p_0")
+        collectJob.cancel()
+        v2Engine.release()
+    }
+
+    @Test
+    fun `LocalTTSEngineV2 clearState delegates to local engine`() = runTest {
+        val engine = MockEngine {
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val localEngine = LocalTTSEngine(config, HttpClient(engine), TestAudioPlayer(), UnconfinedTestDispatcher())
+        val v2Engine = localEngine.asV2()
+
+        localEngine.precacheNext(listOf("p_5" to "متن آزمایشی برای پاکسازی"))?.join()
+        assertTrue(v2Engine.isTextCached("متن آزمایشی برای پاکسازی"))
+
+        v2Engine.clearState()
+
+        assertFalse(v2Engine.isTextCached("متن آزمایشی برای پاکسازی"), "Cache should be cleared after clearState()")
+        v2Engine.release()
+    }
 }
+

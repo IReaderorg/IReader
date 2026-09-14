@@ -127,6 +127,7 @@ sealed class EngineEvent {
     data class Completed(val utteranceId: String) : EngineEvent()
     data class Error(val utteranceId: String, val message: String) : EngineEvent()
     object Ready : EngineEvent()
+    data class Cached(val utteranceId: String) : EngineEvent()
 }
 
 /**

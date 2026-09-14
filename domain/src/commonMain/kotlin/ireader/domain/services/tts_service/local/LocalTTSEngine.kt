@@ -39,10 +39,22 @@ class LocalTTSEngine(
     private var pitch: Float = config.pitch
     private val scope = CoroutineScope(dispatcher + SupervisorJob())
 
-    // In-memory cache for audio bytes (thread-safe)
-    private val audioCache = synchronizedMapOf<String, ByteArray>()
-    private val prefetchJobs = synchronizedMapOf<String, Job>()
-    private var prefetchJob: Job? = null
+    private data class SynthesisRequest(
+        val utteranceId: String,
+        val text: String,
+        val deferred: CompletableDeferred<ByteArray?> = CompletableDeferred()
+    )
+
+    // In-memory cache for audio bytes (thread-safe LRU tracking)
+    private val cacheLock = Any()
+    private val audioCache = mutableMapOf<String, ByteArray>()
+    private val accessOrder = mutableListOf<String>()
+
+    // Sequential synthesis queue and active synthesis tracking
+    private val queueLock = Any()
+    private val synthesisQueue = mutableListOf<SynthesisRequest>()
+    private val activeSynthesis = synchronizedMapOf<String, CompletableDeferred<ByteArray?>>()
+    private var queueWorkerJob: Job? = null
 
     // Mutex to ensure sequential network synthesis requests to the local TTS server.
     // Deep learning autoregressive models (like Chatterbox Persian TTS) are non-reentrant
@@ -57,7 +69,7 @@ class LocalTTSEngine(
 
     companion object {
         private const val TAG = "LocalTTSEngine"
-        private const val MAX_CACHE_SIZE = 30
+        private const val MAX_CACHE_SIZE = 100
         private const val MAX_TEXT_LENGTH = 5000
     }
 
@@ -94,13 +106,29 @@ class LocalTTSEngine(
         callback?.onStart(utteranceId)
 
         try {
-            // Cancel active prefetch for this utterance if running
-            prefetchJob?.cancel()
-            prefetchJobs.remove(utteranceId)?.cancel()
+            // 1. Check if already present in cache
+            var audioData = getAudio(utteranceId, trimmed)
 
-            val audioData = audioCache[utteranceId] ?: audioCache[trimmed] ?: run {
-                Log.info { "$TAG: Synthesizing speech for utterance $utteranceId (${trimmed.take(30)}...)" }
-                generateAudio(trimmed)
+            // 2. If not cached, check if background synthesis is already actively generating it
+            if (audioData == null) {
+                val inFlight = activeSynthesis[utteranceId] ?: activeSynthesis[trimmed]
+                if (inFlight != null) {
+                    Log.info { "$TAG: Awaiting in-flight synthesis for utterance $utteranceId" }
+                    audioData = inFlight.await()
+                }
+            }
+
+            // 3. If still null, synthesize immediately with priority (bypassing remaining queue)
+            if (audioData == null) {
+                synchronized(queueLock) {
+                    synthesisQueue.removeAll { it.utteranceId == utteranceId || it.text == trimmed }
+                }
+                Log.info { "$TAG: Priority synthesizing speech for utterance $utteranceId (${trimmed.take(30)}...)" }
+                audioData = generateAudio(trimmed)
+                if (audioData != null && audioData.isNotEmpty()) {
+                    cacheAudio(utteranceId, trimmed, audioData)
+                    callback?.onCached(utteranceId)
+                }
             }
 
             if (isStopped) {
@@ -108,11 +136,6 @@ class LocalTTSEngine(
             }
 
             if (audioData != null && audioData.isNotEmpty()) {
-                // Cache if not present
-                if (!audioCache.containsKey(trimmed)) {
-                    cacheAudio(trimmed, audioData)
-                }
-
                 val completionDeferred = CompletableDeferred<Unit>()
                 audioPlayer.play(audioData) {
                     if (!isStopped) {
@@ -227,84 +250,178 @@ class LocalTTSEngine(
     }
 
     /**
+     * Retrieves cached audio by utteranceId or text, updating access order.
+     */
+    fun getAudio(utteranceId: String, text: String): ByteArray? {
+        val trimmed = text.trim()
+        return synchronized(cacheLock) {
+            val audio = audioCache[utteranceId] ?: audioCache[trimmed]
+            if (audio != null) {
+                accessOrder.remove(trimmed)
+                accessOrder.add(trimmed)
+            }
+            audio
+        }
+    }
+
+    /**
+     * Caches audio bytes associated with both utteranceId and text.
+     * Enforces LRU eviction when capacity is reached.
+     */
+    fun cacheAudio(utteranceId: String, text: String, bytes: ByteArray) {
+        val trimmed = text.trim()
+        synchronized(cacheLock) {
+            while (accessOrder.size >= MAX_CACHE_SIZE && accessOrder.isNotEmpty()) {
+                val oldest = accessOrder.removeAt(0)
+                audioCache.remove(oldest)
+            }
+            audioCache[utteranceId] = bytes
+            audioCache[trimmed] = bytes
+            accessOrder.remove(trimmed)
+            accessOrder.add(trimmed)
+        }
+    }
+
+    /**
+     * Empties the audio cache and access tracker.
+     */
+    fun clearCache() {
+        synchronized(cacheLock) {
+            audioCache.clear()
+            accessOrder.clear()
+        }
+    }
+
+    fun isTextCached(text: String): Boolean {
+        val trimmed = text.trim()
+        return synchronized(cacheLock) {
+            audioCache.containsKey(trimmed)
+        }
+    }
+
+    fun isUtteranceCached(utteranceId: String): Boolean {
+        return synchronized(cacheLock) {
+            audioCache.containsKey(utteranceId)
+        }
+    }
+
+    private fun ensureQueueWorker(): Job? {
+        return synchronized(queueLock) {
+            if (queueWorkerJob?.isActive == true) return@synchronized queueWorkerJob
+            val job = scope.launch {
+                while (isActive && !isStopped) {
+                    val request = synchronized(queueLock) {
+                        if (synthesisQueue.isEmpty()) null else synthesisQueue.removeAt(0)
+                    } ?: break
+
+                    val (id, text, deferred) = request
+                    if (!isActive || isStopped) {
+                        deferred.complete(null)
+                        break
+                    }
+
+                    // Check if already synthesized/cached (e.g. by priority speak)
+                    val existing = getAudio(id, text)
+                    if (existing != null) {
+                        deferred.complete(existing)
+                        callback?.onCached(id)
+                        continue
+                    }
+
+                    activeSynthesis[id] = deferred
+                    activeSynthesis[text] = deferred
+
+                    try {
+                        val audioData = generateAudio(text)
+                        if (audioData != null && audioData.isNotEmpty()) {
+                            cacheAudio(id, text, audioData)
+                            deferred.complete(audioData)
+                            callback?.onCached(id)
+                            Log.info { "$TAG: Queue synthesized & cached $id (${audioData.size} bytes)" }
+                        } else {
+                            deferred.complete(null)
+                        }
+                    } catch (e: CancellationException) {
+                        deferred.cancel(e)
+                        throw e
+                    } catch (e: Exception) {
+                        Log.warn { "$TAG: Queue synthesis failed for $id: ${e.message}" }
+                        deferred.complete(null)
+                    } finally {
+                        activeSynthesis.remove(id)
+                        activeSynthesis.remove(text)
+                    }
+                }
+            }
+            queueWorkerJob = job
+            job
+        }
+    }
+
+    /**
      * Pre-cache an upcoming paragraph in background
      */
     fun precache(utteranceId: String, text: String): Job? {
         val trimmed = text.trim()
-        if (!hasContent(trimmed) || audioCache.containsKey(trimmed) || audioCache.containsKey(utteranceId)) {
+        if (!hasContent(trimmed) || isUtteranceCached(utteranceId) || isTextCached(trimmed)) {
             return null
         }
-
-        prefetchJobs[utteranceId]?.cancel()
-        val job = scope.launch {
-            try {
-                val audioData = generateAudio(trimmed)
-                if (audioData != null && audioData.isNotEmpty()) {
-                    cacheAudio(trimmed, audioData)
-                    cacheAudio(utteranceId, audioData)
-                    Log.info { "$TAG: Pre-cached paragraph $utteranceId (${audioData.size} bytes)" }
-                }
-            } catch (e: CancellationException) {
-                // Ignore cancellation
-            } catch (e: Exception) {
-                Log.warn { "$TAG: Pre-cache failed for $utteranceId: ${e.message}" }
-            } finally {
-                prefetchJobs.remove(utteranceId)
-            }
+        val deferred = CompletableDeferred<ByteArray?>()
+        synchronized(queueLock) {
+            synthesisQueue.add(0, SynthesisRequest(utteranceId, trimmed, deferred))
         }
-        prefetchJobs[utteranceId] = job
-        return job
+        ensureQueueWorker()
+        return scope.launch {
+            deferred.await()
+        }
     }
 
     /**
-     * Pre-cache multiple upcoming items sequentially (1 sentence at a time).
-     * Strictly awaits the current synthesis response before pre-fetching the immediate next sentence.
-     * Never launches unbounded parallel HTTP calls to /api/tts.
+     * Continuously queues upcoming items for sequential synthesis into cache.
+     * Starts the background synthesis worker if not already active.
      */
-    fun precacheNext(items: List<Pair<String, String>>) {
-        val validItems = items.take(2).filter { (id, text) ->
-            val trimmed = text.trim()
-            hasContent(trimmed) && !audioCache.containsKey(trimmed) && !audioCache.containsKey(id)
-        }
-        if (validItems.isEmpty()) return
-
-        prefetchJob?.cancel()
-        prefetchJob = scope.launch {
-            for ((id, text) in validItems) {
-                if (!isActive || isStopped) break
+    fun precacheNext(items: List<Pair<String, String>>): Job? {
+        var addedAny = false
+        synchronized(queueLock) {
+            for ((id, text) in items) {
                 val trimmed = text.trim()
-                try {
-                    // Awaits current synthesis response before pre-fetching next sentence
-                    val audioData = generateAudio(trimmed)
-                    if (audioData != null && audioData.isNotEmpty()) {
-                        cacheAudio(trimmed, audioData)
-                        cacheAudio(id, audioData)
-                        Log.info { "$TAG: Pre-cached sequential sentence $id (${audioData.size} bytes)" }
-                    }
-                } catch (e: CancellationException) {
-                    break
-                } catch (e: Exception) {
-                    Log.warn { "$TAG: Sequential pre-cache failed for $id: ${e.message}" }
-                }
+                if (!hasContent(trimmed)) continue
+                if (isUtteranceCached(id) || isTextCached(trimmed)) continue
+                if (synthesisQueue.any { it.utteranceId == id || it.text == trimmed }) continue
+                if (activeSynthesis.containsKey(id) || activeSynthesis.containsKey(trimmed)) continue
+
+                synthesisQueue.add(SynthesisRequest(id, trimmed))
+                addedAny = true
             }
         }
+        if (addedAny) {
+            ensureQueueWorker()
+        }
+        return synchronized(queueLock) { queueWorkerJob }
     }
 
-    fun isTextCached(text: String): Boolean = audioCache.containsKey(text.trim())
-
-    private fun cacheAudio(key: String, bytes: ByteArray) {
-        if (audioCache.size >= MAX_CACHE_SIZE) {
-            audioCache.keys.firstOrNull()?.let { audioCache.remove(it) }
+    /**
+     * Clears internal state (synthesis queue and cache) on chapter transition.
+     */
+    fun clearState() {
+        Log.info { "$TAG: clearState() - clearing synthesis queue and cache" }
+        synchronized(queueLock) {
+            synthesisQueue.forEach { it.deferred.cancel() }
+            synthesisQueue.clear()
         }
-        audioCache[key] = bytes
+        queueWorkerJob?.cancel()
+        queueWorkerJob = null
+        clearCache()
     }
 
     override fun stop() {
         isStopped = true
-        prefetchJob?.cancel()
-        prefetchJob = null
-        prefetchJobs.values.forEach { it.cancel() }
-        prefetchJobs.clear()
+        synchronized(queueLock) {
+            synthesisQueue.forEach { it.deferred.cancel() }
+            synthesisQueue.clear()
+        }
+        queueWorkerJob?.cancel()
+        queueWorkerJob = null
         audioPlayer.stop()
     }
 
@@ -336,11 +453,7 @@ class LocalTTSEngine(
 
     override fun cleanup() {
         stop()
-        prefetchJob?.cancel()
-        prefetchJob = null
-        prefetchJobs.values.forEach { it.cancel() }
-        prefetchJobs.clear()
-        audioCache.clear()
+        clearCache()
         scope.cancel()
         audioPlayer.release()
     }

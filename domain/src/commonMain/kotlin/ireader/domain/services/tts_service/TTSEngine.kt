@@ -65,6 +65,8 @@ interface TTSEngineCallback {
     fun onError(utteranceId: String, error: String)
     /** Called when TTS engine becomes ready to speak */
     fun onReady() {}
+    /** Called when audio for an utterance has been synthesized and cached */
+    fun onCached(utteranceId: String) {}
 }
 
 /**

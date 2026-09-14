@@ -369,6 +369,20 @@ class TTSController(
 
                 handleError(TTSError.SpeechFailed(event.message))
             }
+            is EngineEvent.Cached -> {
+                val match = Regex("""p_(\d+)""").matchEntire(event.utteranceId)
+                if (match != null) {
+                    val index = match.groupValues[1].toIntOrNull()
+                    if (index != null) {
+                        _state.update {
+                            it.copy(
+                                cachedParagraphs = it.cachedParagraphs + index,
+                                loadingParagraphs = it.loadingParagraphs - index
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -452,7 +466,7 @@ class TTSController(
     private fun precacheUpcomingParagraphs(currentIndex: Int) {
         val currentState = _state.value
         val content = currentState.displayContent
-        val prefetchCount = 3
+        val prefetchCount = 10
         
         val itemsToPrecache = mutableListOf<Pair<String, String>>()
         for (i in 1..prefetchCount) {

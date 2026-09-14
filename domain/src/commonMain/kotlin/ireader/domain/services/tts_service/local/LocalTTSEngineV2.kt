@@ -43,7 +43,16 @@ class LocalTTSEngineV2(
                 Log.debug { "$TAG: onReady()" }
                 _events.tryEmit(EngineEvent.Ready)
             }
+
+            override fun onCached(utteranceId: String) {
+                Log.debug { "$TAG: onCached($utteranceId)" }
+                _events.tryEmit(EngineEvent.Cached(utteranceId))
+            }
         })
+    }
+
+    override fun clearState() {
+        engine.clearState()
     }
 
     override suspend fun speak(text: String, utteranceId: String) {
