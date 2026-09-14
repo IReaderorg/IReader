@@ -461,4 +461,110 @@ class TextReplacementUseCaseTest {
         val withBookId = useCase.applyReplacementsToStrings(paragraphs, bookId = 42L)
         assertEquals(listOf("Normal paragraph"), withBookId)
     }
+
+    @Test
+    fun `should match text containing non-breaking spaces and nbsp`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Webnovel Notice",
+                findText = "Free Webnovel Comments",
+                replaceText = "",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        // Text with \u00A0 (Unicode non-breaking space)
+        val textWithNbspChar = "Free\u00A0Webnovel\u00A0Comments"
+        val result1 = useCase.applyReplacementsToText(textWithNbspChar)
+        assertEquals("", result1)
+
+        // Text with &nbsp; HTML entity
+        val textWithNbspEntity = "Free&nbsp;Webnovel&nbsp;Comments"
+        val result2 = useCase.applyReplacementsToText(textWithNbspEntity)
+        assertEquals("", result2)
+
+        // As a page: page should be dropped if it becomes blank
+        val pages = listOf(
+            ireader.core.source.model.Text("Free\u00A0Webnovel\u00A0Comments"),
+            ireader.core.source.model.Text("Chapter content starts here.")
+        )
+        val processedPages = useCase.applyReplacementsToPages(pages)
+        assertEquals(1, processedPages.size)
+        assertEquals("Chapter content starts here.", (processedPages[0] as ireader.core.source.model.Text).text)
+    }
+
+    @Test
+    fun `should match text containing HTML entities like quot and apos`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Apostrophe rule",
+                findText = "It's a test \"quote\"",
+                replaceText = "Replaced",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val textWithEntities = "It&#39;s a test &quot;quote&quot;"
+        val result = useCase.applyReplacementsToText(textWithEntities)
+        assertEquals("Replaced", result)
+    }
+
+    @Test
+    fun `should match CRLF line endings when pattern has LF`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Multiline notice",
+                findText = "Line 1\nLine 2",
+                replaceText = "",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val textWithCrlf = "Line 1\r\nLine 2"
+        val result = useCase.applyReplacementsToText(textWithCrlf)
+        assertEquals("", result)
+    }
+
+    @Test
+    fun `applyReplacementsToPages should drop page when text becomes effectively blank with leftover HTML tags`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Comment rule",
+                findText = "Please follow commenting rules",
+                replaceText = "",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        // Old fetched chapters might wrap text in <p> or <div> tags
+        val pages = listOf(
+            ireader.core.source.model.Text("<p>Please follow commenting rules</p>"),
+            ireader.core.source.model.Text("<div class=\"comment-notice\">Please follow commenting rules</div>"),
+            ireader.core.source.model.Text("<p>Story paragraph here.</p>")
+        )
+        val processed = useCase.applyReplacementsToPages(pages)
+        assertEquals(1, processed.size)
+        assertEquals("<p>Story paragraph here.</p>", (processed[0] as ireader.core.source.model.Text).text)
+    }
 }
+

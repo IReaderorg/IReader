@@ -306,7 +306,12 @@ class ReaderScreenViewModel(
      * Subscribe to text replacement changes and re-apply replacements when rules change.
      */
     private fun subscribeToTextReplacementChanges() {
-        textReplacementUseCase.getGlobalReplacements()
+        val flow = if (params.bookId != null) {
+            textReplacementUseCase.getReplacementsForBook(params.bookId)
+        } else {
+            textReplacementUseCase.getGlobalReplacements()
+        }
+        flow
             ?.drop(1)
             ?.onEach { replacements ->
                 Log.debug { "Text replacements changed: ${replacements.size} rules" }
@@ -348,18 +353,28 @@ class ReaderScreenViewModel(
     private fun refilterCurrentContent() {
         val currentState = _state.value as? ReaderState.Success ?: return
         val chapter = currentState.currentChapter
-        val book = currentState.book
-        val catalog = currentState.catalog
         
-        // Invalidate the filter cache so new settings are applied
+        // Invalidate both filter and replacement caches so new settings are applied
         contentFilterUseCase.invalidateCache()
+        textReplacementUseCase.invalidateCache()
         
         // Reload the chapter to get freshly filtered content
         scope.launch {
             val freshChapter = getChapterUseCase.findChapterById(chapter.id)
             if (freshChapter != null) {
                 updateSuccessState { state ->
-                    state.copy(content = freshChapter.content)
+                    val updatedShell = state.chapterShell.map { ch ->
+                        if (ch.id == freshChapter.id) freshChapter else ch
+                    }
+                    val updatedChapters = state.chapters.map { ch ->
+                        if (ch.id == freshChapter.id) freshChapter else ch
+                    }
+                    state.copy(
+                        currentChapter = freshChapter,
+                        content = freshChapter.content,
+                        chapterShell = updatedShell,
+                        chapters = updatedChapters
+                    )
                 }
                 Log.debug { "Re-filtered content by reloading chapter: ${freshChapter.content.size} pages" }
             }

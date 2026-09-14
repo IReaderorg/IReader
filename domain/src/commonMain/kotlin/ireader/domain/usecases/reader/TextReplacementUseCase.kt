@@ -69,6 +69,35 @@ class TextReplacementUseCase(
             }
             return false
         }
+        /**
+         * Normalizes common HTML entities, non-breaking spaces, and CRLF line breaks.
+         * Ensures consistent matching against both clean text and old fetched content.
+         */
+        fun normalizeText(input: String): String {
+            if (input.isEmpty()) return input
+            return input
+                .replace("\r\n", "\n")
+                .replace('\u00A0', ' ')
+                .replace("&nbsp;", " ")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'")
+                .replace("&apos;", "'")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+        }
+
+        /**
+         * Checks if text is blank or only contains empty HTML tags (e.g. <p></p>, <div></div>).
+         */
+        fun isEffectivelyBlank(text: String): Boolean {
+            if (text.isBlank()) return true
+            if (text.contains('<') && text.contains('>')) {
+                val stripped = text.replace(Regex("<[^>]+>"), "").trim()
+                if (stripped.isBlank()) return true
+            }
+            return false
+        }
     }
 
     /**
@@ -79,7 +108,8 @@ class TextReplacementUseCase(
         val findText: String,
         val replaceText: String,
         val caseSensitive: Boolean,
-        val regex: Regex? = null
+        val regex: Regex? = null,
+        val flexibleRegex: Regex? = null
     )
 
     private val cacheLock = Any()
@@ -137,12 +167,24 @@ class TextReplacementUseCase(
             }
         }
 
-        // 3. Literal replacement
+        // 3. Literal replacement with normalization and flexible whitespace regex
+        val normalizedFind = normalizeText(pattern)
+        val flexibleRegex = if (normalizedFind.contains(" ") || normalizedFind.contains("\n")) {
+            val escaped = Regex.escape(normalizedFind)
+                .replace("\\ ", "[\\s\\u00A0]+")
+                .replace("\\n", "\\r?\\n")
+            val options = if (replacement.caseSensitive) emptySet() else setOf(RegexOption.IGNORE_CASE)
+            runCatching { Regex(escaped, options) }.getOrNull()
+        } else {
+            null
+        }
+
         return PreparedReplacement(
-            findText = pattern,
+            findText = normalizedFind,
             replaceText = replacement.replaceText,
             caseSensitive = replacement.caseSensitive,
-            regex = null
+            regex = null,
+            flexibleRegex = flexibleRegex
         )
     }
 
@@ -156,10 +198,11 @@ class TextReplacementUseCase(
         val rawReplacements = getEnabledReplacements(bookId)
         val prepared = rawReplacements.flatMap { replacement ->
             val pattern = replacement.findText
+            val normalizedPattern = normalizeText(pattern)
             // If literal replacement spans multiple lines, also generate per-line rules
             // so individual paragraphs in chapter content are matched and replaced
-            if (!isRegexPattern(pattern) && pattern.contains("\n") && !pattern.trim().startsWith("/")) {
-                val lines = pattern.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+            if (!isRegexPattern(pattern) && normalizedPattern.contains("\n") && !pattern.trim().startsWith("/")) {
+                val lines = normalizedPattern.split("\n").map { it.trim() }.filter { it.isNotBlank() }
                 if (lines.size > 1) {
                     val list = mutableListOf(prepareReplacement(replacement))
                     for (line in lines) {
@@ -201,7 +244,7 @@ class TextReplacementUseCase(
                     if (originalText != replacedText) {
                         Log.debug { "$TAG: Text changed from ${originalText.length} to ${replacedText.length} chars" }
                     }
-                    if (replacedText.isBlank()) null else Text(replacedText)
+                    if (isEffectivelyBlank(replacedText)) null else Text(replacedText)
                 }
                 else -> page // Keep non-text pages as-is
             }
@@ -223,7 +266,7 @@ class TextReplacementUseCase(
 
         return content.mapNotNull { text ->
             val replacedText = applyPreparedReplacements(text, prepared)
-            if (replacedText.isBlank()) null else replacedText
+            if (isEffectivelyBlank(replacedText)) null else replacedText
         }
     }
 
@@ -264,22 +307,34 @@ class TextReplacementUseCase(
 
     /**
      * Apply precompiled replacements to text efficiently.
-     * Uses Regex for regex patterns and fast native string replacement for literal rules.
+     * Uses Regex for regex patterns and fast native string replacement for literal rules,
+     * falling back to flexible whitespace matching if literal match fails.
      */
     private fun applyPreparedReplacements(text: String, prepared: List<PreparedReplacement>): String {
         if (prepared.isEmpty() || text.isEmpty()) {
             return text
         }
 
-        var result = text
+        var result = normalizeText(text)
         for (rep in prepared) {
             result = if (rep.regex != null) {
                 rep.regex.replace(result, rep.replaceText)
             } else {
-                if (rep.caseSensitive) {
-                    result.replace(rep.findText, rep.replaceText)
+                val exactFound = if (rep.caseSensitive) {
+                    result.contains(rep.findText)
                 } else {
-                    result.replace(rep.findText, rep.replaceText, ignoreCase = true)
+                    result.contains(rep.findText, ignoreCase = true)
+                }
+                if (exactFound) {
+                    if (rep.caseSensitive) {
+                        result.replace(rep.findText, rep.replaceText)
+                    } else {
+                        result.replace(rep.findText, rep.replaceText, ignoreCase = true)
+                    }
+                } else if (rep.flexibleRegex != null && rep.flexibleRegex.containsMatchIn(result)) {
+                    rep.flexibleRegex.replace(result, rep.replaceText)
+                } else {
+                    result
                 }
             }
         }

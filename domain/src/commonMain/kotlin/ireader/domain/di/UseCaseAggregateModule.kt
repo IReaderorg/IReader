@@ -130,7 +130,7 @@ val useCaseAggregateModule = module {
     }
     
     // Content filter use case - used by Reader and TTS screens
-    factory {
+    single {
         ireader.domain.usecases.reader.ContentFilterUseCase(
             readerPreferences = get(),
             repository = getOrNull() // Optional - uses preferences fallback if not available
@@ -138,7 +138,7 @@ val useCaseAggregateModule = module {
     }
     
     // Text replacement use case - used by Reader and TTS screens
-    factory {
+    single {
         ireader.domain.usecases.reader.TextReplacementUseCase(
             readerPreferences = get(),
             repository = getOrNull() // Optional
