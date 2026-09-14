@@ -144,4 +144,44 @@ class TTSSentenceSplitterTest {
             result
         )
     }
+
+    @Test
+    fun `does not split normal English sentences between 80 and 350 characters mid-sentence`() {
+        // A typical English sentence with ~200 characters that previously was chopped at 80 characters, causing awkward pauses
+        val sentence = "He walked slowly into the bustling marketplace, observing the vibrant colors of the merchant stalls, while wondering if he would ever manage to find what he had traveled so far across the realm to discover."
+        assertTrue(sentence.length in 150..300, "Sentence length: ${sentence.length}")
+
+        val result = TTSSentenceSplitter.split(sentence)
+
+        // Must remain a single sentence and not be split mid-sentence at commas
+        assertEquals(listOf(sentence), result)
+    }
+
+    @Test
+    fun `sub-splits English sentences exceeding 350 characters at clause boundaries`() {
+        val veryLongSentence = "He walked slowly into the bustling marketplace, observing the vibrant colors of the merchant stalls and the noisy chatter of the crowd, while wondering whether he would ever manage to find what he had traveled so far across the realm to discover, because time was quickly running out and the dark clouds gathering on the horizon suggested that a storm was approaching fast."
+        assertTrue(veryLongSentence.length > 350, "Sentence length: ${veryLongSentence.length}")
+
+        val result = TTSSentenceSplitter.split(veryLongSentence)
+
+        assertTrue(result.size > 1, "Expected sentence over 350 chars to be split into clauses")
+        for (chunk in result) {
+            assertTrue(chunk.length <= 350, "Chunk exceeded max length 350: '$chunk'")
+        }
+    }
+
+    @Test
+    fun `CJK text automatically defaults to 100 character threshold`() {
+        val longCjkSentence = "在很久很久以前的一个古老王国里，住着一位非常聪明的学者，他每天都在图书馆里研读古籍，试图寻找隐藏在历史长河中的秘密，以便能够帮助王国的百姓解决困扰他们已久的干旱和饥荒问题，然而这个秘密却被深深地掩埋在时间的尘埃中。"
+        assertTrue(longCjkSentence.length > 100, "Sentence length: ${longCjkSentence.length}")
+
+        // When maxChunkLength is omitted (defaults to -1), auto-detection applies CJK_MAX_CHUNK_LENGTH (100)
+        val result = TTSSentenceSplitter.split(longCjkSentence)
+
+        assertTrue(result.size > 1, "Expected CJK sentence over 100 chars to be split")
+        for (chunk in result) {
+            assertTrue(chunk.length <= 100, "CJK chunk exceeded max length 100: '$chunk'")
+        }
+    }
 }
+

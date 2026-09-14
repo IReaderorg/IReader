@@ -372,9 +372,93 @@ class TextReplacementUseCaseTest {
         )
 
         val processedPages = useCase.applyReplacementsToPages(pages, bookId = null)
-        assertEquals(3, processedPages.size)
+        assertEquals(2, processedPages.size)
         assertEquals("Doctor John went to the clinic.", (processedPages[0] as ireader.core.source.model.Text).text)
-        assertEquals("", (processedPages[1] as ireader.core.source.model.Text).text)
-        assertEquals("Doctor Smith said hello.", (processedPages[2] as ireader.core.source.model.Text).text)
+        assertEquals("Doctor Smith said hello.", (processedPages[1] as ireader.core.source.model.Text).text)
+    }
+
+    @Test
+    fun `applyReplacementsToStrings drops blank paragraphs after replacement`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Remove boilerplate",
+                findText = "Comment Rules",
+                replaceText = "",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val paragraphs = listOf(
+            "First valid paragraph.",
+            "Comment Rules",
+            "Second valid paragraph."
+        )
+
+        val result = useCase.applyReplacementsToStrings(paragraphs, bookId = null)
+        assertEquals(listOf("First valid paragraph.", "Second valid paragraph."), result)
+    }
+
+    @Test
+    fun `multi-line literal pattern is split into per-line rules matching separate paragraphs`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = listOf(
+            TextReplacement(
+                id = 1,
+                name = "Remove multiline commenting rules",
+                findText = "Comment Rules\nBe respectful to others\nNo spamming",
+                replaceText = "",
+                enabled = true,
+                createdAt = 0L,
+                updatedAt = 0L
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val paragraphs = listOf(
+            "Chapter 1: The Beginning",
+            "Comment Rules",
+            "Be respectful to others",
+            "No spamming",
+            "The story continues here."
+        )
+
+        val result = useCase.applyReplacementsToStrings(paragraphs, bookId = null)
+        assertEquals(listOf("Chapter 1: The Beginning", "The story continues here."), result)
+    }
+
+    @Test
+    fun `book-specific replacements are applied when bookId is supplied`() = runTest {
+        val repository = FakeTextReplacementRepository()
+        repository.enabledGlobalReplacements = emptyList()
+        repository.enabledBookReplacements = mapOf(
+            42L to listOf(
+                TextReplacement(
+                    id = 1,
+                    bookId = 42L,
+                    name = "Book 42 Rule",
+                    findText = "FreeWebNovel Notice",
+                    replaceText = "",
+                    enabled = true,
+                    createdAt = 0L,
+                    updatedAt = 0L
+                )
+            )
+        )
+        val useCase = TextReplacementUseCase(readerPreferences, repository)
+
+        val paragraphs = listOf("FreeWebNovel Notice", "Normal paragraph")
+
+        // Without bookId, replacement is not applied
+        val withoutBookId = useCase.applyReplacementsToStrings(paragraphs, bookId = null)
+        assertEquals(listOf("FreeWebNovel Notice", "Normal paragraph"), withoutBookId)
+
+        // With bookId = 42, replacement is applied and empty paragraph is dropped
+        val withBookId = useCase.applyReplacementsToStrings(paragraphs, bookId = 42L)
+        assertEquals(listOf("Normal paragraph"), withBookId)
     }
 }

@@ -154,7 +154,25 @@ class TextReplacementUseCase(
             preparedCache[bookId]?.let { return it }
         }
         val rawReplacements = getEnabledReplacements(bookId)
-        val prepared = rawReplacements.map { prepareReplacement(it) }
+        val prepared = rawReplacements.flatMap { replacement ->
+            val pattern = replacement.findText
+            // If literal replacement spans multiple lines, also generate per-line rules
+            // so individual paragraphs in chapter content are matched and replaced
+            if (!isRegexPattern(pattern) && pattern.contains("\n") && !pattern.trim().startsWith("/")) {
+                val lines = pattern.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+                if (lines.size > 1) {
+                    val list = mutableListOf(prepareReplacement(replacement))
+                    for (line in lines) {
+                        list.add(prepareReplacement(replacement.copy(findText = line)))
+                    }
+                    list
+                } else {
+                    listOf(prepareReplacement(replacement))
+                }
+            } else {
+                listOf(prepareReplacement(replacement))
+            }
+        }
         synchronized(cacheLock) {
             preparedCache[bookId] = prepared
         }
@@ -164,6 +182,7 @@ class TextReplacementUseCase(
     /**
      * Apply replacements to a list of Page objects (for Reader screen).
      * Pre-compiles matchers once for all pages instead of recompiling per paragraph.
+     * Drops paragraphs that become blank after replacement (e.g. replacing unwanted text with "").
      */
     suspend fun applyReplacementsToPages(pages: List<Page>, bookId: Long? = null): List<Page> {
         val prepared = getPreparedReplacements(bookId)
@@ -174,7 +193,7 @@ class TextReplacementUseCase(
 
         Log.debug { "$TAG: Applying ${prepared.size} precompiled replacements to ${pages.size} pages" }
 
-        return pages.map { page ->
+        return pages.mapNotNull { page ->
             when (page) {
                 is Text -> {
                     val originalText = page.text
@@ -182,7 +201,7 @@ class TextReplacementUseCase(
                     if (originalText != replacedText) {
                         Log.debug { "$TAG: Text changed from ${originalText.length} to ${replacedText.length} chars" }
                     }
-                    Text(replacedText)
+                    if (replacedText.isBlank()) null else Text(replacedText)
                 }
                 else -> page // Keep non-text pages as-is
             }
@@ -191,6 +210,7 @@ class TextReplacementUseCase(
 
     /**
      * Apply replacements to a list of strings (for TTS screen).
+     * Drops paragraphs that become blank after replacement (e.g. replacing unwanted text with "").
      */
     suspend fun applyReplacementsToStrings(content: List<String>, bookId: Long? = null): List<String> {
         val prepared = getPreparedReplacements(bookId)
@@ -201,8 +221,9 @@ class TextReplacementUseCase(
 
         Log.debug { "$TAG: Applying ${prepared.size} precompiled replacements to ${content.size} strings" }
 
-        return content.map { text ->
-            applyPreparedReplacements(text, prepared)
+        return content.mapNotNull { text ->
+            val replacedText = applyPreparedReplacements(text, prepared)
+            if (replacedText.isBlank()) null else replacedText
         }
     }
 

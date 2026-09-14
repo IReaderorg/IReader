@@ -81,7 +81,7 @@ class TTSContentLoaderImpl(
         
         // Parse content into paragraphs (extract text from Page objects)
         // Note: content is already filtered by the use case
-        val paragraphs = parseContent(content)
+        val paragraphs = parseContent(content, bookId)
         
         Log.warn { "$TAG: Loaded chapter with ${paragraphs.size} paragraphs" }
         
@@ -135,7 +135,7 @@ class TTSContentLoaderImpl(
      * Note: Content is already filtered at the Page level by FindChapterById use case.
      * This method applies additional string-level processing after HTML cleaning/splitting.
      */
-    private suspend fun parseContent(content: List<Page>): List<String> {
+    private suspend fun parseContent(content: List<Page>, bookId: Long? = null): List<String> {
         if (content.isEmpty()) {
             return emptyList()
         }
@@ -152,13 +152,13 @@ class TTSContentLoaderImpl(
                 cleanAndSplitText(text)
             }
             
-            // Step 1: Apply text replacements first
-            val replaced = textReplacementUseCase?.applyReplacementsToStrings(paragraphs) ?: paragraphs
+            // Step 1: Apply text replacements first (with bookId support)
+            val replaced = textReplacementUseCase?.applyReplacementsToStrings(paragraphs, bookId) ?: paragraphs
             
-            // Step 2: Apply content filter to remove unwanted patterns
-            val filtered = contentFilterUseCase?.filterStrings(replaced) ?: replaced
+            // Step 2: Apply content filter to remove unwanted patterns (with bookId support)
+            val filtered = contentFilterUseCase?.filterStrings(replaced, bookId) ?: replaced
             
-            return filtered.filter { !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER") }
+            return filtered.filter { it.isNotBlank() && !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER") }
         }
         
         return emptyList()

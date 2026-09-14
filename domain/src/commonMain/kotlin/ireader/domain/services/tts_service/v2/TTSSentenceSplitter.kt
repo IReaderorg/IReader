@@ -10,11 +10,17 @@ package ireader.domain.services.tts_service.v2
 object TTSSentenceSplitter {
 
     /**
-     * Default maximum characters per chunk.
-     * At normal speech rates (~4-5 characters/second for CJK, ~15 chars/sec for English),
-     * 80 characters takes roughly 6 to 18 seconds, well below the 30-second system timeout.
+     * Default maximum characters per chunk for alphabetic languages (English, etc.).
+     * Natural speech rate is ~15 chars/sec for English, so 350 chars takes ~23s,
+     * well below synthesis timeouts while keeping natural sentences intact.
      */
-    const val DEFAULT_MAX_CHUNK_LENGTH = 80
+    const val DEFAULT_MAX_CHUNK_LENGTH = 350
+
+    /**
+     * Maximum characters per chunk for CJK text (Chinese, Japanese, Korean)
+     * where each character represents a full word/syllable (~4-5 chars/sec).
+     */
+    const val CJK_MAX_CHUNK_LENGTH = 100
 
     // Sentence terminators: Chinese/Japanese fullwidth + Persian/Arabic + Western punctuation + newline
     private val PRIMARY_TERMINATORS = charArrayOf('。', '！', '？', '؟', '\n', '.', '!', '?')
@@ -34,21 +40,29 @@ object TTSSentenceSplitter {
      * Splits [text] into smaller, natural chunks suitable for TTS synthesis.
      *
      * @param text The paragraph or text block to segment.
-     * @param maxChunkLength Target upper bound for each chunk in characters.
+     * @param maxChunkLength Target upper bound for each chunk in characters (-1 to auto-detect by language).
      * @return Ordered list of non-empty chunks.
      */
-    fun split(text: String, maxChunkLength: Int = DEFAULT_MAX_CHUNK_LENGTH): List<String> {
+    fun split(text: String, maxChunkLength: Int = -1): List<String> {
         if (text.isBlank()) return emptyList()
+
+        val effectiveMax = if (maxChunkLength > 0) {
+            maxChunkLength
+        } else if (isCjk(text)) {
+            CJK_MAX_CHUNK_LENGTH
+        } else {
+            DEFAULT_MAX_CHUNK_LENGTH
+        }
 
         val primarySentences = splitPrimary(text)
         val result = mutableListOf<String>()
 
         for (sentence in primarySentences) {
-            if (sentence.length <= maxChunkLength) {
+            if (sentence.length <= effectiveMax) {
                 result.add(sentence)
             } else {
                 // Sentence is too long, sub-split by clauses
-                val subChunks = splitSecondary(sentence, maxChunkLength)
+                val subChunks = splitSecondary(sentence, effectiveMax)
                 result.addAll(subChunks)
             }
         }
@@ -250,5 +264,20 @@ object TTSSentenceSplitter {
         val next = text.getOrNull(index + 1)
         val prev = text.getOrNull(index - 1)
         return next == '.' || prev == '.'
+    }
+
+    /**
+     * Determines whether text contains predominantly CJK characters.
+     */
+    private fun isCjk(text: String): Boolean {
+        var cjkCount = 0
+        val sampleLen = minOf(text.length, 100)
+        for (i in 0 until sampleLen) {
+            val c = text[i]
+            if (c in '\u4e00'..'\u9fff' || c in '\u3040'..'\u30ff' || c in '\uac00'..'\ud7af') {
+                cjkCount++
+            }
+        }
+        return cjkCount > 5
     }
 }
