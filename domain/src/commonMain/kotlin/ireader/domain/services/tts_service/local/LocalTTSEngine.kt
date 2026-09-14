@@ -12,6 +12,8 @@ import ireader.domain.services.tts_service.GradioAudioPlayer
 import ireader.domain.services.tts_service.TTSEngine
 import ireader.domain.services.tts_service.TTSEngineCallback
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -40,6 +42,12 @@ class LocalTTSEngine(
     // In-memory cache for audio bytes (thread-safe)
     private val audioCache = synchronizedMapOf<String, ByteArray>()
     private val prefetchJobs = synchronizedMapOf<String, Job>()
+    private var prefetchJob: Job? = null
+
+    // Mutex to ensure sequential network synthesis requests to the local TTS server.
+    // Deep learning autoregressive models (like Chatterbox Persian TTS) are non-reentrant
+    // and fail on concurrent inference requests.
+    private val networkMutex = Mutex()
 
     @Volatile
     private var isStopped = false
@@ -53,9 +61,30 @@ class LocalTTSEngine(
         private const val MAX_TEXT_LENGTH = 5000
     }
 
+    /**
+     * Checks if the text chunk contains valid Persian or alphanumeric characters
+     * and has sufficient length for synthesis.
+     * Prevents solitary punctuation or trailing marks (e.g., ".", "...", "؟", "« »")
+     * from crashing the neural vocoder.
+     */
+    fun hasContent(sentence: String): Boolean {
+        val trimmed = sentence.trim()
+        if (trimmed.length < 2) return false
+        return trimmed.any { it.isLetterOrDigit() }
+    }
+
     override suspend fun speak(text: String, utteranceId: String) {
         val trimmed = text.trim()
         if (trimmed.isEmpty()) {
+            callback?.onDone(utteranceId)
+            return
+        }
+
+        // Sanitize / filter punctuation-only or too-short chunks before requesting
+        if (!hasContent(trimmed)) {
+            Log.info { "$TAG: Skipping punctuation-only or too short chunk '$trimmed' (treating as 100ms pause)" }
+            callback?.onStart(utteranceId)
+            delay(100)
             callback?.onDone(utteranceId)
             return
         }
@@ -66,6 +95,7 @@ class LocalTTSEngine(
 
         try {
             // Cancel active prefetch for this utterance if running
+            prefetchJob?.cancel()
             prefetchJobs.remove(utteranceId)?.cancel()
 
             val audioData = audioCache[utteranceId] ?: audioCache[trimmed] ?: run {
@@ -110,20 +140,31 @@ class LocalTTSEngine(
 
     /**
      * Synthesizes audio bytes from the server using the configured API format.
+     * All network calls are serialized using a Mutex to prevent concurrent POST requests
+     * that cause tensor shape collisions on non-reentrant TTS models (such as Chatterbox).
      */
     suspend fun generateAudio(text: String): ByteArray? {
-        val cleanText = if (text.length > MAX_TEXT_LENGTH) text.take(MAX_TEXT_LENGTH) else text
+        val trimmed = text.trim()
+        if (!hasContent(trimmed)) {
+            Log.info { "$TAG: generateAudio skipped for punctuation-only or too short chunk '$trimmed'" }
+            return null
+        }
 
-        return try {
-            when (config.apiFormat) {
-                LocalTTSApiFormat.SIMPLE_REST -> generateSimpleRest(cleanText)
-                LocalTTSApiFormat.OPENAI_SPEECH -> generateOpenAISpeech(cleanText)
+        val cleanText = if (trimmed.length > MAX_TEXT_LENGTH) trimmed.take(MAX_TEXT_LENGTH) else trimmed
+
+        return networkMutex.withLock {
+            if (isStopped) return null
+            try {
+                when (config.apiFormat) {
+                    LocalTTSApiFormat.SIMPLE_REST -> generateSimpleRest(cleanText)
+                    LocalTTSApiFormat.OPENAI_SPEECH -> generateOpenAISpeech(cleanText)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.error { "$TAG: Request failed: ${e.message}" }
+                null
             }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.error { "$TAG: Request failed: ${e.message}" }
-            null
         }
     }
 
@@ -190,7 +231,7 @@ class LocalTTSEngine(
      */
     fun precache(utteranceId: String, text: String): Job? {
         val trimmed = text.trim()
-        if (trimmed.isEmpty() || audioCache.containsKey(trimmed) || audioCache.containsKey(utteranceId)) {
+        if (!hasContent(trimmed) || audioCache.containsKey(trimmed) || audioCache.containsKey(utteranceId)) {
             return null
         }
 
@@ -203,6 +244,8 @@ class LocalTTSEngine(
                     cacheAudio(utteranceId, audioData)
                     Log.info { "$TAG: Pre-cached paragraph $utteranceId (${audioData.size} bytes)" }
                 }
+            } catch (e: CancellationException) {
+                // Ignore cancellation
             } catch (e: Exception) {
                 Log.warn { "$TAG: Pre-cache failed for $utteranceId: ${e.message}" }
             } finally {
@@ -214,11 +257,36 @@ class LocalTTSEngine(
     }
 
     /**
-     * Pre-cache multiple upcoming items
+     * Pre-cache multiple upcoming items sequentially (1 sentence at a time).
+     * Strictly awaits the current synthesis response before pre-fetching the immediate next sentence.
+     * Never launches unbounded parallel HTTP calls to /api/tts.
      */
     fun precacheNext(items: List<Pair<String, String>>) {
-        items.take(2).forEach { (id, text) ->
-            precache(id, text)
+        val validItems = items.take(2).filter { (id, text) ->
+            val trimmed = text.trim()
+            hasContent(trimmed) && !audioCache.containsKey(trimmed) && !audioCache.containsKey(id)
+        }
+        if (validItems.isEmpty()) return
+
+        prefetchJob?.cancel()
+        prefetchJob = scope.launch {
+            for ((id, text) in validItems) {
+                if (!isActive || isStopped) break
+                val trimmed = text.trim()
+                try {
+                    // Awaits current synthesis response before pre-fetching next sentence
+                    val audioData = generateAudio(trimmed)
+                    if (audioData != null && audioData.isNotEmpty()) {
+                        cacheAudio(trimmed, audioData)
+                        cacheAudio(id, audioData)
+                        Log.info { "$TAG: Pre-cached sequential sentence $id (${audioData.size} bytes)" }
+                    }
+                } catch (e: CancellationException) {
+                    break
+                } catch (e: Exception) {
+                    Log.warn { "$TAG: Sequential pre-cache failed for $id: ${e.message}" }
+                }
+            }
         }
     }
 
@@ -233,6 +301,10 @@ class LocalTTSEngine(
 
     override fun stop() {
         isStopped = true
+        prefetchJob?.cancel()
+        prefetchJob = null
+        prefetchJobs.values.forEach { it.cancel() }
+        prefetchJobs.clear()
         audioPlayer.stop()
     }
 
@@ -264,6 +336,8 @@ class LocalTTSEngine(
 
     override fun cleanup() {
         stop()
+        prefetchJob?.cancel()
+        prefetchJob = null
         prefetchJobs.values.forEach { it.cancel() }
         prefetchJobs.clear()
         audioCache.clear()

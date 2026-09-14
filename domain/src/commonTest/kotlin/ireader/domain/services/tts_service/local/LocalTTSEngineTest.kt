@@ -5,7 +5,7 @@ import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import ireader.domain.services.tts_service.GradioAudioPlayer
 import ireader.domain.services.tts_service.TTSEngineCallback
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
@@ -190,6 +190,140 @@ class LocalTTSEngineTest {
         // Request count should still be 1 (cache hit!)
         assertEquals(1, requestCount)
         assertNotNull(player.playedBytes)
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `hasContent correctly classifies valid content vs solitary punctuation`() {
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(MockEngine { respondOk() }), player)
+
+        // Valid Persian & alphanumeric content
+        assertTrue(ttsEngine.hasContent("سلام دنیا"))
+        assertTrue(ttsEngine.hasContent("سلام"))
+        assertTrue(ttsEngine.hasContent("Hello 123"))
+        assertTrue(ttsEngine.hasContent("«متن داخل گیومه»"))
+        assertTrue(ttsEngine.hasContent("آیا این یک سوال است؟"))
+
+        // Punctuation-only or too short chunks (should be false)
+        assertFalse(ttsEngine.hasContent(""))
+        assertFalse(ttsEngine.hasContent("   "))
+        assertFalse(ttsEngine.hasContent("."))
+        assertFalse(ttsEngine.hasContent("..."))
+        assertFalse(ttsEngine.hasContent("؟"))
+        assertFalse(ttsEngine.hasContent("« »"))
+        assertFalse(ttsEngine.hasContent("«»"))
+        assertFalse(ttsEngine.hasContent("!"))
+        assertFalse(ttsEngine.hasContent("!؟"))
+        assertFalse(ttsEngine.hasContent("، ؛"))
+        assertFalse(ttsEngine.hasContent("a")) // length < 2
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `generateAudio returns null for punctuation-only chunk without HTTP requests`() = runTest {
+        var requestCount = 0
+        val engine = MockEngine {
+            requestCount++
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(engine), player, UnconfinedTestDispatcher())
+
+        val result1 = ttsEngine.generateAudio("...")
+        val result2 = ttsEngine.generateAudio("؟")
+        val result3 = ttsEngine.generateAudio("« »")
+
+        assertNull(result1)
+        assertNull(result2)
+        assertNull(result3)
+        assertEquals(0, requestCount, "No HTTP requests should be made for punctuation-only chunks")
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `speak treats punctuation-only chunks as pause without HTTP requests`() = runTest {
+        var requestCount = 0
+        val engine = MockEngine {
+            requestCount++
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(engine), player, UnconfinedTestDispatcher())
+
+        var started = false
+        var done = false
+
+        ttsEngine.setCallback(object : TTSEngineCallback {
+            override fun onStart(utteranceId: String) {
+                started = true
+            }
+
+            override fun onDone(utteranceId: String) {
+                done = true
+            }
+
+            override fun onError(utteranceId: String, error: String) {
+                fail("Should not error: $error")
+            }
+        })
+
+        ttsEngine.speak("...", "utt_punc")
+
+        assertTrue(started)
+        assertTrue(done)
+        assertEquals(0, requestCount, "No HTTP synthesis request should be dispatched")
+        assertNull(player.playedBytes, "No audio should be played for punctuation-only chunks")
+        ttsEngine.cleanup()
+    }
+
+    @Test
+    fun `concurrent synthesis requests are serialized and never overlap on the network`() = runTest {
+        var concurrentCount = 0
+        var maxConcurrent = 0
+
+        val engine = MockEngine {
+            concurrentCount++
+            if (concurrentCount > maxConcurrent) {
+                maxConcurrent = concurrentCount
+            }
+            kotlinx.coroutines.delay(20)
+            concurrentCount--
+            respond(
+                content = sampleAudioBytes,
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "audio/wav")
+            )
+        }
+
+        val config = LocalTTSConfig(serverUrl = "http://127.0.0.1:8000")
+        val player = TestAudioPlayer()
+        val ttsEngine = LocalTTSEngine(config, HttpClient(engine), player, Dispatchers.Default)
+
+        // Launch 4 concurrent synthesis calls
+        val results = coroutineScope {
+            val j1 = async { ttsEngine.generateAudio("جمله اول تستی برای بررسی") }
+            val j2 = async { ttsEngine.generateAudio("جمله دوم تستی برای بررسی") }
+            val j3 = async { ttsEngine.generateAudio("جمله سوم تستی برای بررسی") }
+            val j4 = async { ttsEngine.generateAudio("جمله چهارم تستی برای بررسی") }
+            listOf(j1.await(), j2.await(), j3.await(), j4.await())
+        }
+
+        results.forEach { assertNotNull(it) }
+        assertEquals(1, maxConcurrent, "Network requests must be serialized: max concurrent was $maxConcurrent")
         ttsEngine.cleanup()
     }
 }

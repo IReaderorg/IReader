@@ -16,14 +16,14 @@ object TTSSentenceSplitter {
      */
     const val DEFAULT_MAX_CHUNK_LENGTH = 80
 
-    // Sentence terminators: Chinese/Japanese fullwidth + Western punctuation + newline
-    private val PRIMARY_TERMINATORS = charArrayOf('。', '！', '？', '\n', '.', '!', '?')
+    // Sentence terminators: Chinese/Japanese fullwidth + Persian/Arabic + Western punctuation + newline
+    private val PRIMARY_TERMINATORS = charArrayOf('。', '！', '？', '؟', '\n', '.', '!', '?')
 
-    // Clause separators used when a sentence exceeds maxChunkLength
-    private val SECONDARY_SEPARATORS = charArrayOf('，', ',', '；', ';', '：', ':', '—', '…')
+    // Clause separators used when a sentence exceeds maxChunkLength (including Persian/Arabic comma and semicolon)
+    private val SECONDARY_SEPARATORS = charArrayOf('，', ',', '؛', ';', '：', ':', '—', '…', '،')
 
     // Closing quotes, brackets, and parenthesis that should stay attached to the preceding sentence
-    private val CLOSING_QUOTES = setOf('”', '’', '"', '\'', '）', ')', ']', '】', '」', '』', '》', '>')
+    private val CLOSING_QUOTES = setOf('”', '’', '"', '\'', '）', ')', ']', '】', '」', '』', '》', '>', '»')
 
     // Common abbreviations that shouldn't trigger a sentence break on period
     private val ABBREVIATIONS = setOf(
@@ -53,7 +53,23 @@ object TTSSentenceSplitter {
             }
         }
 
-        return result.filter { it.isNotBlank() }
+        // Sanitize: filter out solitary punctuation or trailing marks (e.g., ".", "...", "؟", "« »")
+        // and attach trailing marks to preceding chunks so the neural vocoder never crashes
+        val sanitized = mutableListOf<String>()
+        for (chunk in result) {
+            val trimmed = chunk.trim()
+            if (trimmed.isEmpty()) continue
+
+            val hasContent = trimmed.any { it.isLetterOrDigit() }
+            if (hasContent && trimmed.length >= 2) {
+                sanitized.add(trimmed)
+            } else if (sanitized.isNotEmpty()) {
+                // Attach solitary punctuation / trailing mark to the preceding sentence
+                sanitized[sanitized.size - 1] = "${sanitized.last()} $trimmed"
+            }
+        }
+
+        return sanitized
     }
 
     /**

@@ -5,21 +5,31 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.bluetooth.BluetoothA2dp
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothHeadset
+import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.media.AudioAttributes
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
+import android.media.AudioFormat
 import android.media.AudioManager
+import android.media.AudioTrack
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
+import androidx.core.content.IntentCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.media.app.NotificationCompat.MediaStyle
 import androidx.media.session.MediaButtonReceiver
@@ -94,6 +104,8 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
     private var focusRequest: AudioFocusRequest? = null
     private var isNoisyReceiverRegistered = false
     private var silentPlayer: MediaPlayer? = null
+    private var silentAudioTrack: AudioTrack? = null
+    private var audioDeviceCallback: AudioDeviceCallback? = null
     
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var stateObserverJob: Job? = null
@@ -110,22 +122,21 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 ACTION_PLAY_PAUSE -> {
-
                     val state = controller.state.value
                     if (state.isPlaying) {
                         controller.dispatch(TTSCommand.Pause)
+                    } else if (state.isPaused) {
+                        controller.dispatch(TTSCommand.Resume)
                     } else {
                         controller.dispatch(TTSCommand.Play)
                     }
                 }
                 ACTION_STOP -> {
-
                     // Stop and release engine but keep content
                     controller.dispatch(TTSCommand.StopAndRelease)
                     stopSelf()
                 }
                 ACTION_NEXT -> {
-
                     val state = controller.state.value
                     if (state.chunkModeEnabled) {
                         controller.dispatch(TTSCommand.NextChunk)
@@ -134,7 +145,6 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                     }
                 }
                 ACTION_PREVIOUS -> {
-
                     val state = controller.state.value
                     if (state.chunkModeEnabled) {
                         controller.dispatch(TTSCommand.PreviousChunk)
@@ -146,34 +156,58 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         }
     }
     
-    // Broadcast receiver for headphone disconnection (audio becoming noisy)
+    // Broadcast receiver for headphone disconnection (audio becoming noisy, plug state, bluetooth disconnect)
     private val noisyAudioReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
-
-                controller.dispatch(TTSCommand.Pause)
+            val action = intent?.action ?: return
+            when (action) {
+                AudioManager.ACTION_AUDIO_BECOMING_NOISY -> {
+                    Log.info { "TTSV2Service: ACTION_AUDIO_BECOMING_NOISY received, pausing TTS" }
+                    controller.dispatch(TTSCommand.Pause)
+                }
+                Intent.ACTION_HEADSET_PLUG -> {
+                    // isInitialStickyBroadcast() is true when the receiver is first registered; ignore it
+                    if (!isInitialStickyBroadcast) {
+                        val state = intent.getIntExtra("state", -1)
+                        if (state == 0) { // 0 = unplugged
+                            Log.info { "TTSV2Service: Headset unplugged (ACTION_HEADSET_PLUG), pausing TTS" }
+                            controller.dispatch(TTSCommand.Pause)
+                        }
+                    }
+                }
+                BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED,
+                BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
+                    val state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1)
+                    if (state == BluetoothProfile.STATE_DISCONNECTED) {
+                        Log.info { "TTSV2Service: Bluetooth profile disconnected, pausing TTS" }
+                        controller.dispatch(TTSCommand.Pause)
+                    }
+                }
+                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                    Log.info { "TTSV2Service: Bluetooth ACL disconnected, pausing TTS" }
+                    controller.dispatch(TTSCommand.Pause)
+                }
             }
         }
     }
     
     override fun onCreate() {
         super.onCreate()
-
         
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         
         createNotificationChannel()
         setupMediaSession()
         registerActionReceiver()
+        registerNoisyReceiver()
+        registerAudioDeviceCallback()
         
-        // Start silent MediaPlayer to claim the media audio route.
+        // Start silent audio playback to claim the media audio route.
         // Android's TTS engine plays audio through its own internal AudioTrack,
         // so the system doesn't see our app as "currently playing media".
         // By playing silent audio, MediaSessionManager recognizes our session
         // as active and routes headset button presses to us.
-        startSilentMediaPlayer()
-        
-
+        startSilentPlayback()
         
         // Initialize controller
         controller.dispatch(TTSCommand.Initialize)
@@ -183,18 +217,22 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
     }
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        
         // Start as foreground service immediately
         startForeground(NOTIFICATION_ID, createNotification())
         
         // Handle media button intents from MediaButtonReceiver
         // This is how Bluetooth headphone buttons reach our MediaSession callbacks
         if (intent != null && Intent.ACTION_MEDIA_BUTTON == intent.action) {
-
             try {
-                MediaButtonReceiver.handleIntent(mediaSession, intent)
+                val handled = MediaButtonReceiver.handleIntent(mediaSession, intent)
+                if (handled == null) {
+                    val keyEvent = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
+                    if (keyEvent != null) {
+                        mediaSession.controller.dispatchMediaButtonEvent(keyEvent)
+                    }
+                }
             } catch (e: Exception) {
+                Log.error { "TTSV2Service: Error handling media button: ${e.message}" }
             }
             return START_STICKY
         }
@@ -211,10 +249,7 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 val isAlreadyLoaded = currentState.chapter?.id == chapterId && currentState.paragraphs.isNotEmpty()
                 
                 if (!isAlreadyLoaded) {
-
                     controller.dispatch(TTSCommand.LoadChapter(bookId, chapterId, startParagraph))
-                } else {
-
                 }
             }
         }
@@ -223,19 +258,17 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
     }
     
     override fun onBind(intent: Intent?): IBinder {
-
         return binder
     }
     
     override fun onDestroy() {
-
-        
         stateObserverJob?.cancel()
         serviceScope.cancel()
         
-        stopSilentMediaPlayer()
+        stopSilentPlayback()
         unregisterActionReceiver()
         unregisterNoisyReceiver()
+        unregisterAudioDeviceCallback()
         abandonAudioFocus()
         
         mediaSession.release()
@@ -335,32 +368,30 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 setSessionActivity(sessionActivityPi)
             }
             
-            // Set media button receiver PendingIntent - this is the fallback for when
-            // the framework-level routing doesn't work. Point to the SERVICE directly
-            // so media button intents arrive at onStartCommand.
-            val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON)
-            mediaButtonIntent.setClass(this@TTSV2Service, TTSV2Service::class.java)
-            val pendingMediaButtonIntent = PendingIntent.getService(
+            val pendingMediaButtonIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(
                 this@TTSV2Service,
-                0,
-                mediaButtonIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PlaybackStateCompat.ACTION_PLAY_PAUSE
             )
             setMediaButtonReceiver(pendingMediaButtonIntent)
             
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
-                    val keyEvent = mediaButtonEvent?.getParcelableExtra<android.view.KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                    val keyEvent = if (mediaButtonEvent != null) {
+                        IntentCompat.getParcelableExtra(mediaButtonEvent, Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
+                    } else null
 
+                    if (keyEvent == null) {
+                        return super.onMediaButtonEvent(mediaButtonEvent)
+                    }
                     
                     // Only handle ACTION_DOWN (ignore ACTION_UP to avoid double-firing)
-                    if (keyEvent?.action != android.view.KeyEvent.ACTION_DOWN) {
+                    if (keyEvent.action != KeyEvent.ACTION_DOWN) {
                         return true
                     }
                     
                     when (keyEvent.keyCode) {
-                        android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
-                        android.view.KeyEvent.KEYCODE_HEADSETHOOK -> {
+                        KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                        KeyEvent.KEYCODE_HEADSETHOOK -> {
                             // Single-click: toggle play/pause
                             val currentState = ttsController.state.value
                             if (currentState.isPlaying) {
@@ -370,23 +401,23 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                             }
                             return true
                         }
-                        android.view.KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                        KeyEvent.KEYCODE_MEDIA_PLAY -> {
                             onPlay()
                             return true
                         }
-                        android.view.KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                        KeyEvent.KEYCODE_MEDIA_PAUSE -> {
                             onPause()
                             return true
                         }
-                        android.view.KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                        KeyEvent.KEYCODE_MEDIA_NEXT -> {
                             onSkipToNext()
                             return true
                         }
-                        android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                        KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
                             onSkipToPrevious()
                             return true
                         }
-                        android.view.KeyEvent.KEYCODE_MEDIA_STOP -> {
+                        KeyEvent.KEYCODE_MEDIA_STOP -> {
                             onStop()
                             return true
                         }
@@ -396,14 +427,17 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 }
                 
                 override fun onPlay() {
-
                     if (requestAudioFocus()) {
-                        ttsController.dispatch(TTSCommand.Play)
+                        val state = ttsController.state.value
+                        if (state.isPaused) {
+                            ttsController.dispatch(TTSCommand.Resume)
+                        } else {
+                            ttsController.dispatch(TTSCommand.Play)
+                        }
                     }
                 }
                 
                 override fun onPause() {
-
                     ttsController.dispatch(TTSCommand.Pause)
                 }
                 
@@ -728,24 +762,23 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 updateMediaSessionState(state)
                 updateNotification()
                 
-                // Request audio focus and register noisy receiver when starting playback
+                // Request audio focus when starting playback and ensure silent player is active
                 if (state.isPlaying) {
                     requestAudioFocus()
-                    registerNoisyReceiver()
-                } else {
-                    unregisterNoisyReceiver()
+                    if (silentPlayer == null && silentAudioTrack == null) {
+                        startSilentPlayback()
+                    }
                 }
                 
                 // Stop service if playback stopped
                 if (state.playbackState == PlaybackState.STOPPED && !state.hasContent) {
-
                     stopSelf()
                 }
             }
             .launchIn(serviceScope)
     }
     
-    // ========== Silent MediaPlayer (for media button routing) ==========
+    // ========== Silent Audio Playback (for media button routing) ==========
     
     /**
      * Start playing a silent audio track on loop at zero volume.
@@ -753,41 +786,117 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
      * "currently playing media" app, so headset button presses (KEYCODE_HEADSETHOOK)
      * are routed to our MediaSession instead of Google Assistant.
      */
-    private fun startSilentMediaPlayer() {
+    private fun startSilentPlayback() {
         try {
             silentPlayer?.release()
-            silentPlayer = MediaPlayer().apply {
-                // Load silence.wav from assets
-                val afd = assets.openFd("raw/silence.wav")
-                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                afd.close()
-                
-                isLooping = true
-                setVolume(0f, 0f)
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build()
-                )
-                prepare()
-                start()
+            silentPlayer = null
+            
+            // Try loading silence from resources (res/raw/silence.wav)
+            val resId = try {
+                resources.getIdentifier("silence", "raw", packageName).takeIf { it != 0 }
+                    ?: resources.getIdentifier("silence", "raw", "ireader.i18n").takeIf { it != 0 }
+                    ?: ireader.i18n.R.raw.silence
+            } catch (e: Throwable) {
+                0
+            }
+            
+            if (resId != 0) {
+                silentPlayer = MediaPlayer.create(this, resId)?.apply {
+                    isLooping = true
+                    setVolume(0f, 0f)
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    start()
+                }
+                if (silentPlayer != null) {
+                    Log.info { "TTSV2Service: Silent MediaPlayer started with resource $resId" }
+                }
             }
         } catch (e: Exception) {
-            Log.error { "Failed to start silent player: ${e.message}" }
+            Log.warn { "TTSV2Service: MediaPlayer silence creation failed: ${e.message}, falling back to AudioTrack" }
             silentPlayer = null
+        }
+        
+        // Fallback: If MediaPlayer failed or resource is missing, use an in-memory AudioTrack
+        // which has zero file dependencies and directly registers active media playback with Android's AudioService.
+        if (silentPlayer == null && silentAudioTrack == null) {
+            startSilentAudioTrack()
         }
     }
     
-    private fun stopSilentMediaPlayer() {
+    private fun startSilentAudioTrack() {
+        try {
+            silentAudioTrack?.release()
+            val sampleRate = 44100
+            val bufferSize = AudioTrack.getMinBufferSize(
+                sampleRate,
+                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT
+            ).coerceAtLeast(1024)
+            
+            val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                AudioTrack.Builder()
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    .setAudioFormat(
+                        AudioFormat.Builder()
+                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                            .setSampleRate(sampleRate)
+                            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                            .build()
+                    )
+                    .setBufferSizeInBytes(bufferSize)
+                    .setTransferMode(AudioTrack.MODE_STATIC)
+                    .build()
+            } else {
+                @Suppress("DEPRECATION")
+                AudioTrack(
+                    AudioManager.STREAM_MUSIC,
+                    sampleRate,
+                    AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    bufferSize,
+                    AudioTrack.MODE_STATIC
+                )
+            }
+            
+            val silence = ByteArray(bufferSize)
+            track.write(silence, 0, silence.size)
+            track.setLoopPoints(0, bufferSize / 2, -1)
+            track.setVolume(0f)
+            track.play()
+            silentAudioTrack = track
+            Log.info { "TTSV2Service: Silent AudioTrack started successfully" }
+        } catch (e: Exception) {
+            Log.error { "TTSV2Service: Failed to start silent AudioTrack: ${e.message}" }
+            silentAudioTrack = null
+        }
+    }
+    
+    private fun stopSilentPlayback() {
         try {
             silentPlayer?.stop()
             silentPlayer?.release()
-            silentPlayer = null
-
         } catch (e: Exception) {
-
+            // Ignore
         }
+        silentPlayer = null
+        
+        try {
+            silentAudioTrack?.stop()
+            silentAudioTrack?.release()
+        } catch (e: Exception) {
+            // Ignore
+        }
+        silentAudioTrack = null
     }
     
     // ========== Broadcast Receiver ==========
@@ -811,23 +920,78 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         try {
             unregisterReceiver(actionReceiver)
         } catch (e: Exception) {
-
+            // Ignore
         }
     }
     
-    // ========== Noisy Audio Receiver (headphone disconnection) ==========
+    // ========== Headphone & Bluetooth Disconnection Handling ==========
+    
+    private fun registerAudioDeviceCallback() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && audioDeviceCallback == null) {
+            audioDeviceCallback = object : AudioDeviceCallback() {
+                override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>?) {
+                    val devices = removedDevices.orEmpty()
+                    val isHeadphoneRemoved = devices.any { device ->
+                        when (device.type) {
+                            AudioDeviceInfo.TYPE_WIRED_HEADSET,
+                            AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
+                            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                            AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+                            AudioDeviceInfo.TYPE_USB_HEADSET,
+                            AudioDeviceInfo.TYPE_USB_DEVICE -> true
+                            else -> {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    device.type == AudioDeviceInfo.TYPE_BLE_HEADSET ||
+                                    device.type == AudioDeviceInfo.TYPE_BLE_SPEAKER ||
+                                    device.type == AudioDeviceInfo.TYPE_BLE_BROADCAST
+                                } else false
+                            }
+                        }
+                    }
+                    if (isHeadphoneRemoved) {
+                        Log.info { "TTSV2Service: AudioDeviceCallback detected headphone/Bluetooth removal, pausing playback" }
+                        controller.dispatch(TTSCommand.Pause)
+                    }
+                }
+            }
+            try {
+                audioManager.registerAudioDeviceCallback(audioDeviceCallback, null)
+            } catch (e: Exception) {
+                Log.error { "TTSV2Service: Failed to register AudioDeviceCallback: ${e.message}" }
+            }
+        }
+    }
+    
+    private fun unregisterAudioDeviceCallback() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && audioDeviceCallback != null) {
+            try {
+                audioManager.unregisterAudioDeviceCallback(audioDeviceCallback)
+            } catch (e: Exception) {
+                // Ignore
+            }
+            audioDeviceCallback = null
+        }
+    }
     
     private fun registerNoisyReceiver() {
         if (!isNoisyReceiverRegistered) {
-            val filter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                // ACTION_AUDIO_BECOMING_NOISY is a system broadcast, needs RECEIVER_EXPORTED
-                registerReceiver(noisyAudioReceiver, filter, Context.RECEIVER_EXPORTED)
-            } else {
-                registerReceiver(noisyAudioReceiver, filter)
+            val filter = IntentFilter().apply {
+                addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+                addAction(Intent.ACTION_HEADSET_PLUG)
+                addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)
+                addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
+                addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             }
-            isNoisyReceiverRegistered = true
-
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    registerReceiver(noisyAudioReceiver, filter, Context.RECEIVER_EXPORTED)
+                } else {
+                    registerReceiver(noisyAudioReceiver, filter)
+                }
+                isNoisyReceiverRegistered = true
+            } catch (e: Exception) {
+                Log.error { "TTSV2Service: Failed to register noisy receiver: ${e.message}" }
+            }
         }
     }
     
@@ -836,10 +1000,9 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             try {
                 unregisterReceiver(noisyAudioReceiver)
             } catch (e: Exception) {
-    
+                // Ignore
             }
             isNoisyReceiverRegistered = false
-
         }
     }
 }

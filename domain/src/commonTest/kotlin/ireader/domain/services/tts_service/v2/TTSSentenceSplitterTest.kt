@@ -113,4 +113,35 @@ class TTSSentenceSplitterTest {
         val reassembled = chunks.joinToString("")
         assertEquals(userText, reassembled)
     }
+
+    @Test
+    fun `solitary punctuation strings return empty list`() {
+        assertEquals(emptyList(), TTSSentenceSplitter.split("."))
+        assertEquals(emptyList(), TTSSentenceSplitter.split("..."))
+        assertEquals(emptyList(), TTSSentenceSplitter.split("؟"))
+        assertEquals(emptyList(), TTSSentenceSplitter.split("« »"))
+        assertEquals(emptyList(), TTSSentenceSplitter.split("!؟ ..."))
+        assertEquals(emptyList(), TTSSentenceSplitter.split("، ؛"))
+    }
+
+    @Test
+    fun `trailing punctuation marks are attached to preceding sentence`() {
+        val text = "این یک جمله کامل است. ..."
+        val result = TTSSentenceSplitter.split(text)
+        assertEquals(listOf("این یک جمله کامل است. ..."), result)
+    }
+
+    @Test
+    fun `splits Persian sentences with Persian punctuation properly`() {
+        val text = "آیا شما به مهمانی می‌آیید؟ بله، من حتماً می‌آیم! «خیلی خوب است»"
+        val result = TTSSentenceSplitter.split(text)
+        assertEquals(
+            listOf(
+                "آیا شما به مهمانی می‌آیید؟",
+                "بله، من حتماً می‌آیم!",
+                "«خیلی خوب است»"
+            ),
+            result
+        )
+    }
 }
