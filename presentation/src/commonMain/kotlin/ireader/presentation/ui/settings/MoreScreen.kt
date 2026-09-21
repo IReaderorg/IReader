@@ -209,7 +209,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.profile_sync),
-                description = "Manage your account and sync reading progress",
+                description = localizeHelper.localize(Res.string.profile_sync_description),
                 icon = Icons.Outlined.AccountCircle,
                 onClick = onWeb3Profile
             )
@@ -227,13 +227,13 @@ fun MoreScreen(
             item {
                 SettingsItem(
                     title = localizeHelper.localize(Res.string.community),
-                    description = "Leaderboards, reviews, badges, and more",
+                    description = localizeHelper.localize(Res.string.community_description),
                     icon = Icons.Filled.People,
                     onClick = onCommunityHub
                 )
             }
         }
-        
+
         // Reading Hub Section
         item {
             SettingsSectionHeader(
@@ -245,7 +245,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.reading_hub),
-                description = "Statistics, achievements, quotes & your reading buddy",
+                description = localizeHelper.localize(Res.string.reading_hub_description),
                 icon = Icons.Filled.Pets,
                 onClick = onReadingBuddy
             )
@@ -255,8 +255,8 @@ fun MoreScreen(
         if (vm.supabaseEnabled.value) {
             item {
                 SettingsItem(
-                    title = "Spirit Stone Shop",
-                    description = "Spend stones on titles, badges & cosmetics",
+                    title = localizeHelper.localize(Res.string.spirit_stone_shop),
+                    description = localizeHelper.localize(Res.string.spirit_stone_shop_description),
                     icon = Icons.Filled.Star,
                     onClick = onSpiritStoneShop
                 )
@@ -274,7 +274,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.download),
-                description = "Manage downloaded content",
+                description = localizeHelper.localize(Res.string.download_description),
                 icon = Icons.Outlined.Download,
                 onClick = onDownloadScreen
             )
@@ -283,7 +283,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.backup_and_restore),
-                description = "Backup and restore your library",
+                description = localizeHelper.localize(Res.string.backup_and_restore_description),
                 icon = Icons.Outlined.SettingsBackupRestore,
                 onClick = onBackupScreen
             )
@@ -292,7 +292,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.category),
-                description = "Organize books with categories",
+                description = localizeHelper.localize(Res.string.category_description),
                 icon = Icons.AutoMirrored.Outlined.Label,
                 onClick = onCategory
             )
@@ -309,7 +309,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.settings),
-                description = "Configure app preferences",
+                description = localizeHelper.localize(Res.string.settings_description),
                 icon = Icons.Outlined.Settings,
                 onClick = onSettings
             )
@@ -326,7 +326,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.about),
-                description = "App info and credits",
+                description = localizeHelper.localize(Res.string.about_description),
                 icon = Icons.Outlined.Info,
                 onClick = onAbout
             )
@@ -335,7 +335,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.help),
-                description = "Get help with the app",
+                description = localizeHelper.localize(Res.string.help_description),
                 icon = Icons.AutoMirrored.Outlined.Help,
                 onClick = onHelp
             )
@@ -345,7 +345,7 @@ fun MoreScreen(
         item {
             SettingsItem(
                 title = localizeHelper.localize(Res.string.support_development),
-                description = "Help keep IReader free and ad-free",
+                description = localizeHelper.localize(Res.string.support_development_description),
                 icon = Icons.Outlined.Favorite,
                 onClick = onDonation
             )
