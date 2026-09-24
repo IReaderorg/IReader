@@ -3053,4 +3053,18 @@
     <string name="context_size_description">Character limit per AI request. Larger chunks reduce API calls and translate faster.</string>
     <string name="context_size_auto">Auto</string>
     <string name="context_size_custom">Custom</string>
+
+    <!--More Screen description-->
+    <string name="profile_sync_description">Manage your account and sync reading progress</string>
+    <string name="community_description">Leaderboards, reviews, badges, and more</string>
+    <string name="reading_hub_description">Statistics, achievements, quotes &amp; more for your reading buddy</string>
+    <string name="spirit_stone_shop">Spirit Stone Shop</string>
+    <string name="spirit_stone_shop_description">Spend stones on titles, badges &amp; cosmetics</string>
+    <string name="download_description">Manage downloaded content</string>
+    <string name="backup_and_restore_description">Backup and restore your library</string>
+    <string name="category_description">Organize books with categories</string>
+    <string name="settings_description">Configure app preferences</string>
+    <string name="about_description">App info and credits</string>
+    <string name="help_description">Get help with the app</string>
+    <string name="support_development_description">Help keep IReader free and ad-free</string>
 </resources>

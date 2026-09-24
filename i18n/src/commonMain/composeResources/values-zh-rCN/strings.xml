@@ -2980,4 +2980,18 @@
     <string name="similar_titles_no_similar_books">未找到相似书籍</string>
     <string name="only_show_similar_titles_in_explore">仅在探索页显示相似书籍</string>
     <string name="only_show_similar_titles_in_explore_subtitle">仅在从探索页或搜索页进入时显示</string>
+
+    <!--More Screen description-->
+    <string name="profile_sync_description">管理你的账户并同步阅读进度</string>
+    <string name="community_description">排行榜、评价、徽章等</string>
+    <string name="reading_hub_description">为你的阅读伙伴提供统计数据、成就、语录及更多内容</string>
+    <string name="spirit_stone_shop">灵石商店</string>
+    <string name="spirit_stone_shop_description">消耗灵石兑换称号、徽章与装扮</string>
+    <string name="download_description">管理下载内容</string>
+    <string name="backup_and_restore_description">备份和恢复书库</string>
+    <string name="category_description">通过分类管理您的书籍</string>
+    <string name="settings_description">设置应用偏好</string>
+    <string name="about_description">应用信息与相关链接</string>
+    <string name="help_description">获取本应用的帮助</string>
+    <string name="support_development_description">帮助保持 IReader 免费且无广告</string>
 </resources>
