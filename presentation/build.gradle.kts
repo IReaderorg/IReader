@@ -15,20 +15,13 @@ plugins {
 // Reports will be in: build/compose_compiler/
 composeCompiler {
     // Enable stability configuration file for marking external classes as stable
-    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("compose_stability_config.conf")
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
     
     // Generate reports only when explicitly requested (to avoid slowing down normal builds)
     if (project.findProperty("composeCompilerReports") == "true") {
         reportsDestination = layout.buildDirectory.dir("compose_compiler")
         metricsDestination = layout.buildDirectory.dir("compose_compiler")
     }
-    
-    // Enable strong skipping mode for better performance (Compose 1.5.4+)
-    // This allows more composables to be skipped during recomposition
-    enableStrongSkippingMode = true
-    
-    // Enable intrinsic remember optimization
-    enableIntrinsicRemember = true
 }
 
 kotlin {
@@ -137,7 +130,7 @@ kotlin {
                 api(androidx.work.runtime)
                 
                 // Guava ListenableFuture for WorkManager
-                api("com.google.guava:guava:32.1.3-android")
+                api("com.google.guava:guava:33.7.2-android")
                 
                 // Preview only available on Android/Desktop
                 api(compose.preview)

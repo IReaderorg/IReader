@@ -241,7 +241,7 @@ class BookRepositoryImpl(
             title = update.title,
             author = update.author,
             description = update.description,
-            genre = update.genres?.joinToString(";"),
+            genre = update.genres,
             status = update.status,
             thumbnailUrl = update.cover,
             customCover = null, // Preserve existing customCover on partial updates

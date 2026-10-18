@@ -22,7 +22,7 @@ plugins {
     alias(libs.plugins.buildkonfig) apply false
     alias(libs.plugins.detekt)
     alias(libs.plugins.composeHotReload) apply false
-    id("com.gradleup.nmcp") version "1.4.4" apply false
+    id("com.gradleup.nmcp") version "1.6.2" apply false
 }
 
 // Skip detekt tasks when SKIP_DETEKT=true (for faster dev builds)

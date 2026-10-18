@@ -70,25 +70,25 @@ tasks.named<Jar>("jar") {
 
 dependencies {
     // Kotlin stdlib + coroutines
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(kotlinx.stdlib)
+    implementation(kotlinx.coroutines.core)
+    implementation(kotlinx.serialization.json)
 
     // XML pull parser
     compileOnly("xmlpull:xmlpull:1.1.3.1")
 
     // APK parser
-    compileOnly("net.dongliu:apk-parser:2.6.10")
+    compileOnly(libs.apk.parser)
 
     // AndroidX annotations
-    compileOnly("androidx.annotation:annotation:1.7.0")
+    compileOnly("androidx.annotation:annotation:1.9.1")
 
     // ICU4J for SimpleDateFormat (Android-compatible)
     implementation("com.ibm.icu:icu4j:73.1")
 
 
     // Jsoup (for HTML parsing in extensions)
-    implementation("org.jsoup:jsoup:1.22.1")
+    implementation(libs.jsoup)
 
     // Koin (DI framework - used by Suwayomi compat code)
     implementation(libs.koin.core)
@@ -104,7 +104,7 @@ dependencies {
     implementation(libs.dex2jar.tools)
 
     // multiplatform-settings (SharedPreferences impl for Desktop)
-    implementation("com.russhwolf:multiplatform-settings:1.1.1")
+    implementation("com.russhwolf:multiplatform-settings:1.3.0")
 
     // typesafe-config + config4k (Configuration system)
     implementation("com.typesafe:config:1.4.3")

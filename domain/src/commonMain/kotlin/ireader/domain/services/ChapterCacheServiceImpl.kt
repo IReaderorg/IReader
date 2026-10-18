@@ -152,9 +152,6 @@ class ChapterCacheServiceImpl(
                     // Estimate 2 bytes per character (UTF-16)
                     size += page.text.length * 2L
                 }
-                is ireader.core.source.model.Command<*> -> {
-                    size += 100 // Small overhead for commands
-                }
                 is ireader.core.source.model.ImageBase64 -> {
                     size += page.data.length.toLong()
                 }

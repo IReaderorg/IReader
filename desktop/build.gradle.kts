@@ -18,9 +18,7 @@ plugins {
 }
 
 composeCompiler {
-    stabilityConfigurationFile.set(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
-    enableStrongSkippingMode.set(true)
-    enableIntrinsicRemember.set(true)
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
 }
 
 // Load local.properties for local development
@@ -202,7 +200,7 @@ compose.desktop {
 val isPreview: Boolean
     get() = project.hasProperty("preview")
 val previewCode: String
-    get() = project.properties["preview"]?.toString()?.trim('"') ?: 0.toString()
+    get() = (project.findProperty("preview") as? String)?.trim('"') ?: 0.toString()
 
 // Add dependencies for package tasks
 listOf(

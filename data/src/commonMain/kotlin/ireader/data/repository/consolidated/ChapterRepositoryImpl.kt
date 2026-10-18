@@ -181,7 +181,7 @@ class ChapterRepositoryImpl(
             read = update.read ?: existing.read,
             bookmark = update.bookmark ?: existing.bookmark,
             lastPageRead = update.lastPageRead ?: existing.lastPageRead,
-            chapterNumber = (update.number ?: existing.number).toDouble(),
+            chapterNumber = update.number ?: existing.number,
             sourceOrder = update.sourceOrder ?: existing.sourceOrder,
             dateFetch = update.dateFetch ?: existing.dateFetch,
             dateUpload = update.dateUpload ?: existing.dateUpload

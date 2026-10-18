@@ -26,25 +26,22 @@ class ThemeErrorHandler(
         themeOption: ThemeOption,
         onError: ((ThemeError) -> Unit)? = null
     ): Theme {
-        return when (val result = pluginThemeManager.applyTheme(themeOption)) {
-            is Result.Success<*> -> result.value as Theme
-            is Result.Failure -> {
-                val error = ThemeError.ApplicationFailed(
-                    themeId = themeOption.id,
-                    themeName = themeOption.name,
-                    exception = result.exception
-                )
-                
-                // Record the error
-                recordError(error)
-                
-                // Notify callback
-                onError?.invoke(error)
-                
-                // Return fallback theme
-                pluginThemeManager.getDefaultTheme()
-            }
-            else -> pluginThemeManager.getDefaultTheme()
+        val result = pluginThemeManager.applyTheme(themeOption)
+        return result.getOrElse { exception ->
+            val error = ThemeError.ApplicationFailed(
+                themeId = themeOption.id,
+                themeName = themeOption.name,
+                exception = exception
+            )
+            
+            // Record the error
+            recordError(error)
+            
+            // Notify callback
+            onError?.invoke(error)
+            
+            // Return fallback theme
+            pluginThemeManager.getDefaultTheme()
         }
     }
     
@@ -58,19 +55,16 @@ class ThemeErrorHandler(
     ): Theme? {
         return try {
             val themeOption = ThemeOption.Plugin(plugin, isDark)
-            when (val result = pluginThemeManager.applyTheme(themeOption)) {
-                is Result.Success<*> -> result.value as? Theme
-                is Result.Failure -> {
-                    val error = ThemeError.PluginLoadFailed(
-                        pluginId = plugin.manifest.id,
-                        pluginName = plugin.manifest.name,
-                        exception = result.exception
-                    )
-                    recordError(error)
-                    onError?.invoke(error)
-                    null
-                }
-                else -> null
+            val result = pluginThemeManager.applyTheme(themeOption)
+            result.getOrElse { exception ->
+                val error = ThemeError.PluginLoadFailed(
+                    pluginId = plugin.manifest.id,
+                    pluginName = plugin.manifest.name,
+                    exception = exception
+                )
+                recordError(error)
+                onError?.invoke(error)
+                null
             }
         } catch (e: Exception) {
             val error = ThemeError.PluginLoadFailed(

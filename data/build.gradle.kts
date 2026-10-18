@@ -81,11 +81,11 @@ kotlin {
                 api(libs.ktor.contentNegotiation.kotlinx)
                 
                 // Ktor WebSocket for sync data transfer (client-side only in common)
-                implementation("io.ktor:ktor-client-websockets:3.3.2")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.2")
+                implementation("io.ktor:ktor-client-websockets:${libs.versions.ktor.get()}")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:${libs.versions.ktor.get()}")
                 
                 // Ktor compression for network optimization (Phase 10.2.1)
-                implementation("io.ktor:ktor-client-encoding:3.3.2")
+                implementation("io.ktor:ktor-client-encoding:${libs.versions.ktor.get()}")
                 // Note: ktor-server-* dependencies moved to platform-specific source sets (JVM-only)
                 
                 // Kotlin Reflection - Required for Supabase inline reified functions
@@ -120,10 +120,10 @@ kotlin {
                 implementation(libs.sqldelight.android.paging)
                 
                 // Ktor server dependencies (JVM-only, not available on iOS)
-                implementation("io.ktor:ktor-server-core:3.3.2")
-                implementation("io.ktor:ktor-server-netty:3.3.2") // Changed from CIO to Netty
-                implementation("io.ktor:ktor-server-websockets:3.3.2")
-                implementation("io.ktor:ktor-server-compression:3.3.2")
+                implementation("io.ktor:ktor-server-core:${libs.versions.ktor.get()}")
+                implementation("io.ktor:ktor-server-netty:${libs.versions.ktor.get()}") // Changed from CIO to Netty
+                implementation("io.ktor:ktor-server-websockets:${libs.versions.ktor.get()}")
+                implementation("io.ktor:ktor-server-compression:${libs.versions.ktor.get()}")
                 
                 // APK parser (for Tsundoku icon extraction from local APKs)
                 implementation(libs.apk.parser)
@@ -147,8 +147,8 @@ kotlin {
                 }
                 
                 // BouncyCastle for X.509 certificate generation (Task 9.2.2) - Android
-                implementation("org.bouncycastle:bcprov-jdk18on:1.78")
-                implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
+                implementation("org.bouncycastle:bcprov-jdk18on:1.86")
+                implementation("org.bouncycastle:bcpkix-jdk18on:1.86")
                 
                 // android-compat for KoinInjektBridge code compilation
                 compileOnly(project(":android-compat"))
@@ -171,10 +171,10 @@ kotlin {
                 implementation(libs.ktor.okhttp)
                 
                 // Ktor server dependencies (JVM-only, not available on iOS)
-                implementation("io.ktor:ktor-server-core:3.3.2")
-                implementation("io.ktor:ktor-server-netty:3.3.2") // Changed from CIO to Netty
-                implementation("io.ktor:ktor-server-websockets:3.3.2")
-                implementation("io.ktor:ktor-server-compression:3.3.2")
+                implementation("io.ktor:ktor-server-core:${libs.versions.ktor.get()}")
+                implementation("io.ktor:ktor-server-netty:${libs.versions.ktor.get()}") // Changed from CIO to Netty
+                implementation("io.ktor:ktor-server-websockets:${libs.versions.ktor.get()}")
+                implementation("io.ktor:ktor-server-compression:${libs.versions.ktor.get()}")
                 
                 implementation(libs.sqldelight.jvm)
                 implementation(libs.apk.parser)
@@ -183,11 +183,11 @@ kotlin {
                 implementation(libs.dex2jar.tools)
                 
                 // JmDNS for mDNS service discovery on Desktop
-                implementation("org.jmdns:jmdns:3.5.8")
+                implementation("org.jmdns:jmdns:3.6.4")
                 
                 // BouncyCastle for X.509 certificate generation (Task 9.2.2) - Desktop
-                implementation("org.bouncycastle:bcprov-jdk18on:1.78")
-                implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
+                implementation("org.bouncycastle:bcprov-jdk18on:1.86")
+                implementation("org.bouncycastle:bcpkix-jdk18on:1.86")
             }
         }
         
@@ -233,7 +233,7 @@ sqldelight {
         create("Database") {
             packageName.set("ir.kazemcodes.infinityreader")
             schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
-            dialect("app.cash.sqldelight:sqlite-3-24-dialect:2.0.2")
+            dialect("app.cash.sqldelight:sqlite-3-24-dialect:${libs.versions.sqldelight.get()}")
             verifyMigrations = false
             migrationOutputDirectory = file("src/commonMain/sqldelight/migrations")
             deriveSchemaFromMigrations = false

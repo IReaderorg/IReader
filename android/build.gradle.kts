@@ -117,7 +117,6 @@ android {
     buildFeatures {
         // Disable some unused things
         aidl = false
-        renderScript = false
         shaders = false
         buildConfig = true
         compose = true
@@ -283,7 +282,7 @@ android {
         }
     }
     sourceSets {
-        getByName("preview").res.srcDirs("src/debug/res")
+        getByName("preview").res.directories.add("src/debug/res")
     }
 
     compileOptions {
@@ -330,8 +329,7 @@ dependencies {
 
     implementation(libs.core.splashscreen)
     implementation(libs.profileinstaller)
-    @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-    implementation(compose.material3)
+    implementation(composeLib.material3)
 
     implementation(libs.coil.core)
     implementation(composeLib.compose.googlFonts)
@@ -349,11 +347,10 @@ dependencies {
 
     /** Firebase - Excluded from F-Droid builds (fdroid flavor) **/
     "standardImplementation"(platform(libs.firebase.bom))
-    // CLEANED: Removed duplicate firebase.analytic (analyticKtx includes it)
-    "standardImplementation"(libs.firebase.analyticKtx)
+    "standardImplementation"(libs.firebase.analytic)
     "standardImplementation"(libs.firebase.crashlytics)
     "devImplementation"(platform(libs.firebase.bom))
-    "devImplementation"(libs.firebase.analyticKtx)
+    "devImplementation"(libs.firebase.analytic)
     "devImplementation"(libs.firebase.crashlytics)
     
     /** Google ML Kit - Excluded from F-Droid builds (fdroid flavor) **/
@@ -385,18 +382,12 @@ dependencies {
     androidTestImplementation(libs.test.testRunner)
     androidTestImplementation(libs.uiautomator)
     androidTestImplementation(libs.test.truth)
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:${composeLib.versions.ui.get()}")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:${composeLib.versions.ui.get()}")
 }
 composeCompiler {
     // Use stability configuration file for marking external classes as stable
-    stabilityConfigurationFile.set(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
-    
-    // Strong skipping is enabled by default in newer versions
-    enableStrongSkippingMode.set(true)
-    
-    // Enable live literals for hot reload
-    enableIntrinsicRemember.set(true)
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
     
     // Generate reports only when explicitly requested
     if (project.findProperty("composeCompilerReports") == "true") {
