@@ -12,7 +12,7 @@ class ComposeViewController: UIViewController {
         super.viewDidLoad()
         
         // Create the Compose UI view controller
-        composeVC = IosMainViewControllerKt.MainViewController()
+        composeVC = IosMainViewControllerKt.shared.MainViewController()
         
         guard let composeVC = composeVC else {
             showFallbackUI()

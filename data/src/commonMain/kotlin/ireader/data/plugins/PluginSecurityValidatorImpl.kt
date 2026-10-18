@@ -2,6 +2,7 @@ package ireader.data.plugins
 
 import ireader.domain.plugins.*
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Implementation of PluginSecurityValidator.

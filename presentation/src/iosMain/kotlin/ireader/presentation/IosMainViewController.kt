@@ -19,7 +19,6 @@ import ireader.presentation.core.ProvideNavigator
 import ireader.presentation.core.theme.AppTheme
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import platform.UIKit.UIViewController
 import kotlin.experimental.ExperimentalObjCName
@@ -47,27 +46,25 @@ object IosMainViewController {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IReaderApp() {
-    KoinContext {
-        val scope = rememberCoroutineScope()
-        val localizeHelper: LocalizeHelper = koinInject()
-        
-        CompositionLocalProvider(
-            LocalLocalizeHelper provides localizeHelper
-        ) {
-            AppTheme(scope) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    val navController = rememberNavController()
-                    
-                    ProvideNavigator(navController) {
-                        IScaffold {
-                            CommonNavHost(navController)
-                            // Required plugin handler - shows dialog when JS engine or Piper TTS is needed
-                            ireader.presentation.ui.plugins.required.RequiredPluginHandler()
-                        }
+    val scope = rememberCoroutineScope()
+    val localizeHelper: LocalizeHelper = koinInject()
+    
+    CompositionLocalProvider(
+        LocalLocalizeHelper provides localizeHelper
+    ) {
+        AppTheme(scope) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
+                val navController = rememberNavController()
+                
+                ProvideNavigator(navController) {
+                    IScaffold {
+                        CommonNavHost(navController)
+                        // Required plugin handler - shows dialog when JS engine or Piper TTS is needed
+                        ireader.presentation.ui.plugins.required.RequiredPluginHandler()
                     }
                 }
             }

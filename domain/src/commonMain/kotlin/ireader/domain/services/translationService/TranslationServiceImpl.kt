@@ -1,6 +1,7 @@
 package ireader.domain.services.translationService
 
 import ireader.core.log.Log
+import ireader.core.util.synchronized
 import ireader.core.source.LocalCatalogSource
 import ireader.core.source.LocalSource
 import ireader.core.source.model.Page

@@ -7,7 +7,9 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import ireader.core.log.Log
+import ireader.core.util.synchronized
 import ireader.core.util.synchronizedMapOf
+import kotlin.concurrent.Volatile
 import ireader.domain.services.tts_service.GradioAudioPlayer
 import ireader.domain.services.tts_service.TTSEngine
 import ireader.domain.services.tts_service.TTSEngineCallback

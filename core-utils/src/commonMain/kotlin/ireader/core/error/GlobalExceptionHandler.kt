@@ -1,6 +1,7 @@
 package ireader.core.error
 
 import ireader.core.log.IReaderLog
+import ireader.core.util.synchronized
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlin.coroutines.CoroutineContext
 

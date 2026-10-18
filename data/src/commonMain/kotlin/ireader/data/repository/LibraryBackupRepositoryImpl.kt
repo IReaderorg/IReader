@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Implementation of LibraryBackupRepository

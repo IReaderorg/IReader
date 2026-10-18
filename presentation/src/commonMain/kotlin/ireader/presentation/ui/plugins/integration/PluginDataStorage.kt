@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.core.util.synchronized
 
 /**
  * Plugin data storage API allowing plugins to save preferences and data

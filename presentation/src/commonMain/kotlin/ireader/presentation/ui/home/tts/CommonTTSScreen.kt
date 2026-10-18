@@ -88,6 +88,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
+import ireader.core.util.synchronized
 import ireader.i18n.resources.*
 import ireader.i18n.resources.auto_next
 import ireader.i18n.resources.auto_next_chapter_1

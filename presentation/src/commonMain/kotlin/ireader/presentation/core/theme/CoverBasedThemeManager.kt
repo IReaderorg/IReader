@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlin.coroutines.coroutineContext
 
 /**
@@ -60,7 +61,7 @@ class CoverBasedThemeManager(
             }
 
             try {
-                val dominantColor = withContext(Dispatchers.IO) {
+                val dominantColor = withContext(ioDispatcher) {
                     coverColorExtractor.extractDominantColor(coverUrl, sourceId)
                 }
                 if (dominantColor != null) {

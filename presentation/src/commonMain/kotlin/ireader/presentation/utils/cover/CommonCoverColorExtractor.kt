@@ -12,8 +12,8 @@ import ireader.core.source.HttpSource
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.models.common.DomainColor
 import ireader.domain.utils.cover.CoverColorExtractor
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlin.math.sqrt
 
 /**
@@ -27,7 +27,7 @@ class CommonCoverColorExtractor(
     private val httpClients: HttpClients
 ) : CoverColorExtractor {
 
-    override suspend fun extractDominantColor(coverUrl: String, sourceId: Long?): DomainColor? = withContext(Dispatchers.IO) {
+    override suspend fun extractDominantColor(coverUrl: String, sourceId: Long?): DomainColor? = withContext(ioDispatcher) {
         try {
             val catalog = sourceId?.let { catalogStore.get(it) }
             val baseUrl = (catalog?.source as? HttpSource)?.baseUrl
@@ -59,7 +59,7 @@ class CommonCoverColorExtractor(
         }
     }
 
-    override suspend fun extractDominantColorFromBitmap(byteArray: ByteArray): DomainColor? = withContext(Dispatchers.IO) {
+    override suspend fun extractDominantColorFromBitmap(byteArray: ByteArray): DomainColor? = withContext(ioDispatcher) {
         try {
             val bitmap = byteArray.decodeToImageBitmap()
             val pixels = bitmap.toPixelMap()

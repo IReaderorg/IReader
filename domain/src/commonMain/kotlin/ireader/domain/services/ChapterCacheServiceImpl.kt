@@ -1,6 +1,7 @@
 package ireader.domain.services
 
 import ireader.core.log.Log
+import ireader.core.util.synchronized
 import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

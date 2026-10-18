@@ -61,12 +61,12 @@ Return ONLY the image prompt, nothing else. No explanations, no prefixes.
         text = text.replace(Regex("https?://\\S+"), "")
         
         // Remove author notes patterns
-        text = text.replace(Regex("\\[A/N:.*?\\]", RegexOption.DOT_MATCHES_ALL), "")
-        text = text.replace(Regex("\\(Author's Note:.*?\\)", RegexOption.DOT_MATCHES_ALL), "")
+        text = text.replace(Regex("(?s)\\[A/N:.*?\\]"), "")
+        text = text.replace(Regex("(?s)\\(Author's Note:.*?\\)"), "")
         
         // Remove translator notes
-        text = text.replace(Regex("\\[TL:.*?\\]", RegexOption.DOT_MATCHES_ALL), "")
-        text = text.replace(Regex("\\[TN:.*?\\]", RegexOption.DOT_MATCHES_ALL), "")
+        text = text.replace(Regex("(?s)\\[TL:.*?\\]"), "")
+        text = text.replace(Regex("(?s)\\[TN:.*?\\]"), "")
         
         // Trim and limit length
         text = text.trim()

@@ -7,6 +7,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import ireader.core.log.Log
+import ireader.core.util.synchronized
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 

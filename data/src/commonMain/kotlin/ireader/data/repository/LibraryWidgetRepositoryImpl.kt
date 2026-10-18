@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Implementation of LibraryWidgetRepository

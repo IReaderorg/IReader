@@ -12,6 +12,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.seconds
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Implementation of SourceHealthChecker that performs actual health checks on sources

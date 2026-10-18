@@ -124,10 +124,10 @@ fun LibraryController(
             showDialog = false
         },
         editCategoryOnRemoteInDeleteQueue = { category ->
-            deleteQueues.removeIf { it.categoryId == category.id }
+            deleteQueues.removeAll { it.categoryId == category.id }
         },
         editCategoryOnRemoteInInsertQueue = { category ->
-            addQueues.removeIf { it.categoryId == category.id }
+            addQueues.removeAll { it.categoryId == category.id }
         },
         onPagerPageChange = {
             vm.setSelectedPage(it)

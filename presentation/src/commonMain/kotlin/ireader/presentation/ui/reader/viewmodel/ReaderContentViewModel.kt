@@ -17,6 +17,7 @@ import ireader.domain.services.chapter.ChapterNotifier
 import ireader.domain.usecases.chapter.AutoRepairChapterUseCase
 import ireader.domain.usecases.reader.ReaderUseCasesAggregate
 import ireader.domain.utils.extensions.ioDispatcher
+import ireader.core.util.synchronized
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText

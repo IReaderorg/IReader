@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import ireader.core.util.synchronized
 
 /**
  * Implementation of AdvancedFilterRepository

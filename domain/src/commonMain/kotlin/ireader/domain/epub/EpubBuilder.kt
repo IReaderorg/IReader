@@ -27,6 +27,7 @@ import okio.Path
 import okio.Path.Companion.toPath
 import okio.SYSTEM
 import okio.buffer
+import okio.ByteString.Companion.decodeBase64
 import okio.use
 
 /**
@@ -209,7 +210,7 @@ class EpubBuilder(
                             imageCounter++
                             val fileName = "chapter${index}_img${imageCounter}"
                             try {
-                                val imageBytes = java.util.Base64.getDecoder().decode(page.data)
+                                val imageBytes = page.data.decodeBase64()?.toByteArray() ?: ByteArray(0)
                                 val (extension, mediaType) = detectImageFormat(imageBytes)
                                 val actualFileName = "$fileName.$extension"
                                 images.add(EmbeddedImage(actualFileName, mediaType, imageBytes))

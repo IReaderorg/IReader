@@ -103,7 +103,7 @@ actual class GeminiNano actual constructor() : TranslateEngine(), KoinComponent 
         }
     }
     
-    override suspend fun translate(
+    actual override suspend fun translate(
         texts: List<String>,
         source: String,
         target: String,

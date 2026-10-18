@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import ireader.core.util.createICoroutineScope
+import ireader.core.util.synchronized
 import ireader.domain.plugins.Plugin
 import ireader.domain.plugins.PluginManager
 import ireader.domain.utils.extensions.currentTimeToLong

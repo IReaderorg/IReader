@@ -1,6 +1,7 @@
 package ireader.core.deeplink
 
 import ireader.core.log.IReaderLog
+import ireader.core.util.synchronized
 
 /**
  * Deep link handler for processing external URLs and content links

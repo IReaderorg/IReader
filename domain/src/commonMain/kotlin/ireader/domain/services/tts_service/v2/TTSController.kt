@@ -509,7 +509,7 @@ class TTSController(
         if (progress < 2f / 3f) return
 
         nextChapterFetched = true
-        Log.debug { "$TAG: prefetchNextChapter - reached last 1/3 (${String.format("%.1f", progress * 100)}%), starting background fetch" }
+        Log.debug { "$TAG: prefetchNextChapter - reached last 1/3 (${((progress * 1000).toInt() / 10.0)}%), starting background fetch" }
 
         scope.launch {
             try {

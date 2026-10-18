@@ -15,7 +15,7 @@ actual class GoogleTranslateFree actual constructor() : TranslateEngine() {
     
     override val supportedLanguages: List<Pair<String, String>> = emptyList()
     
-    override suspend fun translate(
+    actual override suspend fun translate(
         texts: List<String>,
         source: String,
         target: String,

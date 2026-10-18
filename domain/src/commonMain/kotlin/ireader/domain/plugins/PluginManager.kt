@@ -4,6 +4,7 @@ import ireader.core.io.FileSystem
 import ireader.core.io.VirtualFile
 import ireader.core.prefs.PreferenceStore
 import ireader.core.util.createICoroutineScope
+import ireader.core.util.synchronized
 import ireader.plugin.api.PluginMonetization as ApiPluginMonetization
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

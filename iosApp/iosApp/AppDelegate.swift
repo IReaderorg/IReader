@@ -12,6 +12,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         
+        // Initialize Koin dependency injection
+        IosKoinInitKt.shared.initKoin(additionalModules: [])
+
         // Use Compose Multiplatform UI - MainKt is from Main.kt (no package)
         let composeVC = MainKt.MainViewController()
         window?.rootViewController = composeVC

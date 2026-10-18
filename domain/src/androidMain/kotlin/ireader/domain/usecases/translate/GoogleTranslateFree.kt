@@ -107,7 +107,7 @@ actual class GoogleTranslateFree actual constructor() : TranslateEngine(), KoinC
         "cy" to "Welsh"
     )
     
-    override suspend fun translate(
+    actual override suspend fun translate(
         texts: List<String>,
         source: String,
         target: String,

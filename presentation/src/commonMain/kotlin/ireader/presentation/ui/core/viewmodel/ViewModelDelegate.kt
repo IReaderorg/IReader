@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ireader.i18n.UiText
+import ireader.core.util.synchronized
 
 /**
  * Delegate for common ViewModel operations

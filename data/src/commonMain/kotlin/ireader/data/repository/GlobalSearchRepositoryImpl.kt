@@ -23,6 +23,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlin.collections.emptyList
 import kotlin.time.ExperimentalTime
+import ireader.core.util.synchronized
 
 /**
  * Implementation of GlobalSearchRepository

@@ -1,6 +1,7 @@
 package ireader.domain.usecases.reader
 
 import ireader.core.log.Log
+import ireader.core.util.synchronized
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
 import ireader.domain.data.repository.TextReplacementRepository
@@ -192,9 +193,10 @@ class TextReplacementUseCase(
      * Get pre-compiled replacements for a book, using in-memory cache when available.
      */
     private suspend fun getPreparedReplacements(bookId: Long?): List<PreparedReplacement> {
-        synchronized(cacheLock) {
-            preparedCache[bookId]?.let { return it }
+        val cached = synchronized(cacheLock) {
+            preparedCache[bookId]
         }
+        if (cached != null) return cached
         val rawReplacements = getEnabledReplacements(bookId)
         val prepared = rawReplacements.flatMap { replacement ->
             val pattern = replacement.findText

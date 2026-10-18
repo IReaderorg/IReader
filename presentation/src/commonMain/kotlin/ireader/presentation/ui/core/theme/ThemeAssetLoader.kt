@@ -10,6 +10,7 @@ import ireader.core.io.FileSystem
 import ireader.core.io.VirtualFile
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
+import ireader.core.util.synchronized
 
 /**
  * Platform-specific image decoder

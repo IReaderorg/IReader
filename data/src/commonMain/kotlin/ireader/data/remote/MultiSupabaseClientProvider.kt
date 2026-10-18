@@ -13,6 +13,7 @@ import ireader.core.log.Log
 import kotlinx.serialization.Serializable
 
 import ireader.domain.preferences.prefs.SupabasePreferences
+import ireader.core.util.synchronized
 
 /**
  * Multi-Supabase Client Provider for 7-project setup

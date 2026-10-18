@@ -71,7 +71,7 @@ class IOSQuoteCardGenerator : QuoteCardGenerator {
             val centerY = height / 2.0
             
             // Draw IReader logo text at top center
-            val logoText = "IReader" as NSString
+            val logoText = NSString.create(string = "IReader")
             val logoFont = UIFont.boldSystemFontOfSize(QuoteCardConstants.AUTHOR_TEXT_SIZE.toDouble())
             val logoAttrs = mapOf<Any?, Any?>(
                 NSFontAttributeName to logoFont,
@@ -84,7 +84,7 @@ class IOSQuoteCardGenerator : QuoteCardGenerator {
             )
             
             // Draw quote mark icon (decorative, centered)
-            val quoteMarkText = "\"" as NSString
+            val quoteMarkText = NSString.create(string = "\"")
             val quoteMarkFont = UIFont.boldSystemFontOfSize(120.0)
             val quoteMarkAttrs = mapOf<Any?, Any?>(
                 NSFontAttributeName to quoteMarkFont,
@@ -97,7 +97,7 @@ class IOSQuoteCardGenerator : QuoteCardGenerator {
             )
             
             // Draw quote text (centered, italic)
-            val quoteText = "\"${quote.text}\"" as NSString
+            val quoteText = NSString.create(string = "\"${quote.text}\"")
             val textFont = UIFont.italicSystemFontOfSize(QuoteCardConstants.LOGO_TEXT_SIZE.toDouble())
             val paragraphStyle = NSMutableParagraphStyle()
             paragraphStyle.setAlignment(NSTextAlignmentCenter)
@@ -117,7 +117,7 @@ class IOSQuoteCardGenerator : QuoteCardGenerator {
             quoteText.drawInRect(textRect, withAttributes = textAttrs)
             
             // Draw book title (centered, bold)
-            val bookText = quote.bookTitle as NSString
+            val bookText = NSString.create(string = quote.bookTitle)
             val bookFont = UIFont.boldSystemFontOfSize(QuoteCardConstants.BOOK_TITLE_SIZE.toDouble())
             val bookAttrs = mapOf<Any?, Any?>(
                 NSFontAttributeName to bookFont,
@@ -131,7 +131,7 @@ class IOSQuoteCardGenerator : QuoteCardGenerator {
             
             // Draw author (centered)
             if (!quote.author.isNullOrBlank()) {
-                val authorText = "by ${quote.author}" as NSString
+                val authorText = NSString.create(string = "by ${quote.author}")
                 val authorFont = UIFont.systemFontOfSize(QuoteCardConstants.AUTHOR_TEXT_SIZE.toDouble())
                 val authorAttrs = mapOf<Any?, Any?>(
                     NSFontAttributeName to authorFont,

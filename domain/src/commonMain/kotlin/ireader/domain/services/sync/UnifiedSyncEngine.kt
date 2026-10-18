@@ -2,6 +2,7 @@ package ireader.domain.services.sync
 
 import ireader.core.log.Log
 import ireader.core.util.currentTimeMillis
+import ireader.core.util.synchronized
 import ireader.domain.repositories.SyncLocalRepository
 import ireader.domain.config.PlatformConfig
 import ireader.domain.models.sync.*

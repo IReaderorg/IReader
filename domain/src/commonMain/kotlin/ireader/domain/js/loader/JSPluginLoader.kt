@@ -3,6 +3,7 @@ package ireader.domain.js.loader
 import io.ktor.client.HttpClient
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
+import ireader.core.util.synchronized
 import ireader.domain.js.bridge.JSBridgeService
 import ireader.domain.js.bridge.JSBridgeServiceImpl
 import ireader.domain.js.bridge.JSPluginSource

@@ -4,6 +4,7 @@ import ireader.domain.data.repository.CharacterArtRepository
 import ireader.domain.models.characterart.*
 import ireader.domain.services.discord.DiscordWebhookService
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Discord-based character art repository

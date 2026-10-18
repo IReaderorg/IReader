@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.ioDispatcher
 
 /**
  * Modern, robust ViewModel for the Downloader screen and Spotify-style bottom player bar.
@@ -225,7 +226,7 @@ class DownloaderViewModel(
     private fun fetchBookCovers(bookIds: List<Long>) {
         val missing = bookIds.filter { it !in _bookCovers.value && it > 0 }
         if (missing.isEmpty()) return
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             val loaded = mutableMapOf<Long, BookCover>()
             missing.forEach { bookId ->
                 try {

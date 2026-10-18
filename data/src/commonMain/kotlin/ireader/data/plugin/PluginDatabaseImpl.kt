@@ -7,6 +7,7 @@ import ireader.domain.plugins.PluginManifest
 import ireader.domain.plugins.PluginPermission
 import ireader.domain.plugins.PluginStatus
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Implementation of PluginDatabase interface

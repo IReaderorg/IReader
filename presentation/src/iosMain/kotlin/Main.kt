@@ -15,12 +15,14 @@ import platform.UIKit.UIViewController
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 
+import ireader.presentation.IReaderApp
+
 /**
  * Creates the main UIViewController for iOS.
  * Call from Swift: MainKt.MainViewController()
  */
 fun MainViewController(): UIViewController = ComposeUIViewController {
-    App()
+    IReaderApp()
 }
 
 @Composable

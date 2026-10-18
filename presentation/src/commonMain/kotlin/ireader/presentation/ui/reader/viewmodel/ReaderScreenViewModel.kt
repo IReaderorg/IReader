@@ -605,7 +605,7 @@ class ReaderScreenViewModel(
 
     private fun subscribeReaderThemes() {
         readerThemeRepository.subscribe().onEach { list ->
-            readerColors.removeIf { !it.isDefault }
+            readerColors.removeAll { !it.isDefault }
             readerColors.addAll(0, list.map { theme ->
                 ReaderColors(
                     id = theme.id,

@@ -6,6 +6,7 @@ import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ireader.core.util.synchronized
 
 /**
  * Debounces reading progress sync operations to batch updates

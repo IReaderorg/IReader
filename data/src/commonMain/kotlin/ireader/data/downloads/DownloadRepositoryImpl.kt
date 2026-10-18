@@ -12,6 +12,7 @@ import ireader.domain.models.download.DownloadCacheEntry
 import ireader.domain.models.download.DownloadQueueConfig
 import ireader.data.util.BaseDao
 import ireader.data.core.DatabaseHandler
+import ireader.core.util.synchronized
 
 
 class DownloadRepositoryImpl(private val handler: DatabaseHandler) :

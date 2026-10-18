@@ -10,6 +10,7 @@ import ireader.data.repository.FundingGoalRepositoryImpl
 import ireader.domain.catalogs.interactor.SyncRemoteCatalogs
 import ireader.domain.data.repository.CatalogSourceRepository
 import okio.FileSystem
+import okio.SYSTEM
 
 import org.koin.dsl.module
 

@@ -13,6 +13,7 @@ import ireader.domain.models.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ireader.core.util.synchronized
 
 /**
  * Implementation of TrackingRepository with full integration for:

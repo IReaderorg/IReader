@@ -1,5 +1,6 @@
 package ireader.domain.monitoring
 
+import ireader.core.util.synchronized
 import ireader.domain.plugins.PluginPerformanceInfo
 import ireader.domain.utils.extensions.currentTimeToLong
 
@@ -110,7 +111,7 @@ private class PluginPerformanceMetrics(
     }
 
     fun endOperation(operation: String, success: Boolean) {
-        val (startTime, duration) = synchronized(lock) {
+        synchronized(lock) {
             val start = operationStarts.remove(operation) ?: return
             val dur = currentTimeToLong() - start
             if (operationTimes.size >= 500) {
@@ -124,7 +125,6 @@ private class PluginPerformanceMetrics(
             if (operation == "load") {
                 loadTime = dur
             }
-            start to dur
         }
     }
 

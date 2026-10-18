@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.IO
 import kotlin.concurrent.Volatile
+import ireader.core.util.synchronized
 
 /**
  * ViewModel for the Extension screen.

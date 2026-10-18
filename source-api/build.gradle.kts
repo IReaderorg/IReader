@@ -38,17 +38,16 @@ kotlin {
         }
     }
     
-//    // iOS targets
-//    listOf(
-//        iosX64(),
-//        iosArm64(),
-//        iosSimulatorArm64()
-//    ).forEach { iosTarget ->
-//        iosTarget.binaries.framework {
-//            baseName = "sourceApi"
-//            isStatic = true
-//        }
-//    }
+    // iOS targets
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "sourceApi"
+            isStatic = true
+        }
+    }
 //
 //    // JS target for iOS JavaScriptCore runtime
 //    js(IR) {
@@ -143,29 +142,25 @@ kotlin {
 //            }
 //        }
 //
-//        val iosX64Main by getting
-//        val iosArm64Main by getting
-//        val iosSimulatorArm64Main by getting
-//        val iosMain by creating {
-//            dependsOn(commonMain.get())
-//            iosX64Main.dependsOn(this)
-//            iosArm64Main.dependsOn(this)
-//            iosSimulatorArm64Main.dependsOn(this)
-//            dependencies {
-//                api(libs.ktor.core)
-//                implementation(libs.ktor.client.darwin.v333)
-//            }
-//        }
-//
-//        val iosX64Test by getting
-//        val iosArm64Test by getting
-//        val iosSimulatorArm64Test by getting
-//        val iosTest by creating {
-//            dependsOn(commonTest.get())
-//            iosX64Test.dependsOn(this)
-//            iosArm64Test.dependsOn(this)
-//            iosSimulatorArm64Test.dependsOn(this)
-//        }
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                api(libs.ktor.core)
+                implementation(libs.ktor.client.darwin.v333)
+            }
+        }
+        
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+        val iosTest by creating {
+            dependsOn(commonTest.get())
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
+        }
         
         commonTest {
             dependencies {

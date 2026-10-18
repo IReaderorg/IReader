@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Instant
 import okio.buffer
+import kotlin.text.RegexOption
 import kotlin.time.ExperimentalTime
 
 ///**
@@ -504,7 +505,7 @@ class ImportLNReaderBackup(
 
         // Simple HTML to text extraction
         // Look for content between <p> tags or other text-containing elements
-        val paragraphRegex = Regex("<p[^>]*>(.*?)</p>", RegexOption.DOT_MATCHES_ALL)
+        val paragraphRegex = Regex("(?s)<p[^>]*>(.*?)</p>")
         val matches = paragraphRegex.findAll(html)
 
         for (match in matches) {
@@ -531,7 +532,7 @@ class ImportLNReaderBackup(
 
         // If no paragraphs found, try to extract text from the body
         if (pages.isEmpty()) {
-            val bodyRegex = Regex("<body[^>]*>(.*?)</body>", RegexOption.DOT_MATCHES_ALL)
+            val bodyRegex = Regex("(?s)<body[^>]*>(.*?)</body>")
             val bodyMatch = bodyRegex.find(html)
             if (bodyMatch != null) {
                 var text = bodyMatch.groupValues[1]

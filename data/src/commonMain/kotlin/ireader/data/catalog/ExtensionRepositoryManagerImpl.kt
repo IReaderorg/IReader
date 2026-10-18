@@ -9,6 +9,7 @@ import ireader.domain.models.entities.ExtensionTrustLevel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import okio.ByteString.Companion.encodeUtf8
+import ireader.core.util.synchronized
 
 /**
  * Implementation of extension repository management

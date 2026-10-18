@@ -1,5 +1,8 @@
 package ireader.domain.models.entities
 
+import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.toLocalDate
+
 /**
  * Represents a user title with a passive effect.
  * Titles can be earned through achievements or purchased from the shop.
@@ -83,7 +86,7 @@ data class ActiveTitle(
     val remainingHours: Long
 ) {
     val isActive: Boolean
-        get() = System.currentTimeMillis() < expiresAt
+        get() = currentTimeToLong() < expiresAt
 
     val isTimeRestricted: Boolean
         get() = title.effect is TitleEffect.TimeRestrictedBonus
@@ -93,7 +96,7 @@ data class ActiveTitle(
         if (!isTimeRestricted) return true
 
         val effect = title.effect as TitleEffect.TimeRestrictedBonus
-        val currentHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        val currentHour = currentTimeToLong().toLocalDate().hour
         return if (effect.startHour > effect.endHour) {
             // Wraps midnight (e.g., 22:00 - 06:00)
             currentHour >= effect.startHour || currentHour < effect.endHour

@@ -30,7 +30,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
+import ireader.core.util.synchronizedMapOf
 
 /**
  * Optimized CatalogStore with improved performance for catalog and JS plugin loading.
@@ -469,7 +469,7 @@ class CatalogStore(
         }
     }
 
-    private val installJobs = ConcurrentHashMap<String, Job>()
+    private val installJobs = synchronizedMapOf<String, Job>()
     
     private fun onInstalled(pkgName: String, isLocalInstall: Boolean) {
         // Cancel any previous pending install for the same package

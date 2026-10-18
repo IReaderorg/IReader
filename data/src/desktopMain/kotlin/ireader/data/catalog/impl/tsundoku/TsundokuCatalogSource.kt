@@ -34,7 +34,6 @@ class TsundokuCatalogSource(
 ) : BaseTsundokuCatalogSource() {
 
     private val updateMutex = Mutex()
-    private val chaptersCache = java.util.concurrent.ConcurrentHashMap<String, List<SChapter>>()
 
     override val id: Long get() = try {
         val sId = source.id
@@ -180,13 +179,22 @@ class TsundokuCatalogSource(
                     )
                 }
 
-                // 2. Resilient DOM Fallback
+                // 2. Resilient DOM & Metadata Fallback
                 val doc = Ksoup.parse(cmd.html)
-                val title = doc.selectFirst("h1, .novel-title, .entry-title, .book-title, .title")?.text()?.trim().orEmpty()
-                val cover = doc.selectFirst(".novel-cover img, .book-cover img, .entry-thumb img, img[src*=/cover]")?.attr("src")?.trim().orEmpty()
-                val description = doc.selectFirst(".description, .summary, .entry-content, #synopsis, .synopsis")?.text()?.trim().orEmpty()
-                val author = doc.selectFirst(".author, .book-author, span:contains(Author) + *")?.text()?.trim().orEmpty()
-                val genres = doc.select(".genres a, .genre a, .tags a, .tag a").map { it.text().trim() }.filter { it.isNotBlank() }
+                val title = doc.selectFirst("h1, .novel-title, .entry-title, .book-title, .title, [itemprop=name]")?.text()?.trim()
+                    ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
+                    ?: manga.title
+                val cover = doc.selectFirst("img.cover, .cover, .novel-cover img, .book-cover img, .entry-thumb img, img[src*=/cover]")?.let {
+                    it.attr("src").ifBlank { it.attr("data-src") }
+                }?.trim()
+                    ?: doc.selectFirst("meta[property=og:image]")?.attr("content")?.trim()
+                    ?: manga.cover
+                val description = doc.selectFirst(".description, .summary, .novel-summary, #novel-summary, .entry-content, #synopsis, .synopsis, [itemprop=description]")?.text()?.trim()
+                    ?: doc.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
+                    ?: manga.description
+                val author = doc.selectFirst(".author, .book-author, .novel-author, [itemprop=author], a[href*=/author/], span:contains(Author) + *")?.text()?.trim()
+                    ?: manga.author
+                val genres = doc.select(".genres a, .genre a, .tags a, .tag a, [itemprop=genre]").map { it.text().trim() }.filter { it.isNotBlank() }
 
                 return manga.copy(
                     title = title.ifBlank { manga.title },
@@ -202,10 +210,7 @@ class TsundokuCatalogSource(
             val result = withContext(Dispatchers.IO) {
                 updateMutex.withLock {
                     try {
-                        val update = source.getMangaUpdate(manga.toSManga(), emptyList(), fetchDetails = true, fetchChapters = true)
-                        if (update.chapters.isNotEmpty()) {
-                            chaptersCache[manga.key] = update.chapters
-                        }
+                        val update = source.getMangaUpdate(manga.toSManga(), emptyList(), fetchDetails = true, fetchChapters = false)
                         update.manga
                     } catch (e: NoSuchMethodError) {
                         @Suppress("DEPRECATION")
@@ -267,12 +272,6 @@ class TsundokuCatalogSource(
                     chapters
                 }
             }
-        }
-
-        val cached = chaptersCache.remove(manga.key)
-        if (!cached.isNullOrEmpty()) {
-            Log.info { "Tsundoku[$name]: getChapterList returning ${cached.size} chapters from getMangaUpdate cache" }
-            return cached.map { it.toChapterInfo() }.reversed()
         }
 
         return try {

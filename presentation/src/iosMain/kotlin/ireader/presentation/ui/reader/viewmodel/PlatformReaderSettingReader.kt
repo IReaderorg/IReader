@@ -33,7 +33,7 @@ actual class PlatformReaderSettingReader {
         lazyScrollState: LazyListState
     ) {
         // Save scroll position based on reading mode
-        val scrollPosition = if (readingMode.value == ireader.domain.preferences.prefs.ReadingMode.Continuous) {
+        val scrollPosition = if (readingMode.value == ireader.domain.preferences.prefs.ReadingMode.Continues) {
             scrollState.value.toLong()
         } else {
             lazyScrollState.firstVisibleItemIndex.toLong()

@@ -7,6 +7,7 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.ExtensionSecurity
 import ireader.domain.models.entities.ExtensionTrustLevel
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Implementation of extension security management

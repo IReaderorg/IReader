@@ -1,5 +1,7 @@
 package ireader.core.utils
 
+import ireader.core.util.synchronized
+
 /**
  * A thread-safe LRU (Least Recently Used) cache implementation.
  * Uses a LinkedHashMap for true O(1) access and eviction across all KMP targets.

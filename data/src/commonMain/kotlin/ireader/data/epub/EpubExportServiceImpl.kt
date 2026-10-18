@@ -13,7 +13,6 @@ import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.ExperimentalTime
 
 /**
@@ -143,7 +142,7 @@ class EpubExportServiceImpl(
         }
         
         // 4. Chapter images - download and embed images from chapter content
-        val imageCounter = AtomicInteger(1)
+        var imageCounter = 1
         chapters.forEachIndexed { chapterIndex, chapter ->
             chapter.content.forEach { page ->
                 if (page is ireader.core.source.model.ImageUrl) {
@@ -151,7 +150,7 @@ class EpubExportServiceImpl(
                         val imageData = fileProvider.downloadCoverImage(page.url)
                         if (imageData != null) {
                             val (extension, _) = detectImageFormat(imageData)
-                            val imageName = "chapter${chapterIndex + 1}_image${imageCounter.getAndIncrement()}.$extension"
+                            val imageName = "chapter${chapterIndex + 1}_image${imageCounter++}.$extension"
                             entries.add(EpubZipEntry("OEBPS/images/$imageName", imageData))
                         }
                     } catch (e: Exception) {
@@ -392,8 +391,8 @@ $chapterSpine
     private fun formatContent(content: String): String {
         // Remove script tags and other unwanted elements
         var cleaned = content
-            .replace(Regex("<script[^>]*>.*?</script>", RegexOption.DOT_MATCHES_ALL), "")
-            .replace(Regex("<style[^>]*>.*?</style>", RegexOption.DOT_MATCHES_ALL), "")
+            .replace(Regex("(?s)<script[^>]*>.*?</script>"), "")
+            .replace(Regex("(?s)<style[^>]*>.*?</style>"), "")
         
         // If content doesn't have paragraph tags, add them
         if (!cleaned.contains("<p>") && !cleaned.contains("<p ")) {

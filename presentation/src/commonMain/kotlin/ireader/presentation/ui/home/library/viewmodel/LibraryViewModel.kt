@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.core.util.synchronized
 
 private const val TAG = "LibraryViewModel"
 

@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import okio.buffer
@@ -601,7 +602,7 @@ class BackupScreenViewModel(
         }
         
         scope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 importLNReaderBackup.invoke(uri, options).collect { progress ->
                     _lnReaderImportProgress.value = progress
 

@@ -3,6 +3,7 @@ package ireader.presentation.ui.core.theme
 import androidx.compose.ui.text.font.FontFamily
 import ireader.core.io.VirtualFile
 import ireader.domain.models.fonts.CustomFont
+import ireader.core.util.synchronized
 
 /**
  * Registry for managing custom fonts and their FontFamily objects

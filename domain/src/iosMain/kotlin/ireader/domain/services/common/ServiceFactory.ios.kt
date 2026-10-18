@@ -100,6 +100,9 @@ private class IosDownloadService : DownloadService {
     override suspend fun cancelDownload(chapterId: Long): ServiceResult<Unit> = ServiceResult.Success(Unit)
     override suspend fun cancelAll(): ServiceResult<Unit> = ServiceResult.Success(Unit)
     override suspend fun retryDownload(chapterId: Long): ServiceResult<Unit> = ServiceResult.Success(Unit)
+    override suspend fun retryAllFailed(): ServiceResult<Unit> = ServiceResult.Success(Unit)
+    override suspend fun clearCompleted(): ServiceResult<Unit> = ServiceResult.Success(Unit)
+    override suspend fun clearFailed(): ServiceResult<Unit> = ServiceResult.Success(Unit)
     override fun getDownloadStatus(chapterId: Long): DownloadStatus? = null
     override suspend fun initialize() {}
     override suspend fun start() { _state.value = ServiceState.RUNNING }

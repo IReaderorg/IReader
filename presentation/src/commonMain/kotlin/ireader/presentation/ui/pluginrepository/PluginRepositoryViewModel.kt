@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.concurrent.Volatile
+import ireader.core.util.synchronized
 
 /**
  * ViewModel for Plugin Repository management

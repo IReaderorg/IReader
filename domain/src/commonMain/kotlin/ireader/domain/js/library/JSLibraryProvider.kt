@@ -2,6 +2,7 @@ package ireader.domain.js.library
 
 import io.ktor.client.HttpClient
 import ireader.core.prefs.PreferenceStore
+import ireader.core.util.synchronized
 import ireader.domain.js.engine.JSEngine
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.jsonObject

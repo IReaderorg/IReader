@@ -2,6 +2,8 @@ package ireader.domain.services.extension
 
 import ireader.core.log.Log
 import ireader.core.os.InstallStep
+import ireader.core.util.synchronized
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.catalogs.interactor.InstallCatalog
@@ -107,10 +109,10 @@ class ExtensionController(
             commandMutex.withLock {
                 try {
                     processCommand(command)
-                } catch (e: OutOfMemoryError) {
-                    // OOM is fatal - don't try to recover
-                    Log.error(e, "$TAG: OOM processing command")
-                    _state.update { it.copy(error = ExtensionError.LoadFailed("Out of memory")) }
+                } catch (e: Error) {
+                    // Fatal error - don't try to recover
+                    Log.error(e, "$TAG: Fatal error processing command")
+                    _state.update { it.copy(error = ExtensionError.LoadFailed(e.message ?: "Fatal error")) }
                 } catch (e: Exception) {
                     Log.error(e, "$TAG: Error processing command")
                     val error = ExtensionError.LoadFailed(e.message ?: "Unknown error")
@@ -730,6 +732,6 @@ class ExtensionController(
     data class TimestampedError(
         val error: ExtensionError,
         val cause: Throwable,
-        val timestamp: Long = System.currentTimeMillis()
+        val timestamp: Long = currentTimeToLong()
     )
 }

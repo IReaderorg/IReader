@@ -1,5 +1,6 @@
 package ireader.domain.plugins
 
+import ireader.core.util.synchronized
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -1,6 +1,7 @@
 package ireader.data.backup
 
 import ireader.core.log.Log
+import kotlin.concurrent.Volatile
 import ireader.core.util.currentTimeMillis
 import ireader.data.sync.datasource.SyncLocalDataSource
 import ireader.domain.config.PlatformConfig

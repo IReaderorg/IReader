@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import ireader.core.util.synchronized
 
 /**
  * Service that automatically syncs queued data when network connectivity is restored

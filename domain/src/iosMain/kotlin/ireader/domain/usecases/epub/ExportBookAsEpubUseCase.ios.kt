@@ -44,7 +44,7 @@ actual suspend fun copyPlatformTempFileToContentUri(tempPath: String, contentUri
     }
     
     // Ensure parent directory exists
-    val parentDir = (destinationPath as NSString).stringByDeletingLastPathComponent
+    val parentDir = NSString.create(string = destinationPath).stringByDeletingLastPathComponent
     if (!fileManager.fileExistsAtPath(parentDir)) {
         fileManager.createDirectoryAtPath(
             parentDir,

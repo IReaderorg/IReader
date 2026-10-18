@@ -3,6 +3,7 @@ package ireader.core.startup
 import ireader.core.log.Log
 import ireader.core.time.currentTimeMillis
 import ireader.core.util.IO
+import ireader.core.util.synchronized
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

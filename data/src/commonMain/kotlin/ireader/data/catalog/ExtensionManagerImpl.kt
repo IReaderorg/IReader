@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.flow
 import ireader.domain.utils.extensions.currentTimeToLong
 import okio.FileSystem
 import okio.Path.Companion.toPath
+import ireader.core.util.synchronized
 
 /**
  * Exception thrown when extension security check fails

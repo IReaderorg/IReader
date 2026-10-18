@@ -113,7 +113,7 @@ fun ReadingTimeIndicator(
             )
 
             // Minute hand — sweeps clockwise with progress
-            val minuteAngle = Math.toRadians((-90f + sweepAngle).toDouble())
+            val minuteAngle = (-90f + sweepAngle).toDouble() * (kotlin.math.PI / 180.0)
             val minuteLen = radius * 0.75f
             drawLine(
                 color = handColor,

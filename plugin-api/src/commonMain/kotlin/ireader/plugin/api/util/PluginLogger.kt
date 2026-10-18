@@ -1,5 +1,8 @@
 package ireader.plugin.api.util
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+
 /**
  * Simple logging utility for plugins.
  * Provides consistent logging across all plugin types.
@@ -19,27 +22,22 @@ object PluginLogger {
     var minLevel: Level = Level.DEBUG
     
     /**
-     * Log listeners for custom log handling
+     * Log listeners for custom log handling (lock-free MutableStateFlow)
      */
-    private val listenersLock = Any()
-    private val listeners = mutableListOf<(Level, String, String, Throwable?) -> Unit>()
+    private val listeners = MutableStateFlow<List<(Level, String, String, Throwable?) -> Unit>>(emptyList())
     
     /**
      * Add a log listener
      */
     fun addListener(listener: (Level, String, String, Throwable?) -> Unit) {
-        synchronized(listenersLock) {
-            listeners.add(listener)
-        }
+        listeners.update { it + listener }
     }
     
     /**
      * Remove a log listener
      */
     fun removeListener(listener: (Level, String, String, Throwable?) -> Unit) {
-        synchronized(listenersLock) {
-            listeners.remove(listener)
-        }
+        listeners.update { it - listener }
     }
     
     /**
@@ -74,7 +72,7 @@ object PluginLogger {
         if (level.ordinal < minLevel.ordinal) return
         
         // Notify listeners with snapshot to prevent ConcurrentModificationException
-        val snapshot = synchronized(listenersLock) { listeners.toList() }
+        val snapshot = listeners.value
         snapshot.forEach { it(level, tag, message, throwable) }
         
         // Default console output

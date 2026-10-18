@@ -18,6 +18,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.core.util.synchronized
 
 /**
  * Database performance optimizations providing:

@@ -2,6 +2,8 @@ package ireader.domain.plugins
 
 import ireader.core.io.VirtualFile
 import ireader.core.util.createICoroutineScope
+import okio.FileSystem
+import okio.SYSTEM
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -179,13 +181,13 @@ class PluginUpdateChecker(
             // Delete old .iplugin files for this plugin to prevent version conflicts
             try {
                 val pluginsDir = pluginManager.getPluginsDirectory()
-                val dir = java.io.File(pluginsDir.toString())
-                if (dir.isDirectory) {
-                    dir.listFiles()
-                        ?.filter { it.name.startsWith(pluginId) && it.extension == "iplugin" }
-                        ?.forEach { oldFile ->
+                val fs = FileSystem.SYSTEM
+                if (fs.exists(pluginsDir)) {
+                    fs.list(pluginsDir)
+                        .filter { it.name.startsWith(pluginId) && it.name.endsWith(".iplugin") }
+                        .forEach { oldFile ->
                             println("[PluginUpdateChecker] Removing old version: ${oldFile.name}")
-                            oldFile.delete()
+                            fs.delete(oldFile)
                         }
                 }
             } catch (e: Exception) {
