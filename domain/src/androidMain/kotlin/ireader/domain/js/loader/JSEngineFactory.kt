@@ -243,7 +243,14 @@ private object AdapterCodeCache {
         if (typeof URLSearchParams === 'undefined') {
             globalThis.URLSearchParams = function(init) {
                 this.params = {};
-                if (typeof init === 'string') {
+                if (init && typeof init === 'object') {
+                    for (var key in init) {
+                        if (Object.prototype.hasOwnProperty.call(init, key)) {
+                            if (!this.params[key]) this.params[key] = [];
+                            this.params[key].push(String(init[key]));
+                        }
+                    }
+                } else if (typeof init === 'string') {
                     var query = init.indexOf('?') === 0 ? init.substring(1) : init;
                     if (query) {
                         var self = this;
