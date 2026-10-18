@@ -5,6 +5,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.bundling.Zip
 import java.util.Properties
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -682,4 +683,8 @@ tasks.register("testAppImageDeltaUpdate") {
 // Add AppImage tasks to package dependencies
 listOf("packageDistributionForCurrentOS", "packageReleaseDistributionForCurrentOS").forEach { taskName ->
     tasks.findByName(taskName)?.finalizedBy("buildAppImageWithZsync")
+}
+
+tasks.withType<Zip>().configureEach {
+    isZip64 = true
 }
