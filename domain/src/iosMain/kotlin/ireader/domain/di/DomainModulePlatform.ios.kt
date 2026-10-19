@@ -23,6 +23,10 @@ import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.source.LocalCatalogSource
 import ireader.domain.usecases.local.LocalSourceImpl
+import ireader.domain.preferences.prefs.IosUiPreferences
+import ireader.domain.preferences.prefs.PlatformUiPreferences
+import ireader.domain.usecases.reader.ScreenAlwaysOn
+import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
 import ireader.i18n.LocalizeHelper
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -106,6 +110,8 @@ actual val DomainModule: Module = module {
     single<PreferenceStore> {
         get<PreferenceStoreFactory>().create("ireader")
     }
+    single<PlatformUiPreferences> { IosUiPreferences(get()) }
+    factory<ScreenAlwaysOn> { ScreenAlwaysOnImpl() }
     single<LocalCatalogSource> { LocalSourceImpl() }
     factory { ireader.domain.usecases.local.OpenLocalFolder(get()) }
     single<ireader.core.io.FileSystem> { ireader.core.io.IosFileSystem() }

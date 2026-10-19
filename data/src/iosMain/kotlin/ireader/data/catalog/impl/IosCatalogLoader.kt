@@ -147,7 +147,9 @@ class IosCatalogLoader(
             val meta = json.decodeFromString<InstalledJsSourceMeta>(
                 fileSystem.read(metaPath) { readUtf8() }
             )
-            val source = novgoSourceOrNull(pkgName, meta.id, httpClients) ?: JsSourceWrapper(
+            val source = freeWebNovelSourceOrNull(pkgName, meta.name, meta.id, httpClients)
+                ?: novgoSourceOrNull(pkgName, meta.id, httpClients)
+                ?: JsSourceWrapper(
                 sourceId = pkgName,
                 info = JsSourceInfo(id = meta.id, name = meta.name, lang = meta.lang),
                 loader = this,

@@ -7,8 +7,10 @@ import ireader.domain.services.platform.IosClipboardService
 import ireader.domain.services.platform.IosFileSystemService
 import ireader.domain.services.platform.IosNetworkService
 import ireader.domain.services.platform.IosShareService
+import ireader.domain.services.platform.IosSystemInteractionService
 import ireader.domain.services.platform.NetworkService
 import ireader.domain.services.platform.ShareService
+import ireader.domain.services.platform.SystemInteractionService
 import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -23,4 +25,5 @@ actual val platformServiceModule: Module = module {
     single<FileSystemService> { IosFileSystemService() }
     single<HapticService> { NoOpHapticService() }
     single<NetworkService> { IosNetworkService() }
+    single<SystemInteractionService> { IosSystemInteractionService() }
 }
