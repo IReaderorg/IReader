@@ -4,6 +4,7 @@ import okio.Path.Companion.toPath
 import ireader.domain.usecases.backup.ScheduleAutomaticBackup
 import ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl
 import ireader.domain.usecases.backup.GoogleDriveProvider
+import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.usecases.services.StartDownloadServicesUseCase
 import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
 import ireader.domain.usecases.services.StartTTSServicesUseCase
@@ -18,6 +19,15 @@ import ireader.domain.js.engine.JSEngine
 import ireader.domain.js.update.JSPluginUpdateScheduler
 import ireader.domain.js.update.JSPluginUpdateNotifier
 import ireader.domain.plugins.PluginClassLoader
+import ireader.core.prefs.PreferenceStore
+import ireader.core.prefs.PreferenceStoreFactory
+import ireader.core.source.LocalCatalogSource
+import ireader.domain.usecases.local.LocalSourceImpl
+import ireader.domain.preferences.prefs.IosUiPreferences
+import ireader.domain.preferences.prefs.PlatformUiPreferences
+import ireader.domain.usecases.reader.ScreenAlwaysOn
+import ireader.domain.usecases.reader.ScreenAlwaysOnImpl
+import ireader.i18n.LocalizeHelper
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -85,10 +95,33 @@ actual val DomainModule: Module = module {
     single { StartDownloadServicesUseCase() }
     single { StartLibraryUpdateServicesUseCase() }
     single { StartTTSServicesUseCase() }
+    single {
+        ServiceUseCases(
+            startDownloadServicesUseCase = get(),
+            startLibraryUpdateServicesUseCase = get(),
+            startTTSServicesUseCase = get(),
+        )
+    }
     single { StartExtensionManagerService() }
     
     // Translation
     single { GoogleTranslateML() }
+    single { LocalizeHelper() }
+    single<PreferenceStore> {
+        get<PreferenceStoreFactory>().create("ireader")
+    }
+    single<PlatformUiPreferences> { IosUiPreferences(get()) }
+    factory<ScreenAlwaysOn> { ScreenAlwaysOnImpl() }
+    single<LocalCatalogSource> { LocalSourceImpl() }
+    factory { ireader.domain.usecases.local.OpenLocalFolder(get()) }
+    single<ireader.core.io.FileSystem> { ireader.core.io.IosFileSystem() }
+    single<ireader.domain.plugins.PaymentProcessor> {
+        ireader.domain.plugins.IosPaymentProcessor()
+    }
+    single<ireader.domain.storage.StorageManager> {
+        ireader.domain.storage.IosStorageManager().also { it.initializeDirectories() }
+    }
+    single<ireader.domain.storage.CacheManager> { ireader.domain.storage.IosCacheManager() }
     
     // EPUB
     // EpubCreator uses KoinComponent to inject HttpClient and ChapterRepository automatically

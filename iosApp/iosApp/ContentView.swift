@@ -13,7 +13,7 @@ struct ContentView: View {
 /// UIViewControllerRepresentable wrapper for the Compose UI
 struct ComposeViewControllerRepresentable: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        return MainKt.MainViewController()
+        return IosMainViewControllerKt.shared.MainViewController()
     }
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
