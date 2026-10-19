@@ -7,6 +7,7 @@ import ireader.domain.catalogs.service.CatalogLoader
 import ireader.domain.models.entities.CatalogBundled
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
+import okio.FileSystem
 import ireader.domain.preferences.prefs.UiPreferences
 import platform.JavaScriptCore.*
 import platform.Foundation.*
@@ -132,16 +133,50 @@ class IosCatalogLoader(
         
         // Load JS runtime
         loadRuntime()
-        
-        // Load installed JS sources
-        val installedIds = getInstalledSourceIds()
-        val jsSources = installedIds.mapNotNull { id ->
-            if (loadSource(id)) {
-                createJsSourceCatalog(id)
-            } else null
+
+        val installed = loadInstalledJsCatalogs()
+        return bundled + installed
+    }
+
+    override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
+        val fileSystem = FileSystem.SYSTEM
+        val dir = iosJsPluginsDir()
+        val metaPath = dir / "$pkgName.meta.json"
+        if (!fileSystem.exists(metaPath)) return null
+        return try {
+            val meta = json.decodeFromString<InstalledJsSourceMeta>(
+                fileSystem.read(metaPath) { readUtf8() }
+            )
+            val source = novgoSourceOrNull(pkgName, meta.id, httpClients) ?: JsSourceWrapper(
+                sourceId = pkgName,
+                info = JsSourceInfo(id = meta.id, name = meta.name, lang = meta.lang),
+                loader = this,
+            )
+            CatalogInstalled.Locally(
+                name = meta.name,
+                description = meta.description.ifBlank { "JavaScript source" },
+                source = source,
+                pkgName = pkgName,
+                versionName = meta.version,
+                versionCode = meta.code,
+                nsfw = meta.nsfw,
+                installDir = dir,
+                iconUrl = meta.icon,
+            )
+        } catch (e: Exception) {
+            println("[JSCatalogLoader] Failed to read $pkgName: ${e.message}")
+            null
         }
-        
-        return bundled + jsSources
+    }
+
+    private fun loadInstalledJsCatalogs(): List<CatalogLocal> {
+        val fileSystem = FileSystem.SYSTEM
+        val dir = iosJsPluginsDir()
+        if (!fileSystem.exists(dir)) return emptyList()
+        return fileSystem.list(dir)
+            .map { it.name }
+            .filter { it.endsWith(".meta.json") }
+            .mapNotNull { loadLocalCatalog(it.removeSuffix(".meta.json")) }
     }
     
     private fun createJsSourceCatalog(sourceId: String): CatalogLocal? {
@@ -194,8 +229,6 @@ class IosCatalogLoader(
         )?.toString() ?: "[]"
     }
     
-    // APK loading not supported on iOS
-    override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? = null
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? = null
     
     private fun loadBundledFile(filename: String): String {

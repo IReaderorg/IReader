@@ -14,8 +14,9 @@ import ireader.i18n.UiText
 import ireader.i18n.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okio.FileSystem
-import okio.Path.Companion.toPath
 
 /**
  * iOS implementation of CatalogInstaller
@@ -34,57 +35,44 @@ class IosCatalogInstaller(
 ) : CatalogInstaller {
 
     private val client get() = httpClient.default
-    
-    // JS plugins directory - stored in app's Documents directory
-    private val jsPluginsDir: String
-        get() {
-            // TODO: Use proper iOS Documents directory path
-            // platform.Foundation.NSSearchPathForDirectoriesInDomains(
-            //     NSDocumentDirectory, NSUserDomainMask, true
-            // ).firstOrNull() + "/js-plugins"
-            return "js-plugins"
-        }
+    private val json = Json { ignoreUnknownKeys = true }
 
     override fun install(catalog: CatalogRemote): Flow<InstallStep> = flow {
         emit(InstallStep.Downloading)
-        
-        // On iOS, we only support JS plugins
-        val isJSPlugin = catalog.pkgUrl.endsWith(".js")
-        
-        if (!isJSPlugin) {
-            emit(InstallStep.Error("Only JavaScript plugins are supported on iOS. APK/JAR extensions cannot be installed."))
+
+        val downloadUrl = resolveDownloadUrl(catalog)
+        if (downloadUrl == null) {
+            emit(InstallStep.Error("This extension is only published as an Android APK. iOS can install the JavaScript sources from the IReader repository."))
             return@flow
         }
-        
+
         try {
-            val jsFilePath = "$jsPluginsDir/${catalog.pkgName}.js".toPath()
-            val metadataFilePath = "$jsPluginsDir/${catalog.pkgName}.meta.json".toPath()
-            
-            // Ensure directory exists
             val fileSystem = FileSystem.SYSTEM
-            val dirPath = jsPluginsDir.toPath()
-            if (!fileSystem.exists(dirPath)) {
-                fileSystem.createDirectories(dirPath)
-            }
-            
-            // Download JS plugin
-            val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
+            val dirPath = iosJsPluginsDir()
+            fileSystem.createDirectories(dirPath)
+
+            val fileName = downloadUrl.substringAfterLast('/').substringBefore('?')
+            val jsFilePath = dirPath / fileName
+            val metadataFilePath = dirPath / "${catalog.pkgName}.meta.json"
+
+            val jsResponse: ByteReadChannel = client.get(downloadUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             jsResponse.saveTo(jsFilePath, fileSystem)
-            
-            // Save metadata
-            val metadata = """
-                {
-                  "id": "${catalog.pkgName}",
-                  "name": "${catalog.name.replace("\"", "\\\"")}",
-                  "lang": "${catalog.lang}",
-                  "version": "${catalog.versionName}",
-                  "site": "${catalog.description.replace("\"", "\\\"")}",
-                  "icon": "${catalog.iconUrl.replace("\"", "\\\"")}"
-                }
-            """.trimIndent()
-            
+
+            val metadata = json.encodeToString(
+                InstalledJsSourceMeta(
+                    id = catalog.sourceId,
+                    name = catalog.name,
+                    lang = catalog.lang,
+                    version = catalog.versionName,
+                    code = catalog.versionCode,
+                    description = catalog.description,
+                    icon = catalog.iconUrl,
+                    nsfw = catalog.nsfw,
+                    fileName = fileName,
+                )
+            )
             fileSystem.write(metadataFilePath) {
                 writeUtf8(metadata)
             }
@@ -103,8 +91,16 @@ class IosCatalogInstaller(
             installationChanges.notifyAppUninstall(pkgName)
             
             val fileSystem = FileSystem.SYSTEM
-            val jsFilePath = "$jsPluginsDir/$pkgName.js".toPath()
-            val metadataFilePath = "$jsPluginsDir/$pkgName.meta.json".toPath()
+            val dirPath = iosJsPluginsDir()
+            val metadataFilePath = dirPath / "$pkgName.meta.json"
+            val fileName = if (fileSystem.exists(metadataFilePath)) {
+                json.decodeFromString<InstalledJsSourceMeta>(
+                    fileSystem.read(metadataFilePath) { readUtf8() }
+                ).fileName
+            } else {
+                "$pkgName.js"
+            }
+            val jsFilePath = dirPath / fileName
             
             // Delete JS file
             if (fileSystem.exists(jsFilePath)) {
@@ -121,4 +117,22 @@ class IosCatalogInstaller(
             InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper))
         }
     }
+
+    private suspend fun resolveDownloadUrl(catalog: CatalogRemote): String? {
+        val pkgUrl = catalog.pkgUrl
+        if (pkgUrl.substringBefore('?').endsWith(".js")) return pkgUrl
+        if (!pkgUrl.contains("IReader-extensions")) return null
+        val indexUrl = pkgUrl.substringBefore("/apk/") + "/js/js-index.min.json"
+        val index = client.get(indexUrl).body<String>()
+        val match = json.decodeFromString<List<JsRepoEntry>>(index)
+            .firstOrNull { it.pkg == catalog.pkgName }
+            ?: return null
+        return indexUrl.substringBefore("/js-index.min.json") + "/" + match.file
+    }
 }
+
+@kotlinx.serialization.Serializable
+private data class JsRepoEntry(
+    val pkg: String,
+    val file: String,
+)
