@@ -1,0 +1,109 @@
+name: Publish Source API
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Publish target repository'
+        type: choice
+        required: true
+        default: 'central-portal'
+        options:
+          - 'central-portal'
+          - 'ossrh'
+          - 'github-packages'
+          - 'all'
+      version:
+        description: 'Version override (e.g. 1.5.2, or leave blank to use build.gradle.kts default)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Dry run (test build & signing without uploading)'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish Source API
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup CI Gradle Configuration
+        run: |
+          mkdir -p "$HOME/.gradle"
+          if [ -f ".github/runner-files/ci-gradle.properties" ]; then
+            cp ".github/runner-files/ci-gradle.properties" "$HOME/.gradle/gradle.properties"
+          fi
+          # Make sure gradlew is executable
+          chmod +x gradlew
+
+      - name: Publish to Maven
+        env:
+          # Maven Central / Sonatype credentials
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME || secrets.MAVEN_CENTRAL_USERNAME || secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD || secrets.MAVEN_CENTRAL_PASSWORD || secrets.OSSRH_PASSWORD }}
+          # PGP In-Memory Signing credentials
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          # GitHub Packages credentials
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Speed up build by skipping linter & unit tests
+          SKIP_DETEKT: "true"
+          SKIP_TESTS: "true"
+        run: |
+          # Determine the Gradle publish task based on selection
+          case "${{ inputs.target }}" in
+            central-portal)
+              TASK=":source-api:publishAllPublicationsToCentralPortal"
+              ;;
+            ossrh)
+              TASK=":source-api:publishAllPublicationsToOSSRHRepository"
+              ;;
+            github-packages)
+              TASK=":source-api:publishAllPublicationsToGitHubPackagesRepository"
+              ;;
+            all)
+              TASK=":source-api:publish"
+              ;;
+            *)
+              echo "Unknown target: ${{ inputs.target }}"
+              exit 1
+              ;;
+          esac
+
+          GRADLE_ARGS="$TASK --no-daemon --stacktrace"
+
+          # Optional version override
+          if [ -n "${{ inputs.version }}" ]; then
+            GRADLE_ARGS="$GRADLE_ARGS -PpackageVersion=${{ inputs.version }}"
+          fi
+
+          # Optional dry-run flag
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            GRADLE_ARGS="$GRADLE_ARGS --dry-run"
+          fi
+
+          echo "Executing: ./gradlew $GRADLE_ARGS"
+          ./gradlew $GRADLE_ARGS

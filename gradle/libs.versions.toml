@@ -130,8 +130,16 @@ firebase-analytic = { module = "com.google.firebase:firebase-analytics" }
 okio = "com.squareup.okio:okio:3.18.2"
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 # Ksoup - Kotlin Multiplatform HTML parser (works on iOS, Android, Desktop)
-ksoup = { module = "io.github.ireaderorg:ksoup", version.ref = "ksoup" }
-ksoup-network = { module = "io.github.ireaderorg:ksoup-network", version.ref = "ksoup" }
+# Upstream, not the io.github.ireaderorg fork: the fork is upstream 0.2.5 republished
+# with @JsExport/@JsName annotations added. Upstream 0.2.6 has KmpJsExport (the same
+# JS-export capability, done properly) plus the 0.2.6 parser fixes the fork lacks --
+# <br> newlines in text(), Evaluator attribute-matching rework, TagSet eager copying
+# and the parser stack-depth limit. The package name is identical in both artifacts
+# (com.fleeksoft.ksoup), so proguard rules and imports are unaffected.
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
+# Declared for parity with source-api's published metadata. No API from this artifact
+# is called anywhere in the project; all fetching goes through Ktor.
+ksoup-network = { module = "com.fleeksoft.ksoup:ksoup-network", version.ref = "ksoup" }
 
 # PDF parsing - PDFBox for Desktop, PDFKit for iOS
 # Android uses built-in PdfRenderer (no external dependency needed)

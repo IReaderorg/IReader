@@ -27,6 +27,8 @@ render.experimental.xml
 # ============================================
 *.jks
 *.keystore
+*.asc
+*.gpg
 
 # ============================================
 # Binary files & compiled outputs

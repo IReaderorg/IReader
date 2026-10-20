@@ -174,7 +174,7 @@ kotlin {
 }
 
 // Version for the improved source-api with internal optimizations
-val packageVersion = "1.5.1"
+val packageVersion = (findProperty("packageVersion") as String?) ?: "1.5.2"
 
 
 // Create empty javadoc jar for Maven Central requirements
@@ -297,10 +297,25 @@ afterEvaluate {
 }
 
 // NMCP publishing configuration for Maven Central Portal
-// The publishAllPublications task is provided by the nmcp plugin automatically
-// Credentials are configured via environment variables or gradle.properties:
-// - MAVEN_USERNAME / mavenCentralUsername / mavenUsername
-// - MAVEN_PASSWORD / mavenCentralPassword / mavenPassword
+nmcp {
+    publishAllPublicationsToCentralPortal {
+        username.set(
+            (findProperty("mavenCentralUsername") as String?)
+                ?: (findProperty("mavenUsername") as String?)
+                ?: (findProperty("ossrhUsername") as String?)
+                ?: System.getenv("MAVEN_USERNAME")
+                ?: ""
+        )
+        password.set(
+            (findProperty("mavenCentralPassword") as String?)
+                ?: (findProperty("mavenPassword") as String?)
+                ?: (findProperty("ossrhPassword") as String?)
+                ?: System.getenv("MAVEN_PASSWORD")
+                ?: ""
+        )
+        publishingType.set("AUTOMATIC")
+    }
+}
 
 // Fix task dependencies: signing must happen before publishing
 tasks.withType<PublishToMavenRepository>().configureEach {
