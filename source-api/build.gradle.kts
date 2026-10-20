@@ -49,23 +49,18 @@ kotlin {
         }
     }
 //
-//    // JS target for iOS JavaScriptCore runtime
-//    js(IR) {
-//        browser {
-//            webpackTask {
-//                mainOutputFileName = "source-api.js"
-//            }
-//            testTask {
-//                useKarma {
-//                    useChromeHeadless()
-//                }
-//            }
-//        }
-//        binaries.library()
-//
-//        // Generate TypeScript declarations for better interop
-//        generateTypeScriptDefinitions()
-//    }
+    // JS target for iOS JavaScriptCore runtime
+    js(IR) {
+        browser {
+            webpackTask {
+                mainOutputFileName = "source-api.js"
+            }
+        }
+        binaries.library()
+
+        // Generate TypeScript declarations for better interop
+        generateTypeScriptDefinitions()
+    }
 
     sourceSets {
          commonMain {
@@ -129,19 +124,19 @@ kotlin {
             }
         }
         
-//        // JS source set for iOS JavaScriptCore runtime
-//        val jsMain by getting {
-//            dependencies {
-//                api(libs.ktor.client.js)
-//            }
-//        }
-//
-//        val jsTest by getting {
-//            dependencies {
-//                implementation(kotlin("test-js"))
-//            }
-//        }
-//
+        // JS source set for iOS JavaScriptCore runtime
+        val jsMain by getting {
+            dependencies {
+                api(libs.ktor.client.js)
+            }
+        }
+
+        val jsTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         val iosMain by creating {
@@ -174,7 +169,7 @@ kotlin {
 }
 
 // Version for the improved source-api with internal optimizations
-val packageVersion = (findProperty("packageVersion") as String?) ?: "1.5.2"
+val packageVersion = (findProperty("packageVersion") as String?) ?: "1.5.3"
 
 
 // Create empty javadoc jar for Maven Central requirements
@@ -318,6 +313,6 @@ nmcp {
 }
 
 // Fix task dependencies: signing must happen before publishing
-tasks.withType<PublishToMavenRepository>().configureEach {
+tasks.withType<AbstractPublishToMaven>().configureEach {
     dependsOn(tasks.withType<Sign>())
 }
