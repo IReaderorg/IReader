@@ -40,8 +40,8 @@ class IosCatalogInstaller(
     override fun install(catalog: CatalogRemote): Flow<InstallStep> = flow {
         emit(InstallStep.Downloading)
 
-        val downloadUrl = resolveDownloadUrl(catalog)
-        if (downloadUrl == null) {
+        val download = resolveDownload(catalog)
+        if (download == null) {
             emit(InstallStep.Error("This extension is only published as an Android APK. iOS can install the JavaScript sources from the IReader repository."))
             return@flow
         }
@@ -51,11 +51,11 @@ class IosCatalogInstaller(
             val dirPath = iosJsPluginsDir()
             fileSystem.createDirectories(dirPath)
 
-            val fileName = downloadUrl.substringAfterLast('/').substringBefore('?')
+            val fileName = download.url.substringAfterLast('/').substringBefore('?')
             val jsFilePath = dirPath / fileName
             val metadataFilePath = dirPath / "${catalog.pkgName}.meta.json"
 
-            val jsResponse: ByteReadChannel = client.get(downloadUrl) {
+            val jsResponse: ByteReadChannel = client.get(download.url) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             jsResponse.saveTo(jsFilePath, fileSystem)
@@ -71,6 +71,7 @@ class IosCatalogInstaller(
                     icon = catalog.iconUrl,
                     nsfw = catalog.nsfw,
                     fileName = fileName,
+                    initFunction = download.initFunction,
                 )
             )
             fileSystem.write(metadataFilePath) {
@@ -118,16 +119,17 @@ class IosCatalogInstaller(
         }
     }
 
-    private suspend fun resolveDownloadUrl(catalog: CatalogRemote): String? {
+    private suspend fun resolveDownload(catalog: CatalogRemote): ResolvedJsDownload? {
         val pkgUrl = catalog.pkgUrl
-        if (pkgUrl.substringBefore('?').endsWith(".js")) return pkgUrl
+        if (pkgUrl.substringBefore('?').endsWith(".js")) return ResolvedJsDownload(pkgUrl, "")
         if (!pkgUrl.contains("IReader-extensions")) return null
         val indexUrl = pkgUrl.substringBefore("/apk/") + "/js/js-index.min.json"
         val index = client.get(indexUrl).body<String>()
         val match = json.decodeFromString<List<JsRepoEntry>>(index)
             .firstOrNull { it.pkg == catalog.pkgName }
             ?: return null
-        return indexUrl.substringBefore("/js-index.min.json") + "/" + match.file
+        val url = indexUrl.substringBefore("/js-index.min.json") + "/" + match.file
+        return ResolvedJsDownload(url, match.initFunction)
     }
 }
 
@@ -135,4 +137,10 @@ class IosCatalogInstaller(
 private data class JsRepoEntry(
     val pkg: String,
     val file: String,
+    val initFunction: String = "",
+)
+
+private data class ResolvedJsDownload(
+    val url: String,
+    val initFunction: String,
 )

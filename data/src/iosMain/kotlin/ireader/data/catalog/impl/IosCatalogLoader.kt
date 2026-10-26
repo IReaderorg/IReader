@@ -16,6 +16,11 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import ireader.data.catalog.js.JsRuntimeHost
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * iOS implementation of CatalogLoader
@@ -28,7 +33,7 @@ import io.ktor.client.statement.*
  * - JavaScript execution via JavaScriptCore is allowed
  * - Sources are compiled to JS and loaded at runtime
  */
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
 class IosCatalogLoader(
     private val httpClients: HttpClients,
     private val uiPreferences: UiPreferences,
@@ -40,40 +45,42 @@ class IosCatalogLoader(
     private val installedSourcesPrefs = preferences.create("installed_sources")
     private val json = Json { ignoreUnknownKeys = true }
     
-    // JavaScriptCore context for running JS sources
+    // JavaScriptCore context for running JS sources. Touched only from jsDispatcher.
     private var jsContext: JSContext? = null
     private var runtimeLoaded = false
+    private val jsDispatcher = newSingleThreadContext("ireader-js")
+    private val jsMutex = Mutex()
+    private val pendingBundles = mutableListOf<PendingJsBundle>()
+    private val loadedBundles = mutableSetOf<String>()
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
-    init {
-        setupJSContext()
+
+    private suspend fun <T> onJs(block: suspend () -> T): T {
+        return jsMutex.withLock {
+            withContext(jsDispatcher) {
+                ensureContext()
+                block()
+            }
+        }
     }
-    
+
     /**
      * Set up JavaScriptCore context with native bridges
      */
-    private fun setupJSContext() {
+    private fun ensureContext() {
+        if (jsContext != null) return
         jsContext = JSContext().apply {
-            // Set up exception handler
             exceptionHandler = { _, exception ->
                 println("[JSCatalogLoader] JS Error: ${exception?.toString() ?: "Unknown"}")
             }
-            
-            // Set up console object for logging
             evaluateScript("""
                 var console = {
-                    log: function() {
-                        // Logging handled by native
-                    },
-                    error: function() {
-                        // Error logging handled by native
-                    },
-                    warn: function() {
-                        // Warning logging handled by native
-                    }
+                    log: function() {},
+                    error: function() {},
+                    warn: function() {}
                 };
             """)
+            evaluateScript(JsRuntimeHost.prelude())
         }
     }
     
@@ -82,14 +89,15 @@ class IosCatalogLoader(
      */
     suspend fun loadRuntime() {
         if (runtimeLoaded) return
-        
-        try {
-            val runtimeJs = loadBundledFile("runtime.js")
-            jsContext?.evaluateScript(runtimeJs)
-            runtimeLoaded = true
-            println("[JSCatalogLoader] Runtime loaded successfully")
-        } catch (e: Exception) {
-            println("[JSCatalogLoader] Failed to load runtime: ${e.message}")
+        onJs {
+            if (runtimeLoaded) return@onJs
+            try {
+                val runtimeJs = loadBundledFile("runtime.js")
+                if (runtimeJs.isNotBlank()) jsContext?.evaluateScript(runtimeJs)
+                runtimeLoaded = true
+            } catch (e: Exception) {
+                println("[JSCatalogLoader] Failed to load runtime: ${e.message}")
+            }
         }
     }
     
@@ -98,14 +106,12 @@ class IosCatalogLoader(
      */
     suspend fun loadSource(sourceId: String): Boolean {
         if (!runtimeLoaded) loadRuntime()
-        
+
         return try {
-            val sourceJs = downloadSourceFile(sourceId)
-            if (sourceJs != null) {
+            val sourceJs = downloadSourceFile(sourceId) ?: return false
+            onJs {
                 jsContext?.evaluateScript(sourceJs)
                 jsContext?.exception == null
-            } else {
-                false
             }
         } catch (e: Exception) {
             println("[JSCatalogLoader] Failed to load source $sourceId: ${e.message}")
@@ -149,11 +155,14 @@ class IosCatalogLoader(
             )
             val source = freeWebNovelSourceOrNull(pkgName, meta.name, meta.id, httpClients)
                 ?: novgoSourceOrNull(pkgName, meta.id, httpClients)
-                ?: JsSourceWrapper(
-                sourceId = pkgName,
-                info = JsSourceInfo(id = meta.id, name = meta.name, lang = meta.lang),
-                loader = this,
-            )
+                ?: run {
+                    rememberBundle(pkgName, meta)
+                    JsSourceWrapper(
+                        sourceId = pkgName,
+                        info = JsSourceInfo(id = meta.id, name = meta.name, lang = meta.lang),
+                        loader = this,
+                    )
+                }
             CatalogInstalled.Locally(
                 name = meta.name,
                 description = meta.description.ifBlank { "JavaScript source" },
@@ -203,32 +212,120 @@ class IosCatalogLoader(
         }
     }
     
-    // Bridge methods for JsSourceWrapper to call
-    internal fun jsSearch(sourceId: String, query: String, page: Int): String {
-        return jsContext?.evaluateScript(
-            "JSON.stringify(SourceBridge.search('$sourceId', '${query.escapeJs()}', $page))"
-        )?.toString() ?: "[]"
+    internal fun rememberBundle(pkgName: String, meta: InstalledJsSourceMeta) {
+        pendingBundles.add(PendingJsBundle(pkgName, meta))
     }
-    
-    internal fun jsGetDetails(sourceId: String, bookJson: String): String {
-        val escaped = bookJson.escapeJs()
-        return jsContext?.evaluateScript(
-            "JSON.stringify(SourceBridge.getBookDetails('$sourceId', '$escaped'))"
-        )?.toString() ?: "{}"
+
+    // Bridge methods for JsSourceWrapper to call. They wait until the Promise settles.
+    internal suspend fun jsSearch(sourceId: String, query: String, page: Int): String = onJs {
+        installPendingBundles()
+        awaitJs(
+            JsRuntimeHost.searchCall(sourceId, JsRuntimeHost.registryId(sourceId, sourceId), query, page),
+            "[]",
+        )
     }
-    
-    internal fun jsGetChapters(sourceId: String, bookJson: String): String {
-        val escaped = bookJson.escapeJs()
-        return jsContext?.evaluateScript(
-            "JSON.stringify(SourceBridge.getChapters('$sourceId', '$escaped'))"
-        )?.toString() ?: "[]"
+
+    internal suspend fun jsGetDetails(sourceId: String, bookJson: String): String = onJs {
+        installPendingBundles()
+        awaitJs(
+            JsRuntimeHost.detailsCall(sourceId, JsRuntimeHost.registryId(sourceId, sourceId), bookJson),
+            "{}",
+        )
     }
-    
-    internal fun jsGetContent(sourceId: String, chapterJson: String): String {
-        val escaped = chapterJson.escapeJs()
-        return jsContext?.evaluateScript(
-            "JSON.stringify(SourceBridge.getContent('$sourceId', '$escaped'))"
-        )?.toString() ?: "[]"
+
+    internal suspend fun jsGetChapters(sourceId: String, bookJson: String): String = onJs {
+        installPendingBundles()
+        awaitJs(
+            JsRuntimeHost.chaptersCall(sourceId, JsRuntimeHost.registryId(sourceId, sourceId), bookJson),
+            "[]",
+        )
+    }
+
+    internal suspend fun jsGetContent(sourceId: String, chapterJson: String): String = onJs {
+        installPendingBundles()
+        awaitJs(
+            JsRuntimeHost.contentCall(sourceId, JsRuntimeHost.registryId(sourceId, sourceId), chapterJson),
+            "[]",
+        )
+    }
+
+    private fun installPendingBundles() {
+        val ctx = jsContext ?: return
+        val pending = pendingBundles.toList()
+        pendingBundles.clear()
+        for (bundle in pending) {
+            val meta = bundle.meta
+            if (meta.fileName.isBlank() || meta.fileName in loadedBundles) continue
+            val path = iosJsPluginsDir() / meta.fileName
+            val fileSystem = FileSystem.SYSTEM
+            if (!fileSystem.exists(path)) continue
+            val script = fileSystem.read(path) { readUtf8() }
+            if (script.isBlank()) continue
+            ctx.evaluateScript(script)
+            val init = meta.initFunction.ifBlank { defaultInit(bundle.pkgName, meta) }
+            if (init.isNotBlank()) ctx.evaluateScript(JsRuntimeHost.registryShim(init))
+            loadedBundles.add(meta.fileName)
+        }
+    }
+
+    private fun defaultInit(pkgName: String, meta: InstalledJsSourceMeta): String {
+        val haystack = "$pkgName ${meta.name} ${meta.fileName}".lowercase()
+        return if ("freewebnovel" in haystack) "initFreeWebNovel" else ""
+    }
+
+    private suspend fun awaitJs(call: String, fallback: String): String {
+        val ctx = jsContext ?: return fallback
+        ctx.evaluateScript(JsRuntimeHost.resetResult())
+        ctx.evaluateScript(call)
+        repeat(600) {
+            pump(ctx)
+            val raw = ctx.evaluateScript(JsRuntimeHost.readResult())?.toString()
+            if (!raw.isNullOrBlank() && raw != "undefined" && raw != "null") return raw
+            delay(50)
+        }
+        return fallback
+    }
+
+    private suspend fun pump(ctx: JSContext) {
+        repeat(8) {
+            ctx.evaluateScript(JsRuntimeHost.drainTimers())
+            val queueJson = ctx.evaluateScript(JsRuntimeHost.readFetchQueue())?.toString() ?: "[]"
+            if (queueJson.isBlank() || queueJson == "[]" || queueJson == "undefined" || queueJson == "null") return
+            ctx.evaluateScript(JsRuntimeHost.clearFetchQueue())
+            val requests = JsRuntimeHost.parseFetchQueue(queueJson)
+            if (requests.isEmpty()) return
+            for (request in requests) {
+                val response = performFetch(request)
+                ctx.evaluateScript(
+                    JsRuntimeHost.deliverFetch(
+                        id = request.id,
+                        status = response.status,
+                        url = response.url,
+                        body = response.body,
+                        headers = response.headers,
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun performFetch(request: ireader.data.catalog.js.JsFetchRequest): JsHttpResponse {
+        return try {
+            val response = httpClients.default.request(request.url) {
+                method = HttpMethod.parse(request.method.ifBlank { "GET" }.uppercase())
+                request.headers.forEach { (name, value) -> header(name, value) }
+                val hasUserAgent = request.headers.keys.any { it.equals(HttpHeaders.UserAgent, ignoreCase = true) }
+                if (!hasUserAgent) header(HttpHeaders.UserAgent, USER_AGENT)
+                if (request.body.isNotEmpty()) setBody(request.body)
+            }
+            val headers = buildMap {
+                response.headers.forEach { name, values -> put(name, values.joinToString(",")) }
+            }
+            JsHttpResponse(response.status.value, response.bodyAsText(), headers, request.url)
+        } catch (e: Exception) {
+            println("[JSCatalogLoader] fetch ${request.url}: ${e.message}")
+            JsHttpResponse(0, "", emptyMap(), request.url)
+        }
     }
     
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? = null
@@ -280,13 +377,20 @@ class IosCatalogLoader(
         installedSourcesPrefs.getString("ids", "").set(current.joinToString(","))
     }
     
-    private fun String.escapeJs(): String {
-        return this
-            .replace("\\", "\\\\")
-            .replace("'", "\\'")
-            .replace("\"", "\\\"")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
+    private companion object {
+        const val USER_AGENT =
+            "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
     }
 }
+
+private data class PendingJsBundle(
+    val pkgName: String,
+    val meta: InstalledJsSourceMeta,
+)
+
+private data class JsHttpResponse(
+    val status: Int,
+    val body: String,
+    val headers: Map<String, String>,
+    val url: String,
+)
