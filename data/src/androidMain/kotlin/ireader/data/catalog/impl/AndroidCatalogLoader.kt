@@ -690,6 +690,11 @@ class AndroidCatalogLoader(
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to instantiate source ${data.classToLoad} from $pkgName", e)
             null
+        } catch (e: LinkageError) {
+            // Extension built against an incompatible source-api (NoClassDefFoundError, AbstractMethodError, ...).
+            // These are Errors, not Exceptions; letting them escape crashed the app on install/update.
+            Log.error("AndroidCatalogLoader: Incompatible extension ${data.classToLoad} in $pkgName", e)
+            null
         }
     }
 

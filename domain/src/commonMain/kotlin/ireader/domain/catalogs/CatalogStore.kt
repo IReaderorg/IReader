@@ -16,8 +16,10 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.utils.extensions.currentTimeToLong
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +65,11 @@ class CatalogStore(
         private const val FLOW_DEBOUNCE_MS = 100L
     }
 
-    private val scope = createICoroutineScope()
+    // A broken plugin must not take the app down: without a handler, any throwable escaping
+    // an install/uninstall job reached the thread's uncaught-exception handler and crashed
+    private val scope = createICoroutineScope() + CoroutineExceptionHandler { _, e ->
+        Log.error("CatalogStore: background catalog job failed", e)
+    }
     
     // Thread-safe tracking sets using KMP SynchronizedSet
     private val stubSourceIds: MutableSet<Long> = synchronizedSetOf()
