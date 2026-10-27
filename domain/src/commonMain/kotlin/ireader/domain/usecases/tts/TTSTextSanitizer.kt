@@ -31,7 +31,8 @@ class TTSTextSanitizer {
     
     companion object {
         // Remove bracket delimiter characters while preserving their inner content
-        private val BRACKET_DELIMITERS = Regex("""[()\[\]{}<>]""")
+        // Includes fullwidth/CJK brackets that engines read aloud, e.g. 【】 (issue #203)
+        private val BRACKET_DELIMITERS = Regex("""[()\[\]{}<>【】〔〕〖〗［］（）｛｝《》〈〉]""")
         
         // Remove asterisks (single or multiple)
         private val ASTERISKS = Regex("""\*+""")
@@ -40,8 +41,9 @@ class TTSTextSanitizer {
         // Includes: ~ ` ^ _ | \ © ® ™ § ¶ † ‡ • … ‰ ′ ″
         private val SPECIAL_CHARS = Regex("""[~`^_|\\©®™§¶†‡•…‰′″]+""")
         
-        // Normalize multiple spaces to single space
-        private val MULTIPLE_SPACES = Regex("""\s+""")
+        // Normalize runs of spaces/tabs; line breaks stay so merged chunks still pause between paragraphs
+        private val MULTIPLE_SPACES = Regex("""[^\S\n]+""")
+        private val SPACE_AROUND_NEWLINE = Regex(""" ?\n ?""")
     }
     
     /**
@@ -66,8 +68,9 @@ class TTSTextSanitizer {
         // Remove other special formatting characters
         result = SPECIAL_CHARS.replace(result, " ")
         
-        // Normalize whitespace (multiple spaces, tabs, newlines -> single space)
+        // Normalize whitespace (multiple spaces, tabs -> single space)
         result = MULTIPLE_SPACES.replace(result, " ")
+        result = SPACE_AROUND_NEWLINE.replace(result, "\n")
         
         // Trim leading/trailing whitespace
         return result.trim()

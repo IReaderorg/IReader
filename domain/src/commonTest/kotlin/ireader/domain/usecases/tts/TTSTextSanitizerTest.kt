@@ -218,6 +218,16 @@ class TTSTextSanitizerTest {
     }
     
     @Test
+    fun `sanitize should drop fullwidth brackets but keep their text`() {
+        assertEquals("System Level Up", sanitizer.sanitize("【System】 Level Up"))
+    }
+
+    @Test
+    fun `sanitize should keep paragraph breaks in merged chunks`() {
+        assertEquals("First note\n\nSecond.", sanitizer.sanitize("First (note)  \n\n  Second."))
+    }
+
+    @Test
     fun `sanitize should handle unmatched closing bracket`() {
         // Arrange
         val text = "Hello world)"

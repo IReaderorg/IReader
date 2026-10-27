@@ -204,6 +204,17 @@ class TTSContentLoaderSanitizerTest {
         assertTrue(result.isEmpty())
     }
 
+    @Test
+    fun `parseContent should keep angle bracket text and strip only real html tags`() {
+        val pages = listOf(
+            Text("<Skill: Fireball> activated"),
+            Text("<Status Window> <I will not lose>"),
+            Text("<p class=\"a\">Hello <b>bold</b> world</p>")
+        )
+        val result = parseContentWithSanitizer(pages)
+        assertEquals(listOf("Skill: Fireball activated", "Status Window I will not lose", "Hello bold world"), result)
+    }
+
     /**
      * Helper method that simulates the parseContent logic with sanitizer
      */
@@ -233,7 +244,7 @@ class TTSContentLoaderSanitizerTest {
             .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
             .replace(Regex("<p[^>]*>", RegexOption.IGNORE_CASE), "\n")
             .replace(Regex("</p>", RegexOption.IGNORE_CASE), "\n")
-            .replace(Regex("<[^>]+>"), "")
+            .replace(TTSContentLoaderImpl.HTML_TAG, "")
             .replace("&nbsp;", " ")
             .replace("&amp;", "&")
             .replace("&lt;", "<")

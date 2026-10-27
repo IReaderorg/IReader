@@ -67,6 +67,11 @@ class TTSControllerTest {
         override fun subscribeChapters(bookId: Long): kotlinx.coroutines.flow.Flow<List<ireader.domain.models.entities.Chapter>> {
             return kotlinx.coroutines.flow.emptyFlow()
         }
+
+        val markedRead = mutableListOf<Long>()
+        override suspend fun markChapterRead(chapter: Chapter) {
+            markedRead += chapter.id
+        }
     }
     
     // Mock TTS engine
@@ -166,7 +171,28 @@ class TTSControllerTest {
         assertEquals(3, state.totalParagraphs)
         assertEquals(0, state.currentParagraphIndex)
         assertTrue(state.hasContent)
-        
+
+        controller.destroy()
+    }
+
+    @Test
+    fun `load chapter records reading progress, empty chapter does not`() = runTest(testDispatcher) {
+        val contentLoader = MockContentLoader()
+        val controller = TTSController(
+            contentLoader = contentLoader,
+            nativeEngineFactory = { MockEngine() }
+        )
+
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(bookId = 1, chapterId = 2, startParagraph = 0))
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(2L), contentLoader.markedRead)
+
+        contentLoader.mockParagraphs = emptyList()
+        controller.dispatch(TTSCommand.LoadChapter(bookId = 1, chapterId = 3, startParagraph = 0))
+        testScheduler.advanceUntilIdle()
+        assertEquals(listOf(2L), contentLoader.markedRead)
+
         controller.destroy()
     }
     
@@ -284,7 +310,33 @@ class TTSControllerTest {
         
         // Should advance to next paragraph
         assertEquals(1, controller.state.value.currentParagraphIndex)
-        
+
+        controller.destroy()
+    }
+
+    @Test
+    fun `duplicate completion of the last paragraph moves to the next chapter only once`() = runTest(testDispatcher) {
+        val engine = MockEngine()
+        val contentLoader = MockContentLoader().apply { nextChapterId = 2 }
+        val controller = TTSController(
+            contentLoader = contentLoader,
+            nativeEngineFactory = { engine }
+        )
+
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.SetAutoNextChapter(true))
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 2))
+        testScheduler.advanceUntilIdle()
+        controller.dispatch(TTSCommand.Play)
+        testScheduler.advanceUntilIdle()
+
+        engine.completeUtterance("p_2")
+        engine.completeUtterance("p_2")
+        testScheduler.advanceUntilIdle()
+
+        // Before the fix the second event dispatched NextChapter again (i.e. skipped a chapter)
+        assertEquals(listOf(1L, 2L), contentLoader.markedRead)
+
         controller.destroy()
     }
     

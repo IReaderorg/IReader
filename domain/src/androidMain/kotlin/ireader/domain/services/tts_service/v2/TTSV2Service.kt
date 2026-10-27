@@ -280,22 +280,24 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
     
     // ========== Audio Focus ==========
     
-    override fun onAudioFocusChange(focusChange: Int) {
+    // Only auto-resume on focus gain if a transient focus loss paused us, never after a user/headphone pause
+    private var resumeOnFocusGain = false
 
-        
+    override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
-                controller.dispatch(TTSCommand.Resume)
+                if (resumeOnFocusGain) controller.dispatch(TTSCommand.Resume)
+                resumeOnFocusGain = false
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
+                resumeOnFocusGain = false
                 controller.dispatch(TTSCommand.Pause)
                 abandonAudioFocus()
             }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                controller.dispatch(TTSCommand.Pause)
-            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                // Could lower volume, but for TTS we pause
+                // Could lower volume on duck, but for TTS we pause
+                resumeOnFocusGain = controller.state.value.isPlaying
                 controller.dispatch(TTSCommand.Pause)
             }
         }
