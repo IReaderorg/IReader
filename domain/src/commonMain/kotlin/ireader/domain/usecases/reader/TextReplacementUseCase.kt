@@ -11,6 +11,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
+private val WHITESPACE_RUN = Regex("[\\s\\u00A0]+")
+
+/**
+ * Regex source matching [literal] with any run of whitespace where it has whitespace.
+ * Escapes each word separately: on JVM Regex.escape wraps the whole string in \Q...\E,
+ * so patching its output (the old approach) never matched anything.
+ */
+internal fun flexibleWhitespacePattern(literal: String): String =
+    literal.split(WHITESPACE_RUN).joinToString(WHITESPACE_RUN.pattern) { Regex.escape(it) }
+
 /**
  * Use case for applying text replacements to chapter content.
  * 
@@ -171,11 +181,8 @@ class TextReplacementUseCase(
         // 3. Literal replacement with normalization and flexible whitespace regex
         val normalizedFind = normalizeText(pattern)
         val flexibleRegex = if (normalizedFind.contains(" ") || normalizedFind.contains("\n")) {
-            val escaped = Regex.escape(normalizedFind)
-                .replace("\\ ", "[\\s\\u00A0]+")
-                .replace("\\n", "\\r?\\n")
             val options = if (replacement.caseSensitive) emptySet() else setOf(RegexOption.IGNORE_CASE)
-            runCatching { Regex(escaped, options) }.getOrNull()
+            runCatching { Regex(flexibleWhitespacePattern(normalizedFind), options) }.getOrNull()
         } else {
             null
         }
