@@ -9,7 +9,10 @@ import ireader.domain.models.entities.JSPluginCatalog
 import ireader.domain.models.entities.SearchResultItem
 import ireader.domain.models.entities.SourceSearchResult
 import ireader.domain.models.library.LibrarySort
-import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.models.entities.Book
+import ireader.domain.preferences.prefs.BrowsePreferences
+import ireader.domain.usecases.remote.orderGlobalSearchSources
+import ireader.domain.usecases.remote.updateGlobalSearchMisses
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -32,7 +35,7 @@ import ireader.core.util.synchronized
 class GlobalSearchRepositoryImpl(
     private val catalogStore: CatalogStore,
     private val bookRepository: BookRepository,
-    private val uiPreferences: UiPreferences
+    private val browsePreferences: BrowsePreferences
 ) : GlobalSearchRepository {
 
     private val historyLock = Any()
@@ -61,18 +64,13 @@ class GlobalSearchRepositoryImpl(
         val startTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
         
         return try {
-            val sourcesToSearch = if (sources.isEmpty()) {
-                catalogStore.catalogs.map { it.sourceId }
-            } else {
-                sources
-            }
-
             val libraryBooks = bookRepository.findAllInLibraryBooks(
                 sortType = LibrarySort.default,
                 isAsc = true,
                 unreadFilter = false
             )
             val libraryBookKeys = libraryBooks.map { it.key }.toSet()
+            val sourcesToSearch = sourcesToSearch(sources, libraryBooks)
 
             // Separate JS and non-JS sources
             val (jsSources, nonJsSources) = sourcesToSearch.partition { isJSPluginSource(it) }
@@ -94,6 +92,7 @@ class GlobalSearchRepositoryImpl(
                 
                 nonJsResults + jsResults
             }
+            recordOutcomes(sourceResults)
 
             val totalResults = sourceResults.sumOf { it.results.size }
             val endTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
@@ -121,20 +120,17 @@ class GlobalSearchRepositoryImpl(
         sources: List<Long>
     ): Flow<GlobalSearchResult> = flow {
         val startTime = kotlin.time.Clock.System.now().toEpochMilliseconds()
-        
-        try {
-            val sourcesToSearch = if (sources.isEmpty()) {
-                catalogStore.catalogs.map { it.sourceId }
-            } else {
-                sources
-            }
+        // Outside the try so sources that finished still count when the search is cancelled
+        val completedResults = mutableListOf<SourceSearchResult>()
 
+        try {
             val libraryBooks = bookRepository.findAllInLibraryBooks(
                 sortType = LibrarySort.default,
                 isAsc = true,
                 unreadFilter = false
             )
             val libraryBookKeys = libraryBooks.map { it.key }.toSet()
+            val sourcesToSearch = sourcesToSearch(sources, libraryBooks)
 
             // Separate JS and non-JS sources
             val (jsSources, nonJsSources) = sourcesToSearch.partition { isJSPluginSource(it) }
@@ -161,7 +157,6 @@ class GlobalSearchRepositoryImpl(
             ))
 
             // Search each source and emit progressive results
-            val completedResults = mutableListOf<SourceSearchResult>()
             val resultsChannel = Channel<SourceSearchResult>(Channel.UNLIMITED)
             
             coroutineScope {
@@ -218,7 +213,33 @@ class GlobalSearchRepositoryImpl(
                 totalResults = 0,
                 searchDuration = 0
             ))
+        } finally {
+            recordOutcomes(completedResults)
         }
+    }
+
+    /**
+     * No explicit list: installed sources in the languages picked on the Sources tab (empty = all),
+     * the same filter that tab uses. Then ordered so likely hits are searched first.
+     */
+    private fun sourcesToSearch(requested: List<Long>, libraryBooks: List<Book>): List<Long> {
+        val languages = browsePreferences.selectedLanguages().get()
+        val ids = requested.ifEmpty {
+            catalogStore.catalogs
+                .filter { languages.isEmpty() || it.source?.lang in languages }
+                .map { it.sourceId }
+        }
+        return orderGlobalSearchSources(
+            ids,
+            libraryBooksPerSource = libraryBooks.groupingBy { it.sourceId }.eachCount(),
+            misses = browsePreferences.globalSearchSourceMisses().get()
+        )
+    }
+
+    private fun recordOutcomes(results: List<SourceSearchResult>) {
+        if (results.isEmpty()) return
+        val misses = browsePreferences.globalSearchSourceMisses()
+        misses.set(updateGlobalSearchMisses(misses.get(), results))
     }
 
     override suspend fun saveSearchHistory(query: String) {
