@@ -2,7 +2,6 @@ package ireader.domain.usecases.remote
 
 import ireader.core.log.Log
 import ireader.core.source.CatalogSource
-import ireader.core.source.model.Filter
 import ireader.core.source.model.FilterList
 import ireader.core.source.model.MangaInfo
 import ireader.domain.catalogs.CatalogStore
@@ -72,7 +71,7 @@ class GetSimilarBooksByTitleUseCase(
             if (results.size >= maxResults) break
             
             try {
-                val filters: FilterList = listOf(Filter.Title().apply { value = keyword })
+                val filters: FilterList = searchFiltersFor(keyword, source.getFilters())
                 val pageInfo = source.getMangaList(filters, page = 1)
                 
                 for (manga in pageInfo.mangas) {
@@ -237,7 +236,7 @@ class GetSimilarBooksByTitleUseCase(
             if (sourceResults.size >= maxResults) break
             
             try {
-                val filters: FilterList = listOf(Filter.Title().apply { value = keyword })
+                val filters: FilterList = searchFiltersFor(keyword, source.getFilters())
                 val pageInfo = source.getMangaList(filters, page = 1)
                 
                 for (manga in pageInfo.mangas) {

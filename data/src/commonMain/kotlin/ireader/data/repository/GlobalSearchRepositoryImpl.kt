@@ -297,14 +297,9 @@ class GlobalSearchRepositoryImpl(
                 )
             }
 
-            // Perform search using the source's getMangaList method with filters
-            // Create a filter list with the search query
+            // Search exactly like the source's own search screen: query goes into the source's own filters
             val searchResults = try {
-                val titleFilter = ireader.core.source.model.Filter.Title().apply {
-                    value = query
-                }
-                val filters = listOf(titleFilter)
-                
+                val filters = ireader.domain.usecases.remote.searchFiltersFor(query, source.getFilters())
                 val pageInfo = source.getMangaList(filters, page = 1)
                 pageInfo.mangas
             } catch (e: kotlinx.coroutines.CancellationException) {
