@@ -32,9 +32,9 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(3, result.size)
-        assertEquals("Hello note world", result[0])
-        assertEquals("Test TL: translation content", result[1])
-        assertEquals("More annotation text", result[2])
+        assertEquals("Hello “note” world", result[0])
+        assertEquals("Test “TL: translation” content", result[1])
+        assertEquals("More “annotation” text", result[2])
     }
     
     @Test
@@ -64,7 +64,7 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(1, result.size)
-        assertEquals("Hello note TL world", result[0])
+        assertEquals("Hello “note” “TL” world", result[0])
     }
     
     @Test
@@ -81,9 +81,9 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(3, result.size)
-        assertEquals("only brackets", result[0])
+        assertEquals("“only brackets”", result[0])
         assertEquals("Hello world", result[1])
-        assertEquals("only translation note", result[2])
+        assertEquals("“only translation note”", result[2])
     }
     
     @Test
@@ -99,8 +99,8 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(2, result.size)
-        assertEquals("Hello note world", result[0])
-        assertEquals("Test TL content", result[1])
+        assertEquals("Hello “note” world", result[0])
+        assertEquals("Test “TL” content", result[1])
     }
     
     @Test
@@ -130,7 +130,7 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(1, result.size)
-        assertEquals("Hello outer inner note world", result[0])
+        assertEquals("Hello “outer “inner” note” world", result[0])
     }
     
     @Test
@@ -145,7 +145,7 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(1, result.size)
-        assertEquals("Hello note world", result[0])
+        assertEquals("Hello “note” world", result[0])
     }
     
     @Test
@@ -160,9 +160,9 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(3, result.size)
-        assertEquals("First note paragraph", result[0])
-        assertEquals("Second TL paragraph", result[1])
-        assertEquals("Third annotation paragraph", result[2])
+        assertEquals("First “note” paragraph", result[0])
+        assertEquals("Second “TL” paragraph", result[1])
+        assertEquals("Third “annotation” paragraph", result[2])
     }
     
     @Test
@@ -178,8 +178,8 @@ class TTSContentLoaderSanitizerTest {
         
         // Assert
         assertEquals(2, result.size)
-        assertEquals("Skill: Shadow Step activated!", result[0])
-        assertEquals("Status Window: HP 100/100", result[1])
+        assertEquals("“Skill: Shadow Step” activated!", result[0])
+        assertEquals("“Status Window: HP 100/100”", result[1])
     }
     
     @Test
@@ -212,7 +212,7 @@ class TTSContentLoaderSanitizerTest {
             Text("<p class=\"a\">Hello <b>bold</b> world</p>")
         )
         val result = parseContentWithSanitizer(pages)
-        assertEquals(listOf("Skill: Fireball activated", "Status Window I will not lose", "Hello bold world"), result)
+        assertEquals(listOf("“Skill: Fireball” activated", "“Status Window” “I will not lose”", "Hello bold world"), result)
     }
 
     /**

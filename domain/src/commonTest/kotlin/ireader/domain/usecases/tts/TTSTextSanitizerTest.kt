@@ -22,7 +22,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello this is a thought world", result)
+        assertEquals("Hello “this is a thought” world", result)
     }
     
     @Test
@@ -34,7 +34,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello translator note world", result)
+        assertEquals("Hello “translator note” world", result)
     }
     
     @Test
@@ -46,7 +46,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Skill: Fireball Level 3 Status Window", result)
+        assertEquals("“Skill: Fireball Level 3” “Status Window”", result)
     }
     
     @Test
@@ -58,7 +58,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello some annotation world", result)
+        assertEquals("Hello “some annotation” world", result)
     }
     
     @Test
@@ -82,7 +82,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello note world TL: translation test annotation end", result)
+        assertEquals("Hello “note” world “TL: translation” test “annotation” end", result)
     }
     
     @Test
@@ -94,7 +94,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello outer inner note world", result)
+        assertEquals("Hello “outer “inner” note” world", result)
     }
     
     @Test
@@ -130,7 +130,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("note TL annotation", result)
+        assertEquals("“note” “TL” “annotation”", result)
     }
     
     @Test
@@ -142,7 +142,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello note world", result)
+        assertEquals("Hello “note” world", result)
     }
     
     @Test
@@ -154,7 +154,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("start note Hello world end note", result)
+        assertEquals("“start note” Hello world “end note”", result)
     }
     
     @Test
@@ -166,7 +166,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello some tag world", result)
+        assertEquals("Hello “some tag” world", result)
     }
     
     @Test
@@ -190,7 +190,7 @@ class TTSTextSanitizerTest {
         val result = sanitizer.sanitize(text)
         
         // Assert
-        assertEquals("Hello note TL world", result)
+        assertEquals("Hello “note” “TL” world", result)
     }
     
     @Test
@@ -209,33 +209,52 @@ class TTSTextSanitizerTest {
     fun `sanitize should preserve text following unmatched opening bracket`() {
         // Arrange
         val text = "Hello (world"
-        
+
         // Act
         val result = sanitizer.sanitize(text)
-        
+
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello “world", result)
     }
     
     @Test
     fun `sanitize should drop fullwidth brackets but keep their text`() {
-        assertEquals("System Level Up", sanitizer.sanitize("【System】 Level Up"))
+        assertEquals("“System” Level Up", sanitizer.sanitize("【System】 Level Up"))
     }
 
     @Test
     fun `sanitize should keep paragraph breaks in merged chunks`() {
-        assertEquals("First note\n\nSecond.", sanitizer.sanitize("First (note)  \n\n  Second."))
+        assertEquals("First “note”\n\nSecond.", sanitizer.sanitize("First (note)  \n\n  Second."))
     }
 
     @Test
     fun `sanitize should handle unmatched closing bracket`() {
         // Arrange
         val text = "Hello world)"
-        
+
         // Act
         val result = sanitizer.sanitize(text)
-        
+
         // Assert
-        assertEquals("Hello world", result)
+        assertEquals("Hello world”", result)
+    }
+
+    @Test
+    fun `sanitize should turn every bracket and marker pair into quotes`() {
+        listOf(
+            "「papaya」", "『guava』", "«coconut»", "‹olive›", "⟨fig⟩", "⟦date⟧", "〈lime〉", "《kiwi》",
+            "｛plum｝", "<grape>", "*walnut*", "~pepper~", "|onion|",
+        ).forEach { word ->
+            val inner = word.drop(1).dropLast(1)
+            assertEquals("the “$inner” is ripe", sanitizer.sanitize("the $word is ripe"), word)
+        }
+    }
+
+    @Test
+    fun `sanitize should leave quotes alone and drop empty brackets`() {
+        assertEquals("the “apricot” is orange", sanitizer.sanitize("the “apricot” is orange"))
+        assertEquals("nothing here at all.", sanitizer.sanitize("nothing [] here () at {} all."))
+        assertEquals("He said “Level “2” already?”", sanitizer.sanitize("He said “Level (2) already?”"))
+        assertEquals("a “note”.", sanitizer.sanitize("a (note)."))
     }
 }
