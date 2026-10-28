@@ -211,11 +211,7 @@ class ContentFilterUseCase(
         
         for (exact in exactList) {
             try {
-                val flexiblePattern = Regex.escape(exact)
-                    .replace("\\ ", "\\s+")
-                    .replace("\\(", "\\(?")
-                    .replace("\\)", "\\)?")
-                flexibleList.add(Regex(flexiblePattern, RegexOption.IGNORE_CASE))
+                flexibleList.add(Regex(flexibleWhitespacePattern(exact), RegexOption.IGNORE_CASE))
             } catch (e: Exception) {
                 // Ignore pattern conversion errors
             }
