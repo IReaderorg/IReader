@@ -2,6 +2,8 @@ package ireader.domain.preferences.prefs
 
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 
 class BrowsePreferences(private val preferenceStore: PreferenceStore) {
 
@@ -21,5 +23,14 @@ class BrowsePreferences(private val preferenceStore: PreferenceStore) {
 
     fun maxResultsPerSource(): Preference<Int> {
         return preferenceStore.getInt("browse_max_results", 25)
+    }
+
+    /** Per source id: global searches in a row that errored or found nothing (see orderGlobalSearchSources). */
+    fun globalSearchSourceMisses(): Preference<Map<Long, Int>> {
+        return preferenceStore.getJsonObject(
+            "browse_global_search_misses",
+            emptyMap(),
+            MapSerializer(Long.serializer(), Int.serializer())
+        )
     }
 }
