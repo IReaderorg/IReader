@@ -279,7 +279,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |-
-            # const iosBuild = '${{ needs.ios-build.result }}';
             const build = '${{ needs.BuildBinaries.result }}';
 
             const getEmoji = (result) => result === 'success' ? '✅' : result === 'failure' ? '❌' : '⚠️';
@@ -288,22 +287,10 @@ jobs:
 
             | Check | Status |
             |-------|--------|
-            | All Module Tests | ${getEmoji(allTests)} ${allTests} |
-            # | iOS Build | ${getEmoji(iosBuild)} ${iosBuild} |
             | Build | ${getEmoji(build)} ${build} |
-
-            ### Tests Include:
-            - All domain module tests
-            - All data module tests
-            - All presentation module tests
-            - Database migration tests
-            - Chapter cache and persistence tests
-            - Download service tests
-            - Reading timer tests
-            - iOS framework compilation
             `;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
