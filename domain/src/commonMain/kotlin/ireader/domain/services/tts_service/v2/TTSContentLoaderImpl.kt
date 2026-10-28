@@ -42,6 +42,13 @@ class TTSContentLoaderImpl(
     
     companion object {
         private const val TAG = "TTSContentLoader"
+
+        // Only real tags: known name, then nothing, "/", or name="value" attributes (issue #276)
+        internal val HTML_TAG = Regex(
+            """</?(?:a|b|i|u|s|p|em|strong|span|div|font|sup|sub|small|big|mark|del|ins|strike|code|pre|br|hr|img|h[1-6]|ul|ol|li|blockquote|center|section|article|table|tr|td|th|tbody|thead)""" +
+                """(?:\s+[\w:-]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))*\s*/?>""",
+            RegexOption.IGNORE_CASE
+        )
     }
     
     override suspend fun loadChapter(bookId: Long, chapterId: Long): TTSContentLoader.ChapterContent {
@@ -173,7 +180,7 @@ class TTSContentLoaderImpl(
             .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
             .replace(Regex("<p[^>]*>", RegexOption.IGNORE_CASE), "\n")
             .replace(Regex("</p>", RegexOption.IGNORE_CASE), "\n")
-            .replace(Regex("<[^>]+>"), "") // Remove remaining HTML tags
+            .replace(HTML_TAG, "") // Remove remaining HTML tags, keep novel text like <Skill: Fireball>
             .replace("&nbsp;", " ")
             .replace("&amp;", "&")
             .replace("&lt;", "<")
@@ -243,6 +250,14 @@ class TTSContentLoaderImpl(
         }
     }
     
+    override suspend fun markChapterRead(chapter: Chapter) {
+        try {
+            chapterUseCase.updateLastReadTime(chapter)
+        } catch (e: Exception) {
+            Log.error { "$TAG: Failed to save reading progress for chapter ${chapter.id}: ${e.message}" }
+        }
+    }
+
     override fun subscribeChapters(bookId: Long): Flow<List<Chapter>> {
         return chapterRepository.subscribeChaptersByBookId(bookId)
             .distinctUntilChangedBy { chapters -> chapters.map { it.id } }

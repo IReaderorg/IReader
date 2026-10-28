@@ -3,6 +3,7 @@ package ireader.domain.services.tts_service.v2
 import ireader.core.log.Log
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.usecases.tts.TTSTextSanitizer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -46,6 +47,8 @@ class TTSController(
     // Mutable configs that can be updated at runtime
     private var gradioConfig: GradioConfig? = initialGradioConfig
     private var localConfig: ireader.domain.services.tts_service.local.LocalTTSConfig? = initialLocalConfig
+    // Applied only to text handed to the engine; the screen keeps showing the original brackets
+    private val ttsSanitizer = TTSTextSanitizer()
     companion object {
         private const val TAG = "TTSController"
 
@@ -334,9 +337,14 @@ class TTSController(
             }
             is EngineEvent.Completed -> {
                 // Ignore stale completion events from old/cancelled utterances
-                if (event.utteranceId.isNotEmpty() && currentUtteranceId != null && event.utteranceId != currentUtteranceId) {
-                    Log.warn { "$TAG: Ignoring stale EngineEvent.Completed(utteranceId=${event.utteranceId}, current=$currentUtteranceId)" }
-                    return
+                if (event.utteranceId.isNotEmpty()) {
+                    if (event.utteranceId != currentUtteranceId) {
+                        Log.warn { "$TAG: Ignoring stale EngineEvent.Completed(utteranceId=${event.utteranceId}, current=$currentUtteranceId)" }
+                        return
+                    }
+                    // Consume it: a duplicate Completed for the last paragraph used to dispatch
+                    // NextChapter twice and skip a chapter
+                    currentUtteranceId = null
                 }
                 handleParagraphCompleted()
             }
@@ -427,7 +435,7 @@ class TTSController(
         }
         
         // Use displayContent which respects showTranslation setting
-        val text = currentState.displayContent.getOrNull(paragraphIndex)
+        val text = currentState.displayContent.getOrNull(paragraphIndex)?.let(ttsSanitizer::sanitize)
         if (text != null) {
             if (text.isBlank()) {
                 // If paragraph is blank (e.g. empty line or stripped by regex), advance immediately
@@ -476,7 +484,7 @@ class TTSController(
             // Skip if already cached
             if (currentState.cachedParagraphs.contains(nextIndex)) continue
             
-            val text = content.getOrNull(nextIndex) ?: continue
+            val text = content.getOrNull(nextIndex)?.let(ttsSanitizer::sanitize) ?: continue
             if (text.isBlank()) continue
             
             itemsToPrecache.add("p_$nextIndex" to text)
@@ -1080,7 +1088,12 @@ class TTSController(
             }
             
             Log.debug { "$TAG: Chapter loaded - ${content.paragraphs.size} paragraphs" }
-            
+
+            // Persist progress here (not in the UI) so it is saved with the screen off / app in background
+            if (content.paragraphs.isNotEmpty()) {
+                content.chapter?.let { contentLoader.markChapterRead(it) }
+            }
+
             // Apply pending chunk mode if set
             val pendingWordCount = pendingChunkWordCount
             if (pendingWordCount != null && pendingWordCount > 0) {
@@ -1102,7 +1115,7 @@ class TTSController(
      * Update the cached paragraphs state by checking which paragraphs are in the cache
      */
     private suspend fun updateCachedParagraphsState(paragraphs: List<String>) {
-        val cachedIndices = engine?.getCachedIndices(paragraphs) ?: emptySet()
+        val cachedIndices = engine?.getCachedIndices(paragraphs.map(ttsSanitizer::sanitize)) ?: emptySet()
         Log.debug { "$TAG: updateCachedParagraphsState - ${cachedIndices.size} paragraphs cached" }
         _state.update { it.copy(cachedParagraphs = cachedIndices) }
     }
@@ -1465,7 +1478,9 @@ class TTSController(
         val chapterId = currentState.chapter?.id
         val chunkIndex = currentState.currentChunkIndex
         val utteranceId = "chunk_$chunkIndex"
-        
+        // Set before the cached-audio branch so its Completed event matches
+        currentUtteranceId = utteranceId
+
         // Check if this chunk is cached (for offline playback)
         if (chapterId != null && cacheUseCase != null) {
             val isCached = cacheUseCase.isChunkCached(chapterId, chunkIndex)
@@ -1502,8 +1517,7 @@ class TTSController(
         
         Log.debug { "$TAG: playChunk() - chunk $chunkIndex, text length=${textToSpeak.length}, useTranslation=${currentState.showTranslation}" }
         
-        currentUtteranceId = utteranceId
-        engine?.speak(textToSpeak, utteranceId)
+        engine?.speak(ttsSanitizer.sanitize(textToSpeak), utteranceId)
         
         // Pre-cache next chunk(s) for smoother playback
         precacheNextChunks(currentState, result)
@@ -1534,10 +1548,10 @@ class TTSController(
             }
             
             if (text.isNotBlank()) {
-                itemsToPrecache.add(utteranceId to text)
+                itemsToPrecache.add(utteranceId to ttsSanitizer.sanitize(text))
             }
         }
-        
+
         if (itemsToPrecache.isNotEmpty()) {
             Log.debug { "$TAG: precacheNextChunks() - precaching ${itemsToPrecache.size} chunks" }
             engine?.precacheNext(itemsToPrecache)
@@ -1600,7 +1614,13 @@ interface TTSContentLoader {
      * Emits whenever chapters are added/updated in the database (e.g. after a remote fetch).
      */
     fun subscribeChapters(bookId: Long): kotlinx.coroutines.flow.Flow<List<Chapter>>
-    
+
+    /**
+     * Record that playback moved onto this chapter (read flag + history), like the reader does on open.
+     * Not part of loadChapter because prefetch also loads chapters that haven't been reached yet.
+     */
+    suspend fun markChapterRead(chapter: Chapter) {}
+
     data class ChapterContent(
         val book: Book?,
         val chapter: Chapter?,
