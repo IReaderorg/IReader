@@ -16,8 +16,11 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.utils.extensions.currentTimeToLong
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +33,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import ireader.core.util.synchronizedMapOf
 
 /**
  * Optimized CatalogStore with improved performance for catalog and JS plugin loading.
@@ -63,7 +65,11 @@ class CatalogStore(
         private const val FLOW_DEBOUNCE_MS = 100L
     }
 
-    private val scope = createICoroutineScope()
+    // A broken plugin must not take the app down: without a handler, any throwable escaping
+    // an install/uninstall job reached the thread's uncaught-exception handler and crashed
+    private val scope = createICoroutineScope() + CoroutineExceptionHandler { _, e ->
+        Log.error("CatalogStore: background catalog job failed", e)
+    }
     
     // Thread-safe tracking sets using KMP SynchronizedSet
     private val stubSourceIds: MutableSet<Long> = synchronizedSetOf()
@@ -213,10 +219,12 @@ class CatalogStore(
                     // Cache pinned IDs
                     cachedPinnedIds = pinnedCatalogsPreference.get()
                     initializeCatalogs()
-                } catch (e: Exception) {
+                } catch (e: CancellationException) {
+                    initializationStarted = false
+                    throw e
+                } catch (e: Throwable) {
                     Log.error("CatalogStore: Initialization failed", e)
-                } finally {
-                    _isInitialized.value = true
+                    if (!_isInitialized.value) initializationStarted = false
                 }
             }
         }
@@ -239,13 +247,7 @@ class CatalogStore(
             
             // STEP 1: Load all catalogs INCLUDING stub sources IMMEDIATELY
             // This shows sources in UI right away (stubs are not clickable but visible)
-            val loadedCatalogs = loader.loadAll()
-                .distinctBy { it.sourceId }
-            
-            // Process catalogs efficiently
-            val processedCatalogs = loadedCatalogs.map { catalog ->
-                processCatalog(catalog)
-            }.toMutableList()
+            val processedCatalogs = processLoadedCatalogs(loader.loadAll()).toMutableList()
             
             // Load user-defined sources
             try {
@@ -283,9 +285,20 @@ class CatalogStore(
         }
     }
     
-    /**
-     * Process a single catalog - track stubs and apply pinned state.
-     */
+    private fun processLoadedCatalogs(loaded: List<CatalogLocal>): List<CatalogLocal> {
+        val seenIds = mutableSetOf<Long>()
+        return loaded.mapNotNull { catalog ->
+            try {
+                val id = catalog.sourceId
+                if (id in seenIds) null else processCatalog(catalog).also { seenIds.add(id) }
+            } catch (e: LinkageError) {
+                Log.error("CatalogStore: Skipping incompatible catalog", e)
+                null
+            }
+        }
+    }
+
+    /** Process a single catalog, tracking stubs and applying pinned state. */
     private fun processCatalog(catalog: CatalogLocal): CatalogLocal {
         // Track stub sources
         if (catalog is ireader.domain.models.entities.JSPluginCatalog &&
@@ -499,7 +512,14 @@ class CatalogStore(
                     }
 
                     if (catalog == null) {
-                        loadSingleJSPlugin(pkgName)
+                        val previous = catalogsByPkgName[pkgName]
+                        val sameInstallType = (isLocalInstall && previous is CatalogInstalled.Locally) ||
+                            (!isLocalInstall && previous is CatalogInstalled.SystemWide)
+                        if (sameInstallType && previous != null) {
+                            catalogUpdateChannel.send(CatalogUpdate.Remove(previous.sourceId))
+                        } else if (isLocalInstall) {
+                            loadSingleJSPlugin(pkgName)
+                        }
                         return@launch
                     }
 
@@ -711,9 +731,7 @@ class CatalogStore(
                     loader.clearCatalogCache(catalog.pkgName)
                 }
                 
-                val loadedCatalogs = loader.loadAll()
-                    .distinctBy { it.sourceId }
-                    .map { processCatalog(it) }
+                val loadedCatalogs = processLoadedCatalogs(loader.loadAll())
 
                 catalogs = loadedCatalogs
                 startBackgroundPluginLoading()

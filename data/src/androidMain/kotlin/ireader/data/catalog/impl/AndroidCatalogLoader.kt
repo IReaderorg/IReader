@@ -32,8 +32,6 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.withIOContext
 import ireader.i18n.BuildKonfig
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.Res
-import ireader.i18n.resources.unknown
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -431,7 +429,10 @@ class AndroidCatalogLoader(
                     nsfw = data.nsfw,
                     installDir = (file.parentFile ?: file).absolutePath.toOkioPath(),
                     iconUrl = data.icon
-                )
+                ).also { it.sourceId } // Validate the extension ID before publishing the catalog.
+            } catch (e: LinkageError) {
+                Log.error("AndroidCatalogLoader: Incompatible local catalog $pkgName", e)
+                return null
             } catch (e: OutOfMemoryError) {
                 Log.error("AndroidCatalogLoader: OOM loading catalog $pkgName", e)
                 return null
@@ -567,19 +568,24 @@ class AndroidCatalogLoader(
             return null
         }
         
-        val source = loadSource(pkgName, loader, data)
+        val source = loadSource(pkgName, loader, data) ?: return null
 
-        return CatalogInstalled.SystemWide(
-            name = source?.name ?: localizeHelper.localize(Res.string.unknown),
-            description = data.description,
-            source = source,
-            pkgName = pkgName,
-            versionName = data.versionName,
-            versionCode = data.versionCode,
-            nsfw = data.nsfw,
-            iconUrl = data.icon,
-            installDir = iconFile?.parentFile?.absolutePath?.toOkioPath(),
-        )
+        return try {
+            CatalogInstalled.SystemWide(
+                name = source.name,
+                description = data.description,
+                source = source,
+                pkgName = pkgName,
+                versionName = data.versionName,
+                versionCode = data.versionCode,
+                nsfw = data.nsfw,
+                iconUrl = data.icon,
+                installDir = iconFile?.parentFile?.absolutePath?.toOkioPath(),
+            ).also { it.sourceId }
+        } catch (e: LinkageError) {
+            Log.error("AndroidCatalogLoader: Incompatible system catalog $pkgName", e)
+            null
+        }
     }
 
     /**
@@ -689,6 +695,11 @@ class AndroidCatalogLoader(
             null
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to instantiate source ${data.classToLoad} from $pkgName", e)
+            null
+        } catch (e: LinkageError) {
+            // Extension built against an incompatible source-api (NoClassDefFoundError, AbstractMethodError, ...).
+            // These are Errors, not Exceptions; letting them escape crashed the app on install/update.
+            Log.error("AndroidCatalogLoader: Incompatible extension ${data.classToLoad} in $pkgName", e)
             null
         }
     }
