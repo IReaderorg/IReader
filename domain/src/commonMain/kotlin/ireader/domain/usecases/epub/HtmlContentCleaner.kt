@@ -7,7 +7,9 @@ package ireader.domain.usecases.epub
  * Requirements: 15.2 - Implement HTML content cleaning to remove scripts, styles, ads, and watermarks
  */
 object HtmlContentCleaner {
-    
+
+    private const val AD_NAME = "(?<![A-Za-z0-9])ad(?:s|vert\\w*)?(?![A-Za-z0-9])"
+
     /**
      * Cleans HTML content by removing unwanted elements and attributes.
      * 
@@ -27,8 +29,9 @@ object HtmlContentCleaner {
         cleaned = cleaned.replace(Regex("(?s)<!--.*?-->"), "")
         
         // Remove common ad containers
-        cleaned = cleaned.replace(Regex("(?s)<div[^>]*class=[\"'][^\"']*ad[^\"']*[\"'][^>]*>.*?</div>"), "")
-        cleaned = cleaned.replace(Regex("(?s)<div[^>]*id=[\"'][^\"']*ad[^\"']*[\"'][^>]*>.*?</div>"), "")
+        // "ad" must be a whole name part (ad, ads, ad-top, advert...), not inside "header", "reader", "loading"
+        cleaned = cleaned.replace(Regex("(?s)<div[^>]*class=[\"'][^\"']*$AD_NAME[^\"']*[\"'][^>]*>.*?</div>"), "")
+        cleaned = cleaned.replace(Regex("(?s)<div[^>]*id=[\"'][^\"']*$AD_NAME[^\"']*[\"'][^>]*>.*?</div>"), "")
         
         // Remove common watermark patterns
         cleaned = cleaned.replace(Regex("(?s)<div[^>]*class=[\"'][^\"']*watermark[^\"']*[\"'][^>]*>.*?</div>"), "")
@@ -57,8 +60,8 @@ object HtmlContentCleaner {
         cleaned = cleaned.replace(Regex("<p>\\s*</p>"), "")
         cleaned = cleaned.replace(Regex("<div>\\s*</div>"), "")
         
-        // Remove excessive whitespace
-        cleaned = cleaned.replace(Regex("\\s{2,}"), " ")
+        // Collapse runs of spaces/tabs only; newlines separate the paragraphs the EPUB exporter splits on
+        cleaned = cleaned.replace(Regex("[^\\S\\n]{2,}"), " ")
         
         // Trim the result
         cleaned = cleaned.trim()
