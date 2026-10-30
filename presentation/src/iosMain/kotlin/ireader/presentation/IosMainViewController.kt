@@ -13,10 +13,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ComposeUIViewController
 import androidx.navigation.compose.rememberNavController
+import coil3.compose.setSingletonImageLoaderFactory
+import ireader.core.http.HttpClients
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.core.CommonNavHost
 import ireader.presentation.core.ProvideNavigator
 import ireader.presentation.core.theme.AppTheme
+import ireader.presentation.imageloader.iosImageLoader
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import org.koin.compose.koinInject
@@ -48,7 +51,11 @@ object IosMainViewController {
 fun IReaderApp() {
     val scope = rememberCoroutineScope()
     val localizeHelper: LocalizeHelper = koinInject()
-    
+    val httpClients: HttpClients = koinInject()
+    setSingletonImageLoaderFactory { context ->
+        iosImageLoader(context, httpClients)
+    }
+
     CompositionLocalProvider(
         LocalLocalizeHelper provides localizeHelper
     ) {
