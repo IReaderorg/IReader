@@ -84,7 +84,8 @@ class TTSTextSanitizer {
         result = SPACE_BEFORE_PUNCTUATION.replace(result, "$1")
 
         // Trim leading/trailing whitespace
-        return result.trim()
+        // Nothing speakable (e.g. a "..." paragraph): engines may never report done, stalling playback
+        return if (result.none { it.isLetterOrDigit() }) "" else result.trim()
     }
     
     /**

@@ -251,6 +251,14 @@ class TTSTextSanitizerTest {
     }
 
     @Test
+    fun `sanitize should return empty for punctuation-only text so playback skips it`() {
+        listOf("...", ". . .", "……", "“...”", "(...)", "...!?").forEach {
+            assertEquals("", sanitizer.sanitize(it), it)
+        }
+        assertEquals("Wait... then he left.", sanitizer.sanitize("Wait... then he left."))
+    }
+
+    @Test
     fun `sanitize should leave quotes alone and drop empty brackets`() {
         assertEquals("the “apricot” is orange", sanitizer.sanitize("the “apricot” is orange"))
         assertEquals("nothing here at all.", sanitizer.sanitize("nothing [] here () at {} all."))
