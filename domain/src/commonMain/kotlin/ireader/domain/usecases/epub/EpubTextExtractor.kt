@@ -29,6 +29,24 @@ object EpubTextExtractor {
         "header", "footer", "nav", "aside"
     )
 
+    /**
+     * A single <br> is a line break inside the paragraph (poems, letters, status windows), kept
+     * as "\n"; two or more in a row separate paragraphs, as in many converted web novels.
+     */
+    private fun brParagraphs(rawText: String): List<String> {
+        val paragraphs = mutableListOf<String>()
+        val current = mutableListOf<String>()
+        fun flush() {
+            if (current.isNotEmpty()) paragraphs.add(current.joinToString("\n"))
+            current.clear()
+        }
+        for (line in rawText.split(BR_PLACEHOLDER).map { it.trim() }) {
+            if (line.isBlank()) flush() else current.add(line)
+        }
+        flush()
+        return paragraphs
+    }
+
     fun extractTextContent(doc: Document): List<Text> {
         val body = doc.body()
 
@@ -66,13 +84,7 @@ object EpubTextExtractor {
         }
 
         fun emitParagraph(rawText: String) {
-            val lines = rawText.split(BR_PLACEHOLDER)
-            for (line in lines) {
-                val cleaned = line.trim()
-                if (cleaned.isNotBlank()) {
-                    textList.add(Text(cleaned))
-                }
-            }
+            brParagraphs(rawText).forEach { textList.add(Text(it)) }
         }
 
         fun processContainer(container: Element) {
@@ -125,11 +137,7 @@ object EpubTextExtractor {
         return textList.ifEmpty {
             val bodyText = body.text().trim()
             if (bodyText.isNotBlank()) {
-                val lines = bodyText.split(BR_PLACEHOLDER)
-                lines.mapNotNull { line ->
-                    val trimmed = line.trim()
-                    if (trimmed.isNotBlank()) Text(trimmed) else null
-                }
+                brParagraphs(bodyText).map { Text(it) }
             } else {
                 emptyList()
             }

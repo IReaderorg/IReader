@@ -187,7 +187,7 @@ class EpubTextExtractionTest {
     }
 
     @Test
-    fun `extractTextContent should split paragraphs on br tags`() {
+    fun `extractTextContent should keep single br as a line break and split on double br`() {
         // Arrange
         val html = """
             <html>
@@ -197,15 +197,14 @@ class EpubTextExtractionTest {
             </html>
         """.trimIndent()
         val doc = Ksoup.parse(html)
-        
+
         // Act
         val result = extractTextContent(doc)
-        
+
         // Assert
-        assertEquals(3, result.size)
-        assertEquals("Line 1", result[0].text)
-        assertEquals("Line 2", result[1].text)
-        assertEquals("Line 3", result[2].text)
+        assertEquals(2, result.size)
+        assertEquals("Line 1\nLine 2", result[0].text)
+        assertEquals("Line 3", result[1].text)
     }
 
     @Test
