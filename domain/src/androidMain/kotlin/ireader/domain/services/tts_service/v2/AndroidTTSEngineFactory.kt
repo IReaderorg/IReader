@@ -138,24 +138,31 @@ class AndroidNativeTTSEngineV2(private val context: Context) : TTSEngine, KoinCo
         }
     }
     
+    // Native TTS has no real pause (pause == stop), so resume re-speaks the interrupted utterance.
+    // Without this, headset/notification "play" after a pause stayed silent (issue #277).
+    private var lastUtterance: Pair<String, String>? = null
+
     override suspend fun speak(text: String, utteranceId: String) {
         Log.warn { "$TAG: speak($utteranceId)" }
+        lastUtterance = text to utteranceId
         player.speak(text, utteranceId)
     }
-    
+
     override fun stop() {
         Log.warn { "$TAG: stop()" }
+        lastUtterance = null
         player.stop()
     }
-    
+
     override fun pause() {
         Log.warn { "$TAG: pause()" }
         player.pause()
     }
-    
+
     override fun resume() {
         Log.warn { "$TAG: resume()" }
-        player.resume()
+        val (text, utteranceId) = lastUtterance ?: return
+        scope.launch { player.speak(text, utteranceId) }
     }
     
     override fun setSpeed(speed: Float) {

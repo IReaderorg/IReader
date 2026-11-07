@@ -24,15 +24,24 @@ package ireader.domain.usecases.tts
  * Usage:
  * ```kotlin
  * val sanitizer = TTSTextSanitizer()
- * val cleanText = sanitizer.sanitize("Hello (world) [note]") // Returns "Hello"
+ * val cleanText = sanitizer.sanitize("Hello (world) [note]") // Returns "Hello “world” “note”"
  * ```
  */
 class TTSTextSanitizer {
     
     companion object {
-        // Remove bracket delimiter characters while preserving their inner content
-        private val BRACKET_DELIMITERS = Regex("""[()\[\]{}<>]""")
-        
+        // Bracket-like delimiters become curly quotes: engines pause at “ ” without naming the
+        // symbol, while some read 【】「」«» etc. aloud (issue #203). The inner text is kept.
+        private val OPENING_BRACKETS = Regex("""[(\[{<【〔〖［（｛《〈「『«‹⟨⟦]""")
+        private val CLOSING_BRACKETS = Regex("""[)\]}>】〕〗］）｝》〉」』»›⟩⟧]""")
+        private val EMPTY_QUOTES = Regex("""“\s*”""")
+        private val SPACE_BEFORE_PUNCTUATION = Regex(""" +([.,!?;:])""")
+
+        // *word*, ~word~ and |word| are quoted the same way; stray markers are dropped below
+        private val MARKER_PAIRS = listOf("""\*""", "~", """\|""").map { m ->
+            Regex("""$m+([^$m\s](?:[^$m\n]*[^$m\s])?)$m+""")
+        }
+
         // Remove asterisks (single or multiple)
         private val ASTERISKS = Regex("""\*+""")
         
@@ -40,8 +49,9 @@ class TTSTextSanitizer {
         // Includes: ~ ` ^ _ | \ © ® ™ § ¶ † ‡ • … ‰ ′ ″
         private val SPECIAL_CHARS = Regex("""[~`^_|\\©®™§¶†‡•…‰′″]+""")
         
-        // Normalize multiple spaces to single space
-        private val MULTIPLE_SPACES = Regex("""\s+""")
+        // Normalize runs of spaces/tabs; line breaks stay so merged chunks still pause between paragraphs
+        private val MULTIPLE_SPACES = Regex("""[^\S\n]+""")
+        private val SPACE_AROUND_NEWLINE = Regex(""" ?\n ?""")
     }
     
     /**
@@ -56,19 +66,23 @@ class TTSTextSanitizer {
         
         var result = text
         
-        // Replace bracket delimiter characters with a space so words remain separated
-        // e.g. "[Skill: Fireball]" -> " Skill: Fireball " -> "Skill: Fireball"
-        result = BRACKET_DELIMITERS.replace(result, " ")
-        
+        // e.g. "[Skill: Fireball]" -> "“Skill: Fireball”", "*walnut*" -> "“walnut”"
+        result = MARKER_PAIRS.fold(result) { acc, pair -> pair.replace(acc, " “$1” ") }
+        result = OPENING_BRACKETS.replace(result, " “")
+        result = CLOSING_BRACKETS.replace(result, "” ")
+        result = EMPTY_QUOTES.replace(result, " ")
+
         // Remove asterisks (used for emphasis or footnotes)
         result = ASTERISKS.replace(result, " ")
         
         // Remove other special formatting characters
         result = SPECIAL_CHARS.replace(result, " ")
         
-        // Normalize whitespace (multiple spaces, tabs, newlines -> single space)
+        // Normalize whitespace (multiple spaces, tabs -> single space)
         result = MULTIPLE_SPACES.replace(result, " ")
-        
+        result = SPACE_AROUND_NEWLINE.replace(result, "\n")
+        result = SPACE_BEFORE_PUNCTUATION.replace(result, "$1")
+
         // Trim leading/trailing whitespace
         return result.trim()
     }
