@@ -237,6 +237,11 @@ class ReaderScreenViewModel(
     val openRouterApiKey = readerPreferences.openRouterApiKey().asState()
     val nvidiaApiKey = readerPreferences.nvidiaApiKey().asState()
     val ollamaServerUrl = readerPreferences.ollamaServerUrl().asState()
+    val openAIBaseUrl = readerPreferences.openAIBaseUrl().asState()
+
+    /** Effective AI translation endpoint URL (OpenAI-compatible, or Ollama fallback). */
+    val translationEndpointUrl: String
+        get() = openAIBaseUrl.value.ifBlank { ollamaServerUrl.value }
     
     // Content filter preferences
     val contentFilterEnabled = readerPreferences.contentFilterEnabled().asState()

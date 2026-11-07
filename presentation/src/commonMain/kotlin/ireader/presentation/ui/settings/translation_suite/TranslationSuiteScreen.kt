@@ -61,6 +61,7 @@ fun TranslationSuiteScreen(
     onOllamaUrlChange: (String) -> Unit = {},
     onOllamaModelChange: (String) -> Unit = {},
     onTestConnection: () -> Unit = {},
+    onRequestLocalNetworkPermission: ((onResult: (Boolean) -> Unit) -> Unit)? = null,
     onResetTestConnectionState: () -> Unit = {},
     onInitializeGoogleMlKit: (String, String) -> Unit = { _, _ -> },
     onNavigateToLogin: ((String) -> Unit)? = null,
@@ -174,7 +175,8 @@ fun TranslationSuiteScreen(
                             onParagraphChunkSizeChange = onParagraphChunkSizeChange,
                             onTestConnection = onTestConnection,
                             onInitializeGoogleMlKit = onInitializeGoogleMlKit,
-                            onNavigateToLogin = onNavigateToLogin
+                            onNavigateToLogin = onNavigateToLogin,
+                            onRequestLocalNetworkPermission = onRequestLocalNetworkPermission
                         )
                     }
                 }
@@ -423,7 +425,8 @@ private fun ActiveEngineDetailCard(
     onParagraphChunkSizeChange: (Int) -> Unit = {},
     onTestConnection: () -> Unit,
     onInitializeGoogleMlKit: (String, String) -> Unit,
-    onNavigateToLogin: ((String) -> Unit)?
+    onNavigateToLogin: ((String) -> Unit)?,
+    onRequestLocalNetworkPermission: ((onResult: (Boolean) -> Unit) -> Unit)? = null
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -656,7 +659,16 @@ private fun ActiveEngineDetailCard(
                     text = "Connection Test",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Button(onClick = onTestConnection) {
+                Button(onClick = {
+                    // Android 17+ needs ACCESS_LOCAL_NETWORK for LAN endpoints
+                    // (issue #295). Request first, then run the test regardless so
+                    // denial degrades to the existing error message.
+                    if (onRequestLocalNetworkPermission != null) {
+                        onRequestLocalNetworkPermission { onTestConnection() }
+                    } else {
+                        onTestConnection()
+                    }
+                }) {
                     Icon(Icons.Default.NetworkCheck, contentDescription = null)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(if (state.testConnectionState is TestConnectionState.Testing) "Testing..." else "Test Connection")

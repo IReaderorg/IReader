@@ -21,11 +21,20 @@ class TranslationScreenSpec {
         val viewModel: TranslationSuiteViewModel = getIViewModel()
         val state by viewModel.state.collectAsState()
 
+        // Android 17+ requires ACCESS_LOCAL_NETWORK (Nearby Devices) for LAN
+        // endpoints such as http://192.168.x.x:1234/v1 (issue #295). Request
+        // it lazily only when a local URL is configured; guarded by SDK check
+        // inside the Android actual, no-op elsewhere.
+        val requestLocalNetworkPermission = rememberLocalNetworkPermissionRequest(
+            url = state.openAIBaseUrl.ifBlank { state.ollamaUrl }
+        )
+
         TranslationSuiteScreen(
             state = state,
             onNavigateUp = { navController.safePopBackStack() },
             onSelectEngineId = { viewModel.setEngineId(it) },
             onSelectLanguage = { viewModel.setTargetLanguage(it) },
+            onRequestLocalNetworkPermission = requestLocalNetworkPermission,
             onOpenAIApiKeyChange = { viewModel.setOpenAIApiKey(it) },
             onOpenAIBaseUrlChange = { viewModel.setOpenAIBaseUrl(it) },
             onOpenAIModelChange = { viewModel.setOpenAIModel(it) },

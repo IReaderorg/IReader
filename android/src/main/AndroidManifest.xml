@@ -14,6 +14,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!-- Local network permission (Android 17+ / API 37+, NEARBY_DEVICES group).
+         Required for direct LAN connections, e.g. locally hosted OpenAI-compatible
+         translation endpoints at private IP addresses. Runtime permission; must be
+         requested from UI. See issue #295. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
     <!-- For background jobs -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />

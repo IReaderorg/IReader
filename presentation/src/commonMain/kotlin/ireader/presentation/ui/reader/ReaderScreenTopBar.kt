@@ -66,6 +66,18 @@ fun ReaderScreenTopBar(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
+    // Android 17+ (issue #295): ask for ACCESS_LOCAL_NETWORK (Nearby devices)
+    // with a rationale before translating to a LAN endpoint. On other platforms,
+    // public endpoints, or when already granted, this proceeds immediately.
+    val requestLocalNetworkPermission = ireader.presentation.core.ui.rememberLocalNetworkPermissionRequest(
+        url = vm.translationEndpointUrl
+    )
+    val translateWithPermission = ireader.presentation.core.ui.rememberLocalNetworkPermissionWithRationale(
+        url = vm.translationEndpointUrl,
+        requestPermission = requestLocalNetworkPermission,
+        onProceed = { vm.translateCurrentChapter(forceRetranslate = false) }
+    )
+
     // Main top bar with instant animation (shown when reader mode is disabled)
     AnimatedVisibility(
         visible = !isReaderModeEnable && isLoaded,
@@ -168,7 +180,7 @@ fun ReaderScreenTopBar(
                                 if (successState?.hasTranslation == true) {
                                     vm.showTranslatedContent.value = !vm.showTranslatedContent.value
                                 } else {
-                                    vm.translateCurrentChapter(forceRetranslate = false)
+                                    translateWithPermission()
                                 }
                             }
                         )

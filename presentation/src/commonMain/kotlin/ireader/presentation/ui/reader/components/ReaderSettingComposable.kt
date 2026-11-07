@@ -694,9 +694,21 @@ fun GeneralScreenTab(
             val currentEngine = remember(vm.translatorEngine.value) {
                 vm.translationEnginesManager.get()
             }
+            // Android 17+ (issue #295): rationale + Nearby devices request
+            // before translating to a LAN endpoint; proceeds immediately otherwise.
+            val requestLocalNetworkPermission = ireader.presentation.core.ui.rememberLocalNetworkPermissionRequest(
+                url = vm.translationEndpointUrl
+            )
+            var pendingForceRetranslate by remember { androidx.compose.runtime.mutableStateOf(false) }
+            val translateWithPermission = ireader.presentation.core.ui.rememberLocalNetworkPermissionWithRationale(
+                url = vm.translationEndpointUrl,
+                requestPermission = requestLocalNetworkPermission,
+                onProceed = { vm.translateCurrentChapter(forceRetranslate = pendingForceRetranslate) }
+            )
             TranslateButton(
                 onClick = { forceRetranslate ->
-                    vm.translateCurrentChapter(forceRetranslate = forceRetranslate)
+                    pendingForceRetranslate = forceRetranslate
+                    translateWithPermission()
                 },
                 isTranslating = vm.translationViewModel.isTranslating,
                 translationProgress = vm.translationViewModel.translationProgress,
