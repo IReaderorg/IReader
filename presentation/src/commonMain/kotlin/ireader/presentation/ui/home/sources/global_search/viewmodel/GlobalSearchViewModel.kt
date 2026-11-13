@@ -88,10 +88,9 @@ class GlobalSearchViewModel(
                     return@launch
                 }
 
-                // Mark all sources as loading initially
-                sources.forEach { source ->
-                    handleSearchItems(SearchItem(source), loading = true)
-                }
+                // No pre-marking here: the repository's first emission marks the sources it actually
+                // searches (language-filtered, in search order). Marking every installed source left
+                // other-language sources stuck as "loading".
 
                 // Use the new GlobalSearchUseCase with Flow
                 remoteUseCases.globalSearch.asFlow(query)
