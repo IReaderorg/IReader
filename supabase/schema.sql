@@ -737,34 +737,34 @@ CREATE POLICY "Users can insert their own data" ON public.users FOR INSERT WITH 
 -- ----------------------------------------------------------------------------
 -- Reading Progress Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own reading progress" ON public.reading_progress FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can insert their own reading progress" ON public.reading_progress FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can update their own reading progress" ON public.reading_progress FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can delete their own reading progress" ON public.reading_progress FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can view their own reading progress" ON public.reading_progress FOR SELECT USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own reading progress" ON public.reading_progress FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own reading progress" ON public.reading_progress FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own reading progress" ON public.reading_progress FOR DELETE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Synced Books Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own synced books" ON public.synced_books FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can insert their own synced books" ON public.synced_books FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can update their own synced books" ON public.synced_books FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can delete their own synced books" ON public.synced_books FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can view their own synced books" ON public.synced_books FOR SELECT USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own synced books" ON public.synced_books FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own synced books" ON public.synced_books FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own synced books" ON public.synced_books FOR DELETE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Sync Manifest Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own sync manifest" ON public.sync_manifest FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can insert their own sync manifest" ON public.sync_manifest FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can update their own sync manifest" ON public.sync_manifest FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can delete their own sync manifest" ON public.sync_manifest FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can view their own sync manifest" ON public.sync_manifest FOR SELECT USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own sync manifest" ON public.sync_manifest FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own sync manifest" ON public.sync_manifest FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own sync manifest" ON public.sync_manifest FOR DELETE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Synced Chapters Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own synced chapters" ON public.synced_chapters FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can insert their own synced chapters" ON public.synced_chapters FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can update their own synced chapters" ON public.synced_chapters FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
-CREATE POLICY "Users can delete their own synced chapters" ON public.synced_chapters FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can view their own synced chapters" ON public.synced_chapters FOR SELECT USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own synced chapters" ON public.synced_chapters FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own synced chapters" ON public.synced_chapters FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own synced chapters" ON public.synced_chapters FOR DELETE USING (auth.uid() IS NOT NULL AND user_id::TEXT = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Book Reviews Table Policies
