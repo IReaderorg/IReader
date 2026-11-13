@@ -18,11 +18,20 @@ import ireader.domain.di.platformServiceModule
 import ireader.domain.di.preferencesInjectModule
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import platform.Foundation.NSData
+import platform.Foundation.NSTemporaryDirectory
+import platform.Foundation.create
+import platform.Foundation.writeToFile
+import kotlin.experimental.ExperimentalNativeApi
 import kotlin.experimental.ExperimentalObjCName
 import kotlin.native.ObjCName
+import kotlin.native.setUnhandledExceptionHook
 
 /**
  * Initialize Koin for iOS
@@ -32,6 +41,7 @@ import kotlin.native.ObjCName
 object IosKoinInit {
     @ObjCName("initKoin")
     fun initKoin(additionalModules: List<Module> = emptyList()) {
+        installCrashLog()
         startKoin {
             modules(
                 listOf(
@@ -58,6 +68,8 @@ object IosKoinInit {
                 ) + additionalModules
             )
         }
+        // iOS loads every module in this call, same as desktop.
+        ireader.domain.di.ModuleInitializationState.markFullyInitialized()
     }
 
     /**
@@ -66,5 +78,20 @@ object IosKoinInit {
     @ObjCName("createModule")
     fun createModule(configure: Module.() -> Unit): Module {
         return module(createdAtStart = false, moduleDeclaration = configure)
+    }
+}
+
+@OptIn(ExperimentalNativeApi::class, ExperimentalForeignApi::class)
+private fun installCrashLog() {
+    setUnhandledExceptionHook { throwable ->
+        val text = "IReaderUncaught\n${throwable.stackTraceToString()}"
+        println(text)
+        val bytes = text.encodeToByteArray()
+        if (bytes.isEmpty()) return@setUnhandledExceptionHook
+        val path = NSTemporaryDirectory() + "ireader-crash.txt"
+        bytes.usePinned { pinned ->
+            NSData.create(bytes = pinned.addressOf(0), length = bytes.size.toULong())
+                .writeToFile(path, atomically = true)
+        }
     }
 }

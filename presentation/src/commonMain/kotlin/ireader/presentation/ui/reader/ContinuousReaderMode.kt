@@ -96,45 +96,47 @@ internal fun ContinuousReaderContent(
         selectionMode = vm.isScrollIndicatorDraggable.value,
         rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right,
     ) {
-        LazyColumn(
-            modifier = modifier.fillMaxSize(),
-            state = lazyListState,
-        ) {
-            // Render ONLY the current chapter's content
-            items(
-                count = content.size,
-                key = { index -> "content-${chapter?.id ?: 0}-$index" },
-                contentType = { "paragraph" }
-            ) { index ->
-                val page = content.getOrNull(index)
-                if (page != null) {
-                    val translatedText = if (preferences.bilingualModeEnabled) vm.getTranslationForParagraph(index) else null
-                    MainText(
-                        modifier = modifier,
-                        index = index,
-                        page = page,
-                        isLastIndex = index == content.lastIndex,
-                        preferences = preferences,
-                        translatedText = translatedText,
-                        onTranslateRequest = { selectedText ->
-                            vm.showParagraphTranslation(selectedText)
-                        }
-                    )
+        androidx.compose.runtime.key(chapter?.id, content.isNotEmpty()) {
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                state = lazyListState,
+            ) {
+                // Render ONLY the current chapter's content
+                items(
+                    count = content.size,
+                    key = { index -> "content-${chapter?.id ?: 0}-$index" },
+                    contentType = { "paragraph" }
+                ) { index ->
+                    val page = content.getOrNull(index)
+                    if (page != null) {
+                        val translatedText = if (preferences.bilingualModeEnabled) vm.getTranslationForParagraph(index) else null
+                        MainText(
+                            modifier = modifier,
+                            index = index,
+                            page = page,
+                            isLastIndex = index == content.lastIndex,
+                            preferences = preferences,
+                            translatedText = translatedText,
+                            onTranslateRequest = { selectedText ->
+                                vm.showParagraphTranslation(selectedText)
+                            }
+                        )
+                    }
                 }
-            }
 
-            // ChapterVoidSpace at the end
-            if (content.isNotEmpty() && chapter != null) {
-                item(key = "void-${chapter.id}", contentType = "void_space") {
-                    ChapterVoidSpace(
-                        chapter = chapter,
-                        isLast = !hasNextChapter,
-                        textColor = vm.textColorCompose.value,
-                        backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                        onShowComments = { onShowComments(chapter) },
-                        onNextChapter = onNext,
-                        isLoading = vm.isLoading
-                    )
+                // ChapterVoidSpace at the end
+                if (content.isNotEmpty() && chapter != null) {
+                    item(key = "void-${chapter.id}", contentType = "void_space") {
+                        ChapterVoidSpace(
+                            chapter = chapter,
+                            isLast = !hasNextChapter,
+                            textColor = vm.textColorCompose.value,
+                            backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                            onShowComments = { onShowComments(chapter) },
+                            onNextChapter = onNext,
+                            isLoading = vm.isLoading
+                        )
+                    }
                 }
             }
         }
