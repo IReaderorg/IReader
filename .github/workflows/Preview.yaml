@@ -163,10 +163,10 @@ jobs:
         if: ${{ matrix.runtime == 'android' }}
         with:
           releaseDirectory: android/build/outputs/apk/standard/preview
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY || secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS || secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEY_STORE_PASSWORD || secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD || secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
 
