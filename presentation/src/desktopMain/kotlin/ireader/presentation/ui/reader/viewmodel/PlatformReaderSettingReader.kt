@@ -42,7 +42,7 @@ actual class PlatformReaderSettingReader {
                     ireader.core.log.Log.debug { "Saving scroll position for chapter ${chapter.id}: scrollPosition=$scrollPosition" }
                     // Use the dedicated updateLastPageRead method for efficient update
                     saveScrollPosition(scrollPosition)
-                    getChapterUseCase.updateLastReadTime(chapter)
+                    saveLastReadOnExit(chapter)
                 }
             }
         }

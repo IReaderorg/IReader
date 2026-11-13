@@ -357,11 +357,12 @@ class TTSController(
                 // Resilience: If playback is currently active and there is a next paragraph available,
                 // try auto-advancing to avoid completely stopping playback on an individual paragraph synthesis glitch.
                 val currentState = _state.value
-                if (currentState.isPlaying && currentState.canGoNext) {
+                // LOADING too: an engine can reject text before it ever starts speaking
+                if ((currentState.isPlaying || currentState.isLoading) && currentState.canGoNext) {
                     Log.warn { "$TAG: Speech failed for $currentUtteranceId (${event.message}), attempting to auto-advance to next paragraph" }
                     commandMutex.withLock {
                         val stateInLock = _state.value
-                        if (stateInLock.isPlaying && stateInLock.canGoNext) {
+                        if ((stateInLock.isPlaying || stateInLock.isLoading) && stateInLock.canGoNext) {
                             _state.update {
                                 it.copy(
                                     previousParagraphIndex = it.currentParagraphIndex,

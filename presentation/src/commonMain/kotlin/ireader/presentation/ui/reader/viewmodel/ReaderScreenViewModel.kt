@@ -585,6 +585,17 @@ class ReaderScreenViewModel(
      * Sync Reader with TTS's current chapter.
      * Called explicitly when user returns from TTS screen.
      */
+    /**
+     * Marks the open chapter as last read when the reader closes, unless TTS has moved this
+     * book on to another chapter: TTS saves its own progress, and re-saving the reader's older
+     * chapter here would make it the latest again, so the book resumed chapters back.
+     */
+    suspend fun saveLastReadOnExit(chapter: Chapter) {
+        val ttsChapter = ttsController.state.value.chapter
+        if (ttsChapter != null && ttsChapter.bookId == chapter.bookId && ttsChapter.id != chapter.id) return
+        getChapterUseCase.updateLastReadTime(chapter)
+    }
+
     suspend fun syncWithTTSChapter() {
         val ttsState = ttsController.state.value
         val ttsChapter = ttsState.chapter ?: return

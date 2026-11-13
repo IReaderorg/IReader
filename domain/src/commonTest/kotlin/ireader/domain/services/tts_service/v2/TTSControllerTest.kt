@@ -89,12 +89,13 @@ class TTSControllerTest {
         var speedTTS = 1.0f
         var ttsPitch = 1.0f
         var ready = true
-        
+        var startOnSpeak = true
+
         override suspend fun speak(text: String, utteranceId: String) {
             speakCalled = true
             lastText = text
             lastUtteranceId = utteranceId
-            _events.emit(EngineEvent.Started(utteranceId))
+            if (startOnSpeak) _events.emit(EngineEvent.Started(utteranceId))
         }
         
         override fun stop() { stopCalled = true }
@@ -113,6 +114,45 @@ class TTSControllerTest {
         suspend fun emitReady() {
             _events.emit(EngineEvent.Ready)
         }
+
+        suspend fun failUtterance(utteranceId: String) {
+            _events.emit(EngineEvent.Error(utteranceId, "synthesis failed"))
+        }
+    }
+
+    @Test
+    fun `punctuation-only paragraph is skipped instead of stalling`() = runTest(testDispatcher) {
+        val engine = MockEngine()
+        val loader = MockContentLoader().apply { mockParagraphs = listOf("...", "Paragraph 2") }
+        val controller = TTSController(contentLoader = loader, nativeEngineFactory = { engine })
+
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 0))
+        testScheduler.advanceUntilIdle()
+        controller.dispatch(TTSCommand.Play)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, controller.state.value.currentParagraphIndex)
+        assertEquals("Paragraph 2", engine.lastText)
+        controller.destroy()
+    }
+
+    @Test
+    fun `engine error before speech starts advances to next paragraph`() = runTest(testDispatcher) {
+        val engine = MockEngine().apply { startOnSpeak = false }
+        val controller = TTSController(contentLoader = MockContentLoader(), nativeEngineFactory = { engine })
+
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 0))
+        testScheduler.advanceUntilIdle()
+        controller.dispatch(TTSCommand.Play)
+        testScheduler.advanceUntilIdle()
+        engine.failUtterance("p_0")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, controller.state.value.currentParagraphIndex)
+        assertEquals("p_1", engine.lastUtteranceId)
+        controller.destroy()
     }
     
     @Test
