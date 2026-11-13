@@ -13,6 +13,22 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 
+/**
+ * Puts [query] into the source's own title/search filter (or prepends a Filter.Title if it has none).
+ * Every search must go through this: sources read the query from their own filter instances, so
+ * a bare `listOf(Filter.Title())` made global search miss novels the source's own search finds.
+ */
+fun searchFiltersFor(query: String, filters: List<Filter<*>>?): List<Filter<*>> {
+    if (filters.isNullOrEmpty()) return listOf(Filter.Title().apply { value = query })
+    val titleFilter = filters.filterIsInstance<Filter.Title>().firstOrNull()
+        ?: filters.filterIsInstance<Filter.Text>().firstOrNull {
+            it.name.equals("Title", ignoreCase = true) || it.name.equals("Search", ignoreCase = true)
+        }
+        ?: return listOf(Filter.Title().apply { value = query }) + filters
+    titleFilter.value = query
+    return filters
+}
+
 class GetRemoteBooksUseCase() {
     suspend operator fun invoke(
         query: String? = null,
@@ -33,25 +49,8 @@ class GetRemoteBooksUseCase() {
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
                 if (query != null) {
                     if (query.isNotBlank()) {
-                        val searchFilters = if (!filters.isNullOrEmpty()) {
-                            val titleFilter = filters.filterIsInstance<Filter.Title>().firstOrNull()
-                                ?: filters.filterIsInstance<Filter.Text>().firstOrNull {
-                                    it.name.equals("Title", ignoreCase = true) || it.name.equals("Search", ignoreCase = true)
-                                }
-                            if (titleFilter != null) {
-                                titleFilter.value = query
-                                filters
-                            } else {
-                                listOf(Filter.Title().apply { this.value = query }) + filters
-                            }
-                        } else {
-                            listOf(
-                                Filter.Title()
-                                    .apply { this.value = query }
-                            )
-                        }
                         item = source.getMangaList(
-                            filters = searchFilters,
+                            filters = searchFiltersFor(query, filters),
                             page = page
                         )
                     } else {
