@@ -704,43 +704,67 @@ ALTER TABLE public.character_art_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.character_art_reports ENABLE ROW LEVEL SECURITY;
 
 -- ----------------------------------------------------------------------------
--- Users Table Policies
+-- Users Table Policies & Permissions
 -- ----------------------------------------------------------------------------
+-- Revoke wide update permissions to prevent privilege escalation (is_admin / is_supporter)
+REVOKE UPDATE ON public.users FROM authenticated, anon, public;
+GRANT UPDATE (username, eth_wallet_address, updated_at) ON public.users TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.prevent_user_privilege_escalation()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (NEW.is_admin IS DISTINCT FROM OLD.is_admin OR NEW.is_supporter IS DISTINCT FROM OLD.is_supporter) THEN
+        IF auth.role() != 'service_role' AND NOT EXISTS (
+            SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE
+        ) THEN
+            RAISE EXCEPTION 'Unauthorized: cannot modify administrative privileges';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS tr_prevent_user_privilege_escalation ON public.users;
+CREATE TRIGGER tr_prevent_user_privilege_escalation
+    BEFORE UPDATE ON public.users
+    FOR EACH ROW
+    EXECUTE FUNCTION public.prevent_user_privilege_escalation();
+
 CREATE POLICY "Users can view their own data" ON public.users FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update their own data" ON public.users FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can update their own data" ON public.users FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can insert their own data" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- ----------------------------------------------------------------------------
 -- Reading Progress Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own reading progress" ON public.reading_progress FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can insert their own reading progress" ON public.reading_progress FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can update their own reading progress" ON public.reading_progress FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can delete their own reading progress" ON public.reading_progress FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can view their own reading progress" ON public.reading_progress FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own reading progress" ON public.reading_progress FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own reading progress" ON public.reading_progress FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own reading progress" ON public.reading_progress FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Synced Books Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own synced books" ON public.synced_books FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can insert their own synced books" ON public.synced_books FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can update their own synced books" ON public.synced_books FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can delete their own synced books" ON public.synced_books FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can view their own synced books" ON public.synced_books FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own synced books" ON public.synced_books FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own synced books" ON public.synced_books FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own synced books" ON public.synced_books FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Sync Manifest Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own sync manifest" ON public.sync_manifest FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can insert their own sync manifest" ON public.sync_manifest FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can update their own sync manifest" ON public.sync_manifest FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can delete their own sync manifest" ON public.sync_manifest FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can view their own sync manifest" ON public.sync_manifest FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own sync manifest" ON public.sync_manifest FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own sync manifest" ON public.sync_manifest FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own sync manifest" ON public.sync_manifest FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Synced Chapters Table Policies
 -- ----------------------------------------------------------------------------
-CREATE POLICY "Users can view their own synced chapters" ON public.synced_chapters FOR SELECT USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can insert their own synced chapters" ON public.synced_chapters FOR INSERT WITH CHECK (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can update their own synced chapters" ON public.synced_chapters FOR UPDATE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
-CREATE POLICY "Users can delete their own synced chapters" ON public.synced_chapters FOR DELETE USING (user_id = auth.uid()::TEXT OR auth.uid() IS NULL);
+CREATE POLICY "Users can view their own synced chapters" ON public.synced_chapters FOR SELECT USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can insert their own synced chapters" ON public.synced_chapters FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can update their own synced chapters" ON public.synced_chapters FOR UPDATE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT) WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
+CREATE POLICY "Users can delete their own synced chapters" ON public.synced_chapters FOR DELETE USING (auth.uid() IS NOT NULL AND user_id = auth.uid()::TEXT);
 
 -- ----------------------------------------------------------------------------
 -- Book Reviews Table Policies
@@ -764,8 +788,32 @@ CREATE POLICY "Users can delete their own chapter reviews" ON public.chapter_rev
 CREATE POLICY "Everyone can view badges" ON public.badges FOR SELECT USING (true);
 
 -- ----------------------------------------------------------------------------
--- User Badges Table Policies
+-- User Badges Table Policies & Permissions
 -- ----------------------------------------------------------------------------
+-- Restrict column updates so users cannot tamper with badge_id, user_id, or earned_at
+REVOKE UPDATE ON public.user_badges FROM authenticated, anon, public;
+GRANT UPDATE (is_primary, is_featured) ON public.user_badges TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.prevent_badge_tampering()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (NEW.badge_id IS DISTINCT FROM OLD.badge_id OR NEW.user_id IS DISTINCT FROM OLD.user_id OR NEW.earned_at IS DISTINCT FROM OLD.earned_at) THEN
+        IF auth.role() != 'service_role' AND NOT EXISTS (
+            SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE
+        ) THEN
+            RAISE EXCEPTION 'Unauthorized: cannot alter badge identification or earned date';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_prevent_badge_tampering ON public.user_badges;
+CREATE TRIGGER tr_prevent_badge_tampering
+    BEFORE UPDATE ON public.user_badges
+    FOR EACH ROW
+    EXECUTE FUNCTION public.prevent_badge_tampering();
+
 CREATE POLICY "Everyone can view user badges" ON public.user_badges FOR SELECT USING (true);
 CREATE POLICY "Users can update their own badge settings" ON public.user_badges FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
@@ -786,8 +834,35 @@ CREATE POLICY "Users can insert their own NFT wallet" ON public.nft_wallets FOR 
 CREATE POLICY "Users can update their own NFT wallet" ON public.nft_wallets FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- ----------------------------------------------------------------------------
--- Leaderboard Table Policies
+-- Leaderboard Table Policies & Validation
 -- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.validate_leaderboard_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Prevent claiming badge status on leaderboard without actually having a badge
+    IF NEW.has_badge = TRUE THEN
+        IF NOT EXISTS (SELECT 1 FROM public.user_badges WHERE user_id = NEW.user_id) THEN
+            NEW.has_badge := FALSE;
+            NEW.badge_type := NULL;
+        END IF;
+    END IF;
+
+    -- Sanity check: prevent negative numbers
+    IF NEW.total_reading_time_minutes < 0 THEN NEW.total_reading_time_minutes := 0; END IF;
+    IF NEW.total_chapters_read < 0 THEN NEW.total_chapters_read := 0; END IF;
+    IF NEW.books_completed < 0 THEN NEW.books_completed := 0; END IF;
+    IF NEW.reading_streak < 0 THEN NEW.reading_streak := 0; END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tr_validate_leaderboard ON public.leaderboard;
+CREATE TRIGGER tr_validate_leaderboard
+    BEFORE INSERT OR UPDATE ON public.leaderboard
+    FOR EACH ROW
+    EXECUTE FUNCTION public.validate_leaderboard_update();
+
 CREATE POLICY "Leaderboard is publicly readable" ON public.leaderboard FOR SELECT USING (true);
 CREATE POLICY "Users can insert their own stats" ON public.leaderboard FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their own stats" ON public.leaderboard FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
@@ -923,17 +998,26 @@ END;
 $ LANGUAGE plpgsql;
 
 -- ----------------------------------------------------------------------------
--- Function: Award badge to user
+-- Function: Award badge to user (restricted)
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION award_badge(p_user_id UUID, p_badge_id TEXT, p_metadata JSONB DEFAULT NULL)
 RETURNS BOOLEAN AS $
 BEGIN
+    IF auth.role() != 'service_role' AND NOT EXISTS (
+        SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE
+    ) THEN
+        RAISE EXCEPTION 'Unauthorized: admin only';
+    END IF;
+
     INSERT INTO public.user_badges (user_id, badge_id, metadata)
     VALUES (p_user_id, p_badge_id, p_metadata)
     ON CONFLICT (user_id, badge_id) DO NOTHING;
     RETURN FOUND;
 END;
 $ LANGUAGE plpgsql SECURITY DEFINER;
+
+REVOKE EXECUTE ON FUNCTION award_badge(UUID, TEXT, JSONB) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION award_badge(UUID, TEXT, JSONB) TO service_role;
 
 -- ----------------------------------------------------------------------------
 -- Function: Get user badges
@@ -977,12 +1061,18 @@ END;
 $ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ----------------------------------------------------------------------------
--- Function: Grant badge to user (admin)
+-- Function: Grant badge to user (admin only)
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION grant_badge_to_user(p_user_id UUID, p_badge_id TEXT)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $
 DECLARE result JSON;
 BEGIN
+    IF auth.role() != 'service_role' AND NOT EXISTS (
+        SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE
+    ) THEN
+        RAISE EXCEPTION 'Unauthorized: only admins can grant badges';
+    END IF;
+
     INSERT INTO public.user_badges (user_id, badge_id, earned_at)
     VALUES (p_user_id, p_badge_id, NOW())
     ON CONFLICT (user_id, badge_id) DO NOTHING
@@ -999,12 +1089,33 @@ $;
 GRANT EXECUTE ON FUNCTION grant_badge_to_user(UUID, TEXT) TO authenticated;
 
 -- ----------------------------------------------------------------------------
--- Function: Check and award achievement badge
+-- Function: Check and award achievement badge (self-only & achievement type)
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION check_and_award_achievement_badge(p_user_id UUID, p_badge_id TEXT)
 RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER AS $
-DECLARE v_already_has_badge BOOLEAN;
+DECLARE 
+    v_already_has_badge BOOLEAN;
+    v_badge_type TEXT;
 BEGIN
+    -- Only allow awarding to self unless service_role or admin
+    IF auth.role() != 'service_role' AND p_user_id != auth.uid() AND NOT EXISTS (
+        SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE
+    ) THEN
+        RAISE EXCEPTION 'Unauthorized: cannot award badges to other users';
+    END IF;
+
+    -- Verify badge exists and is of type ACHIEVEMENT
+    SELECT type INTO v_badge_type FROM public.badges WHERE id = p_badge_id;
+    IF v_badge_type IS NULL THEN
+        RAISE EXCEPTION 'Badge not found: %', p_badge_id;
+    END IF;
+    
+    IF v_badge_type != 'ACHIEVEMENT' AND auth.role() != 'service_role' AND NOT EXISTS (
+        SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE
+    ) THEN
+        RAISE EXCEPTION 'Unauthorized: only achievement badges can be claimed via this function';
+    END IF;
+
     SELECT EXISTS(SELECT 1 FROM public.user_badges WHERE user_id = p_user_id AND badge_id = p_badge_id) INTO v_already_has_badge;
     IF NOT v_already_has_badge THEN
         INSERT INTO public.user_badges (user_id, badge_id, earned_at) VALUES (p_user_id, p_badge_id, NOW())

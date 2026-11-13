@@ -42,16 +42,11 @@ class ExtensionSecurityManagerImpl(
     }
     
     override suspend fun verifySignature(catalog: Catalog): Boolean {
-        // In a real implementation, this would verify APK signature
-        // For now, we'll do basic validation
-        return when (catalog) {
-            is CatalogInstalled -> {
-                // Check if package name follows expected pattern
-                catalog.pkgName.startsWith("ireader.extension") ||
-                catalog.pkgName.startsWith("eu.kanade.tachiyomi.extension")
-            }
-            else -> false
-        }
+        // Cryptographic signature verification (e.g. APK signing certificate pinning)
+        // is required before marking an extension as verified.
+        // Package name prefixes can be trivially forged by third-party APKs,
+        // so we fail closed (return false) until true cryptographic validation is available.
+        return false
     }
     
     override suspend fun analyzePermissions(catalog: Catalog): List<String> {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Exclude shared preferences containing credentials, tokens, cloud passwords, and API keys -->
+        <exclude domain="sharedpref" path="supabase_preferences.xml" />
+        <exclude domain="sharedpref" path="sync_preferences.xml" />
+        <exclude domain="sharedpref" path="security_preferences.xml" />
+        <exclude domain="sharedpref" path="secure_storage.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <!-- Sensitive encryption master keys and secure storage should not be transferred in plain device backups -->
+        <exclude domain="sharedpref" path="secure_storage.xml" />
+    </device-transfer>
+</data-extraction-rules>

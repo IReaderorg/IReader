@@ -203,50 +203,20 @@ class ExtensionRepositoryManagerImpl(
     }
     
     /**
-     * Verify a repository's fingerprint by computing SHA-256 hash of the repository URL
-     * and comparing it with the provided fingerprint.
-     * 
-     * For GitHub repositories, this also validates the repository structure.
+     * Verify a repository's fingerprint against known authoritative fingerprints.
+     * Arbitrary strings or self-referential URL hashes must not be accepted.
      */
     private suspend fun verifyFingerprint(url: String, fingerprint: String): Boolean {
         return try {
-            // Compute SHA-256 hash of the URL for basic verification
-            val urlHash = computeSha256(url)
-            
-            // Check if fingerprint matches URL hash (simple verification)
-            if (fingerprint.equals(urlHash, ignoreCase = true)) {
+            val normalizedUrl = url.trim().lowercase()
+            val normalizedFingerprint = fingerprint.trim().lowercase()
+
+            val expectedFingerprint = TRUSTED_REPOSITORY_FINGERPRINTS[normalizedUrl]
+            if (expectedFingerprint != null && expectedFingerprint.equals(normalizedFingerprint, ignoreCase = true)) {
                 return true
             }
-            
-            // For GitHub repositories, verify the fingerprint against known patterns
-            if (url.contains("github.com")) {
-                // Known trusted repository fingerprints
-                val trustedFingerprints = setOf(
-                    // IReader official repository
-                    "ireader-extensions",
-                    // LNReader plugins
-                    "lnreader-plugins",
-                    // Add more trusted fingerprints as needed
-                )
-                
-                val owner = extractOwner(url).lowercase()
-                val repoName = extractRepoName(url).lowercase()
-                
-                // Check if this is a known trusted repository
-                if (trustedFingerprints.any { repoName.contains(it) }) {
-                    log.info("Repository $url matches known trusted pattern")
-                    return true
-                }
-                
-                // Verify fingerprint format (should be SHA-256 hex string)
-                if (fingerprint.length == 64 && fingerprint.all { it.isDigit() || it in 'a'..'f' || it in 'A'..'F' }) {
-                    // Valid SHA-256 format - accept it
-                    log.info("Repository $url has valid fingerprint format")
-                    return true
-                }
-            }
-            
-            log.warn("Fingerprint verification failed for $url")
+
+            log.warn("Fingerprint verification failed for $url: untrusted fingerprint")
             false
         } catch (e: Exception) {
             log.error("Error verifying fingerprint for $url", e)
@@ -255,38 +225,27 @@ class ExtensionRepositoryManagerImpl(
     }
     
     /**
-     * Determine trust level based on URL and fingerprint
+     * Determine trust level based on verified official repository endpoints.
+     * Third-party repositories are UNTRUSTED by default unless verified against pinned authoritative fingerprints.
      */
     private fun determineTrustLevel(url: String, fingerprint: String?): ExtensionTrustLevel {
-        // Known official repositories
-        val officialPatterns = listOf(
-            "github.com/ireaderorg",
-            "github.com/IReaderorg",
-            "ireader-extensions",
-            "lnreader-plugins"
-        )
-        
-        // Check if URL matches official patterns
-        if (officialPatterns.any { url.contains(it, ignoreCase = true) }) {
-            return ExtensionTrustLevel.TRUSTED
+        val normalizedUrl = url.trim().lowercase()
+
+        val isOfficial = OFFICIAL_REPOSITORY_PREFIXES.any { normalizedUrl.startsWith(it.lowercase()) }
+        if (isOfficial) {
+            val expectedFingerprint = TRUSTED_REPOSITORY_FINGERPRINTS[normalizedUrl]
+            if (expectedFingerprint == null || (fingerprint != null && fingerprint.equals(expectedFingerprint, ignoreCase = true))) {
+                return ExtensionTrustLevel.TRUSTED
+            }
         }
-        
-        // If fingerprint is provided and valid format, mark as verified
-        if (fingerprint != null && fingerprint.length == 64) {
-            return ExtensionTrustLevel.VERIFIED
+
+        if (fingerprint != null) {
+            val expectedFingerprint = TRUSTED_REPOSITORY_FINGERPRINTS[normalizedUrl]
+            if (expectedFingerprint != null && fingerprint.equals(expectedFingerprint, ignoreCase = true)) {
+                return ExtensionTrustLevel.VERIFIED
+            }
         }
-        
-        // Known community repositories (from GitHub/GitLab)
-        val communityPatterns = listOf(
-            "github.com",
-            "gitlab.com"
-        )
-        
-        if (communityPatterns.any { url.contains(it, ignoreCase = true) }) {
-            return ExtensionTrustLevel.VERIFIED
-        }
-        
-        // Unknown source
+
         return ExtensionTrustLevel.UNTRUSTED
     }
     
@@ -336,5 +295,20 @@ class ExtensionRepositoryManagerImpl(
         } catch (e: Exception) {
             "Unknown"
         }
+    }
+
+    companion object {
+        // Authoritative official repository prefixes
+        private val OFFICIAL_REPOSITORY_PREFIXES = listOf(
+            "https://raw.githubusercontent.com/ireaderorg/ireader-extensions",
+            "https://github.com/ireaderorg/ireader-extensions",
+            "https://raw.githubusercontent.com/kazemcodes/IReader",
+            "https://github.com/kazemcodes/IReader"
+        )
+
+        // Pinned cryptographic fingerprints for verified repository signing authorities (SHA-256)
+        private val TRUSTED_REPOSITORY_FINGERPRINTS = mapOf<String, String>(
+            // Pinned repository certificate fingerprints can be registered here
+        )
     }
 }

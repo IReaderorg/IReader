@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude shared preferences containing credentials, tokens, cloud passwords, and API keys -->
+    <exclude domain="sharedpref" path="supabase_preferences.xml" />
+    <exclude domain="sharedpref" path="sync_preferences.xml" />
+    <exclude domain="sharedpref" path="security_preferences.xml" />
+    <exclude domain="sharedpref" path="secure_storage.xml" />
+</full-backup-content>
