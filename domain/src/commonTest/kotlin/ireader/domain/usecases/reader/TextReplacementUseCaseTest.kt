@@ -198,6 +198,15 @@ class TextReplacementUseCaseTest {
     }
 
     @Test
+    fun `literal replacement matches across different whitespace`() {
+        val useCase = TextReplacementUseCase(readerPreferences, null)
+
+        assertEquals(" here", useCase.testReplacement("Read  more here", "Read more", ""))
+        assertEquals(" here", useCase.testReplacement("Read\tmore here", "Read more", ""))
+        assertEquals("a.b+c  d", useCase.testReplacement("a.b+c  d", "x y", ""))
+    }
+
+    @Test
     fun `testReplacement should use same regex detection logic`() {
         // Arrange
         val useCase = TextReplacementUseCase(readerPreferences, null)
