@@ -7,6 +7,7 @@ import io.ktor.client.statement.readBytes
 import ireader.core.log.Log
 import ireader.core.source.model.ImageBase64
 import ireader.core.source.model.ImageUrl
+import ireader.core.source.model.Page
 import ireader.core.source.model.Text
 import ireader.core.util.IO
 import ireader.core.util.randomUUID
@@ -176,12 +177,15 @@ class EpubBuilder(
         
         for ((index, chapter) in selectedChapters.withIndex()) {
             // Use translated content if available and requested
-            val contentPages = if (options.useTranslatedContent && translationsMap.containsKey(chapter.id)) {
-                translationsMap[chapter.id]?.translatedContent ?: chapter.content
-            } else {
-                chapter.content
-            }
-            
+            val contentPages = withoutRepeatedTitle(
+                if (options.useTranslatedContent && translationsMap.containsKey(chapter.id)) {
+                    translationsMap[chapter.id]?.translatedContent ?: chapter.content
+                } else {
+                    chapter.content
+                },
+                chapter.name
+            )
+
             val images = mutableListOf<EmbeddedImage>()
             var imageCounter = 0
             
@@ -603,22 +607,7 @@ img {
             content
         }
         
-        // Split into paragraphs and wrap in <p> tags, escaping XML entities and preserving <img> tags
-        return cleanedContent
-            .split("\n\n", "\n")
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
-            .joinToString("\n") { paragraph ->
-                if (paragraph.startsWith("<img", ignoreCase = true)) {
-                    val safeImg = if (paragraph.endsWith("/>")) paragraph else paragraph.removeSuffix(">") + "/>"
-                    "    $safeImg"
-                } else if (paragraph.startsWith("<p", ignoreCase = true) && paragraph.endsWith("</p>", ignoreCase = true)) {
-                    val inner = paragraph.substringAfter(">").substringBeforeLast("</p>").trim()
-                    "    <p>${inner.escapeXml()}</p>"
-                } else {
-                    "    <p>${paragraph.escapeXml()}</p>"
-                }
-            }
+        return paragraphsToXhtml(cleanedContent)
     }
     
     private fun packageAsEpub(sourceDir: Path, outputUri: String): String {
@@ -780,19 +769,63 @@ img {
         return "jpg" to "image/jpeg"
     }
     
-    private fun String.escapeXml(): String {
-        return this
-            .replace("&amp;", "&")
-            .replace("&lt;", "<")
-            .replace("&gt;", ">")
-            .replace("&quot;", "\"")
-            .replace("&apos;", "'")
-            .replace("&#39;", "'")
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("\"", "&quot;")
-            .replace("'", "&apos;")
+    companion object {
+        private val NOT_ALPHANUMERIC = Regex("[^\\p{L}\\p{N}]")
+        private val BLANK_LINE = Regex("\n\\s*\n")
+
+        /**
+         * Sources and EPUB imports usually start the text with the chapter title, which the
+         * exporter already writes as the <h1>; drop that first text page so it isn't shown twice.
+         */
+        internal fun withoutRepeatedTitle(pages: List<Page>, title: String): List<Page> {
+            val first = pages.indexOfFirst { it is Text && it.text.isNotBlank() }
+            if (first < 0) return pages
+            val key = title.replace(NOT_ALPHANUMERIC, "").lowercase()
+            val firstKey = (pages[first] as Text).text.replace(NOT_ALPHANUMERIC, "").lowercase()
+            return if (key.isNotEmpty() && firstKey == key) pages.filterIndexed { i, _ -> i != first } else pages
+        }
+
+        /**
+         * Pages are joined with a blank line, so each block between blank lines is a paragraph.
+         * Inside a plain-text block, single newlines are line breaks (poems, letters, system
+         * windows) and stay in one <p>; HTML lines (<p>, <img>) are still emitted one per line.
+         */
+        internal fun paragraphsToXhtml(content: String): String {
+            return content.split(BLANK_LINE).flatMap { block ->
+                val lines = block.split("\n").map { it.trim() }.filter { it.isNotBlank() }
+                when {
+                    lines.isEmpty() -> emptyList()
+                    lines.any { it.startsWith("<img", true) || it.startsWith("<p", true) } -> lines.map(::lineToXhtml)
+                    else -> listOf("    <p>${lines.joinToString("<br/>") { it.escapeXml() }}</p>")
+                }
+            }.joinToString("\n")
+        }
+
+        private fun lineToXhtml(paragraph: String): String =
+            if (paragraph.startsWith("<img", ignoreCase = true)) {
+                val safeImg = if (paragraph.endsWith("/>")) paragraph else paragraph.removeSuffix(">") + "/>"
+                "    $safeImg"
+            } else if (paragraph.startsWith("<p", ignoreCase = true) && paragraph.endsWith("</p>", ignoreCase = true)) {
+                val inner = paragraph.substringAfter(">").substringBeforeLast("</p>").trim()
+                "    <p>${inner.escapeXml()}</p>"
+            } else {
+                "    <p>${paragraph.escapeXml()}</p>"
+            }
+
+        private fun String.escapeXml(): String {
+            return this
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&apos;", "'")
+                .replace("&#39;", "'")
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;")
+        }
     }
 }
 
