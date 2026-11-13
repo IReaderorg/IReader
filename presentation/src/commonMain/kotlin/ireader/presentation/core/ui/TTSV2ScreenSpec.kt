@@ -1057,7 +1057,12 @@ class TTSV2ScreenSpec(
             }
             override fun onNextChapter() { viewModel.adapter.nextChapter() }
             override fun onPreviousChapter() { viewModel.adapter.previousChapter() }
-            override fun onParagraphClick(index: Int) { viewModel.adapter.jumpToParagraph(index) }
+            override fun onParagraphClick(index: Int) {
+                viewModel.adapter.jumpToParagraph(index)
+                // Bring the tapped paragraph to the top, so reading on is tap-by-tap instead of swiping.
+                // Auto-follow only scrolls when the current paragraph is off screen, and a tapped one never is.
+                if (!pageMode) scope.launch { lazyListState.animateScrollToItem(index) }
+            }
             override fun onToggleBilingualMode() { viewModel.adapter.toggleBilingualMode() }
             override fun onToggleTranslation() {
                 val newShow = !state.showTranslation
