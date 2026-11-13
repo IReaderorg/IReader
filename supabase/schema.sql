@@ -1001,7 +1001,7 @@ $ LANGUAGE plpgsql;
 -- Function: Award badge to user (restricted)
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION award_badge(p_user_id UUID, p_badge_id TEXT, p_metadata JSONB DEFAULT NULL)
-RETURNS BOOLEAN AS $
+RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
     IF auth.role() != 'service_role' AND NOT EXISTS (
         SELECT 1 FROM public.users WHERE id = auth.uid() AND is_admin = TRUE
@@ -1014,7 +1014,7 @@ BEGIN
     ON CONFLICT (user_id, badge_id) DO NOTHING;
     RETURN FOUND;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 REVOKE EXECUTE ON FUNCTION award_badge(UUID, TEXT, JSONB) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION award_badge(UUID, TEXT, JSONB) TO service_role;
@@ -1064,7 +1064,7 @@ $ LANGUAGE plpgsql SECURITY DEFINER;
 -- Function: Grant badge to user (admin only)
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION grant_badge_to_user(p_user_id UUID, p_badge_id TEXT)
-RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $
+RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE result JSON;
 BEGIN
     IF auth.role() != 'service_role' AND NOT EXISTS (
@@ -1084,7 +1084,7 @@ BEGIN
     END IF;
     RETURN result;
 END;
-$;
+$$;
 
 GRANT EXECUTE ON FUNCTION grant_badge_to_user(UUID, TEXT) TO authenticated;
 
@@ -1092,7 +1092,7 @@ GRANT EXECUTE ON FUNCTION grant_badge_to_user(UUID, TEXT) TO authenticated;
 -- Function: Check and award achievement badge (self-only & achievement type)
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION check_and_award_achievement_badge(p_user_id UUID, p_badge_id TEXT)
-RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER AS $
+RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE 
     v_already_has_badge BOOLEAN;
     v_badge_type TEXT;
@@ -1124,7 +1124,7 @@ BEGIN
     END IF;
     RETURN FALSE;
 END;
-$;
+$$;
 
 GRANT EXECUTE ON FUNCTION check_and_award_achievement_badge(UUID, TEXT) TO authenticated;
 
