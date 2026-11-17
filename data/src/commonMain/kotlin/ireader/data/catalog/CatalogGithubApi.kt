@@ -6,7 +6,9 @@ import ireader.core.http.HttpClients
 import ireader.core.http.forceRefresh
 import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.data.repository.CatalogSourceRepository
+import ireader.domain.di.getPlatformType
 import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.services.platform.PlatformType
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
 import ireader.domain.utils.CatalogNotFoundException
 import ireader.i18n.REPO_URL
@@ -62,8 +64,9 @@ class CatalogGithubApi(
     
     private suspend fun fetchFromRepository(repo: ireader.domain.models.entities.ExtensionSource): List<CatalogRemote> {
         try {
+            val indexUrl = jsIndexUrlForPlatform(repo.key)
             val response: String = httpClient.default
-                .get(repo.key) {
+                .get(indexUrl) {
                     // Bypass all cache layers (OkHttp disk cache + Ktor in-memory cache)
                     // so we always get fresh index.json from remote repositories
                     forceRefresh()
@@ -83,6 +86,9 @@ class CatalogGithubApi(
             }
 
             return when {
+                trimmedResponse.contains("\"initFunction\"") -> {
+                    parseJsIndexFormat(response, repo)
+                }
                 repo.isLNReaderRepository() || repo.key.contains("lnreader-plugins") || repo.key.contains("plugins.min.json") -> {
                     parseLNReaderFormat(response, repo)
                 }
@@ -99,6 +105,54 @@ class CatalogGithubApi(
         } catch (e: Exception) {
             // Handle other network or parsing errors
             throw CatalogNotFoundException("Failed to fetch catalogs from repository ${repo.key}: ${e.message}")
+        }
+    }
+
+    /**
+     * iOS cannot install the Android APKs from index.min.json. The same repo
+     * publishes a JavaScript index next to them.
+     */
+    private fun jsIndexUrlForPlatform(key: String): String {
+        if (getPlatformType() != PlatformType.IOS) return key
+        if (!key.contains("IReader-extensions")) return key
+        if (key.contains("js-index")) return key
+        return when {
+            key.contains("index.min.json") -> key.replace("index.min.json", "js/js-index.min.json")
+            key.contains("index.json") -> key.replace("index.json", "js/js-index.json")
+            else -> key
+        }
+    }
+
+    private fun parseJsIndexFormat(
+        response: String,
+        repo: ireader.domain.models.entities.ExtensionSource,
+    ): List<CatalogRemote> {
+        val entries = json.decodeFromString<List<JsIndexEntry>>(response)
+        if (entries.isEmpty()) {
+            throw CatalogNotFoundException("No JavaScript sources found in repository")
+        }
+        val repoUrl = repo.key
+            .substringBefore("index.min.json")
+            .substringBefore("index.json")
+            .trimEnd('/')
+        return entries.map { entry ->
+            val jsUrl = "$repoUrl/js/${entry.file}"
+            CatalogRemote(
+                name = entry.name,
+                description = entry.description,
+                sourceId = entry.id,
+                pkgName = entry.pkg,
+                versionName = entry.version,
+                versionCode = entry.code,
+                lang = entry.lang,
+                pkgUrl = jsUrl,
+                iconUrl = entry.iconUrl,
+                nsfw = entry.nsfw,
+                source = CatalogRemote.DEFAULT_ID,
+                jarUrl = jsUrl,
+                repositoryId = repo.id,
+                repositoryType = "IREADER",
+            )
         }
     }
 
@@ -441,6 +495,21 @@ class CatalogGithubApi(
         return "$repoBaseUrl/raw/main/src/$language/$pluginId/icon.png"
     }
 
+
+    @Serializable
+    private data class JsIndexEntry(
+        val pkg: String,
+        val name: String,
+        val id: Long,
+        val lang: String,
+        val code: Int = 1,
+        val version: String = "1.0",
+        val description: String = "",
+        val nsfw: Boolean = false,
+        val file: String,
+        val initFunction: String = "",
+        val iconUrl: String = "",
+    )
 
     @Serializable
     private data class CatalogRemoteApiModel(

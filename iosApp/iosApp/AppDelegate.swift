@@ -10,16 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        window = UIWindow(frame: UIScreen.main.bounds)
-        
-        // Initialize Koin dependency injection
-        IosKoinInitKt.shared.initKoin(additionalModules: [])
-
-        // Use Compose Multiplatform UI - MainKt is from Main.kt (no package)
-        let composeVC = MainKt.MainViewController()
-        window?.rootViewController = composeVC
-        window?.makeKeyAndVisible()
-        
+        IosKoinInitKt.shared.doInitKoin(additionalModules: [])
         return true
     }
 

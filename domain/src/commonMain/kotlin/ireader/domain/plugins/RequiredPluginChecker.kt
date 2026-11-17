@@ -1,6 +1,8 @@
 package ireader.domain.plugins
 
 import ireader.core.util.createICoroutineScope
+import ireader.domain.di.getPlatformType
+import ireader.domain.services.platform.PlatformType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +37,9 @@ class RequiredPluginChecker(
      * On Android, this checks for J2V8. On Desktop, this checks for GraalVM.
      */
     fun isJSEngineAvailable(): Boolean {
+        // iOS uses JavaScriptCore, which ships with the system. There is no
+        // J2V8 or GraalVM plugin to download.
+        if (getPlatformType() == PlatformType.IOS) return true
         val plugins = pluginManager.pluginsFlow.value
         return plugins.any { plugin ->
             (plugin.id == JS_ENGINE_PLUGIN_ID || plugin.id == GRAALVM_ENGINE_PLUGIN_ID) &&
@@ -76,6 +81,9 @@ class RequiredPluginChecker(
      * Flow that emits true when JS engine becomes available.
      */
     fun observeJSEngineAvailability(): Flow<Boolean> {
+        if (getPlatformType() == PlatformType.IOS) {
+            return kotlinx.coroutines.flow.flowOf(true)
+        }
         return pluginManager.pluginsFlow.map { plugins ->
             plugins.any { plugin ->
                 (plugin.id == JS_ENGINE_PLUGIN_ID || plugin.id == GRAALVM_ENGINE_PLUGIN_ID) &&

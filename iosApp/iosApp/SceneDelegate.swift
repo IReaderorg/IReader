@@ -13,10 +13,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(windowScene: windowScene)
-        
-        // Use Compose Multiplatform UI
-        let composeVC = IosMainViewControllerKt.MainViewController()
-        window?.rootViewController = composeVC
+        window?.rootViewController = IosMainViewControllerKt.shared.MainViewController()
         window?.makeKeyAndVisible()
     }
 
