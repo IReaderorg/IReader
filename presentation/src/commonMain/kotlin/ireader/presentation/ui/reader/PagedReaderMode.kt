@@ -114,7 +114,7 @@ private data class IndexedParagraph(
  * Features:
  * - Real HorizontalPager with 60/120fps hardware-accelerated swipe physics.
  * - TextMeasurer pixel-perfect chunking matching exact viewport dimensions with NO vertical scrolling.
- * - Reliable Chapter Navigation: Lands on First Page on forward chapter navigation, and Last Page on backwards navigation.
+ * - Reliable Chapter Navigation: Resumes the saved page when a chapter is opened, and lands on the last page on backwards navigation.
  * - Start Boundary Page: Pull/tap to Previous Chapter with live title.
  * - End Boundary Page: Chapter Completion, View Comments/Reviews modal button, and Next Chapter action.
  * - 3-Zone Tap Navigation (Left: Prev, Center: Toggle UI, Right: Next).
@@ -242,41 +242,40 @@ internal fun PagedReaderContent(
         // Total pager items = (1 if prev chapter exists) + contentPages + (1 for end/comments page)
         val totalPagerCount = startPageOffset + totalContentPages + 1
 
-        val pagerState = rememberPagerState(
-            initialPage = if (vm.scrollToEndOnChapterChange) {
-                (startPageOffset + totalContentPages - 1).coerceIn(0, totalPagerCount - 1)
-            } else {
-                startPageOffset.coerceIn(0, totalPagerCount - 1)
-            }
-        ) { totalPagerCount }
+        val initialPagerPage = resolvePagedInitialPage(
+            savedPage = scrollPositionToPagedPage(chapter?.lastPageRead ?: 0L),
+            startPageOffset = startPageOffset,
+            totalContentPages = totalContentPages,
+            scrollToEnd = vm.scrollToEndOnChapterChange,
+        ).coerceIn(0, totalPagerCount - 1)
 
-        // Chapter navigation positioning logic:
-        // When navigating to next chapter -> jump to first content page (startPageOffset)
-        // When navigating to previous chapter -> jump to last content page (startPageOffset + totalContentPages - 1)
+        val pagerState = rememberPagerState(initialPage = initialPagerPage) { totalPagerCount }
+
+        // Restore the persisted page index once per chapter. Page mode stores the
+        // 1-based content page in Chapter.lastPageRead, just like continuous mode
+        // stores a paragraph index there.
         val currentChapterId = chapter?.id
-        var prevChapterId by remember { mutableStateOf<Long?>(null) }
-        var pendingScrollToEnd by remember { mutableStateOf(false) }
+        var restoredChapterId by remember { mutableStateOf<Long?>(null) }
 
-        LaunchedEffect(currentChapterId) {
-            if (currentChapterId != null && currentChapterId != prevChapterId) {
-                val isGoingBack = vm.scrollToEndOnChapterChange
-                if (isGoingBack) {
-                    pendingScrollToEnd = true
-                } else {
-                    pendingScrollToEnd = false
-                    pagerState.scrollToPage(startPageOffset)
-                }
-                prevChapterId = currentChapterId
-            }
-        }
+        LaunchedEffect(currentChapterId, chapter?.lastPageRead, content.size) {
+            val chapterId = currentChapterId ?: return@LaunchedEffect
+            if (restoredChapterId == chapterId || contentPages.isEmpty()) return@LaunchedEffect
 
-        LaunchedEffect(contentPages, pendingScrollToEnd) {
-            if (pendingScrollToEnd && contentPages.isNotEmpty()) {
-                val lastContentPage = (startPageOffset + totalContentPages - 1).coerceIn(0, totalPagerCount - 1)
-                pagerState.scrollToPage(lastContentPage)
-                pendingScrollToEnd = false
-                vm.scrollToEndOnChapterChange = false
-            }
+            val isGoingBack = vm.scrollToEndOnChapterChange
+            // Read the persisted position from the database so a stale cached ViewModel
+            // state cannot make the reader restart at page 1.
+            val savedPosition = vm.getChapterUseCase.findChapterById(chapterId)?.lastPageRead
+                ?: chapter?.lastPageRead ?: 0L
+            val targetPage = resolvePagedInitialPage(
+                savedPage = scrollPositionToPagedPage(savedPosition),
+                startPageOffset = startPageOffset,
+                totalContentPages = totalContentPages,
+                scrollToEnd = isGoingBack,
+            ).coerceIn(0, totalPagerCount - 1)
+
+            pagerState.scrollToPage(targetPage)
+            if (isGoingBack) vm.scrollToEndOnChapterChange = false
+            restoredChapterId = chapterId
         }
 
         // Collect volume key / external page navigation events
@@ -316,11 +315,17 @@ internal fun PagedReaderContent(
             }
         }
 
-        LaunchedEffect(currentContentPageIndex, totalContentPages) {
+        LaunchedEffect(currentContentPageIndex, totalContentPages, restoredChapterId, currentChapterId) {
             vm.updatePagedPageInfo(currentContentPageIndex, totalContentPages)
             if (totalContentPages > 0 && !vm.isLoading) {
                 val progress = (currentContentPageIndex - 1).toFloat() / totalContentPages.toFloat()
                 vm.updateReadingTimeEstimation(progress)
+            }
+            // Persist the page so leaving and reopening the chapter resumes here.
+            // Wait until restoration for this chapter completed, otherwise the transient
+            // pager position would overwrite the saved page.
+            if (restoredChapterId == currentChapterId && !isNavigatingChapter && contentPages.isNotEmpty()) {
+                vm.saveScrollPosition(pagedPageToScrollPosition(currentContentPageIndex))
             }
         }
 
