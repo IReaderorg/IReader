@@ -159,6 +159,13 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.core.NavigationRoutes
 import kotlinx.coroutines.launch
 
+/**
+ * The footer clock is only offered where it is most useful: page mode hides the
+ * scrolling layout, and immersive mode hides the system status-bar clock.
+ */
+internal fun shouldShowCurrentTimeToggle(readingMode: ReadingMode, immersiveMode: Boolean): Boolean =
+    readingMode == ReadingMode.Page && immersiveMode
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReaderSettingMainLayout(
@@ -795,6 +802,15 @@ fun GeneralScreenTab(
                 title = localizeHelper.localize(Res.string.immersive_mode),
                 subtitle = "Hide system status/navigation bars and controls while reading. Tap center to reveal."
             )
+        }
+        if (shouldShowCurrentTimeToggle(vm.readingMode.value, vm.immersiveMode.value)) {
+            item {
+                SwitchPreference(
+                    preference = vm.showCurrentTime,
+                    title = localizeHelper.localize(Res.string.show_current_time),
+                    subtitle = "Display the current time in the page mode footer"
+                )
+            }
         }
         item {
             SwitchPreference(

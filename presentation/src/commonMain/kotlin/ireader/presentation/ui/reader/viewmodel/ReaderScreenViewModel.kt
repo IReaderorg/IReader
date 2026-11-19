@@ -213,6 +213,7 @@ class ReaderScreenViewModel(
     val brightness = readerPreferences.brightness().asStateDebounced()
     val verticalScrolling = readerPreferences.scrollMode().asState()
     val readingMode = readerPreferences.readingMode().asState()
+    val showCurrentTime = readerPreferences.showCurrentTime().asState()
     val showTranslatedContent = readerPreferences.showTranslatedContent().asState()
     val bilingualModeEnabled = readerPreferences.bilingualModeEnabled().asState()
     val bilingualModeLayout = readerPreferences.bilingualModeLayout().asState()
