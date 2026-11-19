@@ -5,6 +5,7 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.ChapterSorting
 import ireader.domain.usecases.history.HistoryUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -618,20 +619,20 @@ class BookDetailController(
         // Apply sort
         result = when (sort.type) {
             ChapterSortOrder.Type.SOURCE -> {
-                if (sort.ascending) result.sortedBy { it.number }
-                else result.sortedByDescending { it.number }
+                if (sort.ascending) result.sortedWith(ChapterSorting.BySource)
+                else result.sortedWith(ChapterSorting.BySource.reversed())
             }
             ChapterSortOrder.Type.CHAPTER_NUMBER -> {
-                if (sort.ascending) result.sortedBy { it.number }
-                else result.sortedByDescending { it.number }
+                if (sort.ascending) result.sortedWith(ChapterSorting.ByNumber)
+                else result.sortedWith(ChapterSorting.ByNumber.reversed())
             }
             ChapterSortOrder.Type.UPLOAD_DATE -> {
                 if (sort.ascending) result.sortedBy { it.dateUpload }
                 else result.sortedByDescending { it.dateUpload }
             }
             ChapterSortOrder.Type.NAME -> {
-                if (sort.ascending) result.sortedBy { it.name }
-                else result.sortedByDescending { it.name }
+                if (sort.ascending) result.sortedWith(ChapterSorting.ByName)
+                else result.sortedWith(ChapterSorting.ByName.reversed())
             }
         }
         

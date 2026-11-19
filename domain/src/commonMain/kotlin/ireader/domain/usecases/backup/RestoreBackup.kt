@@ -9,6 +9,8 @@ import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.hasStaleSourceOrder
+import ireader.domain.models.entities.isSameChapter
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.backup.backup.Backup
 import ireader.domain.usecases.backup.backup.BookProto
@@ -155,38 +157,54 @@ class RestoreBackup internal constructor(
         
         val dbChapters = chapterRepository.findChaptersByBookId(dbManga.id)
 
+        // Old backups often contain only sourceOrder = 0. Rebuild order from the
+        // backup's chapter list in that case, otherwise restoring would make every
+        // chapter tie and break "By Source".
+        val rawBackupChapters = manga.chapters.mapNotNull { proto ->
+            kotlin.runCatching { proto.toDomain(dbManga.id) }.getOrNull()
+        }
+        val backupChapters = mutableListOf<Chapter>()
+        for (chapter in rawBackupChapters) {
+            if (backupChapters.none { it.isSameChapter(chapter) }) backupChapters.add(chapter)
+        }
+        val backupHasValidOrder = !backupChapters.hasStaleSourceOrder()
+        if (!backupHasValidOrder) {
+            backupChapters.replaceAll { chapter ->
+                chapter.copy(sourceOrder = backupChapters.indexOf(chapter).toLong())
+            }
+        }
+
         if (dbChapters.isEmpty()) {
-            chapterRepository.insertChapters(manga.chapters.map { it.toDomain(dbManga.id) })
+            chapterRepository.insertChapters(backupChapters)
             return
         }
 
-        // Create maps for merging read/bookmark status
-        val dbChaptersMap = dbChapters.associateBy { it.key }
-        val backupChaptersMap = manga.chapters.associateBy { it.key }
+        // If the database already has a usable source order, keep it: a restored
+        // backup must not silently change the order the user currently sees.
+        val dbHasValidOrder = !dbChapters.hasStaleSourceOrder()
+        var nextOrder = (dbChapters.maxOfOrNull { it.sourceOrder } ?: -1L) + 1
 
         // Keep the backup chapters (backup is newer)
         if (manga.lastUpdate > dbManga.lastUpdate) {
-            val chaptersToAdd = mutableListOf<Chapter>()
-            for (backupChapter in manga.chapters) {
-                val dbChapter = dbChaptersMap[backupChapter.key]
-                val newChapter = kotlin.runCatching {
-                    val fromBackup = backupChapter.toDomain(dbManga.id)
-                    if (dbChapter == null) {
-                        fromBackup
+            val chaptersToAdd = backupChapters.map { fromBackup ->
+                val dbChapter = dbChapters.firstOrNull { it.isSameChapter(fromBackup) }
+                if (dbChapter == null) {
+                    if (dbHasValidOrder) {
+                        fromBackup.copy(sourceOrder = nextOrder++)
                     } else {
-                        // Update in place (same id): deleting and re-inserting cascaded away the
-                        // chapter's reading history, downloads and saved translations
-                        fromBackup.copy(
-                            id = dbChapter.id,
-                            content = if (fromBackup.isEmpty()) dbChapter.content else fromBackup.content,
-                            read = backupChapter.read || dbChapter.read,
-                            bookmark = backupChapter.bookmark || dbChapter.bookmark,
-                            lastPageRead = maxOf(backupChapter.lastPageRead, dbChapter.lastPageRead)
-                        )
+                        fromBackup
                     }
-                }.getOrNull()
-                if (newChapter != null) {
-                    chaptersToAdd.add(newChapter)
+                } else {
+                    // Update in place (same id): deleting and re-inserting cascaded away the
+                    // chapter's reading history, downloads and saved translations
+                    fromBackup.copy(
+                        id = dbChapter.id,
+                        sourceOrder = if (dbHasValidOrder) dbChapter.sourceOrder else fromBackup.sourceOrder,
+                        content = if (fromBackup.isEmpty()) dbChapter.content else fromBackup.content,
+                        read = fromBackup.read || dbChapter.read,
+                        bookmark = fromBackup.bookmark || dbChapter.bookmark,
+                        lastPageRead = maxOf(fromBackup.lastPageRead, dbChapter.lastPageRead)
+                    )
                 }
             }
 
@@ -194,35 +212,27 @@ class RestoreBackup internal constructor(
         }
         // Keep the database chapters (database is newer or same)
         else {
-            val chaptersToUpdate = mutableListOf<Chapter>()
-            val chaptersToAdd = mutableListOf<Chapter>()
-            
-            // Update existing chapters with backup read/bookmark status
-            for (dbChapter in dbChapters) {
-                val backupChapter = backupChaptersMap[dbChapter.key]
-                if (backupChapter != null) {
-                    // Only update if there's something to merge
-                    if (backupChapter.read || backupChapter.bookmark || backupChapter.lastPageRead > 0) {
-                        val update = dbChapter.copy(
-                            id = dbChapter.id,
-                            read = dbChapter.read || backupChapter.read,
-                            bookmark = dbChapter.bookmark || backupChapter.bookmark,
-                            lastPageRead = maxOf(dbChapter.lastPageRead, backupChapter.lastPageRead)
-                        )
-                        chaptersToUpdate.add(update)
-                    }
+            val chaptersToUpdate = dbChapters.mapNotNull { dbChapter ->
+                val backupChapter = backupChapters.firstOrNull { dbChapter.isSameChapter(it) }
+                if (backupChapter != null &&
+                    (backupChapter.read || backupChapter.bookmark || backupChapter.lastPageRead > 0)
+                ) {
+                    dbChapter.copy(
+                        read = dbChapter.read || backupChapter.read,
+                        bookmark = dbChapter.bookmark || backupChapter.bookmark,
+                        lastPageRead = maxOf(dbChapter.lastPageRead, backupChapter.lastPageRead)
+                    )
+                } else {
+                    null
                 }
             }
-            
-            // Add chapters from backup that don't exist in database
-            for (backupChapter in manga.chapters) {
-                if (!dbChaptersMap.containsKey(backupChapter.key)) {
-                    kotlin.runCatching {
-                        chaptersToAdd.add(backupChapter.toDomain(dbManga.id))
-                    }
-                }
+
+            val chaptersToAdd = backupChapters.filter { fromBackup ->
+                dbChapters.none { it.isSameChapter(fromBackup) }
+            }.map { fromBackup ->
+                if (dbHasValidOrder) fromBackup.copy(sourceOrder = nextOrder++) else fromBackup
             }
-            
+
             if (chaptersToUpdate.isNotEmpty()) {
                 chapterRepository.insertChapters(chaptersToUpdate)
             }

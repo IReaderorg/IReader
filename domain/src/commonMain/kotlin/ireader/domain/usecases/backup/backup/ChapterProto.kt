@@ -5,6 +5,7 @@ package ireader.domain.usecases.backup.backup
 import ireader.core.source.model.decode
 import ireader.core.source.model.encode
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.sanitizedChapterNumber
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -35,7 +36,7 @@ internal data class ChapterProto(
             bookmark = bookmark,
             dateFetch = dateFetch,
             dateUpload = dateUpload,
-            number = number,
+            number = number.sanitizedChapterNumber(),
             sourceOrder = sourceOrder,
             content = content.decode(),
             type = type,

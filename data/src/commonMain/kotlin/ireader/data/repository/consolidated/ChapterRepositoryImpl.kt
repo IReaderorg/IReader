@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.catch
 
 /**
  * ChapterRepository implementation following Mihon's DatabaseHandler pattern.
- * 
+ *
  * This implementation supports both suspend functions and Flow-based reactive queries
  * following Mihon's subscribeToOne and subscribeToList patterns.
  */
@@ -25,8 +25,8 @@ class ChapterRepositoryImpl(
 
     override suspend fun getChapterById(id: Long): Chapter? {
         return try {
-            handler.awaitOneOrNull { 
-                chapterQueries.getChapterById(id, chapterMapper) 
+            handler.awaitOneOrNull {
+                chapterQueries.getChapterById(id, chapterMapper)
             }
         } catch (e: Exception) {
             IReaderLog.error("Failed to get chapter by id: $id", e, "ChapterRepository")
@@ -35,8 +35,8 @@ class ChapterRepositoryImpl(
     }
 
     override fun getChapterByIdAsFlow(id: Long): Flow<Chapter?> {
-        return handler.subscribeToOneOrNull { 
-            chapterQueries.getChapterById(id, chapterMapper) 
+        return handler.subscribeToOneOrNull {
+            chapterQueries.getChapterById(id, chapterMapper)
         }.catch { e ->
             IReaderLog.error("Failed to subscribe to chapter: $id", e, "ChapterRepository")
             emit(null)
@@ -45,8 +45,8 @@ class ChapterRepositoryImpl(
 
     override suspend fun getChaptersByBookId(bookId: Long): List<Chapter> {
         return try {
-            handler.awaitList { 
-                chapterQueries.getChaptersByMangaId(bookId, chapterMapper) 
+            handler.awaitList {
+                chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
             }
         } catch (e: Exception) {
             IReaderLog.error("Failed to get chapters for book: $bookId", e, "ChapterRepository")
@@ -55,8 +55,8 @@ class ChapterRepositoryImpl(
     }
 
     override fun getChaptersByBookIdAsFlow(bookId: Long): Flow<List<Chapter>> {
-        return handler.subscribeToList { 
-            chapterQueries.getChaptersByMangaId(bookId, chapterMapper) 
+        return handler.subscribeToList {
+            chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
         }.catch { e ->
             IReaderLog.error("Failed to subscribe to chapters for book: $bookId", e, "ChapterRepository")
             emit(emptyList())
@@ -65,8 +65,8 @@ class ChapterRepositoryImpl(
 
     override suspend fun getLastReadChapter(bookId: Long): Chapter? {
         return try {
-            handler.awaitOneOrNull { 
-                chapterQueries.getLastChapter(bookId, chapterMapper) 
+            handler.awaitOneOrNull {
+                chapterQueries.getLastChapter(bookId, chapterMapper)
             }
         } catch (e: Exception) {
             IReaderLog.error("Failed to get last read chapter for book: $bookId", e, "ChapterRepository")
@@ -75,8 +75,8 @@ class ChapterRepositoryImpl(
     }
 
     override fun getLastReadChapterAsFlow(bookId: Long): Flow<Chapter?> {
-        return handler.subscribeToOneOrNull { 
-            chapterQueries.getLastChapter(bookId, chapterMapper) 
+        return handler.subscribeToOneOrNull {
+            chapterQueries.getLastChapter(bookId, chapterMapper)
         }.catch { e ->
             IReaderLog.error("Failed to subscribe to last read chapter for book: $bookId", e, "ChapterRepository")
             emit(null)
@@ -87,22 +87,42 @@ class ChapterRepositoryImpl(
         return try {
             handler.awaitListAsync(inTransaction = true) {
                 chapters.forEach { chapter ->
-                    chapterQueries.upsert(
-                        id = chapter.id.toDB(),
-                        bookId = chapter.bookId,
-                        key = chapter.key,
-                        name = chapter.name,
-                        read = chapter.read,
-                        bookmark = chapter.bookmark,
-                        last_page_read = chapter.lastPageRead,
-                        chapter_number = chapter.number,
-                        source_order = chapter.sourceOrder,
-                        date_fetch = chapter.dateFetch,
-                        date_upload = chapter.dateUpload,
-                        translator = chapter.translator,
-                        type = chapter.type,
-                        content = chapter.content
-                    )
+                    if (chapter.id != 0L) {
+                        chapterQueries.removeConflictingChapterUrls(chapter.bookId, chapter.key, chapter.id)
+                        chapterQueries.upsertById(
+                            id = chapter.id,
+                            bookId = chapter.bookId,
+                            key = chapter.key,
+                            name = chapter.name,
+                            read = chapter.read,
+                            bookmark = chapter.bookmark,
+                            last_page_read = chapter.lastPageRead,
+                            chapter_number = chapter.number,
+                            source_order = chapter.sourceOrder,
+                            date_fetch = chapter.dateFetch,
+                            date_upload = chapter.dateUpload,
+                            translator = chapter.translator,
+                            type = chapter.type,
+                            content = chapter.content
+                        )
+                    } else {
+                        chapterQueries.upsert(
+                            id = chapter.id.toDB(),
+                            bookId = chapter.bookId,
+                            key = chapter.key,
+                            name = chapter.name,
+                            read = chapter.read,
+                            bookmark = chapter.bookmark,
+                            last_page_read = chapter.lastPageRead,
+                            chapter_number = chapter.number,
+                            source_order = chapter.sourceOrder,
+                            date_fetch = chapter.dateFetch,
+                            date_upload = chapter.dateUpload,
+                            translator = chapter.translator,
+                            type = chapter.type,
+                            content = chapter.content
+                        )
+                    }
                 }
                 chapterQueries.selectLastInsertedRowId()
             }
@@ -159,8 +179,8 @@ class ChapterRepositoryImpl(
 
     override suspend fun removeChaptersByBookId(bookId: Long): Boolean {
         return try {
-            handler.await { 
-                chapterQueries.deleteChaptersByBookId(bookId) 
+            handler.await {
+                chapterQueries.deleteChaptersByBookId(bookId)
             }
             IReaderLog.debug("Successfully removed chapters for book: $bookId", "ChapterRepository")
             true

@@ -2,6 +2,7 @@ package ireader.domain.usecases.local.chapter_usecases
 
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.ChapterSorting
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -24,9 +25,9 @@ class SubscribeChaptersByBookId(private val chapterRepository: ChapterRepository
 private fun List<Chapter>.sort(sort:String): List<Chapter> {
    return when(sort) {
         "default" -> this
-        "by_name" -> this.sortedBy { it.name }
-        "by_source" -> this.sortedBy { it.sourceOrder }
-        "by_chapter_number" -> this.sortedBy { it.number }
+        "by_name" -> this.sortedWith(ChapterSorting.ByName)
+        "by_source" -> this.sortedWith(ChapterSorting.BySource)
+        "by_chapter_number" -> this.sortedWith(ChapterSorting.ByNumber)
         "date_fetched" -> this.sortedBy { it.dateFetch }
         "date_upload" -> this.sortedBy { it.dateUpload }
         "bookmark" -> this.sortedBy { it.bookmark }

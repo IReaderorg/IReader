@@ -68,12 +68,51 @@ fun ChapterInfo.toChapter(bookId: Long): Chapter {
         name = name,
         key = key,
         bookId = bookId,
-        number = number,
+        number = number.sanitizedChapterNumber(),
         dateUpload = dateUpload,
         translator = this.scanlator,
         type =  this.type,
 
     )
+}
+
+/** Sources can return NaN/Infinity; SQLite binds NaN as NULL and the chapter
+ * table declares chapter_number NOT NULL, which would abort the whole update. */
+fun Float.sanitizedChapterNumber(): Float = if (isNaN() || isInfinite()) -1f else this
+
+/**
+ * Convert source chapters while preserving the source's order.
+ *
+ * [Chapter.sourceOrder] is the only stable ordering key in the database. Leaving
+ * it at its default makes every chapter tie, so the list falls back to row
+ * insertion order - which changes when a chapter is re-added by an update or a
+ * backup restore.
+ */
+fun List<ChapterInfo>.toChapters(bookId: Long): List<Chapter> =
+    mapIndexed { index, info -> info.toChapter(bookId).copy(sourceOrder = index.toLong()) }
+
+/**
+ * Whether two entries refer to the same logical chapter.
+ *
+ * Source keys are not stable: a site can change a chapter URL, and backups can
+ * be restored with different keys. Matching on the key alone then inserts a
+ * second row for a chapter the user already has. A parsed chapter number plus a
+ * matching name is used as a fallback identity in that case.
+ */
+fun Chapter.isSameChapter(other: Chapter): Boolean {
+    if (bookId != other.bookId) return false
+    if (key.isNotBlank() && key == other.key) return true
+    if (!isRecognizedNumber || !other.isRecognizedNumber) {
+        return !isRecognizedNumber && !other.isRecognizedNumber && sameChapterName(name, other.name)
+    }
+    return number == other.number && sameChapterName(name, other.name)
+}
+
+private fun sameChapterName(a: String, b: String): Boolean {
+    if (a.equals(b, ignoreCase = true)) return true
+    val first = a.trim().lowercase()
+    val second = b.trim().lowercase()
+    return first.startsWith(second) || second.startsWith(first)
 }
 
 /**

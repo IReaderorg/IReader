@@ -100,7 +100,30 @@ class ChapterRepositoryImpl(
     override suspend fun insertChapter(chapter: Chapter): Long {
         dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
         val contentToSave = if (chapter.isEmpty()) emptyList() else chapter.content
-        val result = handler.awaitOneAsync(inTransaction = true) {
+        val result = handler.await(inTransaction = true) {
+            // Chapters with an id already exist. Using the URL-based upsert for
+            // them fails with SQLITE_CONSTRAINT_PRIMARYKEY (1555) when the source
+            // changes the key during a refresh.
+            if (chapter.id != 0L) {
+                chapterQueries.removeConflictingChapterUrls(chapter.bookId, chapter.key, chapter.id)
+                chapterQueries.upsertById(
+                    chapter.id,
+                    chapter.bookId,
+                    chapter.key,
+                    chapter.name,
+                    chapter.translator,
+                    chapter.read,
+                    chapter.bookmark,
+                    chapter.lastPageRead,
+                    chapter.number,
+                    chapter.sourceOrder,
+                    chapter.dateFetch,
+                    chapter.dateUpload,
+                    contentToSave,
+                    chapter.type,
+                )
+                chapter.id
+            } else {
                 chapterQueries.upsert(
                     chapter.id.toDB(),
                     chapter.bookId,
@@ -117,7 +140,8 @@ class ChapterRepositoryImpl(
                     contentToSave,
                     chapter.type,
                 )
-             chapterQueries.selectLastInsertedRowId()
+                chapterQueries.selectLastInsertedRowId().executeAsOne()
+            }
         }
         
         // Invalidate cache AFTER the insert to ensure fresh data is read
@@ -169,13 +193,33 @@ class ChapterRepositoryImpl(
             dbOptimizations?.invalidateCache("book_${bookId}_chapters")
         }
         
-        val batchSize = 200
-        val results = mutableListOf<Long>()
-        
-        chapters.chunked(batchSize).forEach { chunk ->
-            val chunkResult = handler.awaitListAsync(true) {
-                chunk.forEach { chapter ->
-                    val contentToSave = if (chapter.isEmpty()) emptyList() else chapter.content
+        // A refresh must be atomic: with one transaction per chunk, a constraint
+        // failure in a later chunk left earlier chunks committed and produced a
+        // partially rewritten TOC (and stale By Source order).
+        val results = handler.await(inTransaction = true) {
+            val ids = mutableListOf<Long>()
+            chapters.forEach { chapter ->
+                val contentToSave = if (chapter.isEmpty()) emptyList() else chapter.content
+                if (chapter.id != 0L) {
+                    chapterQueries.removeConflictingChapterUrls(chapter.bookId, chapter.key, chapter.id)
+                    chapterQueries.upsertById(
+                        chapter.id,
+                        chapter.bookId,
+                        chapter.key,
+                        chapter.name,
+                        chapter.translator,
+                        chapter.read,
+                        chapter.bookmark,
+                        chapter.lastPageRead,
+                        chapter.number,
+                        chapter.sourceOrder,
+                        chapter.dateFetch,
+                        chapter.dateUpload,
+                        contentToSave,
+                        chapter.type
+                    )
+                    ids.add(chapter.id)
+                } else {
                     chapterQueries.upsert(
                         chapter.id.toDB(),
                         chapter.bookId,
@@ -192,10 +236,10 @@ class ChapterRepositoryImpl(
                         contentToSave,
                         chapter.type
                     )
+                    ids.add(chapterQueries.selectLastInsertedRowId().executeAsOne())
                 }
-                chapterQueries.selectLastInsertedRowId()
             }
-            results.addAll(chunkResult)
+            ids
         }
         
         // Invalidate cache AFTER the insert to ensure fresh data is read
