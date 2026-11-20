@@ -169,8 +169,8 @@ class RestoreBackup internal constructor(
         }
         val backupHasValidOrder = !backupChapters.hasStaleSourceOrder()
         if (!backupHasValidOrder) {
-            backupChapters.replaceAll { chapter ->
-                chapter.copy(sourceOrder = backupChapters.indexOf(chapter).toLong())
+            backupChapters.forEachIndexed { index, chapter ->
+                backupChapters[index] = chapter.copy(sourceOrder = index.toLong())
             }
         }
 
