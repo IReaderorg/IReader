@@ -1,6 +1,7 @@
 package ireader.domain.usecases.chapter.controller
 
 import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.models.entities.ChapterSorting
 
 /**
  * Use case interface for chapter navigation.
@@ -36,7 +37,7 @@ class NavigateChapterUseCaseImpl(
 
     override suspend fun getNextChapterId(bookId: Long, currentChapterId: Long): Long? {
         val chapters = chapterRepository.findChaptersByBookId(bookId)
-            .sortedBy { it.number }
+            .sortedWith(ChapterSorting.ByNumber)
         
         if (chapters.isEmpty()) return null
         
@@ -53,7 +54,7 @@ class NavigateChapterUseCaseImpl(
 
     override suspend fun getPreviousChapterId(bookId: Long, currentChapterId: Long): Long? {
         val chapters = chapterRepository.findChaptersByBookId(bookId)
-            .sortedBy { it.number }
+            .sortedWith(ChapterSorting.ByNumber)
         
         if (chapters.isEmpty()) return null
         

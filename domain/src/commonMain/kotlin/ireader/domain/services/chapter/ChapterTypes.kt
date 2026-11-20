@@ -3,6 +3,7 @@ package ireader.domain.services.chapter
 import androidx.compose.runtime.Immutable
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.ChapterSorting
 
 /**
  * Consolidated types for the Chapter Controller.
@@ -232,8 +233,8 @@ data class ChapterSort(
     /** Returns a comparator function to sort chapters. */
     fun toComparator(): Comparator<Chapter> {
         val baseComparator: Comparator<Chapter> = when (type) {
-            Type.NUMBER -> compareBy { it.number }
-            Type.NAME -> compareBy { it.name }
+            Type.NUMBER -> ChapterSorting.ByNumber
+            Type.NAME -> ChapterSorting.ByName
             Type.DATE_ADDED -> compareBy { it.dateFetch }
             Type.DATE_READ -> compareBy { it.lastPageRead }
         }

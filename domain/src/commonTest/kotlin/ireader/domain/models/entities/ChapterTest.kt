@@ -224,6 +224,21 @@ class ChapterTest {
         assertEquals("", chapter.translator)
     }
 
+    @Test
+    fun `invalid chapter numbers from sources are sanitized`() {
+        val nan = ChapterInfo(key = "nan", name = "NaN", number = Float.NaN).toChapter(bookId = 1L)
+        val infinite = ChapterInfo(key = "inf", name = "Inf", number = Float.POSITIVE_INFINITY).toChapter(bookId = 1L)
+        val list = listOf(
+            ChapterInfo(key = "nan", name = "NaN", number = Float.NaN),
+            ChapterInfo(key = "ok", name = "Ok", number = 2f),
+        ).toChapters(bookId = 1L)
+
+        assertEquals(-1f, nan.number)
+        assertEquals(-1f, infinite.number)
+        assertEquals(-1f, list.first().number)
+        assertEquals(2f, list.last().number)
+    }
+
     // ==================== Chapter State Tests ====================
 
     @Test

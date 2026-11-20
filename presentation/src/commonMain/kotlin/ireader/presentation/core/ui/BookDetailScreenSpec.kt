@@ -554,9 +554,9 @@ data class BookDetailScreenSpec constructor(
                                 } else {
                                     val comparator: Comparator<Chapter> = when (currentSorting.type) {
                                         ireader.presentation.ui.book.viewmodel.ChapterSort.Type.Default -> compareBy { it.sourceOrder } // Won't be used
-                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.ByName -> compareBy { it.name }
-                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.BySource -> compareBy { it.sourceOrder }
-                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.ByChapterNumber -> compareBy { it.number }
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.ByName -> ireader.domain.models.entities.ChapterSorting.ByName
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.BySource -> ireader.domain.models.entities.ChapterSorting.BySource
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.ByChapterNumber -> ireader.domain.models.entities.ChapterSorting.ByNumber
                                         ireader.presentation.ui.book.viewmodel.ChapterSort.Type.DateFetched -> compareBy { it.dateFetch }
                                         ireader.presentation.ui.book.viewmodel.ChapterSort.Type.DateUpload -> compareBy { it.dateUpload }
                                         ireader.presentation.ui.book.viewmodel.ChapterSort.Type.Bookmark -> compareByDescending { it.bookmark }
