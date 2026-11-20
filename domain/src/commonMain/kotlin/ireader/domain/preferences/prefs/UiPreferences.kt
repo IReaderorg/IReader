@@ -75,6 +75,14 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun maxAutomaticBackupFiles(): Preference<Int> {
         return preferenceStore.getInt("max_automatic_backup_size", 5)
     }
+    /** Maximum age of a backup in days. 0 disables age-based rotation. */
+    fun maxAutomaticBackupAgeDays(): Preference<Int> {
+        return preferenceStore.getInt("max_automatic_backup_age_days", 0)
+    }
+    /** Maximum total size of the backup directory in MB. 0 disables size-based rotation. */
+    fun maxAutomaticBackupSizeMb(): Preference<Int> {
+        return preferenceStore.getInt("max_automatic_backup_size_mb", 0)
+    }
 
     fun colorTheme(): Preference<Long> {
         return preferenceStore.getLong("color_theme", -1L)

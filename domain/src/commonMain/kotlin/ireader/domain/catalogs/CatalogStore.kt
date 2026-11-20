@@ -291,7 +291,7 @@ class CatalogStore(
             try {
                 val id = catalog.sourceId
                 if (id in seenIds) null else processCatalog(catalog).also { seenIds.add(id) }
-            } catch (e: LinkageError) {
+            } catch (e: Error) {
                 Log.error("CatalogStore: Skipping incompatible catalog", e)
                 null
             }

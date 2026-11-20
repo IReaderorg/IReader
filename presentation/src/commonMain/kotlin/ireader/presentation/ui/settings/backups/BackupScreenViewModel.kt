@@ -160,12 +160,27 @@ class BackupScreenViewModel(
     private val importLNReaderBackup: ImportLNReaderBackup? = null,
     // V2 orchestrator — injected alongside old deps during migration
     private val orchestrator: BackupOrchestrator? = null,
+    private val backupRetentionStorage: ireader.domain.usecases.backup.BackupRetentionStorage,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
 
     val automaticBackup = uiPreferences.automaticBackupTime().asState()
     val maxAutomaticFiles = uiPreferences.maxAutomaticBackupFiles().asState()
+    val maxAutomaticAgeDays = uiPreferences.maxAutomaticBackupAgeDays().asState()
+    val maxAutomaticSizeMb = uiPreferences.maxAutomaticBackupSizeMb().asState()
+
+    private val _backupDirectorySize = mutableStateOf(0L)
+    val backupDirectorySize: State<Long> = _backupDirectorySize
+
+    /** Refresh the "current size" indicator shown next to the size limit setting. */
+    fun refreshBackupDirectorySize() {
+        scope.launch {
+            _backupDirectorySize.value = runCatching {
+                backupRetentionStorage.automaticDirectorySize()
+            }.getOrDefault(0L)
+        }
+    }
     
     // Backup/Restore progress state
     private val _backupRestoreProgress = MutableStateFlow<BackupRestoreProgress>(BackupRestoreProgress.Idle)
@@ -230,7 +245,14 @@ class BackupScreenViewModel(
      * Update automatic backup frequency and reschedule
      */
     fun updateAutomaticBackupFrequency(frequency: ireader.domain.models.prefs.PreferenceValues.AutomaticBackup) {
+        val changed = automaticBackup.value != frequency
         automaticBackup.value = frequency
+
+        // A new/updated frequency should produce a backup right away, even if a stale
+        // lastBackUpTime was left behind by an older, broken implementation.
+        if (changed && frequency != ireader.domain.models.prefs.PreferenceValues.AutomaticBackup.Off) {
+            uiPreferences.lastBackUpTime().set(0L)
+        }
         
         // Check storage permissions before scheduling
         if (!storageManager.hasStoragePermission()) {

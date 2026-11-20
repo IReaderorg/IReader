@@ -1,5 +1,6 @@
 import UIKit
 import SwiftUI
+import domain
 import presentation
 
 @main
@@ -15,6 +16,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize Koin dependency injection
         IosKoinInitKt.shared.initKoin(additionalModules: [])
 
+        // Register automatic backup background tasks (requires Koin to be ready)
+        IosAutoBackupRegistration.shared.registerBackgroundTasks()
+        
         // Use Compose Multiplatform UI - MainKt is from Main.kt (no package)
         let composeVC = MainKt.MainViewController()
         window?.rootViewController = composeVC
