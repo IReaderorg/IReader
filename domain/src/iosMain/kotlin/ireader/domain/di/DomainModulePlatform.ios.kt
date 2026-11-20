@@ -65,6 +65,9 @@ actual val DomainModule: Module = module {
     single { ireader.domain.services.processstate.ProcessStateManager(get()) }
     
     // Backup scheduling
+    single<ireader.domain.usecases.backup.BackupRetentionStorage> {
+        ireader.domain.usecases.backup.IosBackupRetentionStorage()
+    }
     single<ScheduleAutomaticBackup> { ScheduleAutomaticBackupImpl() }
     single<ireader.domain.usecases.backup.v2.BackupArchiveStreamer> {
         ireader.domain.usecases.backup.v2.IosBackupArchiveStreamer()

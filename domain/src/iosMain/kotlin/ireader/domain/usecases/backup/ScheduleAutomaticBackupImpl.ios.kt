@@ -2,6 +2,8 @@ package ireader.domain.usecases.backup
 
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.common.Uri
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.usecases.backup.v2.BackupOrchestrator
 import platform.BackgroundTasks.*
 import platform.Foundation.*
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -34,7 +36,9 @@ import org.koin.core.component.inject
 @OptIn(ExperimentalForeignApi::class)
 class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup, KoinComponent {
     
-    private val createBackup: CreateBackup by inject()
+    private val backupOrchestrator: BackupOrchestrator by inject()
+    private val uiPreferences: UiPreferences by inject()
+    private val backupRetentionStorage: BackupRetentionStorage by inject()
     
     private var backupJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -60,14 +64,7 @@ class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup, KoinComponent {
         isScheduledFlag = true
         
         // Calculate interval in seconds
-        val intervalSeconds = when (frequency) {
-            PreferenceValues.AutomaticBackup.Every6Hours -> 6.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Every12Hours -> 12.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Daily -> 24.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Every2Days -> 48.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Weekly -> 7.0 * 24.0 * 60.0 * 60.0
-            else -> return
-        }
+        val intervalSeconds = AutomaticBackupPolicy.interval(frequency)?.inWholeMilliseconds?.div(1000.0) ?: return
         
         scheduleBackgroundTask(intervalSeconds)
         println("[AutoBackup] Scheduled automatic backup: $frequency (interval: ${intervalSeconds}s)")
@@ -162,6 +159,12 @@ class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup, KoinComponent {
      * Perform the actual backup using CreateBackup use case
      */
     private suspend fun performBackup() {
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+        if (!AutomaticBackupPolicy.isDue(currentFrequency, uiPreferences.lastBackUpTime().get(), now)) {
+            println("[AutoBackup] Backup is not due yet, skipping")
+            return
+        }
+
         // Get backup directory
         val documentsDir = NSSearchPathForDirectoriesInDomains(
             NSDocumentDirectory,
@@ -182,62 +185,22 @@ class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup, KoinComponent {
             )
         }
         
-        // Generate backup filename with timestamp
-        val dateFormatter = NSDateFormatter().apply {
-            dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        }
-        val timestamp = dateFormatter.stringFromDate(NSDate())
-        val backupPath = "$backupDir/ireader_backup_$timestamp.ireader"
+        // Use the shared filename convention so retention rules work on every platform.
+        val backupPath = "$backupDir/${AutomaticBackupPolicy.fileName(now)}"
         
         // Create backup using injected CreateBackup use case
         val uri = Uri.parse(backupPath)
-        var backupError: String? = null
-        
-        createBackup.saveTo(
-            uri = uri,
-            onError = { error -> 
-                backupError = error.toString()
-            },
-            onSuccess = {
-                println("[AutoBackup] Backup saved to: $backupPath")
-            },
-            currentEvent = { event ->
-                println("[AutoBackup] $event")
-            }
-        )
-        
-        if (backupError != null) {
-            throw Exception("Backup failed: $backupError")
+        val result = backupOrchestrator.createBackup(uri, AutomaticBackupPolicy.backupOptions())
+        if (!result.isSuccess) {
+            throw Exception("Backup file was not created or could not be validated", result.exceptionOrNull())
         }
-        
-        // Clean up old backups (keep last 5)
-        cleanupOldBackups(backupDir, keepCount = 5)
+
+        uiPreferences.lastBackUpTime().set(now)
+
+        // Apply all retention rules (count, age and total size).
+        backupRetentionStorage.rotateAutomaticBackups(BackupRetentionPolicy.fromPreferences(uiPreferences))
         
         println("[AutoBackup] Backup performed at ${NSDate()}")
-    }
-    
-    /**
-     * Remove old backup files, keeping only the most recent ones
-     */
-    private fun cleanupOldBackups(backupDir: String, keepCount: Int) {
-        try {
-            val fileManager = NSFileManager.defaultManager
-            val contents = fileManager.contentsOfDirectoryAtPath(backupDir, null) as? List<String> ?: return
-            
-            val backupFiles = contents
-                .filter { it.endsWith(".ireader") }
-                .sortedDescending() // Most recent first (due to timestamp naming)
-            
-            if (backupFiles.size > keepCount) {
-                backupFiles.drop(keepCount).forEach { filename ->
-                    val filePath = "$backupDir/$filename"
-                    fileManager.removeItemAtPath(filePath, null)
-                    println("[AutoBackup] Removed old backup: $filename")
-                }
-            }
-        } catch (e: Exception) {
-            println("[AutoBackup] Failed to cleanup old backups: ${e.message}")
-        }
     }
     
     /**
@@ -246,14 +209,8 @@ class ScheduleAutomaticBackupImpl : ScheduleAutomaticBackup, KoinComponent {
     fun getNextBackupTime(): NSDate? {
         if (!isScheduledFlag) return null
         
-        val intervalSeconds = when (currentFrequency) {
-            PreferenceValues.AutomaticBackup.Every6Hours -> 6.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Every12Hours -> 12.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Daily -> 24.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Every2Days -> 48.0 * 60.0 * 60.0
-            PreferenceValues.AutomaticBackup.Weekly -> 7.0 * 24.0 * 60.0 * 60.0
-            else -> return null
-        }
+        val intervalSeconds = AutomaticBackupPolicy.interval(currentFrequency)?.inWholeMilliseconds?.div(1000.0)
+            ?: return null
         
         return NSDate.dateWithTimeIntervalSinceNow(intervalSeconds)
     }
@@ -290,4 +247,22 @@ fun registerAutomaticBackupTasks(backupScheduler: ScheduleAutomaticBackupImpl) {
     }
     
     println("[AutoBackup] Background tasks registered")
+}
+
+/**
+ * Swift-callable entry point. Call once from AppDelegate after Koin is initialized.
+ */
+@OptIn(ExperimentalForeignApi::class)
+object IosAutoBackupRegistration : KoinComponent {
+    private val uiPreferences: UiPreferences by inject()
+    private val scheduleAutomaticBackup: ScheduleAutomaticBackup by inject()
+
+    fun registerBackgroundTasks() {
+        registerAutomaticBackupTasks(ScheduleAutomaticBackupImpl())
+
+        val frequency = uiPreferences.automaticBackupTime().get()
+        if (frequency != PreferenceValues.AutomaticBackup.Off) {
+            scheduleAutomaticBackup.schedule(frequency)
+        }
+    }
 }

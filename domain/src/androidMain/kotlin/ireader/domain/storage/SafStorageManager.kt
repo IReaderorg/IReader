@@ -26,6 +26,7 @@ class SafStorageManager(
         const val DIR_JS_PLUGINS = "js-plugins"
         const val DIR_BOOKS = "Books"
         const val DIR_BACKUPS = "Backups"
+        const val DIR_AUTOMATIC_BACKUPS = "Automatic"
     }
     
     /**
@@ -217,6 +218,15 @@ class SafStorageManager(
      */
     fun getBackupsDirectory(): DocumentFile? {
         return getOrCreateDirectory(DIR_BACKUPS)
+    }
+
+    /**
+     * Get the automatic-backups directory inside Backups, using the same SAF
+     * permission that provides Extensions and js-plugins.
+     */
+    fun getAutomaticBackupsDirectory(): DocumentFile? {
+        val backups = getBackupsDirectory() ?: return null
+        return getOrCreateSubDirectory(backups, DIR_AUTOMATIC_BACKUPS)
     }
     
     /**

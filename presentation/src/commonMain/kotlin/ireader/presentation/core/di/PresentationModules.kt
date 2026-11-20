@@ -51,7 +51,7 @@ val PresentationModules = module {
 
 
     // State objects removed - ViewModels now use Mihon-style MutableStateFlow internally
-    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(), getOrNull()) }
+    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(), getOrNull(), get()) }
     factory   { CloudBackupViewModel(get(), get()) }
     factory   { ireader.presentation.ui.settings.backups.GoogleDriveViewModel(get(), get(), get(), get(), get()) }
 

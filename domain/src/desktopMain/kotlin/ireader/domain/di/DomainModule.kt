@@ -147,6 +147,9 @@ actual val DomainModule: Module = module {
     single<GetSimpleStorage> {
         DesktopGetSimpleStorage()
     }
+    single<ireader.domain.usecases.backup.BackupRetentionStorage> {
+        ireader.domain.usecases.backup.DesktopBackupRetentionStorage(get())
+    }
     single<PlatformUiPreferences> {
         DesktopUiPreferences(get())
     }
@@ -306,7 +309,12 @@ actual val DomainModule: Module = module {
     single { ireader.domain.usecases.fonts.GoogleFontsDownloader(get()) }
     
     single<ireader.domain.usecases.backup.ScheduleAutomaticBackup> {
-        ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl()
+        ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl(
+            get<ireader.domain.usecases.backup.v2.BackupOrchestrator>(),
+            get(),
+            get(),
+            get<ireader.domain.usecases.backup.BackupRetentionStorage>()
+        )
     }
     
     // Local Library Source

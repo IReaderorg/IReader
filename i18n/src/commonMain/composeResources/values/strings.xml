@@ -411,6 +411,11 @@
     <string name="restore">Restore</string>
     <string name="automatic_backup">Automatic Backup</string>
     <string name="maximum_backups">Maximum backups</string>
+    <string name="max_backup_age_days">Max backup age (days)</string>
+    <string name="max_backup_size_mb">Max backup folder size (MB)</string>
+    <string name="backup_retention">Backup Retention</string>
+    <string name="backup_retention_unlimited">Unlimited</string>
+    <string name="backup_retention_disabled">Off</string>
     <string name="auto_backup">Auto backup</string>
     <string name="data">Data</string>
     <string name="chapters_was_cleared">Chapters was cleared</string>
