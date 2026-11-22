@@ -15,6 +15,12 @@ expect class PlatformReaderSettingReader {
         onHideStatus: (Boolean) -> Unit
     )
 
+    /**
+     * Forces one real system-bar show/hide cycle so Compose dispatches final
+     * insets before the first paged layout is measured.
+     */
+    suspend fun warmUpReaderInsets(context: Any)
+
     fun ReaderScreenViewModel.restoreSetting(
         context: Any,
         scrollState: ScrollState,

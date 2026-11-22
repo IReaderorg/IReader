@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,6 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,6 +72,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.request.CachePolicy
@@ -95,9 +100,48 @@ import coil3.compose.LocalPlatformContext
 import ireader.presentation.ui.reader.components.BilingualMode
 import ireader.presentation.ui.reader.components.BilingualText
 import ireader.presentation.ui.reader.components.SelectableTranslatableText
+import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+
+/** Time insets must stay unchanged before the first pager frame is painted. */
+internal const val PAGED_LAYOUT_SETTLE_MS = 300L
+
+internal fun pagedLayoutReady(
+    stableForMs: Long,
+    insetsPrimed: Boolean,
+    settleMs: Long = PAGED_LAYOUT_SETTLE_MS,
+): Boolean = insetsPrimed && stableForMs >= settleMs
+
+/**
+ * Height available for text on one paged-reader page, in pixels.
+ *
+ * The reader is edge-to-edge, so system bars must be removed from the page
+ * budget together with the reader margins and the footer. The same inset values
+ * are applied to [ContentPageView] padding so measurement and painting agree.
+ */
+internal fun pagedContentUsableHeightPx(
+    screenHeightPx: Int,
+    topMarginDp: Int,
+    bottomMarginDp: Int,
+    topInsetDp: Dp,
+    bottomInsetDp: Dp,
+    density: Float,
+): Int {
+    val topMarginPx = (topMarginDp * density).toInt()
+    val bottomMarginPx = (bottomMarginDp * density).toInt()
+    val topInsetPx = (topInsetDp.value * density).toInt()
+    val bottomInsetPx = (bottomInsetDp.value * density).toInt()
+    val bottomIndicatorPx = (24f * density).toInt()
+    val indicatorPaddingPx = (6f * density).toInt()
+    val safetyPaddingPx = (24f * density).toInt()
+
+    return (screenHeightPx - topMarginPx - bottomMarginPx - topInsetPx - bottomInsetPx
+        - bottomIndicatorPx - indicatorPaddingPx - safetyPaddingPx).coerceAtLeast(200)
+}
 
 /**
  * Model representing an indexed paragraph on a page with clean pre-formatted display text.
@@ -149,6 +193,34 @@ internal fun PagedReaderContent(
     val bottomMarginVal = vm.bottomMargin.lazyValue
     val leftMarginVal = vm.leftMargin.lazyValue
     val rightMarginVal = vm.rightMargin.lazyValue
+
+    // Warm up before painting the pager. Waiting alone is not enough: on a cold
+    // start the bars are already hidden, so Compose never dispatches a real
+    // inset change. Drive one show/hide cycle (the same thing the menu toggle
+    // does), then wait for insets to settle and compose the pager exactly once.
+    val platformReader: PlatformReaderSettingReader = koinInject()
+    val platformContext = LocalPlatformContext.current
+    val systemBarPadding = WindowInsets.systemBars.asPaddingValues()
+    val topInsetDp = systemBarPadding.calculateTopPadding()
+    val bottomInsetDp = systemBarPadding.calculateBottomPadding()
+    var hasWarmedUp by rememberSaveable { mutableStateOf(false) }
+    var insetsPrimed by remember { mutableStateOf(hasWarmedUp) }
+    var layoutReady by remember { mutableStateOf(hasWarmedUp) }
+    var lastInsetsChangeMs by remember { mutableStateOf(0L) }
+    LaunchedEffect(Unit) {
+        if (hasWarmedUp) return@LaunchedEffect
+        platformReader.warmUpReaderInsets(platformContext)
+        insetsPrimed = true
+    }
+    LaunchedEffect(topInsetDp, bottomInsetDp, insetsPrimed) {
+        if (layoutReady) return@LaunchedEffect
+        lastInsetsChangeMs = currentTimeToLong()
+        delay(PAGED_LAYOUT_SETTLE_MS)
+        if (pagedLayoutReady(currentTimeToLong() - lastInsetsChangeMs, insetsPrimed)) {
+            layoutReady = true
+            hasWarmedUp = true
+        }
+    }
 
     // Navigation guard to prevent race conditions during rapid tapping/swiping
     var isNavigatingChapter by remember { mutableStateOf(false) }
@@ -215,6 +287,8 @@ internal fun PagedReaderContent(
             bottomMarginVal,
             leftMarginVal,
             rightMarginVal,
+            topInsetDp,
+            bottomInsetDp,
             screenHeightPx,
             screenWidthPx,
             density.density
@@ -230,6 +304,8 @@ internal fun PagedReaderContent(
                 bottomMarginDp = bottomMarginVal,
                 leftMarginDp = leftMarginVal,
                 rightMarginDp = rightMarginVal,
+                topInsetDp = topInsetDp,
+                bottomInsetDp = bottomInsetDp,
                 viewportHeightPx = screenHeightPx,
                 viewportWidthPx = screenWidthPx,
                 densityDpi = density.density
@@ -376,53 +452,63 @@ internal fun PagedReaderContent(
                     )
                 }
         ) {
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-                beyondViewportPageCount = 1
-            ) { pageIndex ->
-                when {
-                    hasStartPage && pageIndex == 0 -> {
-                        // Previous Chapter Transition Page
-                        StartChapterTransitionPage(
-                            prevChapter = prevChapter,
-                            textColor = vm.textColorCompose.value,
-                            backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                            onNavigatePrev = { safeNavigatePrev() }
-                        )
-                    }
-                    pageIndex >= (startPageOffset + totalContentPages) -> {
-                        // End of Chapter & Comments Void Page
-                        EndChapterCompletionPage(
-                            chapter = chapter,
-                            nextChapter = nextChapter,
-                            hasNextChapter = hasNextChapter,
-                            textColor = vm.textColorCompose.value,
-                            backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                            isLoading = vm.isLoading,
-                            onShowComments = { chapter?.let { onShowComments(it) } },
-                            onNextChapter = { safeNavigateNext() },
-                            onReRead = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(startPageOffset)
+            if (!layoutReady) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(vm.backgroundColor.value.toComposeColor())
+                )
+            } else {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    beyondViewportPageCount = 1
+                ) { pageIndex ->
+                    when {
+                        hasStartPage && pageIndex == 0 -> {
+                            // Previous Chapter Transition Page
+                            StartChapterTransitionPage(
+                                prevChapter = prevChapter,
+                                textColor = vm.textColorCompose.value,
+                                backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                                onNavigatePrev = { safeNavigatePrev() }
+                            )
+                        }
+                        pageIndex >= (startPageOffset + totalContentPages) -> {
+                            // End of Chapter & Comments Void Page
+                            EndChapterCompletionPage(
+                                chapter = chapter,
+                                nextChapter = nextChapter,
+                                hasNextChapter = hasNextChapter,
+                                textColor = vm.textColorCompose.value,
+                                backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                                isLoading = vm.isLoading,
+                                onShowComments = { chapter?.let { onShowComments(it) } },
+                                onNextChapter = { safeNavigateNext() },
+                                onReRead = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(startPageOffset)
+                                    }
                                 }
-                            }
-                        )
-                    }
-                    else -> {
-                        // Content Page
-                        val contentIndex = pageIndex - startPageOffset
-                        val pageParagraphs = contentPages.getOrNull(contentIndex) ?: emptyList()
+                            )
+                        }
+                        else -> {
+                            // Content Page
+                            val contentIndex = pageIndex - startPageOffset
+                            val pageParagraphs = contentPages.getOrNull(contentIndex) ?: emptyList()
 
-                        ContentPageView(
-                            paragraphs = pageParagraphs,
-                            vm = vm,
-                            preferences = preferences,
-                            styleParams = styleParams,
-                            currentPage = contentIndex + 1,
-                            totalPages = totalContentPages,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                            ContentPageView(
+                                paragraphs = pageParagraphs,
+                                vm = vm,
+                                preferences = preferences,
+                                styleParams = styleParams,
+                                currentPage = contentIndex + 1,
+                                totalPages = totalContentPages,
+                                topInset = topInsetDp,
+                                bottomInset = bottomInsetDp,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 }
             }
@@ -441,14 +527,16 @@ private fun ContentPageView(
     styleParams: TextStyleParams,
     currentPage: Int,
     totalPages: Int,
+    topInset: Dp = 0.dp,
+    bottomInset: Dp = 0.dp,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(
-                top = vm.topMargin.lazyValue.dp,
-                bottom = vm.bottomMargin.lazyValue.dp,
+                top = vm.topMargin.lazyValue.dp + topInset,
+                bottom = vm.bottomMargin.lazyValue.dp + bottomInset,
                 start = vm.leftMargin.lazyValue.dp,
                 end = vm.rightMargin.lazyValue.dp
             ),
@@ -907,6 +995,8 @@ private fun partitionContentWithMeasurer(
     bottomMarginDp: Int,
     leftMarginDp: Int,
     rightMarginDp: Int,
+    topInsetDp: Dp,
+    bottomInsetDp: Dp,
     viewportHeightPx: Int,
     viewportWidthPx: Int,
     densityDpi: Float
@@ -916,16 +1006,18 @@ private fun partitionContentWithMeasurer(
     val effectiveWidth = if (viewportWidthPx > 0) viewportWidthPx else 1080
     val effectiveHeight = if (viewportHeightPx > 0) viewportHeightPx else 1920
 
-    val topMarginPx = (topMarginDp * densityDpi).toInt()
-    val bottomMarginPx = (bottomMarginDp * densityDpi).toInt()
     val leftMarginPx = (leftMarginDp * densityDpi).toInt()
     val rightMarginPx = (rightMarginDp * densityDpi).toInt()
-    val bottomIndicatorPx = (24 * densityDpi).toInt()
-    val indicatorPaddingPx = (6 * densityDpi).toInt()
-    val safetyPaddingPx = (24 * densityDpi).toInt() // Headroom to ensure zero bottom overflow
 
     val usableWidthPx = (effectiveWidth - leftMarginPx - rightMarginPx).coerceAtLeast(200)
-    val usableHeightPx = (effectiveHeight - topMarginPx - bottomMarginPx - bottomIndicatorPx - indicatorPaddingPx - safetyPaddingPx).coerceAtLeast(200)
+    val usableHeightPx = pagedContentUsableHeightPx(
+        screenHeightPx = effectiveHeight,
+        topMarginDp = topMarginDp,
+        bottomMarginDp = bottomMarginDp,
+        topInsetDp = topInsetDp,
+        bottomInsetDp = bottomInsetDp,
+        density = densityDpi,
+    )
     val constraints = Constraints(maxWidth = usableWidthPx)
     val paragraphSpacingPx = (distanceBetweenParagraphsDp * densityDpi).coerceAtLeast(0f)
 

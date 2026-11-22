@@ -14,10 +14,13 @@ import ireader.domain.utils.extensions.hideSystemUI
 import ireader.domain.utils.extensions.isImmersiveModeEnabled
 import ireader.domain.utils.extensions.showSystemUI
 import ireader.presentation.ui.component.findComponentActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+
+private const val READER_INSET_WARM_UP_DELAY_MS = 80L
 
 actual class PlatformReaderSettingReader(
        private val webViewManager: WebViewManger
@@ -55,6 +58,17 @@ actual class PlatformReaderSettingReader(
             onHideStatus(false)
             showSystemBars(context)
         }
+    }
+
+    actual suspend fun warmUpReaderInsets(context: Any) {
+        val activity = (context as? Context)?.findComponentActivity() ?: return
+        // Called from a Compose LaunchedEffect on the main dispatcher. Driving the
+        // real controller (not the posted helpers) guarantees the show/hide has
+        // been issued before we report warm-up complete.
+        activity.showSystemUI()
+        delay(READER_INSET_WARM_UP_DELAY_MS)
+        activity.hideSystemUI()
+        delay(READER_INSET_WARM_UP_DELAY_MS)
     }
 
     actual suspend fun ReaderScreenViewModel.readBrightness(context: Any) {
