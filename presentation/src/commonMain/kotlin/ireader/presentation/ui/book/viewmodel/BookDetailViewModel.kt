@@ -20,6 +20,8 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.Recommendation
 import ireader.domain.models.entities.isObsolete
+import ireader.domain.models.entities.hasStaleSourceOrder
+import ireader.domain.models.entities.isSameChapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.UiPreferences
@@ -458,7 +460,7 @@ class BookDetailViewModel(
                     val supportsPagination = source?.supportsPaginatedChapters() ?: false
                     
                     // Determine if remote fetch will be needed
-                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
+                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty() || chapters.hasStaleSourceOrder()) && catalogSource?.source != null
                     
                     // Set initial state immediately from prefetch cache
                     // Keep refreshing indicators if remote fetch will be triggered
@@ -578,9 +580,10 @@ class BookDetailViewModel(
                     // Trigger initial fetch if book needs updating (AFTER subscribing)
                     // Fetch remote data if:
                     // 1. Book has never been updated (lastUpdate < 1L), OR
-                    // 2. Book has no chapters yet
+                    // 2. Book has no chapters yet, OR
+                    // 3. Stored chapters tie on sourceOrder (legacy downloaded rows)
                     // This runs in background and won't block UI
-                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
+                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty() || chapters.hasStaleSourceOrder()) && catalogSource?.source != null
                     
                     // Set initial state immediately - this triggers UI update
                     // Keep refreshing indicators if remote fetch will be triggered
@@ -1266,6 +1269,33 @@ class BookDetailViewModel(
     // ==================== Chapter Pagination ====================
     
     /**
+     * Reuse the stored row when a source returns a chapter under a new key on a
+     * later page. Inserting a fresh row in that case creates a duplicate chapter
+     * and pushes it to the end of the list.
+     */
+    private fun Chapter.mergeWithStoredChapter(): Chapter {
+        val stored = chapters.firstOrNull { it.isSameChapter(this) } ?: return this
+        return stored.copy(
+            key = key,
+            name = name,
+            number = number,
+            dateUpload = dateUpload,
+            sourceOrder = sourceOrder,
+            translator = translator,
+            type = type,
+        )
+    }
+
+    private fun List<Chapter>.mergedWithStoredChapters(): List<Chapter> {
+        val merged = mutableListOf<Chapter>()
+        for (chapter in this) {
+            val candidate = chapter.mergeWithStoredChapter()
+            if (merged.none { it.isSameChapter(candidate) }) merged.add(candidate)
+        }
+        return merged
+    }
+
+    /**
      * Check if the current source supports paginated chapter loading
      * and initialize pagination state if it does.
      * If pagination is supported and no chapters are loaded, automatically loads page 1.
@@ -1351,13 +1381,12 @@ class BookDetailViewModel(
             
             when (result) {
                 is ireader.domain.usecases.remote.ChapterPageResult.Success -> {
-                    // Filter out chapters that already exist in the database (by key/URL)
-                    val existingKeys = chapters.map { it.key }.toSet()
-                    val newChapters = result.chapters.filter { it.key !in existingKeys }
-                    
-                    if (newChapters.isNotEmpty()) {
-                        // Save new chapters to database - UI will update via subscription
-                        localInsertUseCases.insertChapters(newChapters)
+                    val chaptersToSave = result.chapters.mergedWithStoredChapters()
+
+                    if (chaptersToSave.isNotEmpty()) {
+                        // Save chapters to database - UI will update via subscription.
+                        // Stored rows are included so their source order is refreshed.
+                        localInsertUseCases.insertChapters(chaptersToSave)
                     }
                     
                     // Save current page to database for persistence
@@ -1417,9 +1446,8 @@ class BookDetailViewModel(
         
         scope.launch {
             try {
-                val allNewChapters = mutableListOf<Chapter>()
+                val chaptersToSave = mutableListOf<Chapter>()
                 val totalPages = currentState.chapterTotalPages
-                val existingKeys = chapters.map { it.key }.toSet()
                 
                 // Fetch all pages sequentially
                 for (page in 1..totalPages) {
@@ -1433,9 +1461,11 @@ class BookDetailViewModel(
                     
                     when (result) {
                         is ireader.domain.usecases.remote.ChapterPageResult.Success -> {
-                            // Filter out chapters that already exist
-                            val newChapters = result.chapters.filter { it.key !in existingKeys }
-                            allNewChapters.addAll(newChapters)
+                            for (chapter in result.chapters.mergedWithStoredChapters()) {
+                                if (chaptersToSave.none { it.isSameChapter(chapter) }) {
+                                    chaptersToSave.add(chapter)
+                                }
+                            }
                         }
                         is ireader.domain.usecases.remote.ChapterPageResult.Error -> {
                             Log.warn { "Failed to load page $page: ${result.error}" }
@@ -1443,9 +1473,9 @@ class BookDetailViewModel(
                     }
                 }
                 
-                // Save all new chapters to database - UI will update via subscription
-                if (allNewChapters.isNotEmpty()) {
-                    localInsertUseCases.insertChapters(allNewChapters)
+                // Save chapters to database - UI will update via subscription
+                if (chaptersToSave.isNotEmpty()) {
+                    localInsertUseCases.insertChapters(chaptersToSave)
                 }
                 
                 updateSuccessState { state ->

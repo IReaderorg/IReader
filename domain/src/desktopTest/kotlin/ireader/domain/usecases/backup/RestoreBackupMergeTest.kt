@@ -71,4 +71,95 @@ class RestoreBackupMergeTest {
         assertTrue(ch1.read)
         assertEquals(0L, saved.captured.single { it.key == "ch2" }.id)
     }
+
+    @Test
+    fun `newer backup with changed chapter key updates in place instead of duplicating`() = runTest {
+        val transactions = mockk<Transactions>()
+        coEvery { transactions.run(any<suspend () -> Any>()) } coAnswers { firstArg<suspend () -> Any>()() }
+        val bookRepository = mockk<ireader.domain.data.repository.BookRepository>(relaxed = true)
+        val chapterRepository = mockk<ireader.domain.data.repository.ChapterRepository>(relaxed = true)
+        val categoryRepository = mockk<ireader.domain.data.repository.CategoryRepository>(relaxed = true)
+
+        coEvery { bookRepository.find("book", 1L) } returns
+            Book(id = 10L, sourceId = 1L, key = "book", title = "Book", initialized = true, favorite = true, lastUpdate = 1000L)
+        coEvery { chapterRepository.findChaptersByBookId(10L) } returns listOf(
+            Chapter(id = 100L, bookId = 10L, key = "old-ch2", name = "Chapter 2", number = 2f, sourceOrder = 1L)
+        )
+        coEvery { categoryRepository.findAll() } returns emptyList()
+
+        val backup = BackupProto(
+            library = listOf(
+                BookProto(
+                    sourceId = 1L, key = "book", title = "Book", initialized = true, lastUpdate = 2000L,
+                    chapters = listOf(
+                        ChapterProto(key = "ch2", name = "Chapter 2", number = 2f, sourceOrder = 1L)
+                    )
+                )
+            )
+        )
+
+        val result = RestoreBackup(
+            bookRepository = bookRepository,
+            categoryRepository = categoryRepository,
+            chapterRepository = chapterRepository,
+            mangaCategoryRepository = mockk(relaxed = true),
+            libraryPreferences = mockk(relaxed = true),
+            transactions = transactions,
+            fileSaver = mockk(relaxed = true)
+        ).restoreFromBytes(ProtoBuf.encodeToByteArray(backup))
+
+        assertTrue(result is RestoreBackup.Result.Success)
+        val saved = slot<List<Chapter>>()
+        coVerify { chapterRepository.insertChapters(capture(saved)) }
+        assertEquals(1, saved.captured.size, "Restoring must not duplicate a chapter whose source key changed")
+        assertEquals(100L, saved.captured.single().id)
+        assertEquals("ch2", saved.captured.single().key)
+    }
+
+    @Test
+    fun `restoring a legacy backup does not overwrite valid source order`() = runTest {
+        val transactions = mockk<Transactions>()
+        coEvery { transactions.run(any<suspend () -> Any>()) } coAnswers { firstArg<suspend () -> Any>()() }
+        val bookRepository = mockk<ireader.domain.data.repository.BookRepository>(relaxed = true)
+        val chapterRepository = mockk<ireader.domain.data.repository.ChapterRepository>(relaxed = true)
+        val categoryRepository = mockk<ireader.domain.data.repository.CategoryRepository>(relaxed = true)
+
+        coEvery { bookRepository.find("book", 1L) } returns
+            Book(id = 10L, sourceId = 1L, key = "book", title = "Book", initialized = true, favorite = true, lastUpdate = 1000L)
+        coEvery { chapterRepository.findChaptersByBookId(10L) } returns listOf(
+            Chapter(id = 100L, bookId = 10L, key = "ch1", name = "Chapter 1", number = 1f, sourceOrder = 0L),
+            Chapter(id = 101L, bookId = 10L, key = "ch2", name = "Chapter 2", number = 2f, sourceOrder = 1L),
+        )
+        coEvery { categoryRepository.findAll() } returns emptyList()
+
+        val backup = BackupProto(
+            library = listOf(
+                BookProto(
+                    sourceId = 1L, key = "book", title = "Book", initialized = true, lastUpdate = 2000L,
+                    chapters = listOf(
+                        ChapterProto(key = "ch1", name = "Chapter 1", number = 1f),
+                        ChapterProto(key = "ch2", name = "Chapter 2", number = 2f),
+                    )
+                )
+            )
+        )
+
+        val result = RestoreBackup(
+            bookRepository = bookRepository,
+            categoryRepository = categoryRepository,
+            chapterRepository = chapterRepository,
+            mangaCategoryRepository = mockk(relaxed = true),
+            libraryPreferences = mockk(relaxed = true),
+            transactions = transactions,
+            fileSaver = mockk(relaxed = true)
+        ).restoreFromBytes(ProtoBuf.encodeToByteArray(backup))
+
+        assertTrue(result is RestoreBackup.Result.Success)
+        val saved = slot<List<Chapter>>()
+        coVerify { chapterRepository.insertChapters(capture(saved)) }
+        assertEquals(
+            listOf(0L, 1L),
+            saved.captured.sortedBy { it.number }.map { it.sourceOrder },
+        )
+    }
 }

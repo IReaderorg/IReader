@@ -8,7 +8,8 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Book.Companion.toBookInfo
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
-import ireader.domain.models.entities.toChapter
+import ireader.domain.models.entities.isSameChapter
+import ireader.domain.models.entities.toChapters
 import ireader.domain.utils.exceptionHandler
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
@@ -33,16 +34,36 @@ class GetRemoteChapters() {
                     val source = catalog?.source ?: throw SourceNotFoundException()
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Called" }
 
-                    val newChapters = source.getChapterList(manga = book.toBookInfo(), commands)
-                            .map { it.toChapter(book.id) }
-                    onRemoteSuccess(newChapters)
-                    val oldKeys = oldChapters.mapTo(HashSet(oldChapters.size)) { it.key }
-                    val newlyDiscovered = newChapters.filter { it.key !in oldKeys }
-                    val chaptersToSave = if (oldChapters.isNotEmpty()) {
-                        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
-                        newlyDiscovered.map { it.copy(dateFetch = now) }
-                    } else {
-                        newlyDiscovered
+                    val fetchedChapters = source.getChapterList(manga = book.toBookInfo(), commands)
+                            .toChapters(book.id)
+                    onRemoteSuccess(fetchedChapters)
+
+                    val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                    val chaptersToSave = mutableListOf<Chapter>()
+                    for (chapter in fetchedChapters) {
+                        if (chaptersToSave.any { it.isSameChapter(chapter) }) continue
+                        val existing = oldChapters.firstOrNull { it.isSameChapter(chapter) }
+                        chaptersToSave += when {
+                            existing != null -> existing.copy(
+                                key = chapter.key,
+                                name = chapter.name,
+                                number = chapter.number,
+                                dateUpload = chapter.dateUpload,
+                                sourceOrder = chapter.sourceOrder,
+                                translator = chapter.translator,
+                                type = chapter.type,
+                            )
+                            oldChapters.isEmpty() -> chapter
+                            else -> chapter.copy(dateFetch = now)
+                        }
+                    }
+                    // A downloaded chapter can disappear from the source list. Keep it,
+                    // but give it a unique order so the whole TOC stops falling back to
+                    // insertion order when legacy rows are tied at 0.
+                    var nextOrder = (chaptersToSave.maxOfOrNull { it.sourceOrder } ?: -1L) + 1
+                    for (oldChapter in oldChapters) {
+                        if (chaptersToSave.any { it.isSameChapter(oldChapter) }) continue
+                        chaptersToSave += oldChapter.copy(sourceOrder = nextOrder++)
                     }
                     onSuccess(chaptersToSave)
                     Log.debug { "Timber: GetRemoteChaptersUseCase was Finished Successfully" }
@@ -86,7 +107,11 @@ class GetRemoteChapters() {
                     commands = commands
                 )
                 
-                val chapters = pageInfo.chapters.map { it.toChapter(book.id) }
+                // Pages are fetched independently, so give each one a distinct
+                // source-order range instead of letting every chapter tie at 0.
+                val pageOffset = (page - 1L) * 1000L
+                val chapters = pageInfo.chapters.toChapters(book.id)
+                    .map { it.copy(sourceOrder = pageOffset + it.sourceOrder) }
                 
                 Log.debug { "GetRemoteChapters: Got ${chapters.size} chapters, page ${pageInfo.currentPage}/${pageInfo.totalPages}" }
                 
