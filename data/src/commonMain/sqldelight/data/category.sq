@@ -54,7 +54,7 @@ FROM categories
 WHERE categories._id = -1
 UNION ALL
 -- User categories (id > 0)
-SELECT categories.*, COUNT(bookcategories.book_id) AS mangaCount
+SELECT categories.*, COUNT(DISTINCT bookcategories.book_id) AS mangaCount
 FROM categories
 LEFT JOIN bookcategories
 ON categories._id = bookcategories.category_id

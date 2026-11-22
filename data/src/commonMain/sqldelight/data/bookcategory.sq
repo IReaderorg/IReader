@@ -14,11 +14,13 @@ CREATE TABLE IF NOT EXISTS bookcategories(
     ON DELETE CASCADE
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_bookcategories_book_category_unique ON bookcategories(book_id, category_id);
+
 findAll:
 SELECT * FROM bookcategories;
 
 insert:
-INSERT OR REPLACE INTO bookcategories(book_id,category_id) VALUES (:bookId,:categoryId);
+INSERT OR IGNORE INTO bookcategories(book_id,category_id) VALUES (:bookId,:categoryId);
 
 
 deleteMangaCategoryByMangaId:

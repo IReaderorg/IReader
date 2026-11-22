@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 38
+    const val CURRENT_VERSION = 39
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -103,6 +103,7 @@ object DatabaseMigrations {
             35 -> migrateV35toV36(driver)
             36 -> migrateV36toV37(driver)
             37 -> migrateV37toV38(driver)
+            38 -> migrateV38toV39(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -2752,6 +2753,40 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(38, e)
+            // Don't throw - allow the app to continue even if migration fails
+        }
+    }
+
+    /**
+     * Migration from version 38 to version 39
+     * Deduplicates book/category assignments created by repeated backup restores and
+     * adds a unique index so a pair can never be inserted twice again.
+     */
+    private fun migrateV38toV39(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(38, 39)
+
+            // Keep the oldest row for each (book, category) pair, exactly like the
+            // chapter de-duplication in migrateV35toV36.
+            driver.execute(null, """
+                DELETE FROM bookcategories
+                WHERE _id NOT IN (
+                    SELECT MIN(_id)
+                    FROM bookcategories
+                    GROUP BY book_id, category_id
+                );
+            """.trimIndent(), 0)
+            Logger.logDebug("Removed duplicate book category assignments before adding unique constraint")
+
+            driver.execute(null, """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_bookcategories_book_category_unique
+                ON bookcategories(book_id, category_id);
+            """.trimIndent(), 0)
+            Logger.logIndexCreated("idx_bookcategories_book_category_unique")
+
+            Logger.logMigrationSuccess(39)
+        } catch (e: Exception) {
+            Logger.logMigrationError(39, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }
