@@ -22,6 +22,11 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.ireader.backup.automatic</string>
+		<string>com.ireader.backup.refresh</string>
+	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>IReader needs access to your photo library to select character art images.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

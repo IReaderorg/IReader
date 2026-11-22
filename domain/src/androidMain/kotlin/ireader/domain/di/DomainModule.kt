@@ -122,17 +122,16 @@ actual val DomainModule = module {
         ireader.domain.usecases.backup.AutoBackupWorker(
             androidContext(),
             get(),
+            get<ireader.domain.usecases.backup.v2.BackupOrchestrator>(),
             get(),
-            get()
+            get<ireader.domain.usecases.backup.AutoBackupStorage>()
         )
     }
 
     single {
         AutomaticBackup(
-                get(),
-                get(),
-                get(),
-                get()
+            get(),
+            get()
         )
     }
     single<ireader.domain.usecases.backup.ScheduleAutomaticBackup> {
@@ -169,6 +168,13 @@ actual val DomainModule = module {
     // SAF Storage Manager
     single<ireader.domain.storage.SafStorageManager> { 
         ireader.domain.storage.SafStorageManager(get(), get()) 
+    }
+
+    single<ireader.domain.usecases.backup.AutoBackupStorage> {
+        ireader.domain.usecases.backup.AutoBackupStorage(androidContext(), get())
+    }
+    single<ireader.domain.usecases.backup.BackupRetentionStorage> {
+        get<ireader.domain.usecases.backup.AutoBackupStorage>()
     }
     
     // SAF Folder Checker - checks if SAF folder is available

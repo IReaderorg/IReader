@@ -103,6 +103,17 @@ fun main() {
         
         // Mark modules as fully initialized (desktop loads all modules synchronously)
         ireader.domain.di.ModuleInitializationState.markFullyInitialized()
+
+        // Restore automatic backup scheduling on startup
+        try {
+            val uiPreferences = koinApp.koin.get<ireader.domain.preferences.prefs.UiPreferences>()
+            val frequency = uiPreferences.automaticBackupTime().get()
+            if (frequency != ireader.domain.models.prefs.PreferenceValues.AutomaticBackup.Off) {
+                koinApp.koin.get<ireader.domain.usecases.backup.ScheduleAutomaticBackup>().schedule(frequency)
+            }
+        } catch (_: Exception) {
+            // Backup scheduling is best-effort; the settings screen can reschedule later.
+        }
         
         // Initialize system fonts
         try {

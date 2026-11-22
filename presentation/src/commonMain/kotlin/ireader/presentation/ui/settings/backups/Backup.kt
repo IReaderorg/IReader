@@ -1,25 +1,35 @@
 package ireader.presentation.ui.settings.backups
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
+import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
@@ -48,6 +58,9 @@ fun BackUpAndRestoreScreen(
     // LNReader import progress
     val lnReaderProgress by vm.lnReaderImportProgress.collectAsState()
     val lnReaderImportProgressDialog by vm.lnReaderImportProgressDialog.collectAsState()
+
+    val backupDirectorySize by vm.backupDirectorySize
+    LaunchedEffect(Unit) { vm.refreshBackupDirectorySize() }
 
     // Backup options dialog
     if (showBackupOptionsDialog) {
@@ -123,7 +136,7 @@ fun BackUpAndRestoreScreen(
         null -> null
     }
     
-    val items = androidx.compose.runtime.remember(importProgressText, localizeHelper) {
+    val items = androidx.compose.runtime.remember(importProgressText, localizeHelper, backupDirectorySize) {
         listOf<Components>(
             Components.Header("Full Backup & Restore"),
             Components.Row(
@@ -190,23 +203,105 @@ fun BackUpAndRestoreScreen(
                     }
                 )
             },
+            Components.Header(localizeHelper.localize(Res.string.backup_retention)),
             Components.Dynamic {
-                ChoicePreference<Int>(
-                    preference = vm.maxAutomaticFiles,
-                    choices = mapOf(
-                        1 to "1",
-                        2 to "2",
-                        3 to "3",
-                        4 to "4",
-                        5 to "5",
-                    ),
-                    title = localizeHelper.localize(
-                        Res.string.maximum_backups
-                    ),
-                    enable = vm.automaticBackup.value != PreferenceValues.AutomaticBackup.Off
+                NumberPreference(
+                    title = localizeHelper.localize(Res.string.maximum_backups),
+                    subtitle = if (vm.maxAutomaticFiles.value <= 0) {
+                        localizeHelper.localize(Res.string.backup_retention_unlimited)
+                    } else null,
+                    value = vm.maxAutomaticFiles.value,
+                    onValueChange = { vm.maxAutomaticFiles.value = it },
+                    min = 0,
+                    max = 1000,
                 )
-            }
+            },
+            Components.Dynamic {
+                NumberPreference(
+                    title = localizeHelper.localize(Res.string.max_backup_age_days),
+                    subtitle = if (vm.maxAutomaticAgeDays.value <= 0) {
+                        localizeHelper.localize(Res.string.backup_retention_unlimited)
+                    } else null,
+                    value = vm.maxAutomaticAgeDays.value,
+                    onValueChange = { vm.maxAutomaticAgeDays.value = it },
+                    min = 0,
+                    max = 3650,
+                )
+            },
+            Components.Dynamic {
+                val limitText = if (vm.maxAutomaticSizeMb.value <= 0) {
+                    localizeHelper.localize(Res.string.backup_retention_unlimited)
+                } else "${vm.maxAutomaticSizeMb.value} MB"
+                NumberPreference(
+                    title = localizeHelper.localize(Res.string.max_backup_size_mb),
+                    subtitle = "${formatBackupSize(backupDirectorySize)} / $limitText",
+                    value = vm.maxAutomaticSizeMb.value,
+                    onValueChange = {
+                        vm.maxAutomaticSizeMb.value = it
+                        vm.refreshBackupDirectorySize()
+                    },
+                    min = 0,
+                    max = 1_000_000,
+                )
+            },
         )
     }
     SetupSettingComponents(items = items, scaffoldPadding = scaffoldPadding)
+}
+
+private fun formatBackupSize(bytes: Long): String = when {
+    bytes <= 0L -> "0 MB"
+    bytes < 1024L * 1024L -> "${bytes / 1024L} KB"
+    bytes < 1024L * 1024L * 1024L -> "${bytes / (1024L * 1024L)} MB"
+    else -> "${bytes / (1024L * 1024L * 1024L)} GB"
+}
+
+/** A preference row that opens a numeric input dialog. `0` means unlimited. */
+@Composable
+private fun NumberPreference(
+    title: String,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    enabled: Boolean = true,
+    min: Int = 0,
+    max: Int = Int.MAX_VALUE,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    var input by remember(value, showDialog) { mutableStateOf(value.toString()) }
+
+    PreferenceRow(
+        title = title,
+        subtitle = subtitle,
+        action = { Text(value.toString(), modifier = Modifier.padding(end = 16.dp)) },
+        enable = enabled,
+        onClick = { if (enabled) showDialog = true },
+    )
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(title) },
+            text = {
+                OutlinedTextField(
+                    value = input,
+                    onValueChange = { input = it.filter(Char::isDigit) },
+                    label = { Text(title) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = modifier,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    input.toIntOrNull()?.coerceIn(min, max)?.let(onValueChange)
+                    showDialog = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+            },
+        )
+    }
 }

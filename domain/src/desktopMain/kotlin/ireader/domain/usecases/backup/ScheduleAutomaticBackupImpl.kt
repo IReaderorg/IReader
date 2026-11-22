@@ -1,56 +1,72 @@
 package ireader.domain.usecases.backup
 
+import ireader.domain.models.common.Uri
 import ireader.domain.models.prefs.PreferenceValues
-import kotlinx.coroutines.*
-import java.util.concurrent.TimeUnit
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.usecases.backup.v2.BackupOrchestrator
+import ireader.domain.usecases.files.GetSimpleStorage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import okio.FileSystem
 
 /**
- * Desktop implementation of automatic backup scheduling
- * Uses a coroutine-based timer approach for desktop platforms
+ * Desktop implementation of automatic backup scheduling.
  */
-class ScheduleAutomaticBackupImpl() : ScheduleAutomaticBackup {
-    
+class ScheduleAutomaticBackupImpl(
+    private val backupOrchestrator: BackupOrchestrator,
+    private val uiPreferences: UiPreferences,
+    private val simpleStorage: GetSimpleStorage,
+    private val backupRetentionStorage: BackupRetentionStorage
+) : ScheduleAutomaticBackup {
     private var scheduledJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
-    override fun schedule(frequency: PreferenceValues.AutomaticBackup) {
-        // Cancel any existing scheduled backup
-        cancel()
-        
-        val intervalMillis = when (frequency) {
-            PreferenceValues.AutomaticBackup.Off -> return
-            PreferenceValues.AutomaticBackup.Every6Hours -> TimeUnit.HOURS.toMillis(6)
-            PreferenceValues.AutomaticBackup.Every12Hours -> TimeUnit.HOURS.toMillis(12)
-            PreferenceValues.AutomaticBackup.Daily -> TimeUnit.DAYS.toMillis(1)
-            PreferenceValues.AutomaticBackup.Every2Days -> TimeUnit.DAYS.toMillis(2)
-            PreferenceValues.AutomaticBackup.Weekly -> TimeUnit.DAYS.toMillis(7)
-        }
+    private val fileSystem = FileSystem.SYSTEM
 
-        
+    override fun schedule(frequency: PreferenceValues.AutomaticBackup) {
+        cancel()
+        val intervalMillis = AutomaticBackupPolicy.interval(frequency)?.inWholeMilliseconds ?: return
+
         scheduledJob = scope.launch {
+            // Catch up immediately if a backup is already overdue, then keep the interval.
+            runCatching { performBackup(frequency) }
             while (isActive) {
                 delay(intervalMillis)
-                try {
-                    performBackup()
-                } catch (_: Exception) {
-                    // Silently ignore backup errors
-                }
+                runCatching { performBackup(frequency) }
             }
         }
     }
-    
+
     override fun cancel() {
         scheduledJob?.cancel()
         scheduledJob = null
     }
-    
-    override fun isScheduled(): Boolean {
-        return scheduledJob?.isActive == true
-    }
-    
-    private suspend fun performBackup() {
-        // This would be called by the scheduled job
-        // The actual backup logic should be injected via dependency injection
-        // Note: In a full implementation, this would call CreateBackup use case
+
+    override fun isScheduled(): Boolean = scheduledJob?.isActive == true
+
+    private suspend fun performBackup(frequency: PreferenceValues.AutomaticBackup) {
+        val now = System.currentTimeMillis()
+        if (!AutomaticBackupPolicy.isDue(frequency, uiPreferences.lastBackUpTime().get(), now)) return
+
+        val backupDir = simpleStorage.automaticBackupDirectory
+        fileSystem.createDirectories(backupDir)
+        val backupPath = backupDir / AutomaticBackupPolicy.fileName(now)
+
+        val result = backupOrchestrator.createBackup(
+            uri = Uri(backupPath.toString()),
+            options = AutomaticBackupPolicy.backupOptions()
+        )
+        if (!result.isSuccess) {
+            println("[AutoBackup] Backup failed: ${result.exceptionOrNull()}")
+            return
+        }
+
+        uiPreferences.lastBackUpTime().set(now)
+        backupRetentionStorage.rotateAutomaticBackups(BackupRetentionPolicy.fromPreferences(uiPreferences))
+        println("[AutoBackup] Backup created: $backupPath")
     }
 }
