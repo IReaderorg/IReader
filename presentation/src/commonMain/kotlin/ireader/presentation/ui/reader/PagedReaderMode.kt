@@ -218,7 +218,6 @@ internal fun PagedReaderContent(
     // inset change. Drive one show/hide cycle (the same thing the menu toggle
     // does), then wait for insets to settle and compose the pager exactly once.
     val platformReader: PlatformReaderSettingReader = koinInject()
-    val platformContext = LocalPlatformContext.current
     val systemBarPadding = WindowInsets.systemBars.asPaddingValues()
     val topInsetDp = systemBarPadding.calculateTopPadding()
     val bottomInsetDp = systemBarPadding.calculateBottomPadding()
