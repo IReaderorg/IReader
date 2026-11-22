@@ -55,9 +55,6 @@ dependencyResolutionManagement {
             filter { includeGroup("com.yarnpkg") }
         }
         mavenCentral()
-
-        // JetBrains Compose repository for Compose Multiplatform
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
         maven(url = "https://jitpack.io")
         maven(url = "https://repo1.maven.org/maven2/")
