@@ -2009,6 +2009,7 @@
     <string name="shimmeranimation">shimmerAnimation</string>
     <string name="shimmertransition">shimmerTransition</string>
     <string name="show_continue_reading_bar">Show Continue Reading Bar</string>
+    <string name="show_current_time">Show Current Time</string>
     <string name="show_empty_categories">Show Empty Categories</string>
     <string name="show_last_update_time">Show Last Update Time</string>
     <string name="show_navigation_bar">Show Navigation Bar</string>

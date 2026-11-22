@@ -50,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -96,6 +97,7 @@ import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeTextAlign
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.core.theme.formatSystemTime
 import coil3.compose.LocalPlatformContext
 import ireader.presentation.ui.reader.components.BilingualMode
 import ireader.presentation.ui.reader.components.BilingualText
@@ -188,6 +190,23 @@ internal fun PagedReaderContent(
     val nextChapter = if (hasNextChapter) chapters.getOrNull(currentIndex + 1) else null
 
     val preferences = rememberReaderTextPreferencesState(vm)
+
+    val showCurrentTime by vm.showCurrentTime
+    val platformContext = LocalPlatformContext.current
+    val currentTimeText by produceState(
+        initialValue = "",
+        key1 = showCurrentTime,
+        key2 = platformContext
+    ) {
+        if (!showCurrentTime) {
+            value = ""
+            return@produceState
+        }
+        while (true) {
+            value = formatSystemTime(currentTimeToLong(), platformContext)
+            delay(30_000L)
+        }
+    }
 
     val topMarginVal = vm.topMargin.lazyValue
     val bottomMarginVal = vm.bottomMargin.lazyValue
@@ -506,6 +525,7 @@ internal fun PagedReaderContent(
                                 totalPages = totalContentPages,
                                 topInset = topInsetDp,
                                 bottomInset = bottomInsetDp,
+                                currentTime = currentTimeText,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
@@ -529,6 +549,7 @@ private fun ContentPageView(
     totalPages: Int,
     topInset: Dp = 0.dp,
     bottomInset: Dp = 0.dp,
+    currentTime: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -559,7 +580,7 @@ private fun ContentPageView(
             }
         }
 
-        // Bottom Page Indicator
+        // Bottom Page Indicator: page / total on the left, optional clock centered, percent on the right
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -567,18 +588,33 @@ private fun ContentPageView(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "$currentPage / $totalPages",
-                color = vm.textColorCompose.value.copy(alpha = 0.5f),
+            val footerColor = vm.textColorCompose.value.copy(alpha = 0.5f)
+            val footerStyle = TextStyle(
+                color = footerColor,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium
             )
+            Text(
+                text = "$currentPage / $totalPages",
+                style = footerStyle,
+                modifier = Modifier.weight(1f)
+            )
+            if (currentTime.isNotEmpty()) {
+                Text(
+                    text = currentTime,
+                    style = footerStyle,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
+            }
             val progressPercent = ((currentPage.toFloat() / totalPages.toFloat()) * 100).toInt()
             Text(
                 text = "$progressPercent%",
-                color = vm.textColorCompose.value.copy(alpha = 0.5f),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium
+                style = footerStyle,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(1f)
             )
         }
     }

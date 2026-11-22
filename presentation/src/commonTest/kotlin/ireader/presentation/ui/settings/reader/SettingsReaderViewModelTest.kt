@@ -141,4 +141,20 @@ class SettingsReaderViewModelTest {
         viewModel.setVolumeKeysInverted(false)
         assertEquals(false, store.booleanValues["reader_volume_keys_inverted"])
     }
+
+    @Test
+    fun setShowCurrentTimeUpdatesReaderPreference() {
+        val store = TestPreferenceStore()
+        val viewModel = SettingsReaderViewModel(store)
+
+        assertFalse(viewModel.showCurrentTime.value)
+
+        viewModel.setShowCurrentTime(true)
+
+        // The reader screen reads this exact preference to show the clock in the pager footer
+        assertEquals(true, store.booleanValues[ReaderPreferences.SHOW_CURRENT_TIME])
+
+        viewModel.setShowCurrentTime(false)
+        assertEquals(false, store.booleanValues[ReaderPreferences.SHOW_CURRENT_TIME])
+    }
 }

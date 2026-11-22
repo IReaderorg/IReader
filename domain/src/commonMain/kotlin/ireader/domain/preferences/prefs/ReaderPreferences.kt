@@ -40,6 +40,7 @@ class ReaderPreferences constructor(
         const val SCROLL_INDICATOR_ALIGNMENT = "scroll_indicator_alignment"
         const val SELECTABLE_TEXT = "selectable_text"
         const val TEXT_ALIGNMENT = "text_alignment"
+        const val SHOW_CURRENT_TIME = "pref_show_current_time"
 
         const val TEXT_READER_SPEECH_RATE = "text_reader_speech_rate"
         const val TEXT_READER_SPEECH_PITCH = "text_reader_speech_pitch"
@@ -482,6 +483,10 @@ Visit.*for more chapters"""
     // Display preferences
     fun showPageNumber(): Preference<Boolean> {
         return preferenceStore.getBoolean("pref_show_page_number_key", true)
+    }
+
+    fun showCurrentTime(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SHOW_CURRENT_TIME, false)
     }
 
     fun showReadingMode(): Preference<Boolean> {

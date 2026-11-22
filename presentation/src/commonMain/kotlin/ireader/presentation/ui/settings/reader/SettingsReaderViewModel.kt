@@ -25,6 +25,7 @@ class SettingsReaderViewModel(
     // Display preferences
     val doubleTapZoom: StateFlow<Boolean> = preferenceStore.getBoolean("double_tap_zoom", true).stateIn(scope)
     val showPageNumber: StateFlow<Boolean> = preferenceStore.getBoolean("show_page_number", true).stateIn(scope)
+    val showCurrentTime: StateFlow<Boolean> = preferenceStore.getBoolean(ReaderPreferences.SHOW_CURRENT_TIME, false).stateIn(scope)
     val fullscreen: StateFlow<Boolean> = preferenceStore.getBoolean(
         ReaderPreferences.SAVED_IMMERSIVE_MODE_PREFERENCES,
         false
@@ -107,6 +108,10 @@ class SettingsReaderViewModel(
     
     fun setShowPageNumber(enabled: Boolean) {
         preferenceStore.getBoolean("show_page_number", true).set(enabled)
+    }
+    
+    fun setShowCurrentTime(enabled: Boolean) {
+        preferenceStore.getBoolean(ReaderPreferences.SHOW_CURRENT_TIME, false).set(enabled)
     }
     
     fun setFullscreen(enabled: Boolean) {

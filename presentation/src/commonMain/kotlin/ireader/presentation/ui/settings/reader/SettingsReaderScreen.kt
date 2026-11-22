@@ -41,6 +41,7 @@ fun SettingsReaderScreen(
     val pageTransitions by viewModel.pageTransitions.collectAsState()
     val doubleTapZoom by viewModel.doubleTapZoom.collectAsState()
     val showPageNumber by viewModel.showPageNumber.collectAsState()
+    val showCurrentTime by viewModel.showCurrentTime.collectAsState()
     val fullscreen by viewModel.fullscreen.collectAsState()
     val keepScreenOn by viewModel.keepScreenOn.collectAsState()
     val showStatusBar by viewModel.showStatusBar.collectAsState()
@@ -144,6 +145,16 @@ fun SettingsReaderScreen(
                     icon = Icons.Outlined.Numbers,
                     checked = showPageNumber,
                     onCheckedChange = viewModel::setShowPageNumber
+                )
+            }
+
+            item {
+                SettingsSwitchItem(
+                    title = localizeHelper.localize(Res.string.show_current_time),
+                    description = "Display the current time in the page mode footer",
+                    icon = Icons.Outlined.Schedule,
+                    checked = showCurrentTime,
+                    onCheckedChange = viewModel::setShowCurrentTime
                 )
             }
             
