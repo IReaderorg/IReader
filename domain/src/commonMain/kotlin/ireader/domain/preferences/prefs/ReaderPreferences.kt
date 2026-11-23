@@ -110,6 +110,16 @@ Visit.*for more chapters"""
         return preferenceStore.getEnum(READING_MODE, ReadingMode.Continues)
     }
 
+    /**
+     * Persists the mode the reader actually observes and the default used for new books.
+     * Both must be written: settings screens use [defaultReadingMode] while the reader screen
+     * observes [readingMode].
+     */
+    fun setActiveReadingMode(mode: ReadingMode) {
+        readingMode().set(mode)
+        defaultReadingMode().set(mode)
+    }
+
     fun paragraphDistance(): Preference<Int> {
         return preferenceStore.getInt(SAVED_PARAGRAPH_DISTANCE, 4)
     }
@@ -858,7 +868,23 @@ enum class ReadingMode {
         fun valueOf(index: Int): ReadingMode {
             return entries.getOrElse(index) { Page }
         }
+
+        /** Maps legacy settings-screen values to the enum names persisted by the reader. */
+        fun fromSettingValue(value: String): ReadingMode = when (value) {
+            "pager", "Page" -> Page
+            "continuous_vertical", "Continues" -> Continues
+            "webtoon", "InfiniteScroll" -> InfiniteScroll
+            else -> Continues
+        }
     }
+
+    /** Legacy value used by the enhanced reader settings screen. */
+    val settingValue: String
+        get() = when (this) {
+            Page -> "pager"
+            Continues -> "continuous_vertical"
+            InfiniteScroll -> "webtoon"
+        }
 }
 
 enum class ChapterDisplayMode {

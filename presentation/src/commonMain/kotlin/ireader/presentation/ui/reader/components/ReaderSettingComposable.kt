@@ -764,7 +764,7 @@ fun GeneralScreenTab(
                         else -> ReadingMode.Continues
                     }
                     vm.readingMode.value = mode
-                    vm.readerPreferences.defaultReadingMode().set(mode)
+                    vm.readerPreferences.setActiveReadingMode(mode)
                 },
                 title = localizeHelper.localize(Res.string.scroll_mode)
             )

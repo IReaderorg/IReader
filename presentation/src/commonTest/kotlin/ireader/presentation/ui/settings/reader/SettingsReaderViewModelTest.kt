@@ -3,6 +3,7 @@ package ireader.presentation.ui.settings.reader
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.prefs.ReadingMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -89,8 +90,30 @@ class SettingsReaderViewModelTest {
         }
 
         override fun getStringSet(key: String, defaultValue: Set<String>): Preference<Set<String>> = throw UnsupportedOperationException()
-        override fun <T> getObject(key: String, defaultValue: T, serializer: (T) -> String, deserializer: (String) -> T): Preference<T> = throw UnsupportedOperationException()
+        override fun <T> getObject(key: String, defaultValue: T, serializer: (T) -> String, deserializer: (String) -> T): Preference<T> =
+            object : Preference<T> {
+                override fun key(): String = key
+                override fun get(): T = (stringValues[key] as? String)?.let(deserializer) ?: defaultValue
+                override fun set(value: T) { stringValues[key] = serializer(value) }
+                override fun isSet(): Boolean = stringValues.containsKey(key)
+                override fun delete() { stringValues.remove(key) }
+                override fun defaultValue(): T = defaultValue
+                override fun changes(): Flow<T> = MutableStateFlow(get())
+                override fun stateIn(scope: CoroutineScope): StateFlow<T> = MutableStateFlow(get())
+            }
         override fun <T> getJsonObject(key: String, defaultValue: T, serializer: KSerializer<T>, serializersModule: SerializersModule): Preference<T> = throw UnsupportedOperationException()
+    }
+
+    @Test
+    fun setReadingModeWritesValueTheReaderCanRead() {
+        val store = TestPreferenceStore()
+        val viewModel = SettingsReaderViewModel(store)
+
+        viewModel.setReadingMode("webtoon")
+
+        val readerPreferences = ReaderPreferences(store)
+        assertEquals(ReadingMode.InfiniteScroll, readerPreferences.readingMode().get())
+        assertEquals(ReadingMode.InfiniteScroll, readerPreferences.defaultReadingMode().get())
     }
 
     @Test
