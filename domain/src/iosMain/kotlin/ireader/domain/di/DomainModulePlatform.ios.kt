@@ -1,6 +1,8 @@
 package ireader.domain.di
 
 import okio.Path.Companion.toPath
+import ireader.core.prefs.PreferenceStore
+import ireader.core.prefs.PreferenceStoreFactory
 import ireader.domain.usecases.backup.ScheduleAutomaticBackup
 import ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl
 import ireader.domain.usecases.backup.GoogleDriveProvider
@@ -56,6 +58,9 @@ import org.koin.dsl.module
  * - PluginClassLoader: Throws UnsupportedOperationException (use JS plugins)
  */
 actual val DomainModule: Module = module {
+    // Preference store backing all typed preferences and settings backup
+    single<PreferenceStore> { get<PreferenceStoreFactory>().create("ireader") }
+
     // Include TTS v2 module for new clean TTS architecture
     includes(ireader.domain.services.tts_service.v2.ttsV2Module)
     // Include Cloudflare bypass module for plugin-based bypass

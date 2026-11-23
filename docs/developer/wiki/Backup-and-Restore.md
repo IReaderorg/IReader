@@ -18,6 +18,8 @@ A full backup includes your library, reading progress, categories, and app setti
    - **Reading Progress**: Chapter and reading position for each book
    - **App Settings**: App preferences and themes
    - **Sources & Extensions**: Source settings (but not the extensions themselves)
+
+   Safe app preferences are included. Credentials, sign-in/session data, and temporary state are not backed up.
 6. Tap **Backup**
 7. Choose a location to save the backup file
    - By default, backups are saved to `Internal Storage/IReader/backup/`

@@ -7,6 +7,7 @@ import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.getEnum
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.usecases.backup.v2.NoBackup
 import ireader.domain.utils.extensions.formatDate
 
 
@@ -63,6 +64,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun autoCatalogUpdater(): Preference<Boolean> {
         return preferenceStore.getBoolean("auto_catalog_updater_catalogs", false)
     }
+    @NoBackup
     fun savedLocalCatalogLocation(): Preference<Boolean> {
         return preferenceStore.getBoolean("saved_local_catalog_location", true)
     }
