@@ -186,6 +186,10 @@ class BackupOrchestrator(
         var settingsRestored = 0
 
         val bookKeyMap = mutableMapOf<Pair<String, Long>, Long>()
+        // History is applied only after all chapter content entries are processed: chapter
+        // re-insertion can change chapter IDs, so restoring earlier leaves history pointing
+        // at stale IDs (and the FK ON DELETE CASCADE removes it entirely).
+        var pendingHistories: List<HistorySnapshot> = emptyList()
 
         archiveStreamer!!.extractArchive(
             uri = uri,
@@ -226,9 +230,8 @@ class BackupOrchestrator(
                         }
                     }
 
-                    if (options.restoreHistory && payload.histories.isNotEmpty()) {
-                        historyRestored = restoreHistories(payload.histories, bookKeyMap)
-                    }
+                    // Deferred until after chapter content — see pendingHistories above.
+                    pendingHistories = payload.histories
 
                     if (options.restoreTracks && payload.tracks.isNotEmpty()) {
                         tracksRestored = restoreTracks(payload.tracks, bookKeyMap)
@@ -266,6 +269,13 @@ class BackupOrchestrator(
                 }
             }
         )
+
+        // Apply history now that chapter IDs are final.
+        if (options.restoreHistory && pendingHistories.isNotEmpty()) {
+            transactions.run {
+                historyRestored = restoreHistories(pendingHistories, bookKeyMap)
+            }
+        }
 
         onProgress(RestoreProgress.Complete)
         return RestoreSummary(
@@ -687,7 +697,9 @@ class BackupOrchestrator(
         var count = 0
 
         for (snap in histories) {
-            val bookId = bookKeyMap[snap.bookKey to snap.bookSourceId] ?: continue
+            val bookId = bookKeyMap[snap.bookKey to snap.bookSourceId]
+                ?: bookRepository.find(snap.bookKey, snap.bookSourceId)?.id
+                ?: continue
             val chapters = chapterRepository.findChaptersByBookId(bookId)
             val chapter = chapters.find { it.key == snap.chapterKey } ?: continue
 
