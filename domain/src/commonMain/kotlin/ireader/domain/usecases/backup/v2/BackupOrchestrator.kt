@@ -14,8 +14,6 @@ import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.History
-import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.flow.firstOrNull
@@ -53,8 +51,7 @@ class BackupOrchestrator(
     private val historyRepository: HistoryRepository,
     private val trackingRepository: TrackingRepository,
     private val readerThemeRepository: ReaderThemeRepository,
-    private val uiPreferences: UiPreferences,
-    private val readerPreferences: ReaderPreferences,
+    private val settingsBackup: SettingsBackup,
     private val transactions: Transactions,
     private val archiveStreamer: BackupArchiveStreamer? = null,
 ) {
@@ -189,6 +186,10 @@ class BackupOrchestrator(
         var settingsRestored = 0
 
         val bookKeyMap = mutableMapOf<Pair<String, Long>, Long>()
+        // History is applied only after all chapter content entries are processed: chapter
+        // re-insertion can change chapter IDs, so restoring earlier leaves history pointing
+        // at stale IDs (and the FK ON DELETE CASCADE removes it entirely).
+        var pendingHistories: List<HistorySnapshot> = emptyList()
 
         archiveStreamer!!.extractArchive(
             uri = uri,
@@ -229,9 +230,8 @@ class BackupOrchestrator(
                         }
                     }
 
-                    if (options.restoreHistory && payload.histories.isNotEmpty()) {
-                        historyRestored = restoreHistories(payload.histories, bookKeyMap)
-                    }
+                    // Deferred until after chapter content — see pendingHistories above.
+                    pendingHistories = payload.histories
 
                     if (options.restoreTracks && payload.tracks.isNotEmpty()) {
                         tracksRestored = restoreTracks(payload.tracks, bookKeyMap)
@@ -243,8 +243,7 @@ class BackupOrchestrator(
                     }
 
                     if (options.restoreSettings && payload.settings.isNotEmpty()) {
-                        restoreSettings(payload.settings)
-                        settingsRestored = payload.settings.size
+                        settingsRestored = restoreSettings(payload.settings)
                     }
                 }
             },
@@ -270,6 +269,13 @@ class BackupOrchestrator(
                 }
             }
         )
+
+        // Apply history now that chapter IDs are final.
+        if (options.restoreHistory && pendingHistories.isNotEmpty()) {
+            transactions.run {
+                historyRestored = restoreHistories(pendingHistories, bookKeyMap)
+            }
+        }
 
         onProgress(RestoreProgress.Complete)
         return RestoreSummary(
@@ -374,8 +380,7 @@ class BackupOrchestrator(
             }
 
             if (options.restoreSettings && payload.settings.isNotEmpty()) {
-                restoreSettings(payload.settings)
-                settingsRestored = payload.settings.size
+                settingsRestored = restoreSettings(payload.settings)
             }
         }
 
@@ -541,21 +546,7 @@ class BackupOrchestrator(
         }
     }
 
-    private fun collectSettings(): List<SettingSnapshot> {
-        val list = mutableListOf<SettingSnapshot>()
-        try {
-            list.add(SettingSnapshot("theme_mode", uiPreferences.themeMode().get().name))
-            list.add(SettingSnapshot("font_size", readerPreferences.fontSize().get().toString()))
-            list.add(SettingSnapshot("line_height", readerPreferences.lineHeight().get().toString()))
-            list.add(SettingSnapshot("paragraph_distance", readerPreferences.paragraphDistance().get().toString()))
-            list.add(SettingSnapshot("paragraph_indent", readerPreferences.paragraphIndent().get().toString()))
-            list.add(SettingSnapshot("auto_backup", uiPreferences.automaticBackupTime().get().name))
-            list.add(SettingSnapshot("max_auto_backup", uiPreferences.maxAutomaticBackupFiles().get().toString()))
-        } catch (e: Exception) {
-            Log.warn(e, "Error collecting settings")
-        }
-        return list
-    }
+    private fun collectSettings(): List<SettingSnapshot> = settingsBackup.collect()
 
     // ── Private: Restore helpers ──────────────────────────────────────────
 
@@ -706,7 +697,9 @@ class BackupOrchestrator(
         var count = 0
 
         for (snap in histories) {
-            val bookId = bookKeyMap[snap.bookKey to snap.bookSourceId] ?: continue
+            val bookId = bookKeyMap[snap.bookKey to snap.bookSourceId]
+                ?: bookRepository.find(snap.bookKey, snap.bookSourceId)?.id
+                ?: continue
             val chapters = chapterRepository.findChaptersByBookId(bookId)
             val chapter = chapters.find { it.key == snap.chapterKey } ?: continue
 
@@ -758,17 +751,5 @@ class BackupOrchestrator(
         }
     }
 
-    private fun restoreSettings(settings: List<SettingSnapshot>) {
-        if (settings.isEmpty()) return
-        val map = settings.associate { it.key to it.value }
-        try {
-            map["font_size"]?.toIntOrNull()?.let { readerPreferences.fontSize().set(it) }
-            map["line_height"]?.toIntOrNull()?.let { readerPreferences.lineHeight().set(it) }
-            map["paragraph_distance"]?.toIntOrNull()?.let { readerPreferences.paragraphDistance().set(it) }
-            map["paragraph_indent"]?.toIntOrNull()?.let { readerPreferences.paragraphIndent().set(it) }
-            map["max_auto_backup"]?.toIntOrNull()?.let { uiPreferences.maxAutomaticBackupFiles().set(it) }
-        } catch (e: Exception) {
-            Log.warn(e, "Failed to restore settings")
-        }
-    }
+    private fun restoreSettings(settings: List<SettingSnapshot>): Int = settingsBackup.restore(settings)
 }

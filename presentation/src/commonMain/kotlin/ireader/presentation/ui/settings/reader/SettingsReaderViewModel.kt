@@ -5,10 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.core.prefs.PreferenceStore
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * ViewModel for the enhanced reader settings screen.
@@ -17,9 +21,17 @@ import kotlinx.coroutines.flow.asStateFlow
 class SettingsReaderViewModel(
     private val preferenceStore: PreferenceStore
 ) : BaseViewModel() {
-    
+    private val readerPreferences = ReaderPreferences(preferenceStore)
+
     // Reading mode preferences
-    val readingMode: StateFlow<String> = preferenceStore.getString("reader_mode", "pager").stateIn(scope)
+    val readingMode: StateFlow<String> = readerPreferences.readingMode()
+        .changes()
+        .map { it.settingValue }
+        .stateIn(
+            scope,
+            SharingStarted.Eagerly,
+            readerPreferences.readingMode().get().settingValue,
+        )
     val pageTransitions: StateFlow<String> = preferenceStore.getString("page_transitions", "slide").stateIn(scope)
     
     // Display preferences
@@ -85,7 +97,7 @@ class SettingsReaderViewModel(
     }
     
     fun setReadingMode(mode: String) {
-        preferenceStore.getString("reader_mode", "pager").set(mode)
+        readerPreferences.setActiveReadingMode(ReadingMode.fromSettingValue(mode))
     }
     
     // Page transitions functions

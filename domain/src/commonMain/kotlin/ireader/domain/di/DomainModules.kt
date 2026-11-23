@@ -96,6 +96,7 @@ val DomainServices = module {
     // ── V2 Backup System (new, coexists with old during migration) ──────
     factory { ireader.domain.usecases.backup.v2.BackupSerializer() }
     factory { ireader.domain.usecases.backup.v2.LegacyMigrator() }
+    factory { ireader.domain.usecases.backup.v2.SettingsBackup(get()) }
     factory {
         ireader.domain.usecases.backup.v2.BackupOrchestrator(
             serializer = get(),
@@ -109,8 +110,7 @@ val DomainServices = module {
             historyRepository = get(),
             trackingRepository = get(),
             readerThemeRepository = get(),
-            uiPreferences = get(),
-            readerPreferences = get(),
+            settingsBackup = get(),
             transactions = get(),
             archiveStreamer = getOrNull(),
         )
