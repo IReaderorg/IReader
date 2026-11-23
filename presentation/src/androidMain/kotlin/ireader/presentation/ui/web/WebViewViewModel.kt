@@ -377,10 +377,11 @@ class WebViewPageModel(
                         webChapters = result
                         if (result.isNotEmpty()) {
                             insertChapters(result.map { it.copy(bookId = book.id) })
-                            val message = if (result.size == 1) 
-                                UiText.MStringResource(Res.string.download_notifier_download_finish) 
-                            else 
-                                UiText.DynamicString("${result.size} chapters have been downloaded")
+                            val newChapterCount = result.count { it.id == 0L }
+                            val message = if (newChapterCount == 1)
+                                UiText.MStringResource(Res.string.download_notifier_download_finish)
+                            else
+                                UiText.DynamicString("$newChapterCount chapters have been downloaded")
                             fetchChaptersState = FetchButtonState.Enabled // Reset to enabled after success
                             showSnackBar(message)
                         } else {
