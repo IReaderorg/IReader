@@ -138,7 +138,7 @@ object TestRegistry {
         featureCoverage.clear()
     }
     
-    private fun extractFeatureArea(testId: String): String {
+    internal fun extractFeatureArea(testId: String): String {
         val parts = testId.split(".")
         return if (parts.size >= 2) parts[0] else "general"
     }

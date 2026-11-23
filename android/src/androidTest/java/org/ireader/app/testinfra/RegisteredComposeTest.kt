@@ -2,15 +2,14 @@ package org.ireader.app.testinfra
 
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.ireader.app.MainActivity
-import kotlin.system.measureTimeMillis
 
 /**
  * Base class for registered Compose tests.
@@ -55,7 +54,7 @@ abstract class RegisteredComposeTest {
     protected fun runRegisteredTest(
         testId: String,
         description: String = "",
-        testBody: AndroidComposeTestRule<MainActivity, *>.() -> Unit
+        testBody: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>.() -> Unit
     ) {
         currentTestId = testId
         testStartTime = System.currentTimeMillis()
@@ -111,5 +110,5 @@ abstract class RegisteredComposeTest {
 /**
  * Extension to get composeTestRule from test class.
  */
-val RegisteredComposeTest.rule: AndroidComposeTestRule<MainActivity, *>
+val RegisteredComposeTest.rule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>
     get() = composeTestRule
