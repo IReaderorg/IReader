@@ -68,7 +68,9 @@ object SettingsBackupRegistry {
         addAll(GeneratedBackupSettings.entries)
     }.distinctBy { it.preferenceKey }
 
-    val byBackupKey: Map<String, SettingSpec> = entries.associateBy { it.backupKey }
+    // Manual legacy mappings come first; keep them authoritative if a generated entry ever
+    // reuses the same backup key.
+    val byBackupKey: Map<String, SettingSpec> = entries.asReversed().associateBy { it.backupKey }
 }
 
 private const val SET_SEPARATOR = "\u001F"

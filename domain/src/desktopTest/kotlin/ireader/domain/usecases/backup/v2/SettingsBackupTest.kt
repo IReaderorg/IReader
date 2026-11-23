@@ -115,15 +115,19 @@ class SettingsBackupTest {
                 SettingSnapshot("line_height", "40"),
                 SettingSnapshot("auto_backup", "Weekly"),
                 SettingSnapshot("max_auto_backup", "7"),
+                SettingSnapshot("max_auto_backup_age_days", "30"),
+                SettingSnapshot("max_auto_backup_size_mb", "100"),
             )
         )
 
-        assertEquals(5, count)
+        assertEquals(7, count)
         assertEquals("Dark", store.getString("theme_mode", "System").get())
         assertEquals(30, store.getInt("reader_font_size", 18).get())
         assertEquals(40, store.getInt("font_height", 28).get())
         assertEquals("Weekly", store.getString("automatic_backup_time", "Off").get())
         assertEquals(7, store.getInt("max_automatic_backup_size", 5).get())
+        assertEquals(30, store.getInt("max_automatic_backup_age_days", 7).get())
+        assertEquals(100, store.getInt("max_automatic_backup_size_mb", 50).get())
     }
 
     @Test

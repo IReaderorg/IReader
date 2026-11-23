@@ -202,17 +202,41 @@ class BackupSettingProcessor(
         var masked = source
         val nextDeclaration = Regex("""\bfun\s+\w+\s*\(|\b(?:class|object)\s+\w+""")
 
+        // Mask the full declaration body. A class-level @NoBackup must hide every getter in the
+        // class, not just the class header up to the first member declaration.
+        fun endOfBlock(from: Int): Int? {
+            val open = masked.indexOf('{', from)
+            if (open < 0) return null
+            var depth = 0
+            for (index in open until masked.length) {
+                when (masked[index]) {
+                    '{' -> depth++
+                    '}' -> {
+                        depth--
+                        if (depth == 0) return index + 1
+                    }
+                }
+            }
+            return masked.length
+        }
+
+        fun mask(start: Int, end: Int) {
+            masked = masked.replaceRange(start until end, " ".repeat(end - start))
+        }
+
         noBackupFunctions.forEach { name ->
             val match = Regex("""\bfun\s+${Regex.escape(name)}\s*\(""").find(masked) ?: return@forEach
-            val end = nextDeclaration.find(masked, match.range.last + 1)?.range?.first ?: masked.length
-            val start = match.range.first
-            masked = masked.replaceRange(start until end, " ".repeat(end - start))
+            val end = endOfBlock(match.range.last + 1)
+                ?: nextDeclaration.find(masked, match.range.last + 1)?.range?.first
+                ?: masked.length
+            mask(match.range.first, end)
         }
         noBackupClasses.forEach { name ->
             val match = Regex("""\b(?:class|object)\s+${Regex.escape(name)}\b""").find(masked) ?: return@forEach
-            val end = nextDeclaration.find(masked, match.range.last + 1)?.range?.first ?: masked.length
-            val start = match.range.first
-            masked = masked.replaceRange(start until end, " ".repeat(end - start))
+            val end = endOfBlock(match.range.last + 1)
+                ?: nextDeclaration.find(masked, match.range.last + 1)?.range?.first
+                ?: masked.length
+            mask(match.range.first, end)
         }
         return masked
     }
@@ -229,8 +253,10 @@ class BackupSettingProcessor(
     }
 
     private fun isExcluded(key: String): Boolean {
-        val lower = key.lowercase()
-        return SENSITIVE_REGEX.containsMatchIn(lower) || TRANSIENT_REGEX.containsMatchIn(lower)
+        // Normalize camelCase first so a future `apiKey` / `accessToken` preference is excluded
+        // just like its snake_case equivalent.
+        val normalized = key.replace(CAMEL_BOUNDARY_REGEX, "$1_$2").lowercase()
+        return SENSITIVE_REGEX.containsMatchIn(normalized) || TRANSIENT_REGEX.containsMatchIn(normalized)
     }
 
     private fun com.google.devtools.ksp.symbol.KSAnnotation.stringArgument(name: String): String =
@@ -252,6 +278,8 @@ class BackupSettingProcessor(
 
         val VALID_TYPES = setOf("INT", "LONG", "FLOAT", "BOOLEAN", "STRING", "STRING_SET")
 
+        val CAMEL_BOUNDARY_REGEX = Regex("([a-z0-9])([A-Z])")
+
         val CONST_REGEX = Regex("""\bconst\s+val\s+(\w+)\s*(?::\s*String\s*)?=\s*"([^"]+)\"""")
         val DECLARATION_REGEX = Regex("""\b(?:class|object)\s+(\w+)""")
         val GETTER_REGEX = Regex(
@@ -259,7 +287,7 @@ class BackupSettingProcessor(
         )
 
         val SENSITIVE_REGEX = Regex(
-            "(^|[_-])(api[_-]?keys?|secrets?|tokens?|passwords?|passwds?|passcodes?|cookies?|sessions?|auths?|credentials?|private[_-]?keys?|access[_-]?keys?|refreshes?|encryptions?|master[_-]?keys?|pins?|user[_-](ids?|names?))([_-]|$)",
+            "(^|[_-])(api[_-]?keys?|secrets?|tokens?|passwords?|passwds?|passcodes?|cookies?|sessions?|auths?|credentials?|private[_-]?keys?|access[_-]?keys?|refreshes?|encryptions?|master[_-]?keys?|pins?|user[_-](ids?|names?|emails?|urls?))([_-]|$)",
         )
         val TRANSIENT_REGEX = Regex(
             "(timestamp|onboard|first[_-]?run|install[_-]|consent[_-]?completed|^last[_-].*time|app[_-](unlock|closed|open)|update[_-]check|source[_-]errors|database[_-]version)",

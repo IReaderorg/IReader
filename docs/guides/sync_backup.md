@@ -31,9 +31,12 @@ Create local backups of your library to keep your data safe.
 1.  Go to **Settings** → **Backup & Restore**.
 2.  Tap **Create Backup**.
 3.  Select what to backup:
-    *   **Library**: Your list of books and categories.
-    *   **Settings**: App preferences.
-    *   **History**: Read history.
+    *   **Library**: Your books and downloaded chapter content.
+    *   **Categories**: Your shelves and custom organization.
+    *   **History**: Reading progress and last-open chapter.
+    *   **Tracking**: Tracker entries and progress.
+    *   **Themes**: Custom reader themes.
+    *   **Settings**: Safe app preferences. Credentials, sign-in data, and temporary state are not backed up.
 4.  Tap **Backup** and choose a location to save the `.ireader` file.
 
 ### Restoring a Backup
