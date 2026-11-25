@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,7 +113,7 @@ fun ArrowIndicator(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height((progress * 140).dp)
+            .heightIn(min = (progress * 140).dp)
             .clipToBounds() // Prevent any content from overflowing outside the box
             .graphicsLayer { alpha = progress }
             .background(
@@ -168,14 +170,14 @@ fun ArrowIndicator(
                     maxLines = 1
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                // Truncate chapter name to single line
-                val truncatedName = if (chapterName.length > 30) chapterName.take(30) + "..." else chapterName
+                val display = chapterNameForDisplay(chapterName)
                 Text(
-                    text = truncatedName,
+                    text = display.text,
                     color = color.copy(alpha = 0.9f * progress),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
+                    maxLines = display.maxLines,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -247,14 +249,14 @@ fun ArrowIndicator(
                     maxLines = 1
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                // Truncate chapter name to single line
-                val truncatedName = if (chapterName.length > 30) chapterName.take(30) + "..." else chapterName
+                val display = chapterNameForDisplay(chapterName)
                 Text(
-                    text = truncatedName,
+                    text = display.text,
                     color = color.copy(alpha = 0.9f * progress),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
+                    maxLines = display.maxLines,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
             } else if (chapterName == null && progress > 0.3f) {

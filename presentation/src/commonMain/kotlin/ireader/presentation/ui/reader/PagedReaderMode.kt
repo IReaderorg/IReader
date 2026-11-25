@@ -70,7 +70,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
@@ -795,14 +794,14 @@ private fun StartChapterTransitionPage(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val prevChapterTitle = previousChapterTitle(prevChapter?.name)
             Text(
-                text = prevChapter?.name ?: "Previous Chapter",
+                text = prevChapterTitle.text,
                 color = textColor,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                maxLines = prevChapterTitle.maxLines
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -883,14 +882,14 @@ private fun EndChapterCompletionPage(
 
             Spacer(modifier = Modifier.height(6.dp))
 
+            val chapterTitle = chapterNameForDisplay(chapter?.name.orEmpty())
             Text(
-                text = chapter?.name ?: "",
+                text = chapterTitle.text,
                 color = textColor,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                maxLines = chapterTitle.maxLines
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -967,13 +966,13 @@ private fun EndChapterCompletionPage(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    val nextChapterTitle = chapterNameForDisplay(nextChapter?.name.orEmpty())
                     Text(
-                        text = nextChapter?.name ?: "",
+                        text = nextChapterTitle.text,
                         color = textColor.copy(alpha = 0.6f),
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        maxLines = nextChapterTitle.maxLines
                     )
                 }
             } else {

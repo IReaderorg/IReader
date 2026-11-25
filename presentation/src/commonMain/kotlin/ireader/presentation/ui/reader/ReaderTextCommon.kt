@@ -47,7 +47,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -510,14 +509,14 @@ internal fun ChapterVoidSpace(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                val chapterTitle = chapterNameForDisplay(chapter.name)
                 Text(
-                    text = chapter.name,
+                    text = chapterTitle.text,
                     color = contentTextColor.copy(alpha = 0.9f),
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = chapterTitle.maxLines
                 )
             }
 
