@@ -17,8 +17,6 @@ actual class PlatformReaderSettingReader {
     actual suspend fun ReaderScreenViewModel.readOrientation(context: Any) {
     }
 
-    actual suspend fun warmUpReaderInsets(context: Any) {
-    }
 
     actual suspend fun ReaderScreenViewModel.readImmersiveMode(
         context: Any,

@@ -19,9 +19,6 @@ actual class PlatformReaderSettingReader {
         // iOS orientation is controlled through UIDevice
     }
 
-    actual suspend fun warmUpReaderInsets(context: Any) {
-        // iOS insets are stable at first composition
-    }
 
     actual suspend fun ReaderScreenViewModel.readImmersiveMode(
         context: Any,

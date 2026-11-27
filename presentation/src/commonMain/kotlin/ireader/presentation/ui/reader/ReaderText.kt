@@ -68,6 +68,14 @@ private enum class TapZone {
 }
 
 /**
+ * The pager owns all taps in page mode: left/right change pages and the centre
+ * toggles the controls. The outer tap handler must stay disabled there or it
+ * opens the bottom bar on every page turn, covering the footer and last lines.
+ */
+internal fun shouldToggleReaderModeOnParentTap(readingMode: ReadingMode): Boolean =
+    readingMode != ReadingMode.Page
+
+/**
  * Determine the tap zone based on x-coordinate and screen width.
  * LEFT: 30% of screen width - previous page
  * CENTER: 40% of screen width - toggle reader mode
@@ -269,6 +277,7 @@ fun ReaderText(
     BoxWithConstraints(
         modifier = Modifier
             .clickable(
+                enabled = shouldToggleReaderModeOnParentTap(vm.readingMode.value),
                 interactionSource = interactionSource,
                 indication = null
             ) {

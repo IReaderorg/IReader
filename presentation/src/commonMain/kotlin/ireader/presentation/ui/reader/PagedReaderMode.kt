@@ -53,7 +53,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -102,21 +102,28 @@ import coil3.compose.LocalPlatformContext
 import ireader.presentation.ui.reader.components.BilingualMode
 import ireader.presentation.ui.reader.components.BilingualText
 import ireader.presentation.ui.reader.components.SelectableTranslatableText
-import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
-/** Time insets must stay unchanged before the first pager frame is painted. */
-internal const val PAGED_LAYOUT_SETTLE_MS = 300L
+/** System-bar insets used for paged text layout. */
+internal data class PagedLayoutInsets(val top: Dp, val bottom: Dp)
 
-internal fun pagedLayoutReady(
-    stableForMs: Long,
-    insetsPrimed: Boolean,
-    settleMs: Long = PAGED_LAYOUT_SETTLE_MS,
-): Boolean = insetsPrimed && stableForMs >= settleMs
+/**
+ * Immersive reading uses the whole screen: no space is reserved for system
+ * bars above the text or below the footer. Non-immersive readers keep the live
+ * insets because their bars are permanently visible.
+ */
+internal fun pagedLayoutInsets(
+    immersiveMode: Boolean,
+    liveTop: Dp,
+    liveBottom: Dp,
+): PagedLayoutInsets = if (immersiveMode) {
+    PagedLayoutInsets(0.dp, 0.dp)
+} else {
+    PagedLayoutInsets(liveTop, liveBottom)
+}
 
 /**
  * Height available for text on one paged-reader page, in pixels.
@@ -144,6 +151,18 @@ internal fun pagedContentUsableHeightPx(
     return (screenHeightPx - topMarginPx - bottomMarginPx - topInsetPx - bottomInsetPx
         - bottomIndicatorPx - indicatorPaddingPx - safetyPaddingPx).coerceAtLeast(200)
 }
+
+/**
+ * A real [Text] measures with fallback metrics until an async font (the default
+ * reader font is a Google Font) has loaded. Compare its height to detect when
+ * pagination must be recomputed with the resolved font; ignore tiny jitter.
+ */
+internal fun fontMetricsKeyChanged(previous: Float, current: Float): Boolean =
+    previous == 0f || kotlin.math.abs(current - previous) > 0.5f
+
+/** Y offset that keeps the footer glued to the bottom of the page slot. */
+internal fun pagedFooterTop(viewportHeightPx: Int, footerHeightPx: Int): Int =
+    (viewportHeightPx - footerHeightPx).coerceAtLeast(0)
 
 /**
  * Model representing an indexed paragraph on a page with clean pre-formatted display text.
@@ -181,6 +200,10 @@ internal fun PagedReaderContent(
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
+    // Height of a real Text measured with the resolved font. Async fonts (the
+    // default reader font is a Google Font) make TextMeasurer use fallback
+    // metrics on cold start; this key forces re-pagination once they change.
+    var fontMetricsKey by remember { mutableStateOf(0f) }
 
     val currentIndex = vm.currentChapterIndex
     val chapters = vm.stateChapters
@@ -213,32 +236,19 @@ internal fun PagedReaderContent(
     val leftMarginVal = vm.leftMargin.lazyValue
     val rightMarginVal = vm.rightMargin.lazyValue
 
-    // Warm up before painting the pager. Waiting alone is not enough: on a cold
-    // start the bars are already hidden, so Compose never dispatches a real
-    // inset change. Drive one show/hide cycle (the same thing the menu toggle
-    // does), then wait for insets to settle and compose the pager exactly once.
-    val platformReader: PlatformReaderSettingReader = koinInject()
+    // Immersive reading has no system-bar padding on either end of the page,
+    // and the same zero insets drive pagination, so cold and warm resumes agree.
+    // Non-immersive readers still use the live system-bar insets.
     val systemBarPadding = WindowInsets.systemBars.asPaddingValues()
     val topInsetDp = systemBarPadding.calculateTopPadding()
     val bottomInsetDp = systemBarPadding.calculateBottomPadding()
-    var hasWarmedUp by rememberSaveable { mutableStateOf(false) }
-    var insetsPrimed by remember { mutableStateOf(hasWarmedUp) }
-    var layoutReady by remember { mutableStateOf(hasWarmedUp) }
-    var lastInsetsChangeMs by remember { mutableStateOf(0L) }
-    LaunchedEffect(Unit) {
-        if (hasWarmedUp) return@LaunchedEffect
-        platformReader.warmUpReaderInsets(platformContext)
-        insetsPrimed = true
-    }
-    LaunchedEffect(topInsetDp, bottomInsetDp, insetsPrimed) {
-        if (layoutReady) return@LaunchedEffect
-        lastInsetsChangeMs = currentTimeToLong()
-        delay(PAGED_LAYOUT_SETTLE_MS)
-        if (pagedLayoutReady(currentTimeToLong() - lastInsetsChangeMs, insetsPrimed)) {
-            layoutReady = true
-            hasWarmedUp = true
-        }
-    }
+    val layoutInsets = pagedLayoutInsets(
+        immersiveMode = vm.immersiveMode.value,
+        liveTop = topInsetDp,
+        liveBottom = bottomInsetDp,
+    )
+    val layoutTopInsetDp = layoutInsets.top
+    val layoutBottomInsetDp = layoutInsets.bottom
 
     // Navigation guard to prevent race conditions during rapid tapping/swiping
     var isNavigatingChapter by remember { mutableStateOf(false) }
@@ -290,6 +300,27 @@ internal fun PagedReaderContent(
         )
     }
 
+    // Measure once with a real Text so the async font is resolved. Without this,
+    // cold-start pagination uses fallback metrics and the rendered text overflows
+    // once the real font arrives; warm resume is fine because the font is cached.
+    Layout(
+        content = {
+            Text(
+                text = "Ag",
+                style = styleParams.textStyle,
+                onTextLayout = { layoutResult ->
+                    val measuredHeight = layoutResult.size.height.toFloat()
+                    if (fontMetricsKeyChanged(fontMetricsKey, measuredHeight)) {
+                        fontMetricsKey = measuredHeight
+                    }
+                }
+            )
+        }
+    ) { measurables, constraints ->
+        measurables.first().measure(constraints.copy(minWidth = 0, minHeight = 0))
+        layout(0, 0) {}
+    }
+
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val screenWidthPx = constraints.maxWidth
         val screenHeightPx = constraints.maxHeight
@@ -305,10 +336,11 @@ internal fun PagedReaderContent(
             bottomMarginVal,
             leftMarginVal,
             rightMarginVal,
-            topInsetDp,
-            bottomInsetDp,
+            layoutTopInsetDp,
+            layoutBottomInsetDp,
             screenHeightPx,
             screenWidthPx,
+            fontMetricsKey,
             density.density
         ) {
             partitionContentWithMeasurer(
@@ -322,8 +354,8 @@ internal fun PagedReaderContent(
                 bottomMarginDp = bottomMarginVal,
                 leftMarginDp = leftMarginVal,
                 rightMarginDp = rightMarginVal,
-                topInsetDp = topInsetDp,
-                bottomInsetDp = bottomInsetDp,
+                topInsetDp = layoutTopInsetDp,
+                bottomInsetDp = layoutBottomInsetDp,
                 viewportHeightPx = screenHeightPx,
                 viewportWidthPx = screenWidthPx,
                 densityDpi = density.density
@@ -470,14 +502,7 @@ internal fun PagedReaderContent(
                     )
                 }
         ) {
-            if (!layoutReady) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(vm.backgroundColor.value.toComposeColor())
-                )
-            } else {
-                HorizontalPager(
+            HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                     beyondViewportPageCount = 1
@@ -522,15 +547,14 @@ internal fun PagedReaderContent(
                                 styleParams = styleParams,
                                 currentPage = contentIndex + 1,
                                 totalPages = totalContentPages,
-                                topInset = topInsetDp,
-                                bottomInset = bottomInsetDp,
+                                topInset = layoutTopInsetDp,
+                                bottomInset = layoutBottomInsetDp,
                                 currentTime = currentTimeText,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
                     }
                 }
-            }
         }
     }
 }
@@ -551,7 +575,7 @@ private fun ContentPageView(
     currentTime: String,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .padding(
@@ -559,62 +583,85 @@ private fun ContentPageView(
                 bottom = vm.bottomMargin.lazyValue.dp + bottomInset,
                 start = vm.leftMargin.lazyValue.dp,
                 end = vm.rightMargin.lazyValue.dp
-            ),
-        verticalArrangement = Arrangement.SpaceBetween
+            )
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            paragraphs.forEachIndexed { idx, item ->
-                if (idx > 0 && preferences.distanceBetweenParagraphs > 0) {
-                    Spacer(modifier = Modifier.height(preferences.distanceBetweenParagraphs.dp))
+        // Measure text at its natural height and pin the footer separately.
+        // Capping the text block clipped glyph tails (e.g. "p" became "D")
+        // even when there was still a gap above the footer.
+        Layout(
+            content = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    paragraphs.forEachIndexed { idx, item ->
+                        if (idx > 0 && preferences.distanceBetweenParagraphs > 0) {
+                            Spacer(modifier = Modifier.height(preferences.distanceBetweenParagraphs.dp))
+                        }
+                        PagedParagraphView(
+                            item = item,
+                            vm = vm,
+                            preferences = preferences,
+                            styleParams = styleParams,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-                PagedParagraphView(
-                    item = item,
-                    vm = vm,
-                    preferences = preferences,
-                    styleParams = styleParams,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
 
-        // Bottom Page Indicator: page / total on the left, optional clock centered, percent on the right
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val footerColor = vm.textColorCompose.value.copy(alpha = 0.5f)
-            val footerStyle = TextStyle(
-                color = footerColor,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = "$currentPage / $totalPages",
-                style = footerStyle,
-                modifier = Modifier.weight(1f)
-            )
-            if (currentTime.isNotEmpty()) {
-                Text(
-                    text = currentTime,
-                    style = footerStyle,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
+                // Bottom Page Indicator: page / total, optional clock, percent
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val footerColor = vm.textColorCompose.value.copy(alpha = 0.5f)
+                    val footerStyle = TextStyle(
+                        color = footerColor,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "$currentPage / $totalPages",
+                        style = footerStyle,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (currentTime.isNotEmpty()) {
+                        Text(
+                            text = currentTime,
+                            style = footerStyle,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                    val progressPercent = ((currentPage.toFloat() / totalPages.toFloat()) * 100).toInt()
+                    Text(
+                        text = "$progressPercent%",
+                        style = footerStyle,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
-            val progressPercent = ((currentPage.toFloat() / totalPages.toFloat()) * 100).toInt()
-            Text(
-                text = "$progressPercent%",
-                style = footerStyle,
-                textAlign = TextAlign.End,
-                modifier = Modifier.weight(1f)
+        ) { measurables, constraints ->
+            val footerPlaceable = measurables[1].measure(constraints.copy(minHeight = 0))
+            val textPlaceable = measurables[0].measure(
+                constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
             )
+            val width = if (constraints.maxWidth != Constraints.Infinity) {
+                constraints.maxWidth
+            } else {
+                maxOf(textPlaceable.width, footerPlaceable.width)
+            }
+            val height = if (constraints.maxHeight != Constraints.Infinity) {
+                constraints.maxHeight
+            } else {
+                textPlaceable.height + footerPlaceable.height
+            }
+            layout(width, height) {
+                textPlaceable.place(0, 0)
+                footerPlaceable.place(0, pagedFooterTop(height, footerPlaceable.height))
+            }
         }
     }
 }
