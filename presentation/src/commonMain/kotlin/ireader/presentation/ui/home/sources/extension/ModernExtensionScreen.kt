@@ -1,3 +1,4 @@
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 //package ireader.presentation.ui.home.sources.extension
 //
 //import androidx.compose.animation.animateColorAsState
@@ -245,7 +246,7 @@
 //                        scale = scale,
 //                        onClick = {
 //                            scope.launch {
-//                                pagerState.animateScrollToPage(
+//                                pagerState.scrollToPageRespectingPolicy(
 //                                    index,
 //                                    animationSpec = spring(
 //                                        dampingRatio = Spring.DampingRatioMediumBouncy,

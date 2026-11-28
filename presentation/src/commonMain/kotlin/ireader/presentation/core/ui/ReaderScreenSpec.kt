@@ -1,9 +1,9 @@
 package ireader.presentation.core.ui
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -76,6 +76,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
+import ireader.presentation.core.ModalBottomSheet
 /**
  * Resolves the initial chapter ID to load in the reader.
  *
@@ -779,7 +780,7 @@ data class ReaderScreenSpec(
 
                     // Plugin panel bottom sheet - uses ReaderPluginPanel for declarative UI
                     if (showPluginMenu && featurePlugins.isNotEmpty()) {
-                        androidx.compose.material3.ModalBottomSheet(
+                        ModalBottomSheet(
                             onDismissRequest = { showPluginMenu = false },
                             sheetState = androidx.compose.material3.rememberModalBottomSheetState()
                         ) {

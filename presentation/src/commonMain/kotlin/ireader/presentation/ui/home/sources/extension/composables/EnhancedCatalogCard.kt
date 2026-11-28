@@ -35,6 +35,9 @@ import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.components.SourceStatusIndicator
 import ireader.presentation.ui.home.sources.extension.Language
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.animateFloatAsState
+import ireader.presentation.ui.component.animations.animateDpAsState
 
 /**
  * Enhanced catalog card with custom modern design

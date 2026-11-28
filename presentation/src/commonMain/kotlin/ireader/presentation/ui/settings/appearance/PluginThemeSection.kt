@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.appearance
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid

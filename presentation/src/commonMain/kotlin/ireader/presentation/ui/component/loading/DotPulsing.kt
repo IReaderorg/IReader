@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.IntOffset
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 
 val dotSize = 8.dp // made it bigger for demo
 val delayUnit = 300 // you can change delay to change animation speed

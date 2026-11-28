@@ -22,6 +22,7 @@ import ireader.presentation.ui.core.theme.currentOrThrow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.util.Locale
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Native TTS Voice Selection Screen for Android
@@ -221,7 +222,7 @@ private fun LanguageSelector(
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
             )
             
-            ExposedDropdownMenu(
+            PerformanceExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {

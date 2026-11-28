@@ -1,8 +1,8 @@
 package ireader.presentation.imageloader
 
-import androidx.compose.animation.Crossfade
+import ireader.presentation.ui.component.animations.Crossfade
 import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -162,12 +162,12 @@ fun ImageLoaderImage(
 ) {
     val performanceConfig = LocalPerformanceConfig.current
     
-    val effectiveCrossfade = if (crossfadeDurationMs > 0) {
-        crossfadeDurationMs
-    } else if (performanceConfig.enableImageCrossfade) {
-        performanceConfig.crossfadeDurationMs
-    } else {
-        0
+    // The performance config is authoritative: an explicit duration from a caller must not
+    // re-enable image crossfades when they are disabled for performance.
+    val effectiveCrossfade = when {
+        !performanceConfig.enableImageCrossfade -> 0
+        crossfadeDurationMs > 0 -> crossfadeDurationMs.coerceAtMost(performanceConfig.crossfadeDurationMs)
+        else -> performanceConfig.crossfadeDurationMs
     }
     
     // Use medium filter quality - good balance of speed and quality

@@ -159,6 +159,7 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.core.NavigationRoutes
 import kotlinx.coroutines.launch
 
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 /**
  * The footer clock is only offered where it is most useful: page mode hides the
  * scrolling layout, and immersive mode hides the system status-bar clock.
@@ -1129,7 +1130,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pag
                 text = { MidSizeTextComposable(text = tab.name) },
                 selected = pagerState.currentPage == index,
                 onClick = {
-                    scope.launch { pagerState.animateScrollToPage(index) }
+                    scope.launch { pagerState.scrollToPageRespectingPolicy(index) }
                 },
             )
         }

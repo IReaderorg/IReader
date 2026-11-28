@@ -1,9 +1,9 @@
 package ireader.presentation.ui.component.components
 
-import androidx.compose.animation.Crossfade
+import ireader.presentation.ui.component.animations.Crossfade
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
-import androidx.compose.animation.core.animateFloatAsState
+import ireader.presentation.ui.component.animations.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme

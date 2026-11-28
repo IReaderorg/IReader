@@ -42,6 +42,8 @@ import ireader.presentation.ui.readingbuddy.components.ReadingBuddyCharacter
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.animateFloatAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

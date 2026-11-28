@@ -1,6 +1,6 @@
 package ireader.presentation.ui.book.components
 
-import androidx.compose.animation.Crossfade
+import ireader.presentation.ui.component.animations.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope

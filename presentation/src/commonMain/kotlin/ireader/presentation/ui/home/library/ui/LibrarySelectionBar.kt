@@ -1,8 +1,8 @@
 package ireader.presentation.ui.home.library.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -37,6 +37,16 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableIntStateOf
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.infiniteRepeatable
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.shrinkVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 
 /**
  * Desktop Download Notification Panel

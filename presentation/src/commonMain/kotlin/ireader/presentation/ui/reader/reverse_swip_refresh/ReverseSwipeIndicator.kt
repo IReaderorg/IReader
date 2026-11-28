@@ -1,9 +1,9 @@
 package ireader.presentation.ui.reader.reverse_swip_refresh
 
-import androidx.compose.animation.Crossfade
+import ireader.presentation.ui.component.animations.Crossfade
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

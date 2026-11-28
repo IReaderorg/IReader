@@ -1,13 +1,13 @@
 package ireader.presentation.ui.home.sources.settings
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.animateColorAsState
+import ireader.presentation.ui.component.animations.animateFloatAsState
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

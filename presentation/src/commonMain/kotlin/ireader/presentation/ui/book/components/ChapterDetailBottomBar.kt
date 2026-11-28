@@ -45,6 +45,7 @@ import ireader.presentation.ui.core.ui.Colour.contentColor
 import kotlinx.coroutines.launch
 
 
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Tabs(libraryTabs: List<String>, pagerState: androidx.compose.foundation.pager.PagerState) {
@@ -61,7 +62,7 @@ fun Tabs(libraryTabs: List<String>, pagerState: androidx.compose.foundation.page
                 selected = pagerState.currentPage == index,
                 unselectedContentColor = MaterialTheme.colorScheme.onBackground,
                 selectedContentColor = MaterialTheme.colorScheme.primary,
-                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                onClick = { scope.launch { pagerState.scrollToPageRespectingPolicy(index) } },
             )
         }
     }

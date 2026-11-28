@@ -21,6 +21,11 @@ import ireader.presentation.ui.home.sources.extension.LocaleHelper
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.shrinkVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 
 /**
  * Modern language filter with collapsible design

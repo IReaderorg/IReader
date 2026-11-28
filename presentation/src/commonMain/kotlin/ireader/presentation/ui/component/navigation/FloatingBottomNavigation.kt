@@ -24,6 +24,17 @@ import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.expandHorizontally
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.shrinkHorizontally
+import ireader.presentation.ui.component.animations.shrinkVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.animateFloatAsState
+import ireader.presentation.ui.component.animations.animateDpAsState
 
 /**
  * Floating bottom navigation bar with pill-shaped design

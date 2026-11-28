@@ -1,18 +1,18 @@
 package ireader.presentation.ui.migration
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
+import ireader.presentation.ui.component.animations.animateFloat
+import ireader.presentation.ui.component.animations.animateFloatAsState
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

@@ -1,9 +1,9 @@
 package ireader.presentation.ui.reader
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -23,6 +23,13 @@ import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.scaleIn
+import ireader.presentation.ui.component.animations.scaleOut
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.animateFloatAsState
 
 /**
  * Material 3 NavigationRail with modern design

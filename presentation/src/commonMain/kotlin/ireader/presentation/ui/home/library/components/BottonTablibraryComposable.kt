@@ -1,8 +1,8 @@
 package ireader.presentation.ui.home.library.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,6 +56,7 @@ import ireader.presentation.ui.core.ui.Colour.contentColor
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pager.PagerState) {
@@ -72,7 +73,7 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pag
                 selected = pagerState.currentPage == index,
                 unselectedContentColor = MaterialTheme.colorScheme.onBackground,
                 selectedContentColor = MaterialTheme.colorScheme.primary,
-                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                onClick = { scope.launch { pagerState.scrollToPageRespectingPolicy(index) } },
             )
         }
     }
@@ -101,7 +102,7 @@ fun ScrollableTabs(
                 selected = pagerState.currentPage == index,
                 unselectedContentColor = MaterialTheme.colorScheme.onBackground,
                 selectedContentColor = MaterialTheme.colorScheme.primary,
-                onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                onClick = { scope.launch { pagerState.scrollToPageRespectingPolicy(index) } },
             )
         }
     }

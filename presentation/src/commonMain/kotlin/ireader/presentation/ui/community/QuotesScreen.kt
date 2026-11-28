@@ -34,6 +34,13 @@ import ireader.domain.models.quote.QuoteCardStyle
 import ireader.i18n.Images
 import ireader.presentation.ui.quote.MyQuotesViewModel
 import ireader.presentation.ui.quote.QuoteStoryEditorScreen
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.infiniteRepeatable
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.expandVertically
+import ireader.presentation.ui.component.animations.shrinkVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 
 /**
  * Instagram-style quote cards gallery with masonry layout

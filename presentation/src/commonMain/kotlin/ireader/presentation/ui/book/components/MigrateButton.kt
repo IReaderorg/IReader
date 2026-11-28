@@ -1,7 +1,7 @@
 package ireader.presentation.ui.book.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.spring
+import ireader.presentation.ui.component.animations.animateColorAsState
+import ireader.presentation.ui.component.animations.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Settings component for reading break reminders
@@ -192,7 +193,7 @@ fun ReadingBreakSettingsCompact(
                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                 )
                 
-                ExposedDropdownMenu(
+                PerformanceExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {

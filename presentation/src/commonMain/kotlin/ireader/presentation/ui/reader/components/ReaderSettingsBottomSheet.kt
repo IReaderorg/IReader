@@ -1,6 +1,6 @@
 package ireader.presentation.ui.reader.components
 
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,7 +15,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import ireader.presentation.core.ModalBottomSheet
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -36,6 +36,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
 
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 // Animation durations - reduced for better performance
 private const val TAB_ANIMATION_DURATION_MS = 150 // Reduced from default ~300ms
 private const val TAB_ANIMATION_DISABLED_MS = 0 // No animation for reduced animations mode
@@ -121,7 +122,7 @@ fun ReaderSettingsBottomSheet(
                             if (reducedAnimations) {
                                 pagerState.scrollToPage(0) // Instant, no animation
                             } else {
-                                pagerState.animateScrollToPage(
+                                pagerState.scrollToPageRespectingPolicy(
                                     page = 0,
                                     animationSpec = tween(durationMillis = animationDuration)
                                 )
@@ -137,7 +138,7 @@ fun ReaderSettingsBottomSheet(
                             if (reducedAnimations) {
                                 pagerState.scrollToPage(1)
                             } else {
-                                pagerState.animateScrollToPage(
+                                pagerState.scrollToPageRespectingPolicy(
                                     page = 1,
                                     animationSpec = tween(durationMillis = animationDuration)
                                 )
@@ -153,7 +154,7 @@ fun ReaderSettingsBottomSheet(
                             if (reducedAnimations) {
                                 pagerState.scrollToPage(2)
                             } else {
-                                pagerState.animateScrollToPage(
+                                pagerState.scrollToPageRespectingPolicy(
                                     page = 2,
                                     animationSpec = tween(durationMillis = animationDuration)
                                 )
@@ -169,7 +170,7 @@ fun ReaderSettingsBottomSheet(
                             if (reducedAnimations) {
                                 pagerState.scrollToPage(3)
                             } else {
-                                pagerState.animateScrollToPage(
+                                pagerState.scrollToPageRespectingPolicy(
                                     page = 3,
                                     animationSpec = tween(durationMillis = animationDuration)
                                 )

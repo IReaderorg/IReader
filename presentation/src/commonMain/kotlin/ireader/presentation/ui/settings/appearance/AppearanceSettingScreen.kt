@@ -1,9 +1,9 @@
 package ireader.presentation.ui.settings.appearance
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import ireader.presentation.ui.component.animations.animateColorAsState
+import ireader.presentation.ui.component.animations.animateDpAsState
+import ireader.presentation.ui.component.animations.animateFloatAsState
+import ireader.presentation.ui.component.animations.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement

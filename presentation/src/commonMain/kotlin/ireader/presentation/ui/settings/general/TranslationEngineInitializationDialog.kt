@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.general
 
-import androidx.compose.animation.core.animateFloatAsState
+import ireader.presentation.ui.component.animations.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons

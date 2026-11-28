@@ -1,3 +1,4 @@
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 //package ireader.presentation.ui.home.sources.extension
 //
 //import androidx.compose.foundation.ExperimentalFoundationApi
@@ -101,7 +102,7 @@
 //                Tab(
 //                    selected = pagerState.currentPage == index,
 //                    onClick = {
-//                        scope.launch { pagerState.animateScrollToPage(index) }
+//                        scope.launch { pagerState.scrollToPageRespectingPolicy(index) }
 //                    },
 //                    text = {
 //                        Text(

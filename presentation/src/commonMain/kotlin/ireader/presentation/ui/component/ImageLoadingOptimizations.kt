@@ -60,7 +60,7 @@ fun rememberOptimizedBookCoverRequest(
                 }
             }
             // Enable crossfade for smooth transitions
-            .crossfade(true)
+            .crossfade(false)
             .build()
     }
 }
@@ -85,7 +85,7 @@ fun rememberOptimizedImageRequest(
             .memoryCacheKey(bookCover.cover)
             .diskCacheKey("${bookCover.cover};${bookCover.lastModified}")
             .size(size)
-            .crossfade(true)
+            .crossfade(false)
             .build()
     }
 }

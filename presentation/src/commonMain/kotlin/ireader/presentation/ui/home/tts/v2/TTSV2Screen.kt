@@ -1,3 +1,4 @@
+import ireader.presentation.ui.component.animations.scrollToItemRespectingPolicy
 //package ireader.presentation.ui.home.tts.v2
 //
 //import androidx.compose.foundation.layout.*
@@ -92,7 +93,7 @@
 //    val listState = rememberLazyListState()
 //    LaunchedEffect(currentParagraph) {
 //        if (currentParagraph > 0 && state.paragraphs.isNotEmpty()) {
-//            listState.animateScrollToItem(currentParagraph)
+//            listState.scrollToItemRespectingPolicy(currentParagraph)
 //        }
 //    }
 //

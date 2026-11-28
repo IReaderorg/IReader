@@ -38,6 +38,9 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchScreenState
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.presentation.ui.home.sources.global_search.viewmodel.SearchItem
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 
 /**
  * Modern Global Search Screen with Material Design 3

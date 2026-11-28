@@ -52,6 +52,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 import kotlinx.collections.immutable.ImmutableList
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Wrapper composable that handles file picking for glossary import/export
@@ -299,7 +300,7 @@ fun AddGlossaryEntryDialog(
                         modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
                     
-                    ExposedDropdownMenu(
+                    PerformanceExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
@@ -401,7 +402,7 @@ fun EditGlossaryEntryDialog(
                         modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
                     
-                    ExposedDropdownMenu(
+                    PerformanceExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {

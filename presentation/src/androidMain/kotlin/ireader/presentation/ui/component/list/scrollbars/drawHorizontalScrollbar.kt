@@ -33,7 +33,7 @@ package ireader.presentation.ui.component.list.scrollbars
 
 import android.view.ViewConfiguration
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

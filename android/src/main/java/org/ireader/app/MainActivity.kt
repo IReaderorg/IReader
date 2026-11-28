@@ -59,9 +59,6 @@ import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.core.ui.setGoogleDriveOAuthActivity
 import ireader.presentation.core.ui.handleGoogleDriveActivityResult
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.component.LocalPerformanceConfig
-import ireader.presentation.ui.component.PerformanceConfig
-import ireader.presentation.ui.component.getPerformanceConfigForDevice
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.core.initFontProvider
 import ireader.presentation.ui.settings.storage.StorageFolderPickerScreen
@@ -163,14 +160,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
             
             // Full UI
             val context = LocalContext.current
-            val maxPerformanceEnabled = uiPreferences.maxPerformanceMode().get()
-            val performanceConfig = remember(maxPerformanceEnabled) { 
-                if (maxPerformanceEnabled) {
-                    PerformanceConfig.MaxPerformance
-                } else {
-                    getPerformanceConfigForDevice(this@MainActivity)
-                }
-            }
             
             SetDefaultTheme()
             KoinContext {
@@ -179,10 +168,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                         context = context
                     )
                 }
-                androidx.compose.runtime.CompositionLocalProvider(
-                    LocalPerformanceConfig provides performanceConfig
-                ) {
-                    AppTheme(this.lifecycleScope) {
+                AppTheme(this.lifecycleScope) {
                         Surface(
                             color = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -251,7 +237,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             }
                         }
                     }
-                }
                 }
             }
         }

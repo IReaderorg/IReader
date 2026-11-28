@@ -23,6 +23,8 @@ import ireader.domain.models.quote.BuddyMood
 import ireader.domain.models.quote.ReadingBuddyState
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 
 /**
  * Animated Reading Buddy character - a cute rabbit using emoji art
