@@ -1,6 +1,6 @@
 package ireader.presentation.ui.sourcecreator.components
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help

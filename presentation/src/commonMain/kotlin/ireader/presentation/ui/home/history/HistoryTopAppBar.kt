@@ -1,6 +1,6 @@
 package ireader.presentation.ui.home.history
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

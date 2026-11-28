@@ -35,7 +35,12 @@ import ireader.domain.models.quote.QuoteCardConstants
 import ireader.i18n.Images
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.infiniteRepeatable
+import ireader.presentation.ui.component.animations.animateDpAsState
 
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 /**
  * Instagram Story-style quote editor with live preview
  * Swipe through styles, tap to edit text, beautiful animations
@@ -117,7 +122,7 @@ fun QuoteStoryEditorScreen(
                 IconButton(
                     onClick = {
                         scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            pagerState.scrollToPageRespectingPolicy(pagerState.currentPage - 1)
                         }
                     },
                     modifier = Modifier
@@ -144,7 +149,7 @@ fun QuoteStoryEditorScreen(
                 IconButton(
                     onClick = {
                         scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            pagerState.scrollToPageRespectingPolicy(pagerState.currentPage + 1)
                         }
                     },
                     modifier = Modifier

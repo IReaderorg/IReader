@@ -29,6 +29,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.infiniteRepeatable
+import ireader.presentation.ui.component.animations.animateFloatAsState
 
 /**
  * Modern full-screen app update dialog

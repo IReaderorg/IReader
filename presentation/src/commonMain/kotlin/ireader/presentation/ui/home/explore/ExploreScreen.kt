@@ -1,8 +1,8 @@
 package ireader.presentation.ui.home.explore
 
-import androidx.compose.animation.animateColorAsState
+import ireader.presentation.ui.component.animations.animateColorAsState
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import ireader.presentation.ui.component.animations.spring
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState

@@ -224,7 +224,7 @@ fun newImageLoader(context: PlatformContext, simpleStorage: GetSimpleStorage, cl
                 .build()
         }
         diskCache(diskCacheInit)
-        crossfade(150)
+        crossfade(0)
 
     }.build()
 }

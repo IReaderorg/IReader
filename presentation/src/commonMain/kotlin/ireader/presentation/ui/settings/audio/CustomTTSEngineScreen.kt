@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.audio
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +20,7 @@ import io.ktor.client.HttpClient
 import ireader.domain.services.tts_service.*
 import ireader.presentation.ui.component.IScaffold
 import kotlinx.coroutines.launch
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Dedicated full-screen Custom TTS Engine Studio.
@@ -738,7 +739,7 @@ fun CustomTTSEngineScreen(
                                     modifier = Modifier.fillMaxWidth().menuAnchor(),
                                     shape = RoundedCornerShape(10.dp)
                                 )
-                                ExposedDropdownMenu(
+                                PerformanceExposedDropdownMenu(
                                     expanded = apiTypeExpanded,
                                     onDismissRequest = { apiTypeExpanded = false }
                                 ) {
@@ -891,7 +892,7 @@ private fun ParameterEditorCard(
                         modifier = Modifier.fillMaxWidth().menuAnchor(),
                         shape = RoundedCornerShape(8.dp)
                     )
-                    ExposedDropdownMenu(
+                    PerformanceExposedDropdownMenu(
                         expanded = typeExpanded,
                         onDismissRequest = { typeExpanded = false }
                     ) {

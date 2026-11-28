@@ -24,6 +24,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
+import ireader.presentation.ui.component.animations.openRespectingPolicy
+import ireader.presentation.ui.component.animations.closeRespectingPolicy
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainBottomSettingComposable(
@@ -70,7 +72,7 @@ fun MainBottomSettingComposable(
         AppIconButton(
             imageVector = Icons.Default.Menu,
             contentDescription = localize(Res.string.drawer),
-            onClick = { scope.launch { drawerState.open() } }
+            onClick = { scope.launch { drawerState.openRespectingPolicy() } }
         )
 
         AppIconButton(

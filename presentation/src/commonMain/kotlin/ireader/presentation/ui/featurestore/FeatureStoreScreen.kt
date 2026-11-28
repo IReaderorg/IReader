@@ -3,8 +3,8 @@ package ireader.presentation.ui.featurestore
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -43,6 +43,7 @@ import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.plugins.marketplace.PriceFilter
 import ireader.presentation.ui.plugins.marketplace.components.FilterBottomSheet
+import ireader.presentation.ui.component.animations.AnimatedContent
 
 private val ItemPlacementSpec = spring<IntOffset>(
     stiffness = Spring.StiffnessMedium,

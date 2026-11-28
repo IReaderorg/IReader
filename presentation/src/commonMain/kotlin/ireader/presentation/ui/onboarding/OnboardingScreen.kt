@@ -38,7 +38,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.scaleIn
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.animateDpAsState
 
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 /**
  * Unified onboarding screen with:
  * 1. Welcome + Language selection
@@ -106,7 +114,7 @@ fun OnboardingScreen(
                             localeHelper?.updateLocal()
                         },
                         onContinue = {
-                            scope.launch { pagerState.animateScrollToPage(1) }
+                            scope.launch { pagerState.scrollToPageRespectingPolicy(1) }
                         }
                     )
                     1 -> StorageSetupPage(
@@ -119,11 +127,11 @@ fun OnboardingScreen(
                             onFolderUriSelected?.invoke(path)
                             scope.launch { 
                                 delay(500)
-                                pagerState.animateScrollToPage(2) 
+                                pagerState.scrollToPageRespectingPolicy(2) 
                             }
                         },
                         onBack = {
-                            scope.launch { pagerState.animateScrollToPage(0) }
+                            scope.launch { pagerState.scrollToPageRespectingPolicy(0) }
                         }
                     )
                     2 -> DevServerPage(
@@ -144,7 +152,7 @@ fun OnboardingScreen(
                             onComplete()
                         },
                         onBack = {
-                            scope.launch { pagerState.animateScrollToPage(1) }
+                            scope.launch { pagerState.scrollToPageRespectingPolicy(1) }
                         }
                     )
                 }

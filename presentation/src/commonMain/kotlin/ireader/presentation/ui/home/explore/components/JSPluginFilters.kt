@@ -14,6 +14,7 @@ import ireader.domain.js.models.FilterOption
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Composable for rendering JavaScript plugin filters.
@@ -119,7 +120,7 @@ fun JSPluginFilterPicker(
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
             )
             
-            ExposedDropdownMenu(
+            PerformanceExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {

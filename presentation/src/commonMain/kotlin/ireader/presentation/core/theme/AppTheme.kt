@@ -8,9 +8,13 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.unit.LayoutDirection
 import ireader.i18n.LocalizeHelper
+import ireader.domain.preferences.prefs.UiPreferences
+import ireader.presentation.ui.component.AnimationPolicy
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.rememberPlatformPerformanceConfig
+import ireader.presentation.ui.component.resolveAnimationsEnabled
+import ireader.presentation.ui.component.resolvePerformanceConfig
 import ireader.presentation.ui.core.theme.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.utils.LocalIsRtl
@@ -26,6 +30,7 @@ fun AppTheme(
     content: @Composable() () -> Unit,
 ) {
     val vm = koinInject<AppThemeViewModel>()
+    val uiPreferences = koinInject<UiPreferences>()
     val (materialColors, customColors) = vm.getColors()
     val typography = vm.getTypography()
     val systemUiController = LocalISystemUIController.current
@@ -105,8 +110,17 @@ fun AppTheme(
         }
     }
 
-    // Get performance config - uses platform-specific detection when available
-    val performanceConfig = rememberPlatformPerformanceConfig()
+    // Max performance mode must win over the device-detected config. Observing
+    // changes here makes the setting take effect immediately on every platform.
+    val maxPerformanceMode by uiPreferences.maxPerformanceMode().changes()
+        .collectAsState(initial = uiPreferences.maxPerformanceMode().get())
+    val platformConfig = rememberPlatformPerformanceConfig()
+    val performanceConfig = remember(platformConfig, maxPerformanceMode) {
+        resolvePerformanceConfig(platformConfig, maxPerformanceMode)
+    }
+    SideEffect {
+        AnimationPolicy.animationsEnabled = resolveAnimationsEnabled(maxPerformanceMode)
+    }
     
     // Determine layout direction based on current language
     // This enables RTL support for Arabic, Hebrew, Persian, etc.

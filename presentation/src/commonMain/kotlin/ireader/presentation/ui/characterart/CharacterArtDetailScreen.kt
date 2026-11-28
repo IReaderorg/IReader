@@ -35,6 +35,8 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.animateFloatAsState
 
 /**
  * Detail screen for viewing character art

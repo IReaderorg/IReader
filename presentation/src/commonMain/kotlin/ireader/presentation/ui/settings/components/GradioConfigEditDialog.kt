@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.components
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -27,6 +27,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 import kotlinx.coroutines.launch
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Smart Dialog for adding and editing Gradio Cloud TTS configurations.
@@ -542,7 +543,7 @@ fun GradioConfigEditDialog(
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = apiTypeExpanded) },
                                 modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                             )
-                            ExposedDropdownMenu(
+                            PerformanceExposedDropdownMenu(
                                 expanded = apiTypeExpanded,
                                 onDismissRequest = { apiTypeExpanded = false }
                             ) {
@@ -654,7 +655,7 @@ private fun ParameterEditor(
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 )
 
-                ExposedDropdownMenu(
+                PerformanceExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {

@@ -120,6 +120,7 @@ import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 import org.koin.compose.koinInject
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Compact engine-specific configuration sections
@@ -1626,7 +1627,7 @@ private fun LanguageDropdown(
             textStyle = MaterialTheme.typography.bodySmall
         )
         
-        ExposedDropdownMenu(
+        PerformanceExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
@@ -1735,7 +1736,7 @@ private fun GeminiConfig(
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
                 
-                ExposedDropdownMenu(
+                PerformanceExposedDropdownMenu(
                     expanded = modelExpanded,
                     onDismissRequest = { modelExpanded = false }
                 ) {
@@ -1869,7 +1870,7 @@ private fun OpenRouterConfig(
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
                 
-                ExposedDropdownMenu(
+                PerformanceExposedDropdownMenu(
                     expanded = modelExpanded,
                     onDismissRequest = { modelExpanded = false }
                 ) {
@@ -2003,7 +2004,7 @@ private fun NvidiaConfig(
                     textStyle = MaterialTheme.typography.bodyMedium
                 )
                 
-                ExposedDropdownMenu(
+                PerformanceExposedDropdownMenu(
                     expanded = modelExpanded,
                     onDismissRequest = { modelExpanded = false }
                 ) {
@@ -2306,7 +2307,7 @@ private fun RenderConfigField(
                             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                         )
                         
-                        ExposedDropdownMenu(
+                        PerformanceExposedDropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
                         ) {

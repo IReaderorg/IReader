@@ -1,11 +1,11 @@
 package ireader.presentation.ui.home.sources.extension
 
-import androidx.compose.animation.animateColorAsState
+import ireader.presentation.ui.component.animations.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.animateFloatAsState
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -83,6 +83,7 @@ import ireader.presentation.ui.home.sources.extension.composables.UserSourcesCre
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 private val ItemPlacementSpec = spring<IntOffset>(
     stiffness = Spring.StiffnessMedium,
     dampingRatio = Spring.DampingRatioNoBouncy
@@ -156,7 +157,7 @@ fun UnifiedSourceScreen(
             selectedIndex = pagerState.currentPage,
             onSegmentSelected = { index ->
                 scope.launch {
-                    pagerState.animateScrollToPage(index)
+                    pagerState.scrollToPageRespectingPolicy(index)
                 }
             },
             segments = listOf(

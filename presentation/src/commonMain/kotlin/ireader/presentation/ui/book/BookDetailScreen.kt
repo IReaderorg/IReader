@@ -2,8 +2,8 @@ package ireader.presentation.ui.book
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.spring
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues

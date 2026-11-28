@@ -12,6 +12,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
+import ireader.presentation.ui.component.animations.scaleIn
+import ireader.presentation.ui.component.animations.scaleOut
 
 /**
  * Smooth navigation host that eliminates white flashes during screen transitions.

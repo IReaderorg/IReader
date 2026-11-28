@@ -1,3 +1,4 @@
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 //package ireader.presentation.ui.home.sources.extension
 //
 //import androidx.compose.foundation.ExperimentalFoundationApi
@@ -244,7 +245,7 @@
 //                },
 //                selected = pagerState.currentPage == index,
 //                onClick = {
-//                    scope.launch { pagerState.animateScrollToPage(index) }
+//                    scope.launch { pagerState.scrollToPageRespectingPolicy(index) }
 //                },
 //                selectedContentColor = MaterialTheme.colorScheme.primary,
 //                unselectedContentColor = MaterialTheme.colorScheme.onBackground,

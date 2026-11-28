@@ -1,13 +1,13 @@
 package ireader.presentation.ui.book.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.animateColorAsState
+import ireader.presentation.ui.component.animations.animateFloatAsState
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import ireader.presentation.ui.component.animations.scrollToItemRespectingPolicy
 /**
  * Modern pagination bar for chapter lists with paged loading support.
  * Features a sleek design with page number chips and smooth animations.
@@ -66,7 +67,7 @@ fun ChapterPaginationBar(
     LaunchedEffect(currentPage, visiblePages) {
         val index = visiblePages.indexOf(currentPage)
         if (index >= 0) {
-            listState.animateScrollToItem(index)
+            listState.scrollToItemRespectingPolicy(index)
         }
     }
     

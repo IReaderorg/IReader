@@ -29,6 +29,12 @@ import ireader.domain.services.common.TranslationStatus
 import ireader.domain.services.common.ServiceState
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.slideInHorizontally
+import ireader.presentation.ui.component.animations.slideOutHorizontally
+import ireader.presentation.ui.component.animations.AnimatedContent
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Translation mode - determines the context of translation
@@ -802,7 +808,7 @@ private fun <T> TranslationDropdown(
                 )
             )
             
-            ExposedDropdownMenu(
+            PerformanceExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { onExpandedChange(false) }
             ) {
@@ -854,7 +860,7 @@ private fun LanguageDropdown(
                 textStyle = MaterialTheme.typography.bodyMedium
             )
             
-            ExposedDropdownMenu(
+            PerformanceExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { onExpandedChange(false) }
             ) {

@@ -19,6 +19,8 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.animateFloatAsState
 
 /**
  * Enhanced section header with custom design

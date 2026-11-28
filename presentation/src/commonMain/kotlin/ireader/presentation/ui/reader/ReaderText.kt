@@ -2,10 +2,10 @@ package ireader.presentation.ui.reader
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
+import ireader.presentation.ui.component.animations.animateFloat
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture

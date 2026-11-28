@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.translation
 
-import androidx.compose.animation.animateColorAsState
+import ireader.presentation.ui.component.animations.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow

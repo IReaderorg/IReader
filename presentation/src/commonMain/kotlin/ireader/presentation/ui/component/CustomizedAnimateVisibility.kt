@@ -1,9 +1,9 @@
 package ireader.presentation.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
+import ireader.presentation.ui.component.animations.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 

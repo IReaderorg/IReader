@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 
 /**
  * Success dialog shown after saving or sharing a quote.

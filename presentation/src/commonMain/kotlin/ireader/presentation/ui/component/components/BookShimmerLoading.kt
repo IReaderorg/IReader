@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 
 @Composable
 fun BookShimmerLoading(

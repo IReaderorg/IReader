@@ -1,8 +1,8 @@
 package ireader.presentation.core.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -130,6 +130,9 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
+import ireader.presentation.ui.component.animations.openRespectingPolicy
+import ireader.presentation.ui.component.animations.closeRespectingPolicy
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 /**
  * TTS V2 Screen Spec - Full-featured TTS screen using v2 architecture
  * 
@@ -744,7 +747,7 @@ class TTSV2ScreenSpec(
                     }
                     if (pagerState.currentPage != targetPage) {
                         try {
-                            pagerState.animateScrollToPage(targetPage)
+                            pagerState.scrollToPageRespectingPolicy(targetPage)
                         } catch (e: Exception) {
                             try { pagerState.scrollToPage(targetPage) } catch (_: Exception) {}
                         }
@@ -1103,7 +1106,7 @@ class TTSV2ScreenSpec(
             override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
             override fun onSpeedChange(speed: Float) { viewModel.adapter.setSpeed(speed) }
             override fun onAutoNextChange(enabled: Boolean) { viewModel.adapter.setAutoNextChapter(enabled) }
-            override fun onOpenSettings() { scope.launch { settingsDrawerState.open() } }
+            override fun onOpenSettings() { scope.launch { settingsDrawerState.openRespectingPolicy() } }
             override fun onSelectVoice() { showVoiceSelection = true }
             override fun onSelectEngine(engine: String) { showEngineSettings = true }
         }
@@ -1219,7 +1222,7 @@ class TTSV2ScreenSpec(
             onCoquiTTSChange = { enabled ->
                 if (enabled && !isGradioConfigured) {
                     showEngineSettings = true
-                    scope.launch { settingsDrawerState.close() }
+                    scope.launch { settingsDrawerState.closeRespectingPolicy() }
                 } else if (isGradioConfigured) {
                     scope.launch { appPreferences.useGradioTTS().set(enabled) }
                     if (enabled) {
@@ -1264,20 +1267,20 @@ class TTSV2ScreenSpec(
             },
             onOpenEngineSettings = {
                 showEngineSettings = true
-                scope.launch { settingsDrawerState.close() }
+                scope.launch { settingsDrawerState.closeRespectingPolicy() }
             },
             onSelectVoice = {
                 showVoiceSelection = true
-                scope.launch { settingsDrawerState.close() }
+                scope.launch { settingsDrawerState.closeRespectingPolicy() }
             },
             onNavigateToTextReplacement = {
                 scope.launch { 
-                    settingsDrawerState.close()
+                    settingsDrawerState.closeRespectingPolicy()
                     navController.navigate(NavigationRoutes.textReplacement)
                 }
             },
             onClose = {
-                scope.launch { settingsDrawerState.close() }
+                scope.launch { settingsDrawerState.closeRespectingPolicy() }
             }
         ) {
         // Main UI with Chapter Drawer
@@ -1294,7 +1297,7 @@ class TTSV2ScreenSpec(
                         onChapter = { ch ->
                             val wasPlaying = isPlaying
                             scope.launch {
-                                drawerState.close()
+                                drawerState.closeRespectingPolicy()
                                 
                                 // Clear translation state
                                 viewModel.adapter.setTranslatedContent(null)
@@ -1653,7 +1656,7 @@ class TTSV2ScreenSpec(
                                 viewModel.adapter.nextChapter()
                             },
                             onSettings = {
-                                scope.launch { settingsDrawerState.open() }
+                                scope.launch { settingsDrawerState.openRespectingPolicy() }
                             },
                             modifier = Modifier.fillMaxWidth()
                         )

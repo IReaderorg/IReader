@@ -232,9 +232,9 @@ private fun ColorPresetItem(
     onClick: () -> Unit
 ) {
     // Enhanced preset item with better visual feedback
-    val scale by androidx.compose.animation.core.animateFloatAsState(
+    val scale by ireader.presentation.ui.component.animations.animateFloatAsState(
         targetValue = if (isSelected) 1.1f else 1f,
-        animationSpec = androidx.compose.animation.core.spring(
+        animationSpec = ireader.presentation.ui.component.animations.spring(
             dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
         )
     )
@@ -256,10 +256,10 @@ private fun ColorPresetItem(
             )
             .clickable(onClick = onClick)
     ) {
-        androidx.compose.animation.AnimatedVisibility(
+        ireader.presentation.ui.component.animations.AnimatedVisibility(
             visible = isSelected,
-            enter = androidx.compose.animation.scaleIn() + androidx.compose.animation.fadeIn(),
-            exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut()
+            enter = ireader.presentation.ui.component.animations.scaleIn() + ireader.presentation.ui.component.animations.fadeIn(),
+            exit = ireader.presentation.ui.component.animations.scaleOut() + ireader.presentation.ui.component.animations.fadeOut()
         ) {
             Icon(
                 imageVector = Icons.Default.Check,

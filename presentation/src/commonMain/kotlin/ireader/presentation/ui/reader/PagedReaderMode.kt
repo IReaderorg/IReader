@@ -2,10 +2,10 @@ package ireader.presentation.ui.reader
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
+import ireader.presentation.ui.component.animations.animateFloat
+import ireader.presentation.ui.component.animations.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import ireader.presentation.ui.component.animations.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -108,6 +108,8 @@ import ireader.presentation.ui.reader.viewmodel.ReaderState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+
+import ireader.presentation.ui.component.animations.scrollToPageRespectingPolicy
 
 /** Time insets must stay unchanged before the first pager frame is painted. */
 internal const val PAGED_LAYOUT_SETTLE_MS = 300L
@@ -379,14 +381,14 @@ internal fun PagedReaderContent(
                 when (event) {
                     is PageNavigationEvent.Next -> {
                         if (targetPage < totalPagerCount - 1) {
-                            pagerState.animateScrollToPage(targetPage + 1)
+                            pagerState.scrollToPageRespectingPolicy(targetPage + 1)
                         } else if (hasNextChapter) {
                             safeNavigateNext()
                         }
                     }
                     is PageNavigationEvent.Prev -> {
                         if (targetPage > 0) {
-                            pagerState.animateScrollToPage(targetPage - 1)
+                            pagerState.scrollToPageRespectingPolicy(targetPage - 1)
                         } else if (hasPrevChapter) {
                             safeNavigatePrev()
                         }
@@ -445,7 +447,7 @@ internal fun PagedReaderContent(
                                     // Tap Left: Previous page
                                     if (pagerState.currentPage > 0) {
                                         scope.launch {
-                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                            pagerState.scrollToPageRespectingPolicy(pagerState.currentPage - 1)
                                         }
                                     } else if (hasPrevChapter) {
                                         safeNavigatePrev()
@@ -455,7 +457,7 @@ internal fun PagedReaderContent(
                                     // Tap Right: Next page
                                     if (pagerState.currentPage < totalPagerCount - 1) {
                                         scope.launch {
-                                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                            pagerState.scrollToPageRespectingPolicy(pagerState.currentPage + 1)
                                         }
                                     } else if (hasNextChapter) {
                                         safeNavigateNext()
@@ -505,7 +507,7 @@ internal fun PagedReaderContent(
                                 onNextChapter = { safeNavigateNext() },
                                 onReRead = {
                                     scope.launch {
-                                        pagerState.animateScrollToPage(startPageOffset)
+                                        pagerState.scrollToPageRespectingPolicy(startPageOffset)
                                     }
                                 }
                             )

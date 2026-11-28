@@ -337,7 +337,7 @@ fun ModernListItem(
                             .data(bookCover)
                             .memoryCacheKey(bookCover.cover)
                             .diskCacheKey("${bookCover.cover};${bookCover.lastModified}")
-                            .crossfade(true)
+                            .crossfade(false)
                             .build()
                     }
 
@@ -809,7 +809,7 @@ fun BookCoverImage(
             .data(bookCover) // Use BookCover directly for better caching
             .memoryCacheKey(bookCover.cover) // Explicit memory cache key
             .diskCacheKey("${bookCover.cover};${bookCover.lastModified}") // Explicit disk cache key
-            .crossfade(true) // Smooth transition
+            .crossfade(false) // Smooth transition
             .build()
     }
 

@@ -1,13 +1,13 @@
 package ireader.presentation.ui.reader
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
+import ireader.presentation.ui.component.animations.AnimatedVisibility
+import ireader.presentation.ui.component.animations.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import ireader.presentation.ui.component.animations.tween
+import ireader.presentation.ui.component.animations.fadeIn
+import ireader.presentation.ui.component.animations.fadeOut
+import ireader.presentation.ui.component.animations.slideInVertically
+import ireader.presentation.ui.component.animations.slideOutVertically
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -73,6 +73,9 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
+import ireader.presentation.ui.component.animations.openRespectingPolicy
+import ireader.presentation.ui.component.animations.closeRespectingPolicy
+import ireader.presentation.core.ModalBottomSheet
 /**
  * Pre-computed modifiers for ReaderScreen to avoid recreation on each recomposition
  */
@@ -333,7 +336,7 @@ private fun ReadingScreenContent(
                                         showChapterReviews.value = true
                                     }
                                 },
-                                onOpenDrawer = { scope.launch { drawerState.open() } },
+                                onOpenDrawer = { scope.launch { drawerState.openRespectingPolicy() } },
                                 onCopyModeDone = onNavigateToQuoteCreation
                             )
 
@@ -360,7 +363,7 @@ private fun ReadingScreenContent(
                                 val currentBook = vm.book
                                 val currentChapter = chapter
                                 if (currentBook != null && currentChapter != null) {
-                                    androidx.compose.material3.ModalBottomSheet(
+                                    ModalBottomSheet(
                                         onDismissRequest = { showChapterReviews.value = false },
                                         sheetState = androidx.compose.material3.rememberModalBottomSheetState()
                                     ) {

@@ -328,10 +328,10 @@ private fun CreateSourceFab(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Mini FABs (shown when expanded)
-        androidx.compose.animation.AnimatedVisibility(
+        ireader.presentation.ui.component.animations.AnimatedVisibility(
             visible = expanded,
-            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.expandVertically(),
-            exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.shrinkVertically()
+            enter = ireader.presentation.ui.component.animations.fadeIn() + ireader.presentation.ui.component.animations.expandVertically(),
+            exit = ireader.presentation.ui.component.animations.fadeOut() + ireader.presentation.ui.component.animations.shrinkVertically()
         ) {
             Column(
                 horizontalAlignment = Alignment.End,

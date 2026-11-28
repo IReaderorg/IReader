@@ -19,6 +19,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.PerformanceExposedDropdownMenu
 
 /**
  * Data class representing EPUB export options
@@ -317,7 +318,7 @@ fun EpubExportDialog(
                                         .fillMaxWidth()
                                         .menuAnchor()
                                 )
-                                ExposedDropdownMenu(
+                                PerformanceExposedDropdownMenu(
                                     expanded = expanded,
                                     onDismissRequest = { expanded = false }
                                 ) {

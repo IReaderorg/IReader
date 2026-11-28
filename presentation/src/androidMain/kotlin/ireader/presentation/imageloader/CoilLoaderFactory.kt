@@ -82,8 +82,8 @@ class CoilLoaderFactory(
             // Large disk cache for persistent storage
             diskCache(diskCacheInit)
             
-            // Smooth 150ms crossfade for disk/network fetches (memory cache remains 0ms instant)
-            crossfade(150)
+            // Instant image display; crossfades are disabled by the performance config.
+            crossfade(0)
             
             // Bitmap configuration optimized for speed
             when {
