@@ -34,6 +34,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Battery0Bar
+import androidx.compose.material.icons.filled.Battery1Bar
+import androidx.compose.material.icons.filled.Battery2Bar
+import androidx.compose.material.icons.filled.Battery3Bar
+import androidx.compose.material.icons.filled.Battery4Bar
+import androidx.compose.material.icons.filled.Battery5Bar
+import androidx.compose.material.icons.filled.Battery6Bar
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Replay
@@ -58,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -95,6 +104,10 @@ import ireader.i18n.resources.the_end
 import ireader.i18n.resources.view_comments
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeTextAlign
+import ireader.presentation.core.util.batteryBarLevel
+import ireader.presentation.core.util.currentBatteryLevel
+import ireader.presentation.core.util.formatBatteryLevel
+import ireader.presentation.core.util.formatPageProgress
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.core.theme.formatSystemTime
@@ -205,6 +218,15 @@ internal fun PagedReaderContent(
         while (true) {
             value = formatSystemTime(currentTimeToLong(), platformContext)
             delay(30_000L)
+        }
+    }
+    val batteryLevel by produceState<Int?>(
+        initialValue = null,
+        key1 = platformContext
+    ) {
+        while (true) {
+            value = currentBatteryLevel(platformContext)
+            delay(60_000L)
         }
     }
 
@@ -525,6 +547,7 @@ internal fun PagedReaderContent(
                                 topInset = topInsetDp,
                                 bottomInset = bottomInsetDp,
                                 currentTime = currentTimeText,
+                                batteryLevel = batteryLevel,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
@@ -549,6 +572,7 @@ private fun ContentPageView(
     topInset: Dp = 0.dp,
     bottomInset: Dp = 0.dp,
     currentTime: String,
+    batteryLevel: Int?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -579,7 +603,7 @@ private fun ContentPageView(
             }
         }
 
-        // Bottom Page Indicator: page / total on the left, optional clock centered, percent on the right
+        // Bottom Page Indicator: page / total (percent), optional clock, battery
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -594,7 +618,7 @@ private fun ContentPageView(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "$currentPage / $totalPages",
+                text = formatPageProgress(currentPage, totalPages),
                 style = footerStyle,
                 modifier = Modifier.weight(1f)
             )
@@ -608,13 +632,27 @@ private fun ContentPageView(
             } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
-            val progressPercent = ((currentPage.toFloat() / totalPages.toFloat()) * 100).toInt()
-            Text(
-                text = "$progressPercent%",
-                style = footerStyle,
-                textAlign = TextAlign.End,
-                modifier = Modifier.weight(1f)
-            )
+            if (batteryLevel != null) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = batteryLevelIcon(batteryLevel),
+                        contentDescription = null,
+                        tint = footerColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text(
+                        text = formatBatteryLevel(batteryLevel),
+                        style = footerStyle
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
+            }
         }
     }
 }
@@ -1220,5 +1258,16 @@ private fun findCleanBreak(text: String, rawCutOffset: Int): Int {
 
     // 5. Fallback to targetLimit
     return targetLimit
+}
+
+private fun batteryLevelIcon(level: Int?): ImageVector = when (batteryBarLevel(level)) {
+    0 -> Icons.Filled.Battery0Bar
+    1 -> Icons.Filled.Battery1Bar
+    2 -> Icons.Filled.Battery2Bar
+    3 -> Icons.Filled.Battery3Bar
+    4 -> Icons.Filled.Battery4Bar
+    5 -> Icons.Filled.Battery5Bar
+    6 -> Icons.Filled.Battery6Bar
+    else -> Icons.Filled.BatteryFull
 }
 
